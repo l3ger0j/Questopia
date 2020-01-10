@@ -245,6 +245,8 @@
     <string name="defRelPath">/QSP/games/</string>
     <string name="defDownDirPath">-----</string>
     <string name="key_internal_uri_extsdcard">keyToDownloadDirUri</string>
+    <string name="alertCancel">CANCEL</string>
+    <string name="alertChoose">CHOOSE</string>
 
     <!-- ***************************************** -->
     <!-- ******** END UNTRANSLATED REGION ******** -->
