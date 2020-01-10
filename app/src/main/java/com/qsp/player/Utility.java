@@ -116,7 +116,7 @@ public class Utility {
     public static Spanned QspStrToHtml(String str, ImageGetter imgGetter, String srcDir, int maxW, int maxH, boolean fitToWidth, boolean hideImg,Context uiContext) {
 Utility.WriteLog("Original (StrToHtml): "+str);
         if (str != null && str.length() > 0) {
-            str = str.replaceAll("\r", "<br>");
+            str = htmlizeLineBreaks(str);
             str = str.replaceAll("(?i)</td>", "");
             str = str.replaceAll("(?i)</tr>", "<br>");
 
@@ -137,9 +137,7 @@ Utility.WriteLog("toHtml:\n"+ str);
     public static String QspStrToWebView(String str, String srcDir, int maxW, int maxH, boolean audioIsOn,boolean fitToWidth, boolean videoSwitch, boolean hideImg, Context uiContext) {
         if (str != null && str.length() > 0) {
 //            Utility.WriteLog("Orig. Text: "+str);
-            str = str.replaceAll("\r", "<br>");
-
-            str = minimizeBreaks(str);
+            str = htmlizeLineBreaks(str);
 
             str = fixTableAlign(str);
 
@@ -157,6 +155,11 @@ Utility.WriteLog("toHtml:\n"+ str);
 
         }
         return "";
+    }
+
+    private static String htmlizeLineBreaks(String s) {
+        return s.replaceAll("\n", "<br>")
+                .replaceAll("\r", "");
     }
 
     //Remove <br> at beginning of page, combine <br><br> into single break
@@ -1752,7 +1755,7 @@ Utility.WriteLog("finished vidStr = "+vidStr);
 //Utility.WriteLog("toStr:\n"+str);
         String result = "";
         if (str != null && str.length() > 0) {
-            result = str.replaceAll("\r", "");
+            result = htmlizeLineBreaks(str);
         }
         return result;
     }
