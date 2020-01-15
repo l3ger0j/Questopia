@@ -6,10 +6,10 @@
             android:key="interface_screen" android:title="@string/interface_screen" android:summary="@string/interface_scr_sum">
 -->
 <!--
-		<CheckBoxPreference android:title="@string/fullscreenTitle" android:key="fullscreen" android:summaryOff="@string/fullscreen_off" android:summaryOn="@string/fullscreenSum"/>
-    	<CheckBoxPreference android:title="@string/opt_image_density" android:key="image_density" android:summary="@string/optdesc_image_density" android:defaultValue="true" />
+        <CheckBoxPreference android:title="@string/fullscreenTitle" android:key="fullscreen" android:summaryOff="@string/fullscreen_off" android:summaryOn="@string/fullscreenSum"/>
+        <CheckBoxPreference android:title="@string/opt_image_density" android:key="image_density" android:summary="@string/optdesc_image_density" android:defaultValue="true" />
 -->
-		<!-- <ListPreference android:defaultValue="0" android:key="theme" android:title="@string/appTheme" android:entries="@array/themeName" android:entryValues="@array/fontValue"></ListPreference> -->
+        <!-- <ListPreference android:defaultValue="0" android:key="theme" android:title="@string/appTheme" android:entries="@array/themeName" android:entryValues="@array/fontValue"></ListPreference> -->
 <!--    <PreferenceCategory android:title="@string/setcat_img" android:key="pref_key_image_settings"> -->
         <EditTextPreference android:key="cheats" android:title="@string/cheatTitle" android:summary="@string/cheatSumm"/>
         <PreferenceScreen android:title="@string/setcat_img" android:key="pref_key_image_settings">
@@ -23,17 +23,17 @@
     <PreferenceScreen android:title="@string/setcat_txt" android:key="pref_key_text_settings">
             <ListPreference android:key="theme" android:title="@string/appTheme" android:entries="@array/themeName" android:entryValues="@array/themeValue" android:defaultValue="0" android:summary="@string/themeSumm"/>
             <ListPreference android:key="typeface" android:title="@string/typeface" android:entries="@array/fontName" android:entryValues="@array/fontValue" android:defaultValue="0"/>
-		    <ListPreference android:key="fontsize" android:title="@string/fontSize" android:entries="@array/fontSize" android:entryValues="@array/fontSize" android:defaultValue="16"/>
+            <ListPreference android:key="fontsize" android:title="@string/fontSize" android:entries="@array/fontSize" android:entryValues="@array/fontSize" android:defaultValue="16"/>
 <!-- <com.att.preference.colorpicker.ColorPickerPreference -->
             <net.margaritov.preference.colorpicker.ColorPickerPreference android:title="@string/backColor" android:key="backColor" android:defaultValue="@color/defBackColor" android:summary="@string/colorSumm" type="color"/>
-	    	<net.margaritov.preference.colorpicker.ColorPickerPreference android:title="@string/textColor" android:key="textColor" android:defaultValue="@color/defTextColor" android:summary="@string/colorSumm"/>
-		    <net.margaritov.preference.colorpicker.ColorPickerPreference android:title="@string/linkColor" android:key="linkColor" android:defaultValue="@color/defLinkColor" android:summary="@string/colorSumm"/>
-    		<net.margaritov.preference.colorpicker.ColorPickerPreference android:title="@string/actsColor" android:key="actsColor" android:defaultValue="@color/defActsColor" android:summary="@string/colorSumm"/>
+            <net.margaritov.preference.colorpicker.ColorPickerPreference android:title="@string/textColor" android:key="textColor" android:defaultValue="@color/defTextColor" android:summary="@string/colorSumm"/>
+            <net.margaritov.preference.colorpicker.ColorPickerPreference android:title="@string/linkColor" android:key="linkColor" android:defaultValue="@color/defLinkColor" android:summary="@string/colorSumm"/>
+            <net.margaritov.preference.colorpicker.ColorPickerPreference android:title="@string/actsColor" android:key="actsColor" android:defaultValue="@color/defActsColor" android:summary="@string/colorSumm"/>
             <CheckBoxPreference android:title="@string/opt_highlight_acts" android:key="highlight_acts" android:summary="@string/optdesc_highlight_acts" android:defaultValue="true"/>
             <CheckBoxPreference android:key="resetAll" android:title="@string/resetAll" android:summary="@string/resetAllSum" android:defaultValue="false"/>
         </PreferenceScreen>
 <!--	</PreferenceScreen> -->
-	<CheckBoxPreference android:key="sound" android:title="@string/soundTitle" android:summary="@string/soundSum" android:defaultValue="true"/>
+    <CheckBoxPreference android:key="sound" android:title="@string/soundTitle" android:summary="@string/soundSum" android:defaultValue="true"/>
     <CheckBoxPreference android:key="gestures" android:title="@string/using_gestures" android:enabled="true" android:summaryOff="@string/gestures_off" android:summaryOn="@string/gestures_sum"/>
     <CheckBoxPreference android:title="@string/opt_show_acts_hot_keys" android:key="acts_hot_keys"/>
     <CheckBoxPreference android:title="@string/rotateTitle" android:summary="@string/rotateSumm" android:key="rotate_key"/>

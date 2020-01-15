@@ -214,12 +214,12 @@ extends ScrollingMovementMethod
             ImageSpan[] images = null;
             for (int i=0; i<9; i++)
             {
-            	line = layout.getLineForVertical(y) + dy[i];
-            	if ((line < 0) || (line > layout.getLineCount() - 1))
-            		continue;
-            	off = layout.getOffsetForHorizontal(line, x) + dx[i];
-            	link = buffer.getSpans(off, off, URLSpan.class);
-            	if (link.length != 0) break;
+                line = layout.getLineForVertical(y) + dy[i];
+                if ((line < 0) || (line > layout.getLineCount() - 1))
+                    continue;
+                off = layout.getOffsetForHorizontal(line, x) + dx[i];
+                link = buffer.getSpans(off, off, URLSpan.class);
+                if (link.length != 0) break;
                 images = buffer.getSpans(off, off, ImageSpan.class);
                 if (images.length != 0) break;
             }
@@ -283,7 +283,7 @@ extends ScrollingMovementMethod
     
     public void setCatcher(UrlClickCatcher catcher)
     {
-    	urlCatcher = catcher;
+        urlCatcher = catcher;
     }
 
     private static QspLinkMovementMethod sInstance;

@@ -155,28 +155,28 @@
 <h4><b>Quest Soft Player</b> (<a href=\"http://qsp.su/?option=com_content&view=article&id=64\">俄文网站</a>), 是个跨平台的互动电子小说软体. <B>Quest Player</B> 是其开源的安卓版播放器. 最新的版本可以在 MrBoboFace 的 <a href=\"https://github.com/MrBoboFace/QuestPlayer\">GitHub</a> 找到.</h4><br>
 <h3><center>游戏安装指南:</center></h3>
 <ol>
-	<li>在你的内置储存区 或 SD卡 的根目录建立 \"QSP\" 资料夹(或其他你偏好的名称)</li>
-	<li>在QSP目录内建立子资料夹. 资料夹名称会作为游戏名称显示 (范例: QSP/game1)</li>
-	<li>把游戏的.qsp档和图片, 音乐等复制入 QSP/game1<br>注意: 游戏资料夹 或 .qsp档名内不能有空白或特殊字元</li>
-	<li>如果要安装其他游戏, 重复上述步骤 (例: QSP/game2, QSP/game3, 以此类推)</li>
-	<li>在 QSP player 里, 设定 - 游戏位置/游戏目录, 设定正确的资料夹位置</li>
-	<li>这些游戏会出现在游戏架中的 \"本机\" 分页中</li>
+    <li>在你的内置储存区 或 SD卡 的根目录建立 \"QSP\" 资料夹(或其他你偏好的名称)</li>
+    <li>在QSP目录内建立子资料夹. 资料夹名称会作为游戏名称显示 (范例: QSP/game1)</li>
+    <li>把游戏的.qsp档和图片, 音乐等复制入 QSP/game1<br>注意: 游戏资料夹 或 .qsp档名内不能有空白或特殊字元</li>
+    <li>如果要安装其他游戏, 重复上述步骤 (例: QSP/game2, QSP/game3, 以此类推)</li>
+    <li>在 QSP player 里, 设定 - 游戏位置/游戏目录, 设定正确的资料夹位置</li>
+    <li>这些游戏会出现在游戏架中的 \"本机\" 分页中</li>
 </ol>]]></string>
     <string name="app_credits"><![CDATA[<center><h3>创作团队</h3></center>
 <ul>
-	<li><b>程式:</b></li>
-	<ul style="list-style-type:none">
-	    <li>Nex (~v1.0.201)</li>
-	    <li>BOOMik (v1.3)</li>
-	    <li>MrBoboFace (v1.4+)</li>
-	</ul>
-	<li><b>翻译:</b></li>
-	<ul style="list-style-type:none">
-	    <li>Illume (简体中文/繁体中文/英文~v1.3)</li>
-		<li>Unregistred (俄罗斯)</li>
-	</ul>
-	<li><b>特别感谢:</b> Kevin Smarts 和所有 <a href=\"https://tfgamessite.com/\">TFGamesSite Community</a> 的协力者</li>
-	<li><i>第五世界</i> 画家 Noah Bradley (Creative Commons License; 图片被缩放和裁切过)</li>
+    <li><b>程式:</b></li>
+    <ul style="list-style-type:none">
+        <li>Nex (~v1.0.201)</li>
+        <li>BOOMik (v1.3)</li>
+        <li>MrBoboFace (v1.4+)</li>
+    </ul>
+    <li><b>翻译:</b></li>
+    <ul style="list-style-type:none">
+        <li>Illume (简体中文/繁体中文/英文~v1.3)</li>
+        <li>Unregistred (俄罗斯)</li>
+    </ul>
+    <li><b>特别感谢:</b> Kevin Smarts 和所有 <a href=\"https://tfgamessite.com/\">TFGamesSite Community</a> 的协力者</li>
+    <li><i>第五世界</i> 画家 Noah Bradley (Creative Commons License; 图片被缩放和裁切过)</li>
 </ul>]]></string>
     <string name="about_template"><![CDATA[<html><head><meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1"><style type="text/css">body{margin: 0; padding: 0; color: QSPTEXTCOLOR; background-color: QSPBACKCOLOR; max-width: 100%; font-size: QSPFONTSIZE; font-family: QSPFONTSTYLE; } a{color: QSPLINKCOLOR; } a:link{color: QSPLINKCOLOR; } table{font-size: QSPFONTSIZE; font-family: QSPFONTSTYLE; }</style></head><body>REPLACETEXT</body></html>]]></string>
 

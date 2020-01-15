@@ -145,28 +145,28 @@
 <h4>Quest Player это проект с открытым исходным кодом, является Android-версией <b>Quest Soft Player</b> (<a href=\"http://qsp.su/?option=com_content&view=article&id=64\">русскоязычный сайт</a>), платформы для создания интерактивной литературы с интерфейсом, основанным на меню выбора действий. The most recent version can be downloaded at MrBoboFace\'s <a href=\"https://github.com/MrBoboFace/QuestPlayer\">GitHub</a>.</h4>
 <h3><center>Установка игр для Quest Player:</center></h3>
 <ol>
-	<li>Создайте папку с именем \"QSP\" (или похожим) на встроенном диске или внешней SD-карте вашего Android-устройства</li>
-	<li>Для установки игры в папке QSP создайте подпапку с желаемым именем игры (например QSP/game1)</li>
-	<li>Переместите все файлы игры в созданную папку</li>
-	<li>Повторите предыдущие пункты для каждой новой игры (тоесть  QSP/game2, QSP/game3, и т.д.).</li>
-	<li>В меню «Настройки» Quest Player укажите путь к папке игр</li>
-	<li>В закладке \"Загружено”\ на Полке Игр будут показаны все установленные игры</li>
+    <li>Создайте папку с именем \"QSP\" (или похожим) на встроенном диске или внешней SD-карте вашего Android-устройства</li>
+    <li>Для установки игры в папке QSP создайте подпапку с желаемым именем игры (например QSP/game1)</li>
+    <li>Переместите все файлы игры в созданную папку</li>
+    <li>Повторите предыдущие пункты для каждой новой игры (тоесть  QSP/game2, QSP/game3, и т.д.).</li>
+    <li>В меню «Настройки» Quest Player укажите путь к папке игр</li>
+    <li>В закладке \"Загружено”\ на Полке Игр будут показаны все установленные игры</li>
 </ol>]]></string>
     <string name="app_credits"><![CDATA[<center><h3>Credits</h3></center>
 <ul>
-	<li><b>Разработка:</b></li>
-	<ul style="list-style-type:none">
-	    <li>Nex (~v1.0.201)</li>
-	    <li>BOOMik (v1.3)</li>
-	    <li>MrBoboFace (v1.4+)</li>
+    <li><b>Разработка:</b></li>
+    <ul style="list-style-type:none">
+        <li>Nex (~v1.0.201)</li>
+        <li>BOOMik (v1.3)</li>
+        <li>MrBoboFace (v1.4+)</li>
     </ul>
-	<li><b>Перевод:</b></li>
-	<ul style="list-style-type:none">
-	    <li>Illume (Китайский упрощенный / Китайский традиционный/Английский~v1.3)</li>
-	    <li>Unregistred (Русский)</li>
-	</ul>
-	<li><b>Особое спасибо:</b> Kevin Smarts и всему <a href=\"https://tfgamessite.com/\">TFGamesSite сообществу</a></li>
-	<li><i>Изображения Пятого Мира</i> созданы Noah Bradley (Творческие Сообщества; изображения уменьшены и обрезаны)</li>
+    <li><b>Перевод:</b></li>
+    <ul style="list-style-type:none">
+        <li>Illume (Китайский упрощенный / Китайский традиционный/Английский~v1.3)</li>
+        <li>Unregistred (Русский)</li>
+    </ul>
+    <li><b>Особое спасибо:</b> Kevin Smarts и всему <a href=\"https://tfgamessite.com/\">TFGamesSite сообществу</a></li>
+    <li><i>Изображения Пятого Мира</i> созданы Noah Bradley (Творческие Сообщества; изображения уменьшены и обрезаны)</li>
 </ul>]]></string>
     <string name="useVidTitle">Пробовать заменить картинки на видео?</string>
     <string name="useVidSumm">Искать по префиксу (т.е. akl.jpg -> akl.*)</string>

@@ -5,7 +5,7 @@
         android:title="@string/menu_gamestock" />
         
     <item android:id="@+id/menu_options"
-    	android:title="@string/menu_options" />
+        android:title="@string/menu_options" />
 
 <!--    <item
         android:id="@+id/menu_about"

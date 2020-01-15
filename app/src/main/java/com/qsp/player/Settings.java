@@ -22,7 +22,7 @@ import java.util.Comparator;
 
 
 public class Settings extends PreferenceActivity implements Preference.OnPreferenceChangeListener {
-	final private Context uiContext = this;
+    final private Context uiContext = this;
     final int ACTIVITY_SELECT_DIRECTORY = 531;
     final int REQUEST_CODE_STORAGE_ACCESS = 42;
     SharedPreferences sharedPref = null;
@@ -312,7 +312,7 @@ public class Settings extends PreferenceActivity implements Preference.OnPrefere
     }
 
     public boolean onPreferenceChange(Preference preference, Object newValue) {
-    	preference.setSummary((CharSequence)newValue);
+        preference.setSummary((CharSequence)newValue);
         return true;
     }
 

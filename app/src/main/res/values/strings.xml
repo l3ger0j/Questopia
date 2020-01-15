@@ -2,7 +2,7 @@
 
 <!-- ** English/Default version ** -->
 <resources>
-	<!-- Настройки Settings -->
+    <!-- Настройки Settings -->
     <string name="appTheme">Theme</string>
     <string name="fontSize">Font Size</string>
     <string name="typeface">Font Style</string>
@@ -24,18 +24,18 @@
     <string name="opt_highlight_acts">Enforced Actions</string>
     <string name="optdesc_highlight_acts">Show Actions with Selected Color</string>
     <string name="actsColor">Action Color</string>
-	<string name="opt_back_action">Back Button as 1st action</string>
-	<string name="opt_big_image">Stretch Image to Screen Width</string>
-	<string name="opt_image_density">Image Fit to Screen</string>
-	<string name="optdesc_back_action">Back Button executes the first available action</string>
-	<string name="optdesc_big_image">Stretch image to the full width, but not more than maximum height</string>
-	<string name="optdesc_image_density">Stretch the image depending on the screen density</string>
+    <string name="opt_back_action">Back Button as 1st action</string>
+    <string name="opt_big_image">Stretch Image to Screen Width</string>
+    <string name="opt_image_density">Image Fit to Screen</string>
+    <string name="optdesc_back_action">Back Button executes the first available action</string>
+    <string name="optdesc_big_image">Stretch image to the full width, but not more than maximum height</string>
+    <string name="optdesc_image_density">Stretch the image depending on the screen density</string>
     <string name="gamesdirTitle">Path to game files</string>
     <string name="gamesdirSum">Directory where game files are stored</string>
     <string name="langTitle">Language</string>
     <string name="errorTitle">Error</string>
 
-	<!-- Меню Menu -->
+    <!-- Меню Menu -->
     <string name="menu_gamestock">Game Stock</string>
     <string name="menu_options">Settings</string>
     <string name="menu_about">About Quest Player</string>
@@ -46,13 +46,13 @@
     <string name="menu_deletegames">Delete Game</string>
     <string name="menu_openfile">Open Game File</string>
     <string name="menu_closeapp">Close QuestPlayer</string>
-	
-	<!-- Вкладки Tabs -->	
+
+    <!-- Вкладки Tabs -->
     <string name="tab_all">All</string>
     <string name="tab_downloaded">Local</string>
     <string name="tab_starred">Market</string>
-	
-	<!-- Прочее Other -->	
+
+    <!-- Прочее Other -->
     <string name="app_name">Quest Player</string>
 
     <!-- Прочее Other Part 2: QspGameStock -->
@@ -144,28 +144,28 @@
 <h4>Quest Player is an open-source Android port of <b>Quest Soft Player</b> (<a href=\"http://qsp.su/?option=com_content&view=article&id=64\">Russian site</a>), a menu-based platform for creating interactive fiction. The most recent version can be downloaded at MrBoboFace\'s <a href=\"https://github.com/MrBoboFace/QuestPlayer\">GitHub</a>.</h4>
 <h3><center>Installing Games for Quest Player:</center></h3>
 <ol>
-	<li>Create a folder named \"QSP\" (or something similar) on your Android\'s internal storage or external SD card</li>
-	<li>To install a game, create a unique folder in the QSP folder (i.e., QSP/game1)</li>
-	<li>Next, move all files associated with that game into the new game folder</li>
-	<li>Repeat for each game (i.e., QSP/game2, QSP/game3, etc.)</li>
-	<li>Use Settings to point Quest Player to your primary game folder</li>
-	<li>The \"Local\" tab in Game Stock should show all your loaded games</li>
+    <li>Create a folder named \"QSP\" (or something similar) on your Android\'s internal storage or external SD card</li>
+    <li>To install a game, create a unique folder in the QSP folder (i.e., QSP/game1)</li>
+    <li>Next, move all files associated with that game into the new game folder</li>
+    <li>Repeat for each game (i.e., QSP/game2, QSP/game3, etc.)</li>
+    <li>Use Settings to point Quest Player to your primary game folder</li>
+    <li>The \"Local\" tab in Game Stock should show all your loaded games</li>
 </ol>]]></string>
     <string name="app_credits"><![CDATA[<center><h3>Credits</h3></center>
 <ul>
-	<li><b>Coding:</b>
-	<ul style="list-style-type:none">
-	    <li>Nex (~v1.0.201)</li>
-	    <li>BOOMik (v1.3)</li>
-	    <li>MrBoboFace (v1.4+)</li>
-	</ul>
-	<li><b>Translations:</b></li>
-	<ul style="list-style-type:none">
-	    <li>Illume (English~v1.3/Simplified Chinese/Traditional Chinese)</li>
-	    <li>Unregistred (Russian)</li>
-	</ul>
-	<li><b>Special Thanks:</b> Kevin Smarts and all those in <a href=\"https://tfgamessite.com/\">TFGamesSite Community</a></li>
-	<li><i>The Fifth World</i> painting by Noah Bradley (Creative Commons License; image scaled and cropped)</li>
+    <li><b>Coding:</b>
+    <ul style="list-style-type:none">
+        <li>Nex (~v1.0.201)</li>
+        <li>BOOMik (v1.3)</li>
+        <li>MrBoboFace (v1.4+)</li>
+    </ul>
+    <li><b>Translations:</b></li>
+    <ul style="list-style-type:none">
+        <li>Illume (English~v1.3/Simplified Chinese/Traditional Chinese)</li>
+        <li>Unregistred (Russian)</li>
+    </ul>
+    <li><b>Special Thanks:</b> Kevin Smarts and all those in <a href=\"https://tfgamessite.com/\">TFGamesSite Community</a></li>
+    <li><i>The Fifth World</i> painting by Noah Bradley (Creative Commons License; image scaled and cropped)</li>
 </ul>]]></string>
     <string name="useVidTitle">Use video instead?</string>
     <string name="useVidSumm">Replaces images with video file (akl.jpg -> akl.*)</string>
