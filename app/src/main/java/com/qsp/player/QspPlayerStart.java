@@ -2208,7 +2208,6 @@ Utility.WriteLog("runGame\\");
             public void run() {
                 File tqsp = new File(gameFileName);
                 FileInputStream fIn = null;
-                int size = 0;
                 try {
                     fIn = new FileInputStream(tqsp);
                 } catch (FileNotFoundException e) {
@@ -2216,20 +2215,7 @@ Utility.WriteLog("runGame\\");
                     Utility.ShowError(uiContext, getString(R.string.fileNotFound));
                     return;
                 }
-                try {
-                    size = fIn.available();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    Utility.ShowError(uiContext, getString(R.string.accessFileFail));
-                    try {
-                        fIn.close();
-                    } catch (IOException e1) {
-                        Utility.ShowError(uiContext, getString(R.string.fileHandleReleaseFail));
-                        e1.printStackTrace();
-                    }
-                    return;
-                }
-
+                int size = (int) tqsp.length();
                 byte[] inputBuffer = new byte[size];
                 try {
                     // Fill the Buffer with data from the file
