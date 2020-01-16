@@ -187,6 +187,7 @@
     <string name="cheatDesc">Отладка: Введите команду</string>
 
     <string name="SDpathNotFound">Подходящий путь не найден: использование директории ROOT</string>
+    <string name="inputArea">Поле ввода</string>
 
 </resources>
 

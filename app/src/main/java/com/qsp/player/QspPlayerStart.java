@@ -1990,6 +1990,24 @@ Utility.WriteLog("Saving to (DF): "+filename+" in "+FileUtil.getFullPathFromTree
         setCurrentWin(WIN_EXT);
     }
 
+    public void onInpClick(View v) {
+        libThreadHandler.post(new Runnable() {
+            public void run() {
+                if (libraryThreadIsRunning)
+                    return;
+                libraryThreadIsRunning = true;
+
+                String userText = InputBox(getString(R.string.inputArea));
+                QSPSetInputStrText(userText);
+
+                boolean result = QSPExecUserInput(true);
+                CheckQspResult(result, "onInpClick: QSPExecUserInput");
+
+                libraryThreadIsRunning = false;
+            }
+        });
+    }
+
     //смена активного экрана
     private void setCurrentWin(int win) {
         switch (win) {

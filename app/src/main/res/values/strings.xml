@@ -247,6 +247,7 @@
     <string name="key_internal_uri_extsdcard">keyToDownloadDirUri</string>
     <string name="alertCancel">CANCEL</string>
     <string name="alertChoose">CHOOSE</string>
+    <string name="inputArea">Input area</string>
 
     <!-- ***************************************** -->
     <!-- ******** END UNTRANSLATED REGION ******** -->
