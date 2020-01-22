@@ -38,6 +38,7 @@ import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.style.ImageSpan;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.view.View.MeasureSpec;
@@ -419,191 +420,34 @@ Utility.WriteLog("toHtml:\n"+ str);
             return styleList.toArray(new String[styleList.size()]);
     }
 
-    //Prepares an "exec:" URL tag for execution
-    public static String prepareForExec (String code) {
-        String tempCode = "";
-
-        //Check the code char by char for "%"
-        for (int i=0; i<code.length(); i++) {
-            //if not "%", skip it
-            if (code.charAt(i) != '%') {
-                tempCode += code.charAt(i);
-                continue;
-            }
-            //If "%" starts a URL escape code, skip it
-            if (code.length() >= i+3)
-                if ( code.substring(i,i+3).matches("%[a-zA-Z0-9][a-zA-Z0-9]") ) {
-                    tempCode += code.substring(i,i+3);
-                    i = i + 2;
-                    continue;
-                }
-            //If "%" is NOT a URL escape code, safety-encode it
-            tempCode += "-SAFEPERCENT-";
-
-        }
-
-        //Safety-encode any "+" signs that are present
-        tempCode = tempCode.replace("+","-SAFEPLUSSIGN-");
-
-        try {
-            //Decode all the URL escape codes back to normal text
-            tempCode = URLDecoder.decode(tempCode, "UTF-8");
-        } catch (UnsupportedEncodingException e) { }
-
-        //Decode all the safety-encoded percent signs
-        tempCode = tempCode.replace("-SAFEPERCENT-", "%");
-        tempCode = tempCode.replace("-SAFEPLUSSIGN-","+");
-
-        //Add spaces before and after "&" symbols
-        tempCode = addSpacesWithChar(tempCode,"&",true,true);
-
-        //Replace all "<br>" in exec string with " & "
-        tempCode = tempCode.replace("<br>"," & ");
-
-        //Replace all "%2b" in exec string with "+"
-        tempCode = tempCode.replace("%2b","+");
-
-        //Collapse multispace
-        tempCode = tempCode.replaceAll("/ +/"," ");
-
-        //Collapse "& &" (if any) to "&"
-        tempCode = tempCode.replace("& &","&");
-
-Utility.WriteLog("prepareForExec: "+tempCode);
-        return tempCode;
+    public static String prepareForExec(String code) {
+        return new String(Base64.decode(code, Base64.DEFAULT));
     }
 
-    //Find all of a certain character and adds a leading and trailing space, if needed
-    public static String addSpacesWithChar(String str, String target,boolean addBefore, boolean addAfter) {
-
-        //Check if the string has the target character set
-        boolean hasTarget = str.toLowerCase().contains(target.toLowerCase());
-        if ( !hasTarget || (!addBefore && !addAfter) ) return str;
-
-        int targetLength = target.length();
-        String endOfStr = str;
-        String newStr = "";
-
-        do {
-            int targetIndex = endOfStr.toLowerCase().indexOf(target.toLowerCase());
-
-            //Add to newStr any text up to the target
-            if (targetIndex > 0)
-                newStr += endOfStr.substring(0,targetIndex);
-            //Set endOfStr to everything after the target, but be sure not to go past
-            //the length of endOfStr
-            if (endOfStr.length() > targetIndex + targetLength)
-                endOfStr = endOfStr.substring(targetIndex + targetLength);
-            else endOfStr = "";
-
-            //addBefore: if there are characters before the target, add a space if there isn't one
-            if ((addBefore) && (newStr.length() > 0) && (newStr.charAt(newStr.length()-1) != ' '))
-                newStr += " ";
-
-            newStr += target;
-
-            //addAfter: if there are characters after the target, add a space if there isn't one
-            if( (addAfter) && (endOfStr.length() > 0) && (endOfStr.charAt(0) != ' ') )
-                newStr += " ";
-
-            hasTarget = endOfStr.toLowerCase().contains(target.toLowerCase());
-        } while (hasTarget);
-
-        //finish the string
-        newStr += endOfStr;
-
-        return newStr;
-    }
-
-    //This encodes all (+) symbols found in Href tags to (%2b) for URLDecoder;
-    //all other (+) symbols are changed to QSPPLUSSYMBOLCODE for later replacement
-    public static String replaceHrefPlusSymbols(String str) {
-        String curStr = "";
-        String newStr = "";
-
-        if (!str.toLowerCase().contains("href") || !str.contains("<") || !str.contains(">")) return str;
-
-        int startStr = 0;
-        int endStr = 0;
-
-        String remainingStr = str;
-
-        do {
-            //Mark the next (<)
-            endStr = remainingStr.indexOf("<");
-            //if (<) is not at the end of remainingStr, encode all (+), save up to (<) and then
-            //delete it from remainingStr
-            if (endStr < remainingStr.length()) {
-                if (endStr > 0) newStr += remainingStr.substring(0, endStr).replace("+","QSPPLUSSYMBOLCODE");
-                remainingStr = remainingStr.substring(endStr);
-            }
-            //if (<) is at the end, just add the rest of remainingStr to newStr and exit
-            else break;
-
-            //Same as with (<), but mark to (>) and save (<...>) as curStr for processing
-            if (remainingStr.contains(">")) {
-                endStr = remainingStr.indexOf(">");
-                curStr = remainingStr.substring(0,endStr);
-                remainingStr = remainingStr.substring(endStr);
-            }
-            else break;
-
-            //Replace all the (+) symbols within the (<...href...>) block with (%2b) then
-            //add the processed curStr to newStr
-
-            if (curStr.contains("href")) {
-                if (curStr.contains("+"))
-                    curStr = curStr.replace("+","%2b");
-                newStr += curStr;
-            }
-            //if (href) is not present in (<...>), add curStr to newStr and continue
-            else newStr += curStr;
-
-        } while (remainingStr.toLowerCase().contains("<"));
-
-        newStr += remainingStr.replace("+","QSPPLUSSYMBOLCODE");
-        return newStr;
-    }
-
-    //This function corrects all "exec:" commands so that the '+' is not lost when the URL is
-    //loaded into WebView but instead becomes "%2b"
     public static String encodeExec(String str) {
-        boolean hasExec = str.contains("exec:");
-        if (!hasExec) return replaceHrefPlusSymbols(str);
-
-        String endOfExecStr = str;
-        String newStr = "";
-        String execStr;
-        int execIndex;
-        int quoteIndex;
-
+        StringBuilder sb = new StringBuilder();
+        int startIndex = 0;
         do {
-            execIndex = endOfExecStr.toLowerCase().indexOf("exec:");
-            newStr += replaceHrefPlusSymbols(endOfExecStr.substring(0, execIndex));
-
-            quoteIndex = endOfExecStr.indexOf("\"");
-
-            //execStr includes 'exec:' to the next '"' or to the end of endOfStr
-            //endOfStr starts after execStr or becomes ""
-            if (quoteIndex > execIndex) {
-                execStr = endOfExecStr.substring(execIndex, quoteIndex);
-                endOfExecStr = endOfExecStr.substring(quoteIndex);
+            int execIndex = str.indexOf("exec:", startIndex);
+            if (execIndex == -1) {
+                sb.append(str.substring(startIndex));
+                break;
             }
             else {
-                execStr = endOfExecStr.substring(execIndex);
-                endOfExecStr = "";
+                sb.append(str, startIndex, execIndex + 5);
+                int quoteIndex = str.indexOf('"', execIndex + 5);
+                if (quoteIndex == -1) {
+                    throw new RuntimeException("Closing quote not found for exec at " + execIndex);
+                }
+                String code = str.substring(execIndex + 5, quoteIndex);
+                String b64code = Base64.encodeToString(code.getBytes(), Base64.NO_WRAP);
+                sb.append(b64code);
+                sb.append('"');
+                startIndex = quoteIndex + 1;
             }
+        } while (true);
 
-            //Replace all '+' with the URL-codable '+' and attach to newStr
-//            newStr += addSpacesWithChar(replaceHrefPlusSymbols(execStr),"&",true,true);
-            newStr += replaceHrefPlusSymbols(execStr);
-
-            hasExec = endOfExecStr.contains("exec:");
-        } while (hasExec);
-        //Utility.WriteLog("testend");
-
-        newStr += endOfExecStr;
-        return newStr;
+        return sb.toString();
     }
 
     public static String fixImagesSize(String str, String srcDir, boolean isForTextView, int maxW, int maxH, boolean fitToWidth, boolean hideImg, Context uiContext) {

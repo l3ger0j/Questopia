@@ -2512,21 +2512,8 @@ Utility.WriteLog("runGame\\");
                     if (newPage == null || newPage.equals(""))
                         main_desc.loadDataWithBaseURL("", freshPageURL.replace("REPLACETEXT", ""), "text/html", "UTF-8", "");
                     else {
-Utility.WriteLog("original: "+newPage);
+                        Utility.WriteLog("original: "+newPage);
                         newPage = Utility.encodeExec(newPage);
-                        try {
-                            //Decode the URL, but be sure to remove any % signs before doing so
-                            //as these can cause crashes. Change back after URLDecoder.
-                            newPage = newPage.replace("%", "-PERCENTSIGN-");
-                            newPage = URLDecoder.decode(newPage, "UTF-8");
-                            newPage = newPage.replace("-PERCENTSIGN-", "%");
-
-                        } catch (UnsupportedEncodingException e) {
-                            Utility.ShowError(uiContext, getString(R.string.urlNotComp).replace("-URLTEXT-", txtMainDesc));
-                        }
-                        //Return the visible (+) symbols to their normal form
-                        newPage = newPage.replace("QSPPLUSSYMBOLCODE","+");
-
                         isMainDescHTML = html;
                         setMainDescHTML(newPage);
                         RefreshMainDesc();
