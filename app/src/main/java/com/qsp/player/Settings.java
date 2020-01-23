@@ -9,17 +9,11 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.CheckBoxPreference;
-import android.preference.EditTextPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
-import android.preference.SwitchPreference;
-import android.provider.DocumentsContract;
-import android.support.v4.provider.DocumentFile;
-import android.text.TextUtils;
-import android.widget.Toast;
 
-import net.margaritov.preference.colorpicker.ColorPickerPreference;
+import androidx.documentfile.provider.DocumentFile;
 
 import java.io.File;
 import java.util.ArrayList;

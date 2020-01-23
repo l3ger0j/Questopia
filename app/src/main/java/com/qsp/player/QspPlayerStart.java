@@ -2,13 +2,11 @@ package com.qsp.player;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Instrumentation;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -16,7 +14,6 @@ import android.gesture.Gesture;
 import android.gesture.GestureOverlayView;
 import android.gesture.GestureStroke;
 import android.gesture.GestureOverlayView.OnGesturePerformedListener;
-import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Typeface;
@@ -31,15 +28,14 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.preference.PreferenceManager;
-import android.support.annotation.RequiresPermission;
-import android.support.v4.content.PermissionChecker;
-import android.support.v4.provider.DocumentFile;
+import androidx.core.content.PermissionChecker;
+import androidx.documentfile.provider.DocumentFile;
+
 import android.text.format.DateFormat;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Display;
-import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -50,8 +46,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -68,8 +62,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
-import org.w3c.dom.Text;
-
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
@@ -78,11 +70,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Locale;
-import java.util.StringTokenizer;
 import java.util.Vector;
 import java.util.concurrent.locks.LockSupport;
 import java.util.concurrent.locks.ReentrantLock;
@@ -90,8 +79,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import static android.content.ContentValues.TAG;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
-import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
-import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.webkit.WebView.HitTestResult.IMAGE_TYPE;
@@ -2089,7 +2076,7 @@ Utility.WriteLog("Saving to (DF): "+filename+" in "+FileUtil.getFullPathFromTree
 
     private void runGame(String fileName) {
 Utility.WriteLog("runGame\\");
-        if (PermissionChecker.checkSelfPermission(uiContext,"android.permission.WRITE_EXTERNAL_STORAGE") == PackageManager.PERMISSION_GRANTED) {
+        if (PermissionChecker.checkSelfPermission(uiContext,"android.permission.WRITE_EXTERNAL_STORAGE") == PermissionChecker.PERMISSION_GRANTED) {
             Log.d(TAG, "Write granted");
             Utility.WriteLog("Write granted");
         } else {

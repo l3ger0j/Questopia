@@ -1,18 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-      package="com.qsp.player"
-      android:versionCode="222" android:versionName="2.0.0 alpha">
+          package="com.qsp.player">
     <application android:icon="@drawable/icon" android:label="@string/app_name"
-        android:name="QspApp"
-        android:hardwareAccelerated="true"
-        android:largeHeap="true">
-<!--        android:theme="@android:style/Theme.NoTitleBar"> -->
+                 android:name="QspApp"
+                 android:hardwareAccelerated="true"
+                 android:largeHeap="true"
+                 android:usesCleartextTraffic="true">
         <activity android:name=".QspPlayerStart"
                   android:label="@string/app_name" 
                   android:alwaysRetainTaskState="true"
-            android:screenOrientation="fullSensor"
+                  android:screenOrientation="fullSensor"
                   android:configChanges="orientation|keyboardHidden|screenSize">
-            <!--        android:screenOrientation="portrait" -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -20,20 +18,18 @@
         </activity>
 
     <activity android:name="QspImageBox"
-                 android:theme="@style/Theme.Translucent"
-                android:screenOrientation="fullSensor"
-                 android:configChanges="orientation|keyboardHidden"/>
+              android:theme="@style/Theme.Translucent"
+              android:screenOrientation="fullSensor"
+              android:configChanges="orientation|keyboardHidden"/>
 
     <activity android:name="Settings"
-    			 android:label="@string/menu_options"/>
+              android:label="@string/menu_options"/>
 
     <activity android:name="QspGameStock" 
-                 android:label="@string/menu_gamestock"
-                android:screenOrientation="fullSensor"
-    			 android:configChanges="orientation|keyboardHidden"/>
+              android:label="@string/menu_gamestock"
+              android:screenOrientation="fullSensor"
+              android:configChanges="orientation|keyboardHidden"/>
 </application>
-    <uses-sdk android:minSdkVersion="19" android:targetSdkVersion="22"/>
-
 
     <uses-permission android:name="android.permission.INTERNET"></uses-permission>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"></uses-permission>

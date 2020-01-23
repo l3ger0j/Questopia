@@ -3,6 +3,7 @@ package com.qsp.player;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -18,26 +19,22 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import org.apache.http.util.ByteArrayBuffer;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.app.TabActivity;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -48,9 +45,7 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.preference.Preference;
 import android.preference.PreferenceManager;
-import android.provider.DocumentsContract;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -71,7 +66,8 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.TabHost.OnTabChangeListener;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.support.v4.provider.DocumentFile;
+
+import androidx.documentfile.provider.DocumentFile;
 
 public class QspGameStock extends TabActivity {
 
@@ -808,14 +804,14 @@ Utility.WriteLog("GameStock Tab "+tabNum);
 
             PendingIntent contentIntent = PendingIntent.getActivity(uiContext, 0, notificationIntent, 0); 
 
-            Notification note = new Notification(
-                    android.R.drawable.stat_notify_sdcard, //!!! STUB              // the icon for the status bar
-                    text,                  		// the text to display in the ticker
-                    System.currentTimeMillis() // the timestamp for the notification
-                    ); 
-
-            note.setLatestEventInfo(uiContext, text, details, contentIntent);
-            note.flags = Notification.FLAG_AUTO_CANCEL;
+            Notification note = new Notification.Builder(uiContext)
+                    .setSmallIcon(android.R.drawable.stat_notify_sdcard)
+                    .setContentText(text)
+                    .setWhen(System.currentTimeMillis())
+                    .setSubText(details)
+                    .setContentIntent(contentIntent)
+                    .setAutoCancel(true)
+                    .build();
             
             mNotificationManager.notify(
                        QSP_NOTIFICATION_ID, // we use a string id because it is a unique
@@ -1878,15 +1874,21 @@ Utility.WriteLog("qspGameDirs["+i+"]: "+qspGameDirs.get(i).getName()+
                 URLConnection conn = updateURL.openConnection();
                 InputStream is = conn.getInputStream();
                 BufferedInputStream bis = new BufferedInputStream(is);
-                ByteArrayBuffer baf = new ByteArrayBuffer(1024);
+                final String xml;
 
-                int current = 0;
-                while((current = bis.read()) != -1){
-                    baf.append((byte)current);
+                try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+                    int b;
+                    do {
+                        b = bis.read();
+                        if (b == -1) {
+                            break;
+                        }
+                        os.write(b);
+                    } while (true);
+
+                    xml = new String(os.toByteArray());
                 }
 
-                /* Convert the Bytes read to a String. */
-                final String xml = new String(baf.toByteArray());
     			runOnUiThread(new Runnable() {
     				public void run() {
     					xmlGameListCached = xml;
