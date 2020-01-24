@@ -1,4 +1,4 @@
-package com.qsp.player;
+package com.qsp.player.settings;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -14,6 +14,10 @@ import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 
 import androidx.documentfile.provider.DocumentFile;
+
+import com.qsp.player.FileUtil;
+import com.qsp.player.R;
+import com.qsp.player.Utility;
 
 import java.io.File;
 import java.util.ArrayList;

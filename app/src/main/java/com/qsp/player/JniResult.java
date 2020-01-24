@@ -2,13 +2,13 @@ package com.qsp.player;
 
 public class JniResult 
 {
-    boolean success;
+    public boolean success;
 
-    int int1;
-    int int2;
-    int int3;
+    public int int1;
+    public int int2;
+    public int int3;
 
-    String str1;
-    String str2;
+    public String str1;
+    public String str2;
     String str3;
 }

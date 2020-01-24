@@ -1,4 +1,4 @@
-package com.qsp.player;
+package com.qsp.player.stock;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -69,48 +69,13 @@ import android.widget.Toast;
 
 import androidx.documentfile.provider.DocumentFile;
 
-public class QspGameStock extends TabActivity {
+import com.qsp.player.FileUtil;
+import com.qsp.player.game.QspPlayerStart;
+import com.qsp.player.R;
+import com.qsp.player.settings.Settings;
+import com.qsp.player.Utility;
 
-    public class GameItem {
-        //Parsed
-        String game_id;
-        String list_id;
-        String author;
-        String ported_by;
-        String version;
-        String title;
-        String lang;
-        String player;
-        String file_url;
-        int file_size;
-        String desc_url;
-        String pub_date;
-        String mod_date;
-        //Flags
-        boolean downloaded;
-        boolean checked;
-        //Local
-        String game_file;
-        GameItem()
-        {
-            game_id = "";
-            list_id = "";
-            author = "";
-            ported_by = "";
-            version = "";
-            title = "";
-            lang = "";
-            player = "";
-            file_url = "";
-            file_size = 0;
-            desc_url = "";
-            pub_date = "";
-            mod_date = "";
-            downloaded = false;
-            checked = false;
-            game_file = "";
-        }
-    }
+public class QspGameStock extends TabActivity {
 
     final private Context uiContext = this;
     private String xmlGameListCached;

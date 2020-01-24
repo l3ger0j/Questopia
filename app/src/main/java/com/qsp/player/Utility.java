@@ -50,6 +50,8 @@ import android.widget.Toast;
 
 import androidx.documentfile.provider.DocumentFile;
 
+import com.qsp.player.stock.GameItem;
+
 import pl.droidsonroids.gif.GifDrawable;
 
 public class Utility {
@@ -1841,18 +1843,18 @@ Utility.WriteLog("GetGamesPath() - [path == null] is "+(path==null));
     }
 
     //Sort an ArrayList of GameItem by title (what is seen on the GameStock menu)
-    public static ArrayList<QspGameStock.GameItem> GameSorter (ArrayList<QspGameStock.GameItem> items) {
+    public static ArrayList<GameItem> GameSorter (ArrayList<GameItem> items) {
         //Skip if there aren't at least two files
         if (items.size() < 2) return items;
 
-        QspGameStock.GameItem[] gameArray = items.toArray(new QspGameStock.GameItem[items.size()]);
-        Arrays.sort(gameArray, new Comparator<QspGameStock.GameItem>() {
-            public int compare(QspGameStock.GameItem f1, QspGameStock.GameItem f2) {
+        GameItem[] gameArray = items.toArray(new GameItem[items.size()]);
+        Arrays.sort(gameArray, new Comparator<GameItem>() {
+            public int compare(GameItem f1, GameItem f2) {
                 return f1.title.toLowerCase().compareTo(f2.title.toLowerCase());
             }
         });
 
-        ArrayList<QspGameStock.GameItem> returnedList = new ArrayList<QspGameStock.GameItem>();
+        ArrayList<GameItem> returnedList = new ArrayList<GameItem>();
 
         for(int i=0; i<gameArray.length; i++)
             returnedList.add(gameArray[i]);

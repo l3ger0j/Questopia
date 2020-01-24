@@ -1,4 +1,4 @@
-package com.qsp.player;
+package com.qsp.player.game;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -7,13 +7,12 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.gesture.Gesture;
 import android.gesture.GestureOverlayView;
-import android.gesture.GestureStroke;
 import android.gesture.GestureOverlayView.OnGesturePerformedListener;
+import android.gesture.GestureStroke;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Typeface;
@@ -28,9 +27,6 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.preference.PreferenceManager;
-import androidx.core.content.PermissionChecker;
-import androidx.documentfile.provider.DocumentFile;
-
 import android.text.format.DateFormat;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -61,6 +57,15 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.core.content.PermissionChecker;
+import androidx.documentfile.provider.DocumentFile;
+
+import com.qsp.player.FileUtil;
+import com.qsp.player.JniResult;
+import com.qsp.player.R;
+import com.qsp.player.Utility;
+import com.qsp.player.settings.Settings;
+import com.qsp.player.stock.QspGameStock;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -779,7 +784,7 @@ Utility.WriteLog("FreeResources*");
 
     private void ShowGameStock() {
         Intent myIntent = new Intent(this, QspGameStock.class);
-        //myIntent.setClassName("com.qsp.player", "com.qsp.player.QspGameStock");
+        //myIntent.setClassName("com.qsp.player", "com.qsp.player.stock.QspGameStock");
         myIntent.putExtra("game_is_running", gameIsRunning);
         startActivityForResult(myIntent, ACTIVITY_SELECT_GAME);
     }
@@ -2744,7 +2749,7 @@ Utility.WriteLog("obsELSE str1: "+objsResult.str1+", str2: "+objsResult.str2);
                 waitForImageBox = true;
 
                 Intent imageboxIntent = new Intent(QspPlayerStart.this, QspImageBox.class);
-                //imageboxIntent.setClassName("com.qsp.player", "com.qsp.player.QspImageBox");
+                //imageboxIntent.setClassName("com.qsp.player", "com.qsp.player.game.QspImageBox");
                 Bundle b = new Bundle();
                 b.putString("imageboxFile", prefix.concat(fileName));
                 imageboxIntent.putExtras(b);

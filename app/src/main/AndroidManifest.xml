@@ -6,7 +6,7 @@
                  android:hardwareAccelerated="true"
                  android:largeHeap="true"
                  android:usesCleartextTraffic="true">
-        <activity android:name=".QspPlayerStart"
+        <activity android:name=".game.QspPlayerStart"
                   android:label="@string/app_name" 
                   android:alwaysRetainTaskState="true"
                   android:configChanges="orientation|keyboardHidden|screenSize">
@@ -16,14 +16,14 @@
             </intent-filter>
         </activity>
 
-    <activity android:name="QspImageBox"
+    <activity android:name=".game.QspImageBox"
               android:theme="@style/Theme.Translucent"
               android:configChanges="orientation|keyboardHidden"/>
 
-    <activity android:name="Settings"
+    <activity android:name=".settings.Settings"
               android:label="@string/menu_options"/>
 
-    <activity android:name="QspGameStock" 
+    <activity android:name=".stock.QspGameStock" 
               android:label="@string/menu_gamestock"
               android:configChanges="orientation|keyboardHidden"/>
 </application>

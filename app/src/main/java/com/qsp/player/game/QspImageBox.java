@@ -1,4 +1,4 @@
-package com.qsp.player;
+package com.qsp.player.game;
 
 import android.app.Activity;
 import android.graphics.drawable.Drawable;
@@ -8,6 +8,8 @@ import android.view.View.OnClickListener;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
+
+import com.qsp.player.R;
 
 import java.io.File;
 import java.io.IOException;
