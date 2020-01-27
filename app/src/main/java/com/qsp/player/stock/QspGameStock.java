@@ -1,5 +1,60 @@
 package com.qsp.player.stock;
 
+import android.Manifest;
+import android.app.AlertDialog;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.res.Configuration;
+import android.content.res.Resources;
+import android.graphics.Color;
+import android.net.Uri;
+import android.os.Bundle;
+import android.os.Environment;
+import android.os.PersistableBundle;
+import android.preference.PreferenceManager;
+import android.text.TextUtils;
+import android.util.DisplayMetrics;
+import android.util.Log;
+import android.view.KeyEvent;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.webkit.WebView;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.collection.SparseArrayCompat;
+import androidx.documentfile.provider.DocumentFile;
+import androidx.fragment.app.FragmentTransaction;
+
+import com.qsp.player.FileUtil;
+import com.qsp.player.PermissionUtil;
+import com.qsp.player.R;
+import com.qsp.player.Utility;
+import com.qsp.player.game.QspPlayerStart;
+import com.qsp.player.settings.Settings;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlPullParserFactory;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -25,57 +80,7 @@ import java.util.Locale;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlPullParserFactory;
-
-import android.app.AlertDialog;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.app.ProgressDialog;
-import android.app.TabActivity;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.res.Configuration;
-import android.content.res.Resources;
-import android.graphics.Color;
-import android.net.Uri;
-import android.os.Bundle;
-import android.os.Environment;
-import android.preference.PreferenceManager;
-import android.text.TextUtils;
-import android.util.DisplayMetrics;
-import android.util.Log;
-import android.view.KeyEvent;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.webkit.WebView;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
-import android.widget.TabHost;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.TabHost.OnTabChangeListener;
-import android.widget.TextView;
-import android.widget.Toast;
-
-import androidx.documentfile.provider.DocumentFile;
-
-import com.qsp.player.FileUtil;
-import com.qsp.player.game.QspPlayerStart;
-import com.qsp.player.R;
-import com.qsp.player.settings.Settings;
-import com.qsp.player.Utility;
-
-public class QspGameStock extends TabActivity {
+public class QspGameStock extends AppCompatActivity {
 
     final private Context uiContext = this;
     private String xmlGameListCached;
@@ -90,12 +95,13 @@ public class QspGameStock extends TabActivity {
     private boolean startingGSUp = true;
 
     public static final int MAX_SPINNER = 1024;
-    public static final int DOWNLOADED_TABNUM = 0;
-    public static final int STARRED_TABNUM = 1;
-    public static final int ALL_TABNUM = 2;
+    public static final int TAB_DOWNLOADED = 0;
+    public static final int TAB_STARRED = 1;
+    public static final int TAB_ALL = 2;
     public static final int REQUEST_CODE_STORAGE_ACCESS = 42;
 
     public static final String GAME_INFO_FILENAME = "gamestockInfo";
+    private static final int REQUEST_CODE_EXTERNAL_STORAGE = 1;
 
     public static DocumentFile downloadDir = null;
 
@@ -131,14 +137,13 @@ public class QspGameStock extends TabActivity {
 
     HashMap<String, GameItem> gamesMap;
 
-    ListView lvAll;
-    ListView lvDownloaded;
-    ListView lvStarred;
+    ListView lvGames;
     ProgressDialog downloadProgressDialog = null;
     Thread downloadThread = null;
 
     private NotificationManager mNotificationManager;
     private int QSP_NOTIFICATION_ID;
+    private SparseArrayCompat<GameAdapter> gameAdapters = new SparseArrayCompat<>();
     
     public QspGameStock() {
         Utility.WriteLog("[G]constructor\\");
@@ -197,6 +202,14 @@ public class QspGameStock extends TabActivity {
         Utility.WriteLog("[G]onCreate\\");
         // Be sure to call the super class.
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.gamestock);
+
+        PermissionUtil.requestPermissionsIfNotGranted(
+                this,
+                REQUEST_CODE_EXTERNAL_STORAGE,
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
         settings = PreferenceManager.getDefaultSharedPreferences(this);
 
         userSetLang = settings.getString("lang", "en");
@@ -210,35 +223,38 @@ public class QspGameStock extends TabActivity {
         Intent gameStockIntent = getIntent();
         gameIsRunning = gameStockIntent.getBooleanExtra("game_is_running", false);
         startingGSUp = true;
-        
+
         isActive = false;
         showProgressDialog = false;
-        
+
         mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        
-        TabHost tabHost = getTabHost();
-        LayoutInflater.from(getApplicationContext()).inflate(R.layout.gamestock, tabHost.getTabContentView(), true);
-        tabHost.addTab(tabHost.newTabSpec("downloaded")
-                .setIndicator(getResources().getString(R.string.tab_downloaded))
-                .setContent(R.id.downloaded_tab));
-        tabHost.addTab(tabHost.newTabSpec("starred")
-                .setIndicator(getResources().getString(R.string.tab_starred))
-                .setContent(R.id.starred_tab));
-        tabHost.addTab(tabHost.newTabSpec("all")
-                .setIndicator(getResources().getString(R.string.tab_all))
-                .setContent(R.id.all_tab));
-        
+
+        TabListener tabListener = new TabListener();
+        ActionBar bar = getSupportActionBar();
+        bar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+        bar.addTab(bar.newTab()
+                .setText(R.string.tab_downloaded)
+                .setTabListener(tabListener), false);
+
+        bar.addTab(bar.newTab()
+                .setText(R.string.tab_starred)
+                .setTabListener(tabListener), false);
+
+        bar.addTab(bar.newTab()
+                .setText(R.string.tab_all)
+                .setTabListener(tabListener), false);
+
         openDefaultTab = true;
         gameListIsLoading = false;
         triedToLoadGameList = false;
 
         xmlGameListCached = null;
 
-        InitListViews();
+        InitListViews(savedInstanceState);
 
         setResult(RESULT_CANCELED);
-        
-        //TODO: 
+
+        //TODO:
         // 1v. Отображение статуса "Загружено", например цветом фона.
         // 2. Авто-обновление игр
         // 3. Кэширование списка игр
@@ -248,7 +264,7 @@ public class QspGameStock extends TabActivity {
         // 7v. Доступ к настройкам приложения через меню этой активити
         Utility.WriteLog("[G]onCreate/");
     }
-    
+
     @Override
     public void onResume()
     {
@@ -568,11 +584,11 @@ public class QspGameStock extends TabActivity {
         Utility.WriteLog("[G]onDestroy/");
         super.onDestroy();
     }
-    
+
     @Override
-    public Object onRetainNonConfigurationInstance() {
-        final String gameListToRecreatedActivity = xmlGameListCached;
-        return gameListToRecreatedActivity;
+    public void onSaveInstanceState(@NonNull Bundle outState, @NonNull PersistableBundle outPersistentState) {
+        super.onSaveInstanceState(outState, outPersistentState);
+        outState.putString("gameList", xmlGameListCached);
     }
 
     @Override
@@ -706,58 +722,19 @@ public class QspGameStock extends TabActivity {
         return super.onKeyDown(keyCode, event);
     }
 
-    private void InitListViews()
+    private void InitListViews(Bundle savedInstanceState)
     {
-        lvAll = (ListView)findViewById(R.id.all_tab);
-        lvDownloaded = (ListView)findViewById(R.id.downloaded_tab);
-        lvStarred = (ListView)findViewById(R.id.starred_tab);
-
-        lvDownloaded.setTextFilterEnabled(true);
-        lvDownloaded.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-        lvDownloaded.setOnItemClickListener(gameListClickListener);
-        lvDownloaded.setOnItemLongClickListener(gameListLongClickListener);
-
-        lvStarred.setTextFilterEnabled(true);
-        lvStarred.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-        lvStarred.setOnItemClickListener(gameListClickListener);
-        lvStarred.setOnItemLongClickListener(gameListLongClickListener);
-
-        lvAll.setTextFilterEnabled(true);
-        lvAll.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-        lvAll.setOnItemClickListener(gameListClickListener);
-        lvAll.setOnItemLongClickListener(gameListLongClickListener);
+        lvGames = findViewById(R.id.games);
+        lvGames.setTextFilterEnabled(true);
+        lvGames.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+        lvGames.setOnItemClickListener(gameListClickListener);
+        lvGames.setOnItemLongClickListener(gameListLongClickListener);
 
         //Забираем список игр из предыдущего состояния активити, если оно было пересоздано (при повороте экрана)
-        final Object data = getLastNonConfigurationInstance();        
-        if (data != null) {
-            xmlGameListCached = (String)data;
+        if (savedInstanceState != null) {
+            xmlGameListCached = savedInstanceState.getString("gameList");
         }
 
-        getTabHost().setOnTabChangedListener(new OnTabChangeListener(){
-            @Override
-            public void onTabChanged(String tabId) {
-                int tabNum = getTabHost().getCurrentTab();
-Utility.WriteLog("GameStock Tab "+tabNum);
-                if (((tabNum == STARRED_TABNUM) || (tabNum == ALL_TABNUM)) && (xmlGameListCached == null) && !gameListIsLoading) {
-                    if (Utility.haveInternet(uiContext))
-                    {
-                        gameListIsLoading = true;
-                        triedToLoadGameList = true;
-                        LoadGameListThread tLoadGameList = new LoadGameListThread();
-                        tLoadGameList.start();
-                    }
-                    else
-                    {
-                        if (!triedToLoadGameList)
-                        {
-                            Utility.ShowError(uiContext, getString(R.string.gamelistLoadError));
-                            triedToLoadGameList = true;
-                        }
-                    }
-                }
-            }
-        });
-        
         RefreshLists();
     }
 
@@ -777,40 +754,22 @@ Utility.WriteLog("GameStock Tab "+tabNum);
                     .setContentIntent(contentIntent)
                     .setAutoCancel(true)
                     .build();
-            
+
             mNotificationManager.notify(
                        QSP_NOTIFICATION_ID, // we use a string id because it is a unique
                                             // number.  we use it later to cancel the
                                             // notification
                        note);
     }
-    
+
     private String getGameIdByPosition(int position)
     {
-        String value = "";
-        int tab = getTabHost().getCurrentTab();
-        switch (tab) {
-        case DOWNLOADED_TABNUM:
-            //Загруженные
-            GameItem tt1 = (GameItem) lvDownloaded.getAdapter().getItem(position);
-            value = tt1.game_id;
-            break;
-        case STARRED_TABNUM:
-            //Отмеченные
-            GameItem tt2 = (GameItem) lvStarred.getAdapter().getItem(position);
-            value = tt2.game_id;
-            break;
-        case ALL_TABNUM:
-            //Все
-            GameItem tt3 = (GameItem) lvAll.getAdapter().getItem(position);
-            value = tt3.game_id;
-            break;
-        }
-        return value;
+        final GameItem game = (GameItem) lvGames.getAdapter().getItem(position);
+        return game.game_id;
     }
-    
+
     //Выбрана игра в списке
-    private OnItemClickListener gameListClickListener = new OnItemClickListener() 
+    private OnItemClickListener gameListClickListener = new OnItemClickListener()
     {
         @Override
         public void onItemClick(AdapterView<?> parent, View arg1, int position, long arg3)
@@ -974,19 +933,7 @@ Utility.WriteLog("Dialog txt: "+txt);
                 //in this case, going to save it in program cache directory
                 //on sd card.
 
-                // ** original code for checking for storage directory **
-                // File SDCardRoot = Environment.getExternalStorageDirectory();
-                // File cacheDir = new File (SDCardRoot.getPath().concat("/Android/data/com.qsp.player/cache/"));
-
-                // ** begin replacement code for checking storage directory **
-                String strSDCardPath = System.getenv("SECONDARY_STORAGE");
-                                if ((null == strSDCardPath) || (strSDCardPath.length() == 0)) {
-                    strSDCardPath = System.getenv("EXTERNAL_SDCARD_STORAGE");
-                }
-                File cacheDir = new File (Environment.getExternalStorageDirectory().getPath().concat("/Android/data/com.qsp.player/cache/"));
-                // ** end replacement code for checking storage directory **
-
-
+                final File cacheDir = QspGameStock.this.getCacheDir();
                 if (!cacheDir.exists())
                 {
                     if (!cacheDir.mkdirs())
@@ -1566,60 +1513,31 @@ Utility.WriteLog("qspGameDirs["+i+"]: "+qspGameDirs.get(i).getName()+
     private void RefreshAllTabs()
     {
         //Update all tab titles
-        TabHost tabHost = getTabHost();
-        ((TextView)tabHost.getTabWidget().getChildAt(2).findViewById(android.R.id.title)).setText(getString(R.string.tab_all));
-        ((TextView)tabHost.getTabWidget().getChildAt(1).findViewById(android.R.id.title)).setText(getString(R.string.tab_starred));
-        ((TextView)tabHost.getTabWidget().getChildAt(0).findViewById(android.R.id.title)).setText(getString(R.string.tab_downloaded));
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.getTabAt(2).setText(getString(R.string.tab_all));
+        actionBar.getTabAt(1).setText(getString(R.string.tab_starred));
+        actionBar.getTabAt(0).setText(getString(R.string.tab_downloaded));
 
         //Выводим списки игр на экран
-/*
-        //Все
-        ArrayList<GameItem> gamesAll = new ArrayList<GameItem>();
-        for (HashMap.Entry<String, GameItem> e : gamesMap.entrySet())
-        {
-            gamesAll.add(e.getValue());
-        }
-        gamesAll = Utility.GameSorter(gamesAll);
-        lvAll.setAdapter(new GameAdapter(uiContext, R.layout.game_item, gamesAll));
-        //Загруженные
-        ArrayList<GameItem> gamesDownloaded = new ArrayList<GameItem>();
-        for (HashMap.Entry<String, GameItem> e : gamesMap.entrySet())
-        {
-            if (e.getValue().downloaded)
-                gamesDownloaded.add(e.getValue());
-        }
-        gamesDownloaded = Utility.GameSorter(gamesDownloaded);
-        lvDownloaded.setAdapter(new GameAdapter(uiContext, R.layout.game_item, gamesDownloaded));
-        
-        //Отмеченные
-        //!!! STUB
-        ArrayList<GameItem> gamesStarred = new ArrayList<GameItem>();
-        for (HashMap.Entry<String, GameItem> e : gamesMap.entrySet())
-        {
-            if (!e.getValue().downloaded)
-                gamesStarred.add(e.getValue());
-        }
-        gamesStarred = Utility.GameSorter(gamesStarred);
-        lvStarred.setAdapter(new GameAdapter(uiContext, R.layout.game_item, gamesStarred));
-*/
+        ArrayList<GameItem> games = new ArrayList<>(gamesMap.values());
+        Utility.GameSorter(games);
 
-        ArrayList<GameItem> gamesAll = new ArrayList<GameItem>();
-        ArrayList<GameItem> gamesDownloaded = new ArrayList<GameItem>();
-        ArrayList<GameItem> gamesStarred = new ArrayList<GameItem>();
-        for (HashMap.Entry<String, GameItem> e : gamesMap.entrySet())
-        {
-            gamesAll.add(e.getValue());
-            if (e.getValue().downloaded)
-                gamesDownloaded.add(e.getValue());
-            else
-                gamesStarred.add(e.getValue());
+        ArrayList<GameItem> gamesDownloaded = new ArrayList<>();
+        ArrayList<GameItem> gamesStarred = new ArrayList<>();
+        ArrayList<GameItem> gamesAll = new ArrayList<>();
+
+        for (GameItem game : games) {
+            if (game.downloaded) {
+                gamesDownloaded.add(game);
+            } else {
+                gamesStarred.add(game);
+            }
+            gamesAll.add(game);
         }
-        gamesAll = Utility.GameSorter(gamesAll);
-        lvAll.setAdapter(new GameAdapter(uiContext, R.layout.game_item, gamesAll));
-        gamesDownloaded = Utility.GameSorter(gamesDownloaded);
-        lvDownloaded.setAdapter(new GameAdapter(uiContext, R.layout.game_item, gamesDownloaded));
-        gamesStarred = Utility.GameSorter(gamesStarred);
-        lvStarred.setAdapter(new GameAdapter(uiContext, R.layout.game_item, gamesStarred));
+
+        gameAdapters.put(TAB_DOWNLOADED, new GameAdapter(this, R.layout.game_item, gamesDownloaded));
+        gameAdapters.put(TAB_STARRED, new GameAdapter(this, R.layout.game_item, gamesStarred));
+        gameAdapters.put(TAB_ALL, new GameAdapter(this, R.layout.game_item, gamesAll));
 
         //Determine which tab to open
         if (openDefaultTab)
@@ -1627,15 +1545,28 @@ Utility.WriteLog("qspGameDirs["+i+"]: "+qspGameDirs.get(i).getName()+
             openDefaultTab = false;
 
             int tabIndex = 0;//Uploaded
-            if (lvDownloaded.getAdapter().isEmpty())
+            if (gamesDownloaded.isEmpty())
             {
-                if (lvStarred.getAdapter().isEmpty())
+                if (gamesStarred.isEmpty())
                     tabIndex = 2;//All
                 else
                     tabIndex = 1;//Reported
             }
 
-            getTabHost().setCurrentTab(tabIndex);
+            getSupportActionBar().setSelectedNavigationItem(tabIndex);
+        } else {
+            int tab = getSupportActionBar().getSelectedNavigationIndex();
+            setGameAdapterFromTab(tab);
+        }
+    }
+
+    private void setGameAdapterFromTab(int tab) {
+        switch (tab) {
+            case TAB_DOWNLOADED:
+            case TAB_STARRED:
+            case TAB_ALL:
+                lvGames.setAdapter(gameAdapters.get(tab));
+                break;
         }
     }
     
@@ -2258,5 +2189,33 @@ Utility.WriteLog("getNewDownloadDir()");
                 });
         bld.create().show();
 
+    }
+
+    private class TabListener implements ActionBar.TabListener {
+
+        @Override
+        public void onTabSelected(ActionBar.Tab tab, FragmentTransaction ft) {
+            int position = tab.getPosition();
+            if ((position == TAB_STARRED || position == TAB_ALL) && xmlGameListCached == null && !gameListIsLoading) {
+                if (Utility.haveInternet(uiContext)) {
+                    gameListIsLoading = true;
+                    triedToLoadGameList = true;
+                    LoadGameListThread tLoadGameList = new LoadGameListThread();
+                    tLoadGameList.start();
+                } else if (!triedToLoadGameList) {
+                    Utility.ShowError(uiContext, getString(R.string.gamelistLoadError));
+                    triedToLoadGameList = true;
+                }
+            }
+            setGameAdapterFromTab(position);
+        }
+
+        @Override
+        public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction ft) {
+        }
+
+        @Override
+        public void onTabReselected(ActionBar.Tab tab, FragmentTransaction ft) {
+        }
     }
 }

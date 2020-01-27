@@ -25,7 +25,8 @@
 
     <activity android:name=".stock.QspGameStock" 
               android:label="@string/menu_gamestock"
-              android:configChanges="orientation|keyboardHidden"/>
+              android:configChanges="orientation|keyboardHidden"
+              android:theme="@style/Theme.AppCompat"/>
 </application>
 
     <uses-permission android:name="android.permission.INTERNET"></uses-permission>

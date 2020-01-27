@@ -1,20 +1,5 @@
 package com.qsp.player;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Stack;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.Context;
@@ -51,6 +36,20 @@ import android.widget.Toast;
 import androidx.documentfile.provider.DocumentFile;
 
 import com.qsp.player.stock.GameItem;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Stack;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import pl.droidsonroids.gif.GifDrawable;
 
@@ -1843,23 +1842,15 @@ Utility.WriteLog("GetGamesPath() - [path == null] is "+(path==null));
     }
 
     //Sort an ArrayList of GameItem by title (what is seen on the GameStock menu)
-    public static ArrayList<GameItem> GameSorter (ArrayList<GameItem> items) {
+    public static void GameSorter (ArrayList<GameItem> items) {
         //Skip if there aren't at least two files
-        if (items.size() < 2) return items;
+        if (items.size() < 2) return;
 
-        GameItem[] gameArray = items.toArray(new GameItem[items.size()]);
-        Arrays.sort(gameArray, new Comparator<GameItem>() {
+        Collections.sort(items, new Comparator<GameItem>() {
             public int compare(GameItem f1, GameItem f2) {
                 return f1.title.toLowerCase().compareTo(f2.title.toLowerCase());
             }
         });
-
-        ArrayList<GameItem> returnedList = new ArrayList<GameItem>();
-
-        for(int i=0; i<gameArray.length; i++)
-            returnedList.add(gameArray[i]);
-
-        return returnedList;
     }
 
 
