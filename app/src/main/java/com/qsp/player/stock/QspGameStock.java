@@ -56,7 +56,6 @@ import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -66,7 +65,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.StringReader;
 import java.net.HttpURLConnection;
@@ -77,8 +75,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 public class QspGameStock extends AppCompatActivity {
 
@@ -1079,177 +1075,39 @@ Utility.WriteLog("Dialog txt: "+txt);
     
     private void Unzip(String zipFile, String location, String gameName)
     {
+        _zipFile = zipFile;
+        _location = location;
+
+        runOnUiThread(new Runnable() {
+            public void run() {
+                downloadProgressDialog = new ProgressDialog(uiContext);
+                downloadProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                downloadProgressDialog.setCancelable(false);
+            }
+        });
+        updateSpinnerProgress(true, gameName, getString(R.string.unpackMsg), 0);
+
         if (downloadDir != null) {
-            _zipFile = zipFile;
-            _location = location;
             String folderName = Utility.ConvertGameTitleToCorrectFolderName(gameName);
 
-            runOnUiThread(new Runnable() {
-                public void run() {
-                    downloadProgressDialog = new ProgressDialog(uiContext);
-                    downloadProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-                    downloadProgressDialog.setCancelable(false);
-                }
-            });
-            updateSpinnerProgress(true, gameName, getString(R.string.unpackMsg), 0);
-
             try {
-                FileInputStream fin = new FileInputStream(_zipFile);
-                ZipInputStream zin = new ZipInputStream(fin);
-                BufferedInputStream in = new BufferedInputStream(zin);
                 DocumentFile gameFolder = downloadDir.findFile(folderName);
                 if (gameFolder == null)
                     gameFolder = downloadDir.createDirectory(folderName);
 
-                ZipEntry ze = null;
-                while ((ze = zin.getNextEntry()) != null) {
-                    Log.v(getString(R.string.decompMsg), getString(R.string.unzipMsg).replace("-FILENAME-", "\n" + ze.getName() + "\n"));
-
-Utility.WriteLog("ze.getName(): "+ze.getName());
-                    if (ze.isDirectory()) {
-                        _dirCheckerDD(gameFolder,ze.getName());
-                    } else {
-                        //if creating a file, use a DocumentFile that represents the directory where
-                        //the file must be created
-                        if (ze.getName().endsWith("/")) continue;
-                        String filenameOnly = ze.getName();
-                        if (filenameOnly.indexOf("/") > 0)
-                            filenameOnly = filenameOnly.substring(filenameOnly.lastIndexOf("/")+1);
-                        DocumentFile targetDir = getDFDirectory(gameFolder,ze.getName());
-                        DocumentFile tempDocFile = targetDir.createFile(URLConnection.guessContentTypeFromName(filenameOnly),filenameOnly);
-                        Uri tempUri = tempDocFile.getUri();
-                        OutputStream fout = uiContext.getContentResolver().openOutputStream(tempUri);
-                        if (fout == null) {
-                            break;
-                        }
-                        BufferedOutputStream out = new BufferedOutputStream(fout);
-                        byte b[] = new byte[1024];
-                        int n;
-                        while ((n = in.read(b, 0, 1024)) >= 0) {
-                            out.write(b, 0, n);
-                            updateSpinnerProgress(true, gameName, getString(R.string.unpackMsg), n);
-                        }
-
-                        zin.closeEntry();
-                        out.close();
-                        fout.close();
-                    }
-
-                }
-                in.close();
-                zin.close();
+                ZipUtil.unzip(_zipFile, gameFolder, this);
             } catch (Exception e) {
                 Log.e(getString(R.string.decompMsg), getString(R.string.unzipMsgShort), e);
             }
 
         }
         else {
-            _zipFile = zipFile;
-            _location = location;
-
-            runOnUiThread(new Runnable() {
-                public void run() {
-                    downloadProgressDialog = new ProgressDialog(uiContext);
-                    downloadProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-                    downloadProgressDialog.setCancelable(false);
-                }
-            });
-            updateSpinnerProgress(true, gameName, getString(R.string.unpackMsg), 0);
-
-            _dirChecker("");
-
             try {
-                FileInputStream fin = new FileInputStream(_zipFile);
-                ZipInputStream zin = new ZipInputStream(fin);
-                BufferedInputStream in = new BufferedInputStream(zin);
-
-                ZipEntry ze = null;
-                while ((ze = zin.getNextEntry()) != null) {
-                    Log.v(getString(R.string.decompMsg), getString(R.string.unzipMsg).replace("-FILENAME-", "\n" + ze.getName() + "\n"));
-
-                    if (ze.isDirectory()) {
-                        _dirChecker(ze.getName());
-                    } else {
-                        FileOutputStream fout = new FileOutputStream(_location + ze.getName());
-                        BufferedOutputStream out = new BufferedOutputStream(fout);
-                        byte b[] = new byte[1024];
-                        int n;
-                        while ((n = in.read(b, 0, 1024)) >= 0) {
-                            out.write(b, 0, n);
-                            updateSpinnerProgress(true, gameName, getString(R.string.unpackMsg), n);
-                        }
-
-                        zin.closeEntry();
-                        out.close();
-                        fout.close();
-                    }
-
-                }
-                in.close();
-                zin.close();
+                ZipUtil.unzip(_zipFile, _location);
             } catch (Exception e) {
                 Log.e(getString(R.string.decompMsg), getString(R.string.unzipMsgShort), e);
             }
         }
-    }
-    
-    private void _dirChecker(String dir) { 
-        File f = new File(_location + dir);
-
-        if(!f.isDirectory()) {
-            downloadDir.createDirectory(dir);
-        }
-    }
-
-    //If using downloadDir, check if the directory exists and create it if it doesn't
-    private void _dirCheckerDD(DocumentFile baseDF, String dir) {
-Utility.WriteLog("1. dir = "+dir);
-        if (dir.endsWith("/")) {
-            if (dir.length() > 1) //remove the trailing "/" if present
-                dir = dir.substring(0,dir.length()-1);
-            else //skip if the directory is just root
-                return;
-        }
-Utility.WriteLog("2. dir = "+dir);
-
-        String[] allDirs = dir.split("/");
-
-        //If there are no directories to make, skip
-        if (allDirs.length == 0) return;
-
-        //Make the first directory in the list
-        DocumentFile df = baseDF.findFile(allDirs[0]);
-        if (df == null) {
-            baseDF.createDirectory(allDirs[0]);
-            df = baseDF.findFile(allDirs[0]);
-        }
-
-        //if there are more directories, repeat process
-        if (df.isDirectory())
-            if (allDirs.length > 1) {
-                _dirCheckerDD(df,dir.substring(dir.indexOf("/")+1));
-            }
-    }
-
-    private DocumentFile getDFDirectory (DocumentFile baseDF, String target) {
-        String[] allDirs = target.split("/");
-        if (allDirs.length < 2) return baseDF;
-        String newTarget = target.substring(target.indexOf("/")+1);
-Utility.WriteLog("last split("+allDirs.length+" segments): "+ allDirs[0]+" /.../ "+allDirs[allDirs.length-1]);
-Utility.WriteLog("target: "+target);
-Utility.WriteLog("newTarget: "+newTarget);
-
-        DocumentFile newBaseDF = baseDF.findFile(allDirs[0]);
-        if (newBaseDF == null) {
-            baseDF.createDirectory(allDirs[0]);
-            newBaseDF = baseDF.findFile(allDirs[0]);
-        }
-        else {
-Utility.WriteLog(newBaseDF.getName()+" exists.");
-        }
-        newBaseDF = getDFDirectory(newBaseDF,newTarget);
-
-        return newBaseDF;
     }
 
     private void WriteGameInfo(String gameId)

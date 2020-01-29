@@ -24,7 +24,10 @@ import android.provider.DocumentsContract;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
+import androidx.documentfile.provider.DocumentFile;
+
 import android.util.Log;
+import android.webkit.MimeTypeMap;
 
 @SuppressLint("NewApi")
 public final class FileUtil {
@@ -183,5 +186,49 @@ public final class FileUtil {
         }
     }
 
+    public static String normalizeDirectoryPath(String dirPath) {
+        final int idx = dirPath.lastIndexOf('/');
+        return idx == -1 ? dirPath : dirPath.substring(0, idx);
+    }
 
+    public static void createDirectories(DocumentFile parentDir, String dirPath) {
+        int idx = dirPath.indexOf('/');
+        String dirName = idx == -1 ? dirPath : dirPath.substring(0, idx);
+        DocumentFile dir = parentDir.findFile(dirName);
+        if (dir == null) {
+            dir = parentDir.createDirectory(dirName);
+        }
+        if (idx != -1) {
+            createDirectories(dir, dirPath.substring(idx + 1));
+        }
+    }
+
+    public static DocumentFile getParentDirectory(DocumentFile parentDir, String path) {
+        int idx = path.indexOf('/');
+        if (idx == -1) {
+            return parentDir;
+        }
+
+        String dirName = path.substring(0, idx);
+        DocumentFile dir = parentDir.findFile(dirName);
+        if (dir == null) {
+            dir = parentDir.createDirectory(dirName);
+        }
+
+        return getParentDirectory(dir, path.substring(idx + 1));
+    }
+
+    public static String getFilename(String path) {
+        int idx = path.lastIndexOf('/');
+        if (idx == -1) {
+            return path;
+        }
+
+        return path.substring(idx + 1);
+    }
+
+    public static String getMimeType(String url) {
+        String ext = MimeTypeMap.getFileExtensionFromUrl(url);
+        return MimeTypeMap.getSingleton().getMimeTypeFromExtension(ext);
+    }
 }
