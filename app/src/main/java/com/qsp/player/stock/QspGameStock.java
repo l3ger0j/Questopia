@@ -55,7 +55,6 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
-import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -130,7 +129,7 @@ public class QspGameStock extends AppCompatActivity {
 
     ListView lvGames;
     ProgressDialog downloadProgressDialog = null;
-    Thread downloadThread = null;
+    DownloadGameAsyncTask downloadTask = null;
 
     private NotificationManager mNotificationManager;
     private int QSP_NOTIFICATION_ID;
@@ -705,7 +704,7 @@ public class QspGameStock extends AppCompatActivity {
         //Ловим кнопку "Back", и не закрываем активити, а только
         //отправляем в бэкграунд (как будто нажали "Home"),
         //при условии, что запущен поток скачивания игры
-        if ((downloadThread != null) && downloadThread.isAlive() && 
+        if (downloadTask != null && downloadTask.getStatus() == AsyncTask.Status.RUNNING &&
                 (keyCode == KeyEvent.KEYCODE_BACK) && (event.getRepeatCount() == 0)) {
             moveTaskToBack(true);
             return true;
@@ -788,7 +787,7 @@ public class QspGameStock extends AppCompatActivity {
             } else {
                 //иначе загружаем
                 checkDownloadDirectory();
-                DownloadGame(selectedGame.file_url, selectedGame.file_size, selectedGame.game_id);
+                downloadGame(selectedGame);
             }
             return true;
         }
@@ -885,7 +884,7 @@ Utility.WriteLog("Dialog txt: "+txt);
                     finish();
                 }else
                     //иначе загружаем
-                    DownloadGame(selectedGame.file_url, selectedGame.file_size, selectedGame.game_id);
+                    downloadGame(selectedGame);
             }
         })
             .setNegativeButton(getString(R.string.closeGameCmd), new DialogInterface.OnClickListener() {
@@ -896,179 +895,23 @@ Utility.WriteLog("Dialog txt: "+txt);
         });
             bld.create().show();
     }
-    
-    private void DownloadGame(String file_url, int file_size, String game_id)
-    {
+
+    private void downloadGame(GameItem game) {
         if (!Utility.haveInternet(uiContext))
         {
             Utility.ShowError(uiContext, getString(R.string.gameLoadNetError));
             return;
         }
-        GameItem gameToDownload = gamesMap.get(game_id);
-        String folderName = Utility.ConvertGameTitleToCorrectFolderName(gameToDownload.title);
 
-        final String urlToDownload = file_url;
-        final String unzipLocation = Utility.GetDownloadPath(this).concat("/").concat(folderName).concat("/");
-        final String gameId = game_id;
-        final String gameName = gameToDownload.title;
-        final String gamesPath = Utility.GetDownloadPath(this);
-        final int totalSize = file_size;
         downloadProgressDialog = new ProgressDialog(uiContext);
         downloadProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-        downloadProgressDialog.setMax(totalSize);
+        downloadProgressDialog.setMax(game.file_size);
         downloadProgressDialog.setCancelable(false);
 
-
-        downloadThread = new Thread() {
-            public void run() {
-                //set the path where we want to save the file
-                //in this case, going to save it in program cache directory
-                //on sd card.
-
-                final File cacheDir = QspGameStock.this.getCacheDir();
-                if (!cacheDir.exists())
-                {
-                    if (!cacheDir.mkdirs())
-                    {
-                        Utility.WriteLog(getString(R.string.cacheCreateError));
-                        return;
-                    }
-                }
-
-                //create a new file, specifying the path, and the filename
-                //which we want to save the file as.
-                String filename = String.valueOf(System.currentTimeMillis()).concat("_game.zip");
-                File file = new File(cacheDir, filename);
-
-                boolean successDownload = false;
-
-                try {
-                    //set the download URL, a url that points to a file on the internet
-                    //this is the file to be downloaded
-                    URL url = new URL(urlToDownload);
-
-                    //create the new connection
-                    HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-
-                    //set up some things on the connection
-                    urlConnection.setRequestMethod("GET");
-                    urlConnection.setDoOutput(true);
-
-                    //and connect!
-                    urlConnection.connect();
-
-                    //this will be used to write the downloaded data into the file we created
-                    FileOutputStream fileOutput = new FileOutputStream(file);
-
-                    //this will be used in reading the data from the internet
-                    InputStream inputStream = urlConnection.getInputStream();
-
-                    //create a buffer...
-                    byte[] buffer = new byte[1024];
-                    int bufferLength = 0; //used to store a temporary size of the buffer
-                    int downloadedCount = 0;
-
-                    //now, read through the input buffer and write the contents to the file
-                    while ( (bufferLength = inputStream.read(buffer)) > 0 ) {
-                        //add the data in the buffer to the file in the file output stream (the file on the sd card
-                        fileOutput.write(buffer, 0, bufferLength);
-                        //this is where you would do something to report the prgress, like this maybe
-                        downloadedCount += bufferLength;
-                        updateSpinnerProgress(true, gameName, getString(R.string.dlWaiting), -downloadedCount);
-                    }
-                    //close the output stream when done
-                    fileOutput.close();
-                    successDownload = totalSize == downloadedCount;
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    Utility.WriteLog(getString(R.string.dlGameError));
-                }
-
-                updateSpinnerProgress(false, "", "", 0);
-
-                final String checkGameName = gameName;
-                final String checkGameId = gameId;
-
-                if (!successDownload)
-                {
-                    if (file.exists())
-                        file.delete();
-                    runOnUiThread(new Runnable() {
-                        public void run() {
-                            String desc = getString(R.string.cantDlGameError).replace("-GAMENAME-",checkGameName);
-                            if (isActive)
-                                Utility.ShowError(uiContext, desc);
-                            else
-                                Notify(getString(R.string.genGameLoadError), desc);
-                        }
-                    });
-                    return;
-                }
-
-                //Unzip
-                Unzip(file.getPath(), unzipLocation, gameName);
-                file.delete();
-                //Пишем информацию об игре
-                WriteGameInfo(gameId);
-
-                updateSpinnerProgress(false, "", "", 0);
-
-                runOnUiThread(new Runnable() {
-                    public void run() {
-                        RefreshLists();
-                        GameItem selectedGame = gamesMap.get(checkGameId);
-
-                        //Если игра не появилась в списке, значит она не соответствует формату "Полки игр"
-                        boolean success = (selectedGame != null) && selectedGame.downloaded;
-
-                        if (!success)
-                        {
-                            if (downloadDir == null) {
-                                //Удаляем неудачно распакованную игру
-                                File gameFolder = new File(gamesPath.concat("/").concat(Utility.ConvertGameTitleToCorrectFolderName(checkGameName)));
-                                Utility.DeleteRecursive(gameFolder);
-                            }
-                            else {
-                                DocumentFile gameFolder = downloadDir.findFile(Utility.ConvertGameTitleToCorrectFolderName(checkGameName));
-                                if (gameFolder != null) Utility.DeleteDocFileRecursive(gameFolder);
-                            }
-                        }
-
-                        if (isActive)
-                        {
-                            if ( !success )
-                            {
-                                //Показываем сообщение об ошибке
-                                Utility.ShowError(uiContext, getString(R.string.cantUnzipGameError).replace("-GAMENAME-", "\""+checkGameName+"\""));
-                            }
-                            else
-                            {
-                                ShowGameInfo(checkGameId);
-                            }
-                        }
-                        else
-                        {
-                            String msg = null;
-                            String desc = null;
-                            if ( !success )
-                            {
-                                msg = getString(R.string.genGameLoadError);
-                                desc = getString(R.string.cantUnzipGameError).replace("-GAMENAME-", "\""+checkGameName+"\"");
-                            }
-                            else
-                            {
-                                msg = getString(R.string.gameDlSuccess);
-                                desc = getString(R.string.gameUploadSuccess).replace("-GAMENAME-","\""+checkGameName+"\"");
-                            }
-                            Notify(msg, desc);
-                        }
-                    }
-                });
-            }
-        };
-        downloadThread.start();
+        downloadTask = new DownloadGameAsyncTask(game);
+        downloadTask.execute();
     }
-    
+
     private void Unzip(String zipFile, String location, String gameName)
     {
         _zipFile = zipFile;
@@ -1827,6 +1670,129 @@ Utility.WriteLog("getNewDownloadDir()");
             RefreshLists();
             updateSpinnerProgress(false, "", "", 0);
             gameListIsLoading = false;
+        }
+    }
+
+    private class DownloadGameAsyncTask extends AsyncTask<Void, Void, Boolean> {
+
+        private final GameItem game;
+
+        private DownloadGameAsyncTask(GameItem game) {
+            this.game = game;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            File cacheDir = getCacheDir();
+            if (!cacheDir.exists() && !cacheDir.mkdirs()) {
+                Utility.WriteLog(getString(R.string.cacheCreateError));
+                return false;
+            }
+
+            String zipPath = String.valueOf(System.currentTimeMillis()).concat("_game.zip");
+            File zip = new File(cacheDir, zipPath);
+            boolean downloaded = download(zip);
+
+            updateSpinnerProgress(false, "", "", 0);
+
+            if (downloaded) {
+                Unzip(zip.getPath(), getUnzipLocation(), game.title);
+                zip.delete();
+                WriteGameInfo(game.game_id);
+                updateSpinnerProgress(false, "", "", 0);
+                return true;
+            }
+
+            if (zip.exists()) {
+                zip.delete();
+            }
+            String text = getString(R.string.cantDlGameError).replace("-GAMENAME-", game.title);
+            if (isActive) {
+                Utility.ShowError(uiContext, text);
+            } else {
+                Notify(getString(R.string.genGameLoadError), text);
+            }
+
+            return false;
+        }
+
+        private String getUnzipLocation() {
+            String downloadPath = FileUtil.normalizeDirectoryPath(Utility.GetDownloadPath(QspGameStock.this));
+            String folderName = Utility.ConvertGameTitleToCorrectFolderName(game.title);
+
+            return downloadPath.concat("/").concat(folderName);
+        }
+
+        private boolean download(final File zip) {
+            try {
+                URL url = new URL(game.file_url);
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("GET");
+                conn.setDoOutput(true);
+                conn.connect();
+
+                try (InputStream in = conn.getInputStream()) {
+                    try (FileOutputStream out = new FileOutputStream(zip)) {
+                        byte[] b = new byte[8192];
+                        int totalBytesRead = 0;
+                        int bytesRead;
+                        while ((bytesRead = in.read(b)) > 0) {
+                            out.write(b, 0, bytesRead);
+                            totalBytesRead += bytesRead;
+                            updateSpinnerProgress(true, game.title, getString(R.string.dlWaiting), -totalBytesRead);
+                        }
+                        return totalBytesRead == game.file_size;
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                Utility.WriteLog(getString(R.string.dlGameError));
+                return false;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(Boolean result) {
+            if (!result) {
+                return;
+            }
+            RefreshLists();
+
+            //Если игра не появилась в списке, значит она не соответствует формату "Полки игр"
+            GameItem downloadedGame = gamesMap.get(game.game_id);
+            boolean downloaded = downloadedGame != null && downloadedGame.downloaded;
+
+            if (!downloaded) {
+                if (downloadDir == null) {
+                    String downloadPath = FileUtil.normalizeDirectoryPath(Utility.GetDownloadPath(QspGameStock.this));
+                    File gameFolder = new File(downloadPath.concat("/").concat(Utility.ConvertGameTitleToCorrectFolderName(game.title)));
+                    Utility.DeleteRecursive(gameFolder);
+                } else {
+                    DocumentFile gameFolder = downloadDir.findFile(Utility.ConvertGameTitleToCorrectFolderName(game.title));
+                    if (gameFolder != null) {
+                        Utility.DeleteDocFileRecursive(gameFolder);
+                    }
+                }
+            }
+
+            if (isActive) {
+                if (downloaded) {
+                    ShowGameInfo(game.game_id);
+                } else {
+                    Utility.ShowError(uiContext, getString(R.string.cantUnzipGameError).replace("-GAMENAME-", "\"" + game.title + "\""));
+                }
+            } else {
+                String msg;
+                String desc;
+                if (downloaded) {
+                    msg = getString(R.string.gameDlSuccess);
+                    desc = getString(R.string.gameUploadSuccess).replace("-GAMENAME-", "\"" + game.title + "\"");
+                } else {
+                    msg = getString(R.string.genGameLoadError);
+                    desc = getString(R.string.cantUnzipGameError).replace("-GAMENAME-", "\"" + game.title + "\"");
+                }
+                Notify(msg, desc);
+            }
         }
     }
 }

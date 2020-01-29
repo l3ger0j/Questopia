@@ -1906,5 +1906,4 @@ Utility.WriteLog("GetGamesPath() - [path == null] is "+(path==null));
         Utility.WriteLog("Directories are totally different!");
         return false;
     }
-
 }
