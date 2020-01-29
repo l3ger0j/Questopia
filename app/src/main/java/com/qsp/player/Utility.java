@@ -1874,20 +1874,15 @@ Utility.WriteLog("GetGamesPath() - [path == null] is "+(path==null));
         return returnedList;
     }
 
-    //Sort an array of Files by file name
-    public static File[] FileSorter (File[] files) {
-        //Skip if there aren't at least two files
-        if (files.length < 2) return files;
+    public static void FileSorter(List<File> files) {
+        if (files.size() < 2) return;
 
-        File[] sortedFiles = files;
-
-        Arrays.sort(sortedFiles, new Comparator<File>() {
-            public int compare(File f1, File f2) {
-                return f1.getName().toLowerCase().compareTo(f2.getName().toLowerCase());
+        Collections.sort(files, new Comparator<File>() {
+            @Override
+            public int compare(File first, File second) {
+                return first.getName().toLowerCase().compareTo(second.getName().toLowerCase());
             }
         });
-
-        return sortedFiles;
     }
 
     //Compare the file names of two file lists to see if they are the same

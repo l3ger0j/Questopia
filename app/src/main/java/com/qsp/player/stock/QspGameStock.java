@@ -18,7 +18,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.PersistableBundle;
 import android.preference.PreferenceManager;
-import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -56,24 +55,19 @@ import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.StringReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 
 public class QspGameStock extends AppCompatActivity {
@@ -140,6 +134,7 @@ public class QspGameStock extends AppCompatActivity {
     private NotificationManager mNotificationManager;
     private int QSP_NOTIFICATION_ID;
     private SparseArrayCompat<GameAdapter> gameAdapters = new SparseArrayCompat<>();
+    private final LocalGameRepository localGameRepository = new LocalGameRepository(this);
     
     public QspGameStock() {
         Utility.WriteLog("[G]constructor\\");
@@ -1196,8 +1191,11 @@ Utility.WriteLog("Dialog txt: "+txt);
 
         ParseGameList(xmlGameListCached);
 
-        if (!ScanDownloadedGames())
-        {
+        try {
+            for (GameItem game : localGameRepository.getGameItems()) {
+                gamesMap.put(game.game_id, game);
+            }
+        } catch (NoCardAccessException e) {
             Utility.ShowError(uiContext, getString(R.string.noCardAccess));
             return;
         }
@@ -1206,159 +1204,6 @@ Utility.WriteLog("Dialog txt: "+txt);
 
 
         RefreshAllTabs();
-    }
-    
-    private boolean ScanDownloadedGames()
-    {
-        //Check that either downloadPath or path exist
-        String path = Utility.GetGamesPath(this);
-        String downloadPath = Utility.GetDownloadPath(this);
-Utility.WriteLog("downloadPath: "+downloadPath);
-Utility.WriteLog("path: "+path);
-
-        if (TextUtils.isEmpty(path) && TextUtils.isEmpty(downloadPath))
-            return false;
-
-        File gameStartDir = null;
-        File downloadStartDir = null;
-
-        //if path exists, get gameStartDir as File
-        if (!TextUtils.isEmpty(path))
-            gameStartDir = new File (path);
-        //if downloadDir exists and is NOT same as path, get downloadDir as File
-        if (!TextUtils.isEmpty(downloadPath) && !path.equals(downloadPath))
-            downloadStartDir = new File (downloadPath);
-
-        //Create a complete list of all files in the download and game directories;
-        //exit function if there are no files
-        ArrayList<File> completeFileList = new ArrayList<File>();
-
-        //first check the main game directory
-        if (gameStartDir != null) {
-            if (gameStartDir.exists() && gameStartDir.isDirectory()) {
-                List<File> fileListGameStartDir = Arrays.asList(gameStartDir.listFiles());
-                if (!fileListGameStartDir.isEmpty())
-                    completeFileList.addAll(fileListGameStartDir);
-            }
-        }
-Utility.WriteLog("games in gameStartDir: "+completeFileList.size());
-
-        //then the download directory
-        if (downloadStartDir != null) {
-            if (downloadStartDir.exists() && downloadStartDir.isDirectory()) {
-                List<File> fileListDownloadStartDir = Arrays.asList(downloadStartDir.listFiles());
-                if (!fileListDownloadStartDir.isEmpty())
-                    completeFileList.addAll(Arrays.asList(downloadStartDir.listFiles()));
-            }
-        }
-Utility.WriteLog("games in both: "+completeFileList.size());
-
-        if (completeFileList.isEmpty()) return true;
-
-        //Compare each File(i) to File(i+1) in List; delete File(i) if somehow duplicated
-        if (completeFileList.size()>1)
-            for (int i=0; i<completeFileList.size()-1; i++) {
-                if (completeFileList.get(i).equals(completeFileList.get(i+1)))
-                    completeFileList.remove(i);
-            }
-
-        //Convert completeFileList (ArrayList<File>) to simple array
-        File[] sdcardFiles = completeFileList.toArray(new File[completeFileList.size()]);
-        //File[] sdcardFiles = gameStartDir.listFiles();
-        ArrayList<File> qspGameDirs = new ArrayList<File>();
-        ArrayList<File> qspGameFiles = new ArrayList<File>();
-        ArrayList<Boolean> qspGamePack = new ArrayList<Boolean>();
-        String lastGame = "[ ---- ]"; //placeholder in case no files are present
-
-
-        //Look at every directory in the QSP games folder after first sorting the list
-        if (sdcardFiles!=null) {
-            sdcardFiles = Utility.FileSorter(sdcardFiles);
-            for (File currentFile : sdcardFiles) {
-                if (currentFile.isDirectory() && !currentFile.isHidden() && !currentFile.getName().startsWith(".")) {
-
-                    //Sort the files in the current game directory, then for each QSP/GAM file, add
-                    //the directory and game to an array
-                    File[] curDirFiles = currentFile.listFiles();
-                    curDirFiles = Utility.FileSorter(curDirFiles);
-                    for (File innerFile : curDirFiles) {
-                        if (!innerFile.isHidden() && (innerFile.getName().toLowerCase().endsWith(".qsp") || innerFile.getName().toLowerCase().endsWith(".gam"))) {
-                            Utility.WriteLog("[" + qspGamePack.size() + "], currentFile: " + currentFile.getName() + ", lastGame: " + lastGame);
-
-                            //Mark the "Pack" array if the directory holds more than one QSP game file
-                            if (currentFile.getName().equals(lastGame) && !lastGame.equals("")) {
-                                qspGamePack.set(qspGamePack.size() - 1, true);
-                                qspGamePack.add(true);
-                            } else qspGamePack.add(false);
-                            qspGameDirs.add(currentFile);
-                            qspGameFiles.add(innerFile);
-//                		break; <-- removed so all QSP and GAM files are checked and loaded, not just the first
-                            lastGame = currentFile.getName();
-                        }
-                    }
-                }
-            }
-        }
-
-        //Ищем загруженные игры в карте
-        for (int i=0; i<qspGameDirs.size(); i++)
-        {
-Utility.WriteLog("qspGameDirs["+i+"]: "+qspGameDirs.get(i).getName()+
-                    ", qspGameFiles["+i+"]: "+qspGameFiles.get(i).getName()+
-                    ", qspGamePack["+i+"]: "+qspGamePack.get(i));
-            File d = qspGameDirs.get(i);
-            GameItem game = null;
-            File infoFile = new File(d.getPath().concat("/").concat(GAME_INFO_FILENAME));
-            if (infoFile.exists())
-            {
-                String text = "";
-                try {
-                    FileInputStream instream = new FileInputStream(infoFile.getPath());
-                    if (instream != null) {
-                        InputStreamReader inputreader = new InputStreamReader(instream);
-                        BufferedReader buffreader = new BufferedReader(inputreader);
-                        boolean exit = false;
-                        while (!exit) {
-                            String line = null;
-                            try {
-                                line = buffreader.readLine();
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                                Utility.WriteLog(getString(R.string.gameInfoFileReadError));
-                            }
-                            exit = line == null;
-                            if (!exit)
-                                text = text.concat(line);
-                        }
-                        buffreader.close();
-                    }
-                    instream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    Utility.WriteLog(getString(R.string.gameInfoFileReadError));
-                    continue;
-                }
-                game = ParseGameInfo(text);
-            }
-            if (game == null)
-            {
-                game = new GameItem();
-                String displayName = d.getName();
-                game.title = displayName;
-                game.game_id = displayName;
-            }
-            //If this is part of a pack of game files, add in the individual file name, too
-            if (qspGamePack.get(i)) {
-                game.title += " ("+qspGameFiles.get(i).getName()+")";
-                game.game_id += " ("+qspGameFiles.get(i).getName()+")";
-            }
-            File f = qspGameFiles.get(i);
-            game.game_file = f.getPath();
-            game.downloaded = true;
-            gamesMap.put(game.game_id, game);
-        }
-    
-        return true;
     }
     
     private void GetCheckedGames()
@@ -1427,89 +1272,7 @@ Utility.WriteLog("qspGameDirs["+i+"]: "+qspGameDirs.get(i).getName()+
                 break;
         }
     }
-    
-    private GameItem ParseGameInfo(String xml)
-    {
-        //Читаем информацию об игре
-        GameItem resultItem = null;
-        GameItem curItem = null;
-        try {
-            XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
-            factory.setNamespaceAware(true);
-            XmlPullParser xpp = factory.newPullParser();
 
-            xpp.setInput( new StringReader ( xml ) );
-            int eventType = xpp.getEventType();
-            boolean doc_started = false;
-            boolean game_started = false;
-            String lastTagName = "";
-            while (eventType != XmlPullParser.END_DOCUMENT) {
-                if(eventType == XmlPullParser.START_DOCUMENT) {
-                    doc_started = true;
-                } else if(eventType == XmlPullParser.END_DOCUMENT) {
-                    //Never happens
-                } else if(eventType == XmlPullParser.START_TAG) {
-                    if (doc_started)
-                    {
-                        lastTagName = xpp.getName();
-                        if (lastTagName.equals("game"))
-                        {
-                            game_started = true;
-                            curItem = new GameItem();
-                        }
-                    }
-                } else if(eventType == XmlPullParser.END_TAG) {
-                    if (doc_started && game_started)
-                    {
-                        if (xpp.getName().equals("game"))
-                            resultItem = curItem;
-                        lastTagName = "";
-                    }
-                } else if(eventType == XmlPullParser.CDSECT) {
-                    if (doc_started && game_started)
-                    {
-                        String val = xpp.getText();
-                        if (lastTagName.equals("id"))
-                            curItem.game_id = "id:".concat(val);
-                        else if (lastTagName.equals("list_id"))
-                            curItem.list_id = val;
-                        else if (lastTagName.equals("author"))
-                            curItem.author = val;
-                        else if (lastTagName.equals("ported_by"))
-                            curItem.ported_by = val;
-                        else if (lastTagName.equals("version"))
-                            curItem.version = val;
-                        else if (lastTagName.equals("title"))
-                            curItem.title = val;
-                        else if (lastTagName.equals("lang"))
-                            curItem.lang = val;
-                        else if (lastTagName.equals("player"))
-                            curItem.player = val;
-                        else if (lastTagName.equals("file_url"))
-                            curItem.file_url = val;
-                        else if (lastTagName.equals("file_size"))
-                            curItem.file_size = Integer.parseInt(val);
-                        else if (lastTagName.equals("desc_url"))
-                            curItem.desc_url = val;
-                        else if (lastTagName.equals("pub_date"))
-                            curItem.pub_date = val;
-                        else if (lastTagName.equals("mod_date"))
-                            curItem.mod_date = val;
-                    }
-                }
-                eventType = xpp.nextToken();
-            }
-        } catch (XmlPullParserException e) {
-            String errTxt = getString(R.string.parseGameInfoXMLError);
-            errTxt = errTxt.replace("-LINENUM-",String.valueOf(e.getLineNumber()));
-            errTxt = errTxt.replace("-COLNUM-",String.valueOf(e.getColumnNumber()));
-            Utility.WriteLog(errTxt);
-        } catch (Exception e) {
-            Utility.WriteLog(getString(R.string.parseGameInfoUnkError));
-        }
-        return resultItem;
-    }
-    
     private boolean ParseGameList(String xml)
     {
         boolean parsed = false;
