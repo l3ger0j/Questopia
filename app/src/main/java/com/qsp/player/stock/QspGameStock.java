@@ -14,6 +14,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.PersistableBundle;
@@ -1375,59 +1376,6 @@ Utility.WriteLog("Dialog txt: "+txt);
         return parsed;
     }
 
-    private class LoadGameListThread extends Thread {
-        //Загружаем список игр
-        public void run() {
-            runOnUiThread(new Runnable() {
-                public void run() {
-                    downloadProgressDialog = new ProgressDialog(uiContext);
-                    downloadProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-                    downloadProgressDialog.setCancelable(false);
-                }
-            });
-            try {
-                updateSpinnerProgress(true, "", getString(R.string.gamelistLoadWait), 0);
-                URL updateURL = new URL("http://qsp.su/tools/gamestock/gamestock.php");
-                URLConnection conn = updateURL.openConnection();
-                InputStream is = conn.getInputStream();
-                BufferedInputStream bis = new BufferedInputStream(is);
-                final String xml;
-
-                try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
-                    int b;
-                    do {
-                        b = bis.read();
-                        if (b == -1) {
-                            break;
-                        }
-                        os.write(b);
-                    } while (true);
-
-                    xml = new String(os.toByteArray());
-                }
-
-                runOnUiThread(new Runnable() {
-                    public void run() {
-                        xmlGameListCached = xml;
-                        RefreshLists();
-                        updateSpinnerProgress(false, "", "", 0);
-                        gameListIsLoading = false;
-                    }
-                });
-            } catch (Exception e) {
-                Utility.WriteLog(getString(R.string.gamelistLoadExcept));
-                runOnUiThread(new Runnable() {
-                    public void run() {
-                        RefreshLists();
-                        updateSpinnerProgress(false, "", "", 0);
-                        gameListIsLoading = false;
-                    }
-                });
-            }
-        }
-    };
-    
-    
     //***********************************************************************
     //			выбор файла "напрямую", через пролистывание папок
     //***********************************************************************
@@ -1821,8 +1769,8 @@ Utility.WriteLog("getNewDownloadDir()");
                 if (Utility.haveInternet(uiContext)) {
                     gameListIsLoading = true;
                     triedToLoadGameList = true;
-                    LoadGameListThread tLoadGameList = new LoadGameListThread();
-                    tLoadGameList.start();
+                    LoadGameListAsyncTask loadGameListTask = new LoadGameListAsyncTask();
+                    loadGameListTask.execute();
                 } else if (!triedToLoadGameList) {
                     Utility.ShowError(uiContext, getString(R.string.gamelistLoadError));
                     triedToLoadGameList = true;
@@ -1837,6 +1785,48 @@ Utility.WriteLog("getNewDownloadDir()");
 
         @Override
         public void onTabReselected(ActionBar.Tab tab, FragmentTransaction ft) {
+        }
+    }
+
+    private class LoadGameListAsyncTask extends AsyncTask<Void, Void, String> {
+
+        @Override
+        protected void onPreExecute() {
+            downloadProgressDialog = new ProgressDialog(uiContext);
+            downloadProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            downloadProgressDialog.setCancelable(false);
+        }
+
+        @Override
+        protected String doInBackground(Void... params) {
+            try {
+                updateSpinnerProgress(true, "", getString(R.string.gamelistLoadWait), 0);
+                URL url = new URL("http://qsp.su/tools/gamestock/gamestock.php");
+                URLConnection conn = url.openConnection();
+                byte[] b = new byte[8192];
+                try (InputStream in = conn.getInputStream()) {
+                    try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+                        int bytesRead;
+                        while ((bytesRead = in.read(b)) > 0) {
+                            os.write(b, 0, bytesRead);
+                        }
+                        return new String(os.toByteArray());
+                    }
+                }
+            } catch (Exception e) {
+                Utility.WriteLog(getString(R.string.gamelistLoadExcept));
+                return null;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            if (result != null) {
+                xmlGameListCached = result;
+            }
+            RefreshLists();
+            updateSpinnerProgress(false, "", "", 0);
+            gameListIsLoading = false;
         }
     }
 }
