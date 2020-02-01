@@ -26,8 +26,6 @@
 	#define QSP_MAXSTATSNAMES 100
 	#define QSP_STATMAXARGS 10
 	#define QSP_STATELSE QSP_FMT("ELSE")
-	#define QSP_STATFORTO QSP_FMT("TO")
-	#define QSP_STATFORSTEP QSP_FMT("STEP")
 
 	typedef QSP_BOOL (*QSP_STATEMENT)(QSPVariant *, int, QSP_CHAR **, int);
 
@@ -49,24 +47,16 @@
 
 	enum
 	{
-		qspFlowExecute,
-		qspFlowSkip,
-		qspFlowContinue
-	};
-
-	enum
-	{
 		qspStatUnknown,
 		qspStatLabel,
 		qspStatComment,
 		qspStatAct,
-		qspStatFor,
-		qspStatLocal,
 		qspStatIf,
 		qspStatElseIf,
 		qspStatElse,
 		qspStatEnd,
 		qspStatAddObj,
+		qspStatAddQst,
 		qspStatClA,
 		qspStatClear,
 		qspStatCloseAll,
@@ -79,13 +69,12 @@
 		qspStatDynamic,
 		qspStatExec,
 		qspStatExit,
-		qspStatFreeLib,
 		qspStatGoSub,
 		qspStatGoTo,
-		qspStatIncLib,
 		qspStatJump,
 		qspStatKillAll,
 		qspStatKillObj,
+		qspStatKillQst,
 		qspStatKillVar,
 		qspStatMClear,
 		qspStatMenu,
@@ -118,7 +107,7 @@
 	/* External functions */
 	void qspInitStats();
 	int qspGetStatArgs(QSP_CHAR *, int, QSPVariant *);
-	QSP_BOOL qspExecTopCodeWithLocals(QSPLineOfCode *, int, int, QSP_BOOL);
+	QSP_BOOL qspExecCode(QSPLineOfCode *, int, int, int, QSP_CHAR **);
 	void qspExecStringAsCodeWithArgs(QSP_CHAR *, QSPVariant *, int);
 	QSP_CHAR *qspGetLineLabel(QSP_CHAR *);
 	void qspInitLineOfCode(QSPLineOfCode *, QSP_CHAR *, int);

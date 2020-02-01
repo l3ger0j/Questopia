@@ -15,14 +15,11 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#include "declarations.h"
 #include "callbacks.h"
 #include "actions.h"
-#include "coding.h"
 #include "common.h"
 #include "errors.h"
 #include "objects.h"
-#include "text.h"
 
 QSP_CALLBACK qspCallBacks[QSP_CALL_DUMMY];
 QSP_BOOL qspIsInCallBack = QSP_FALSE;

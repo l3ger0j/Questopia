@@ -138,18 +138,12 @@ QSP_BOOL qspIsAnyString(QSP_CHAR *s)
 
 void qspLowerStr(QSP_CHAR *str)
 {
-	while (*str) {
-		*str = QSP_CHRLWR(*str);
-		str++;
-	}
+	while (*str) *str++ = QSP_CHRLWR(*str);
 }
 
 void qspUpperStr(QSP_CHAR *str)
 {
-	while (*str) {
-		*str = QSP_CHRUPR(*str);
-		str++;
-	}
+	while (*str) *str++ = QSP_CHRUPR(*str);
 }
 
 int qspStrsNComp(QSP_CHAR *str1, QSP_CHAR *str2, int maxLen)
@@ -278,7 +272,7 @@ int qspSplitStr(QSP_CHAR *str, QSP_CHAR *delim, QSP_CHAR ***res)
 		newStr[allocChars] = 0;
 		if (++count > bufSize)
 		{
-			bufSize += 16;
+			bufSize <<= 1;
 			ret = (QSP_CHAR **)realloc(ret, bufSize * sizeof(QSP_CHAR *));
 		}
 		ret[count - 1] = newStr;
@@ -430,15 +424,13 @@ QSP_CHAR *qspStrPos(QSP_CHAR *txt, QSP_CHAR *str, QSP_BOOL isIsolated)
 
 QSP_CHAR *qspReplaceText(QSP_CHAR *txt, QSP_CHAR *searchTxt, QSP_CHAR *repTxt)
 {
-	int txtLen, oldTxtLen, bufSize, searchLen, repLen, len;
-	QSP_CHAR *newTxt, *pos = qspStrStr(txt, searchTxt);
-	if (!pos) return qspGetNewText(txt, -1);
-	bufSize = 256;
-	txtLen = oldTxtLen = 0;
+	int txtLen = 0, oldTxtLen = 0, bufSize = 256, searchLen, repLen, len;
+	QSP_CHAR *newTxt, *pos;
 	searchLen = qspStrLen(searchTxt);
 	repLen = qspStrLen(repTxt);
 	newTxt = (QSP_CHAR *)malloc(bufSize * sizeof(QSP_CHAR));
-	do
+	pos = qspStrStr(txt, searchTxt);
+	while (pos)
 	{
 		len = (int)(pos - txt);
 		if ((txtLen += len + repLen) >= bufSize)
@@ -451,7 +443,7 @@ QSP_CHAR *qspReplaceText(QSP_CHAR *txt, QSP_CHAR *searchTxt, QSP_CHAR *repTxt)
 		oldTxtLen = txtLen;
 		txt = pos + searchLen;
 		pos = qspStrStr(txt, searchTxt);
-	} while (pos);
+	}
 	return qspGetAddText(newTxt, txt, txtLen, -1);
 }
 
@@ -462,20 +454,24 @@ QSP_CHAR *qspFormatText(QSP_CHAR *txt, QSP_BOOL canReturnSelf)
 	int oldRefreshCount, len, txtLen, oldTxtLen, bufSize;
 	if (qspGetVarNumValue(QSP_FMT("DISABLESUBEX")))
 	{
-		if (canReturnSelf) return txt;
-		return qspGetNewText(txt, -1);
+		if (canReturnSelf)
+			return txt;
+		else
+			return qspGetNewText(txt, -1);
 	}
 	lPos = qspStrStr(txt, QSP_LSUBEX);
 	if (!lPos)
 	{
-		if (canReturnSelf) return txt;
-		return qspGetNewText(txt, -1);
+		if (canReturnSelf)
+			return txt;
+		else
+			return qspGetNewText(txt, -1);
 	}
 	bufSize = 256;
 	newTxt = (QSP_CHAR *)malloc(bufSize * sizeof(QSP_CHAR));
 	txtLen = oldTxtLen = 0;
 	oldRefreshCount = qspRefreshCount;
-	do
+	while (lPos)
 	{
 		len = (int)(lPos - txt);
 		if ((txtLen += len) >= bufSize)
@@ -512,6 +508,6 @@ QSP_CHAR *qspFormatText(QSP_CHAR *txt, QSP_BOOL canReturnSelf)
 		oldTxtLen = txtLen;
 		txt = rPos + QSP_LEN(QSP_RSUBEX);
 		lPos = qspStrStr(txt, QSP_LSUBEX);
-	} while (lPos);
+	}
 	return qspGetAddText(newTxt, txt, txtLen, -1);
 }

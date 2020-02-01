@@ -46,9 +46,7 @@ qsp/onig/enc/ascii.c \
 qsp/onig/enc/cp1251.c \
 qsp/onig/enc/koi8_r.c \
 qsp/onig/enc/unicode.c \
-qsp/onig/enc/utf16_be.c \
 qsp/onig/enc/utf16_le.c \
-qsp/onig/enc/utf32_be.c \
 qsp/onig/enc/utf32_le.c \
 qsp/bindings/android/android_callbacks.c \
 qsp/bindings/android/android_coding.c \

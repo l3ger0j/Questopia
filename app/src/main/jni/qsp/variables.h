@@ -48,35 +48,19 @@
 		int IndsBufSize;
 	} QSPVar;
 
-	typedef struct
-	{
-		QSPVar *Vars;
-		int VarsCount;
-	} QSPVarsGroup;
-
 	extern QSPVar qspVars[QSP_VARSCOUNT];
-	extern QSPVarsGroup *qspSavedVarsGroups;
-	extern int qspSavedVarsGroupsCount;
 
 	/* External functions */
 	void qspClearVars(QSP_BOOL);
 	void qspEmptyVar(QSPVar *);
 	QSPVar *qspVarReference(QSP_CHAR *, QSP_BOOL);
 	QSPVar *qspVarReferenceWithType(QSP_CHAR *, QSP_BOOL, QSP_BOOL *);
-	void qspSetVarValueByReference(QSPVar *, int, QSPVariant *);
-	QSPVariant qspGetVarValueByReference(QSPVar *, int, QSP_BOOL);
+	void qspSetVarValueByName(QSP_CHAR *, QSPVariant *);
 	QSP_CHAR *qspGetVarStrValue(QSP_CHAR *);
 	int qspGetVarNumValue(QSP_CHAR *);
 	QSPVariant qspGetVar(QSP_CHAR *);
-	void qspPrepareGlobalVars();
-	int qspPrepareLocalVars(QSPVar **);
-	void qspRestoreLocalVars(QSPVar *, int, QSPVarsGroup *, int);
-	void qspClearLocalVars(QSPVar *, int);
-	int qspGetVarsList(QSP_CHAR *, QSPVar **);
-	void qspRestoreVarsList(QSPVar *, int);
-	void qspClearVarsList(QSPVar *, int);
 	int qspArraySize(QSP_CHAR *);
-	int qspArrayPos(QSP_CHAR *, QSPVariant *, int, QSP_BOOL);
+	int qspArrayPos(QSPVariant *, int, QSP_BOOL);
 	QSPVariant qspArrayMinMaxItem(QSP_CHAR *, QSP_BOOL);
 	int qspGetVarsCount();
 	void qspSetArgs(QSPVar *, QSPVariant *, int);

@@ -19,17 +19,30 @@
 #include "callbacks.h"
 #include "errors.h"
 #include "game.h"
-#include "locations.h"
 #include "text.h"
 #include "variables.h"
 
+QSP_CHAR *qspCurMenuLocs[QSP_MAXMENUITEMS];
+int qspCurMenuItems = 0;
+
+void qspClearMenu(QSP_BOOL isFirst)
+{
+	int i;
+	if (!isFirst)
+	{
+		for (i = 0; i < qspCurMenuItems; ++i)
+			free(qspCurMenuLocs[i]);
+	}
+	qspCurMenuItems = 0;
+}
+
 QSP_BOOL qspStatementShowMenu(QSPVariant *args, int count, QSP_CHAR **jumpTo, int extArg)
 {
+	int ind, maxItems, len;
 	QSPVar *var;
-	QSPVariant arg;
-	int ind, itemsCount, maxItems, len;
-	QSP_CHAR *menuLocs[QSP_MAXMENUITEMS], *imgPath, *str, *pos, *pos2;
+	QSP_CHAR *imgPath, *str, *pos, *pos2;
 	if (!(var = qspVarReferenceWithType(QSP_STR(args[0]), QSP_FALSE, 0))) return QSP_FALSE;
+	qspClearMenu(QSP_FALSE);
 	qspCallDeleteMenu();
 	if (count == 1)
 	{
@@ -48,17 +61,16 @@ QSP_BOOL qspStatementShowMenu(QSPVariant *args, int count, QSP_CHAR **jumpTo, in
 			if (maxItems < 0) maxItems = 0;
 		}
 	}
-	itemsCount = 0;
 	while (ind < var->ValsCount)
 	{
-		if (itemsCount == maxItems) break;
+		if (qspCurMenuItems == maxItems) break;
 		if (!((str = var->Values[ind].Str) && qspIsAnyString(str))) break;
 		if (!(pos2 = qspInStrRChars(str, QSP_MENUDELIM, 0)))
 		{
 			qspSetError(QSP_ERR_COLONNOTFOUND);
 			return QSP_FALSE;
 		}
-		if (itemsCount == QSP_MAXMENUITEMS)
+		if (qspCurMenuItems == QSP_MAXMENUITEMS)
 		{
 			qspSetError(QSP_ERR_CANTADDMENUITEM);
 			return QSP_FALSE;
@@ -74,24 +86,13 @@ QSP_BOOL qspStatementShowMenu(QSPVariant *args, int count, QSP_CHAR **jumpTo, in
 			len = -1;
 			imgPath = 0;
 		}
-		menuLocs[itemsCount++] = qspGetNewText(pos + 1, len);
+		qspCurMenuLocs[qspCurMenuItems++] = qspGetNewText(pos + 1, len);
 		*pos = 0;
 		qspCallAddMenuItem(str, imgPath);
 		*pos = QSP_MENUDELIM[0];
 		if (imgPath) free(imgPath);
 		++ind;
 	}
-	if (itemsCount)
-	{
-		ind = qspCallShowMenu();
-		if (ind >= 0 && ind < itemsCount)
-		{
-			arg.IsStr = QSP_FALSE;
-			QSP_NUM(arg) = ind + 1;
-			qspExecLocByNameWithArgs(menuLocs[ind], &arg, 1);
-		}
-		while (--itemsCount >= 0)
-			free(menuLocs[itemsCount]);
-	}
+	if (qspCurMenuItems) qspCallShowMenu();
 	return QSP_FALSE;
 }

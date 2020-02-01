@@ -30,7 +30,7 @@ unsigned char qspCP1251ToKOI8RTable[] =
 	0xD2, 0xD3, 0xD4, 0xD5, 0xC6, 0xC8, 0xC3, 0xDE, 0xDB, 0xDD, 0xDF, 0xD9, 0xD8, 0xDC, 0xC0, 0xD1
 };
 
-int qspKOI8RToUnicodeTable[] =
+wchar_t qspKOI8RToUnicodeTable[] =
 {
 	0x2500, 0x2502, 0x250C, 0x2510, 0x2514, 0x2518, 0x251C, 0x2524,
 	0x252C, 0x2534, 0x253C, 0x2580, 0x2584, 0x2588, 0x258C, 0x2590,
@@ -50,7 +50,7 @@ int qspKOI8RToUnicodeTable[] =
 	0x042C, 0x042B, 0x0417, 0x0428, 0x042D, 0x0429, 0x0427, 0x042A
 };
 
-int qspCP1251ToUnicodeTable[] =
+wchar_t qspCP1251ToUnicodeTable[] =
 {
 	0x0402, 0x0403, 0x201A, 0x0453, 0x201E, 0x2026, 0x2020, 0x2021,
 	0x20AC, 0x2030, 0x0409, 0x2039, 0x040A, 0x040C, 0x040B, 0x040F,
@@ -194,8 +194,8 @@ static int qspUCS2StrLen(char *);
 static char *qspUCS2StrStr(char *, char *);
 static char qspDirectConvertSB(char, unsigned char *);
 static char qspReverseConvertSB(char, unsigned char *);
-static int qspDirectConvertUC(char, int *);
-static char qspReverseConvertUC(int, int *);
+static wchar_t qspDirectConvertUC(char, wchar_t *);
+static char qspReverseConvertUC(wchar_t, wchar_t *);
 static char *qspQSPToGameString(QSP_CHAR *, QSP_BOOL, QSP_BOOL);
 
 static int qspUCS2StrLen(char *str)
@@ -244,13 +244,13 @@ static char qspReverseConvertSB(char ch, unsigned char *table)
 	return 0x20;
 }
 
-static int qspDirectConvertUC(char ch, int *table)
+static wchar_t qspDirectConvertUC(char ch, wchar_t *table)
 {
 	unsigned char ch2 = (unsigned char)ch;
 	return (ch2 >= 0x80 ? table[ch2 - 0x80] : ch);
 }
 
-static char qspReverseConvertUC(int ch, int *table)
+static char qspReverseConvertUC(wchar_t ch, wchar_t *table)
 {
 	int i;
 	if (ch < 0x80) return (char)ch;
@@ -291,6 +291,14 @@ QSP_CHAR *qspCodeReCode(QSP_CHAR *str, QSP_BOOL isCode)
 	return buf;
 }
 
+char *qspFromQSPString(QSP_CHAR *s)
+{
+	int len = QSP_WCSTOMBSLEN(s) + 1;
+	char *ret = (char *)malloc(len);
+	QSP_WCSTOMBS(ret, s, len);
+	return ret;
+}
+
 static char *qspQSPToGameString(QSP_CHAR *s, QSP_BOOL isUCS2, QSP_BOOL isCode)
 {
 	unsigned short uCh, *ptr;
@@ -304,21 +312,18 @@ static char *qspQSPToGameString(QSP_CHAR *s, QSP_BOOL isUCS2, QSP_BOOL isCode)
 		{
 			while (--len >= 0)
 			{
-				uCh = (unsigned short)QSP_BTOWC(s[len]);
+				uCh = QSP_BTOWC(s[len]);
 				if (uCh == QSP_CODREMOV)
 					uCh = (unsigned short)-QSP_CODREMOV;
 				else
 					uCh -= QSP_CODREMOV;
-				ptr[len] = QSP_FIXBYTESORDER(uCh);
+				ptr[len] = uCh;
 			}
 		}
 		else
 		{
 			while (--len >= 0)
-			{
-				uCh = (unsigned short)QSP_BTOWC(s[len]);
-				ptr[len] = QSP_FIXBYTESORDER(uCh);
-			}
+				ptr[len] = QSP_BTOWC(s[len]);
 		}
 	}
 	else
@@ -359,7 +364,7 @@ QSP_CHAR *qspGameToQSPString(char *s, QSP_BOOL isUCS2, QSP_BOOL isCoded)
 		{
 			while (--len >= 0)
 			{
-				uCh = QSP_FIXBYTESORDER(ptr[len]);
+				uCh = ptr[len];
 				if (uCh == (unsigned short)-QSP_CODREMOV)
 					uCh = QSP_CODREMOV;
 				else
@@ -370,10 +375,7 @@ QSP_CHAR *qspGameToQSPString(char *s, QSP_BOOL isUCS2, QSP_BOOL isCoded)
 		else
 		{
 			while (--len >= 0)
-			{
-				uCh = QSP_FIXBYTESORDER(ptr[len]);
-				ret[len] = QSP_WCTOB(uCh);
-			}
+				ret[len] = QSP_WCTOB(ptr[len]);
 		}
 	}
 	else
@@ -387,13 +389,13 @@ QSP_CHAR *qspGameToQSPString(char *s, QSP_BOOL isUCS2, QSP_BOOL isCoded)
 					ch = QSP_CODREMOV;
 				else
 					ch += QSP_CODREMOV;
-				ret[len] = (QSP_CHAR)QSP_TO_OS_CHAR(ch);
+				ret[len] = QSP_TO_OS_CHAR(ch);
 			}
 		}
 		else
 		{
 			while (--len >= 0)
-				ret[len] = (QSP_CHAR)QSP_TO_OS_CHAR(s[len]);
+				ret[len] = QSP_TO_OS_CHAR(s[len]);
 		}
 	}
 	return ret;
@@ -419,7 +421,7 @@ int qspSplitGameStr(char *str, QSP_BOOL isUCS2, QSP_CHAR *delim, char ***res)
 			newStr[allocChars] = 0;
 		if (++count > bufSize)
 		{
-			bufSize += 16;
+			bufSize <<= 1;
 			ret = (char **)realloc(ret, bufSize * sizeof(char *));
 		}
 		ret[count - 1] = newStr;
