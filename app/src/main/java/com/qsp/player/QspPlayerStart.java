@@ -2858,6 +2858,8 @@ Utility.WriteLog("obsELSE str1: "+objsResult.str1+", str2: "+objsResult.str2);
         parkThread = null;
         Utility.WriteLog("ShowMenu: libThread unparked, "+getString(R.string.exitedS));
 
+        QSPSelectMenuItem(menuResult);
+
         return menuResult;
     }
 
@@ -3259,6 +3261,9 @@ Utility.WriteLog("Config changed: portrait");
     public native boolean QSPOpenSavedGameFromData(byte data[], int dataSize, boolean isRefresh);
 
     public native boolean QSPRestartGame(boolean isRefresh);
+
+    public native void QSPSelectMenuItem(int index);
+
     //public native void QSPSetCallBack(int type, QSP_CALLBACK func) 
 
     static {

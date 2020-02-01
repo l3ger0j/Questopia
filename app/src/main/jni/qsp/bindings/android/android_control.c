@@ -395,6 +395,19 @@ const QSP_CHAR *QSPGetErrorDesc(int errorNum)
 	return str;
 }
 /* ------------------------------------------------------------ */
+/* Меню */
+void QSPSelectMenuItem(int index)
+{
+	QSPVariant arg;
+	if (index >= 0 && index < qspCurMenuItems)
+	{
+		if (qspIsDisableCodeExec) return;
+		arg.IsStr = QSP_FALSE;
+		QSP_NUM(arg) = index + 1;
+		qspExecLocByNameWithArgs(qspCurMenuLocs[index], &arg, 1);
+	}
+}
+/* ------------------------------------------------------------ */
 /* Управление игрой */
 
 /* Загрузка новой игры из файла */

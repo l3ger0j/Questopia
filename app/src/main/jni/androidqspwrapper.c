@@ -549,6 +549,12 @@ jboolean Java_com_qsp_player_QspPlayerStart_QSPRestartGame(JNIEnv * env, jobject
 	return QSPRestartGame((QSP_BOOL)isRefresh);
 }
 ///* ------------------------------------------------------------ */
+///* Меню */
+void Java_com_qsp_player_QspPlayerStart_QSPSelectMenuItem(JNIEnv * env, jobject this, jint ind)
+{
+	QSPSelectMenuItem(ind);
+}
+///* ------------------------------------------------------------ */
 ///* Установка CALLBACK'ов */
 //void QSPSetCallBack(int type, QSP_CALLBACK func)
 //{
