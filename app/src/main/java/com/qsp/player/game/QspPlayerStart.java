@@ -153,10 +153,10 @@ public class QspPlayerStart extends Activity implements UrlClickCatcher, OnGestu
     private int maxH = 0;
     private float playerHeightLimit = 1/2;
 
-    private static String defaultQSPtextColor = "#ffffff";
-    private static String defaultQSPbackColor = "#000000";
-    private static String defaultQSPlinkColor = "#0000ee";
-    private static String defaultQSPactsColor = "#ffffd7";
+    private static String defaultQSPtextColor = "#000000";
+    private static String defaultQSPbackColor = "#e0e0e0";
+    private static String defaultQSPlinkColor = "#0000ff";
+    private static String defaultQSPactsColor = "#000000";
     private static String defaultQSPfontSize = "16";
     private static String defaultQSPfontStyle = "DEFAULT";
     private static String defaultQSPfontTheme = "0";

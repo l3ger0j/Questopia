@@ -86,10 +86,10 @@ public class QspGameStock extends AppCompatActivity {
 
     public static DocumentFile downloadDir = null;
 
-    private static String defaultQSPtextColor = "#ffffff";
-    private static String defaultQSPbackColor = "#000000";
-    private static String defaultQSPlinkColor = "#0000ee";
-    private static String defaultQSPactsColor = "#ffffd7";
+    private static String defaultQSPtextColor = "#000000";
+    private static String defaultQSPbackColor = "#e0e0e0";
+    private static String defaultQSPlinkColor = "#0000ff";
+    private static String defaultQSPactsColor = "#000000";
     private static String defaultQSPfontTheme = "0";
 
     private static String QSPtextColor = defaultQSPtextColor;

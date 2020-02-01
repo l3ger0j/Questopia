@@ -218,10 +218,10 @@
     <string name="deffontsize">16</string>
 
     <string name="deftheme">0</string>
-    <string name="defbackColor">#000000</string>
-    <string name="deftextColor">#ffffff</string>
-    <string name="deflinkColor">#3333ff</string>
-    <string name="defactsColor">#ffffd7</string>
+    <string name="defbackColor">#e0e0e0</string>
+    <string name="deftextColor">#000000</string>
+    <string name="deflinkColor">#0000ff</string>
+    <string name="defactsColor">#000000</string>
 
     <string name="lighttheme">1</string>
     <string name="lightbackColor">#ffffff</string>
