@@ -17,7 +17,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.PersistableBundle;
 import android.preference.PreferenceManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -37,7 +36,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.collection.SparseArrayCompat;
@@ -51,29 +49,22 @@ import com.qsp.player.Utility;
 import com.qsp.player.game.QspPlayerStart;
 import com.qsp.player.settings.Settings;
 
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlPullParserFactory;
-
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
-import java.io.StringReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Locale;
 
 public class QspGameStock extends AppCompatActivity {
 
     final private Context uiContext = this;
-    private String xmlGameListCached;
     private boolean openDefaultTab;
     private boolean gameListIsLoading;
     private boolean triedToLoadGameList;
@@ -135,6 +126,8 @@ public class QspGameStock extends AppCompatActivity {
     private int QSP_NOTIFICATION_ID;
     private SparseArrayCompat<GameAdapter> gameAdapters = new SparseArrayCompat<>();
     private final LocalGameRepository localGameRepository = new LocalGameRepository(this);
+    private final RemoteGameRepository remoteGameRepository = new RemoteGameRepository(this);
+    private Collection<GameItem> remoteGames = null;
     
     public QspGameStock() {
         Utility.WriteLog("[G]constructor\\");
@@ -239,9 +232,7 @@ public class QspGameStock extends AppCompatActivity {
         gameListIsLoading = false;
         triedToLoadGameList = false;
 
-        xmlGameListCached = null;
-
-        InitListViews(savedInstanceState);
+        InitListViews();
 
         setResult(RESULT_CANCELED);
 
@@ -577,12 +568,6 @@ public class QspGameStock extends AppCompatActivity {
     }
 
     @Override
-    public void onSaveInstanceState(@NonNull Bundle outState, @NonNull PersistableBundle outPersistentState) {
-        super.onSaveInstanceState(outState, outPersistentState);
-        outState.putString("gameList", xmlGameListCached);
-    }
-
-    @Override
     public void onNewIntent(Intent intent)
     {
         Utility.WriteLog("[G]onNewIntent\\");
@@ -713,18 +698,13 @@ public class QspGameStock extends AppCompatActivity {
         return super.onKeyDown(keyCode, event);
     }
 
-    private void InitListViews(Bundle savedInstanceState)
+    private void InitListViews()
     {
         lvGames = findViewById(R.id.games);
         lvGames.setTextFilterEnabled(true);
         lvGames.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         lvGames.setOnItemClickListener(gameListClickListener);
         lvGames.setOnItemLongClickListener(gameListLongClickListener);
-
-        //Забираем список игр из предыдущего состояния активити, если оно было пересоздано (при повороте экрана)
-        if (savedInstanceState != null) {
-            xmlGameListCached = savedInstanceState.getString("gameList");
-        }
 
         RefreshLists();
     }
@@ -1033,7 +1013,11 @@ Utility.WriteLog("Dialog txt: "+txt);
     {
         gamesMap.clear();
 
-        ParseGameList(xmlGameListCached);
+        if (remoteGames != null) {
+            for (GameItem game : remoteGames) {
+                gamesMap.put(game.game_id, game);
+            }
+        }
 
         try {
             for (GameItem game : localGameRepository.getGameItems()) {
@@ -1115,108 +1099,6 @@ Utility.WriteLog("Dialog txt: "+txt);
                 lvGames.setAdapter(gameAdapters.get(tab));
                 break;
         }
-    }
-
-    private boolean ParseGameList(String xml)
-    {
-        boolean parsed = false;
-        if (xml != null)
-        {
-            GameItem curItem = null;
-            try {
-                XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
-                factory.setNamespaceAware(true);
-                XmlPullParser xpp = factory.newPullParser();
-
-                xpp.setInput( new StringReader ( xml ) );
-                int eventType = xpp.getEventType();
-                boolean doc_started = false;
-                boolean list_started = false;
-                String lastTagName = "";
-                String listId = "unknown";
-                String listTitle = "";
-                while (eventType != XmlPullParser.END_DOCUMENT) {
-                    if(eventType == XmlPullParser.START_DOCUMENT) {
-                        doc_started = true;
-                    } else if(eventType == XmlPullParser.END_DOCUMENT) {
-                        //Never happens
-                    } else if(eventType == XmlPullParser.START_TAG) {
-                        if (doc_started)
-                        {
-                            lastTagName = xpp.getName();
-                            if (lastTagName.equals("game_list"))
-                            {
-                                list_started = true;
-                                listId = xpp.getAttributeValue(null, "id");
-                                listTitle = xpp.getAttributeValue(null, "title");
-                            }
-                            if (list_started)
-                            {
-                                if (lastTagName.equals("game"))
-                                {
-                                    curItem = new GameItem();
-                                    curItem.list_id = listId;
-                                }
-                            }
-                        }
-                    } else if(eventType == XmlPullParser.END_TAG) {
-                        if (doc_started && list_started)
-                        {
-                            if (xpp.getName().equals("game"))
-                            {
-                                gamesMap.put(curItem.game_id, curItem);
-                            }
-                            if (xpp.getName().equals("game_list"))
-                                parsed = true;
-                            lastTagName = "";
-                        }
-                    } else if(eventType == XmlPullParser.CDSECT) {
-                        if (doc_started && list_started)
-                        {
-                            String val = xpp.getText();
-                            if (lastTagName.equals("id"))
-                                curItem.game_id = "id:".concat(val);
-                            else if (lastTagName.equals("author"))
-                                curItem.author = val;
-                            else if (lastTagName.equals("ported_by"))
-                                curItem.ported_by = val;
-                            else if (lastTagName.equals("version"))
-                                curItem.version = val;
-                            else if (lastTagName.equals("title"))
-                                curItem.title = val;
-                            else if (lastTagName.equals("lang"))
-                                curItem.lang = val;
-                            else if (lastTagName.equals("player"))
-                                curItem.player = val;
-                            else if (lastTagName.equals("file_url"))
-                                curItem.file_url = val;
-                            else if (lastTagName.equals("file_size"))
-                                curItem.file_size = Integer.parseInt(val);
-                            else if (lastTagName.equals("desc_url"))
-                                curItem.desc_url = val;
-                            else if (lastTagName.equals("pub_date"))
-                                curItem.pub_date = val;
-                            else if (lastTagName.equals("mod_date"))
-                                curItem.mod_date = val;
-                        }
-                    }
-                    eventType = xpp.nextToken();
-                }
-            } catch (XmlPullParserException e) {
-                String errTxt = getString(R.string.parseGameInfoXMLError);
-                errTxt = errTxt.replace("-LINENUM-",String.valueOf(e.getLineNumber()));
-                errTxt = errTxt.replace("-COLNUM-",String.valueOf(e.getColumnNumber()));
-                Utility.WriteLog(errTxt);
-            } catch (Exception e) {
-                Utility.WriteLog(getString(R.string.parseGameInfoUnkError));
-            }
-        }
-        if ( !parsed && isActive && triedToLoadGameList )
-        {
-            //Показываем сообщение об ошибке
-            Utility.ShowError(uiContext, getString(R.string.gamelistLoadError));
-        }
-        return parsed;
     }
 
     //***********************************************************************
@@ -1608,7 +1490,7 @@ Utility.WriteLog("getNewDownloadDir()");
         @Override
         public void onTabSelected(ActionBar.Tab tab, FragmentTransaction ft) {
             int position = tab.getPosition();
-            if ((position == TAB_STARRED || position == TAB_ALL) && xmlGameListCached == null && !gameListIsLoading) {
+            if ((position == TAB_STARRED || position == TAB_ALL) && remoteGames == null && !gameListIsLoading) {
                 if (Utility.haveInternet(uiContext)) {
                     gameListIsLoading = true;
                     triedToLoadGameList = true;
@@ -1631,7 +1513,7 @@ Utility.WriteLog("getNewDownloadDir()");
         }
     }
 
-    private class LoadGameListAsyncTask extends AsyncTask<Void, Void, String> {
+    private class LoadGameListAsyncTask extends AsyncTask<Void, Void, Collection<GameItem>> {
 
         @Override
         protected void onPreExecute() {
@@ -1641,31 +1523,23 @@ Utility.WriteLog("getNewDownloadDir()");
         }
 
         @Override
-        protected String doInBackground(Void... params) {
+        protected Collection<GameItem> doInBackground(Void... params) {
+            updateSpinnerProgress(true, "", getString(R.string.gamelistLoadWait), 0);
+
             try {
-                updateSpinnerProgress(true, "", getString(R.string.gamelistLoadWait), 0);
-                URL url = new URL("http://qsp.su/tools/gamestock/gamestock.php");
-                URLConnection conn = url.openConnection();
-                byte[] b = new byte[8192];
-                try (InputStream in = conn.getInputStream()) {
-                    try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
-                        int bytesRead;
-                        while ((bytesRead = in.read(b)) > 0) {
-                            os.write(b, 0, bytesRead);
-                        }
-                        return new String(os.toByteArray());
-                    }
+                return remoteGameRepository.getGameItems();
+            } catch (GameListLoadException e) {
+                if (isActive && triedToLoadGameList) {
+                    Utility.ShowError(uiContext, getString(R.string.gamelistLoadError));
                 }
-            } catch (Exception e) {
-                Utility.WriteLog(getString(R.string.gamelistLoadExcept));
                 return null;
             }
         }
 
         @Override
-        protected void onPostExecute(String result) {
+        protected void onPostExecute(Collection<GameItem> result) {
             if (result != null) {
-                xmlGameListCached = result;
+                remoteGames = result;
             }
             RefreshLists();
             updateSpinnerProgress(false, "", "", 0);
