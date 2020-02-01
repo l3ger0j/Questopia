@@ -196,7 +196,7 @@ public class QspGameStock extends AppCompatActivity {
 
         settings = PreferenceManager.getDefaultSharedPreferences(this);
 
-        userSetLang = settings.getString("lang", "en");
+        userSetLang = settings.getString("lang", "ru");
         curLang = userSetLang;
         setGSLocale(userSetLang);
 
@@ -254,7 +254,7 @@ public class QspGameStock extends AppCompatActivity {
 
         //Set the language if it has changed
         boolean langChanged = false;
-        userSetLang = settings.getString("lang","en");
+        userSetLang = settings.getString("lang","ru");
         Utility.WriteLog("userSetLang = "+userSetLang+", curLang = "+curLang);
         if (!curLang.equals(userSetLang)) {
             Utility.WriteLog("GameStock:"+userSetLang+" <> "+curLang+", setting language");

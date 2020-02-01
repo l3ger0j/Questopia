@@ -447,7 +447,7 @@ Utility.WriteLog("onPageFinished: "+url);
         if (res.getConfiguration().orientation == ORIENTATION_LANDSCAPE)
             hideTitle();
 
-        userSetLang = settings.getString("lang", "en");
+        userSetLang = settings.getString("lang", "ru");
             curLang = userSetLang;
             setQSPLocale(userSetLang);
 
@@ -638,7 +638,7 @@ Utility.WriteLog("playerHeightLimit: " + playerHeightLimit + ", tempImgPerScreen
 
         //Set the language if it has changed
         boolean langChanged = false;
-        userSetLang = settings.getString("lang","en");
+        userSetLang = settings.getString("lang","ru");
 //        Utility.WriteLog("userSetLang = "+userSetLang+", curLang = "+curLang);
         if (!curLang.equals(userSetLang)) {
 //            Utility.WriteLog(userSetLang+" <> "+curLang+", setting language");
