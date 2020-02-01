@@ -2,22 +2,22 @@ package com.qsp.player.stock;
 
 public class GameItem {
     //Parsed
-    String game_id = "";
-    String list_id = "";
+    String gameId = "";
+    String listId = "";
     String author = "";
-    String ported_by = "";
+    String portedBy = "";
     String version = "";
-    public String title = "";
+    public String title;
     String lang = "";
     String player = "";
-    String file_url = "";
-    int file_size;
-    String desc_url = "";
-    String pub_date = "";
-    String mod_date = "";
+    String fileUrl = "";
+    int fileSize;
+    String descUrl = "";
+    String pubDate = "";
+    String modDate = "";
     //Flags
     boolean downloaded;
     boolean checked;
     //Local
-    String game_file = "";
+    String gameFile = "";
 }

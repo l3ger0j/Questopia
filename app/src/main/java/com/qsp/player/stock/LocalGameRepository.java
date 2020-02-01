@@ -59,14 +59,14 @@ class LocalGameRepository {
                     String name = game.dir.getName();
                     item = new GameItem();
                     item.title = name;
-                    item.game_id = name;
+                    item.gameId = name;
                 }
                 if (gamePack) {
                     String name = file.getName();
                     item.title += " (" + name + ")";
-                    item.game_id += " (" + name + ")";
+                    item.gameId += " (" + name + ")";
                 }
-                item.game_file = file.getPath();
+                item.gameFile = file.getPath();
                 item.downloaded = true;
                 items.add(item);
             }
@@ -212,16 +212,16 @@ class LocalGameRepository {
     private void fillGameItemFromCDATA(GameItem item, String tagName, String value) {
         switch (tagName) {
             case "id":
-                item.game_id = "id:".concat(value);
+                item.gameId = "id:".concat(value);
                 break;
             case "list_id":
-                item.list_id = value;
+                item.listId = value;
                 break;
             case "author":
                 item.author = value;
                 break;
             case "ported_by":
-                item.ported_by = value;
+                item.portedBy = value;
                 break;
             case "version":
                 item.version = value;
@@ -236,19 +236,19 @@ class LocalGameRepository {
                 item.player = value;
                 break;
             case "file_url":
-                item.file_url = value;
+                item.fileUrl = value;
                 break;
             case "file_size":
-                item.file_size = Integer.parseInt(value);
+                item.fileSize = Integer.parseInt(value);
                 break;
             case "desc_url":
-                item.desc_url = value;
+                item.descUrl = value;
                 break;
             case "pub_date":
-                item.pub_date = value;
+                item.pubDate = value;
                 break;
             case "mod_date":
-                item.mod_date = value;
+                item.modDate = value;
                 break;
         }
     }

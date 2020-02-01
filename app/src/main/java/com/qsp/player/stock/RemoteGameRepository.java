@@ -87,7 +87,7 @@ class RemoteGameRepository {
                                 }
                                 if (listStarted && lastTagName.equals("game")) {
                                     curItem = new GameItem();
-                                    curItem.list_id = listId;
+                                    curItem.listId = listId;
                                 }
                             }
                             break;
@@ -129,13 +129,13 @@ class RemoteGameRepository {
     private void fillGameItemFromCDATA(GameItem item, String tagName, String value) {
         switch (tagName) {
             case "id":
-                item.game_id = "id:".concat(value);
+                item.gameId = "id:".concat(value);
                 break;
             case "author":
                 item.author = value;
                 break;
             case "ported_by":
-                item.ported_by = value;
+                item.portedBy = value;
                 break;
             case "version":
                 item.version = value;
@@ -150,19 +150,19 @@ class RemoteGameRepository {
                 item.player = value;
                 break;
             case "file_url":
-                item.file_url = value;
+                item.fileUrl = value;
                 break;
             case "file_size":
-                item.file_size = Integer.parseInt(value);
+                item.fileSize = Integer.parseInt(value);
                 break;
             case "desc_url":
-                item.desc_url = value;
+                item.descUrl = value;
                 break;
             case "pub_date":
-                item.pub_date = value;
+                item.pubDate = value;
                 break;
             case "mod_date":
-                item.mod_date = value;
+                item.modDate = value;
                 break;
         }
     }

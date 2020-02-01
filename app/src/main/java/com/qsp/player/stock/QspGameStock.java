@@ -736,7 +736,7 @@ public class QspGameStock extends AppCompatActivity {
     private String getGameIdByPosition(int position)
     {
         final GameItem game = (GameItem) lvGames.getAdapter().getItem(position);
-        return game.game_id;
+        return game.gameId;
     }
 
     //Выбрана игра в списке
@@ -761,7 +761,7 @@ public class QspGameStock extends AppCompatActivity {
             if (selectedGame.downloaded){
                 //Если игра загружена, стартуем
                 Intent data = new Intent();
-                data.putExtra("file_name", selectedGame.game_file);
+                data.putExtra("file_name", selectedGame.gameFile);
                 setResult(RESULT_OK, data);
                 finish();
             } else {
@@ -840,15 +840,15 @@ public class QspGameStock extends AppCompatActivity {
             return;
 
             StringBuilder txt = new StringBuilder();
-            if (selectedGame.game_file.contains(" ")) {
+            if (selectedGame.gameFile.contains(" ")) {
                 txt.append(getString(R.string.spaceWarn)+"\n");
             }
             if(selectedGame.author.length()>0)
                 txt.append("Author: ").append(selectedGame.author);
             if(selectedGame.version.length()>0)
                 txt.append("\nVersion: ").append(selectedGame.version);
-            if(selectedGame.file_size>0)
-                txt.append("\nSize: ").append(selectedGame.file_size/1024).append(" Kilobytes");
+            if(selectedGame.fileSize >0)
+                txt.append("\nSize: ").append(selectedGame.fileSize /1024).append(" Kilobytes");
 Utility.WriteLog("Dialog txt: "+txt);
             AlertDialog.Builder bld = new AlertDialog.Builder(uiContext).setMessage(txt)
             .setTitle(selectedGame.title)
@@ -859,7 +859,7 @@ Utility.WriteLog("Dialog txt: "+txt);
                 if (selectedGame.downloaded){
                     //Если игра загружена, стартуем
                     Intent data = new Intent();
-                    data.putExtra("file_name", selectedGame.game_file);
+                    data.putExtra("file_name", selectedGame.gameFile);
                     setResult(RESULT_OK, data);
                     finish();
                 }else
@@ -885,7 +885,7 @@ Utility.WriteLog("Dialog txt: "+txt);
 
         downloadProgressDialog = new ProgressDialog(uiContext);
         downloadProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-        downloadProgressDialog.setMax(game.file_size);
+        downloadProgressDialog.setMax(game.fileSize);
         downloadProgressDialog.setCancelable(false);
 
         downloadTask = new DownloadGameAsyncTask(game);
@@ -953,19 +953,19 @@ Utility.WriteLog("Dialog txt: "+txt);
 
         try {
             osw.write("<game>\n");
-            osw.write("\t<id><![CDATA[".concat(game.game_id.substring(3)).concat("]]></id>\n"));
-            osw.write("\t<list_id><![CDATA[".concat(game.list_id).concat("]]></list_id>\n"));
+            osw.write("\t<id><![CDATA[".concat(game.gameId.substring(3)).concat("]]></id>\n"));
+            osw.write("\t<list_id><![CDATA[".concat(game.listId).concat("]]></list_id>\n"));
             osw.write("\t<author><![CDATA[".concat(game.author).concat("]]></author>\n"));
-            osw.write("\t<ported_by><![CDATA[".concat(game.ported_by).concat("]]></ported_by>\n"));
+            osw.write("\t<ported_by><![CDATA[".concat(game.portedBy).concat("]]></ported_by>\n"));
             osw.write("\t<version><![CDATA[".concat(game.version).concat("]]></version>\n"));
             osw.write("\t<title><![CDATA[".concat(game.title).concat("]]></title>\n"));
             osw.write("\t<lang><![CDATA[".concat(game.lang).concat("]]></lang>\n"));
             osw.write("\t<player><![CDATA[".concat(game.player).concat("]]></player>\n"));
-            osw.write("\t<file_url><![CDATA[".concat(game.file_url).concat("]]></file_url>\n"));
-            osw.write("\t<file_size><![CDATA[".concat(String.valueOf(game.file_size)).concat("]]></file_size>\n"));
-            osw.write("\t<desc_url><![CDATA[".concat(game.desc_url).concat("]]></desc_url>\n"));
-            osw.write("\t<pub_date><![CDATA[".concat(game.pub_date).concat("]]></pub_date>\n"));
-            osw.write("\t<mod_date><![CDATA[".concat(game.mod_date).concat("]]></mod_date>\n"));
+            osw.write("\t<file_url><![CDATA[".concat(game.fileUrl).concat("]]></file_url>\n"));
+            osw.write("\t<file_size><![CDATA[".concat(String.valueOf(game.fileSize)).concat("]]></file_size>\n"));
+            osw.write("\t<desc_url><![CDATA[".concat(game.descUrl).concat("]]></desc_url>\n"));
+            osw.write("\t<pub_date><![CDATA[".concat(game.pubDate).concat("]]></pub_date>\n"));
+            osw.write("\t<mod_date><![CDATA[".concat(game.modDate).concat("]]></mod_date>\n"));
             osw.write("</game>");
 
             osw.flush();
@@ -1015,13 +1015,13 @@ Utility.WriteLog("Dialog txt: "+txt);
 
         if (remoteGames != null) {
             for (GameItem game : remoteGames) {
-                gamesMap.put(game.game_id, game);
+                gamesMap.put(game.gameId, game);
             }
         }
 
         try {
             for (GameItem game : localGameRepository.getGameItems()) {
-                gamesMap.put(game.game_id, game);
+                gamesMap.put(game.gameId, game);
             }
         } catch (NoCardAccessException e) {
             Utility.ShowError(uiContext, getString(R.string.noCardAccess));
@@ -1572,7 +1572,7 @@ Utility.WriteLog("getNewDownloadDir()");
             if (downloaded) {
                 Unzip(zip.getPath(), getUnzipLocation(), game.title);
                 zip.delete();
-                WriteGameInfo(game.game_id);
+                WriteGameInfo(game.gameId);
                 updateSpinnerProgress(false, "", "", 0);
                 return true;
             }
@@ -1599,7 +1599,7 @@ Utility.WriteLog("getNewDownloadDir()");
 
         private boolean download(final File zip) {
             try {
-                URL url = new URL(game.file_url);
+                URL url = new URL(game.fileUrl);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("GET");
                 conn.setDoOutput(true);
@@ -1615,7 +1615,7 @@ Utility.WriteLog("getNewDownloadDir()");
                             totalBytesRead += bytesRead;
                             updateSpinnerProgress(true, game.title, getString(R.string.dlWaiting), -totalBytesRead);
                         }
-                        return totalBytesRead == game.file_size;
+                        return totalBytesRead == game.fileSize;
                     }
                 }
             } catch (Exception e) {
@@ -1633,7 +1633,7 @@ Utility.WriteLog("getNewDownloadDir()");
             RefreshLists();
 
             //Если игра не появилась в списке, значит она не соответствует формату "Полки игр"
-            GameItem downloadedGame = gamesMap.get(game.game_id);
+            GameItem downloadedGame = gamesMap.get(game.gameId);
             boolean downloaded = downloadedGame != null && downloadedGame.downloaded;
 
             if (!downloaded) {
@@ -1651,7 +1651,7 @@ Utility.WriteLog("getNewDownloadDir()");
 
             if (isActive) {
                 if (downloaded) {
-                    ShowGameInfo(game.game_id);
+                    ShowGameInfo(game.gameId);
                 } else {
                     Utility.ShowError(uiContext, getString(R.string.cantUnzipGameError).replace("-GAMENAME-", "\"" + game.title + "\""));
                 }
