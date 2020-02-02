@@ -1,26 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Base application theme is the default theme. -->
-    <style name="Theme" parent="android:Theme">
-    </style>
-
-
-    <!-- A theme that has a translucent background.  Here we explicitly specify
-         that this theme is to inherit from the system's translucent theme,
-         which sets up various attributes correctly. -->
-    <style name="Theme.Translucent" parent="android:style/Theme.Translucent">
+    <style name="Theme.QSP.Translucent" parent="Theme.AppCompat">
         <item name="android:windowBackground">@drawable/translucent_background</item>
         <item name="android:windowNoTitle">true</item>
         <item name="android:colorForeground">#fff</item>
     </style>
-    <!-- Variation on the Light theme that turns off the title -->
-    <style name="Theme.QSP" parent="android:style/Theme.Light">
-        <item name="android:windowNoTitle">true</item>
-        <item name="android:windowContentOverlay">@null</item>
-    </style>
-
-
-   <style name="Theme.Black" parent="android:style/Theme.Black"/>
-   <style name="Theme.Light" parent="android:style/Theme.Light"/>
-   <style name="Theme.Trans" parent="android:style/Theme.Translucent"/>
 </resources>

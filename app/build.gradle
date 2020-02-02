@@ -31,9 +31,9 @@ android {
 }
 
 dependencies {
-    implementation 'androidx.appcompat:appcompat:1.0.2'
-    implementation 'pl.droidsonroids.gif:android-gif-drawable:1.2.1'
-    implementation 'com.github.chrisbanes:PhotoView:1.3.0'
+    implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation 'androidx.documentfile:documentfile:1.0.1'
     implementation 'net.margaritov.preference.colorpicker.ColorPickerPreference:ColorPickerPreference:1.0.0'
     implementation 'org.apache.commons:commons-compress:1.19'
+    implementation 'org.jsoup:jsoup:1.12.1'
 }

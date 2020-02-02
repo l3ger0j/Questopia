@@ -1,38 +1,36 @@
 package com.qsp.player.stock;
 
 import android.content.Context;
-
-import com.qsp.player.R;
-import com.qsp.player.Utility;
+import android.util.Log;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.List;
 
 class RemoteGameRepository {
 
-    private static Collection<GameItem> cachedGameItems = null;
+    private static final String TAG = RemoteGameRepository.class.getName();
 
-    private final Context context;
+    private static List<GameStockItem> cachedGames = null;
 
-    RemoteGameRepository(final Context context) {
-        this.context = context;
-    }
-
-    Collection<GameItem> getGameItems() {
-        if (cachedGameItems == null) {
-            cachedGameItems = parseGameStockXml(getGameStockXml());
+    List<GameStockItem> getGames() {
+        if (cachedGames == null) {
+            String xml = getGameStockXml();
+            if (xml != null) {
+                cachedGames = parseGameStockXml(xml);
+            }
         }
 
-        return cachedGameItems;
+        return cachedGames;
     }
 
     private String getGameStockXml() {
@@ -49,84 +47,74 @@ class RemoteGameRepository {
                     return new String(os.toByteArray());
                 }
             }
-        } catch (Exception e) {
-            Utility.WriteLog(context.getString(R.string.gamelistLoadExcept));
+        } catch (IOException e) {
+            Log.e(TAG, "Failed to fetch game stock XML", e);
             return null;
         }
     }
 
-    private Collection<GameItem> parseGameStockXml(String xml) {
-        Collection<GameItem> items = new ArrayList<>();
-        boolean parsed = false;
-        if (xml != null) {
-            GameItem curItem = null;
-            try {
-                XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
-                factory.setNamespaceAware(true);
+    private ArrayList<GameStockItem> parseGameStockXml(String xml) {
+        ArrayList<GameStockItem> items = new ArrayList<>();
 
-                XmlPullParser xpp = factory.newPullParser();
-                xpp.setInput(new StringReader(xml));
+        try {
+            XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
+            factory.setNamespaceAware(true);
 
-                boolean docStarted = false;
-                boolean listStarted = false;
-                String lastTagName = "";
-                String listId = "unknown";
+            XmlPullParser xpp = factory.newPullParser();
+            xpp.setInput(new StringReader(xml));
 
-                int eventType = xpp.getEventType();
-                while (eventType != XmlPullParser.END_DOCUMENT) {
-                    switch (eventType) {
-                        case XmlPullParser.START_DOCUMENT:
-                            docStarted = true;
-                            break;
-                        case XmlPullParser.START_TAG:
-                            if (docStarted) {
-                                lastTagName = xpp.getName();
-                                if (lastTagName.equals("game_list")) {
-                                    listStarted = true;
-                                    listId = xpp.getAttributeValue(null, "id");
-                                }
-                                if (listStarted && lastTagName.equals("game")) {
-                                    curItem = new GameItem();
-                                    curItem.listId = listId;
-                                }
+            int eventType = xpp.getEventType();
+            boolean docStarted = false;
+            String tagName = "";
+            boolean listStarted = false;
+            String listId = "unknown";
+            GameStockItem item = null;
+
+            while (eventType != XmlPullParser.END_DOCUMENT) {
+                switch (eventType) {
+                    case XmlPullParser.START_DOCUMENT:
+                        docStarted = true;
+                        break;
+
+                    case XmlPullParser.START_TAG:
+                        if (docStarted) {
+                            tagName = xpp.getName();
+                            if (tagName.equals("game_list")) {
+                                listStarted = true;
+                                listId = xpp.getAttributeValue(null, "id");
                             }
-                            break;
-                        case XmlPullParser.END_TAG:
-                            if (docStarted && listStarted) {
-                                if (xpp.getName().equals("game")) {
-                                    items.add(curItem);
-                                } else if (xpp.getName().equals("game_list")) {
-                                    parsed = true;
-                                }
-                                lastTagName = "";
+                            if (listStarted && tagName.equals("game")) {
+                                item = new GameStockItem();
+                                item.listId = listId;
                             }
-                            break;
-                        case XmlPullParser.CDSECT:
-                            if (docStarted && listStarted) {
-                                fillGameItemFromCDATA(curItem, lastTagName, xpp.getText());
+                        }
+                        break;
+
+                    case XmlPullParser.END_TAG:
+                        if (docStarted && listStarted) {
+                            if (xpp.getName().equals("game")) {
+                                items.add(item);
                             }
-                            break;
-                    }
-                    eventType = xpp.nextToken();
+                            tagName = "";
+                        }
+                        break;
+
+                    case XmlPullParser.CDSECT:
+                        if (docStarted && listStarted) {
+                            fillGameItemFromCDATA(item, tagName, xpp.getText());
+                        }
+                        break;
                 }
-            } catch (XmlPullParserException e) {
-                String errTxt = context.getString(R.string.parseGameInfoXMLError)
-                        .replace("-LINENUM-", String.valueOf(e.getLineNumber()))
-                        .replace("-COLNUM-", String.valueOf(e.getColumnNumber()));
-
-                Utility.WriteLog(errTxt);
-            } catch (Exception e) {
-                Utility.WriteLog(context.getString(R.string.parseGameInfoUnkError));
+                eventType = xpp.nextToken();
             }
-        }
-        if (!parsed) {
-            throw new GameListLoadException();
+        } catch (XmlPullParserException | IOException e) {
+            Log.e(TAG, "Failed to parse game stock XML", e);
         }
 
         return items;
     }
 
-    private void fillGameItemFromCDATA(GameItem item, String tagName, String value) {
+    private void fillGameItemFromCDATA(GameStockItem item, String tagName, String value) {
         switch (tagName) {
             case "id":
                 item.gameId = "id:".concat(value);

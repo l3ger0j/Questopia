@@ -1,8 +1,6 @@
-package com.qsp.player;
+package com.qsp.player.util;
 
-import android.Manifest;
 import android.app.Activity;
-import android.content.Context;
 import android.content.pm.PackageManager;
 
 import androidx.core.app.ActivityCompat;
@@ -11,10 +9,11 @@ import androidx.core.content.ContextCompat;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class PermissionUtil {
+public final class PermissionUtil {
 
     /**
      * Checks if all <code>permissions</code> are granted and requests denied permissions.
+     *
      * @return <code>true</code> if all permissions are granted, <code>false</code> otherwise
      */
     public static boolean requestPermissionsIfNotGranted(Activity activity, int requestCode, String... permissions) {

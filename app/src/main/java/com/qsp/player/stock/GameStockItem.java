@@ -1,13 +1,12 @@
 package com.qsp.player.stock;
 
-public class GameItem {
-    //Parsed
+class GameStockItem {
     String gameId = "";
     String listId = "";
     String author = "";
     String portedBy = "";
     String version = "";
-    public String title;
+    String title;
     String lang = "";
     String player = "";
     String fileUrl = "";
@@ -15,9 +14,7 @@ public class GameItem {
     String descUrl = "";
     String pubDate = "";
     String modDate = "";
-    //Flags
     boolean downloaded;
-    boolean checked;
-    //Local
-    String gameFile = "";
+    String localDirUri = "";
+    String localFileUri = "";
 }

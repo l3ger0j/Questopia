@@ -1,52 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- ** Russian version ** -->
-
 <resources>
     <string-array name="fontName">
-        <item>По умолчанию</item>
+        <item>По-умолчанию</item>
         <item>SANS_SERIF</item>
         <item>SERIF</item>
         <item>MONOSPACE</item>
     </string-array>
-    <string-array name="fontValue"><item>0</item>
+    <string-array name="fontValue">
+        <item>0</item>
         <item>1</item>
         <item>2</item>
         <item>3</item>
     </string-array>
-    <string-array name="fontSize"><item>12</item>
+    <string-array name="fontSize">
+        <item>12</item>
         <item>14</item>
         <item>16</item>
         <item>18</item>
         <item>20</item>
         <item>22</item>
     </string-array>
-    <string-array name="themeName">
-        <item>Темная (По умолчанию)</item>
-        <item>Светлая</item>
-        <item>Рабочий стол</item>
-        <item>Custom</item>
-    </string-array>
     <string-array name="langName">
         <item>English</item>
         <item>Русский</item>
-        <item>简体中文</item>
-        <item>繁體中文</item>
-<!--    <item>Custom Language Name</item> -->
     </string-array>
     <string-array name="langValue">
         <item>en</item>
         <item>ru</item>
-        <item>zh-rCN</item>
-        <item>zh-rTW</item>
-<!--    <item>custom-region-code</item> -->
-    </string-array>
-    <string-array name="imgHeightDesc">
-        <item>Полная высота</item>
-        <item>2/3 от высоты экрана</item>
-        <item>1/2 от высоты экрана</item>
-        <item>1/3 от высоты экрана</item>
-        <item>1/4 от высоты экрана</item>
-        <item>1/5 от высоты экрана</item>
-        <item>1/10 от высоты экрана</item>
     </string-array>
 </resources>

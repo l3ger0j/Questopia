@@ -3,13 +3,10 @@
     <drawable name="translucent_background">#C0000000</drawable>
     <color name="title_background">#202020</color>
     <color name="title_text">#ffffffff</color>
-    <color name="title_background2">#ff000000</color>
     <color name="title_separator">#40ffffff</color>
     <color name="web_text">#ffffffff</color>
     <color name="web_background">#ff000000</color>
-    <item name="defTextColor" type="color">#ffffff</item>
-    <item name="defBackColor" type="color">#000000</item>
-    <item name="defLinkColor" type="color">#0000ee</item>
-    <item name="defActsColor" type="color">#ffffd7</item>
-
+    <color name="defTextColor">#000000</color>
+    <color name="defBackColor">#e0e0e0</color>
+    <color name="defLinkColor">#0000ff</color>
 </resources>

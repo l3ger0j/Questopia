@@ -1,155 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<!-- ** Russian version ** -->
 <resources>
-    <!-- Настройки  -->
-    <string name="appTheme">Тема оформления</string>
-    <string name="fontSize">Размер шрифта</string>
-    <string name="typeface">Стиль шрифта</string>
-    <string name="fullscreenSum">скрывать строку состояния</string>
-    <string name="fullscreen_off">показывать строку состояния</string>
-    <string name="fullscreenTitle">Полноэкранный режим</string>
-    <string name="gestures_off">смена экрана только тапом иконки</string>
-    <string name="gestures_sum">смена экрана при помощи жестов</string>
-    <string name="using_gestures">Жесты</string>
-    <string name="interface_scr_sum">настройка внешнего вида плеера</string>
-    <string name="interface_screen">Настройки отображения</string>
-    <string name="soundSum">использование звуков и музыки</string>
-    <string name="soundTitle">Звук</string>
-    <string name="dialog_color_picker">Выбор цвета</string>
-    <string name="textColor">Цвет текста</string>
-    <string name="backColor">Цвет фона</string>
-    <string name="linkColor">Цвет ссылок</string>
-    <string name="opt_show_acts_hot_keys">Показ горячих клавиш для действий</string>
-    <string name="opt_highlight_acts">Подсветка действий</string>
-    <string name="optdesc_highlight_acts">Использовать для действий цвет, отличный от цвета описания</string>
-    <string name="actsColor">Цвет действий</string>
-    <string name="opt_back_action">Кнопка Назад выполняет 1 действие</string>
-    <string name="opt_big_image">Большие изображения</string>
-    <string name="opt_image_density">Изображения в зависимости от экрана</string>
-    <string name="optdesc_back_action">Нажатие на кнопку "Назад" выполняет первое из доступных действий</string>
-    <string name="optdesc_big_image">Растягивать изображения на всю ширину экрана</string>
-    <string name="optdesc_image_density">Растягивать изображения в зависимости от типа экрана</string>
-    <string name="langTitle">Язык</string>
-    <string name="errorTitle">Ошибка</string>
-
-    <!-- Меню -->
-    <string name="menu_gamestock">Полка игр</string>
-    <string name="menu_options">Настройки</string>
-    <string name="menu_about">О программе</string>
-    <string name="menu_newgame">Начать заново</string>
-    <string name="menu_resumegame">Продолжить игру</string>
-    <string name="menu_load">Загрузить</string>
-    <string name="menu_save">Сохранить</string>
-    <string name="menu_deletegames">Удаление игр</string>
-    <string name="menu_openfile">Открыть файл</string>
-    <string name="menu_closeapp">Закрыть Quest Player</string>
-
-    <!-- Вкладки -->
-    <string name="tab_downloaded">Загружено</string>
-    <string name="tab_starred">Отмечено</string>
-    <string name="tab_all">Все</string>
-
-    <!-- Прочее -->
-    <string name="app_name">Quest Player Fork</string>
-
-    <!-- Прочее Other Part 2: QspGameStock -->
-    <string name="gamelistLoadError">Список игр не может быть загружен. Проверьте ваше соединение с интернетом.</string>
-    <string name="playGameCmd">Играть</string>
-    <string name="dlGameCmd">Скачать</string>
-    <string name="gameLoadNetError">Список игр не может быть загружен. Проверьте ваше соединение с интернетом.</string>
-    <string name="cacheCreateError">Невозможно создать директорию кеширования.</string>
-    <string name="dlWaiting">Скачивается...</string>
-    <string name="dlGameError">Ошибка при попытке скачать файл</string>
-    <string name="genGameLoadError">Ошибка загрузки игры</string>
-    <string name="gameDlSuccess">Игра загружена</string>
-    <string name="unpackMsg">Распаковывается...</string>
-    <string name="decompMsg">Распаковано</string>
-    <string name="unzipMsgShort">Разархивировать</string>
-    <string name="gameInfoFileCreateError">Ошибка создания информационного файла игры.</string>
-    <string name="gameInfoFileWriteError">Ошибка записи в информационный файл игры.</string>
-    <string name="noCardAccess">Нет доступа к флеш-карте.</string>
-    <string name="gameInfoFileReadError">Ошибка считывания информационного файла игры.</string>
-    <string name="parseGameInfoUnkError">Нештатная ситуация при анализе информационного файла, неизвестная ошибка.</string>
-    <string name="gamelistLoadWait">Загрузка списка игр</string>
-    <string name="gamelistLoadExcept">Нештатная ситуация при загрузке списка игр.</string>
-    <string name="gameFileSelect">Выберите игру</string>
-    <string name="gameFileDeleteTitle">Удалить игру</string>
-    <string name="gameFileDeleteSuccess">Игра удалена.</string>
-
-    <!-- Прочее Other Part 3: QspImageBox -->
-    <string name="scaleImgHelp1">Теперь вы можете маштабировать изображение. Нажмите кнопку ещё раз чтобы закрыть окно.</string>
-    <string name="scaleImgHelp2">Нажмите на увеличительное стекло в правом верхнем углу экрана чтобы рассмотреть изображение поближе.</string>
-
-    <!-- Прочее Other Part 4: QspPlayerStart -->
-    <string name="inputBoxUIMsg">InputBox(UI): Подтверждено, распаковка библиотек.</string>
-    <string name="SDCardNotConnected">"SD-карта не подключена, Quest Player не может быть запущен. Подключите SD-карту и перезапустите Quest Player.</string>
-    <string name="pauseGameMsg">onPause: Пауза</string>
-    <string name="appCloseByUser">Приложение закрыто пользователем! Переход к фону.</string>
-    <string name="selectSlotTitle">Выберите слот</string>
-    <string name="marketNotFound">Не найдено приложение Market.</string>
-    <string name="LSF_fileNotFound">Слот загрузки: Ошибка, файл не найден.</string>
-    <string name="openFileFail">Невозможно открыть файл.</string>
-    <string name="accessFileFail">Нет доступа к файлу.</string>
-    <string name="fileHandleReleaseFail">Не удалось освободить обработчик файла.</string>
-    <string name="LSF_libRun">Слот загрузки: Ошибка, библиотека уже запущена.</string>
-    <string name="LSF_dataBuff">Слот загрузки: Ошибка, невозможно загрузить данные из буфера.</string>
-    <string name="SSF_libRun">Слот сохранения: Ошибка, библиотека уже запущена.</string>
-    <string name="SSF_noCreate">Слот сохранения: Ошибка, невозможно создать файл сохранения.</string>
-
-    <string name="invTitle">Инвентарь</string>
-    <string name="mainDescTitle">Описание</string>
-    <string name="varDescTitle">Доп. описание</string>
-
-    <string name="stopGame">Остановить игру</string>
-    <string name="fileNotFound">Файл не найден.</string>
-    <string name="libRunError">Библиотека уже запущена</string>
-    <string name="readFileError">Невозможно прочитать файл.</string>
-    <string name="noBrowser">Браузер не найден.</string>
-
-
-    <string name="cantDlGameError">Невозможно скачать игру -GAMENAME-.</string>
-    <string name="cantUnzipGameError">Невозможно распаковать игру -GAMENAME-.</string>
-    <string name="gameUploadSuccess">Игра -GAMENAME- успешно загружена.</string>
-    <string name="unzipMsg">Распаковка -FILENAME-</string>
-    <string name="pathNotFound">Невозможно найти раздел: -PATHNAME-</string>
-    <string name="gameFileDeleteQuery">Удалить игру -GAMENAME-?</string>
-    <string name="gameAuthorText">Автор: -AUTHOR-</string>
-    <string name="urlNotComp">URL -URLTEXT- не является UTF-8 совместимым.</string>
-    <string name="parseGameInfoXMLError">Нештатная ситуация при анализе информационного файла игры, XML повреждён в строке -LINENUM-, столбце -COLNUM-.</string>
-
-    <string name="loadingURL">Загрузка...</string>
-    <string name="resetAll">Сбросить цвет и стиль текста к настройкам по умолчанию?</string>
-    <string name="resetAllSum">Выйдите из меню для завершения сброса</string>
-    <string name="imgHeightTitle">Максимальная высота изображения</string>
-    <string name="imgHeightSum">Уменьшить изображение до указанной высоты</string>
-
-    <string name="closeGameCmd">Закрыть</string>
-    <string name="langSummary">ВНИМАНИЕ: Смена языка закроет все запущенные игры</string>
-    <string name="loadingPageTitle">Показывать экран загрузки</string>
-    <string name="loadingPageSumm">Показывать \"Загрузка...\" при каждой смене страницы</string>
-
-    <string name="setcat_img">Настройки изображения</string>
-    <string name="setcat_txt">Настройки текста</string>
-
-    <string name="app_descrip"><![CDATA[<h2><center>О Quest Player<img src=\"file:///android_res/drawable/landscape.jpg\" width=\"100%\"></center></h2>
-<h4>Quest Player это проект с открытым исходным кодом, является Android-версией <b>Quest Soft Player</b> (<a href=\"http://qsp.su/?option=com_content&view=article&id=64\">русскоязычный сайт</a>), платформы для создания интерактивной литературы с интерфейсом, основанным на меню выбора действий. The most recent version can be downloaded at MrBoboFace\'s <a href=\"https://github.com/MrBoboFace/QuestPlayer\">GitHub</a>.</h4>
-<h3><center>Установка игр для Quest Player:</center></h3>
-<ol>
-    <li>Создайте папку с именем \"QSP\" (или похожим) на встроенном диске или внешней SD-карте вашего Android-устройства</li>
-    <li>Для установки игры в папке QSP создайте подпапку с желаемым именем игры (например QSP/game1)</li>
-    <li>Переместите все файлы игры в созданную папку</li>
-    <li>Повторите предыдущие пункты для каждой новой игры (тоесть  QSP/game2, QSP/game3, и т.д.).</li>
-    <li>В меню «Настройки» Quest Player укажите путь к папке игр</li>
-    <li>В закладке \"Загружено”\ на Полке Игр будут показаны все установленные игры</li>
-</ol>]]></string>
-    <string name="app_credits"><![CDATA[<center><h3>Credits</h3></center>
+    <!-- Приложение -->
+    <string name="appName">Quest Player</string>
+    <string name="appDescription">
+<![CDATA[
+<h2><center>О Quest Player<img src=\"file:///android_res/drawable/landscape.jpg\" width=\"100%\"></center></h2>
+<h4>Quest Player это проект с открытым исходным кодом, является Android-версией <b>Quest Soft Player</b> (<a href=\"http://qsp.su/?option=com_content&view=article&id=64\">русскоязычный сайт</a>), платформы для создания интерактивной литературы с интерфейсом, основанным на меню выбора действий. Вы можете скачать актуальную версию приложения на <a href=\"https://github.com/seedhartha/QuestPlayer\">GitHub</a>.</h4>
+]]>
+    </string>
+    <string name="appCredits">
+<![CDATA[
+<center><h3>Credits</h3></center>
 <ul>
     <li><b>Разработка:</b></li>
     <ul style="list-style-type:none">
         <li>Nex (~v1.0.201)</li>
         <li>BOOMik (v1.3)</li>
         <li>MrBoboFace (v1.4+)</li>
+        <li>seedhartha (v2.1+)</li>
     </ul>
     <li><b>Перевод:</b></li>
     <ul style="list-style-type:none">
@@ -158,28 +26,60 @@
     </ul>
     <li><b>Особое спасибо:</b> Kevin Smarts и всему <a href=\"https://tfgamessite.com/\">TFGamesSite сообществу</a></li>
     <li><i>Изображения Пятого Мира</i> созданы Noah Bradley (Творческие Сообщества; изображения уменьшены и обрезаны)</li>
-</ul>]]></string>
-    <string name="useVidTitle">Пробовать заменить картинки на видео?</string>
-    <string name="useVidSumm">Искать по префиксу (т.е. akl.jpg -> akl.*)</string>
+</ul>
+]]>
+    </string>
 
-    <string name="hideImgTitle">Спрятать изображения в игре</string>
-    <string name="hideImgSumm">Заменить изображения в игре на нейтральные</string>
+    <!-- Меню -->
+    <string name="gameStock">Полка игр</string>
+    <string name="settings">Настройки</string>
+    <string name="aboutApp">О программе</string>
+    <string name="restartGame">Начать заново</string>
+    <string name="resumeGame">Продолжить игру</string>
+    <string name="load">Загрузить</string>
+    <string name="save">Сохранить</string>
+    <string name="deleteGame">Удаление игр</string>
+    <string name="openGameFile">Открыть файл</string>
+    <string name="closeApp">Закрыть Quest Player</string>
+    <string name="selectSlot">Выберите слот</string>
+    <string name="slotPresent">Слот %d</string>
+    <string name="slotEmpty">Слот %d [Пусто]</string>
 
-    <string name="spaceWarn">**Внимание** В названии игры обнаружены пробелы! Пожалуйста, переименуйте папку и уберите пробелы!\n</string>
-    <string name="themeSumm">Выберите цветовую схему</string>
+    <!-- Настройки -->
+    <string name="textSettings">Настройки текста</string>
+    <string name="fontSize">Размер шрифта</string>
+    <string name="fontStyle">Стиль шрифта</string>
+    <string name="textColor">Цвет текста</string>
+    <string name="backColor">Цвет фона</string>
+    <string name="linkColor">Цвет ссылок</string>
+    <string name="colorSummary">Укажите новый цвет</string>
+    <string name="sound">Звук</string>
+    <string name="soundSummary">использование звуков и музыки</string>
+    <string name="lang">Язык</string>
+    <string name="langSummary">ВНИМАНИЕ: Смена языка закроет все запущенные игры</string>
 
-    <string name="colorSumm">Укажите новый цвет</string>
-
-    <string name="rotateTitle">Автоочистка</string>
-    <string name="rotateSumm">Опционально: может убрать пустые строки, возникающие на некоторых устройствах</string>
-
-    <string name="cheatTitle">Опции отладчика</string>
-    <string name="cheatSumm">Введите код для активации опций отладчика</string>
-    <string name="cheatDesc">Отладка: Введите команду</string>
-
-    <string name="inputArea">Поле ввода</string>
     <string name="reqPermMissing">Отсутствуют разрешения необходимые для работы приложения</string>
-
+    <string name="error">Ошибка</string>
+    <string name="loadGameListError">Список игр не может быть загружен. Проверьте ваше соединение с интернетом.</string>
+    <string name="loadGameError">Список игр не может быть загружен. Проверьте ваше соединение с интернетом.</string>
+    <string name="tabLocal">Загружено</string>
+    <string name="tabRemote">Отмечено</string>
+    <string name="tabAll">Все</string>
+    <string name="inventory">Инвентарь</string>
+    <string name="mainDesc">Описание</string>
+    <string name="varsDesc">Доп. описание</string>
+    <string name="inputArea">Поле ввода</string>
+    <string name="play">Играть</string>
+    <string name="download">Скачать</string>
+    <string name="downloading">Скачивается...</string>
+    <string name="unpacking">Распаковывается...</string>
+    <string name="gameListLoading">Загрузка списка игр</string>
+    <string name="selectGameFile">Выберите игру</string>
+    <string name="deleteGameCmd">Удалить игру</string>
+    <string name="gameDeleted">Игра удалена.</string>
+    <string name="deleteGameQuery">Удалить игру -GAMENAME-?</string>
+    <string name="author">Автор: -AUTHOR-</string>
+    <string name="close">Закрыть</string>
 </resources>
 
 

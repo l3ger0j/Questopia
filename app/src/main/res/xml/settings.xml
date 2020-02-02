@@ -2,59 +2,16 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     android:key="main_screen">
 
-    <EditTextPreference
-        android:key="cheats"
-        android:summary="@string/cheatSumm"
-        android:title="@string/cheatTitle" />
-
-    <PreferenceScreen
-        android:key="pref_key_image_settings"
-        android:title="@string/setcat_img">
-
-        <ListPreference
-            android:defaultValue="1"
-            android:entries="@array/imgHeightDesc"
-            android:entryValues="@array/imgHeightValue"
-            android:key="imgHeight"
-            android:summary="@string/imgHeightSum"
-            android:title="@string/imgHeightTitle" />
-
-        <CheckBoxPreference
-            android:key="big_image"
-            android:summary="@string/optdesc_big_image"
-            android:title="@string/opt_big_image" />
-
-        <CheckBoxPreference
-            android:key="videoSwitch"
-            android:summary="@string/useVidSumm"
-            android:title="@string/useVidTitle" />
-
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:key="hideImg"
-            android:summary="@string/hideImgSumm"
-            android:title="@string/hideImgTitle" />
-
-    </PreferenceScreen>
-
     <PreferenceScreen
         android:key="pref_key_text_settings"
-        android:title="@string/setcat_txt">
-
-        <ListPreference
-            android:defaultValue="0"
-            android:entries="@array/themeName"
-            android:entryValues="@array/themeValue"
-            android:key="theme"
-            android:summary="@string/themeSumm"
-            android:title="@string/appTheme" />
+        android:title="@string/textSettings">
 
         <ListPreference
             android:defaultValue="0"
             android:entries="@array/fontName"
             android:entryValues="@array/fontValue"
             android:key="typeface"
-            android:title="@string/typeface" />
+            android:title="@string/fontStyle" />
 
         <ListPreference
             android:defaultValue="16"
@@ -64,84 +21,37 @@
             android:title="@string/fontSize" />
 
         <net.margaritov.preference.colorpicker.ColorPickerPreference
-            type="color"
             android:defaultValue="@color/defBackColor"
             android:key="backColor"
-            android:summary="@string/colorSumm"
+            android:summary="@string/colorSummary"
             android:title="@string/backColor" />
 
         <net.margaritov.preference.colorpicker.ColorPickerPreference
             android:defaultValue="@color/defTextColor"
             android:key="textColor"
-            android:summary="@string/colorSumm"
+            android:summary="@string/colorSummary"
             android:title="@string/textColor" />
 
         <net.margaritov.preference.colorpicker.ColorPickerPreference
             android:defaultValue="@color/defLinkColor"
             android:key="linkColor"
-            android:summary="@string/colorSumm"
+            android:summary="@string/colorSummary"
             android:title="@string/linkColor" />
-
-        <net.margaritov.preference.colorpicker.ColorPickerPreference
-            android:defaultValue="@color/defActsColor"
-            android:key="actsColor"
-            android:summary="@string/colorSumm"
-            android:title="@string/actsColor" />
-
-        <CheckBoxPreference
-            android:defaultValue="true"
-            android:key="highlight_acts"
-            android:summary="@string/optdesc_highlight_acts"
-            android:title="@string/opt_highlight_acts" />
-
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:key="resetAll"
-            android:summary="@string/resetAllSum"
-            android:title="@string/resetAll" />
 
     </PreferenceScreen>
 
     <CheckBoxPreference
         android:defaultValue="true"
         android:key="sound"
-        android:summary="@string/soundSum"
-        android:title="@string/soundTitle" />
-
-    <CheckBoxPreference
-        android:enabled="true"
-        android:key="gestures"
-        android:summaryOff="@string/gestures_off"
-        android:summaryOn="@string/gestures_sum"
-        android:title="@string/using_gestures" />
-
-    <CheckBoxPreference
-        android:key="acts_hot_keys"
-        android:title="@string/opt_show_acts_hot_keys" />
-
-    <CheckBoxPreference
-        android:key="rotate_key"
-        android:summary="@string/rotateSumm"
-        android:title="@string/rotateTitle" />
-
-    <CheckBoxPreference
-        android:defaultValue="false"
-        android:key="back_action"
-        android:summary="@string/optdesc_back_action"
-        android:title="@string/opt_back_action" />
-
-    <CheckBoxPreference
-        android:enabled="true"
-        android:key="showLoadingPage"
-        android:summary="@string/loadingPageSumm"
-        android:title="@string/loadingPageTitle" />
+        android:summary="@string/soundSummary"
+        android:title="@string/sound" />
 
     <ListPreference
-        android:defaultValue="@string/defaultLang"
+        android:defaultValue="ru"
         android:entries="@array/langName"
         android:entryValues="@array/langValue"
         android:key="lang"
         android:summary="@string/langSummary"
-        android:title="@string/langTitle" />
+        android:title="@string/lang" />
 
 </PreferenceScreen>

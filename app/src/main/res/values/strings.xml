@@ -1,154 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<!-- ** English/Default version ** -->
 <resources>
-    <!-- Настройки Settings -->
-    <string name="appTheme">Theme</string>
-    <string name="fontSize">Font Size</string>
-    <string name="typeface">Font Style</string>
-    <string name="fullscreenSum">Hide Status Bar</string>
-    <string name="fullscreen_off">Show Status Bar</string>
-    <string name="fullscreenTitle">Full Screen</string>
-    <string name="gestures_off">Switch tab by Icons</string>
-    <string name="gestures_sum">Switch tab by Swap</string>
-    <string name="using_gestures">Gestures</string>
-    <string name="interface_scr_sum">Interface Setting</string>
-    <string name="interface_screen">Display Settings</string>
-    <string name="soundSum">Sound and Music</string>
-    <string name="soundTitle">Sound</string>
-    <string name="dialog_color_picker">Choose Color</string>
-    <string name="textColor">Text Color</string>
-    <string name="backColor">Background Color</string>
-    <string name="linkColor">Link Color</string>
-    <string name="opt_show_acts_hot_keys">Show Hotkey for Actions</string>
-    <string name="opt_highlight_acts">Enforced Actions</string>
-    <string name="optdesc_highlight_acts">Show Actions with Selected Color</string>
-    <string name="actsColor">Action Color</string>
-    <string name="opt_back_action">Back Button as 1st action</string>
-    <string name="opt_big_image">Stretch Image to Screen Width</string>
-    <string name="opt_image_density">Image Fit to Screen</string>
-    <string name="optdesc_back_action">Back Button executes the first available action</string>
-    <string name="optdesc_big_image">Stretch image to the full width, but not more than maximum height</string>
-    <string name="optdesc_image_density">Stretch the image depending on the screen density</string>
-    <string name="langTitle">Language</string>
-    <string name="errorTitle">Error</string>
-
-    <!-- Меню Menu -->
-    <string name="menu_gamestock">Game Stock</string>
-    <string name="menu_options">Settings</string>
-    <string name="menu_about">About Quest Player</string>
-    <string name="menu_newgame">Restart Game</string>
-    <string name="menu_resumegame">Resume Game</string>
-    <string name="menu_load">Load</string>
-    <string name="menu_save">Save</string>
-    <string name="menu_deletegames">Delete Game</string>
-    <string name="menu_openfile">Open Game File</string>
-    <string name="menu_closeapp">Close QuestPlayer</string>
-
-    <!-- Вкладки Tabs -->
-    <string name="tab_all">All</string>
-    <string name="tab_downloaded">Local</string>
-    <string name="tab_starred">Market</string>
-
-    <!-- Прочее Other -->
-    <string name="app_name">Quest Player</string>
-
-    <!-- Прочее Other Part 2: QspGameStock -->
-    <string name="gamelistLoadError">The game list could not be loaded. Check your internet connection.</string>
-    <string name="playGameCmd">Play</string>
-    <string name="dlGameCmd">Download</string>
-    <string name="gameLoadNetError">The game could not be loaded. Check your internet connection.</string>
-    <string name="cacheCreateError">Cannot create cache folder.</string>
-    <string name="dlWaiting">Downloading...</string>
-    <string name="dlGameError">Error while trying to download file</string>
-    <string name="genGameLoadError">Error loading game</string>
-    <string name="gameDlSuccess">Game downloaded</string>
-    <string name="unpackMsg">Unpacked...</string>
-    <string name="decompMsg">Decompress</string>
-    <string name="unzipMsgShort">unzip</string>
-    <string name="gameInfoFileCreateError">Creating game info file failed.</string>
-    <string name="gameInfoFileWriteError">Writing to game info file failed.</string>
-    <string name="noCardAccess">No access to the flash card.</string>
-    <string name="gameInfoFileReadError">Reading game info file failed.</string>
-    <string name="parseGameInfoUnkError">Exception occurred while trying to parse game info, unknown error.</string>
-    <string name="gamelistLoadWait">Loading a list of games</string>
-    <string name="gamelistLoadExcept">Exception occurred while trying to load game list.</string>
-    <string name="gameFileSelect">Select a game file</string>
-    <string name="gameFileDeleteTitle">Delete game</string>
-    <string name="gameFileDeleteSuccess">The game has been deleted.</string>
-
-    <!-- Прочее Other Part 3: QspImageBox -->
-    <string name="scaleImgHelp1">Now you can scale the image. To close the window, click again on this button.</string>
-    <string name="scaleImgHelp2">Click the magnifying glass in the upper-right corner to examine the image closer.</string>
-
-    <!-- Прочее Other Part 4: QspPlayerStart -->
-    <string name="inputBoxUIMsg">InputBox(UI): OK clicked, unparking library thread.</string>
-    <string name="SDCardNotConnected">"SD card is not connected: Quest Player cannot start. Connect the SD card and restart Quest Player.</string>
-    <string name="pauseGameMsg">onPause: pausing game</string>
-    <string name="appCloseByUser">App closed by user! Going to background.</string>
-    <string name="selectSlotTitle">Select a slot</string>
-    <string name="marketNotFound">Market Intent not found.</string>
-    <string name="LSF_fileNotFound">LoadSlot: failed, file not found.</string>
-    <string name="openFileFail">Could not open file.</string>
-    <string name="accessFileFail">Could not access file.</string>
-    <string name="fileHandleReleaseFail">Could not release the file handler.</string>
-    <string name="LSF_libRun">LoadSlot: failed, library is already running.</string>
-    <string name="LSF_dataBuff">LoadSlot: failed, cannot load data from byte buffer.</string>
-    <string name="SSF_libRun">SaveSlot: failed, library is already running.</string>
-    <string name="SSF_noCreate">SaveSlot: failed, cannot create save data.</string>
-
-    <string name="invTitle">Inventory</string>
-    <string name="mainDescTitle">Description</string>
-    <string name="varDescTitle">Character</string>
-
-    <string name="stopGame">stopping game</string>
-    <string name="fileNotFound">File not found.</string>
-    <string name="libRunError">library thread is already running</string>
-    <string name="readFileError">Could not read file.</string>
-    <string name="noBrowser">Could not find browser.</string>
-
-    <string name="gameAuthorText">Author: -AUTHOR-</string>
-    <string name="cantDlGameError">Could not download game -GAMENAME-.</string>
-    <string name="cantUnzipGameError">Unable to unzip the game -GAMENAME-.</string>
-    <string name="gameUploadSuccess">Game -GAMENAME- successfully uploaded.</string>
-    <string name="unzipMsg">Unzipping -FILENAME-</string>
-    <string name="parseGameInfoXMLError">Exception occurred while trying to parse game info, XML corrupted at line -LINENUM- column -COLNUM-.</string>
-    <string name="pathNotFound">Could not find path: -PATHNAME-</string>
-    <string name="gameFileDeleteQuery">Delete game -GAMENAME-?</string>
-    <string name="urlNotComp">URL -URLTEXT- is not UTF-8 compatible.</string>
-
-    <string name="loadingURL"><center>Loading...</center></string>
-    <string name="resetAll">Reset to default text colors and style?</string>
-    <string name="resetAllSum">Exit menu to complete reset</string>
-    <string name="imgHeightTitle">Maximum Image Height</string>
-    <string name="imgHeightSum">Shrink images to specific height</string>
-
-    <string name="closeGameCmd">Close</string>
-    <string name="langSummary">Exit menu to apply new language</string>
-    <string name="loadingPageTitle">Display Loading Page</string>
-    <string name="loadingPageSumm">Choose whether to show \"Loading...\" before each page loads</string>
-
-    <string name="setcat_img">Image Settings</string>
-    <string name="setcat_txt">Text Settings</string>
-
-    <string name="app_descrip"><![CDATA[<h2><center>About Quest Player<img src=\"file:///android_res/drawable/landscape.jpg\" width=\"100%\"></center></h2>
-<h4>Quest Player is an open-source Android port of <b>Quest Soft Player</b> (<a href=\"http://qsp.su/?option=com_content&view=article&id=64\">Russian site</a>), a menu-based platform for creating interactive fiction. The most recent version can be downloaded at MrBoboFace\'s <a href=\"https://github.com/MrBoboFace/QuestPlayer\">GitHub</a>.</h4>
-<h3><center>Installing Games for Quest Player:</center></h3>
-<ol>
-    <li>Create a folder named \"QSP\" (or something similar) on your Android\'s internal storage or external SD card</li>
-    <li>To install a game, create a unique folder in the QSP folder (i.e., QSP/game1)</li>
-    <li>Next, move all files associated with that game into the new game folder</li>
-    <li>Repeat for each game (i.e., QSP/game2, QSP/game3, etc.)</li>
-    <li>Use Settings to point Quest Player to your primary game folder</li>
-    <li>The \"Local\" tab in Game Stock should show all your loaded games</li>
-</ol>]]></string>
-    <string name="app_credits"><![CDATA[<center><h3>Credits</h3></center>
+    <!-- Application -->
+    <string name="appName">Quest Player</string>
+    <string name="appDescription">
+<![CDATA[
+<h2><center>About Quest Player<img src=\"file:///android_res/drawable/landscape.jpg\" width=\"100%\"></center></h2>
+<h4>Quest Player is an open-source Android port of <b>Quest Soft Player</b> (<a href=\"http://qsp.su/?option=com_content&view=article&id=64\">Russian site</a>), a menu-based platform for creating interactive fiction. The most recent version can be downloaded from <a href=\"https://github.com/seedhartha/QuestPlayer\">GitHub</a>.</h4>
+]]>
+    </string>
+    <string name="appCredits">
+<![CDATA[
+<center><h3>Credits</h3></center>
 <ul>
     <li><b>Coding:</b>
     <ul style="list-style-type:none">
         <li>Nex (~v1.0.201)</li>
         <li>BOOMik (v1.3)</li>
         <li>MrBoboFace (v1.4+)</li>
+        <li>seedhartha (v2.1+)</li>
     </ul>
     <li><b>Translations:</b></li>
     <ul style="list-style-type:none">
@@ -157,84 +26,58 @@
     </ul>
     <li><b>Special Thanks:</b> Kevin Smarts and all those in <a href=\"https://tfgamessite.com/\">TFGamesSite Community</a></li>
     <li><i>The Fifth World</i> painting by Noah Bradley (Creative Commons License; image scaled and cropped)</li>
-</ul>]]></string>
-    <string name="useVidTitle">Use video instead?</string>
-    <string name="useVidSumm">Replaces images with video file (akl.jpg -> akl.*)</string>
+</ul>
+]]>
+    </string>
 
-    <string name="hideImgTitle">Hide game graphics</string>
-    <string name="hideImgSumm">Replaces game graphics with neutral scene</string>
+    <!-- Menu -->
+    <string name="gameStock">Game Stock</string>
+    <string name="settings">Settings</string>
+    <string name="aboutApp">About Quest Player</string>
+    <string name="restartGame">Restart Game</string>
+    <string name="resumeGame">Resume Game</string>
+    <string name="load">Load</string>
+    <string name="save">Save</string>
+    <string name="deleteGame">Delete Game</string>
+    <string name="openGameFile">Open Game File</string>
+    <string name="closeApp">Close QuestPlayer</string>
+    <string name="selectSlot">Select a slot</string>
+    <string name="slotPresent">Slot %d</string>
+    <string name="slotEmpty">Slot %d [Empty]</string>
 
-    <string name="spaceWarn">**WARNING!** Space detected in game path! Please rename game folder and remove spaces!\n</string>
-    <string name="themeSumm">Choose color scheme</string>
-
-    <string name="colorSumm">Press new color to apply</string>
-
-    <string name="rotateTitle">Auto-Clear</string>
-    <string name="rotateSumm">Optional: may clear empty space that occurs on some devices</string>
-
-    <string name="cheatTitle">Debugging Option</string>
-    <string name="cheatSumm">Enter code to activate debugging option</string>
-    <string name="cheatDesc">DEBUG: Input command</string>
+    <!-- Settings -->
+    <string name="textSettings">Text Settings</string>
+    <string name="fontSize">Font Size</string>
+    <string name="fontStyle">Font Style</string>
+    <string name="textColor">Text Color</string>
+    <string name="backColor">Background Color</string>
+    <string name="linkColor">Link Color</string>
+    <string name="colorSummary">Press new color to apply</string>
+    <string name="sound">Sound</string>
+    <string name="soundSummary">Sound and Music</string>
+    <string name="lang">Language</string>
+    <string name="langSummary">Exit menu to apply new language</string>
 
     <string name="reqPermMissing">Permissions required by the application are missing</string>
-
-    <!-- ***************************************** -->
-    <!-- WARNING: DO NOT TRANSLATE BELOW THIS LINE -->
-    <!-- ***************************************** -->
-
-    <string name="about_template"><![CDATA[<html><head><meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1"><style type="text/css">body{margin: 0; padding: 0; color: QSPTEXTCOLOR; background-color: QSPBACKCOLOR; max-width: 100%; font-size: QSPFONTSIZE; font-family: QSPFONTSTYLE; } a{color: QSPLINKCOLOR; } a:link{color: QSPLINKCOLOR; } table{font-size: QSPFONTSIZE; font-family: QSPFONTSTYLE; }</style></head><body>REPLACETEXT</body></html>]]></string>
-
-    <string name="defaultLang">ru</string>
-    <string name="market_details_url">market://details?id=com.qsp.player</string>
-    <string name="translator">illume</string>
-
-    <!-- These all write a log in the format "SUBROUTINE: nameS"-->
-    <string name="enterS">enter</string>
-    <string name="successS">success</string>
-    <string name="failedS">failed</string>
-    <string name="isNullS">is null</string>
-    <string name="isDeadS">is dead</string>
-    <string name="isSetS">is set</string>
-    <string name="exitedS">exited</string>
-
-    <string name="deftypeface">0</string>
-    <string name="deffontsize">16</string>
-
-    <string name="deftheme">0</string>
-    <string name="defbackColor">#e0e0e0</string>
-    <string name="deftextColor">#000000</string>
-    <string name="deflinkColor">#0000ff</string>
-    <string name="defactsColor">#000000</string>
-
-    <string name="lighttheme">1</string>
-    <string name="lightbackColor">#ffffff</string>
-    <string name="lighttextColor">#000000</string>
-    <string name="lightlinkColor">#0000cc</string>
-    <string name="lightactsColor">#333300</string>
-
-    <string name="desktheme">2</string>
-    <string name="deskbackColor">#DCEA86</string>
-    <string name="desktextColor">#072A1F</string>
-    <string name="desklinkColor">#36715E</string>
-    <string name="deskactsColor">#659728</string>
-
-    <string name="customtheme">-1</string>
-    <string name="defcustombackColor">#000000</string>
-    <string name="defcustomtextColor">#FFFFFF</string>
-    <string name="defcustomlinkColor">#3333FF</string>
-    <string name="defcustomactsColor">#FFFFD7</string>
-
-    <string name="defGamePath">/storage/sdcard1/QSP/games/</string>
-    <string name="defRelPath">/QSP/games/</string>
-    <string name="defDownDirPath">-----</string>
-    <string name="key_internal_uri_extsdcard">keyToDownloadDirUri</string>
-    <string name="alertCancel">CANCEL</string>
-    <string name="alertChoose">CHOOSE</string>
+    <string name="error">Error</string>
+    <string name="loadGameListError">The game list could not be loaded. Check your internet connection.</string>
+    <string name="loadGameError">The game could not be loaded. Check your internet connection.</string>
+    <string name="tabAll">All</string>
+    <string name="tabLocal">Local</string>
+    <string name="tabRemote">Remote</string>
+    <string name="inventory">Inventory</string>
+    <string name="mainDesc">Description</string>
+    <string name="varsDesc">Character</string>
     <string name="inputArea">Input area</string>
-
-    <!-- ***************************************** -->
-    <!-- ******** END UNTRANSLATED REGION ******** -->
-    <!-- ***************************************** -->
-
+    <string name="play">Play</string>
+    <string name="download">Download</string>
+    <string name="downloading">Downloading...</string>
+    <string name="unpacking">Unpacking...</string>
+    <string name="gameListLoading">Loading a list of games</string>
+    <string name="selectGameFile">Select a game file</string>
+    <string name="deleteGameCmd">Delete game</string>
+    <string name="gameDeleted">The game has been deleted.</string>
+    <string name="author">Author: -AUTHOR-</string>
+    <string name="deleteGameQuery">Delete game -GAMENAME-?</string>
+    <string name="close">Close</string>
 </resources>
-

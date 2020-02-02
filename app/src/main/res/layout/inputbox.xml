@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-  xmlns:android="http://schemas.android.com/apk/res/android"
-  android:layout_width="wrap_content"
-  android:layout_height="wrap_content">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
     <EditText
         android:id="@+id/inputbox_edit"
-        android:layout_height="wrap_content"
         android:layout_width="fill_parent"
-        android:autoText="false"
-        android:capitalize="none"
+        android:layout_height="wrap_content"
         android:gravity="fill_horizontal"
         android:textAppearance="?android:attr/textAppearanceMedium" />
+
 </LinearLayout>

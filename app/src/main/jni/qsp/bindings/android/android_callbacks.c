@@ -223,12 +223,12 @@ void qspCallShowMenu()
 	
 	jclass cls = (*qspCallbackEnv)->GetObjectClass(qspCallbackEnv, qspCallbackObject);
 	jmethodID mid = 
-		 (*qspCallbackEnv)->GetMethodID(qspCallbackEnv, cls, "ShowMenu", "()I");
+		 (*qspCallbackEnv)->GetMethodID(qspCallbackEnv, cls, "ShowMenu", "()V");
 	(*qspCallbackEnv)->DeleteLocalRef( qspCallbackEnv, cls );
 	if (mid == NULL)
 		return; /* method not found */
 
-	(*qspCallbackEnv)->CallIntMethod(qspCallbackEnv, qspCallbackObject, mid);
+	(*qspCallbackEnv)->CallVoidMethod(qspCallbackEnv, qspCallbackObject, mid);
 	
 	
 	qspRestoreCallState(&state);

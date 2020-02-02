@@ -1,19 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item android:id="@+id/menu_options"
-        android:title="@string/menu_options" />
+    <item
+        android:id="@+id/menu_options"
+        android:title="@string/settings" />
 
-    <item android:id="@+id/menu_resumegame"
-        android:title="@string/menu_resumegame" />
+    <item
+        android:id="@+id/menu_resumegame"
+        android:title="@string/resumeGame" />
 
-    <item android:id="@+id/menu_openfile"
-        android:title="@string/menu_openfile" />
+    <item
+        android:id="@+id/menu_openfile"
+        android:title="@string/openGameFile" />
 
-    <item android:id="@+id/menu_deletegames"
-        android:title="@string/menu_deletegames" />
+    <item
+        android:id="@+id/menu_deletegames"
+        android:title="@string/deleteGame" />
 
-    <item android:id="@+id/menu_about"
-        android:title="@string/menu_about" />
+    <item
+        android:id="@+id/menu_about"
+        android:title="@string/aboutApp" />
 
 </menu>

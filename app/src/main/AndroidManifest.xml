@@ -1,37 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.qsp.player">
-    <application android:icon="@drawable/icon" android:label="@string/app_name"
-                 android:name="QspApp"
-                 android:hardwareAccelerated="true"
-                 android:largeHeap="true"
-                 android:usesCleartextTraffic="true">
-        <activity android:name=".game.QspPlayerStart"
-                  android:label="@string/app_name" 
-                  android:alwaysRetainTaskState="true"
-                  android:configChanges="orientation|keyboardHidden|screenSize">
+    package="com.qsp.player">
+
+    <application
+        android:name=".QspApplication"
+        android:hardwareAccelerated="true"
+        android:icon="@drawable/icon"
+        android:label="@string/appName"
+        android:largeHeap="true"
+        android:usesCleartextTraffic="true">
+
+        <activity
+            android:name=".game.QspPlayerStart"
+            android:alwaysRetainTaskState="true"
+            android:label="@string/appName"
+            android:theme="@style/Theme.AppCompat">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-    <activity android:name=".game.QspImageBox"
-              android:theme="@style/Theme.Translucent"
-              android:configChanges="orientation|keyboardHidden"/>
+        <activity
+            android:name=".game.QspImageBox"
+            android:theme="@style/Theme.QSP.Translucent" />
 
-    <activity android:name=".settings.Settings"
-              android:label="@string/menu_options"/>
+        <activity
+            android:name=".settings.Settings"
+            android:label="@string/settings" />
 
-    <activity android:name=".stock.QspGameStock" 
-              android:label="@string/menu_gamestock"
-              android:configChanges="orientation|keyboardHidden"
-              android:theme="@style/Theme.AppCompat"/>
-</application>
+        <activity
+            android:name=".stock.QspGameStock"
+            android:label="@string/gameStock"
+            android:theme="@style/Theme.AppCompat" />
+    </application>
 
-    <uses-permission android:name="android.permission.INTERNET"></uses-permission>
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"></uses-permission>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"></uses-permission>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"></uses-permission>
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
 </manifest>
