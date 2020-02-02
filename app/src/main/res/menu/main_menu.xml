@@ -2,26 +2,24 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item android:id="@+id/menu_gamestock"
-        android:title="@string/menu_gamestock" />
+          android:title="@string/menu_gamestock" />
         
     <item android:id="@+id/menu_options"
-        android:title="@string/menu_options" />
+          android:title="@string/menu_options" />
 
-<!--    <item
-        android:id="@+id/menu_about"
-        android:title="@string/menu_about" /> -->
-    <item
-        android:id="@+id/menu_exit"
-        android:title="@string/menu_closeapp" />
+    <item android:id="@+id/menu_exit"
+          android:title="@string/menu_closeapp" />
 
     <group android:id="@+id/menugroup_running">
 
         <item android:id="@+id/menu_newgame"
-            android:title="@string/menu_newgame" />
+              android:title="@string/menu_newgame" />
 
-        <item android:id="@+id/menu_loadgame" />
+        <item android:id="@+id/menu_loadgame"
+              android:title="@string/menu_load"/>
 
-        <item android:id="@+id/menu_savegame" />
+        <item android:id="@+id/menu_savegame"
+              android:title="@string/menu_save"/>
 
     </group>
 

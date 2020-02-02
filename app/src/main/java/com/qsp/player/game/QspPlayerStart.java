@@ -75,6 +75,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Vector;
@@ -87,7 +88,6 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.webkit.WebView.HitTestResult.IMAGE_TYPE;
-
 
 public class QspPlayerStart extends Activity implements UrlClickCatcher, OnGesturePerformedListener, Drawable.Callback {
 
@@ -537,7 +537,7 @@ Utility.WriteLog("onPageFinished: "+url);
                     .setCancelable(false)
                     .create();
 
-            if (Utility.GetDownloadPath(this) == null) {
+            if (Utility.getDownloadDir(this) == null) {
                 sdcard_mounted = false;
                 Utility.ShowError(uiContext, getString(R.string.SDCardNotConnected));
 
@@ -2107,7 +2107,7 @@ Utility.WriteLog("runGame\\");
             Utility.WriteLog("Write refused");
         }
         //Контекст UI
-        File f = new File(fileName);
+        File f = new File(URI.create(fileName));
         if (!f.exists()) {
             Utility.ShowError(uiContext, getString(R.string.fileNotFound));
             return;
@@ -2125,9 +2125,9 @@ Utility.WriteLog("runGame\\");
 
         final boolean inited = qspInited;
         qspInited = true;
-        final String gameFileName = fileName;
+        final String gameFileName = f.getPath();
         curGameFile = gameFileName;
-        curGameDir = gameFileName.substring(0, gameFileName.lastIndexOf(File.separator, gameFileName.length() - 1) + 1);
+        curGameDir = gameFileName.substring(0, gameFileName.lastIndexOf(File.separator) + 1);
         Utility.WriteLog("curGameFile: "+curGameFile);
         Utility.WriteLog("curGameDir: "+curGameDir);
 

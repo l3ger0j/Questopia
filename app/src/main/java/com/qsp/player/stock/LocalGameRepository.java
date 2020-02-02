@@ -1,7 +1,8 @@
 package com.qsp.player.stock;
 
 import android.content.Context;
-import android.text.TextUtils;
+
+import androidx.documentfile.provider.DocumentFile;
 
 import com.qsp.player.R;
 import com.qsp.player.Utility;
@@ -11,9 +12,8 @@ import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -33,25 +33,21 @@ class LocalGameRepository {
     }
 
     Collection<GameItem> getGameItems() {
-        String gamesPath = Utility.GetGamesPath(context);
-        File gamesDir = TextUtils.isEmpty(gamesPath) ? null : new File(gamesPath);
-        String downloadPath = Utility.GetDownloadPath(context);
-        File downloadDir = TextUtils.isEmpty(downloadPath) || downloadPath.equals(gamesPath) ? null : new File(downloadPath);
-        if (gamesDir == null && downloadDir == null) {
-            throw new NoCardAccessException();
+        DocumentFile downloadDir = Utility.getDownloadDir(context);
+        if (downloadDir == null) {
+            return null;
         }
 
-        List<File> subdirectories = getSubdirectories(gamesDir, downloadDir);
+        List<DocumentFile> subdirectories = getSubdirectories(downloadDir);
         if (subdirectories.isEmpty()) {
             return Collections.emptyList();
         }
 
         Collection<GameItem> items = new ArrayList<>();
-
         for (Game game : getGames(subdirectories)) {
             String info = getGameInfo(game);
             boolean gamePack = game.gameFiles.size() > 1;
-            for (File file : game.gameFiles) {
+            for (DocumentFile file : game.gameFiles) {
                 GameItem item;
                 if (info != null) {
                     item = parseGameInfo(info);
@@ -66,7 +62,7 @@ class LocalGameRepository {
                     item.title += " (" + name + ")";
                     item.gameId += " (" + name + ")";
                 }
-                item.gameFile = file.getPath();
+                item.gameFile = file.getUri().toString();
                 item.downloaded = true;
                 items.add(item);
             }
@@ -75,20 +71,9 @@ class LocalGameRepository {
         return items;
     }
 
-    private List<File> getSubdirectories(File... dirs) {
-        List<File> sub = new ArrayList<>();
-        for (File dir : dirs) {
-            if (dir != null && dir.exists() && dir.isDirectory()) {
-                sub.addAll(getSubdirectories(dir));
-            }
-        }
-
-        return sub;
-    }
-
-    private Collection<File> getSubdirectories(File dir) {
-        Collection<File> sub = new ArrayList<>();
-        for (File f : dir.listFiles()) {
+    private List<DocumentFile> getSubdirectories(DocumentFile dir) {
+        List<DocumentFile> sub = new ArrayList<>();
+        for (DocumentFile f : dir.listFiles()) {
             if (f.isDirectory()) {
                 sub.add(f);
             }
@@ -97,20 +82,20 @@ class LocalGameRepository {
         return sub;
     }
 
-    private List<Game> getGames(List<File> dirs) {
+    private List<Game> getGames(List<DocumentFile> dirs) {
         List<Game> games = new ArrayList<>();
         Utility.FileSorter(dirs);
 
-        for (File dir : dirs) {
-            if (!dir.isHidden() && !dir.getName().startsWith(".")) {
-                List<File> gameFiles = new ArrayList<>();
+        for (DocumentFile dir : dirs) {
+            if (!dir.getName().startsWith(".")) {
+                List<DocumentFile> gameFiles = new ArrayList<>();
 
-                List<File> files = Arrays.asList(dir.listFiles());
+                List<DocumentFile> files = Arrays.asList(dir.listFiles());
                 Utility.FileSorter(files);
 
-                for (File f : files) {
+                for (DocumentFile f : files) {
                     String lcFileName = f.getName().toLowerCase();
-                    if (!f.isHidden() && (lcFileName.endsWith(".qsp") || lcFileName.endsWith(".gam"))) {
+                    if (lcFileName.endsWith(".qsp") || lcFileName.endsWith(".gam")) {
                         gameFiles.add(f);
                     }
                 }
@@ -123,8 +108,8 @@ class LocalGameRepository {
     }
 
     private String getGameInfo(Game game) {
-        File infoFile = new File(game.dir, GAME_INFO_FILENAME);
-        if (infoFile.exists()) {
+        DocumentFile infoFile = game.dir.findFile(GAME_INFO_FILENAME);
+        if (infoFile != null) {
             try {
                 return readFileAsString(infoFile);
             } catch (IOException e) {
@@ -136,9 +121,9 @@ class LocalGameRepository {
         return null;
     }
 
-    private String readFileAsString(File file) throws IOException {
+    private String readFileAsString(DocumentFile file) throws IOException {
         StringBuilder builder = new StringBuilder();
-        FileInputStream in = new FileInputStream(file);
+        InputStream in = context.getContentResolver().openInputStream(file.getUri());
         InputStreamReader inReader = new InputStreamReader(in);
 
         try (BufferedReader bufReader = new BufferedReader(inReader)) {
@@ -255,10 +240,10 @@ class LocalGameRepository {
 
     private static class Game {
 
-        private final File dir;
-        private final Collection<File> gameFiles;
+        private final DocumentFile dir;
+        private final Collection<DocumentFile> gameFiles;
 
-        private Game(File dir, Collection<File> gameFiles) {
+        private Game(DocumentFile dir, Collection<DocumentFile> gameFiles) {
             this.dir = dir;
             this.gameFiles = gameFiles;
         }

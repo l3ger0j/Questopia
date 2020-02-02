@@ -30,8 +30,6 @@
     <string name="optdesc_back_action">Back Button executes the first available action</string>
     <string name="optdesc_big_image">Stretch image to the full width, but not more than maximum height</string>
     <string name="optdesc_image_density">Stretch the image depending on the screen density</string>
-    <string name="gamesdirTitle">Path to game files</string>
-    <string name="gamesdirSum">Directory where game files are stored</string>
     <string name="langTitle">Language</string>
     <string name="errorTitle">Error</string>
 
@@ -130,15 +128,8 @@
     <string name="loadingPageTitle">Display Loading Page</string>
     <string name="loadingPageSumm">Choose whether to show \"Loading...\" before each page loads</string>
 
-    <string name="storTypeTitle">Use External SD Card</string>
-    <string name="storTypeSumOn">Using: External SD Card</string>
-    <string name="storTypeSumOff">Using: Internal Storage</string>
-
     <string name="setcat_img">Image Settings</string>
     <string name="setcat_txt">Text Settings</string>
-
-    <string name="selectDirTitle">Select Game Directory</string>
-    <string name="selectDir">[CLICK TO SELECT: \"-DIRNAME-\"]</string>
 
     <string name="app_descrip"><![CDATA[<h2><center>About Quest Player<img src=\"file:///android_res/drawable/landscape.jpg\" width=\"100%\"></center></h2>
 <h4>Quest Player is an open-source Android port of <b>Quest Soft Player</b> (<a href=\"http://qsp.su/?option=com_content&view=article&id=64\">Russian site</a>), a menu-based platform for creating interactive fiction. The most recent version can be downloaded at MrBoboFace\'s <a href=\"https://github.com/MrBoboFace/QuestPlayer\">GitHub</a>.</h4>
@@ -185,15 +176,7 @@
     <string name="cheatSumm">Enter code to activate debugging option</string>
     <string name="cheatDesc">DEBUG: Input command</string>
 
-    <string name="SDpathNotFound">No suitable path found: using ROOT directory</string>
-
-    <string name="selDownDirTitle">Select downloads directory</string>
-
-    <string name="intCard">Internal SD Card: </string>
-    <string name="extCard">External SD Card: </string>
-    <string name="DDWarnMsg">NO GAME DIRECTORY FOUND!</string>
-    <string name="DDWarnDesc">\"-SELECTDIRTITLE-\" in Settings. When selecting a directory, first use the menus to \"-SHOWSDCARD-\" and then choose your SD Card.\n\nThis application will not operate properly until this task is complete.</string>
-    <string name="ShowSDCard">Show SD Card</string>
+    <string name="reqPermMissing">Permissions required by the application are missing</string>
 
     <!-- ***************************************** -->
     <!-- WARNING: DO NOT TRANSLATE BELOW THIS LINE -->

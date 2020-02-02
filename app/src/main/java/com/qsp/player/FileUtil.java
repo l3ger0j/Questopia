@@ -6,12 +6,6 @@ https://stackoverflow.com/questions/34927748/android-5-0-documentfile-from-tree-
  */
 package com.qsp.player;
 
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.Array;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -20,14 +14,18 @@ import android.os.Build;
 import android.os.Environment;
 import android.os.storage.StorageManager;
 import android.provider.DocumentsContract;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.documentfile.provider.DocumentFile;
 
-import android.util.Log;
-import android.webkit.MimeTypeMap;
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.Array;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
 
 @SuppressLint("NewApi")
 public final class FileUtil {
@@ -225,10 +223,5 @@ public final class FileUtil {
         }
 
         return path.substring(idx + 1);
-    }
-
-    public static String getMimeType(String url) {
-        String ext = MimeTypeMap.getFileExtensionFromUrl(url);
-        return MimeTypeMap.getSingleton().getMimeTypeFromExtension(ext);
     }
 }

@@ -136,12 +136,6 @@
         android:summary="@string/loadingPageSumm"
         android:title="@string/loadingPageTitle" />
 
-    <Preference
-        android:defaultValue="@string/defDownDirPath"
-        android:key="downDirPath"
-        android:summary="@string/defDownDirPath"
-        android:title="@string/selectDirTitle" />
-
     <ListPreference
         android:defaultValue="@string/defaultLang"
         android:entries="@array/langName"

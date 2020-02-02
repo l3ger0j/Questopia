@@ -30,8 +30,6 @@
     <string name="optdesc_back_action">Нажатие на кнопку "Назад" выполняет первое из доступных действий</string>
     <string name="optdesc_big_image">Растягивать изображения на всю ширину экрана</string>
     <string name="optdesc_image_density">Растягивать изображения в зависимости от типа экрана</string>
-    <string name="gamesdirTitle">Путь к файлу игры</string>
-    <string name="gamesdirSum">Директория хранения игр</string>
     <string name="langTitle">Язык</string>
     <string name="errorTitle">Ошибка</string>
 
@@ -131,15 +129,8 @@
     <string name="loadingPageTitle">Показывать экран загрузки</string>
     <string name="loadingPageSumm">Показывать \"Загрузка...\" при каждой смене страницы</string>
 
-    <string name="storTypeTitle">Использовать внешнюю SD-карту</string>
-    <string name="storTypeSumOn">Назначено: Внешняя SD-карта</string>
-    <string name="storTypeSumOff">Назначено: Внутренняя память</string>
-
     <string name="setcat_img">Настройки изображения</string>
     <string name="setcat_txt">Настройки текста</string>
-
-    <string name="selectDirTitle">Выберите директорию игры</string>
-    <string name="selectDir">[НАЖМИТЕ ДЛЯ ВЫБОРА: \"-DIRNAME-\"]</string>
 
     <string name="app_descrip"><![CDATA[<h2><center>О Quest Player<img src=\"file:///android_res/drawable/landscape.jpg\" width=\"100%\"></center></h2>
 <h4>Quest Player это проект с открытым исходным кодом, является Android-версией <b>Quest Soft Player</b> (<a href=\"http://qsp.su/?option=com_content&view=article&id=64\">русскоязычный сайт</a>), платформы для создания интерактивной литературы с интерфейсом, основанным на меню выбора действий. The most recent version can be downloaded at MrBoboFace\'s <a href=\"https://github.com/MrBoboFace/QuestPlayer\">GitHub</a>.</h4>
@@ -186,8 +177,8 @@
     <string name="cheatSumm">Введите код для активации опций отладчика</string>
     <string name="cheatDesc">Отладка: Введите команду</string>
 
-    <string name="SDpathNotFound">Подходящий путь не найден: использование директории ROOT</string>
     <string name="inputArea">Поле ввода</string>
+    <string name="reqPermMissing">Отсутствуют разрешения необходимые для работы приложения</string>
 
 </resources>
 

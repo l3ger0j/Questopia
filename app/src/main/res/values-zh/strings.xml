@@ -31,8 +31,6 @@
     <string name="optdesc_back_action">按下返回键时, 会执行第一个选项</string>
     <string name="optdesc_big_image">缩放图片, 让宽度在指定的高度下尽量符合萤幕</string>
     <string name="optdesc_image_density">依萤幕长宽缩放图片</string>
-    <string name="gamesdirTitle">游戏档案位置</string>
-    <string name="gamesdirSum">游戏档案所存放的资料夹位置</string>
     <string name="langTitle">语言</string>
     <string name="errorTitle">错误</string>
 
@@ -141,15 +139,8 @@
     <string name="loadingPageTitle">载入提示</string>
     <string name="loadingPageSumm">载入过程中是否显示 \"读取中...\" </string>
 
-    <string name="storTypeTitle">游戏位置</string>
-    <string name="storTypeSumOn">使用外挂SD卡</string>
-    <string name="storTypeSumOff">使用内置空间</string>
-
     <string name="setcat_img">图片设定</string>
     <string name="setcat_txt">文字设定</string>
-
-    <string name="selectDirTitle">选择游戏目录位置</string>
-    <string name="selectDir">[设为: \"-DIRNAME-\"]</string>
 
     <string name="app_descrip"><![CDATA[<h2><center>关于 Quest Player<img src=\"file:///android_res/drawable/landscape.jpg\" width=\"100%\"></center></h2>
 <h4><b>Quest Soft Player</b> (<a href=\"http://qsp.su/?option=com_content&view=article&id=64\">俄文网站</a>), 是个跨平台的互动电子小说软体. <B>Quest Player</B> 是其开源的安卓版播放器. 最新的版本可以在 MrBoboFace 的 <a href=\"https://github.com/MrBoboFace/QuestPlayer\">GitHub</a> 找到.</h4><br>
@@ -197,7 +188,5 @@
     <string name="cheatTitle">除错模式</string>
     <string name="cheatSumm">输入密碼以启用除错模式</string>
     <string name="cheatDesc">DEBUG: 输入指令</string>
-
-    <string name="SDpathNotFound">未发现适合的路径: 使用根目录</string>
 
 </resources>

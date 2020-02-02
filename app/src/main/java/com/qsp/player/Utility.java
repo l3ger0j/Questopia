@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -15,15 +16,15 @@ import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
-import android.os.Environment;
+import android.os.Build;
 import android.preference.PreferenceManager;
 import android.text.Html;
 import android.text.Html.ImageGetter;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
-import android.text.TextUtils;
 import android.text.style.ImageSpan;
 import android.util.Base64;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.view.View.MeasureSpec;
@@ -41,12 +42,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -1615,80 +1616,19 @@ Utility.WriteLog("finished vidStr = "+vidStr);
         return result;
     }
 
-    private static void CheckNoMedia(String path) {
-        //Создаем в папке QSP пустой файл .nomedia
-        File f = new File(path);
-        if (f.exists())
-            return;
-        try {
-            f.createNewFile();
-        } catch (IOException e) {
-            e.printStackTrace();
+    public static DocumentFile getDownloadDir(Context context) {
+        File dirFile = context.getExternalFilesDir(null);
+        DocumentFile parentDir = DocumentFile.fromFile(dirFile);
+        DocumentFile dir = parentDir.findFile("games");
+        if (dir == null) {
+            dir = parentDir.createDirectory("games");
         }
+
+        return isValidDownloadDir(dir) ? dir : null;
     }
 
-    public static String GetDefaultPath(Context context) {
-
-        //Возвращаем путь к папке с играми.
-        if (!android.os.Environment.getExternalStorageState().equals(android.os.Environment.MEDIA_MOUNTED))
-            return null;
-
-        // ** original code for checking games directory **
-        // File sdDir = Environment.getExternalStorageDirectory();
-        // ** begin replacement code for checking storage directory **
-
-        File sdDir;
-        String strSDCardPath = System.getenv("SECONDARY_STORAGE");
-        Utility.WriteLog("1. " + strSDCardPath);
-        if ((null == strSDCardPath) || (strSDCardPath.length() == 0)) {
-            strSDCardPath = System.getenv("EXTERNAL_SDCARD_STORAGE");
-            Utility.WriteLog("2. " + strSDCardPath);
-        }
-        if ((null == strSDCardPath) || (strSDCardPath.length() == 0)) {
-            strSDCardPath = Environment.getExternalStorageDirectory().getPath();
-            Utility.WriteLog("3. " + strSDCardPath);
-        }
-        // ** end replacement code for checking storage directory **
-
-        sdDir = new File(strSDCardPath);
-        if (sdDir.canRead())
-            Utility.WriteLog("- sdDir.canRead() = true");
-        if (sdDir.exists())
-            Utility.WriteLog("- sdDir.exists() = true");
-
-        if (sdDir.exists() && sdDir.canRead()) {
-            Utility.WriteLog("4.");
-            String flashCard = sdDir.getPath();
-            String tryFull1 = flashCard + "/qsp/games";
-            String tryFull2 = tryFull1 + "/";
-            String noMedia = flashCard + "/qsp/.nomedia";
-            File f = new File(tryFull1);
-            if (f.exists()) {
-                CheckNoMedia(noMedia);
-                return tryFull2;
-            } else {
-                if (f.mkdirs()) {
-                    CheckNoMedia(noMedia);
-                    return tryFull2;
-                } else
-                    return strSDCardPath;
-            }
-        }
-
-        return null;
-    }
-
-    public static String GetGamesPath(Context context) {
-        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-        String path = settings.getString("compGamePath", null);
-Utility.WriteLog("GetGamesPath() - [path == null] is "+(path==null));
-        return (path != null && !TextUtils.isEmpty(path)) ? path : GetDefaultPath(context);
-    }
-
-    public static String GetDownloadPath(Context context) {
-        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-        String path = settings.getString("downDirPath", null);
-        return (path != null && !TextUtils.isEmpty(path)) ? path : "";
+    private static boolean isValidDownloadDir(DocumentFile dir) {
+        return dir != null && dir.exists() && dir.isDirectory() && dir.canWrite();
     }
 
     public static void WriteLog(String msg) {
@@ -1874,12 +1814,12 @@ Utility.WriteLog("GetGamesPath() - [path == null] is "+(path==null));
         return returnedList;
     }
 
-    public static void FileSorter(List<File> files) {
+    public static void FileSorter(List<DocumentFile> files) {
         if (files.size() < 2) return;
 
-        Collections.sort(files, new Comparator<File>() {
+        Collections.sort(files, new Comparator<DocumentFile>() {
             @Override
-            public int compare(File first, File second) {
+            public int compare(DocumentFile first, DocumentFile second) {
                 return first.getName().toLowerCase().compareTo(second.getName().toLowerCase());
             }
         });
@@ -1905,5 +1845,28 @@ Utility.WriteLog("GetGamesPath() - [path == null] is "+(path==null));
         }
         Utility.WriteLog("Directories are totally different!");
         return false;
+    }
+
+    public static void setLocale(Context context, String lang) {
+        Locale locale;
+
+        if (lang.equals("zh-rTW")) {  // TAIWAN
+            locale = Locale.TAIWAN;
+        } else if (lang.equals("zh-rCN")) {  // CHINA
+            locale = Locale.CHINA;
+        } else if (!lang.contains("-r")) {  // lang doesn't contain a region code
+            locale = new Locale(lang);
+        } else {  // lang is not TAIWAN, CHINA, or short, use country+region
+            String region = lang.substring(lang.indexOf("-r") + 2);
+            locale = new Locale(lang, region);
+        }
+
+        Resources newRes = context.getResources();
+        DisplayMetrics dm = newRes.getDisplayMetrics();
+
+        Configuration conf = newRes.getConfiguration();
+        conf.locale = locale;
+
+        newRes.updateConfiguration(conf, dm);
     }
 }
