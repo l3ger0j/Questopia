@@ -64,7 +64,7 @@
     <string name="downloadNetworkError">Невозможно скачать игру. Проверьте ваше соединение с интернетом.</string>
     <string name="downloadError">Невозможно скачать игру -GAMENAME-.</string>
     <string name="tabLocal">Загружено</string>
-    <string name="tabRemote">Отмечено</string>
+    <string name="tabRemote">Сайт</string>
     <string name="tabAll">Все</string>
     <string name="inventory">Инвентарь</string>
     <string name="mainDesc">Описание</string>
