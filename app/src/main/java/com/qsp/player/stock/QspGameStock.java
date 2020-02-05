@@ -247,7 +247,7 @@ public class QspGameStock extends AppCompatActivity {
 
     private void downloadGame(GameStockItem game) {
         if (!isNetworkConnected()) {
-            ViewUtil.showErrorDialog(uiContext, getString(R.string.loadGameError));
+            ViewUtil.showErrorDialog(uiContext, getString(R.string.downloadNetworkError));
             return;
         }
         DownloadGameAsyncTask task = new DownloadGameAsyncTask(this, game);
@@ -842,7 +842,7 @@ public class QspGameStock extends AppCompatActivity {
                     }
                 }
             } catch (IOException e) {
-                Log.e(TAG, "Failed downloading a ZIP file", e);
+                Log.e(TAG, "Failed to download a ZIP file", e);
                 return false;
             }
         }
@@ -899,6 +899,11 @@ public class QspGameStock extends AppCompatActivity {
             if (result) {
                 activity.refreshGames();
                 activity.showGameInfo(game.gameId);
+            } else {
+                String message = activity.getString(R.string.downloadError)
+                        .replace("-GAMENAME-", game.title);
+
+                ViewUtil.showErrorDialog(activity, message);
             }
         }
     }

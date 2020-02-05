@@ -61,7 +61,8 @@
     <string name="reqPermMissing">Отсутствуют разрешения необходимые для работы приложения</string>
     <string name="error">Ошибка</string>
     <string name="loadGameListError">Список игр не может быть загружен. Проверьте ваше соединение с интернетом.</string>
-    <string name="loadGameError">Список игр не может быть загружен. Проверьте ваше соединение с интернетом.</string>
+    <string name="downloadNetworkError">Невозможно скачать игру. Проверьте ваше соединение с интернетом.</string>
+    <string name="downloadError">Невозможно скачать игру -GAMENAME-.</string>
     <string name="tabLocal">Загружено</string>
     <string name="tabRemote">Отмечено</string>
     <string name="tabAll">Все</string>
