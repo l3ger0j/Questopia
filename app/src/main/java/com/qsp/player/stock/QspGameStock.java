@@ -122,8 +122,8 @@ public class QspGameStock extends AppCompatActivity {
 
         loadLocale();
         initGamesListView();
-        initActionBar();
         initProgressDialog();
+        initActionBar(savedInstanceState);
         setResult(RESULT_CANCELED);
     }
 
@@ -134,7 +134,7 @@ public class QspGameStock extends AppCompatActivity {
         currentLanguage = language;
     }
 
-    private void initActionBar() {
+    private void initActionBar(Bundle savedInstanceState) {
         TabListener tabListener = new TabListener();
         ActionBar bar = getSupportActionBar();
         if (bar == null) {
@@ -153,7 +153,13 @@ public class QspGameStock extends AppCompatActivity {
                 .setText(R.string.tabAll)
                 .setTabListener(tabListener), false);
 
-        bar.setSelectedNavigationItem(TAB_LOCAL);
+        int tab;
+        if (savedInstanceState != null) {
+            tab = savedInstanceState.getInt("tab", TAB_LOCAL);
+        } else {
+            tab = TAB_LOCAL;
+        }
+        bar.setSelectedNavigationItem(tab);
     }
 
     private void initGamesListView() {
@@ -270,6 +276,15 @@ public class QspGameStock extends AppCompatActivity {
             loadGameListTask.cancel(true);
         }
         super.onDestroy();
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        ActionBar bar = getSupportActionBar();
+        if (bar != null) {
+            outState.putInt("tab", bar.getSelectedNavigationIndex());
+        }
     }
 
     @Override
