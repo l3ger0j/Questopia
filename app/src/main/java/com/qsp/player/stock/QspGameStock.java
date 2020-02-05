@@ -122,7 +122,6 @@ public class QspGameStock extends AppCompatActivity {
 
         loadLocale();
         initGamesListView();
-        initProgressDialog();
         initActionBar(savedInstanceState);
         setResult(RESULT_CANCELED);
     }
@@ -259,12 +258,6 @@ public class QspGameStock extends AppCompatActivity {
     private boolean isNetworkConnected() {
         NetworkInfo info = connectivityManager.getActiveNetworkInfo();
         return info != null && info.isConnected();
-    }
-
-    private void initProgressDialog() {
-        progressDialog = new ProgressDialog(uiContext);
-        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        progressDialog.setCancelable(false);
     }
 
     @Override
@@ -470,11 +463,11 @@ public class QspGameStock extends AppCompatActivity {
             return;
         }
         String gameName = FileUtil.removeFileExtension(filename);
-        updateProgressDialog(true, gameName, getString(R.string.unpacking), 0);
+        updateProgressDialog(true, gameName, getString(R.string.unpacking));
 
         unzip(zipFile, gameName);
 
-        updateProgressDialog(false, "", "", 0);
+        updateProgressDialog(false, "", "");
         refreshGames();
     }
 
@@ -589,18 +582,23 @@ public class QspGameStock extends AppCompatActivity {
         return super.onKeyDown(keyCode, event);
     }
 
-    private void updateProgressDialog(boolean show, String title, String message, int progress) {
+    private void updateProgressDialog(boolean show, String title, String message) {
         showProgressDialog = show;
 
-        if (!show && progressDialog.isShowing()) {
-            progressDialog.hide();
-            return;
-        }
-        if (show && !progressDialog.isShowing()) {
-            progressDialog.setTitle(title);
-            progressDialog.setMessage(message);
-            progressDialog.setProgress(progress);
-            progressDialog.show();
+        if (show) {
+            if (progressDialog == null) {
+                progressDialog = new ProgressDialog(uiContext);
+                progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                progressDialog.setCancelable(false);
+            }
+            if (!progressDialog.isShowing()) {
+                progressDialog.setTitle(title);
+                progressDialog.setMessage(message);
+                progressDialog.show();
+            }
+        } else if (progressDialog != null && progressDialog.isShowing()) {
+            progressDialog.dismiss();
+            progressDialog = null;
         }
     }
 
@@ -746,7 +744,7 @@ public class QspGameStock extends AppCompatActivity {
         protected void onPreExecute() {
             QspGameStock activity = this.activity.get();
             if (activity != null) {
-                activity.updateProgressDialog(true, "", activity.getString(R.string.gameListLoading), 0);
+                activity.updateProgressDialog(true, "", activity.getString(R.string.gameListLoading));
             }
         }
 
@@ -761,7 +759,7 @@ public class QspGameStock extends AppCompatActivity {
             if (activity == null) {
                 return;
             }
-            activity.updateProgressDialog(false, "", "", 0);
+            activity.updateProgressDialog(false, "", "");
             if (result != null) {
                 activity.setRemoteGames(result);
             }
@@ -782,7 +780,7 @@ public class QspGameStock extends AppCompatActivity {
         protected void onPreExecute() {
             QspGameStock activity = this.activity.get();
             if (activity != null) {
-                activity.updateProgressDialog(true, game.title, activity.getString(R.string.downloading), 0);
+                activity.updateProgressDialog(true, game.title, activity.getString(R.string.downloading));
             }
         }
 
@@ -897,7 +895,7 @@ public class QspGameStock extends AppCompatActivity {
             if (activity == null) {
                 return;
             }
-            activity.updateProgressDialog(false, "", "", 0);
+            activity.updateProgressDialog(false, "", "");
             if (result) {
                 activity.refreshGames();
                 activity.showGameInfo(game.gameId);
