@@ -964,6 +964,15 @@ public class QspPlayerStart extends AppCompatActivity {
             }
         }
 
+        JniResult fSizeResult = (JniResult) QSPGetVarValues("FSIZE", 0);
+        if (fSizeResult.success) {
+            int newFSize = fSizeResult.int1;
+            if (qspFSize != newFSize) {
+                qspFSize = newFSize;
+                settingsChanged = true;
+            }
+        }
+
         JniResult bColorResult = (JniResult) QSPGetVarValues("BCOLOR", 0);
         if (bColorResult.success) {
             int newBColor = bColorResult.int1;
