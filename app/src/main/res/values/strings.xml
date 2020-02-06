@@ -39,7 +39,7 @@
     <string name="load">Load</string>
     <string name="save">Save</string>
     <string name="deleteGame">Delete Game</string>
-    <string name="openGameFile">Open Game File</string>
+    <string name="installGame">Install Game</string>
     <string name="closeApp">Close QuestPlayer</string>
     <string name="selectSlot">Select a slot</string>
     <string name="slotPresent">Slot %d</string>
@@ -59,7 +59,6 @@
     <string name="langSummary">Choose display language</string>
     <string name="closeToApply">Close settings to apply changes</string>
 
-    <string name="reqPermMissing">Permissions required by the application are missing</string>
     <string name="error">Error</string>
     <string name="gamesDirError">Unable to create or open games directory.</string>
     <string name="loadGameListNetworkError">The game list could not be loaded. Check your internet connection.</string>
@@ -79,7 +78,6 @@
     <string name="downloading">Downloading...</string>
     <string name="unpacking">Unpacking...</string>
     <string name="gameListLoading">Loading a list of games</string>
-    <string name="selectGameFile">Select a game file</string>
     <string name="deleteGameCmd">Delete game</string>
     <string name="gameDeleted">The game has been deleted.</string>
     <string name="author">Author: -AUTHOR-</string>

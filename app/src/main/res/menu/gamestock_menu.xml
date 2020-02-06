@@ -10,8 +10,8 @@
         android:title="@string/resumeGame" />
 
     <item
-        android:id="@+id/menu_openfile"
-        android:title="@string/openGameFile" />
+        android:id="@+id/menu_installgame"
+        android:title="@string/installGame" />
 
     <item
         android:id="@+id/menu_deletegames"

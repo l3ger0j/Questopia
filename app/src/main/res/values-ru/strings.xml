@@ -39,7 +39,7 @@
     <string name="load">Загрузить</string>
     <string name="save">Сохранить</string>
     <string name="deleteGame">Удаление игр</string>
-    <string name="openGameFile">Открыть файл</string>
+    <string name="installGame">Установить игру</string>
     <string name="closeApp">Закрыть Quest Player</string>
     <string name="selectSlot">Выберите слот</string>
     <string name="slotPresent">Слот %d</string>
@@ -59,7 +59,6 @@
     <string name="langSummary">Выберите язык интерфейса</string>
     <string name="closeToApply">Закройте настройки для применения изменений</string>
 
-    <string name="reqPermMissing">Отсутствуют разрешения необходимые для работы приложения</string>
     <string name="error">Ошибка</string>
     <string name="gamesDirError">Невозможно создать или открыть папку с играми.</string>
     <string name="loadGameListNetworkError">Список игр не может быть загружен. Проверьте ваше соединение с интернетом.</string>
@@ -79,7 +78,6 @@
     <string name="downloading">Скачивается...</string>
     <string name="unpacking">Распаковывается...</string>
     <string name="gameListLoading">Загрузка списка игр</string>
-    <string name="selectGameFile">Выберите игру</string>
     <string name="deleteGameCmd">Удалить игру</string>
     <string name="gameDeleted">Игра удалена.</string>
     <string name="deleteGameQuery">Удалить игру -GAMENAME-?</string>

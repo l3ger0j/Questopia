@@ -64,7 +64,7 @@ import static com.qsp.player.util.FileUtil.GAME_INFO_FILENAME;
 public class QspGameStock extends AppCompatActivity {
 
     private static final String TAG = QspGameStock.class.getName();
-    private static final int REQUEST_CODE_OPEN_GAME_FILE = 1;
+    private static final int REQUEST_CODE_INSTALL_GAME = 1;
 
     private static final int TAB_LOCAL = 0;
     private static final int TAB_REMOTE = 1;
@@ -387,7 +387,7 @@ public class QspGameStock extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        if (requestCode != REQUEST_CODE_OPEN_GAME_FILE) {
+        if (requestCode != REQUEST_CODE_INSTALL_GAME) {
             super.onActivityResult(requestCode, resultCode, data);
             return;
         }
@@ -396,7 +396,7 @@ public class QspGameStock extends AppCompatActivity {
         }
         Uri uri;
         if (data == null || (uri = data.getData()) == null) {
-            Log.e(TAG, "Game file is not selected");
+            Log.e(TAG, "Game archive is not selected");
             return;
         }
         installGame(uri);
@@ -477,8 +477,8 @@ public class QspGameStock extends AppCompatActivity {
                 showAboutDialog();
                 return true;
 
-            case R.id.menu_openfile:
-                showOpenFileDialog();
+            case R.id.menu_installgame:
+                showInstallGameDialog();
                 return true;
 
             case R.id.menu_deletegames:
@@ -489,11 +489,11 @@ public class QspGameStock extends AppCompatActivity {
         return false;
     }
 
-    private void showOpenFileDialog() {
+    private void showInstallGameDialog() {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         intent.setType("application/zip");
         intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        startActivityForResult(intent, REQUEST_CODE_OPEN_GAME_FILE);
+        startActivityForResult(intent, REQUEST_CODE_INSTALL_GAME);
     }
 
     private void showSettings() {
