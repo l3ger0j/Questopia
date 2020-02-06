@@ -1,6 +1,5 @@
 package com.qsp.player.stock;
 
-import android.Manifest;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -41,7 +40,6 @@ import androidx.fragment.app.FragmentTransaction;
 import com.qsp.player.R;
 import com.qsp.player.settings.Settings;
 import com.qsp.player.util.FileUtil;
-import com.qsp.player.util.PermissionUtil;
 import com.qsp.player.util.ViewUtil;
 import com.qsp.player.util.ZipUtil;
 
@@ -61,14 +59,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
-import static androidx.core.content.PermissionChecker.PERMISSION_GRANTED;
 import static com.qsp.player.util.FileUtil.GAME_INFO_FILENAME;
 
 public class QspGameStock extends AppCompatActivity {
 
     private static final String TAG = QspGameStock.class.getName();
-    private static final int REQUEST_CODE_EXTERNAL_STORAGE = 1;
-    private static final int REQUEST_CODE_OPEN_GAME_FILE = 2;
+    private static final int REQUEST_CODE_OPEN_GAME_FILE = 1;
 
     private static final int TAB_LOCAL = 0;
     private static final int TAB_REMOTE = 1;
@@ -97,8 +93,6 @@ public class QspGameStock extends AppCompatActivity {
     private ConnectivityManager connectivityManager;
     private Collection<GameStockItem> remoteGames;
     private DocumentFile gamesDir;
-    private boolean permissionsGranted;
-
     private DownloadGameAsyncTask downloadTask;
     private LoadGameListAsyncTask loadGameListTask;
 
@@ -106,12 +100,6 @@ public class QspGameStock extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.gamestock);
-
-        permissionsGranted = PermissionUtil.requestPermissionsIfNotGranted(
-                this,
-                REQUEST_CODE_EXTERNAL_STORAGE,
-                Manifest.permission.READ_EXTERNAL_STORAGE,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE);
 
         settings = PreferenceManager.getDefaultSharedPreferences(uiContext);
         connectivityManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
@@ -283,10 +271,8 @@ public class QspGameStock extends AppCompatActivity {
     public void onResume() {
         super.onResume();
         updateLocale();
+        refreshGamesDirectory();
 
-        if (permissionsGranted) {
-            refreshGamesDirectory();
-        }
         if (showProgressDialog && progressDialog != null) {
             progressDialog.show();
         }
@@ -397,39 +383,6 @@ public class QspGameStock extends AppCompatActivity {
             progressDialog.hide();
         }
         super.onPause();
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (requestCode != REQUEST_CODE_EXTERNAL_STORAGE) {
-            return;
-        }
-        for (int result : grantResults) {
-            if (result != PERMISSION_GRANTED) {
-                showMissingPermissionsDialog();
-                return;
-            }
-        }
-        refreshGamesDirectory();
-    }
-
-    private void showMissingPermissionsDialog() {
-        new AlertDialog.Builder(this)
-                .setMessage(R.string.reqPermMissing)
-                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        finishAffinity();
-                    }
-                })
-                .setOnDismissListener(new DialogInterface.OnDismissListener() {
-                    @Override
-                    public void onDismiss(DialogInterface dialog) {
-                        finishAffinity();
-                    }
-                })
-                .create()
-                .show();
     }
 
     @Override
