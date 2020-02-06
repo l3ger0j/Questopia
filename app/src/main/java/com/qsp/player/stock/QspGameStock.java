@@ -815,7 +815,7 @@ public class QspGameStock extends AppCompatActivity {
                 return false;
             }
 
-            String zipFilename = String.valueOf(System.currentTimeMillis()).concat("_game.zip");
+            String zipFilename = String.valueOf(System.currentTimeMillis()).concat("_game");
             DocumentFile zipFile = cacheDir.createFile("application/zip", zipFilename);
             if (zipFile == null) {
                 Log.e(TAG, "Failed to create a ZIP file: " + zipFilename);
