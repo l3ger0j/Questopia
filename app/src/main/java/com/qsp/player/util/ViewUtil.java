@@ -15,19 +15,7 @@ import java.util.Locale;
 public final class ViewUtil {
 
     public static void setLocale(Context context, String lang) {
-        Locale locale;
-
-        if (lang.equals("zh-rTW")) {  // TAIWAN
-            locale = Locale.TAIWAN;
-        } else if (lang.equals("zh-rCN")) {  // CHINA
-            locale = Locale.CHINA;
-        } else if (!lang.contains("-r")) {  // lang doesn't contain a region code
-            locale = new Locale(lang);
-        } else {  // lang is not TAIWAN, CHINA, or short, use country+region
-            String region = lang.substring(lang.indexOf("-r") + 2);
-            locale = new Locale(lang, region);
-        }
-
+        Locale locale = new Locale(lang);
         Resources newRes = context.getResources();
         DisplayMetrics dm = newRes.getDisplayMetrics();
 

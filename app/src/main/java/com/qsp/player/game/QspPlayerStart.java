@@ -409,7 +409,7 @@ public class QspPlayerStart extends AppCompatActivity {
     public void onResume() {
         super.onResume();
 
-        updateLanguage();
+        updateLocale();
         loadTextSettings();
         applyTextSettings();
         refreshMainDesc();
@@ -425,12 +425,12 @@ public class QspPlayerStart extends AppCompatActivity {
         }
     }
 
-    private void updateLanguage() {
+    private void updateLocale() {
         String language = settings.getString("lang", "ru");
         if (currentLanguage.equals(language)) {
             return;
         }
-        ViewUtil.setLocale(uiContext, currentLanguage);
+        ViewUtil.setLocale(uiContext, language);
         setTitle(R.string.appName);
         invalidateOptionsMenu();
         setActiveTab(activeTab);
