@@ -17,7 +17,7 @@
             android:defaultValue="16"
             android:entries="@array/fontSize"
             android:entryValues="@array/fontSize"
-            android:key="fontsize"
+            android:key="fontSize"
             android:title="@string/fontSize" />
 
         <net.margaritov.preference.colorpicker.ColorPickerPreference
