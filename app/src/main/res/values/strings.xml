@@ -60,7 +60,8 @@
 
     <string name="reqPermMissing">Permissions required by the application are missing</string>
     <string name="error">Error</string>
-    <string name="loadGameListError">The game list could not be loaded. Check your internet connection.</string>
+    <string name="loadGameListNetworkError">The game list could not be loaded. Check your internet connection.</string>
+    <string name="loadGameListError">The game list could not be loaded.</string>
     <string name="downloadNetworkError">The game could not be loaded. Check your internet connection.</string>
     <string name="downloadError">Could not download game -GAMENAME-.</string>
     <string name="tabAll">All</string>

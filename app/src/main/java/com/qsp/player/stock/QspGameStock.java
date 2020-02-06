@@ -720,7 +720,7 @@ public class QspGameStock extends AppCompatActivity {
                     loadGameListTask = task;
                     task.execute();
                 } else {
-                    ViewUtil.showErrorDialog(uiContext, getString(R.string.loadGameListError));
+                    ViewUtil.showErrorDialog(uiContext, getString(R.string.loadGameListNetworkError));
                 }
             }
             setGameAdapterFromTab(position);
@@ -764,9 +764,13 @@ public class QspGameStock extends AppCompatActivity {
                 return;
             }
             activity.updateProgressDialog(false, "", "");
-            if (result != null) {
-                activity.setRemoteGames(result);
+
+            if (result == null) {
+                String message = activity.getString(R.string.loadGameListError);
+                ViewUtil.showErrorDialog(activity, message);
+                return;
             }
+            activity.setRemoteGames(result);
         }
     }
 
