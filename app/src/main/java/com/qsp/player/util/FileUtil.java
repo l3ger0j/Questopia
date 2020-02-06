@@ -15,7 +15,6 @@ import java.net.URI;
 
 public final class FileUtil {
 
-    public static final String MIME_TYPE_BINARY = "application/octet-stream";
     public static final String GAME_INFO_FILENAME = "gamestockInfo";
 
     private static final String TAG = FileUtil.class.getName();
@@ -91,6 +90,35 @@ public final class FileUtil {
         }
 
         return null;
+    }
+
+    /**
+     * Creates a binary file in the <code>parentDir</code>. This is to avoid a ".bin" extension
+     * being appended to the filename.
+     *
+     * @param parentDir directory to create a file in. URI scheme must be "file"
+     */
+    public static DocumentFile createBinaryFile(DocumentFile parentDir, String filename) {
+        Uri androidUri = parentDir.getUri();
+        String scheme = androidUri.getScheme();
+        if (scheme == null || !scheme.equals("file")) {
+            Log.e(TAG, "URI scheme of parentDir must be 'file'");
+            return null;
+        }
+
+        URI javaUri = URI.create(androidUri.toString());
+        File parentDirJava = new File(javaUri);
+
+        File file = new File(parentDirJava, filename);
+        if (!file.exists()) {
+            try {
+                file.createNewFile();
+            } catch (IOException e) {
+                return null;
+            }
+        }
+
+        return DocumentFile.fromFile(file);
     }
 
     public static String readFileAsString(Context context, DocumentFile file) {

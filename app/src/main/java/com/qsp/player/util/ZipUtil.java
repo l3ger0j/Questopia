@@ -12,8 +12,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import static com.qsp.player.util.FileUtil.MIME_TYPE_BINARY;
-
 public final class ZipUtil {
 
     private static final String TAG = ZipUtil.class.getName();
@@ -33,7 +31,7 @@ public final class ZipUtil {
                     }
                     DocumentFile parentDir = FileUtil.getParentDirectory(gameDir, entry.getName());
                     String filename = FileUtil.getFilename(entry.getName());
-                    DocumentFile file = parentDir.createFile(MIME_TYPE_BINARY, filename);
+                    DocumentFile file = FileUtil.createBinaryFile(parentDir, filename);
                     try (OutputStream out = context.getContentResolver().openOutputStream(file.getUri())) {
                         int bytesRead;
                         while ((bytesRead = zipIn.read(b)) > 0) {

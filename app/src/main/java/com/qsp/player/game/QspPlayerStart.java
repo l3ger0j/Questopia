@@ -61,8 +61,6 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static com.qsp.player.util.FileUtil.MIME_TYPE_BINARY;
-
 public class QspPlayerStart extends AppCompatActivity {
 
     private static final String TAG = QspPlayerStart.class.getName();
@@ -689,7 +687,7 @@ public class QspPlayerStart extends AppCompatActivity {
             public void run() {
                 DocumentFile file = dir.findFile(filename);
                 if (file == null) {
-                    file = dir.createFile(MIME_TYPE_BINARY, filename);
+                    file = FileUtil.createBinaryFile(dir, filename);
                 }
                 byte[] gameData = QSPSaveGameAsData(false);
                 if (gameData == null) {

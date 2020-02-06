@@ -63,7 +63,6 @@ import java.util.Locale;
 
 import static androidx.core.content.PermissionChecker.PERMISSION_GRANTED;
 import static com.qsp.player.util.FileUtil.GAME_INFO_FILENAME;
-import static com.qsp.player.util.FileUtil.MIME_TYPE_BINARY;
 
 public class QspGameStock extends AppCompatActivity {
 
@@ -877,7 +876,7 @@ public class QspGameStock extends AppCompatActivity {
             }
             DocumentFile infoFile = gameDir.findFile(GAME_INFO_FILENAME);
             if (infoFile == null) {
-                infoFile = gameDir.createFile(MIME_TYPE_BINARY, GAME_INFO_FILENAME);
+                infoFile = FileUtil.createBinaryFile(gameDir, GAME_INFO_FILENAME);
             }
             if (!FileUtil.isWritableFile(infoFile)) {
                 Log.e(TAG, "Game info file is not writable");
