@@ -711,13 +711,17 @@ public class QspGameStock extends AppCompatActivity {
         @Override
         public void onTabSelected(ActionBar.Tab tab, FragmentTransaction ft) {
             int position = tab.getPosition();
-            if ((position == TAB_REMOTE || position == TAB_ALL) && loadGameListTask == null) {
-                if (!isNetworkConnected()) {
+            boolean tabHasRemoteGames = position == TAB_REMOTE || position == TAB_ALL;
+            boolean gamesNotBeingLoaded = loadGameListTask == null || loadGameListTask.getStatus() == AsyncTask.Status.FINISHED;
+
+            if (tabHasRemoteGames && gamesNotBeingLoaded) {
+                if (isNetworkConnected()) {
+                    LoadGameListAsyncTask task = new LoadGameListAsyncTask(QspGameStock.this);
+                    loadGameListTask = task;
+                    task.execute();
+                } else {
                     ViewUtil.showErrorDialog(uiContext, getString(R.string.loadGameListError));
                 }
-                LoadGameListAsyncTask task = new LoadGameListAsyncTask(QspGameStock.this);
-                loadGameListTask = task;
-                task.execute();
             }
             setGameAdapterFromTab(position);
         }

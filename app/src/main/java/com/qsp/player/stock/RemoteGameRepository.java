@@ -1,6 +1,5 @@
 package com.qsp.player.stock;
 
-import android.content.Context;
 import android.util.Log;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -54,9 +53,9 @@ class RemoteGameRepository {
     }
 
     private ArrayList<GameStockItem> parseGameStockXml(String xml) {
-        ArrayList<GameStockItem> items = new ArrayList<>();
-
         try {
+            ArrayList<GameStockItem> items = new ArrayList<>();
+
             XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
             factory.setNamespaceAware(true);
 
@@ -107,11 +106,12 @@ class RemoteGameRepository {
                 }
                 eventType = xpp.nextToken();
             }
+
+            return items;
         } catch (XmlPullParserException | IOException e) {
             Log.e(TAG, "Failed to parse game stock XML", e);
+            return null;
         }
-
-        return items;
     }
 
     private void fillGameItemFromCDATA(GameStockItem item, String tagName, String value) {
