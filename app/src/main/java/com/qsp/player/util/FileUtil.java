@@ -20,6 +20,14 @@ public final class FileUtil {
 
     private static final String TAG = FileUtil.class.getName();
 
+    public static boolean isWritableFile(DocumentFile file) {
+        return file != null && file.exists() && file.canWrite();
+    }
+
+    public static boolean isWritableDirectory(DocumentFile dir) {
+        return dir != null && dir.exists() && dir.isDirectory() && dir.canWrite();
+    }
+
     public static String normalizePath(String path) {
         if (path == null) {
             return null;

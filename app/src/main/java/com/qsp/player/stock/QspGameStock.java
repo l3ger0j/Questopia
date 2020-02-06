@@ -325,10 +325,13 @@ public class QspGameStock extends AppCompatActivity {
         if (dir == null) {
             dir = extFilesDir.createDirectory("games");
         }
-        if (dir == null || !dir.canWrite()) {
+        if (!FileUtil.isWritableDirectory(dir)) {
             Log.e(TAG, "Games directory is not writable");
+            String message = getString(R.string.gamesDirError);
+            ViewUtil.showErrorDialog(uiContext, message);
             return;
         }
+
         gamesDir = dir;
         localGameRepository.setGamesDirectory(gamesDir);
         refreshGames();
@@ -436,20 +439,20 @@ public class QspGameStock extends AppCompatActivity {
             super.onActivityResult(requestCode, resultCode, data);
             return;
         }
-        if (resultCode != RESULT_OK || data == null) {
+        if (resultCode != RESULT_OK) {
             return;
         }
-        Uri uri = data.getData();
-        if (uri == null) {
-            Log.e(TAG, "Game file not selected");
+        Uri uri;
+        if (data == null || (uri = data.getData()) == null) {
+            Log.e(TAG, "Game file is not selected");
             return;
         }
         installGame(uri);
     }
 
     private void installGame(Uri uri) {
-        if (gamesDir == null || !gamesDir.canWrite()) {
-            Log.e(TAG, "Game directory is not writable");
+        if (!FileUtil.isWritableDirectory(gamesDir)) {
+            Log.e(TAG, "Games directory is not writable");
             return;
         }
         DocumentFile zipFile = DocumentFile.fromSingleUri(uiContext, uri);
@@ -465,25 +468,31 @@ public class QspGameStock extends AppCompatActivity {
         String gameName = FileUtil.removeFileExtension(filename);
         updateProgressDialog(true, gameName, getString(R.string.unpacking));
 
-        unzip(zipFile, gameName);
+        if (unzip(zipFile, gameName)) {
+            refreshGames();
+        } else {
+            String message = getString(R.string.unzipError)
+                    .replace("-GAMENAME-", gameName);
+
+            ViewUtil.showErrorDialog(uiContext, message);
+        }
 
         updateProgressDialog(false, "", "");
-        refreshGames();
     }
 
-    private void unzip(DocumentFile zipFile, String gameName) {
+    private boolean unzip(DocumentFile zipFile, String gameName) {
         String folderName = FileUtil.normalizeGameFolderName(gameName);
         DocumentFile dir = gamesDir.findFile(folderName);
 
         if (dir == null) {
             dir = gamesDir.createDirectory(folderName);
         }
-        if (dir == null || !dir.canWrite()) {
+        if (!FileUtil.isWritableDirectory(dir)) {
             Log.e(TAG, "Game directory is not writable");
-            return;
+            return false;
         }
 
-        ZipUtil.unzip(uiContext, zipFile, dir);
+        return ZipUtil.unzip(uiContext, zipFile, dir);
     }
 
     @Override
@@ -801,7 +810,7 @@ public class QspGameStock extends AppCompatActivity {
 
             File dirFile = activity.getCacheDir();
             DocumentFile cacheDir = DocumentFile.fromFile(dirFile);
-            if (!cacheDir.canWrite()) {
+            if (!FileUtil.isWritableDirectory(cacheDir)) {
                 Log.e(TAG, "Cache directory is not writable");
                 return false;
             }
@@ -809,20 +818,20 @@ public class QspGameStock extends AppCompatActivity {
             String zipFilename = String.valueOf(System.currentTimeMillis()).concat("_game.zip");
             DocumentFile zipFile = cacheDir.createFile("application/zip", zipFilename);
             if (zipFile == null) {
-                Log.e(TAG, "Unable to create a ZIP file: " + zipFilename);
+                Log.e(TAG, "Failed to create a ZIP file: " + zipFilename);
                 return false;
             }
 
-            boolean downloaded = download(zipFile);
-            if (downloaded) {
-                activity.unzip(zipFile, game.title);
-                writeGameInfo();
+            boolean result = false;
+
+            if (download(zipFile) && activity.unzip(zipFile, game.title)) {
+                result = writeGameInfo();
             }
             if (zipFile.exists()) {
                 zipFile.delete();
             }
 
-            return downloaded;
+            return result;
         }
 
         private boolean download(DocumentFile zipFile) {
@@ -855,24 +864,24 @@ public class QspGameStock extends AppCompatActivity {
             }
         }
 
-        private void writeGameInfo() {
+        private boolean writeGameInfo() {
             QspGameStock activity = this.activity.get();
             if (activity == null) {
-                return;
+                return false;
             }
             String folderName = FileUtil.normalizeGameFolderName(game.title);
             DocumentFile gameDir = activity.gamesDir.findFile(folderName);
-            if (gameDir == null || !gameDir.canWrite()) {
+            if (!FileUtil.isWritableDirectory(gameDir)) {
                 Log.e(TAG, "Game directory is not writable");
-                return;
+                return false;
             }
             DocumentFile infoFile = gameDir.findFile(GAME_INFO_FILENAME);
             if (infoFile == null) {
                 infoFile = gameDir.createFile(MIME_TYPE_BINARY, GAME_INFO_FILENAME);
             }
-            if (infoFile == null || !infoFile.canWrite()) {
+            if (!FileUtil.isWritableFile(infoFile)) {
                 Log.e(TAG, "Game info file is not writable");
-                return;
+                return false;
             }
             try (OutputStream out = activity.getContentResolver().openOutputStream(infoFile.getUri())) {
                 try (OutputStreamWriter writer = new OutputStreamWriter(out)) {
@@ -892,8 +901,11 @@ public class QspGameStock extends AppCompatActivity {
                     writer.write("\t<mod_date><![CDATA[".concat(game.modDate).concat("]]></mod_date>\n"));
                     writer.write("</game>");
                 }
+
+                return true;
             } catch (IOException e) {
                 Log.e(TAG, "Failed to write to a game info file", e);
+                return false;
             }
         }
 

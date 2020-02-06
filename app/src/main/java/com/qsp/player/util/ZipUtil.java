@@ -21,7 +21,7 @@ public final class ZipUtil {
     /**
      * Extracts the ZIP archive <code>zipFile</code> to a directory <code>gameDir</code>.
      */
-    public static void unzip(Context context, DocumentFile zipFile, DocumentFile gameDir) {
+    public static boolean unzip(Context context, DocumentFile zipFile, DocumentFile gameDir) {
         try (InputStream in = context.getContentResolver().openInputStream(zipFile.getUri())) {
             try (ZipArchiveInputStream zipIn = new ZipArchiveInputStream(in, "cp866")) {
                 byte[] b = new byte[8192];
@@ -41,9 +41,12 @@ public final class ZipUtil {
                         }
                     }
                 }
+
+                return true;
             }
         } catch (IOException e) {
-            Log.e(TAG, "Failed to extract ZIP file", e);
+            Log.e(TAG, "Failed to extract a ZIP file", e);
+            return false;
         }
     }
 }
