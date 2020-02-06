@@ -46,17 +46,18 @@
     <string name="slotEmpty">Слот %d [Пусто]</string>
 
     <!-- Настройки -->
-    <string name="textSettings">Настройки текста</string>
+    <string name="generalSettings">Главное</string>
+    <string name="textSettings">Текст</string>
     <string name="fontSize">Размер шрифта</string>
     <string name="fontStyle">Стиль шрифта</string>
     <string name="textColor">Цвет текста</string>
     <string name="backColor">Цвет фона</string>
     <string name="linkColor">Цвет ссылок</string>
-    <string name="colorSummary">Укажите новый цвет</string>
     <string name="sound">Звук</string>
-    <string name="soundSummary">использование звуков и музыки</string>
+    <string name="soundSummary">Проигрывать звуки и музыку</string>
     <string name="lang">Язык</string>
-    <string name="langSummary">ВНИМАНИЕ: Смена языка закроет все запущенные игры</string>
+    <string name="langSummary">Выберите язык интерфейса</string>
+    <string name="closeToApply">Закройте настройки для применения изменений</string>
 
     <string name="reqPermMissing">Отсутствуют разрешения необходимые для работы приложения</string>
     <string name="error">Ошибка</string>

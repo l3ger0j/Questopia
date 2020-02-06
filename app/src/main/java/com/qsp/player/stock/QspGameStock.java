@@ -470,9 +470,7 @@ public class QspGameStock extends AppCompatActivity {
                 return true;
 
             case R.id.menu_options:
-                Intent intent = new Intent();
-                intent.setClass(this, Settings.class);
-                startActivity(intent);
+                showSettings();
                 return true;
 
             case R.id.menu_about:
@@ -496,6 +494,11 @@ public class QspGameStock extends AppCompatActivity {
         intent.setType("application/zip");
         intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         startActivityForResult(intent, REQUEST_CODE_OPEN_GAME_FILE);
+    }
+
+    private void showSettings() {
+        Intent intent = new Intent(uiContext, Settings.class);
+        startActivity(intent);
     }
 
     private void showAboutDialog() {

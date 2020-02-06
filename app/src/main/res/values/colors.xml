@@ -9,4 +9,23 @@
     <color name="defTextColor">#000000</color>
     <color name="defBackColor">#e0e0e0</color>
     <color name="defLinkColor">#0000ff</color>
+
+    <string-array name="color_choice_values">
+        <item>#ffffff</item>
+        <item>#c0c0c0</item>
+        <item>#808080</item>
+        <item>#000000</item>
+        <item>#ff0000</item>
+        <item>#800000</item>
+        <item>#ffff00</item>
+        <item>#808000</item>
+        <item>#00ff00</item>
+        <item>#008000</item>
+        <item>#00ffff</item>
+        <item>#008080</item>
+        <item>#0000ff</item>
+        <item>#000080</item>
+        <item>#ff00ff</item>
+        <item>#800080</item>
+    </string-array>
 </resources>

@@ -1,11 +1,25 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-    android:key="main_screen">
+<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <PreferenceScreen
-        android:key="pref_key_text_settings"
-        android:title="@string/textSettings">
+    <PreferenceCategory android:title="@string/generalSettings">
+        <ListPreference
+            android:defaultValue="ru"
+            android:entries="@array/langName"
+            android:entryValues="@array/langValue"
+            android:key="lang"
+            android:summary="@string/langSummary"
+            android:title="@string/lang" />
 
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="sound"
+            android:summary="@string/soundSummary"
+            android:title="@string/sound" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/textSettings">
         <ListPreference
             android:defaultValue="0"
             android:entries="@array/fontName"
@@ -20,38 +34,24 @@
             android:key="fontSize"
             android:title="@string/fontSize" />
 
-        <net.margaritov.preference.colorpicker.ColorPickerPreference
+        <com.kizitonwose.colorpreferencecompat.ColorPreferenceCompat
             android:defaultValue="@color/defBackColor"
             android:key="backColor"
-            android:summary="@string/colorSummary"
-            android:title="@string/backColor" />
+            android:title="@string/backColor"
+            app:colorChoices="@array/color_choice_values" />
 
-        <net.margaritov.preference.colorpicker.ColorPickerPreference
+        <com.kizitonwose.colorpreferencecompat.ColorPreferenceCompat
             android:defaultValue="@color/defTextColor"
             android:key="textColor"
-            android:summary="@string/colorSummary"
-            android:title="@string/textColor" />
+            android:title="@string/textColor"
+            app:colorChoices="@array/color_choice_values" />
 
-        <net.margaritov.preference.colorpicker.ColorPickerPreference
+        <com.kizitonwose.colorpreferencecompat.ColorPreferenceCompat
             android:defaultValue="@color/defLinkColor"
             android:key="linkColor"
-            android:summary="@string/colorSummary"
-            android:title="@string/linkColor" />
+            android:title="@string/linkColor"
+            app:colorChoices="@array/color_choice_values" />
 
-    </PreferenceScreen>
+    </PreferenceCategory>
 
-    <CheckBoxPreference
-        android:defaultValue="true"
-        android:key="sound"
-        android:summary="@string/soundSummary"
-        android:title="@string/sound" />
-
-    <ListPreference
-        android:defaultValue="ru"
-        android:entries="@array/langName"
-        android:entryValues="@array/langValue"
-        android:key="lang"
-        android:summary="@string/langSummary"
-        android:title="@string/lang" />
-
-</PreferenceScreen>
+</androidx.preference.PreferenceScreen>

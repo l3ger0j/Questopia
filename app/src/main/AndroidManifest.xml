@@ -28,7 +28,8 @@
 
         <activity
             android:name=".settings.Settings"
-            android:label="@string/settings" />
+            android:label="@string/settings"
+            android:theme="@style/Theme.AppCompat" />
 
         <activity
             android:name=".stock.QspGameStock"

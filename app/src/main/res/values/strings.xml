@@ -46,17 +46,18 @@
     <string name="slotEmpty">Slot %d [Empty]</string>
 
     <!-- Settings -->
-    <string name="textSettings">Text Settings</string>
+    <string name="generalSettings">General</string>
+    <string name="textSettings">Text</string>
     <string name="fontSize">Font Size</string>
     <string name="fontStyle">Font Style</string>
     <string name="textColor">Text Color</string>
     <string name="backColor">Background Color</string>
     <string name="linkColor">Link Color</string>
-    <string name="colorSummary">Press new color to apply</string>
     <string name="sound">Sound</string>
-    <string name="soundSummary">Sound and Music</string>
+    <string name="soundSummary">Play music and sounds</string>
     <string name="lang">Language</string>
-    <string name="langSummary">Exit menu to apply new language</string>
+    <string name="langSummary">Choose display language</string>
+    <string name="closeToApply">Close settings to apply changes</string>
 
     <string name="reqPermMissing">Permissions required by the application are missing</string>
     <string name="error">Error</string>
