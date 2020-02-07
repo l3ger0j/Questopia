@@ -1,6 +1,5 @@
 package com.qsp.player.settings;
 
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 
@@ -11,7 +10,7 @@ import androidx.preference.PreferenceFragmentCompat;
 import com.qsp.player.R;
 import com.qsp.player.util.ViewUtil;
 
-public class Settings extends AppCompatActivity {
+public class SettingsActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {

@@ -14,7 +14,7 @@ import androidx.documentfile.provider.DocumentFile;
 import com.qsp.player.R;
 import com.qsp.player.util.FileUtil;
 
-public class QspImageBox extends AppCompatActivity {
+public class ImageBoxActivity extends AppCompatActivity {
 
     private final Context uiContext = this;
     private final QspImageGetter imageGetter = new QspImageGetter(this);

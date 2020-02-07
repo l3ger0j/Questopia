@@ -38,7 +38,7 @@ import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.qsp.player.R;
-import com.qsp.player.settings.Settings;
+import com.qsp.player.settings.SettingsActivity;
 import com.qsp.player.util.FileUtil;
 import com.qsp.player.util.ViewUtil;
 import com.qsp.player.util.ZipUtil;
@@ -61,9 +61,9 @@ import java.util.Locale;
 
 import static com.qsp.player.util.FileUtil.GAME_INFO_FILENAME;
 
-public class QspGameStock extends AppCompatActivity {
+public class GameStockActivity extends AppCompatActivity {
 
-    private static final String TAG = QspGameStock.class.getName();
+    private static final String TAG = GameStockActivity.class.getName();
     private static final int REQUEST_CODE_INSTALL_GAME = 1;
 
     private static final int TAB_LOCAL = 0;
@@ -497,7 +497,7 @@ public class QspGameStock extends AppCompatActivity {
     }
 
     private void showSettings() {
-        Intent intent = new Intent(uiContext, Settings.class);
+        Intent intent = new Intent(uiContext, SettingsActivity.class);
         startActivity(intent);
     }
 
@@ -680,7 +680,7 @@ public class QspGameStock extends AppCompatActivity {
 
             if (tabHasRemoteGames && gamesNotBeingLoaded) {
                 if (isNetworkConnected()) {
-                    LoadGameListAsyncTask task = new LoadGameListAsyncTask(QspGameStock.this);
+                    LoadGameListAsyncTask task = new LoadGameListAsyncTask(GameStockActivity.this);
                     loadGameListTask = task;
                     task.execute();
                 } else {
@@ -701,16 +701,16 @@ public class QspGameStock extends AppCompatActivity {
 
     private static class LoadGameListAsyncTask extends AsyncTask<Void, Void, List<GameStockItem>> {
 
-        private final WeakReference<QspGameStock> activity;
+        private final WeakReference<GameStockActivity> activity;
         private final RemoteGameRepository remoteGameRepository = new RemoteGameRepository();
 
-        private LoadGameListAsyncTask(QspGameStock activity) {
+        private LoadGameListAsyncTask(GameStockActivity activity) {
             this.activity = new WeakReference<>(activity);
         }
 
         @Override
         protected void onPreExecute() {
-            QspGameStock activity = this.activity.get();
+            GameStockActivity activity = this.activity.get();
             if (activity != null) {
                 activity.updateProgressDialog(true, "", activity.getString(R.string.gameListLoading));
             }
@@ -723,7 +723,7 @@ public class QspGameStock extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(List<GameStockItem> result) {
-            QspGameStock activity = this.activity.get();
+            GameStockActivity activity = this.activity.get();
             if (activity == null) {
                 return;
             }
@@ -740,17 +740,17 @@ public class QspGameStock extends AppCompatActivity {
 
     private static class DownloadGameAsyncTask extends AsyncTask<Void, Void, Boolean> {
 
-        private final WeakReference<QspGameStock> activity;
+        private final WeakReference<GameStockActivity> activity;
         private final GameStockItem game;
 
-        private DownloadGameAsyncTask(QspGameStock activity, GameStockItem game) {
+        private DownloadGameAsyncTask(GameStockActivity activity, GameStockItem game) {
             this.activity = new WeakReference<>(activity);
             this.game = game;
         }
 
         @Override
         protected void onPreExecute() {
-            QspGameStock activity = this.activity.get();
+            GameStockActivity activity = this.activity.get();
             if (activity != null) {
                 activity.updateProgressDialog(true, game.title, activity.getString(R.string.downloading));
             }
@@ -758,7 +758,7 @@ public class QspGameStock extends AppCompatActivity {
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            QspGameStock activity = this.activity.get();
+            GameStockActivity activity = this.activity.get();
             if (activity == null) {
                 return false;
             }
@@ -790,7 +790,7 @@ public class QspGameStock extends AppCompatActivity {
         }
 
         private boolean download(DocumentFile zipFile) {
-            QspGameStock activity = this.activity.get();
+            GameStockActivity activity = this.activity.get();
             if (activity == null) {
                 return false;
             }
@@ -820,7 +820,7 @@ public class QspGameStock extends AppCompatActivity {
         }
 
         private boolean writeGameInfo() {
-            QspGameStock activity = this.activity.get();
+            GameStockActivity activity = this.activity.get();
             if (activity == null) {
                 return false;
             }
@@ -866,7 +866,7 @@ public class QspGameStock extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(Boolean result) {
-            QspGameStock activity = this.activity.get();
+            GameStockActivity activity = this.activity.get();
             if (activity == null) {
                 return;
             }

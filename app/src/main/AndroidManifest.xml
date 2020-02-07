@@ -16,7 +16,7 @@
         android:usesCleartextTraffic="true">
 
         <activity
-            android:name=".game.QspPlayerStart"
+            android:name=".game.MainActivity"
             android:alwaysRetainTaskState="true"
             android:configChanges="orientation"
             android:label="@string/appName"
@@ -29,16 +29,16 @@
         </activity>
 
         <activity
-            android:name=".game.QspImageBox"
+            android:name=".game.ImageBoxActivity"
             android:theme="@style/Theme.QSP.Translucent" />
 
         <activity
-            android:name=".settings.Settings"
+            android:name=".settings.SettingsActivity"
             android:label="@string/settings"
             android:theme="@style/Theme.AppCompat" />
 
         <activity
-            android:name=".stock.QspGameStock"
+            android:name=".stock.GameStockActivity"
             android:label="@string/gameStock"
             android:theme="@style/Theme.AppCompat" />
     </application>

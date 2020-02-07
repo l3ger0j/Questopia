@@ -44,8 +44,8 @@ import androidx.documentfile.provider.DocumentFile;
 
 import com.qsp.player.JniResult;
 import com.qsp.player.R;
-import com.qsp.player.settings.Settings;
-import com.qsp.player.stock.QspGameStock;
+import com.qsp.player.settings.SettingsActivity;
+import com.qsp.player.stock.GameStockActivity;
 import com.qsp.player.util.FileUtil;
 import com.qsp.player.util.HtmlUtil;
 import com.qsp.player.util.ViewUtil;
@@ -62,9 +62,9 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class QspPlayerStart extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity {
 
-    private static final String TAG = QspPlayerStart.class.getName();
+    private static final String TAG = MainActivity.class.getName();
     private static final int MAX_SAVE_SLOTS = 5;
 
     private static final int REQUEST_CODE_SELECT_GAME = 1;
@@ -378,7 +378,7 @@ public class QspPlayerStart extends AppCompatActivity {
     }
 
     private void startSelectGame() {
-        Intent intent = new Intent(this, QspGameStock.class);
+        Intent intent = new Intent(this, GameStockActivity.class);
         intent.putExtra("gameRunning", gameRunning);
         startActivityForResult(intent, REQUEST_CODE_SELECT_GAME);
     }
@@ -756,7 +756,7 @@ public class QspPlayerStart extends AppCompatActivity {
 
             case R.id.menu_options:
                 Intent intent = new Intent();
-                intent.setClass(this, Settings.class);
+                intent.setClass(this, SettingsActivity.class);
                 startActivity(intent);
                 return true;
 
@@ -1097,7 +1097,7 @@ public class QspPlayerStart extends AppCompatActivity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                Intent intent = new Intent(uiContext, QspImageBox.class);
+                Intent intent = new Intent(uiContext, ImageBoxActivity.class);
                 intent.putExtra("gameDirUri", gameDir.getUri().toString());
                 intent.putExtra("imagePath", FileUtil.normalizePath(path));
                 startActivity(intent);
