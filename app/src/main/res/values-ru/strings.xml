@@ -44,6 +44,8 @@
     <string name="selectSlot">Выберите слот</string>
     <string name="slotPresent">Слот %d</string>
     <string name="slotEmpty">Слот %d [Пусто]</string>
+    <string name="loadFrom">Из файла…</string>
+    <string name="saveTo">В файл…</string>
 
     <!-- Настройки -->
     <string name="generalSettings">Главное</string>

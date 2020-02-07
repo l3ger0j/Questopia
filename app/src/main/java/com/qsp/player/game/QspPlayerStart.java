@@ -9,6 +9,7 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -64,8 +65,11 @@ import java.util.concurrent.locks.ReentrantLock;
 public class QspPlayerStart extends AppCompatActivity {
 
     private static final String TAG = QspPlayerStart.class.getName();
-    private static final int REQUEST_CODE_SELECT_GAME = 1;
     private static final int MAX_SAVE_SLOTS = 5;
+
+    private static final int REQUEST_CODE_SELECT_GAME = 1;
+    private static final int REQUEST_CODE_LOAD_FROM_FILE = 2;
+    private static final int REQUEST_CODE_SAVE_TO_FILE = 3;
 
     private static final int TAB_OBJECTS = 0;
     private static final int TAB_MAIN_DESC = 1;
@@ -597,6 +601,30 @@ public class QspPlayerStart extends AppCompatActivity {
         SubMenu subMenu = mainMenu.addSubMenu(R.id.menugroup_running, id, Menu.NONE, parent.getTitle());
         subMenu.setHeaderTitle(getString(R.string.selectSlot));
 
+        MenuItem item;
+        switch (action) {
+            case LOAD:
+                item = subMenu.add(getString(R.string.loadFrom));
+                item.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        startLoadFromFile();
+                        return true;
+                    }
+                });
+                break;
+            case SAVE:
+                item = subMenu.add(getString(R.string.saveTo));
+                item.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        startSaveToFile();
+                        return true;
+                    }
+                });
+                break;
+        }
+
         DocumentFile dir = getOrCreateSavesDirectory();
 
         for (int i = 0; i < MAX_SAVE_SLOTS; ++i) {
@@ -606,18 +634,19 @@ public class QspPlayerStart extends AppCompatActivity {
                     getString(file != null ? R.string.slotPresent : R.string.slotEmpty),
                     i + 1);
 
-            MenuItem item = subMenu.add(title);
+            item = subMenu.add(title);
             item.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
                 @Override
                 public boolean onMenuItemClick(MenuItem item) {
                     switch (action) {
                         case LOAD:
                             if (file != null) {
-                                doLoadGame(filename);
+                                doLoadGame(file.getUri());
                             }
                             break;
                         case SAVE:
-                            doSaveGame(filename);
+                            DocumentFile file = getOrCreateSaveFile(filename);
+                            doSaveGame(file.getUri());
                             break;
                     }
 
@@ -625,6 +654,19 @@ public class QspPlayerStart extends AppCompatActivity {
                 }
             });
         }
+    }
+
+    private void startLoadFromFile() {
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.setType("application/octet-stream");
+        startActivityForResult(intent, REQUEST_CODE_LOAD_FROM_FILE);
+    }
+
+    private void startSaveToFile() {
+        Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+        intent.setType("application/octet-stream");
+        intent.putExtra(Intent.EXTRA_TITLE, "save");
+        startActivityForResult(intent, REQUEST_CODE_SAVE_TO_FILE);
     }
 
     private DocumentFile getOrCreateSavesDirectory() {
@@ -640,15 +682,9 @@ public class QspPlayerStart extends AppCompatActivity {
         return (slot + 1) + ".sav";
     }
 
-    private void doLoadGame(String filename) {
-        DocumentFile dir = getOrCreateSavesDirectory();
-        DocumentFile file = dir.findFile(filename);
-        if (file == null) {
-            Log.e(TAG, "Save file not found: " + filename);
-            return;
-        }
+    private void doLoadGame(Uri uri) {
         final byte[] gameData;
-        try (InputStream in = uiContext.getContentResolver().openInputStream(file.getUri())) {
+        try (InputStream in = uiContext.getContentResolver().openInputStream(uri)) {
             try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
                 byte[] b = new byte[8192];
                 int bytesRead;
@@ -680,20 +716,25 @@ public class QspPlayerStart extends AppCompatActivity {
         });
     }
 
-    private void doSaveGame(final String filename) {
-        final DocumentFile dir = getOrCreateSavesDirectory();
+    private DocumentFile getOrCreateSaveFile(String filename) {
+        DocumentFile dir = getOrCreateSavesDirectory();
+        DocumentFile file = dir.findFile(filename);
+        if (file == null) {
+            file = FileUtil.createBinaryFile(dir, filename);
+        }
+
+        return file;
+    }
+
+    private void doSaveGame(final Uri uri) {
         executeOnLibQspThread(new Runnable() {
             @Override
             public void run() {
-                DocumentFile file = dir.findFile(filename);
-                if (file == null) {
-                    file = FileUtil.createBinaryFile(dir, filename);
-                }
                 byte[] gameData = QSPSaveGameAsData(false);
                 if (gameData == null) {
                     return;
                 }
-                try (OutputStream out = uiContext.getContentResolver().openOutputStream(file.getUri(), "w")) {
+                try (OutputStream out = uiContext.getContentResolver().openOutputStream(uri, "w")) {
                     out.write(gameData);
                 } catch (IOException e) {
                     Log.e(TAG, "Failed writing to a save file", e);
@@ -749,10 +790,22 @@ public class QspPlayerStart extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode != REQUEST_CODE_SELECT_GAME) {
-            super.onActivityResult(requestCode, resultCode, data);
-            return;
+        switch (requestCode) {
+            case REQUEST_CODE_SELECT_GAME:
+                handleSelectGame(resultCode, data);
+                break;
+            case REQUEST_CODE_LOAD_FROM_FILE:
+                handleLoadFromFile(resultCode, data);
+                break;
+            case REQUEST_CODE_SAVE_TO_FILE:
+                handleSaveToFile(resultCode, data);
+                break;
+            default:
+                super.onActivityResult(requestCode, resultCode, data);
         }
+    }
+
+    private void handleSelectGame(int resultCode, Intent data) {
         if (resultCode != RESULT_OK || data == null) {
             return;
         }
@@ -768,6 +821,22 @@ public class QspPlayerStart extends AppCompatActivity {
         gameFile = FileUtil.getFile(uiContext, gameFileUri);
 
         runGame();
+    }
+
+    private void handleLoadFromFile(int resultCode, Intent data) {
+        if (resultCode != RESULT_OK || data == null) {
+            return;
+        }
+        Uri uri = data.getData();
+        doLoadGame(uri);
+    }
+
+    private void handleSaveToFile(int resultCode, Intent data) {
+        if (resultCode != RESULT_OK || data == null) {
+            return;
+        }
+        Uri uri = data.getData();
+        doSaveGame(uri);
     }
 
     public void onTitleClick(View v) {
@@ -1105,12 +1174,23 @@ public class QspPlayerStart extends AppCompatActivity {
         });
     }
 
-    private void OpenGame(String file) {
-        doLoadGame(file);
+    private void OpenGame(String filename) {
+        DocumentFile file = getSaveFile(filename);
+        if (file == null) {
+            Log.e(TAG, "Save file not found: " + filename);
+            return;
+        }
+        doLoadGame(file.getUri());
     }
 
-    private void SaveGame(String file) {
-        doSaveGame(file);
+    private DocumentFile getSaveFile(String filename) {
+        DocumentFile dir = getOrCreateSavesDirectory();
+        return dir.findFile(filename);
+    }
+
+    private void SaveGame(String filename) {
+        DocumentFile file = getOrCreateSaveFile(filename);
+        doSaveGame(file.getUri());
     }
 
     private String InputBox(final String prompt) {
