@@ -38,7 +38,7 @@
     <string name="resumeGame">Продолжить игру</string>
     <string name="load">Загрузить</string>
     <string name="save">Сохранить</string>
-    <string name="deleteGame">Удаление игр</string>
+    <string name="deleteGame">Удалить игру</string>
     <string name="installGame">Установить игру</string>
     <string name="closeApp">Закрыть Quest Player</string>
     <string name="selectSlot">Выберите слот</string>
