@@ -384,7 +384,7 @@ public class QspPlayerStart extends AppCompatActivity {
         if (gameRunning) {
             stopGame();
         }
-        stopLibraryThread();
+        stopLibQspThread();
         super.onDestroy();
     }
 
@@ -397,7 +397,7 @@ public class QspPlayerStart extends AppCompatActivity {
         gameRunning = false;
     }
 
-    private void stopLibraryThread() {
+    private void stopLibQspThread() {
         Handler handler = libQspHandler;
         if (handler != null) {
             handler.getLooper().quitSafely();
