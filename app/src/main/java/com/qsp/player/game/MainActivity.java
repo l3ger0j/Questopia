@@ -124,6 +124,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean gameRunning;
     private String pageTemplate;
     private volatile Handler libQspHandler;
+    private String gameTitle;
     private DocumentFile gameDir;
     private DocumentFile gameFile;
 
@@ -665,7 +666,7 @@ public class MainActivity extends AppCompatActivity {
     private void startSaveToFile() {
         Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
         intent.setType("application/octet-stream");
-        intent.putExtra(Intent.EXTRA_TITLE, "save");
+        intent.putExtra(Intent.EXTRA_TITLE, gameTitle + ".sav");
         startActivityForResult(intent, REQUEST_CODE_SAVE_TO_FILE);
     }
 
@@ -810,6 +811,8 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
         stopGame();
+
+        gameTitle = data.getStringExtra("gameTitle");
 
         String gameDirUri = data.getStringExtra("gameDirUri");
         DocumentFile newGameDir = FileUtil.getDirectory(uiContext, gameDirUri);

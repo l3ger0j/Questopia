@@ -224,6 +224,7 @@ public class GameStockActivity extends AppCompatActivity {
     private void playOrDownloadGame(GameStockItem game) {
         if (game.downloaded) {
             Intent data = new Intent();
+            data.putExtra("gameTitle", game.title);
             data.putExtra("gameDirUri", game.localDirUri);
             data.putExtra("gameFileUri", game.localFileUri);
             setResult(RESULT_OK, data);
