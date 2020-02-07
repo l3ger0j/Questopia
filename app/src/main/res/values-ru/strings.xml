@@ -84,6 +84,8 @@
     <string name="gameDeleted">Игра удалена.</string>
     <string name="deleteGameQuery">Удалить игру -GAMENAME-?</string>
     <string name="author">Автор: -AUTHOR-</string>
+    <string name="version">Версия: -VERSION-</string>
+    <string name="fileSize">Размер: -SIZE- КБ</string>
     <string name="close">Закрыть</string>
 </resources>
 

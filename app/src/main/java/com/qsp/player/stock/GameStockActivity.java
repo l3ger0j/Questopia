@@ -190,13 +190,15 @@ public class GameStockActivity extends AppCompatActivity {
         }
         StringBuilder message = new StringBuilder();
         if (game.author.length() > 0) {
-            message.append("Author: ").append(game.author);
+            message.append(getString(R.string.author).replace("-AUTHOR-", game.author));
         }
         if (game.version.length() > 0) {
-            message.append("\nVersion: ").append(game.version);
+            message.append('\n');
+            message.append(getString(R.string.version).replace("-VERSION-", game.version));
         }
         if (game.fileSize > 0) {
-            message.append("\nSize: ").append(game.fileSize / 1024).append(" Kilobytes");
+            message.append('\n');
+            message.append(getString(R.string.fileSize).replace("-SIZE-", Integer.toString(game.fileSize / 1024)));
         }
 
         new AlertDialog.Builder(uiContext)

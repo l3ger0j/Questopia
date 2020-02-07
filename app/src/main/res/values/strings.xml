@@ -83,6 +83,8 @@
     <string name="deleteGameCmd">Delete game</string>
     <string name="gameDeleted">The game has been deleted.</string>
     <string name="author">Author: -AUTHOR-</string>
+    <string name="version">Version: -VERSION-</string>
+    <string name="fileSize">Size: -SIZE- KB</string>
     <string name="deleteGameQuery">Delete game -GAMENAME-?</string>
     <string name="close">Close</string>
 </resources>
