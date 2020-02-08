@@ -78,7 +78,7 @@
     <string name="play">Играть</string>
     <string name="download">Скачать</string>
     <string name="downloading">Скачивается...</string>
-    <string name="unpacking">Распаковывается...</string>
+    <string name="extracting">Распаковывается...</string>
     <string name="gameListLoading">Загрузка списка игр</string>
     <string name="deleteGameCmd">Удалить игру</string>
     <string name="gameDeleted">Игра удалена.</string>

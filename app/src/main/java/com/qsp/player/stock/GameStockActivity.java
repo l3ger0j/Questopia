@@ -421,7 +421,7 @@ public class GameStockActivity extends AppCompatActivity {
             return;
         }
         String gameName = FileUtil.removeFileExtension(filename);
-        updateProgressDialog(true, gameName, getString(R.string.unpacking));
+        updateProgressDialog(true, gameName, getString(R.string.extracting));
 
         if (unzip(zipFile, gameName)) {
             refreshGames();
@@ -558,9 +558,10 @@ public class GameStockActivity extends AppCompatActivity {
                 progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
                 progressDialog.setCancelable(false);
             }
+            progressDialog.setTitle(title);
+            progressDialog.setMessage(message);
+
             if (!progressDialog.isShowing()) {
-                progressDialog.setTitle(title);
-                progressDialog.setMessage(message);
                 progressDialog.show();
             }
         } else if (progressDialog != null && progressDialog.isShowing()) {
@@ -741,7 +742,7 @@ public class GameStockActivity extends AppCompatActivity {
         }
     }
 
-    private static class DownloadGameAsyncTask extends AsyncTask<Void, Void, Boolean> {
+    private static class DownloadGameAsyncTask extends AsyncTask<Void, DownloadGameAsyncTask.DownloadPhase, Boolean> {
 
         private final WeakReference<GameStockActivity> activity;
         private final GameStockItem game;
@@ -782,8 +783,11 @@ public class GameStockActivity extends AppCompatActivity {
 
             boolean result = false;
 
-            if (download(zipFile) && activity.unzip(zipFile, game.title)) {
-                result = writeGameInfo();
+            if (download(zipFile)) {
+                publishProgress(DownloadPhase.EXTRACT);
+                if (activity.unzip(zipFile, game.title)) {
+                    result = writeGameInfo();
+                }
             }
             if (zipFile.exists()) {
                 zipFile.delete();
@@ -868,6 +872,16 @@ public class GameStockActivity extends AppCompatActivity {
         }
 
         @Override
+        protected void onProgressUpdate(DownloadPhase... values) {
+            super.onProgressUpdate(values);
+            GameStockActivity activity = this.activity.get();
+            if (activity == null) {
+                return;
+            }
+            activity.updateProgressDialog(true, game.title, activity.getString(R.string.extracting));
+        }
+
+        @Override
         protected void onPostExecute(Boolean result) {
             GameStockActivity activity = this.activity.get();
             if (activity == null) {
@@ -883,6 +897,11 @@ public class GameStockActivity extends AppCompatActivity {
 
                 ViewUtil.showErrorDialog(activity, message);
             }
+        }
+
+        private enum DownloadPhase {
+            DOWNLOAD,
+            EXTRACT
         }
     }
 }
