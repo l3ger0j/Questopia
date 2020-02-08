@@ -35,22 +35,22 @@
             android:title="@string/fontSize" />
 
         <com.kizitonwose.colorpreferencecompat.ColorPreferenceCompat
-            android:defaultValue="@color/defBackColor"
+            android:defaultValue="@color/def_back_color"
             android:key="backColor"
             android:title="@string/backColor"
-            app:colorChoices="@array/color_choice_values" />
+            app:showDialog="false" />
 
         <com.kizitonwose.colorpreferencecompat.ColorPreferenceCompat
-            android:defaultValue="@color/defTextColor"
+            android:defaultValue="@color/def_text_color"
             android:key="textColor"
             android:title="@string/textColor"
-            app:colorChoices="@array/color_choice_values" />
+            app:showDialog="false" />
 
         <com.kizitonwose.colorpreferencecompat.ColorPreferenceCompat
-            android:defaultValue="@color/defLinkColor"
+            android:defaultValue="@color/def_link_color"
             android:key="linkColor"
             android:title="@string/linkColor"
-            app:colorChoices="@array/color_choice_values" />
+            app:showDialog="false" />
 
     </PreferenceCategory>
 
