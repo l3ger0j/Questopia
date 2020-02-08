@@ -10,10 +10,13 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public final class HtmlUtil {
 
     private static final String TAG = HtmlUtil.class.getName();
+    private static final Pattern EXEC_PATTERN = Pattern.compile("href=\"exec:([\\s\\S]*?)\"", Pattern.CASE_INSENSITIVE);
 
     public static String preprocessQspHtml(String html) {
         if (html == null || html.isEmpty()) {
@@ -31,64 +34,21 @@ public final class HtmlUtil {
     }
 
     private static String encodeExec(String html) {
-        StringBuilder result = new StringBuilder();
-        int len = html.length();
-
-        int fromIdx = 0;
-        while (fromIdx < len) {
-            int idx = indexOfIgnoreCase(html, "<a ", fromIdx);
-            if (idx == -1) {
-                result.append(html.substring(fromIdx));
-                break;
-            }
-            result.append(html, fromIdx, idx + 3);
-            fromIdx = idx + 3;
-
-            int anchorEndIdx = html.indexOf('>', fromIdx);
-            if (anchorEndIdx == -1) {
-                Log.w(TAG, String.format("Invalid HTML: anchor element at %d is not closed", idx));
-                result.append(html.substring(fromIdx));
-                break;
-            }
-
-            idx = indexOfIgnoreCase(html, "href=\"exec:", fromIdx, anchorEndIdx);
-            if (idx == -1) {
-                result.append(html, fromIdx, anchorEndIdx + 1);
-                fromIdx = anchorEndIdx + 1;
-                continue;
-            }
-
-            result.append(html, fromIdx, idx + 11);
-            fromIdx = idx + 11;
-
-            int hrefEndIdx = indexOfIgnoreCase(html, "\"", fromIdx, anchorEndIdx);
-            if (hrefEndIdx == -1) {
-                Log.w(TAG, String.format("Invalid HTML: href attribute at %d is not closed", idx));
-                result.append(html.substring(fromIdx));
-                break;
-            }
-
-            String code = html.substring(fromIdx, hrefEndIdx);
-            String codeB64 = Base64.encodeToString(code.getBytes(), Base64.NO_WRAP);
-            result.append(codeB64);
-            result.append(html, hrefEndIdx, anchorEndIdx + 1);
-            fromIdx = anchorEndIdx + 1;
+        Matcher matcher = EXEC_PATTERN.matcher(html);
+        StringBuffer sb = new StringBuffer();
+        while (matcher.find()) {
+            String group = matcher.group(1);
+            String encodedExec = Base64.encodeToString(group.getBytes(), Base64.NO_WRAP);
+            matcher.appendReplacement(sb, "href=\"exec:" + encodedExec + "\"");
         }
+        matcher.appendTail(sb);
 
-        return result.toString();
+        return sb.toString();
     }
 
     private static String htmlizeLineBreaks(String s) {
         return s.replace("\n", "<br>")
                 .replace("\r", "");
-    }
-
-    private static int indexOfIgnoreCase(String str, String substr, int fromIndex) {
-        return str.toLowerCase().indexOf(substr, fromIndex);
-    }
-
-    private static int indexOfIgnoreCase(String str, String substr, int fromIndex, int endIndex) {
-        return str.substring(0, endIndex).toLowerCase().indexOf(substr, fromIndex);
     }
 
     public static String convertQspStringToHtml(String str) {
