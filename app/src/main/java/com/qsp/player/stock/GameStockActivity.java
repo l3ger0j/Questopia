@@ -423,31 +423,65 @@ public class GameStockActivity extends AppCompatActivity {
         String gameName = FileUtil.removeFileExtension(filename);
         updateProgressDialog(true, gameName, getString(R.string.extracting));
 
-        if (unzip(zipFile, gameName)) {
-            refreshGames();
+        DocumentFile gameDir = getOrCreateGameDirectory(gameName);
+        if (!FileUtil.isWritableDirectory(gameDir)) {
+            Log.e(TAG, "Game directory is not writable");
+            return;
+        }
+
+        boolean extracted = unzip(zipFile, gameDir);
+        boolean containsGameFiles = false;
+
+        if (extracted) {
+            containsGameFiles = doesDirectoryContainGameFiles(gameDir);
         } else {
-            String message = getString(R.string.unzipError)
+            String message = getString(R.string.extractError)
                     .replace("-GAMENAME-", gameName);
 
             ViewUtil.showErrorDialog(uiContext, message);
         }
 
+        if (containsGameFiles) {
+            refreshGames();
+        } else {
+            ViewUtil.showErrorDialog(uiContext, getString(R.string.noGameFilesError));
+        }
+
         updateProgressDialog(false, "", "");
     }
 
-    private boolean unzip(DocumentFile zipFile, String gameName) {
+    private DocumentFile getOrCreateGameDirectory(String gameName) {
         String folderName = FileUtil.normalizeGameFolderName(gameName);
         DocumentFile dir = gamesDir.findFile(folderName);
-
         if (dir == null) {
             dir = gamesDir.createDirectory(folderName);
         }
+
+        return dir;
+    }
+
+    private boolean unzip(DocumentFile zipFile, DocumentFile dir) {
         if (!FileUtil.isWritableDirectory(dir)) {
             Log.e(TAG, "Game directory is not writable");
             return false;
         }
 
         return ZipUtil.unzip(uiContext, zipFile, dir);
+    }
+
+    private boolean doesDirectoryContainGameFiles(DocumentFile dir) {
+        for (DocumentFile file : dir.listFiles()) {
+            String name = file.getName();
+            if (name == null) {
+                continue;
+            }
+            String lcName = name.toLowerCase();
+            if (lcName.endsWith(".qsp") || lcName.endsWith(".gam")) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     @Override
@@ -742,7 +776,7 @@ public class GameStockActivity extends AppCompatActivity {
         }
     }
 
-    private static class DownloadGameAsyncTask extends AsyncTask<Void, DownloadGameAsyncTask.DownloadPhase, Boolean> {
+    private static class DownloadGameAsyncTask extends AsyncTask<Void, DownloadGameAsyncTask.DownloadPhase, DownloadGameAsyncTask.DownloadResult> {
 
         private final WeakReference<GameStockActivity> activity;
         private final GameStockItem game;
@@ -761,39 +795,50 @@ public class GameStockActivity extends AppCompatActivity {
         }
 
         @Override
-        protected Boolean doInBackground(Void... params) {
+        protected DownloadResult doInBackground(Void... params) {
             GameStockActivity activity = this.activity.get();
             if (activity == null) {
-                return false;
+                return DownloadResult.DOWNLOAD_FAILED;
             }
 
             File dirFile = activity.getCacheDir();
             DocumentFile cacheDir = DocumentFile.fromFile(dirFile);
             if (!FileUtil.isWritableDirectory(cacheDir)) {
                 Log.e(TAG, "Cache directory is not writable");
-                return false;
+                return DownloadResult.DOWNLOAD_FAILED;
             }
 
             String zipFilename = String.valueOf(System.currentTimeMillis()).concat("_game");
             DocumentFile zipFile = cacheDir.createFile("application/zip", zipFilename);
             if (zipFile == null) {
                 Log.e(TAG, "Failed to create a ZIP file: " + zipFilename);
-                return false;
+                return DownloadResult.DOWNLOAD_FAILED;
             }
 
-            boolean result = false;
+            boolean downloaded = download(zipFile);
+            DocumentFile gameDir = null;
+            boolean extracted = false;
 
-            if (download(zipFile)) {
+            if (downloaded) {
                 publishProgress(DownloadPhase.EXTRACT);
-                if (activity.unzip(zipFile, game.title)) {
-                    result = writeGameInfo();
-                }
+                gameDir = activity.getOrCreateGameDirectory(game.title);
+                extracted = activity.unzip(zipFile, gameDir);
             }
             if (zipFile.exists()) {
                 zipFile.delete();
             }
+            if (!downloaded) {
+                return DownloadResult.DOWNLOAD_FAILED;
+            }
+            if (!extracted) {
+                return DownloadResult.EXTRACT_FAILED;
+            }
+            if (!activity.doesDirectoryContainGameFiles(gameDir)) {
+                return DownloadResult.GAME_FILES_NOT_FOUND;
+            }
+            writeGameInfo();
 
-            return result;
+            return DownloadResult.OK;
         }
 
         private boolean download(DocumentFile zipFile) {
@@ -882,26 +927,44 @@ public class GameStockActivity extends AppCompatActivity {
         }
 
         @Override
-        protected void onPostExecute(Boolean result) {
+        protected void onPostExecute(DownloadResult result) {
             GameStockActivity activity = this.activity.get();
             if (activity == null) {
                 return;
             }
             activity.updateProgressDialog(false, "", "");
-            if (result) {
-                activity.refreshGames();
-                activity.showGameInfo(game.gameId);
-            } else {
-                String message = activity.getString(R.string.downloadError)
-                        .replace("-GAMENAME-", game.title);
 
-                ViewUtil.showErrorDialog(activity, message);
+            String message;
+            switch (result) {
+                case OK:
+                    activity.refreshGames();
+                    activity.showGameInfo(game.gameId);
+                    break;
+                case DOWNLOAD_FAILED:
+                    message = activity.getString(R.string.downloadError).replace("-GAMENAME-", game.title);
+                    ViewUtil.showErrorDialog(activity, message);
+                    break;
+                case EXTRACT_FAILED:
+                    message = activity.getString(R.string.extractError).replace("-GAMENAME-", game.title);
+                    ViewUtil.showErrorDialog(activity, message);
+                    break;
+                case GAME_FILES_NOT_FOUND:
+                    message = activity.getString(R.string.noGameFilesError);
+                    ViewUtil.showErrorDialog(activity, message);
+                    break;
             }
         }
 
         private enum DownloadPhase {
             DOWNLOAD,
             EXTRACT
+        }
+
+        private enum DownloadResult {
+            OK,
+            DOWNLOAD_FAILED,
+            EXTRACT_FAILED,
+            GAME_FILES_NOT_FOUND
         }
     }
 }
