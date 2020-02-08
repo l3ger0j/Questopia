@@ -20,19 +20,14 @@ public final class HtmlUtil {
             return "";
         }
 
-        String result = htmlizeLineBreaks(html);
-        result = encodeExec(result);
+        String result = encodeExec(html);
+        result = htmlizeLineBreaks(result);
 
         Document document = Jsoup.parse(result);
         Element body = document.body();
         body.select("img").attr("style", "max-width: 100%;");
 
         return document.toString();
-    }
-
-    private static String htmlizeLineBreaks(String s) {
-        return s.replace("\n", "<br>")
-                .replace("\r", "");
     }
 
     private static String encodeExec(String html) {
@@ -81,6 +76,11 @@ public final class HtmlUtil {
         }
 
         return result.toString();
+    }
+
+    private static String htmlizeLineBreaks(String s) {
+        return s.replace("\n", "<br>")
+                .replace("\r", "");
     }
 
     private static int indexOfIgnoreCase(String str, String substr, int fromIndex) {
