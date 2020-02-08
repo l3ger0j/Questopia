@@ -1323,7 +1323,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
             if (url.startsWith("file:///")) {
-                String path = FileUtil.normalizePath(url.substring(8));
+                String path = FileUtil.normalizePath(Uri.decode(url.substring(8)));
                 DocumentFile file = FileUtil.findFileByPath(gameDir, path);
                 if (file == null) {
                     return null;
