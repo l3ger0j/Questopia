@@ -463,7 +463,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private int getBackgroundColor() {
-        return qspBColor != 0 ? qspBColor : backColor;
+        return qspBColor != 0 ? reverseColor(qspBColor) : backColor;
+    }
+
+    private int reverseColor(int color) {
+        return 0xff000000 |
+                ((color & 0x0000ff) << 16) |
+                (color & 0x00ff00) |
+                ((color & 0xff0000) >> 16);
     }
 
     private void updatePageTemplate() {
@@ -478,11 +485,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private int getTextColor() {
-        return qspFColor != 0 ? qspFColor : textColor;
+        return qspFColor != 0 ? reverseColor(qspFColor) : textColor;
     }
 
     private int getLinkColor() {
-        return qspLColor != 0 ? qspLColor : linkColor;
+        return qspLColor != 0 ? reverseColor(qspLColor) : linkColor;
     }
 
     private String getFontSize() {
