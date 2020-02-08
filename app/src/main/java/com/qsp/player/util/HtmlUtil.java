@@ -3,9 +3,13 @@ package com.qsp.player.util;
 import android.util.Base64;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+
+import java.util.Objects;
 
 public final class HtmlUtil {
 
@@ -95,9 +99,11 @@ public final class HtmlUtil {
         return htmlizeLineBreaks(str);
     }
 
-    public static String removeHtmlTags(String html) {
-        if (html == null || html.isEmpty()) {
-            return "";
+    public static String removeHtmlTags(@NonNull String html) {
+        Objects.requireNonNull(html, "html must not be null");
+
+        if (html.isEmpty()) {
+            return html;
         }
 
         StringBuilder result = new StringBuilder();

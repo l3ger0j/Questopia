@@ -1124,8 +1124,13 @@ public class MainActivity extends AppCompatActivity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                String processedMsg = useHtml ? HtmlUtil.removeHtmlTags(message) : message;
+                if (processedMsg == null) {
+                    processedMsg = "";
+                }
+
                 new AlertDialog.Builder(uiContext)
-                        .setMessage(useHtml ? HtmlUtil.removeHtmlTags(message) : message)
+                        .setMessage(processedMsg)
                         .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
@@ -1203,11 +1208,15 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
                 final View view = getLayoutInflater().inflate(R.layout.inputbox, null);
-                String title = prompt != null ? prompt : "";
+
+                String message = useHtml ? HtmlUtil.removeHtmlTags(prompt) : prompt;
+                if (message == null) {
+                    message = "";
+                }
 
                 new AlertDialog.Builder(uiContext)
                         .setView(view)
-                        .setMessage(title)
+                        .setMessage(message)
                         .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
