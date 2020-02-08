@@ -1013,11 +1013,11 @@ public class MainActivity extends AppCompatActivity {
                     QspItemAdapter adapter = new QspItemAdapter(uiContext, R.layout.obj_item, objects);
                     objectsView.setAdapter(adapter);
                 }
+                if (varsDescChanged && activeTab != TAB_VARS_DESC) {
+                    varsDescUnread = true;
+                    updateTitle();
+                }
                 if (settingsChanged || varsDescChanged) {
-                    if (activeTab != TAB_VARS_DESC) {
-                        varsDescUnread = true;
-                        updateTitle();
-                    }
                     refreshVarsDesc();
                 }
             }
