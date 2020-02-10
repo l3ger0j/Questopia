@@ -13,16 +13,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 
-class QspImageGetter implements ImageGetter {
+class ImageProvider implements ImageGetter {
 
-    private static final String TAG = QspImageGetter.class.getName();
+    private static final String TAG = ImageProvider.class.getName();
     private static final HashMap<String, Drawable> CACHE = new HashMap<>();
 
     private final Context context;
 
     private DocumentFile gameDir;
 
-    QspImageGetter(Context context) {
+    ImageProvider(Context context) {
         this.context = context;
     }
 

@@ -8,7 +8,7 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
-        android:name=".QspApplication"
+        android:name=".QuestPlayerApplication"
         android:hardwareAccelerated="true"
         android:icon="@drawable/icon"
         android:label="@string/appName"
@@ -41,6 +41,7 @@
             android:name=".stock.GameStockActivity"
             android:label="@string/gameStock"
             android:theme="@style/Theme.AppCompat" />
+
     </application>
 
 </manifest>

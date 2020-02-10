@@ -7,12 +7,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Typeface;
-import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.util.TypedValue;
@@ -42,7 +39,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.documentfile.provider.DocumentFile;
 
-import com.qsp.player.JniResult;
+import com.qsp.player.QuestPlayerApplication;
 import com.qsp.player.R;
 import com.qsp.player.settings.SettingsActivity;
 import com.qsp.player.stock.GameStockActivity;
@@ -50,19 +47,15 @@ import com.qsp.player.util.FileUtil;
 import com.qsp.player.util.HtmlUtil;
 import com.qsp.player.util.ViewUtil;
 
-import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.locks.ReentrantLock;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements PlayerView {
 
     private static final String TAG = MainActivity.class.getName();
     private static final int MAX_SAVE_SLOTS = 5;
@@ -93,40 +86,17 @@ public class MainActivity extends AppCompatActivity {
     private static final String PAGE_BODY_TEMPLATE = "<body>REPLACETEXT</body>";
 
     private final Context uiContext = this;
-    private final ReentrantLock libQspLock = new ReentrantLock();
-    private final Handler counterHandler = new Handler();
-    private final ArrayList<QspMenuItem> qspMenuItems = new ArrayList<>();
-    private final AudioPlayer audioPlayer = new AudioPlayer();
-    private final QspImageGetter imageGetter = new QspImageGetter(this);
+    private final ImageProvider imageProvider = new ImageProvider(this);
 
-    private final Runnable counterTask = new Runnable() {
-        @Override
-        public void run() {
-            executeOnLibQspThread(new Runnable() {
-                @Override
-                public void run() {
-                    if (!QSPExecCounter(true)) {
-                        showLastLibQspError();
-                    }
-                }
-            });
-            counterHandler.postDelayed(this, timerInterval);
-        }
-    };
-
+    private LibQspProxy libQspProxy;
     private SharedPreferences settings;
-    private boolean varsDescUnread;
-    private int objectsBackground, varsDescBackground;
-    private int activeTab;
     private String currentLanguage = Locale.getDefault().getLanguage();
-    private volatile long gameStartTime;
-    private volatile int timerInterval;
-    private boolean gameRunning;
-    private String pageTemplate;
-    private volatile Handler libQspHandler;
-    private String gameTitle;
-    private DocumentFile gameDir;
-    private DocumentFile gameFile;
+    private int activeTab;
+    private boolean varsDescUnread;
+    private int varsDescBackground;
+    private String pageTemplate = "";
+    private boolean selectingGame;
+    private PlayerViewState viewState;
 
     private View mainView;
     private WebView mainDescView;
@@ -142,18 +112,15 @@ public class MainActivity extends AppCompatActivity {
     private int textColor;
     private int linkColor;
 
-    private volatile boolean useHtml;
-    private volatile String mainDesc = "";
-    private volatile String varsDesc = "";
-    private volatile int qspFSize;
-    private volatile int qspBColor;
-    private volatile int qspFColor;
-    private volatile int qspLColor;
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        libQspProxy = ((QuestPlayerApplication) getApplication()).getLibQspProxy();
+        libQspProxy.setPlayerView(this);
+
         setContentView(R.layout.main);
+        setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
         settings = PreferenceManager.getDefaultSharedPreferences(uiContext);
 
@@ -166,10 +133,6 @@ public class MainActivity extends AppCompatActivity {
         initActionsView();
         initObjectsView();
         setActiveTab(TAB_MAIN_DESC);
-
-        setVolumeControlStream(AudioManager.STREAM_MUSIC);
-        startLibQspThread();
-        startSelectGame();
     }
 
     private void loadLocale() {
@@ -195,87 +158,18 @@ public class MainActivity extends AppCompatActivity {
         actionsView.setOnItemClickListener(new OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                executeAction(position);
+                libQspProxy.onActionClicked(position);
             }
         });
 
         actionsView.setOnItemSelectedListener(new OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, final int position, long id) {
-                executeOnLibQspThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (!QSPSetSelActionIndex(position, true)) {
-                            showLastLibQspError();
-                        }
-                    }
-                });
+                libQspProxy.onActionSelected(position);
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-            }
-        });
-    }
-
-    private void executeOnLibQspThread(final Runnable runnable) {
-        if (libQspLock.isLocked()) {
-            return;
-        }
-        libQspHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                libQspLock.lock();
-                try {
-                    runnable.run();
-                } finally {
-                    libQspLock.unlock();
-                }
-            }
-        });
-    }
-
-    private void executeAction(final int position) {
-        executeOnLibQspThread(new Runnable() {
-            @Override
-            public void run() {
-                if (!QSPSetSelActionIndex(position, false)) {
-                    showLastLibQspError();
-                }
-                if (!QSPExecuteSelActionCode(true)) {
-                    showLastLibQspError();
-                }
-            }
-        });
-    }
-
-    private void showLastLibQspError() {
-        JniResult errorResult = (JniResult) QSPGetLastErrorData();
-
-        String locName = (errorResult.str1 == null) ? "" : errorResult.str1;
-        int action = errorResult.int2;
-        int line = errorResult.int3;
-        int errorNumber = errorResult.int1;
-
-        String desc = QSPGetErrorDesc(errorResult.int1);
-        if (desc == null) {
-            desc = "";
-        }
-
-        final String message = String.format(
-                "Location: %s\nAction: %d\nLine: %d\nError number: %d\nDescription: %s",
-                locName,
-                action,
-                line,
-                errorNumber,
-                desc);
-
-        Log.e(TAG, message);
-
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                ViewUtil.showErrorDialog(uiContext, message);
             }
         });
     }
@@ -287,14 +181,7 @@ public class MainActivity extends AppCompatActivity {
         objectsView.setOnItemClickListener(new OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
-                executeOnLibQspThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (!QSPSetSelObjectIndex(position, true)) {
-                            showLastLibQspError();
-                        }
-                    }
-                });
+                libQspProxy.onObjectSelected(position);
             }
         });
     }
@@ -305,7 +192,6 @@ public class MainActivity extends AppCompatActivity {
                 toggleObjects(true);
                 toggleMainDesc(false);
                 toggleVarsDesc(false);
-                objectsBackground = 0;
                 setTitle(getString(R.string.inventory));
                 break;
 
@@ -329,6 +215,21 @@ public class MainActivity extends AppCompatActivity {
         activeTab = tab;
     }
 
+    private void toggleObjects(boolean show) {
+        findViewById(R.id.inv).setVisibility(show ? View.VISIBLE : View.GONE);
+        findViewById(R.id.title_button_1).setBackgroundResource(show ? R.drawable.btn_bg_active : 0);
+    }
+
+    private void toggleMainDesc(boolean show) {
+        findViewById(R.id.main_tab).setVisibility(show ? View.VISIBLE : View.GONE);
+        findViewById(R.id.title_home_button).setBackgroundResource(show ? R.drawable.btn_bg_active : 0);
+    }
+
+    private void toggleVarsDesc(boolean show) {
+        findViewById(R.id.vars_tab).setVisibility(show ? View.VISIBLE : View.GONE);
+        findViewById(R.id.title_button_2).setBackgroundResource(show ? R.drawable.btn_bg_active : varsDescBackground);
+    }
+
     private void setTitle(String second) {
         TextView winTitle = findViewById(R.id.title_text);
         winTitle.setText(second);
@@ -348,67 +249,11 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void toggleObjects(boolean show) {
-        findViewById(R.id.inv).setVisibility(show ? View.VISIBLE : View.GONE);
-        findViewById(R.id.title_button_1).setBackgroundResource(show ? R.drawable.btn_bg_active : objectsBackground);
-    }
-
-    private void toggleMainDesc(boolean show) {
-        findViewById(R.id.main_tab).setVisibility(show ? View.VISIBLE : View.GONE);
-        findViewById(R.id.title_home_button).setBackgroundResource(show ? R.drawable.btn_bg_active : 0);
-    }
-
-    private void toggleVarsDesc(boolean show) {
-        findViewById(R.id.vars_tab).setVisibility(show ? View.VISIBLE : View.GONE);
-        findViewById(R.id.title_button_2).setBackgroundResource(show ? R.drawable.btn_bg_active : varsDescBackground);
-    }
-
-    private void startLibQspThread() {
-        new Thread() {
-            @Override
-            public void run() {
-                QSPInit();
-                Looper.prepare();
-                libQspHandler = new Handler();
-                Looper.loop();
-                QSPDeInit();
-            }
-        }
-                .start();
-
-        Log.i(TAG, "QSP library thread started");
-    }
-
-    private void startSelectGame() {
-        Intent intent = new Intent(this, GameStockActivity.class);
-        intent.putExtra("gameRunning", gameRunning);
-        startActivityForResult(intent, REQUEST_CODE_SELECT_GAME);
-    }
-
     @Override
-    public void onDestroy() {
-        if (gameRunning) {
-            stopGame();
-        }
-        stopLibQspThread();
+    protected void onDestroy() {
+        libQspProxy.pauseGame();
+        libQspProxy.setPlayerView(null);
         super.onDestroy();
-    }
-
-    private void stopGame() {
-        if (!gameRunning) {
-            return;
-        }
-        counterHandler.removeCallbacks(counterTask);
-        audioPlayer.stopAll();
-        gameRunning = false;
-    }
-
-    private void stopLibQspThread() {
-        Handler handler = libQspHandler;
-        if (handler != null) {
-            handler.getLooper().quitSafely();
-        }
-        Log.i(TAG, "QSP library thread stopped");
     }
 
     @Override
@@ -418,16 +263,13 @@ public class MainActivity extends AppCompatActivity {
         updateLocale();
         loadTextSettings();
         applyTextSettings();
-        refreshMainDesc();
-        refreshVarsDesc();
-        refreshActions();
-        refreshObjects();
 
-        audioPlayer.setSoundEnabled(settings.getBoolean("sound", true));
-
-        if (gameRunning) {
-            counterHandler.postDelayed(counterTask, timerInterval);
-            audioPlayer.resumeAll();
+        viewState = libQspProxy.getViewState();
+        if (viewState.gameRunning) {
+            applyViewState();
+            libQspProxy.resumeGame();
+        } else if (!selectingGame) {
+            startSelectGame();
         }
     }
 
@@ -465,7 +307,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private int getBackgroundColor() {
-        return qspBColor != 0 ? reverseColor(qspBColor) : backColor;
+        return viewState != null && viewState.backColor != 0 ?
+                reverseColor(viewState.backColor) :
+                backColor;
     }
 
     private int reverseColor(int color) {
@@ -487,23 +331,39 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private int getTextColor() {
-        return qspFColor != 0 ? reverseColor(qspFColor) : textColor;
+        return viewState != null && viewState.fontColor != 0 ?
+                reverseColor(viewState.fontColor) :
+                textColor;
     }
 
     private int getLinkColor() {
-        return qspLColor != 0 ? reverseColor(qspLColor) : linkColor;
+        return viewState != null && viewState.linkColor != 0 ?
+                reverseColor(viewState.linkColor) :
+                linkColor;
     }
 
     private String getFontSize() {
-        return useGameFont && qspFSize != 0 ? Integer.toString(qspFSize) : fontSize;
+        return useGameFont && viewState != null && viewState.fontSize != 0 ?
+                Integer.toString(viewState.fontSize) :
+                fontSize;
     }
 
     private String getHexColor(int color) {
         return String.format("#%06X", 0xFFFFFF & color);
     }
 
+    private void applyViewState() {
+        imageProvider.setGameDirectory(viewState.gameDir);
+
+        applyTextSettings();
+        refreshMainDesc();
+        refreshVarsDesc();
+        refreshActions();
+        refreshObjects();
+    }
+
     private void refreshMainDesc() {
-        String text = getHtml(mainDesc);
+        String text = getHtml(viewState.mainDesc);
         mainDescView.loadDataWithBaseURL(
                 "file:///",
                 pageTemplate.replace("REPLACETEXT", text),
@@ -513,11 +373,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private String getHtml(String str) {
-        return useHtml ? HtmlUtil.preprocessQspHtml(str) : HtmlUtil.convertQspStringToHtml(str);
+        return viewState.useHtml ?
+                HtmlUtil.preprocessQspHtml(str) :
+                HtmlUtil.convertQspStringToHtml(str);
     }
 
     private void refreshVarsDesc() {
-        String text = getHtml(varsDesc);
+        String text = getHtml(viewState.varsDesc);
         varsDescView.loadDataWithBaseURL(
                 "file:///",
                 pageTemplate.replace("REPLACETEXT", text),
@@ -527,25 +389,25 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void refreshActions() {
-        QspItemAdapter adapter = (QspItemAdapter) actionsView.getAdapter();
-        if (adapter != null) {
-            adapter.notifyDataSetChanged();
-        }
+        actionsView.setAdapter(new QspItemAdapter(uiContext, R.layout.act_item, viewState.actions));
+        adjustListViewHeight(actionsView);
     }
 
     private void refreshObjects() {
-        QspItemAdapter adapter = (QspItemAdapter) objectsView.getAdapter();
-        if (adapter != null) {
-            adapter.notifyDataSetChanged();
-        }
+        objectsView.setAdapter(new QspItemAdapter(uiContext, R.layout.obj_item, viewState.objects));
+        adjustListViewHeight(objectsView);
+    }
+
+    private void startSelectGame() {
+        selectingGame = true;
+        Intent intent = new Intent(this, GameStockActivity.class);
+        intent.putExtra("gameRunning", viewState.gameRunning);
+        startActivityForResult(intent, REQUEST_CODE_SELECT_GAME);
     }
 
     @Override
     public void onPause() {
-        if (gameRunning) {
-            counterHandler.removeCallbacks(counterTask);
-            audioPlayer.pauseAll();
-        }
+        libQspProxy.pauseGame();
         super.onPause();
     }
 
@@ -571,7 +433,7 @@ public class MainActivity extends AppCompatActivity {
                         if (which == 0) {
                             startSelectGame();
                         } else if (which == 1) {
-                            moveTaskToBack(true);
+                            System.exit(0);
                         }
                     }
                 })
@@ -591,6 +453,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
+        boolean gameRunning = viewState.gameRunning;
         menu.setGroupVisible(R.id.menugroup_running, gameRunning);
 
         if (gameRunning) {
@@ -612,6 +475,37 @@ public class MainActivity extends AppCompatActivity {
         subMenu.setHeaderTitle(getString(R.string.selectSlot));
 
         MenuItem item;
+        final DocumentFile savesDir = FileUtil.getOrCreateDirectory(viewState.gameDir, "saves");
+        final LibQspProxy proxy = libQspProxy;
+
+        for (int i = 0; i < MAX_SAVE_SLOTS; ++i) {
+            final String filename = getSaveSlotFilename(i);
+            final DocumentFile file = savesDir.findFile(filename);
+            String title = String.format(
+                    getString(file != null ? R.string.slotPresent : R.string.slotEmpty),
+                    i + 1);
+
+            item = subMenu.add(title);
+            item.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                @Override
+                public boolean onMenuItemClick(MenuItem item) {
+                    switch (action) {
+                        case LOAD:
+                            if (file != null) {
+                                proxy.loadGameState(file.getUri());
+                            }
+                            break;
+                        case SAVE:
+                            DocumentFile file = FileUtil.getOrCreateBinaryFile(savesDir, filename);
+                            proxy.saveGameState(file.getUri());
+                            break;
+                    }
+
+                    return true;
+                }
+            });
+        }
+
         switch (action) {
             case LOAD:
                 item = subMenu.add(getString(R.string.loadFrom));
@@ -634,36 +528,6 @@ public class MainActivity extends AppCompatActivity {
                 });
                 break;
         }
-
-        DocumentFile dir = getOrCreateSavesDirectory();
-
-        for (int i = 0; i < MAX_SAVE_SLOTS; ++i) {
-            final String filename = getSaveSlotFilename(i);
-            final DocumentFile file = dir.findFile(filename);
-            String title = String.format(
-                    getString(file != null ? R.string.slotPresent : R.string.slotEmpty),
-                    i + 1);
-
-            item = subMenu.add(title);
-            item.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-                @Override
-                public boolean onMenuItemClick(MenuItem item) {
-                    switch (action) {
-                        case LOAD:
-                            if (file != null) {
-                                doLoadGame(file.getUri());
-                            }
-                            break;
-                        case SAVE:
-                            DocumentFile file = getOrCreateSaveFile(filename);
-                            doSaveGame(file.getUri());
-                            break;
-                    }
-
-                    return true;
-                }
-            });
-        }
     }
 
     private void startLoadFromFile() {
@@ -675,82 +539,12 @@ public class MainActivity extends AppCompatActivity {
     private void startSaveToFile() {
         Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
         intent.setType("application/octet-stream");
-        intent.putExtra(Intent.EXTRA_TITLE, gameTitle + ".sav");
+        intent.putExtra(Intent.EXTRA_TITLE, viewState.gameTitle + ".sav");
         startActivityForResult(intent, REQUEST_CODE_SAVE_TO_FILE);
-    }
-
-    private DocumentFile getOrCreateSavesDirectory() {
-        DocumentFile dir = gameDir.findFile("saves");
-        if (dir == null) {
-            dir = gameDir.createDirectory("saves");
-        }
-
-        return dir;
     }
 
     private String getSaveSlotFilename(int slot) {
         return (slot + 1) + ".sav";
-    }
-
-    private void doLoadGame(Uri uri) {
-        final byte[] gameData;
-        try (InputStream in = uiContext.getContentResolver().openInputStream(uri)) {
-            try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-                byte[] b = new byte[8192];
-                int bytesRead;
-                while ((bytesRead = in.read(b)) > 0) {
-                    out.write(b, 0, bytesRead);
-                }
-                gameData = out.toByteArray();
-            }
-        } catch (IOException e) {
-            Log.e(TAG, "Failed reading from the save file", e);
-            return;
-        }
-        counterHandler.removeCallbacks(counterTask);
-        audioPlayer.stopAll();
-
-        executeOnLibQspThread(new Runnable() {
-            @Override
-            public void run() {
-                if (!QSPOpenSavedGameFromData(gameData, gameData.length, true)) {
-                    showLastLibQspError();
-                }
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        counterHandler.postDelayed(counterTask, timerInterval);
-                    }
-                });
-            }
-        });
-    }
-
-    private DocumentFile getOrCreateSaveFile(String filename) {
-        DocumentFile dir = getOrCreateSavesDirectory();
-        DocumentFile file = dir.findFile(filename);
-        if (file == null) {
-            file = FileUtil.createBinaryFile(dir, filename);
-        }
-
-        return file;
-    }
-
-    private void doSaveGame(final Uri uri) {
-        executeOnLibQspThread(new Runnable() {
-            @Override
-            public void run() {
-                byte[] gameData = QSPSaveGameAsData(false);
-                if (gameData == null) {
-                    return;
-                }
-                try (OutputStream out = uiContext.getContentResolver().openOutputStream(uri, "w")) {
-                    out.write(gameData);
-                } catch (IOException e) {
-                    Log.e(TAG, "Failed writing to a save file", e);
-                }
-            }
-        });
     }
 
     @Override
@@ -761,7 +555,7 @@ public class MainActivity extends AppCompatActivity {
                 return true;
 
             case R.id.menu_exit:
-                moveTaskToBack(true);
+                System.exit(0);
                 return true;
 
             case R.id.menu_options:
@@ -775,8 +569,8 @@ public class MainActivity extends AppCompatActivity {
                 return true;
 
             case R.id.menu_newgame:
-                stopGame();
-                runGame();
+                libQspProxy.restartGame();
+                setActiveTab(TAB_MAIN_DESC);
                 return true;
 
             case R.id.menu_loadgame:
@@ -819,20 +613,16 @@ public class MainActivity extends AppCompatActivity {
         if (resultCode != RESULT_OK || data == null) {
             return;
         }
-        stopGame();
-
-        gameTitle = data.getStringExtra("gameTitle");
+        String gameTitle = data.getStringExtra("gameTitle");
 
         String gameDirUri = data.getStringExtra("gameDirUri");
-        DocumentFile newGameDir = FileUtil.getDirectory(uiContext, gameDirUri);
-        imageGetter.setGameDirectory(newGameDir);
-        audioPlayer.setGameDirectory(newGameDir);
-        gameDir = newGameDir;
+        DocumentFile gameDir = FileUtil.getDirectory(uiContext, gameDirUri);
+        imageProvider.setGameDirectory(gameDir);
 
         String gameFileUri = data.getStringExtra("gameFileUri");
-        gameFile = FileUtil.getFile(uiContext, gameFileUri);
+        DocumentFile gameFile = FileUtil.getFile(uiContext, gameFileUri);
 
-        runGame();
+        libQspProxy.runGame(gameTitle, gameDir, gameFile);
     }
 
     private void handleLoadFromFile(int resultCode, Intent data) {
@@ -840,7 +630,7 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
         Uri uri = data.getData();
-        doLoadGame(uri);
+        libQspProxy.loadGameState(uri);
     }
 
     private void handleSaveToFile(int resultCode, Intent data) {
@@ -848,7 +638,7 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
         Uri uri = data.getData();
-        doSaveGame(uri);
+        libQspProxy.saveGameState(uri);
     }
 
     public void onTitleClick(View v) {
@@ -883,203 +673,7 @@ public class MainActivity extends AppCompatActivity {
     public void onInputButtonClick(View v) {
         View inputButton = findViewById(R.id.title_button_3);
         inputButton.clearAnimation();
-
-        executeOnLibQspThread(new Runnable() {
-            @Override
-            public void run() {
-                String input = InputBox(getString(R.string.inputArea));
-                QSPSetInputStrText(input);
-
-                if (!QSPExecUserInput(true)) {
-                    showLastLibQspError();
-                }
-            }
-        });
-    }
-
-    private void runGame() {
-        executeOnLibQspThread(new Runnable() {
-            @Override
-            public void run() {
-                gameStartTime = System.currentTimeMillis();
-                qspFSize = 0;
-                qspBColor = 0;
-                qspFColor = 0;
-                qspLColor = 0;
-                if (!loadGameWorld()) {
-                    return;
-                }
-                if (!QSPRestartGame(true)) {
-                    showLastLibQspError();
-                }
-                startCounter();
-                gameRunning = true;
-            }
-        });
-
-        setActiveTab(TAB_MAIN_DESC);
-    }
-
-    private boolean loadGameWorld() {
-        byte[] gameData;
-        try (InputStream in = uiContext.getContentResolver().openInputStream(gameFile.getUri())) {
-            try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-                byte[] b = new byte[8192];
-                int bytesRead;
-                while ((bytesRead = in.read(b)) > 0) {
-                    out.write(b, 0, bytesRead);
-                }
-                gameData = out.toByteArray();
-            }
-        } catch (IOException e) {
-            Log.e(TAG, "Failed loading the game world", e);
-            return false;
-        }
-
-        if (!QSPLoadGameWorldFromData(gameData, gameData.length, gameFile.getUri().toString())) {
-            showLastLibQspError();
-            return false;
-        }
-
-        return true;
-    }
-
-    private void startCounter() {
-        timerInterval = 500;
-        counterHandler.postDelayed(counterTask, timerInterval);
-    }
-
-    private void RefreshInt() {
-        final boolean settingsChanged = loadGameUISettings();
-
-        final boolean mainDescChanged = QSPIsMainDescChanged();
-        if (mainDescChanged) {
-            mainDesc = QSPGetMainDesc();
-        }
-
-        final boolean actionsChanged = QSPIsActionsChanged();
-        final ArrayList<QspListItem> actions;
-        if (actionsChanged) {
-            int actionsCount = QSPGetActionsCount();
-            actions = new ArrayList<>();
-            for (int i = 0; i < actionsCount; ++i) {
-                JniResult actionResult = (JniResult) QSPGetActionData(i);
-                QspListItem action = new QspListItem();
-                action.icon = imageGetter.getDrawable(FileUtil.normalizePath(actionResult.str2));
-                action.text = useHtml ? HtmlUtil.removeHtmlTags(actionResult.str1) : actionResult.str1;
-                actions.add(action);
-            }
-        } else {
-            actions = null;
-        }
-
-        final boolean objectsChanged = QSPIsObjectsChanged();
-        final ArrayList<QspListItem> objects;
-        if (objectsChanged) {
-            int objectsCount = QSPGetObjectsCount();
-            objects = new ArrayList<>();
-            for (int i = 0; i < objectsCount; i++) {
-                JniResult objectResult = (JniResult) QSPGetObjectData(i);
-                QspListItem object = new QspListItem();
-                object.icon = imageGetter.getDrawable(FileUtil.normalizePath(objectResult.str2));
-                object.text = useHtml ? HtmlUtil.removeHtmlTags(objectResult.str1) : objectResult.str1;
-                objects.add(object);
-            }
-        } else {
-            objects = null;
-        }
-
-        final boolean varsDescChanged = QSPIsVarsDescChanged();
-        if (varsDescChanged) {
-            varsDesc = QSPGetVarsDesc();
-        }
-
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if (settingsChanged) {
-                    applyTextSettings();
-                }
-                if (settingsChanged || mainDescChanged) {
-                    refreshMainDesc();
-                }
-                if (actionsChanged) {
-                    QspItemAdapter adapter = new QspItemAdapter(uiContext, R.layout.act_item, actions);
-                    actionsView.setAdapter(adapter);
-                    adjustListViewHeight(actionsView);
-                }
-                if (objectsChanged) {
-                    if (activeTab != TAB_OBJECTS) {
-                        updateTitle();
-                    }
-                    QspItemAdapter adapter = new QspItemAdapter(uiContext, R.layout.obj_item, objects);
-                    objectsView.setAdapter(adapter);
-                }
-                if (varsDescChanged && activeTab != TAB_VARS_DESC) {
-                    varsDescUnread = true;
-                    updateTitle();
-                }
-                if (settingsChanged || varsDescChanged) {
-                    refreshVarsDesc();
-                }
-            }
-        });
-    }
-
-    /**
-     * Loads user interface settings from the current game.
-     *
-     * @return <code>true</code> if settings changed, <code>false</code> otherwise
-     */
-    private boolean loadGameUISettings() {
-        boolean settingsChanged = false;
-
-        JniResult htmlResult = (JniResult) QSPGetVarValues("USEHTML", 0);
-        if (htmlResult.success) {
-            boolean newUseHtml = htmlResult.int1 != 0;
-            if (useHtml != newUseHtml) {
-                useHtml = newUseHtml;
-                settingsChanged = true;
-            }
-        }
-
-        JniResult fSizeResult = (JniResult) QSPGetVarValues("FSIZE", 0);
-        if (fSizeResult.success) {
-            int newFSize = fSizeResult.int1;
-            if (qspFSize != newFSize) {
-                qspFSize = newFSize;
-                settingsChanged = true;
-            }
-        }
-
-        JniResult bColorResult = (JniResult) QSPGetVarValues("BCOLOR", 0);
-        if (bColorResult.success) {
-            int newBColor = bColorResult.int1;
-            if (qspBColor != newBColor) {
-                qspBColor = newBColor;
-                settingsChanged = true;
-            }
-        }
-
-        JniResult fColorResult = (JniResult) QSPGetVarValues("FCOLOR", 0);
-        if (fColorResult.success) {
-            int newFColor = fColorResult.int1;
-            if (qspFColor != newFColor) {
-                qspFColor = newFColor;
-                settingsChanged = true;
-            }
-        }
-
-        JniResult lColorResult = (JniResult) QSPGetVarValues("LCOLOR", 0);
-        if (lColorResult.success) {
-            int newLColor = lColorResult.int1;
-            if (qspLColor != newLColor) {
-                qspLColor = newLColor;
-                settingsChanged = true;
-            }
-        }
-
-        return settingsChanged;
+        libQspProxy.onInputAreaClicked();
     }
 
     private void adjustListViewHeight(ListView view) {
@@ -1102,38 +696,75 @@ public class MainActivity extends AppCompatActivity {
         view.requestLayout();
     }
 
-    private void ShowPicture(final String path) {
-        if (path == null || path.isEmpty()) {
-            return;
-        }
+    // Begin PlayerView implementation
+
+    @Override
+    public void refreshGameView(
+            final boolean confChanged,
+            final boolean mainDescChanged,
+            final boolean actionsChanged,
+            final boolean objectsChanged,
+            final boolean varsDescChanged) {
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                viewState = libQspProxy.getViewState();
+
+                if (confChanged) {
+                    applyTextSettings();
+                }
+                if (confChanged || mainDescChanged) {
+                    refreshMainDesc();
+                }
+                if (actionsChanged) {
+                    refreshActions();
+                }
+                if (objectsChanged) {
+                    refreshObjects();
+                }
+                if (varsDescChanged && activeTab != TAB_VARS_DESC) {
+                    varsDescUnread = true;
+                    updateTitle();
+                }
+                if (confChanged || varsDescChanged) {
+                    refreshVarsDesc();
+                }
+            }
+        });
+    }
+
+    @Override
+    public void showError(final String message) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                ViewUtil.showErrorDialog(uiContext, message);
+            }
+        });
+    }
+
+    @Override
+    public void showPicture(final String path) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 Intent intent = new Intent(uiContext, ImageBoxActivity.class);
-                intent.putExtra("gameDirUri", gameDir.getUri().toString());
+                intent.putExtra("gameDirUri", viewState.gameDir.getUri().toString());
                 intent.putExtra("imagePath", FileUtil.normalizePath(path));
                 startActivity(intent);
             }
         });
     }
 
-    private void SetTimer(int msecs) {
-        final int timeMsecs = msecs;
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                timerInterval = timeMsecs;
-            }
-        });
-    }
-
-    private void ShowMessage(final String message) {
+    @Override
+    public void showMessage(final String message) {
         final CountDownLatch latch = new CountDownLatch(1);
 
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                String processedMsg = useHtml ? HtmlUtil.removeHtmlTags(message) : message;
+                String processedMsg = viewState.useHtml ? HtmlUtil.removeHtmlTags(message) : message;
                 if (processedMsg == null) {
                     processedMsg = "";
                 }
@@ -1155,62 +786,12 @@ public class MainActivity extends AppCompatActivity {
         try {
             latch.await();
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            Log.e(TAG, "Wait failed", e);
         }
     }
 
-    private void PlayFile(final String path, final int volume) {
-        if (path == null || path.isEmpty()) {
-            return;
-        }
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                audioPlayer.play(FileUtil.normalizePath(path), volume);
-            }
-        });
-    }
-
-    private boolean IsPlayingFile(final String path) {
-        if (path == null || path.isEmpty()) {
-            return false;
-        }
-        return audioPlayer.isPlaying(FileUtil.normalizePath(path));
-    }
-
-    private void CloseFile(final String path) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if (path == null || path.isEmpty()) {
-                    audioPlayer.stopAll();
-                } else {
-                    audioPlayer.stop(FileUtil.normalizePath(path));
-                }
-            }
-        });
-    }
-
-    private void OpenGame(String filename) {
-        DocumentFile file = getSaveFile(filename);
-        if (file == null) {
-            Log.e(TAG, "Save file not found: " + filename);
-            return;
-        }
-        doLoadGame(file.getUri());
-    }
-
-    private DocumentFile getSaveFile(String filename) {
-        DocumentFile dir = getOrCreateSavesDirectory();
-        return dir.findFile(filename);
-    }
-
-    private void SaveGame(String filename) {
-        DocumentFile file = getOrCreateSaveFile(filename);
-        doSaveGame(file.getUri());
-    }
-
-    private String InputBox(final String prompt) {
+    @Override
+    public String showInputBox(final String prompt) {
         final ArrayBlockingQueue<String> inputQueue = new ArrayBlockingQueue<>(1);
 
         runOnUiThread(new Runnable() {
@@ -1218,7 +799,7 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 final View view = getLayoutInflater().inflate(R.layout.inputbox, null);
 
-                String message = useHtml ? HtmlUtil.removeHtmlTags(prompt) : prompt;
+                String message = viewState.useHtml ? HtmlUtil.removeHtmlTags(prompt) : prompt;
                 if (message == null) {
                     message = "";
                 }
@@ -1242,27 +823,17 @@ public class MainActivity extends AppCompatActivity {
         try {
             return inputQueue.take();
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            Log.e(TAG, "Wait for input failed", e);
             return null;
         }
     }
 
-    private int GetMSCount() {
-        return (int) (System.currentTimeMillis() - gameStartTime);
-    }
-
-    private void AddMenuItem(String name, String imgPath) {
-        QspMenuItem item = new QspMenuItem();
-        item.imgPath = FileUtil.normalizePath(imgPath);
-        item.name = name;
-        qspMenuItems.add(item);
-    }
-
-    private void ShowMenu() {
+    @Override
+    public int showMenu() {
         final ArrayBlockingQueue<Integer> resultQueue = new ArrayBlockingQueue<>(1);
         final ArrayList<String> items = new ArrayList<>();
 
-        for (QspMenuItem item : qspMenuItems) {
+        for (QspMenuItem item : viewState.menuItems) {
             items.add(item.name);
         }
 
@@ -1288,25 +859,18 @@ public class MainActivity extends AppCompatActivity {
         });
 
         try {
-            int result = resultQueue.take();
-            if (result != -1) {
-                QSPSelectMenuItem(result);
-            }
+            return resultQueue.take();
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            Log.e(TAG, "Wait failed", e);
+            return -1;
         }
     }
 
-    private void DeleteMenu() {
-        qspMenuItems.clear();
-    }
+    // End PlayerView implementation
 
-    private void Wait(int msecs) {
-        try {
-            Thread.sleep(msecs);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+    private enum SlotAction {
+        LOAD,
+        SAVE
     }
 
     private class QspWebViewClient extends WebViewClient {
@@ -1314,15 +878,8 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, final String href) {
             if (href.toLowerCase().startsWith("exec:")) {
-                executeOnLibQspThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        String code = HtmlUtil.decodeExec(href.substring(5));
-                        if (!QSPExecString(code, true)) {
-                            showLastLibQspError();
-                        }
-                    }
-                });
+                final String code = HtmlUtil.decodeExec(href.substring(5));
+                libQspProxy.execute(code);
             }
 
             return true;
@@ -1333,8 +890,9 @@ public class MainActivity extends AppCompatActivity {
         public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
             if (url.startsWith("file:///")) {
                 String path = FileUtil.normalizePath(Uri.decode(url.substring(8)));
-                DocumentFile file = FileUtil.findFileByPath(gameDir, path);
+                DocumentFile file = FileUtil.findFileByPath(viewState.gameDir, path);
                 if (file == null) {
+                    Log.e(TAG, "File not found: " + path);
                     return null;
                 }
                 try {
@@ -1400,115 +958,5 @@ public class MainActivity extends AppCompatActivity {
                     return Typeface.DEFAULT;
             }
         }
-    }
-
-    private class QspListItem {
-        Drawable icon;
-        CharSequence text;
-    }
-
-    private class QspMenuItem {
-        String name;
-        String imgPath;
-    }
-
-    private enum SlotAction {
-        LOAD,
-        SAVE
-    }
-
-    public native void QSPInit();
-
-    public native void QSPDeInit();
-
-    public native boolean QSPIsInCallBack();
-
-    public native void QSPEnableDebugMode(boolean isDebug);
-
-    public native Object QSPGetCurStateData();//!!!STUB
-
-    public native String QSPGetVersion();
-
-    public native int QSPGetFullRefreshCount();
-
-    public native String QSPGetQstFullPath();
-
-    public native String QSPGetCurLoc();
-
-    public native String QSPGetMainDesc();
-
-    public native boolean QSPIsMainDescChanged();
-
-    public native String QSPGetVarsDesc();
-
-    public native boolean QSPIsVarsDescChanged();
-
-    public native Object QSPGetExprValue();//!!!STUB
-
-    public native void QSPSetInputStrText(String val);
-
-    public native int QSPGetActionsCount();
-
-    public native Object QSPGetActionData(int ind);//!!!STUB
-
-    public native boolean QSPExecuteSelActionCode(boolean isRefresh);
-
-    public native boolean QSPSetSelActionIndex(int ind, boolean isRefresh);
-
-    public native int QSPGetSelActionIndex();
-
-    public native boolean QSPIsActionsChanged();
-
-    public native int QSPGetObjectsCount();
-
-    public native Object QSPGetObjectData(int ind);//!!!STUB
-
-    public native boolean QSPSetSelObjectIndex(int ind, boolean isRefresh);
-
-    public native int QSPGetSelObjectIndex();
-
-    public native boolean QSPIsObjectsChanged();
-
-    public native void QSPShowWindow(int type, boolean isShow);
-
-    public native Object QSPGetVarValuesCount(String name);
-
-    public native Object QSPGetVarValues(String name, int ind);//!!!STUB
-
-    public native int QSPGetMaxVarsCount();
-
-    public native Object QSPGetVarNameByIndex(int index);//!!!STUB
-
-    public native boolean QSPExecString(String s, boolean isRefresh);
-
-    public native boolean QSPExecLocationCode(String name, boolean isRefresh);
-
-    public native boolean QSPExecCounter(boolean isRefresh);
-
-    public native boolean QSPExecUserInput(boolean isRefresh);
-
-    public native Object QSPGetLastErrorData();
-
-    public native String QSPGetErrorDesc(int errorNum);
-
-    public native boolean QSPLoadGameWorld(String fileName);
-
-    public native boolean QSPLoadGameWorldFromData(byte data[], int dataSize, String fileName);
-
-    public native boolean QSPSaveGame(String fileName, boolean isRefresh);
-
-    public native byte[] QSPSaveGameAsData(boolean isRefresh);
-
-    public native boolean QSPOpenSavedGame(String fileName, boolean isRefresh);
-
-    public native boolean QSPOpenSavedGameFromData(byte data[], int dataSize, boolean isRefresh);
-
-    public native boolean QSPRestartGame(boolean isRefresh);
-
-    public native void QSPSelectMenuItem(int index);
-    //public native void QSPSetCallBack(int type, QSP_CALLBACK func)
-
-    static {
-        System.loadLibrary("ndkqsp");
     }
 }

@@ -16,13 +16,13 @@ public final class ViewUtil {
 
     public static void setLocale(Context context, String lang) {
         Locale locale = new Locale(lang);
-        Resources newRes = context.getResources();
-        DisplayMetrics dm = newRes.getDisplayMetrics();
+        Resources res = context.getResources();
+        DisplayMetrics dm = res.getDisplayMetrics();
 
-        Configuration conf = newRes.getConfiguration();
+        Configuration conf = res.getConfiguration();
         conf.locale = locale;
 
-        newRes.updateConfiguration(conf, dm);
+        res.updateConfiguration(conf, dm);
     }
 
     public static void showToast(Context context, String text) {

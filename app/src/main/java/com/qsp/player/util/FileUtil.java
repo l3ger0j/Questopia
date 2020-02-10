@@ -59,12 +59,30 @@ public final class FileUtil {
         return DocumentFile.fromSingleUri(context, Uri.parse(uri));
     }
 
+    public static DocumentFile getOrCreateBinaryFile(DocumentFile parentDir, String filename) {
+        DocumentFile file = parentDir.findFile(filename);
+        if (file == null) {
+            file = createBinaryFile(parentDir, filename);
+        }
+
+        return file;
+    }
+
     public static DocumentFile getDirectory(Context context, String uri) {
         if (uri.startsWith("file:///")) {
             return DocumentFile.fromFile(new File(URI.create(uri)));
         }
 
         return DocumentFile.fromTreeUri(context, Uri.parse(uri));
+    }
+
+    public static DocumentFile getOrCreateDirectory(DocumentFile parentDir, String name) {
+        DocumentFile dir = parentDir.findFile(name);
+        if (dir == null) {
+            dir = parentDir.createDirectory(name);
+        }
+
+        return dir;
     }
 
     public static DocumentFile findFileByPath(DocumentFile parentDir, String path) {

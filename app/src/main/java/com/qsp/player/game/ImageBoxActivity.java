@@ -17,7 +17,7 @@ import com.qsp.player.util.FileUtil;
 public class ImageBoxActivity extends AppCompatActivity {
 
     private final Context uiContext = this;
-    private final QspImageGetter imageGetter = new QspImageGetter(this);
+    private final ImageProvider imageProvider = new ImageProvider(this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,10 +28,10 @@ public class ImageBoxActivity extends AppCompatActivity {
 
         String gameDirUri = intent.getStringExtra("gameDirUri");
         DocumentFile gameDir = FileUtil.getDirectory(uiContext, gameDirUri);
-        imageGetter.setGameDirectory(gameDir);
+        imageProvider.setGameDirectory(gameDir);
 
         String imagePath = intent.getStringExtra("imagePath");
-        Drawable drawable = imageGetter.getDrawable(imagePath);
+        Drawable drawable = imageProvider.getDrawable(imagePath);
         initImageView(drawable);
     }
 
