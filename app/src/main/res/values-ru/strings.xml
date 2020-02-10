@@ -52,6 +52,8 @@
     <string name="textSettings">Текст</string>
     <string name="fontSize">Размер шрифта</string>
     <string name="fontStyle">Стиль шрифта</string>
+    <string name="useGameFont">Исп. шрифт игры</string>
+    <string name="useGameFontSummary">Использовать настройки шрифта из игры</string>
     <string name="textColor">Цвет текста</string>
     <string name="backColor">Цвет фона</string>
     <string name="linkColor">Цвет ссылок</string>

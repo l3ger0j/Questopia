@@ -52,6 +52,8 @@
     <string name="textSettings">Text</string>
     <string name="fontSize">Font Size</string>
     <string name="fontStyle">Font Style</string>
+    <string name="useGameFont">Use Game Font</string>
+    <string name="useGameFontSummary">Use font settings from the game</string>
     <string name="textColor">Text Color</string>
     <string name="backColor">Background Color</string>
     <string name="linkColor">Link Color</string>

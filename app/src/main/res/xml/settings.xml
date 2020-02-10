@@ -34,6 +34,11 @@
             android:key="fontSize"
             android:title="@string/fontSize" />
 
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="useGameFont"
+            android:title="@string/useGameFont" />
+
         <com.kizitonwose.colorpreferencecompat.ColorPreferenceCompat
             android:defaultValue="@color/def_back_color"
             android:key="backColor"

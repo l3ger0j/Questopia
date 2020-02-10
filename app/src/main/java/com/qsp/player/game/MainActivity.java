@@ -137,6 +137,7 @@ public class MainActivity extends AppCompatActivity {
 
     private String typeface = "";
     private String fontSize = "";
+    private boolean useGameFont;
     private int backColor;
     private int textColor;
     private int linkColor;
@@ -445,6 +446,7 @@ public class MainActivity extends AppCompatActivity {
     private void loadTextSettings() {
         typeface = settings.getString("typeface", "0");
         fontSize = settings.getString("fontSize", "16");
+        useGameFont = settings.getBoolean("useGameFont", false);
         backColor = settings.getInt("backColor", Color.parseColor("#e0e0e0"));
         textColor = settings.getInt("textColor", Color.parseColor("#000000"));
         linkColor = settings.getInt("linkColor", Color.parseColor("#0000ff"));
@@ -493,7 +495,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private String getFontSize() {
-        return qspFSize != 0 ? Integer.toString(qspFSize) : fontSize;
+        return useGameFont && qspFSize != 0 ? Integer.toString(qspFSize) : fontSize;
     }
 
     private String getHexColor(int color) {
