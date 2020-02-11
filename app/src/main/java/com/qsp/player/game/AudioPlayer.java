@@ -11,7 +11,6 @@ import com.qsp.player.util.FileUtil;
 
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CountDownLatch;
 
 class AudioPlayer {
 
@@ -58,7 +57,7 @@ class AudioPlayer {
             return;
         }
         final float sysVolume = getSystemVolume(volume);
-        runOnAudioThreadBlocking(new Runnable() {
+        runOnAudioThread(new Runnable() {
             @Override
             public void run() {
                 Sound prevSound = sounds.get(path);
@@ -101,22 +100,8 @@ class AudioPlayer {
         });
     }
 
-    private void runOnAudioThreadBlocking(final Runnable r) {
-        final CountDownLatch latch = new CountDownLatch(1);
-
-        audioHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                r.run();
-                latch.countDown();
-            }
-        });
-
-        try {
-            latch.await();
-        } catch (InterruptedException e) {
-            Log.e(TAG, "Wait failed", e);
-        }
+    private void runOnAudioThread(final Runnable r) {
+        audioHandler.post(r);
     }
 
     private float getSystemVolume(int volume) {
@@ -135,7 +120,7 @@ class AudioPlayer {
         if (!soundEnabled) {
             return;
         }
-        runOnAudioThreadBlocking(new Runnable() {
+        runOnAudioThread(new Runnable() {
             @Override
             public void run() {
                 for (Sound sound : sounds.values()) {
@@ -150,7 +135,7 @@ class AudioPlayer {
     }
 
     void pauseAll() {
-        runOnAudioThreadBlocking(new Runnable() {
+        runOnAudioThread(new Runnable() {
             @Override
             public void run() {
                 for (Sound sound : sounds.values()) {
@@ -163,7 +148,7 @@ class AudioPlayer {
     }
 
     void stop(final String path) {
-        runOnAudioThreadBlocking(new Runnable() {
+        runOnAudioThread(new Runnable() {
             @Override
             public void run() {
                 Sound sound = sounds.remove(path);
@@ -178,7 +163,7 @@ class AudioPlayer {
     }
 
     void stopAll() {
-        runOnAudioThreadBlocking(new Runnable() {
+        runOnAudioThread(new Runnable() {
             @Override
             public void run() {
                 for (Sound sound : sounds.values()) {
