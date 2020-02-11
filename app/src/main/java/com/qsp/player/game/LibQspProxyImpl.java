@@ -7,7 +7,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
-import androidx.annotation.MainThread;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.preference.PreferenceManager;
 
@@ -22,6 +21,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Locale;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class LibQspProxyImpl implements LibQspProxy {
@@ -61,10 +61,11 @@ public class LibQspProxyImpl implements LibQspProxy {
         this.context = context;
         settings = PreferenceManager.getDefaultSharedPreferences(context);
         imageProvider = new ImageProvider(context);
-        startQspThread();
     }
 
     private void startQspThread() {
+        final CountDownLatch latch = new CountDownLatch(1);
+
         new Thread() {
             @Override
             public void run() {
@@ -72,6 +73,7 @@ public class LibQspProxyImpl implements LibQspProxy {
                 QSPInit();
                 Looper.prepare();
                 qspHandler = new Handler();
+                latch.countDown();
                 Looper.loop();
                 QSPDeInit();
                 qspThreadRunning = false;
@@ -79,7 +81,12 @@ public class LibQspProxyImpl implements LibQspProxy {
         }
                 .start();
 
-        Log.i(TAG, "QSP library thread started");
+        try {
+            latch.await();
+            Log.i(TAG, "QSP library thread started");
+        } catch (InterruptedException e) {
+            Log.e(TAG, "Wait failed", e);
+        }
     }
 
     public void close() {
@@ -131,6 +138,9 @@ public class LibQspProxyImpl implements LibQspProxy {
     private void runOnQspThread(final Runnable runnable) {
         if (qspLock.isLocked()) {
             return;
+        }
+        if (!qspThreadRunning) {
+            startQspThread();
         }
         qspHandler.post(new Runnable() {
             @Override
