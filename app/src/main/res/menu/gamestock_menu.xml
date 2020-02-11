@@ -14,7 +14,7 @@
         android:title="@string/installGame" />
 
     <item
-        android:id="@+id/menu_deletegames"
+        android:id="@+id/menu_deletegame"
         android:title="@string/deleteGame" />
 
     <item

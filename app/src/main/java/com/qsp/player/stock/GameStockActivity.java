@@ -518,7 +518,7 @@ public class GameStockActivity extends AppCompatActivity {
                 showInstallGameDialog();
                 return true;
 
-            case R.id.menu_deletegames:
+            case R.id.menu_deletegame:
                 showDeleteGameDialog();
                 return true;
         }
