@@ -471,7 +471,8 @@ public class MainActivity extends AppCompatActivity implements PlayerView {
         int id = parent.getItemId();
         mainMenu.removeItem(id);
 
-        SubMenu subMenu = mainMenu.addSubMenu(R.id.menugroup_running, id, Menu.NONE, parent.getTitle());
+        int order = action == SlotAction.LOAD ? 2 : 3;
+        SubMenu subMenu = mainMenu.addSubMenu(R.id.menugroup_running, id, order, parent.getTitle());
         subMenu.setHeaderTitle(getString(R.string.selectSlot));
 
         MenuItem item;

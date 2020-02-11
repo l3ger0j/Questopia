@@ -1,32 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item
-        android:id="@+id/menu_gamestock"
-        android:title="@string/gameStock" />
-
-    <item
-        android:id="@+id/menu_options"
-        android:title="@string/settings" />
-
-    <item
-        android:id="@+id/menu_exit"
-        android:title="@string/closeApp" />
-
     <group android:id="@+id/menugroup_running">
 
         <item
             android:id="@+id/menu_newgame"
+            android:orderInCategory="1"
             android:title="@string/restartGame" />
 
         <item
             android:id="@+id/menu_loadgame"
+            android:orderInCategory="2"
             android:title="@string/load" />
 
         <item
             android:id="@+id/menu_savegame"
+            android:orderInCategory="3"
             android:title="@string/save" />
 
     </group>
+
+    <item
+        android:id="@+id/menu_gamestock"
+        android:orderInCategory="4"
+        android:title="@string/gameStock" />
+
+    <item
+        android:id="@+id/menu_options"
+        android:orderInCategory="5"
+        android:title="@string/settings" />
+
+    <item
+        android:id="@+id/menu_exit"
+        android:orderInCategory="6"
+        android:title="@string/closeApp" />
 
 </menu>
