@@ -11,6 +11,7 @@ import com.qsp.player.util.FileUtil;
 
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
 
 class AudioPlayer {
 
@@ -18,24 +19,32 @@ class AudioPlayer {
 
     private final ConcurrentHashMap<String, Sound> sounds = new ConcurrentHashMap<>();
 
+    private volatile boolean audioThreadRunning;
     private volatile Handler audioHandler;
     private boolean soundEnabled;
     private DocumentFile gameDir;
 
-    AudioPlayer() {
-        startAudioThread();
-    }
-
     private void startAudioThread() {
+        final CountDownLatch latch = new CountDownLatch(1);
+
         new Thread(new Runnable() {
             @Override
             public void run() {
+                audioThreadRunning = true;
                 Looper.prepare();
                 audioHandler = new Handler();
+                latch.countDown();
                 Looper.loop();
+                audioThreadRunning = false;
             }
         })
                 .start();
+
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            Log.e(TAG, "Wait failed", e);
+        }
     }
 
     void setSoundEnabled(boolean enabled) {
@@ -101,6 +110,9 @@ class AudioPlayer {
     }
 
     private void runOnAudioThread(final Runnable r) {
+        if (!audioThreadRunning) {
+            startAudioThread();
+        }
         audioHandler.post(r);
     }
 
