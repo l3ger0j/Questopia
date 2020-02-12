@@ -401,7 +401,9 @@ public class MainActivity extends AppCompatActivity implements PlayerView {
     private void startSelectGame() {
         selectingGame = true;
         Intent intent = new Intent(this, GameStockActivity.class);
-        intent.putExtra("gameRunning", viewState.gameRunning);
+        if (viewState.gameRunning) {
+            intent.putExtra("gameRunning", viewState.gameDir.getName());
+        }
         startActivityForResult(intent, REQUEST_CODE_SELECT_GAME);
     }
 

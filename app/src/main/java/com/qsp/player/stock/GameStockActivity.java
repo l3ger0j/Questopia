@@ -84,7 +84,7 @@ public class GameStockActivity extends AppCompatActivity {
     private final SparseArrayCompat<GameStockItemAdapter> gameAdapters = new SparseArrayCompat<>();
     private final LocalGameRepository localGameRepository = new LocalGameRepository(this);
 
-    private boolean gameRunning;
+    private String gameRunning;
     private boolean showProgressDialog;
     private SharedPreferences settings;
     private String currentLanguage = Locale.getDefault().getLanguage();
@@ -105,7 +105,7 @@ public class GameStockActivity extends AppCompatActivity {
         connectivityManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
 
         Intent intent = getIntent();
-        gameRunning = intent.getBooleanExtra("gameRunning", false);
+        gameRunning = intent.getStringExtra("gameRunning");
 
         loadLocale();
         initGamesListView();
@@ -494,7 +494,7 @@ public class GameStockActivity extends AppCompatActivity {
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         MenuItem resumeGameItem = menu.findItem(R.id.menu_resumegame);
-        resumeGameItem.setVisible(gameRunning);
+        resumeGameItem.setVisible(gameRunning != null);
         return true;
     }
 
@@ -639,6 +639,10 @@ public class GameStockActivity extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         if (which == DialogInterface.BUTTON_POSITIVE) {
+                            if (gameRunning != null && gameRunning.equals(gameDir.getName())) {
+                                gameRunning = null;
+                                invalidateOptionsMenu();
+                            }
                             FileUtil.deleteDirectory(gameDir);
                             ViewUtil.showToast(uiContext, getString(R.string.gameDeleted));
                             refreshGames();
