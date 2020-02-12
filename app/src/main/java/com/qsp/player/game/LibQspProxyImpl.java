@@ -90,7 +90,7 @@ public class LibQspProxyImpl implements LibQspProxy {
     }
 
     public void close() {
-        audioPlayer.close();
+        audioPlayer.destroy();
         stopQspThread();
     }
 
@@ -338,9 +338,7 @@ public class LibQspProxyImpl implements LibQspProxy {
 
     private void doRunGame(final String title, final DocumentFile dir, final DocumentFile file) {
         counterHandler.removeCallbacks(counterTask);
-
-        audioPlayer.stopAll();
-        audioPlayer.setSoundEnabled(settings.getBoolean("sound", true));
+        audioPlayer.closeAllFiles();
 
         viewState.reset();
         viewState.gameRunning = true;
@@ -376,14 +374,15 @@ public class LibQspProxyImpl implements LibQspProxy {
 
     @Override
     public void resumeGame() {
-        audioPlayer.resumeAll();
+        audioPlayer.setSoundEnabled(settings.getBoolean("sound", true));
+        audioPlayer.resume();
         counterHandler.postDelayed(counterTask, timerInterval);
     }
 
     @Override
     public void pauseGame() {
         counterHandler.removeCallbacks(counterTask);
-        audioPlayer.pauseAll();
+        audioPlayer.pause();
     }
 
     @Override
@@ -505,7 +504,7 @@ public class LibQspProxyImpl implements LibQspProxy {
 
     private void PlayFile(String path, int volume) {
         if (path != null && !path.isEmpty()) {
-            audioPlayer.play(FileUtil.normalizePath(path), volume);
+            audioPlayer.playFile(FileUtil.normalizePath(path), volume);
         }
     }
 
@@ -514,14 +513,14 @@ public class LibQspProxyImpl implements LibQspProxy {
             return false;
         }
 
-        return audioPlayer.isPlaying(FileUtil.normalizePath(path));
+        return audioPlayer.isPlayingFile(FileUtil.normalizePath(path));
     }
 
     private void CloseFile(String path) {
         if (path == null || path.isEmpty()) {
-            audioPlayer.stopAll();
+            audioPlayer.closeAllFiles();
         } else {
-            audioPlayer.stop(FileUtil.normalizePath(path));
+            audioPlayer.closeFile(FileUtil.normalizePath(path));
         }
     }
 

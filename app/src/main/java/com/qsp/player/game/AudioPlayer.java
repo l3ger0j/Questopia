@@ -23,6 +23,44 @@ class AudioPlayer {
     private volatile Handler audioHandler;
     private boolean soundEnabled;
     private DocumentFile gameDir;
+    private boolean paused;
+
+    void setSoundEnabled(boolean enabled) {
+        soundEnabled = enabled;
+    }
+
+    void setGameDirectory(DocumentFile dir) {
+        gameDir = dir;
+    }
+
+    void destroy() {
+        if (audioHandler != null) {
+            audioHandler.getLooper().quitSafely();
+        }
+    }
+
+    void resume() {
+        paused = false;
+
+        if (!soundEnabled) {
+            return;
+        }
+        runOnAudioThread(new Runnable() {
+            @Override
+            public void run() {
+                for (Sound sound : sounds.values()) {
+                    doPlay(sound);
+                }
+            }
+        });
+    }
+
+    private void runOnAudioThread(final Runnable r) {
+        if (!audioThreadRunning) {
+            startAudioThread();
+        }
+        audioHandler.post(r);
+    }
 
     private void startAudioThread() {
         final CountDownLatch latch = new CountDownLatch(1);
@@ -47,106 +85,46 @@ class AudioPlayer {
         }
     }
 
-    void setSoundEnabled(boolean enabled) {
-        soundEnabled = enabled;
-    }
+    private void doPlay(final Sound sound) {
+        float sysVolume = getSystemVolume(sound.volume);
 
-    void setGameDirectory(DocumentFile dir) {
-        gameDir = dir;
-    }
-
-    void close() {
-        if (audioHandler != null) {
-            audioHandler.getLooper().quitSafely();
-        }
-    }
-
-    void play(final String path, final int volume) {
-        if (!soundEnabled) {
+        if (sound.player != null) {
+            sound.player.setVolume(sysVolume, sysVolume);
+            if (!sound.player.isPlaying()) {
+                sound.player.start();
+            }
             return;
         }
-        final float sysVolume = getSystemVolume(volume);
-        runOnAudioThread(new Runnable() {
-            @Override
-            public void run() {
-                Sound prevSound = sounds.get(path);
-                if (prevSound != null) {
-                    prevSound.player.setVolume(sysVolume, sysVolume);
-                    if (!prevSound.player.isPlaying()) {
-                        prevSound.player.start();
-                    }
-                    return;
-                }
 
-                DocumentFile file = FileUtil.findFileByPath(gameDir, path);
-                if (file == null) {
-                    Log.e(TAG, "Sound file not found: " + path);
-                    return;
-                }
-
-                MediaPlayer player = new MediaPlayer();
-                try {
-                    player.setDataSource(file.getUri().toString());
-                    player.prepare();
-                } catch (IOException e) {
-                    Log.e(TAG, "Failed to initialize media player", e);
-                    return;
-                }
-                player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                    @Override
-                    public void onCompletion(MediaPlayer mp) {
-                        sounds.remove(path);
-                    }
-                });
-                player.setVolume(sysVolume, sysVolume);
-                player.start();
-
-                Sound sound = new Sound();
-                sound.volume = volume;
-                sound.player = player;
-                sounds.put(path, sound);
-            }
-        });
-    }
-
-    private void runOnAudioThread(final Runnable r) {
-        if (!audioThreadRunning) {
-            startAudioThread();
-        }
-        audioHandler.post(r);
-    }
-
-    private float getSystemVolume(int volume) {
-        return volume / 100.f;
-    }
-
-    boolean isPlaying(String path) {
-        if (path == null || path.isEmpty()) {
-            return false;
-        }
-
-        return sounds.containsKey(path);
-    }
-
-    void resumeAll() {
-        if (!soundEnabled) {
+        DocumentFile file = FileUtil.findFileByPath(gameDir, sound.path);
+        if (file == null) {
+            Log.e(TAG, "Sound file not found: " + sound.path);
             return;
         }
-        runOnAudioThread(new Runnable() {
+
+        MediaPlayer player = new MediaPlayer();
+        try {
+            player.setDataSource(file.getUri().toString());
+            player.prepare();
+        } catch (IOException e) {
+            Log.e(TAG, "Failed to initialize media player", e);
+            return;
+        }
+        player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
-            public void run() {
-                for (Sound sound : sounds.values()) {
-                    if (!sound.player.isPlaying()) {
-                        float volume = getSystemVolume(sound.volume);
-                        sound.player.setVolume(volume, volume);
-                        sound.player.start();
-                    }
-                }
+            public void onCompletion(MediaPlayer mp) {
+                sounds.remove(sound.path);
             }
         });
+        player.setVolume(sysVolume, sysVolume);
+        player.start();
+
+        sound.player = player;
     }
 
-    void pauseAll() {
+    void pause() {
+        paused = true;
+
         runOnAudioThread(new Runnable() {
             @Override
             public void run() {
@@ -159,30 +137,66 @@ class AudioPlayer {
         });
     }
 
-    void stop(final String path) {
+    void playFile(final String path, final int volume) {
         runOnAudioThread(new Runnable() {
             @Override
             public void run() {
-                Sound sound = sounds.remove(path);
+                Sound sound = sounds.get(path);
                 if (sound != null) {
-                    if (sound.player.isPlaying()) {
-                        sound.player.stop();
-                    }
-                    sound.player.release();
+                    sound.volume = volume;
+                } else {
+                    sound = new Sound();
+                    sound.path = path;
+                    sound.volume = volume;
+                    sounds.put(path, sound);
+                }
+                if (soundEnabled && !paused) {
+                    doPlay(sound);
                 }
             }
         });
     }
 
-    void stopAll() {
+    private float getSystemVolume(int volume) {
+        return volume / 100.f;
+    }
+
+    boolean isPlayingFile(String path) {
+        if (path == null || path.isEmpty()) {
+            return false;
+        }
+
+        return sounds.containsKey(path);
+    }
+
+    void closeFile(final String path) {
+        runOnAudioThread(new Runnable() {
+            @Override
+            public void run() {
+                Sound sound = sounds.remove(path);
+                if (sound != null) {
+                    doClose(sound);
+                }
+            }
+        });
+    }
+
+    private void doClose(Sound sound) {
+        if (sound.player == null) {
+            return;
+        }
+        if (sound.player.isPlaying()) {
+            sound.player.stop();
+        }
+        sound.player.release();
+    }
+
+    void closeAllFiles() {
         runOnAudioThread(new Runnable() {
             @Override
             public void run() {
                 for (Sound sound : sounds.values()) {
-                    if (sound.player.isPlaying()) {
-                        sound.player.stop();
-                    }
-                    sound.player.release();
+                    doClose(sound);
                 }
                 sounds.clear();
             }
@@ -190,6 +204,7 @@ class AudioPlayer {
     }
 
     private static class Sound {
+        private String path;
         private int volume;
         private MediaPlayer player;
     }
