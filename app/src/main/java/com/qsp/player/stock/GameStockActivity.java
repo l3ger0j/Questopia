@@ -434,6 +434,7 @@ public class GameStockActivity extends AppCompatActivity {
         boolean containsGameFiles = false;
 
         if (extracted) {
+            normalizeGameDirectory(gameDir);
             containsGameFiles = doesDirectoryContainGameFiles(gameDir);
         } else {
             String message = getString(R.string.extractError)
@@ -468,6 +469,25 @@ public class GameStockActivity extends AppCompatActivity {
         }
 
         return ZipUtil.unzip(uiContext, zipFile, dir);
+    }
+
+    /**
+     * Если в папке есть только одна папка, и больше ничего, рекурсивно разворачивает папку до тех
+     * пор, пока или ничего не останется, или останется папка, в которой будет что-то другое, кроме
+     * одной вложенной папки.
+     */
+    private void normalizeGameDirectory(DocumentFile dir) {
+        String dirPath = dir.getUri().getPath();
+        File dirFile = new File(dirPath);
+        File[] subFiles = dirFile.listFiles();
+        if (subFiles == null || subFiles.length != 1 || !subFiles[0].isDirectory()) {
+            return;
+        }
+        for (File file : subFiles[0].listFiles()) {
+            file.renameTo(new File(dirPath + "/", file.getName()));
+        }
+        subFiles[0].delete();
+        normalizeGameDirectory(dir);
     }
 
     private boolean doesDirectoryContainGameFiles(DocumentFile dir) {
@@ -838,6 +858,8 @@ public class GameStockActivity extends AppCompatActivity {
             if (!extracted) {
                 return DownloadResult.EXTRACT_FAILED;
             }
+            activity.normalizeGameDirectory(gameDir);
+
             if (!activity.doesDirectoryContainGameFiles(gameDir)) {
                 return DownloadResult.GAME_FILES_NOT_FOUND;
             }
