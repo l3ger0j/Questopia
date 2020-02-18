@@ -156,8 +156,8 @@ public class GameStockActivity extends AppCompatActivity {
         gamesView.setOnItemClickListener(new OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String value = getGameIdByPosition(position);
-                showGameInfo(value);
+                String gameId = getGameIdByPosition(position);
+                showGameInfo(gameId);
             }
         });
 
@@ -371,6 +371,7 @@ public class GameStockActivity extends AppCompatActivity {
             return games;
         }
         Collections.sort(games, new Comparator<GameStockItem>() {
+            @Override
             public int compare(GameStockItem first, GameStockItem second) {
                 return first.title.toLowerCase()
                         .compareTo(second.title.toLowerCase());
