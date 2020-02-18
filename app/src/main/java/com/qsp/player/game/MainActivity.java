@@ -99,6 +99,10 @@ public class MainActivity extends AppCompatActivity implements PlayerView {
     private PlayerViewState viewState;
 
     private View mainView;
+    private ImageButton mainDescButton;
+    private ImageButton invButton;
+    private ImageButton varsDescButton;
+    private ImageButton inputButton;
     private WebView mainDescView;
     private WebView varsDescView;
     private ListView actionsView;
@@ -127,6 +131,10 @@ public class MainActivity extends AppCompatActivity implements PlayerView {
         loadLocale();
 
         mainView = findViewById(R.id.main);
+        mainDescButton = findViewById(R.id.title_main_desc_btn);
+        invButton = findViewById(R.id.title_inv_btn);
+        varsDescButton = findViewById(R.id.title_vars_desc_btn);
+        inputButton = findViewById(R.id.title_input_btn);
 
         initMainDescView();
         initVarsDescView();
@@ -217,17 +225,20 @@ public class MainActivity extends AppCompatActivity implements PlayerView {
 
     private void toggleObjects(boolean show) {
         findViewById(R.id.inv).setVisibility(show ? View.VISIBLE : View.GONE);
-        findViewById(R.id.title_button_1).setBackgroundResource(show ? R.drawable.btn_bg_active : 0);
+        invButton.setBackgroundResource(show ? R.drawable.btn_bg_active : 0);
+        invButton.setEnabled(!show);
     }
 
     private void toggleMainDesc(boolean show) {
         findViewById(R.id.main_tab).setVisibility(show ? View.VISIBLE : View.GONE);
-        findViewById(R.id.title_home_button).setBackgroundResource(show ? R.drawable.btn_bg_active : 0);
+        mainDescButton.setBackgroundResource(show ? R.drawable.btn_bg_active : 0);
+        mainDescButton.setEnabled(!show);
     }
 
     private void toggleVarsDesc(boolean show) {
         findViewById(R.id.vars_tab).setVisibility(show ? View.VISIBLE : View.GONE);
-        findViewById(R.id.title_button_2).setBackgroundResource(show ? R.drawable.btn_bg_active : varsDescBackground);
+        varsDescButton.setBackgroundResource(show ? R.drawable.btn_bg_active : varsDescBackground);
+        varsDescButton.setEnabled(!show);
     }
 
     private void setTitle(String second) {
@@ -237,14 +248,11 @@ public class MainActivity extends AppCompatActivity implements PlayerView {
     }
 
     private void updateTitle() {
-        ImageButton objectsBtn = findViewById(R.id.title_button_1);
-        objectsBtn.clearAnimation();
-
-        ImageButton varsDescBtn = findViewById(R.id.title_button_2);
-        varsDescBtn.clearAnimation();
+        invButton.clearAnimation();
+        varsDescButton.clearAnimation();
 
         if (varsDescUnread) {
-            varsDescBtn.setBackgroundResource(varsDescBackground = R.drawable.btn_bg_pressed);
+            varsDescButton.setBackgroundResource(varsDescBackground = R.drawable.btn_bg_pressed);
             varsDescUnread = false;
         }
     }
@@ -674,7 +682,6 @@ public class MainActivity extends AppCompatActivity implements PlayerView {
     }
 
     public void onInputButtonClick(View v) {
-        View inputButton = findViewById(R.id.title_button_3);
         inputButton.clearAnimation();
         libQspProxy.onInputAreaClicked();
     }
