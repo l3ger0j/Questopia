@@ -30,6 +30,10 @@ public final class HtmlUtil {
         Element body = document.body();
         body.select("img").attr("style", "max-width: 100%;");
 
+        // video setting
+        body.select("video").attr("style", "max-width: 100%;");
+        body.select("video").attr("muted", "true");
+
         return document.toString();
     }
 
