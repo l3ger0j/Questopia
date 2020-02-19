@@ -99,7 +99,7 @@
 
     <ImageButton
         android:id="@+id/title_input_btn"
-        android:contentDescription="@string/inputAreaContentDesc"
+        android:contentDescription="@string/userInputContentDesc"
         android:layout_width="@dimen/title_height"
         android:layout_height="fill_parent"
         android:layout_alignWithParentIfMissing="true"

@@ -76,11 +76,11 @@
     <string name="tabRemote">Remote</string>
     <string name="inventory">Inventory</string>
     <string name="mainDesc">Description</string>
-    <string name="mainDescContentDesc">Main description tab</string>
-    <string name="varsDesc">Character</string>
-    <string name="varsDescContentDesc">Additional description tab</string>
-    <string name="inputArea">Input area</string>
-    <string name="inputAreaContentDesc">User text input area</string>
+    <string name="mainDescContentDesc">Go to main description</string>
+    <string name="varsDesc">Add. description</string>
+    <string name="varsDescContentDesc">Go to additional description</string>
+    <string name="userInput">User input</string>
+    <string name="userInputContentDesc">User input</string>
     <string name="play">Play</string>
     <string name="download">Download</string>
     <string name="downloading">Downloading...</string>

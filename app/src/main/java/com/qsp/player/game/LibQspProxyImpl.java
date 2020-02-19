@@ -316,7 +316,7 @@ public class LibQspProxyImpl implements LibQspProxy {
         runOnQspThread(new Runnable() {
             @Override
             public void run() {
-                String input = view.showInputBox(context.getString(R.string.inputArea));
+                String input = view.showInputBox(context.getString(R.string.userInput));
                 QSPSetInputStrText(input);
 
                 if (!QSPExecUserInput(true)) {

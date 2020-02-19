@@ -76,11 +76,11 @@
     <string name="tabAll">Все</string>
     <string name="inventory">Инвентарь</string>
     <string name="mainDesc">Описание</string>
-    <string name="mainDescContentDesc">Вкладка с основным описанием</string>
+    <string name="mainDescContentDesc">Перейти к основному описанию</string>
     <string name="varsDesc">Доп. описание</string>
-    <string name="varsDescContentDesc">Вкладка с дополнительным описанием</string>
-    <string name="inputArea">Поле ввода</string>
-    <string name="inputAreaContentDesc">Поле для ввода пользовательского текста</string>
+    <string name="varsDescContentDesc">Перейти к дополнительному описанию</string>
+    <string name="userInput">Пользовательский ввод</string>
+    <string name="userInputContentDesc">Пользовательский ввод</string>
     <string name="play">Играть</string>
     <string name="download">Скачать</string>
     <string name="downloading">Скачивается...</string>
