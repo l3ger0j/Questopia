@@ -75,6 +75,7 @@
     <string name="tabLocal">Local</string>
     <string name="tabRemote">Remote</string>
     <string name="inventory">Inventory</string>
+    <string name="inventoryContentDesc">Go to inventory</string>
     <string name="mainDesc">Description</string>
     <string name="mainDescContentDesc">Go to main description</string>
     <string name="varsDesc">Add. description</string>
@@ -93,4 +94,5 @@
     <string name="fileSize">Size: -SIZE- KB</string>
     <string name="deleteGameQuery">Delete game -GAMENAME-?</string>
     <string name="close">Close</string>
+    <string name="selectGameFile">Select a game file to run</string>
 </resources>

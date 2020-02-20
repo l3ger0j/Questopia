@@ -75,6 +75,7 @@
     <string name="tabRemote">Сайт</string>
     <string name="tabAll">Все</string>
     <string name="inventory">Инвентарь</string>
+    <string name="inventoryContentDesc">Перейти к инвентарю</string>
     <string name="mainDesc">Описание</string>
     <string name="mainDescContentDesc">Перейти к основному описанию</string>
     <string name="varsDesc">Доп. описание</string>
@@ -93,6 +94,7 @@
     <string name="version">Версия: -VERSION-</string>
     <string name="fileSize">Размер: -SIZE- КБ</string>
     <string name="close">Закрыть</string>
+    <string name="selectGameFile">Выберите файл игры для запуска</string>
 </resources>
 
 

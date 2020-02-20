@@ -221,18 +221,45 @@ public class GameStockActivity extends AppCompatActivity {
                 .show();
     }
 
-    private void playOrDownloadGame(GameStockItem game) {
-        if (game.downloaded) {
-            Intent data = new Intent();
-            data.putExtra("gameTitle", game.title);
-            data.putExtra("gameDirUri", game.localDirUri);
-            data.putExtra("gameFileUri", game.localFileUri);
-            setResult(RESULT_OK, data);
-            finish();
+    private void playOrDownloadGame(final GameStockItem game) {
+        if (!game.downloaded) {
+            downloadGame(game);
             return;
         }
+        final Intent data = new Intent();
+        data.putExtra("gameTitle", game.title);
+        data.putExtra("gameDirUri", game.gameDir.getUri().toString());
 
-        downloadGame(game);
+        int gameFileCount = game.gameFiles.size();
+        switch (gameFileCount) {
+            case 0:
+                Log.w(TAG, "Game has no game files");
+                return;
+            case 1:
+                data.putExtra("gameFileUri", game.gameFiles.get(0).getUri().toString());
+                setResult(RESULT_OK, data);
+                finish();
+                return;
+            default:
+                break;
+        }
+
+        ArrayList<String> names = new ArrayList<>();
+        for (DocumentFile file : game.gameFiles) {
+            names.add(file.getName());
+        }
+        new AlertDialog.Builder(GameStockActivity.this)
+                .setTitle(getString(R.string.selectGameFile))
+                .setCancelable(false)
+                .setItems(names.toArray(new String[0]), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        data.putExtra("gameFileUri", game.gameFiles.get(which).getUri().toString());
+                        setResult(RESULT_OK, data);
+                        finish();
+                    }
+                })
+                .show();
     }
 
     private void downloadGame(GameStockItem game) {

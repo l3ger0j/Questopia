@@ -52,28 +52,19 @@ class LocalGameRepository {
         ArrayList<GameStockItem> items = new ArrayList<>();
         for (GameFolder folder : getGameFolders(gameDirs)) {
             String info = getGameInfo(folder);
-            boolean pack = folder.gameFiles.size() > 1;
-
-            for (DocumentFile file : folder.gameFiles) {
-                GameStockItem item;
-                if (info != null) {
-                    item = parseGameInfo(info);
-                } else {
-                    String name = folder.dir.getName();
-                    item = new GameStockItem();
-                    item.title = name;
-                    item.gameId = name;
-                }
-                if (pack) {
-                    String name = file.getName();
-                    item.title += " (" + name + ")";
-                    item.gameId += " (" + name + ")";
-                }
-                item.downloaded = true;
-                item.localDirUri = folder.dir.getUri().toString();
-                item.localFileUri = file.getUri().toString();
-                items.add(item);
+            GameStockItem item;
+            if (info != null) {
+                item = parseGameInfo(info);
+            } else {
+                String name = folder.dir.getName();
+                item = new GameStockItem();
+                item.gameId = name;
+                item.title = name;
             }
+            item.downloaded = true;
+            item.gameDir = folder.dir;
+            item.gameFiles = folder.gameFiles;
+            items.add(item);
         }
 
         return items;
@@ -239,9 +230,9 @@ class LocalGameRepository {
 
     private static class GameFolder {
         private final DocumentFile dir;
-        private final Collection<DocumentFile> gameFiles;
+        private final List<DocumentFile> gameFiles;
 
-        private GameFolder(DocumentFile dir, Collection<DocumentFile> gameFiles) {
+        private GameFolder(DocumentFile dir, List<DocumentFile> gameFiles) {
             this.dir = dir;
             this.gameFiles = gameFiles;
         }
