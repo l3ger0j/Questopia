@@ -9,6 +9,7 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.media.AudioManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -59,6 +60,9 @@ public class MainActivity extends AppCompatActivity implements PlayerView {
 
     private static final String TAG = MainActivity.class.getName();
     private static final int MAX_SAVE_SLOTS = 5;
+    private static final String SHOW_ADVANCED_EXTRA_NAME = Build.VERSION.SDK_INT < Build.VERSION_CODES.Q ?
+            "android.content.extra.SHOW_ADVANCED" :
+            "android.provider.extra.SHOW_ADVANCED";
 
     private static final int REQUEST_CODE_SELECT_GAME = 1;
     private static final int REQUEST_CODE_LOAD_FROM_FILE = 2;
@@ -543,6 +547,7 @@ public class MainActivity extends AppCompatActivity implements PlayerView {
 
     private void startLoadFromFile() {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.putExtra(SHOW_ADVANCED_EXTRA_NAME, true);
         intent.setType("application/octet-stream");
         startActivityForResult(intent, REQUEST_CODE_LOAD_FROM_FILE);
     }
