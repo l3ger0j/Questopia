@@ -893,7 +893,7 @@ public class MainActivity extends AppCompatActivity implements PlayerView {
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, final String href) {
             if (href.toLowerCase().startsWith("exec:")) {
-                final String code = HtmlUtil.decodeExec(href.substring(5));
+                String code = HtmlUtil.decodeExec(href.substring(5));
                 libQspProxy.execute(code);
             }
 

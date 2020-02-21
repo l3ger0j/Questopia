@@ -22,8 +22,8 @@ public final class HtmlUtil {
         if (html == null || html.isEmpty()) {
             return "";
         }
-
-        String result = encodeExec(html);
+        String result = unescapeQuotes(html);
+        result = encodeExec(result);
         result = htmlizeLineBreaks(result);
 
         Document document = Jsoup.parse(result);
@@ -35,6 +35,10 @@ public final class HtmlUtil {
         body.select("video").attr("muted", "true");
 
         return document.toString();
+    }
+
+    private static String unescapeQuotes(String str) {
+        return str.replace("\\\"", "'");
     }
 
     private static String encodeExec(String html) {
