@@ -42,7 +42,7 @@
     <string name="installGame">Install Game</string>
     <string name="closeApp">Close QuestPlayer</string>
     <string name="selectSlot">Select a slot</string>
-    <string name="slotPresent">Slot %d</string>
+    <string name="slotPresent">Slot %d - %s</string>
     <string name="slotEmpty">Slot %d [Empty]</string>
     <string name="loadFrom">From File…</string>
     <string name="saveTo">To File…</string>
