@@ -352,12 +352,14 @@ public class LibQspProxyImpl implements LibQspProxy {
         if (!loadGameWorld()) {
             return;
         }
+
+        gameStartTime = System.currentTimeMillis();
+        timerInterval = 500;
+
         if (!QSPRestartGame(true)) {
             showLastQspError();
         }
 
-        gameStartTime = System.currentTimeMillis();
-        timerInterval = 500;
         counterHandler.postDelayed(counterTask, timerInterval);
     }
 
