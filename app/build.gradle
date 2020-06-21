@@ -8,8 +8,8 @@ android {
         applicationId "com.qsp.player"
         minSdkVersion 19
         targetSdkVersion 29
-        versionCode 239
-        versionName "2.1.2"
+        versionCode 240
+        versionName "2.1.3"
     }
 
     externalNativeBuild {
