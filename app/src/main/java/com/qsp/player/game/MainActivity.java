@@ -52,7 +52,6 @@ import com.qsp.player.util.ViewUtil;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -886,6 +885,11 @@ public class MainActivity extends AppCompatActivity implements PlayerView {
             Log.e(TAG, "Wait failed", e);
             return -1;
         }
+    }
+
+    @Override
+    public void showSaveGamePopup(String filename) {
+        mainMenu.performIdentifierAction(R.id.menu_savegame, 0);
     }
 
     // End PlayerView implementation

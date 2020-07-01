@@ -170,7 +170,7 @@ void qspCallOpenGame(QSP_CHAR *file)
 void qspCallSaveGame(QSP_CHAR *file)
 {
 	QSPCallState state;
-	qspSaveCallState(&state, QSP_TRUE, QSP_FALSE);
+	qspSaveCallState(&state, QSP_FALSE, QSP_FALSE);
 
 	jclass cls = (*qspCallbackEnv)->GetObjectClass(qspCallbackEnv, qspCallbackObject);
 	jmethodID mid =

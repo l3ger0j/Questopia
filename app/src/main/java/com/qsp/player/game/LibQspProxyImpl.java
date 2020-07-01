@@ -540,8 +540,10 @@ public class LibQspProxyImpl implements LibQspProxy {
     }
 
     private void SaveGame(String filename) {
-        DocumentFile file = FileUtil.getOrCreateBinaryFile(viewState.gameDir, filename);
-        saveGameState(file.getUri());
+        PlayerView view = playerView;
+        if (view != null) {
+            view.showSaveGamePopup(filename);
+        }
     }
 
     private String InputBox(String prompt) {

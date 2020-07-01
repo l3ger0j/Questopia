@@ -14,4 +14,5 @@ interface PlayerView {
     void showMessage(String message);
     String showInputBox(String prompt);
     int showMenu();
+    void showSaveGamePopup(String filename);
 }
