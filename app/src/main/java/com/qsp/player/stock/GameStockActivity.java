@@ -12,6 +12,7 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -860,7 +861,7 @@ public class GameStockActivity extends AppCompatActivity {
                 return DownloadResult.DOWNLOAD_FAILED;
             }
 
-            String zipFilename = String.valueOf(System.currentTimeMillis()).concat("_game");
+            String zipFilename = String.valueOf(SystemClock.elapsedRealtime()).concat("_game");
             DocumentFile zipFile = cacheDir.createFile("application/zip", zipFilename);
             if (zipFile == null) {
                 Log.e(TAG, "Failed to create a ZIP file: " + zipFilename);

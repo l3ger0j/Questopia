@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.SystemClock;
 import android.util.Log;
 
 import androidx.documentfile.provider.DocumentFile;
@@ -353,7 +354,7 @@ public class LibQspProxyImpl implements LibQspProxy {
             return;
         }
 
-        gameStartTime = System.currentTimeMillis();
+        gameStartTime = SystemClock.elapsedRealtime();
         timerInterval = 500;
 
         if (!QSPRestartGame(true)) {
@@ -547,7 +548,7 @@ public class LibQspProxyImpl implements LibQspProxy {
     }
 
     private int GetMSCount() {
-        return (int) (System.currentTimeMillis() - gameStartTime);
+        return (int) (SystemClock.elapsedRealtime() - gameStartTime);
     }
 
     private void AddMenuItem(String name, String imgPath) {
