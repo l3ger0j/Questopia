@@ -66,7 +66,7 @@ public class LibQspProxyImpl implements LibQspProxy {
     private void startQspThread() {
         final CountDownLatch latch = new CountDownLatch(1);
 
-        new Thread() {
+        new Thread("qsp") {
             @Override
             public void run() {
                 qspThreadRunning = true;
