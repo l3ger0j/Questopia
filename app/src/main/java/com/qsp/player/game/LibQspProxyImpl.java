@@ -55,6 +55,7 @@ public class LibQspProxyImpl implements LibQspProxy {
     private volatile boolean qspThreadRunning;
     private volatile Handler qspHandler;
     private volatile long gameStartTime;
+    private volatile long lastMsCountCallTime;
     private volatile int timerInterval;
     private PlayerView playerView;
 
@@ -355,6 +356,7 @@ public class LibQspProxyImpl implements LibQspProxy {
         }
 
         gameStartTime = SystemClock.elapsedRealtime();
+        lastMsCountCallTime = 0;
         timerInterval = 500;
 
         if (!QSPRestartGame(true)) {
@@ -548,7 +550,14 @@ public class LibQspProxyImpl implements LibQspProxy {
     }
 
     private int GetMSCount() {
-        return (int) (SystemClock.elapsedRealtime() - gameStartTime);
+        long now = SystemClock.elapsedRealtime();
+        if (lastMsCountCallTime == 0) {
+            lastMsCountCallTime = gameStartTime;
+        }
+        int dt = (int) (now - lastMsCountCallTime);
+        lastMsCountCallTime = now;
+
+        return dt;
     }
 
     private void AddMenuItem(String name, String imgPath) {
