@@ -65,6 +65,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 import static com.qsp.player.util.FileUtil.GAME_INFO_FILENAME;
 import static com.qsp.player.util.GameDirUtil.doesDirectoryContainGameFiles;
@@ -88,7 +89,7 @@ public class GameStockActivity extends AppCompatActivity {
             "table{font-size: QSPFONTSIZE; font-family: QSPFONTSTYLE; }\n" +
             "</style></head><body>REPLACETEXT</body></html>";
 
-    private final Context uiContext = this;
+    private final Context context = this;
     private final HashMap<String, GameStockItem> gamesMap = new HashMap<>();
     private final SparseArrayCompat<GameStockItemAdapter> gameAdapters = new SparseArrayCompat<>();
     private final LocalGameRepository localGameRepository = new LocalGameRepository(this);
@@ -117,7 +118,7 @@ public class GameStockActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.gamestock);
 
-        settings = PreferenceManager.getDefaultSharedPreferences(uiContext);
+        settings = PreferenceManager.getDefaultSharedPreferences(context);
         connectivityManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
 
         Intent intent = getIntent();
@@ -131,7 +132,7 @@ public class GameStockActivity extends AppCompatActivity {
 
     private void loadLocale() {
         String language = settings.getString("lang", "ru");
-        ViewUtil.setLocale(uiContext, language);
+        ViewUtil.setLocale(context, language);
         setTitle(R.string.gameStock);
         currentLanguage = language;
     }
@@ -217,7 +218,7 @@ public class GameStockActivity extends AppCompatActivity {
             message.append(getString(R.string.fileSize).replace("-SIZE-", Integer.toString(game.fileSize / 1024)));
         }
 
-        new AlertDialog.Builder(uiContext)
+        new AlertDialog.Builder(context)
                 .setMessage(message)
                 .setTitle(game.title)
                 .setIcon(R.drawable.icon)
@@ -280,7 +281,7 @@ public class GameStockActivity extends AppCompatActivity {
 
     private void downloadGame(GameStockItem game) {
         if (!isNetworkConnected()) {
-            ViewUtil.showErrorDialog(uiContext, getString(R.string.downloadNetworkError));
+            ViewUtil.showErrorDialog(context, getString(R.string.downloadNetworkError));
             return;
         }
         DownloadGameAsyncTask task = new DownloadGameAsyncTask(this, game);
@@ -327,7 +328,7 @@ public class GameStockActivity extends AppCompatActivity {
     private void updateLocale() {
         String language = settings.getString("lang", "ru");
         if (!currentLanguage.equals(language)) {
-            ViewUtil.setLocale(uiContext, language);
+            ViewUtil.setLocale(context, language);
             setTitle(getString(R.string.gameStock));
             refreshActionBar();
             invalidateOptionsMenu();
@@ -359,7 +360,7 @@ public class GameStockActivity extends AppCompatActivity {
         if (!FileUtil.isWritableDirectory(dir)) {
             Log.e(TAG, "Games directory is not writable");
             String message = getString(R.string.gamesDirError);
-            ViewUtil.showErrorDialog(uiContext, message);
+            ViewUtil.showErrorDialog(context, message);
             return;
         }
 
@@ -473,14 +474,14 @@ public class GameStockActivity extends AppCompatActivity {
             Log.e(TAG, "Game directory is not writable");
             return;
         }
-        updateProgressDialog(true, installer.getGameName(), getString(R.string.installing));
+        updateProgressDialog(true, installer.getGameName(), getString(R.string.installing), null);
 
         boolean installed = installer.install(gameDir);
         if (installed) {
             refreshGames();
         }
 
-        updateProgressDialog(false, "", "");
+        updateProgressDialog(false, "", "", null);
     }
 
     private DocumentFile getOrCreateGameDirectory(String gameName) {
@@ -497,7 +498,7 @@ public class GameStockActivity extends AppCompatActivity {
             Log.e(TAG, "Game directory is not writable");
             return false;
         }
-        return ZipUtil.unzip(uiContext, zipFile, dir);
+        return ZipUtil.unzip(context, zipFile, dir);
     }
 
     @Override
@@ -568,7 +569,7 @@ public class GameStockActivity extends AppCompatActivity {
     }
 
     private void showSettings() {
-        Intent intent = new Intent(uiContext, SettingsActivity.class);
+        Intent intent = new Intent(context, SettingsActivity.class);
         startActivity(intent);
     }
 
@@ -617,18 +618,29 @@ public class GameStockActivity extends AppCompatActivity {
         return super.onKeyDown(keyCode, event);
     }
 
-    private void updateProgressDialog(boolean show, String title, String message) {
+    private void updateProgressDialog(boolean show, String title, String message, final Runnable onCancel) {
         showProgressDialog = show;
 
         if (show) {
             if (progressDialog == null) {
-                progressDialog = new ProgressDialog(uiContext);
+                progressDialog = new ProgressDialog(context);
                 progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-                progressDialog.setCancelable(false);
             }
             progressDialog.setTitle(title);
             progressDialog.setMessage(message);
-
+            progressDialog.setCancelable(false);
+            progressDialog.setCanceledOnTouchOutside(false);
+            if (onCancel != null) {
+                progressDialog.setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.cancel), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        if (which == DialogInterface.BUTTON_NEGATIVE) {
+                            dialog.dismiss();
+                            onCancel.run();
+                        }
+                    }
+                });
+            }
             if (!progressDialog.isShowing()) {
                 progressDialog.show();
             }
@@ -648,7 +660,7 @@ public class GameStockActivity extends AppCompatActivity {
             }
         }
 
-        new AlertDialog.Builder(uiContext)
+        new AlertDialog.Builder(context)
                 .setTitle(getString(R.string.deleteGameCmd))
                 .setItems(items.toArray(new String[0]), new DialogInterface.OnClickListener() {
                     @Override
@@ -667,7 +679,7 @@ public class GameStockActivity extends AppCompatActivity {
     }
 
     private void showConfirmDeleteDialog(final DocumentFile gameDir) {
-        new AlertDialog.Builder(uiContext)
+        new AlertDialog.Builder(context)
                 .setMessage(getString(R.string.deleteGameQuery).replace("-GAMENAME-", "\"" + gameDir.getName() + "\""))
                 .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                     @Override
@@ -678,7 +690,7 @@ public class GameStockActivity extends AppCompatActivity {
                                 invalidateOptionsMenu();
                             }
                             FileUtil.deleteDirectory(gameDir);
-                            ViewUtil.showToast(uiContext, getString(R.string.gameDeleted));
+                            ViewUtil.showToast(context, getString(R.string.gameDeleted));
                             refreshGames();
                         }
                     }
@@ -760,7 +772,7 @@ public class GameStockActivity extends AppCompatActivity {
                     loadGameListTask = task;
                     task.execute();
                 } else {
-                    ViewUtil.showErrorDialog(uiContext, getString(R.string.loadGameListNetworkError));
+                    ViewUtil.showErrorDialog(context, getString(R.string.loadGameListNetworkError));
                 }
             }
             setGameAdapterFromTab(position);
@@ -788,7 +800,7 @@ public class GameStockActivity extends AppCompatActivity {
         protected void onPreExecute() {
             GameStockActivity activity = this.activity.get();
             if (activity != null) {
-                activity.updateProgressDialog(true, "", activity.getString(R.string.gameListLoading));
+                activity.updateProgressDialog(true, "", activity.getString(R.string.gameListLoading), null);
             }
         }
 
@@ -803,7 +815,7 @@ public class GameStockActivity extends AppCompatActivity {
             if (activity == null) {
                 return;
             }
-            activity.updateProgressDialog(false, "", "");
+            activity.updateProgressDialog(false, "", "", null);
 
             if (result == null) {
                 String message = activity.getString(R.string.loadGameListError);
@@ -819,6 +831,8 @@ public class GameStockActivity extends AppCompatActivity {
         private final WeakReference<GameStockActivity> activity;
         private final GameStockItem game;
 
+        private volatile boolean cancelled = false;
+
         private DownloadGameAsyncTask(GameStockActivity activity, GameStockItem game) {
             this.activity = new WeakReference<>(activity);
             this.game = game;
@@ -828,7 +842,12 @@ public class GameStockActivity extends AppCompatActivity {
         protected void onPreExecute() {
             GameStockActivity activity = this.activity.get();
             if (activity != null) {
-                activity.updateProgressDialog(true, game.title, activity.getString(R.string.downloading));
+                activity.updateProgressDialog(true, game.title, activity.getString(R.string.downloading), new Runnable() {
+                    @Override
+                    public void run() {
+                        cancelled = true;
+                    }
+                });
             }
         }
 
@@ -866,7 +885,7 @@ public class GameStockActivity extends AppCompatActivity {
                 zipFile.delete();
             }
             if (!downloaded) {
-                return DownloadResult.DOWNLOAD_FAILED;
+                return cancelled ? DownloadResult.CANCELLED : DownloadResult.DOWNLOAD_FAILED;
             }
             if (!extracted) {
                 return DownloadResult.EXTRACT_FAILED;
@@ -899,6 +918,10 @@ public class GameStockActivity extends AppCompatActivity {
                         int totalBytesRead = 0;
                         int bytesRead;
                         while ((bytesRead = in.read(b)) > 0) {
+                            if (cancelled) {
+                                Log.i(TAG, "Game download was cancelled");
+                                return false;
+                            }
                             out.write(b, 0, bytesRead);
                             totalBytesRead += bytesRead;
                         }
@@ -963,7 +986,7 @@ public class GameStockActivity extends AppCompatActivity {
             if (activity == null) {
                 return;
             }
-            activity.updateProgressDialog(true, game.title, activity.getString(R.string.installing));
+            activity.updateProgressDialog(true, game.title, activity.getString(R.string.installing), null);
         }
 
         @Override
@@ -972,7 +995,7 @@ public class GameStockActivity extends AppCompatActivity {
             if (activity == null) {
                 return;
             }
-            activity.updateProgressDialog(false, "", "");
+            activity.updateProgressDialog(false, "", "", null);
 
             String message;
             switch (result) {
@@ -1002,9 +1025,10 @@ public class GameStockActivity extends AppCompatActivity {
 
         private enum DownloadResult {
             OK,
+            CANCELLED,
             DOWNLOAD_FAILED,
             EXTRACT_FAILED,
-            GAME_FILES_NOT_FOUND
+            GAME_FILES_NOT_FOUND,
         }
     }
 }

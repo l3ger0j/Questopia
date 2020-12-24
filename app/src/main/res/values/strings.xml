@@ -97,4 +97,5 @@
     <string name="deleteGameQuery">Delete game -GAMENAME-?</string>
     <string name="close">Close</string>
     <string name="selectGameFile">Select a game file to run</string>
+    <string name="cancel">Cancel</string>
 </resources>
