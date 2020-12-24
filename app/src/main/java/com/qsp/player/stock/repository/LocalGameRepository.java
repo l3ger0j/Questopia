@@ -1,10 +1,11 @@
-package com.qsp.player.stock;
+package com.qsp.player.stock.repository;
 
 import android.content.Context;
 import android.util.Log;
 
 import androidx.documentfile.provider.DocumentFile;
 
+import com.qsp.player.stock.GameStockItem;
 import com.qsp.player.util.FileUtil;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -15,14 +16,13 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
 import static com.qsp.player.util.FileUtil.GAME_INFO_FILENAME;
 
-class LocalGameRepository {
+public class LocalGameRepository {
 
     private static final String TAG = LocalGameRepository.class.getName();
 
@@ -30,15 +30,15 @@ class LocalGameRepository {
 
     private DocumentFile gamesDir;
 
-    LocalGameRepository(Context context) {
+    public LocalGameRepository(Context context) {
         this.context = context;
     }
 
-    void setGamesDirectory(DocumentFile dir) {
+    public void setGamesDirectory(DocumentFile dir) {
         gamesDir = dir;
     }
 
-    List<GameStockItem> getGames() {
+    public List<GameStockItem> getGames() {
         if (gamesDir == null) {
             Log.e(TAG, "Games directory is not specified");
             return Collections.emptyList();
@@ -61,7 +61,6 @@ class LocalGameRepository {
                 item.gameId = name;
                 item.title = name;
             }
-            item.downloaded = true;
             item.gameDir = folder.dir;
             item.gameFiles = folder.gameFiles;
             items.add(item);

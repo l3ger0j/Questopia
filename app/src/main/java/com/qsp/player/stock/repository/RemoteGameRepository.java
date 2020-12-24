@@ -1,6 +1,8 @@
-package com.qsp.player.stock;
+package com.qsp.player.stock.repository;
 
 import android.util.Log;
+
+import com.qsp.player.stock.GameStockItem;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -15,13 +17,13 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 
-class RemoteGameRepository {
+public class RemoteGameRepository {
 
     private static final String TAG = RemoteGameRepository.class.getName();
 
     private static List<GameStockItem> cachedGames = null;
 
-    List<GameStockItem> getGames() {
+    public List<GameStockItem> getGames() {
         if (cachedGames == null) {
             String xml = getGameStockXml();
             if (xml != null) {

@@ -4,21 +4,28 @@ import androidx.documentfile.provider.DocumentFile;
 
 import java.util.List;
 
-class GameStockItem {
-    String gameId = "";
-    String listId = "";
-    String author = "";
-    String portedBy = "";
-    String version = "";
-    String title = "";
-    String lang = "";
-    String player = "";
-    String fileUrl = "";
-    int fileSize;
-    String descUrl = "";
-    String pubDate = "";
-    String modDate = "";
-    boolean downloaded;
-    DocumentFile gameDir;
-    List<DocumentFile> gameFiles;
+public class GameStockItem {
+    public String gameId = "";
+    public String listId = "";
+    public String author = "";
+    public String portedBy = "";
+    public String version = "";
+    public String title = "";
+    public String lang = "";
+    public String player = "";
+    public String fileUrl = "";
+    public int fileSize;
+    public String descUrl = "";
+    public String pubDate = "";
+    public String modDate = "";
+    public DocumentFile gameDir;
+    public List<DocumentFile> gameFiles;
+
+    public  boolean hasRemoteUrl() {
+        return fileUrl != null;
+    }
+
+    public boolean isInstalled() {
+        return gameDir != null;
+    }
 }

@@ -98,6 +98,7 @@
     <string name="close">Закрыть</string>
     <string name="selectGameFile">Выберите файл игры для запуска</string>
     <string name="cancel">Отмена</string>
+    <string name="update">Обновить</string>
 </resources>
 
 

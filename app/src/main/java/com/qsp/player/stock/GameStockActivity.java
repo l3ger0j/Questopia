@@ -46,6 +46,8 @@ import com.qsp.player.stock.install.FolderGameInstaller;
 import com.qsp.player.stock.install.GameInstaller;
 import com.qsp.player.stock.install.InstallException;
 import com.qsp.player.stock.install.InstallType;
+import com.qsp.player.stock.repository.LocalGameRepository;
+import com.qsp.player.stock.repository.RemoteGameRepository;
 import com.qsp.player.util.FileUtil;
 import com.qsp.player.util.ViewUtil;
 import com.qsp.player.util.ZipUtil;
@@ -65,7 +67,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.TimeUnit;
 
 import static com.qsp.player.util.FileUtil.GAME_INFO_FILENAME;
 import static com.qsp.player.util.GameDirUtil.doesDirectoryContainGameFiles;
@@ -184,7 +185,7 @@ public class GameStockActivity extends AppCompatActivity {
                 String gameId = getGameIdByPosition(position);
                 GameStockItem game = gamesMap.get(gameId);
                 if (game != null) {
-                    playOrDownloadGame(game);
+                    playGame(game);
                 } else {
                     Log.e(TAG, "Game not found: " + gameId);
                 }
@@ -205,6 +206,7 @@ public class GameStockActivity extends AppCompatActivity {
             Log.e(TAG, "Game not found: " + gameId);
             return;
         }
+
         StringBuilder message = new StringBuilder();
         if (game.author.length() > 0) {
             message.append(getString(R.string.author).replace("-AUTHOR-", game.author));
@@ -218,31 +220,37 @@ public class GameStockActivity extends AppCompatActivity {
             message.append(getString(R.string.fileSize).replace("-SIZE-", Integer.toString(game.fileSize / 1024)));
         }
 
-        new AlertDialog.Builder(context)
+        AlertDialog.Builder alertBuilder = new AlertDialog.Builder(context)
                 .setMessage(message)
                 .setTitle(game.title)
                 .setIcon(R.drawable.icon)
-                .setPositiveButton(game.downloaded ? getString(R.string.play) : getString(R.string.download), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        playOrDownloadGame(game);
-                    }
-                })
                 .setNegativeButton(getString(R.string.close), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.cancel();
                     }
-                })
-                .create()
-                .show();
+                });
+
+        if (game.isInstalled()) {
+            alertBuilder.setNeutralButton(getString(R.string.play), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    playGame(game);
+                }
+            });
+        }
+        if (game.hasRemoteUrl()) {
+            alertBuilder.setPositiveButton(game.isInstalled() ? getString(R.string.update) : getString(R.string.download), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    downloadGame(game);
+                }
+            });
+        }
+        alertBuilder.create().show();
     }
 
-    private void playOrDownloadGame(final GameStockItem game) {
-        if (!game.downloaded) {
-            downloadGame(game);
-            return;
-        }
+    private void playGame(final GameStockItem game) {
         final Intent data = new Intent();
         data.putExtra("gameTitle", game.title);
         data.putExtra("gameDirUri", game.gameDir.getUri().toString());
@@ -378,7 +386,13 @@ public class GameStockActivity extends AppCompatActivity {
             }
         }
         for (GameStockItem game : localGameRepository.getGames()) {
-            gamesMap.put(game.gameId, game);
+            GameStockItem existingGame = gamesMap.get(game.gameId);
+            if (existingGame != null) {
+                existingGame.gameDir = game.gameDir;
+                existingGame.gameFiles = game.gameFiles;
+            } else {
+                gamesMap.put(game.gameId, game);
+            }
         }
 
         refreshGameAdapters();
@@ -390,9 +404,10 @@ public class GameStockActivity extends AppCompatActivity {
         ArrayList<GameStockItem> remoteGames = new ArrayList<>();
 
         for (GameStockItem game : games) {
-            if (game.downloaded) {
+            if (game.isInstalled()) {
                 localGames.add(game);
-            } else {
+            }
+            if (game.hasRemoteUrl()) {
                 remoteGames.add(game);
             }
         }
@@ -739,7 +754,7 @@ public class GameStockActivity extends AppCompatActivity {
                 TextView titleView = convertView.findViewById(R.id.game_title);
                 if (titleView != null) {
                     titleView.setText(item.title);
-                    if (item.downloaded) {
+                    if (item.isInstalled()) {
                         titleView.setTextColor(0xFFE0E0E0);
                     } else {
                         titleView.setTextColor(0xFFFFD700);
