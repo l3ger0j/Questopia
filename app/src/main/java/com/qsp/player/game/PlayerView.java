@@ -15,4 +15,5 @@ interface PlayerView {
     String showInputBox(String prompt);
     int showMenu();
     void showSaveGamePopup(String filename);
+    void showWindow(WindowType type, boolean show);
 }

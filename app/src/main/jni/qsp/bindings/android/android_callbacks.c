@@ -260,12 +260,17 @@ void qspCallShowPicture(QSP_CHAR *file)
 void qspCallShowWindow(int type, QSP_BOOL isShow)
 {
 	QSPCallState state;
-	if (qspCallBacks[QSP_CALL_SHOWWINDOW])
-	{
-		qspSaveCallState(&state, QSP_TRUE, QSP_FALSE);
-		qspCallBacks[QSP_CALL_SHOWWINDOW](type, isShow);
-		qspRestoreCallState(&state);
-	}
+	qspSaveCallState(&state, QSP_FALSE, QSP_FALSE);
+
+	jclass cls = (*qspCallbackEnv)->GetObjectClass(qspCallbackEnv, qspCallbackObject);
+	jmethodID mid = (*qspCallbackEnv)->GetMethodID(qspCallbackEnv, cls, "ShowWindow", "(IZ)V");
+	(*qspCallbackEnv)->DeleteLocalRef(qspCallbackEnv, cls);
+
+	if (mid == NULL) return;
+
+	(*qspCallbackEnv)->CallVoidMethod(qspCallbackEnv, qspCallbackObject, mid, type, isShow);
+
+	qspRestoreCallState(&state);
 }
 
 void qspCallPlayFile(QSP_CHAR *file, int volume)

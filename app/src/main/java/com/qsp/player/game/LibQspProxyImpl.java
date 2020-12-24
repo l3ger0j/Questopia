@@ -592,6 +592,11 @@ public class LibQspProxyImpl implements LibQspProxy {
         }
     }
 
+    private void ShowWindow(int type, boolean isShow) {
+        WindowType windowType = WindowType.values()[type];
+        playerView.showWindow(windowType, isShow);
+    }
+
     // End QSP library callbacks
 
     // Begin JNI

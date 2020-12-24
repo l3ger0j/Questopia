@@ -892,6 +892,20 @@ public class MainActivity extends AppCompatActivity implements PlayerView {
         mainMenu.performIdentifierAction(R.id.menu_savegame, 0);
     }
 
+    @Override
+    public void showWindow(WindowType type, final boolean show) {
+        if (type == WindowType.Actions) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    actionsView.setVisibility(show ? View.VISIBLE : View.GONE);
+                }
+            });
+        } else {
+            Log.d(TAG, "Unsupported window type: " + type);
+        }
+    }
+
     // End PlayerView implementation
 
     private enum SlotAction {
