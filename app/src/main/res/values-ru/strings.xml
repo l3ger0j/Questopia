@@ -40,6 +40,8 @@
     <string name="save">Сохранить</string>
     <string name="deleteGame">Удалить игру</string>
     <string name="installGame">Установить игру</string>
+    <string name="installFromArchive">Из ZIP-архива</string>
+    <string name="installFromFolder">Из папки</string>
     <string name="closeApp">Закрыть Quest Player</string>
     <string name="selectSlot">Выберите слот</string>
     <string name="slotPresent">Слот %d - %s</string>
@@ -70,7 +72,7 @@
     <string name="downloadNetworkError">Невозможно скачать игру. Проверьте ваше соединение с интернетом.</string>
     <string name="downloadError">Невозможно скачать игру -GAMENAME-.</string>
     <string name="extractError">Невозможно распаковать игру -GAMENAME-.</string>
-    <string name="noGameFilesError">Распакованный архив не содержит файлов игры.</string>
+    <string name="noGameFilesError">Файлы игры не найдены после установки.</string>
     <string name="tabLocal">Загружено</string>
     <string name="tabRemote">Сайт</string>
     <string name="tabAll">Все</string>
@@ -85,7 +87,7 @@
     <string name="play">Играть</string>
     <string name="download">Скачать</string>
     <string name="downloading">Скачивается...</string>
-    <string name="extracting">Распаковывается...</string>
+    <string name="installing">Устанавливается...</string>
     <string name="gameListLoading">Загрузка списка игр</string>
     <string name="deleteGameCmd">Удалить игру</string>
     <string name="gameDeleted">Игра удалена.</string>

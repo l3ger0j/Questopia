@@ -11,6 +11,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
@@ -40,6 +41,11 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.qsp.player.R;
 import com.qsp.player.settings.SettingsActivity;
+import com.qsp.player.stock.install.ArchiveGameInstaller;
+import com.qsp.player.stock.install.FolderGameInstaller;
+import com.qsp.player.stock.install.GameInstaller;
+import com.qsp.player.stock.install.InstallException;
+import com.qsp.player.stock.install.InstallType;
 import com.qsp.player.util.FileUtil;
 import com.qsp.player.util.ViewUtil;
 import com.qsp.player.util.ZipUtil;
@@ -61,6 +67,8 @@ import java.util.List;
 import java.util.Locale;
 
 import static com.qsp.player.util.FileUtil.GAME_INFO_FILENAME;
+import static com.qsp.player.util.GameDirUtil.doesDirectoryContainGameFiles;
+import static com.qsp.player.util.GameDirUtil.normalizeGameDirectory;
 
 public class GameStockActivity extends AppCompatActivity {
 
@@ -84,6 +92,7 @@ public class GameStockActivity extends AppCompatActivity {
     private final HashMap<String, GameStockItem> gamesMap = new HashMap<>();
     private final SparseArrayCompat<GameStockItemAdapter> gameAdapters = new SparseArrayCompat<>();
     private final LocalGameRepository localGameRepository = new LocalGameRepository(this);
+    private final HashMap<InstallType, GameInstaller> installers = new HashMap<>();
 
     private String gameRunning;
     private boolean showProgressDialog;
@@ -96,6 +105,12 @@ public class GameStockActivity extends AppCompatActivity {
     private DocumentFile gamesDir;
     private DownloadGameAsyncTask downloadTask;
     private LoadGameListAsyncTask loadGameListTask;
+    private InstallType lastInstallType = InstallType.ARCHIVE;
+
+    public GameStockActivity() {
+        installers.put(InstallType.ARCHIVE, new ArchiveGameInstaller(this));
+        installers.put(InstallType.FOLDER, new FolderGameInstaller(this));
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -423,58 +438,46 @@ public class GameStockActivity extends AppCompatActivity {
             super.onActivityResult(requestCode, resultCode, data);
             return;
         }
-        if (resultCode != RESULT_OK) {
-            return;
-        }
+        if (resultCode != RESULT_OK) return;
+
         Uri uri;
         if (data == null || (uri = data.getData()) == null) {
             Log.e(TAG, "Game archive is not selected");
             return;
         }
-        installGame(uri);
+        installGame(uri, lastInstallType);
     }
 
-    private void installGame(Uri uri) {
+    private void installGame(Uri uri, InstallType type) {
         if (!FileUtil.isWritableDirectory(gamesDir)) {
             Log.e(TAG, "Games directory is not writable");
             return;
         }
-        DocumentFile zipFile = DocumentFile.fromSingleUri(uiContext, uri);
-        if (zipFile == null || !zipFile.exists()) {
-            Log.e(TAG, "ZIP file not found: " + uri);
+        GameInstaller installer = installers.get(type);
+        if (installer == null) {
+            Log.e(TAG, String.format("Installer not found by install type '%s'", type));
             return;
         }
-        String filename = zipFile.getName();
-        if (filename == null) {
-            Log.e(TAG, "ZIP filename is null");
-            return;
+        try {
+            doInstallGame(installer, uri);
+        } catch (InstallException ex) {
+            Log.e(TAG, ex.getMessage());
         }
-        String gameName = FileUtil.removeFileExtension(filename);
-        updateProgressDialog(true, gameName, getString(R.string.extracting));
+    }
 
-        DocumentFile gameDir = getOrCreateGameDirectory(gameName);
+    private void doInstallGame(GameInstaller installer, Uri uri) {
+        installer.load(uri);
+
+        DocumentFile gameDir = getOrCreateGameDirectory(installer.getGameName());
         if (!FileUtil.isWritableDirectory(gameDir)) {
             Log.e(TAG, "Game directory is not writable");
             return;
         }
+        updateProgressDialog(true, installer.getGameName(), getString(R.string.installing));
 
-        boolean extracted = unzip(zipFile, gameDir);
-        boolean containsGameFiles = false;
-
-        if (extracted) {
-            normalizeGameDirectory(gameDir);
-            containsGameFiles = doesDirectoryContainGameFiles(gameDir);
-        } else {
-            String message = getString(R.string.extractError)
-                    .replace("-GAMENAME-", gameName);
-
-            ViewUtil.showErrorDialog(uiContext, message);
-        }
-
-        if (containsGameFiles) {
+        boolean installed = installer.install(gameDir);
+        if (installed) {
             refreshGames();
-        } else {
-            ViewUtil.showErrorDialog(uiContext, getString(R.string.noGameFilesError));
         }
 
         updateProgressDialog(false, "", "");
@@ -486,7 +489,6 @@ public class GameStockActivity extends AppCompatActivity {
         if (dir == null) {
             dir = gamesDir.createDirectory(folderName);
         }
-
         return dir;
     }
 
@@ -495,42 +497,7 @@ public class GameStockActivity extends AppCompatActivity {
             Log.e(TAG, "Game directory is not writable");
             return false;
         }
-
         return ZipUtil.unzip(uiContext, zipFile, dir);
-    }
-
-    /**
-     * Если в папке есть только одна папка, и больше ничего, рекурсивно разворачивает папку до тех
-     * пор, пока или ничего не останется, или останется папка, в которой будет что-то другое, кроме
-     * одной вложенной папки.
-     */
-    private void normalizeGameDirectory(DocumentFile dir) {
-        String dirPath = dir.getUri().getPath();
-        File dirFile = new File(dirPath);
-        File[] subFiles = dirFile.listFiles();
-        if (subFiles == null || subFiles.length != 1 || !subFiles[0].isDirectory()) {
-            return;
-        }
-        for (File file : subFiles[0].listFiles()) {
-            file.renameTo(new File(dirPath + "/", file.getName()));
-        }
-        subFiles[0].delete();
-        normalizeGameDirectory(dir);
-    }
-
-    private boolean doesDirectoryContainGameFiles(DocumentFile dir) {
-        for (DocumentFile file : dir.listFiles()) {
-            String name = file.getName();
-            if (name == null) {
-                continue;
-            }
-            String lcName = name.toLowerCase();
-            if (lcName.endsWith(".qsp") || lcName.endsWith(".gam")) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     @Override
@@ -542,8 +509,14 @@ public class GameStockActivity extends AppCompatActivity {
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
+        boolean isLollipopOrGreater = Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP;
+
+        MenuItem installFromFolderItem = menu.findItem(R.id.menu_installfromfolder);
+        installFromFolderItem.setEnabled(isLollipopOrGreater);
+
         MenuItem resumeGameItem = menu.findItem(R.id.menu_resumegame);
         resumeGameItem.setVisible(gameRunning != null);
+
         return true;
     }
 
@@ -563,8 +536,12 @@ public class GameStockActivity extends AppCompatActivity {
                 showAboutDialog();
                 return true;
 
-            case R.id.menu_installgame:
-                showInstallGameDialog();
+            case R.id.menu_installfromarchive:
+                showInstallGameDialog(InstallType.ARCHIVE);
+                return true;
+
+            case R.id.menu_installfromfolder:
+                showInstallGameDialog(InstallType.FOLDER);
                 return true;
 
             case R.id.menu_deletegame:
@@ -575,9 +552,17 @@ public class GameStockActivity extends AppCompatActivity {
         return false;
     }
 
-    private void showInstallGameDialog() {
-        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-        intent.setType("application/zip");
+    private void showInstallGameDialog(InstallType installType) {
+        boolean installFromArchive = installType == InstallType.ARCHIVE;
+        String action = installFromArchive ?
+                Intent.ACTION_OPEN_DOCUMENT :
+                Intent.ACTION_OPEN_DOCUMENT_TREE;
+
+        lastInstallType = installType;
+        Intent intent = new Intent(action);
+        if (installFromArchive) {
+            intent.setType("application/zip");
+        }
         intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         startActivityForResult(intent, REQUEST_CODE_INSTALL_GAME);
     }
@@ -621,9 +606,9 @@ public class GameStockActivity extends AppCompatActivity {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (downloadTask != null &&
-            downloadTask.getStatus() == AsyncTask.Status.RUNNING &&
-            keyCode == KeyEvent.KEYCODE_BACK &&
-            event.getRepeatCount() == 0) {
+                downloadTask.getStatus() == AsyncTask.Status.RUNNING &&
+                keyCode == KeyEvent.KEYCODE_BACK &&
+                event.getRepeatCount() == 0) {
 
             moveTaskToBack(true);
             return true;
@@ -886,9 +871,9 @@ public class GameStockActivity extends AppCompatActivity {
             if (!extracted) {
                 return DownloadResult.EXTRACT_FAILED;
             }
-            activity.normalizeGameDirectory(gameDir);
+            normalizeGameDirectory(gameDir);
 
-            if (!activity.doesDirectoryContainGameFiles(gameDir)) {
+            if (!doesDirectoryContainGameFiles(gameDir)) {
                 return DownloadResult.GAME_FILES_NOT_FOUND;
             }
             writeGameInfo();
@@ -978,7 +963,7 @@ public class GameStockActivity extends AppCompatActivity {
             if (activity == null) {
                 return;
             }
-            activity.updateProgressDialog(true, game.title, activity.getString(R.string.extracting));
+            activity.updateProgressDialog(true, game.title, activity.getString(R.string.installing));
         }
 
         @Override

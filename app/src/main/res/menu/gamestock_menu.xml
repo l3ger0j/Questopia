@@ -1,24 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-
     <item
         android:id="@+id/menu_resumegame"
         android:title="@string/resumeGame" />
-
     <item
         android:id="@+id/menu_installgame"
-        android:title="@string/installGame" />
+        android:title="@string/installGame">
 
+        <menu>
+            <item
+                android:id="@+id/menu_installfromarchive"
+                android:title="@string/installFromArchive" />
+            <item
+                android:id="@+id/menu_installfromfolder"
+                android:title="@string/installFromFolder"
+                android:enabled="false" />
+        </menu>
+    </item>
     <item
         android:id="@+id/menu_deletegame"
         android:title="@string/deleteGame" />
-
     <item
         android:id="@+id/menu_options"
         android:title="@string/settings" />
-
     <item
         android:id="@+id/menu_about"
         android:title="@string/aboutApp" />
-
 </menu>
