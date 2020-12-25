@@ -26,13 +26,7 @@ public class LocalGameRepository {
 
     private static final String TAG = LocalGameRepository.class.getName();
 
-    private final Context context;
-
     private File gamesDir;
-
-    public LocalGameRepository(Context context) {
-        this.context = context;
-    }
 
     public void setGamesDirectory(File dir) {
         gamesDir = dir;
@@ -117,7 +111,7 @@ public class LocalGameRepository {
             return null;
         }
 
-        return FileUtil.readFileAsString(context, gameInfoFiles[0]);
+        return FileUtil.readFileAsString(gameInfoFiles[0]);
     }
 
     private GameStockItem parseGameInfo(String xml) {

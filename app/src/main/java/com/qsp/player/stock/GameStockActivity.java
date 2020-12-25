@@ -93,7 +93,7 @@ public class GameStockActivity extends AppCompatActivity {
     private final Context context = this;
     private final HashMap<String, GameStockItem> gamesMap = new HashMap<>();
     private final SparseArrayCompat<GameStockItemAdapter> gameAdapters = new SparseArrayCompat<>();
-    private final LocalGameRepository localGameRepository = new LocalGameRepository(this);
+    private final LocalGameRepository localGameRepository = new LocalGameRepository();
     private final HashMap<InstallType, GameInstaller> installers = new HashMap<>();
 
     private String gameRunning;

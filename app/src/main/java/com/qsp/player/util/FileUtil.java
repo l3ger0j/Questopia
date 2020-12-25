@@ -104,7 +104,7 @@ public final class FileUtil {
         return findFileRecursively(dir, path.substring(idx + 1));
     }
 
-    public static String readFileAsString(Context context, File file) {
+    public static String readFileAsString(File file) {
         StringBuilder result = new StringBuilder();
         try (FileInputStream in = new FileInputStream(file)) {
             InputStreamReader inReader = new InputStreamReader(in);
