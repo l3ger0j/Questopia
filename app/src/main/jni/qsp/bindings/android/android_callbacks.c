@@ -439,4 +439,36 @@ QSP_CHAR *qspCallInputBox(QSP_CHAR *text)
 	return buffer;
 }
 
+char *qspCallGetFileContents(QSP_CHAR *fileName, int *filesize) {
+	// Get GetFileContents method
+	jclass cls = (*qspCallbackEnv)->GetObjectClass(qspCallbackEnv, qspCallbackObject);
+	jmethodID mid = (*qspCallbackEnv)->GetMethodID(qspCallbackEnv, cls, "GetFileContents", "(Ljava/lang/String;)[B");
+	(*qspCallbackEnv)->DeleteLocalRef(qspCallbackEnv, cls);
+
+	// Convert QSP file name to Java
+	char *cFileName = qspW2C(fileName);
+	jstring javaFileName = (*qspCallbackEnv)->NewStringUTF(qspCallbackEnv, cFileName);
+	free(cFileName);
+
+	// Call GetFileContents
+	jbyteArray byteArray = (jbyteArray)(*qspCallbackEnv)->CallObjectMethod(qspCallbackEnv, qspCallbackObject, mid, javaFileName);
+	(*qspCallbackEnv)->DeleteLocalRef(qspCallbackEnv, javaFileName);
+	if (!byteArray) return NULL;
+
+	// Copy file contents into a new buffer
+	jboolean isCopy;
+	jbyte *data = (*qspCallbackEnv)->GetByteArrayElements(qspCallbackEnv, byteArray, &isCopy);
+	jsize byteArrayLen = (*qspCallbackEnv)->GetArrayLength(qspCallbackEnv, byteArray);
+	char *result = (char *)malloc(byteArrayLen);
+	memcpy(result, data, byteArrayLen);
+	(*qspCallbackEnv)->ReleaseByteArrayElements(qspCallbackEnv, byteArray, data, JNI_ABORT);
+
+	// Set file size
+	if (filesize) {
+		*filesize = byteArrayLen;
+	}
+
+	return result;
+}
+
 #endif

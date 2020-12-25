@@ -17,9 +17,12 @@ import com.qsp.player.util.FileUtil;
 import com.qsp.player.util.HtmlUtil;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.concurrent.CountDownLatch;
@@ -159,7 +162,7 @@ public class LibQspProxyImpl implements LibQspProxy {
 
     private boolean loadGameWorld() {
         byte[] gameData;
-        try (InputStream in = context.getContentResolver().openInputStream(viewState.gameFile.getUri())) {
+        try (FileInputStream in = new FileInputStream(viewState.gameFile)) {
             try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
                 byte[] b = new byte[8192];
                 int bytesRead;
@@ -172,8 +175,8 @@ public class LibQspProxyImpl implements LibQspProxy {
             Log.e(TAG, "Failed to load the game world", e);
             return false;
         }
-
-        if (!QSPLoadGameWorldFromData(gameData, gameData.length, viewState.gameFile.getUri().toString())) {
+        String fileName = viewState.gameFile.getAbsolutePath();
+        if (!QSPLoadGameWorldFromData(gameData, gameData.length, fileName)) {
             showLastQspError();
             return false;
         }
@@ -329,7 +332,7 @@ public class LibQspProxyImpl implements LibQspProxy {
     }
 
     @Override
-    public void runGame(final String title, final DocumentFile dir, final DocumentFile file) {
+    public void runGame(final String title, final File dir, final File file) {
         runOnQspThread(new Runnable() {
             @Override
             public void run() {
@@ -338,7 +341,7 @@ public class LibQspProxyImpl implements LibQspProxy {
         });
     }
 
-    private void doRunGame(final String title, final DocumentFile dir, final DocumentFile file) {
+    private void doRunGame(final String title, final File dir, final File file) {
         counterHandler.removeCallbacks(counterTask);
         audioPlayer.closeAllFiles();
 
@@ -530,13 +533,13 @@ public class LibQspProxyImpl implements LibQspProxy {
     }
 
     private void OpenGame(String filename) {
-        DocumentFile dir = FileUtil.getOrCreateDirectory(viewState.gameDir, "saves");
-        DocumentFile file = dir.findFile(filename);
-        if (file == null) {
+        File savesDir = FileUtil.getOrCreateDirectory(viewState.gameDir, "saves");
+        File saveFile = FileUtil.findFileOrDirectory(savesDir, filename);
+        if (saveFile == null) {
             Log.e(TAG, "Save file not found: " + filename);
             return;
         }
-        loadGameState(file.getUri());
+        loadGameState(Uri.fromFile(saveFile));
     }
 
     private void SaveGame(String filename) {
@@ -595,6 +598,27 @@ public class LibQspProxyImpl implements LibQspProxy {
     private void ShowWindow(int type, boolean isShow) {
         WindowType windowType = WindowType.values()[type];
         playerView.showWindow(windowType, isShow);
+    }
+
+    private byte[] GetFileContents(String path) {
+        File file = new File(path);
+        try (FileInputStream in = new FileInputStream(file)) {
+            try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+                byte[] buf = new byte[8192];
+                int bytesRead;
+                do {
+                    bytesRead = in.read(buf);
+                    if (bytesRead > 0) {
+                        out.write(buf, 0, bytesRead);
+                    }
+                } while (bytesRead != -1);
+
+                return out.toByteArray();
+            }
+        } catch (IOException ex) {
+            Log.e(TAG, "Error reading file: " + path, ex);
+            return null;
+        }
     }
 
     // End QSP library callbacks

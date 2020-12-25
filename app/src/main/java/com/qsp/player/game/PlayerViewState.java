@@ -1,15 +1,14 @@
 package com.qsp.player.game;
 
-import androidx.documentfile.provider.DocumentFile;
-
+import java.io.File;
 import java.util.ArrayList;
 
 class PlayerViewState {
 
     boolean gameRunning;
     String gameTitle;
-    DocumentFile gameDir;
-    DocumentFile gameFile;
+    File gameDir;
+    File gameFile;
     boolean useHtml;
     int fontSize;
     int backColor;

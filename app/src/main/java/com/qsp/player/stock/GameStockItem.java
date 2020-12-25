@@ -1,7 +1,6 @@
 package com.qsp.player.stock;
 
-import androidx.documentfile.provider.DocumentFile;
-
+import java.io.File;
 import java.util.List;
 
 public class GameStockItem {
@@ -18,8 +17,8 @@ public class GameStockItem {
     public String descUrl = "";
     public String pubDate = "";
     public String modDate = "";
-    public DocumentFile gameDir;
-    public List<DocumentFile> gameFiles;
+    public File gameDir;
+    public List<File> gameFiles;
 
     public  boolean hasRemoteUrl() {
         return fileUrl != null;

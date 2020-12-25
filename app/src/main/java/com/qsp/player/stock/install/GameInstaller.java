@@ -8,6 +8,8 @@ import androidx.documentfile.provider.DocumentFile;
 import com.qsp.player.R;
 import com.qsp.player.util.ViewUtil;
 
+import java.io.File;
+
 import static com.qsp.player.util.GameDirUtil.doesDirectoryContainGameFiles;
 import static com.qsp.player.util.GameDirUtil.normalizeGameDirectory;
 
@@ -30,13 +32,13 @@ public abstract class GameInstaller {
     /**
      * @throws InstallException непредвиденная ошибка
      */
-    public abstract boolean install(DocumentFile gameDir);
+    public abstract boolean install(File gameDir);
 
     public String getGameName() {
         return gameName;
     }
 
-    protected boolean postInstall(DocumentFile gameDir) {
+    protected boolean postInstall(File gameDir) {
         normalizeGameDirectory(gameDir);
 
         boolean containsGameFiles = doesDirectoryContainGameFiles(gameDir);

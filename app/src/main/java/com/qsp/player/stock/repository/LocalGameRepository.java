@@ -3,8 +3,6 @@ package com.qsp.player.stock.repository;
 import android.content.Context;
 import android.util.Log;
 
-import androidx.documentfile.provider.DocumentFile;
-
 import com.qsp.player.stock.GameStockItem;
 import com.qsp.player.util.FileUtil;
 
@@ -12,6 +10,8 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
+import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -28,13 +28,13 @@ public class LocalGameRepository {
 
     private final Context context;
 
-    private DocumentFile gamesDir;
+    private File gamesDir;
 
     public LocalGameRepository(Context context) {
         this.context = context;
     }
 
-    public void setGamesDirectory(DocumentFile dir) {
+    public void setGamesDirectory(File dir) {
         gamesDir = dir;
     }
 
@@ -44,7 +44,7 @@ public class LocalGameRepository {
             return Collections.emptyList();
         }
 
-        ArrayList<DocumentFile> gameDirs = getGameDirectories();
+        ArrayList<File> gameDirs = getGameDirectories();
         if (gameDirs.isEmpty()) {
             return Collections.emptyList();
         }
@@ -69,9 +69,9 @@ public class LocalGameRepository {
         return items;
     }
 
-    private ArrayList<DocumentFile> getGameDirectories() {
-        ArrayList<DocumentFile> dirs = new ArrayList<>();
-        for (DocumentFile f : gamesDir.listFiles()) {
+    private ArrayList<File> getGameDirectories() {
+        ArrayList<File> dirs = new ArrayList<>();
+        for (File f : gamesDir.listFiles()) {
             if (f.isDirectory()) {
                 dirs.add(f);
             }
@@ -80,17 +80,17 @@ public class LocalGameRepository {
         return dirs;
     }
 
-    private List<GameFolder> getGameFolders(List<DocumentFile> dirs) {
+    private List<GameFolder> getGameFolders(List<File> dirs) {
         ArrayList<GameFolder> folders = new ArrayList<>();
         sortFilesByName(dirs);
 
-        for (DocumentFile dir : dirs) {
-            ArrayList<DocumentFile> gameFiles = new ArrayList<>();
+        for (File dir : dirs) {
+            ArrayList<File> gameFiles = new ArrayList<>();
 
-            List<DocumentFile> files = Arrays.asList(dir.listFiles());
+            List<File> files = Arrays.asList(dir.listFiles());
             sortFilesByName(files);
 
-            for (DocumentFile file : files) {
+            for (File file : files) {
                 String lcName = file.getName().toLowerCase();
                 if (lcName.endsWith(".qsp") || lcName.endsWith(".gam")) {
                     gameFiles.add(file);
@@ -103,27 +103,31 @@ public class LocalGameRepository {
         return folders;
     }
 
-    private void sortFilesByName(List<DocumentFile> files) {
-        if (files.size() < 2) {
-            return;
-        }
-        Collections.sort(files, new Comparator<DocumentFile>() {
+    private void sortFilesByName(List<File> files) {
+        if (files.size() < 2) return;
+
+        Collections.sort(files, new Comparator<File>() {
             @Override
-            public int compare(DocumentFile first, DocumentFile second) {
-                return first.getName().toLowerCase()
-                        .compareTo(second.getName().toLowerCase());
+            public int compare(File o1, File o2) {
+                return o1.getName().toLowerCase()
+                        .compareTo(o2.getName().toLowerCase());
             }
         });
     }
 
     private String getGameInfo(GameFolder game) {
-        DocumentFile infoFile = game.dir.findFile(GAME_INFO_FILENAME);
-        if (infoFile == null) {
+        File[] gameInfoFiles = game.dir.listFiles(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                return name.equalsIgnoreCase(GAME_INFO_FILENAME);
+            }
+        });
+        if (gameInfoFiles == null || gameInfoFiles.length == 0) {
             Log.w(TAG, "Game info file not found in " + game.dir.getName());
             return null;
         }
 
-        return FileUtil.readFileAsString(context, infoFile);
+        return FileUtil.readFileAsString(context, gameInfoFiles[0]);
     }
 
     private GameStockItem parseGameInfo(String xml) {
@@ -228,10 +232,10 @@ public class LocalGameRepository {
     }
 
     private static class GameFolder {
-        private final DocumentFile dir;
-        private final List<DocumentFile> gameFiles;
+        private final File dir;
+        private final List<File> gameFiles;
 
-        private GameFolder(DocumentFile dir, List<DocumentFile> gameFiles) {
+        private GameFolder(File dir, List<File> gameFiles) {
             this.dir = dir;
             this.gameFiles = gameFiles;
         }

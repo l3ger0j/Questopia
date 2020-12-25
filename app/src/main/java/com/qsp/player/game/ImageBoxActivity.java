@@ -9,14 +9,13 @@ import android.view.View.OnClickListener;
 import android.widget.ImageView;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.documentfile.provider.DocumentFile;
 
 import com.qsp.player.R;
-import com.qsp.player.util.FileUtil;
+
+import java.io.File;
 
 public class ImageBoxActivity extends AppCompatActivity {
 
-    private final Context uiContext = this;
     private final ImageProvider imageProvider = new ImageProvider(this);
 
     @Override
@@ -27,8 +26,7 @@ public class ImageBoxActivity extends AppCompatActivity {
         Intent intent = getIntent();
 
         String gameDirUri = intent.getStringExtra("gameDirUri");
-        DocumentFile gameDir = FileUtil.getDirectory(uiContext, gameDirUri);
-        imageProvider.setGameDirectory(gameDir);
+        imageProvider.setGameDirectory(new File(gameDirUri));
 
         String imagePath = intent.getStringExtra("imagePath");
         Drawable drawable = imageProvider.getDrawable(imagePath);

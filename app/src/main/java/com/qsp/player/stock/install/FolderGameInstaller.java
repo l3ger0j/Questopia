@@ -8,6 +8,8 @@ import androidx.documentfile.provider.DocumentFile;
 
 import com.qsp.player.util.FileUtil;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -31,16 +33,16 @@ public class FolderGameInstaller extends GameInstaller {
     }
 
     @Override
-    public boolean install(DocumentFile gameDir) {
+    public boolean install(File gameDir) {
         for (DocumentFile file : gameFileOrDir.listFiles()) {
             copyFileOrDirectory(file, gameDir);
         }
         return postInstall(gameDir);
     }
 
-    private void copyFileOrDirectory(DocumentFile fileOrDir, DocumentFile parentDir) {
+    private void copyFileOrDirectory(DocumentFile fileOrDir, File parentDir) {
         if (fileOrDir.isDirectory()) {
-            DocumentFile subDir = FileUtil.getOrCreateDirectory(parentDir, fileOrDir.getName());
+            File subDir = FileUtil.getOrCreateDirectory(parentDir, fileOrDir.getName());
             for (DocumentFile dirFile : fileOrDir.listFiles()) {
                 copyFileOrDirectory(dirFile, subDir);
             }
@@ -49,25 +51,23 @@ public class FolderGameInstaller extends GameInstaller {
         }
     }
 
-    private void copyFile(DocumentFile file, DocumentFile parentDir) {
-        DocumentFile destFile = FileUtil.createBinaryFile(parentDir, file.getName());
+    private void copyFile(DocumentFile file, File parentDir) {
+        File destFile = FileUtil.createFile(parentDir, file.getName());
         if (destFile == null) {
             Log.e(TAG, "Destination file is null");
             return;
         }
         byte[] buffer = new byte[BUFFER_SIZE];
-        try (
-                InputStream in = context.getContentResolver().openInputStream(file.getUri());
-                OutputStream out = context.getContentResolver().openOutputStream(destFile.getUri())) {
-
-            int bytesRead;
-            do {
-                bytesRead = in.read(buffer);
-                if (bytesRead > 0) {
-                    out.write(buffer, 0, bytesRead);
-                }
-            } while (bytesRead > 0);
-
+        try (InputStream in = context.getContentResolver().openInputStream(file.getUri())) {
+            try (OutputStream out = new FileOutputStream(destFile)) {
+                int bytesRead;
+                do {
+                    bytesRead = in.read(buffer);
+                    if (bytesRead > 0) {
+                        out.write(buffer, 0, bytesRead);
+                    }
+                } while (bytesRead > 0);
+            }
         } catch (IOException ex) {
             throw new InstallException("Error copying game files");
         }

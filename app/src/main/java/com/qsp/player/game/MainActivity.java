@@ -23,6 +23,7 @@ import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.MimeTypeMap;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -39,7 +40,6 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.documentfile.provider.DocumentFile;
 
 import com.qsp.player.QuestPlayerApplication;
 import com.qsp.player.R;
@@ -49,6 +49,7 @@ import com.qsp.player.util.FileUtil;
 import com.qsp.player.util.HtmlUtil;
 import com.qsp.player.util.ViewUtil;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -491,12 +492,12 @@ public class MainActivity extends AppCompatActivity implements PlayerView {
         subMenu.setHeaderTitle(getString(R.string.selectSlot));
 
         MenuItem item;
-        final DocumentFile savesDir = FileUtil.getOrCreateDirectory(viewState.gameDir, "saves");
+        final File savesDir = FileUtil.getOrCreateDirectory(viewState.gameDir, "saves");
         final LibQspProxy proxy = libQspProxy;
 
         for (int i = 0; i < MAX_SAVE_SLOTS; ++i) {
             final String filename = getSaveSlotFilename(i);
-            final DocumentFile file = savesDir.findFile(filename);
+            final File file = FileUtil.findFileOrDirectory(savesDir, filename);
             String title;
 
             if (file != null) {
@@ -513,12 +514,12 @@ public class MainActivity extends AppCompatActivity implements PlayerView {
                     switch (action) {
                         case LOAD:
                             if (file != null) {
-                                proxy.loadGameState(file.getUri());
+                                proxy.loadGameState(Uri.fromFile(file));
                             }
                             break;
                         case SAVE:
-                            DocumentFile file = FileUtil.getOrCreateBinaryFile(savesDir, filename);
-                            proxy.saveGameState(file.getUri());
+                            File file = FileUtil.getOrCreateFile(savesDir, filename);
+                            proxy.saveGameState(Uri.fromFile(file));
                             break;
                     }
 
@@ -638,11 +639,11 @@ public class MainActivity extends AppCompatActivity implements PlayerView {
         String gameTitle = data.getStringExtra("gameTitle");
 
         String gameDirUri = data.getStringExtra("gameDirUri");
-        DocumentFile gameDir = FileUtil.getDirectory(uiContext, gameDirUri);
+        File gameDir = new File(gameDirUri);
         imageProvider.setGameDirectory(gameDir);
 
         String gameFileUri = data.getStringExtra("gameFileUri");
-        DocumentFile gameFile = FileUtil.getFile(uiContext, gameFileUri);
+        File gameFile = new File(gameFileUri);
 
         libQspProxy.runGame(gameTitle, gameDir, gameFile);
     }
@@ -771,7 +772,7 @@ public class MainActivity extends AppCompatActivity implements PlayerView {
             @Override
             public void run() {
                 Intent intent = new Intent(uiContext, ImageBoxActivity.class);
-                intent.putExtra("gameDirUri", viewState.gameDir.getUri().toString());
+                intent.putExtra("gameDirUri", viewState.gameDir.getAbsolutePath());
                 intent.putExtra("imagePath", FileUtil.normalizePath(path));
                 startActivity(intent);
             }
@@ -930,14 +931,16 @@ public class MainActivity extends AppCompatActivity implements PlayerView {
         public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
             if (url.startsWith("file:///")) {
                 String path = FileUtil.normalizePath(Uri.decode(url.substring(8)));
-                DocumentFile file = FileUtil.findFileByPath(viewState.gameDir, path);
+                File file = FileUtil.findFileRecursively(viewState.gameDir, path);
                 if (file == null) {
                     Log.e(TAG, "File not found: " + path);
                     return null;
                 }
                 try {
-                    InputStream in = uiContext.getContentResolver().openInputStream(file.getUri());
-                    return new WebResourceResponse(file.getType(), null, in);
+                    String extension = FileUtil.getExtension(file.getName());
+                    String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+                    InputStream in = uiContext.getContentResolver().openInputStream(Uri.fromFile(file));
+                    return new WebResourceResponse(mimeType, null, in);
                 } catch (FileNotFoundException e) {
                     Log.e(TAG, "File not found", e);
                     return null;

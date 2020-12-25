@@ -301,6 +301,23 @@ void qspOpenQuestFromData(char *data, int dataSize, QSP_CHAR *fileName, QSP_BOOL
 
 void qspOpenQuest(QSP_CHAR *fileName, QSP_BOOL isAddLocs)
 {
+	int fileSize;
+
+	char *data = qspCallGetFileContents(fileName, &fileSize);
+	if (!data) {
+		qspSetError(QSP_ERR_FILENOTFOUND);
+		return;
+	}
+
+	char *buf = (char *)malloc(fileSize + 3);
+	memcpy(buf, data, fileSize);
+	free(data);
+
+	buf[fileSize] = buf[fileSize + 1] = buf[fileSize + 2] = 0;
+	qspOpenQuestFromData(buf, fileSize, fileName, isAddLocs);
+	free(buf);
+
+	/*
 	FILE *f;
 	char *buf;
 	int fileSize;
@@ -318,6 +335,7 @@ void qspOpenQuest(QSP_CHAR *fileName, QSP_BOOL isAddLocs)
 	buf[fileSize] = buf[fileSize + 1] = buf[fileSize + 2] = 0;
 	qspOpenQuestFromData(buf, fileSize + 3, fileName, isAddLocs);
 	free(buf);
+	 */
 }
 
 int qspSaveGameStatusToString(QSP_CHAR **buf)

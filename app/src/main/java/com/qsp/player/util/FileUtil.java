@@ -1,17 +1,16 @@
 package com.qsp.player.util;
 
 import android.content.Context;
-import android.net.Uri;
 import android.util.Log;
 
 import androidx.documentfile.provider.DocumentFile;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URI;
 
 public final class FileUtil {
 
@@ -19,11 +18,11 @@ public final class FileUtil {
 
     private static final String TAG = FileUtil.class.getName();
 
-    public static boolean isWritableFile(DocumentFile file) {
+    public static boolean isWritableFile(File file) {
         return file != null && file.exists() && file.canWrite();
     }
 
-    public static boolean isWritableDirectory(DocumentFile dir) {
+    public static boolean isWritableDirectory(File dir) {
         return dir != null && dir.exists() && dir.isDirectory() && dir.canWrite();
     }
 
@@ -51,97 +50,69 @@ public final class FileUtil {
         return idx != -1 ? filename.substring(0, idx) : filename;
     }
 
-    public static DocumentFile getFile(Context context, String uri) {
-        if (uri.startsWith("file:///")) {
-            return DocumentFile.fromFile(new File(URI.create(uri)));
-        }
-
-        return DocumentFile.fromSingleUri(context, Uri.parse(uri));
-    }
-
-    public static DocumentFile getOrCreateBinaryFile(DocumentFile parentDir, String filename) {
-        DocumentFile file = parentDir.findFile(filename);
+    public static File getOrCreateFile(File parentDir, String name) {
+        File file = findFileOrDirectory(parentDir, name);
         if (file == null) {
-            file = createBinaryFile(parentDir, filename);
+            file = createFile(parentDir, name);
         }
-
         return file;
     }
 
-    public static DocumentFile getDirectory(Context context, String uri) {
-        if (uri.startsWith("file:///")) {
-            return DocumentFile.fromFile(new File(URI.create(uri)));
-        }
-
-        return DocumentFile.fromTreeUri(context, Uri.parse(uri));
-    }
-
-    public static DocumentFile getOrCreateDirectory(DocumentFile parentDir, String name) {
-        DocumentFile dir = parentDir.findFile(name);
-        if (dir == null) {
-            dir = parentDir.createDirectory(name);
-        }
-
-        return dir;
-    }
-
-    public static DocumentFile findFileByPath(DocumentFile parentDir, String path) {
-        int idx = path.indexOf("/");
-        if (idx == -1) {
-            return findFileIgnoreCase(parentDir, path);
-        }
-
-        String dirName = path.substring(0, idx);
-        DocumentFile dir = findFileIgnoreCase(parentDir, dirName);
-        if (dir == null) {
-            return null;
-        }
-
-        return findFileByPath(dir, path.substring(idx + 1));
-    }
-
-    private static DocumentFile findFileIgnoreCase(DocumentFile parentDir, String displayName) {
-        for (DocumentFile f : parentDir.listFiles()) {
-            if (f.getName().toLowerCase().equals(displayName.toLowerCase())) {
-                return f;
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * Creates a binary file in the <code>parentDir</code>. This is to avoid a ".bin" extension
-     * being appended to the filename.
-     *
-     * @param parentDir directory to create a file in. URI scheme must be "file"
-     */
-    public static DocumentFile createBinaryFile(DocumentFile parentDir, String filename) {
-        Uri androidUri = parentDir.getUri();
-        String scheme = androidUri.getScheme();
-        if (scheme == null || !scheme.equals("file")) {
-            Log.e(TAG, "URI scheme of parentDir must be 'file'");
-            return null;
-        }
-
-        URI javaUri = URI.create(androidUri.toString());
-        File parentDirJava = new File(javaUri);
-
-        File file = new File(parentDirJava, filename);
+    public static File createFile(File parentDir, String name) {
+        File file = new File(parentDir, name);
         if (!file.exists()) {
             try {
                 file.createNewFile();
-            } catch (IOException e) {
+            } catch (IOException ex) {
+                Log.e(TAG, "Error creating a file: " + name, ex);
                 return null;
             }
         }
-
-        return DocumentFile.fromFile(file);
+        return file;
     }
 
-    public static String readFileAsString(Context context, DocumentFile file) {
+    public static File getOrCreateDirectory(File parentDir, String name) {
+        File dir = findFileOrDirectory(parentDir, name);
+        if (dir == null) {
+            dir = createDirectory(parentDir, name);
+        }
+        return dir;
+    }
+
+    public static File createDirectory(File parentDir, String name) {
+        File dir = new File(parentDir, name);
+        dir.mkdir();
+        return dir;
+    }
+
+    public static File findFileOrDirectory(File parentDir, final String name) {
+        File[] files = parentDir.listFiles(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String filename) {
+                return filename.equalsIgnoreCase(name);
+            }
+        });
+        if (files == null || files.length == 0) return null;
+
+        return files[0];
+    }
+
+    public static File findFileRecursively(File parentDir, String path) {
+        int idx = path.indexOf("/");
+        if (idx == -1) {
+            return findFileOrDirectory(parentDir, path);
+        }
+
+        String dirName = path.substring(0, idx);
+        File dir = findFileOrDirectory(parentDir, dirName);
+        if (dir == null) return null;
+
+        return findFileRecursively(dir, path.substring(idx + 1));
+    }
+
+    public static String readFileAsString(Context context, File file) {
         StringBuilder result = new StringBuilder();
-        try (InputStream in = context.getContentResolver().openInputStream(file.getUri())) {
+        try (FileInputStream in = new FileInputStream(file)) {
             InputStreamReader inReader = new InputStreamReader(in);
             try (BufferedReader bufReader = new BufferedReader(inReader)) {
                 String line;
@@ -149,60 +120,58 @@ public final class FileUtil {
                     result.append(line);
                 }
             }
-        } catch (IOException e) {
-            Log.e(TAG, "Failed to read file", e);
+        } catch (IOException ex) {
+            Log.e(TAG, "Error reading a file", ex);
             return null;
         }
-
         return result.toString();
     }
 
-    public static void deleteDirectory(DocumentFile dir) {
-        for (DocumentFile child : dir.listFiles()) {
-            if (child.isDirectory()) {
-                deleteDirectory(child);
+    public static void deleteDirectory(File dir) {
+        for (File file : dir.listFiles()) {
+            if (file.isDirectory()) {
+                deleteDirectory(file);
             } else {
-                child.delete();
+                file.delete();
             }
         }
         dir.delete();
     }
 
-    static String normalizeDirectoryPath(String dirPath) {
-        int idx = dirPath.lastIndexOf('/');
-        return idx == -1 ? dirPath : dirPath.substring(0, idx);
-    }
-
-    static String getFilename(String path) {
+    public static String normalizeDirectoryPath(String path) {
         int idx = path.lastIndexOf('/');
-        if (idx == -1) {
-            return path;
-        }
-
-        return path.substring(idx + 1);
+        return idx == -1 ? path : path.substring(0, idx);
     }
 
-    static DocumentFile getParentDirectory(DocumentFile parentDir, String path) {
+    public static String getFilename(String path) {
+        int idx = path.lastIndexOf('/');
+        return idx == -1 ? path : path.substring(idx + 1);
+    }
+
+    public static String getExtension(String filename) {
+        int idx = filename.lastIndexOf('.');
+        return idx == -1 ? null : filename.substring(idx + 1);
+    }
+
+    public static File getParentDirectory(File parentDir, String path) {
         int idx = path.indexOf('/');
-        if (idx == -1) {
-            return parentDir;
-        }
+        if (idx == -1) return parentDir;
 
         String dirName = path.substring(0, idx);
-        DocumentFile dir = parentDir.findFile(dirName);
+        File dir = findFileOrDirectory(parentDir, dirName);
         if (dir == null) {
-            dir = parentDir.createDirectory(dirName);
+            dir =  createDirectory(parentDir, dirName);;
         }
 
         return getParentDirectory(dir, path.substring(idx + 1));
     }
 
-    static void createDirectories(DocumentFile parentDir, String dirPath) {
+    public static void createDirectories(File parentDir, String dirPath) {
         int idx = dirPath.indexOf('/');
         String dirName = idx == -1 ? dirPath : dirPath.substring(0, idx);
-        DocumentFile dir = parentDir.findFile(dirName);
+        File dir = findFileOrDirectory(parentDir, dirName);
         if (dir == null) {
-            dir = parentDir.createDirectory(dirName);
+            dir = createDirectory(parentDir, dirName);
         }
         if (idx != -1) {
             createDirectories(dir, dirPath.substring(idx + 1));

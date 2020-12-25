@@ -8,9 +8,10 @@ import androidx.documentfile.provider.DocumentFile;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 
 public final class ZipUtil {
 
@@ -19,7 +20,7 @@ public final class ZipUtil {
     /**
      * Extracts the ZIP archive <code>zipFile</code> to a directory <code>gameDir</code>.
      */
-    public static boolean unzip(Context context, DocumentFile zipFile, DocumentFile gameDir) {
+    public static boolean unzip(Context context, DocumentFile zipFile, File gameDir) {
         try (InputStream in = context.getContentResolver().openInputStream(zipFile.getUri())) {
             try (ZipArchiveInputStream zipIn = new ZipArchiveInputStream(in, "cp866")) {
                 byte[] b = new byte[8192];
@@ -29,10 +30,10 @@ public final class ZipUtil {
                         FileUtil.createDirectories(gameDir, FileUtil.normalizeDirectoryPath(entry.getName()));
                         continue;
                     }
-                    DocumentFile parentDir = FileUtil.getParentDirectory(gameDir, entry.getName());
+                    File parentDir = FileUtil.getParentDirectory(gameDir, entry.getName());
                     String filename = FileUtil.getFilename(entry.getName());
-                    DocumentFile file = FileUtil.createBinaryFile(parentDir, filename);
-                    try (OutputStream out = context.getContentResolver().openOutputStream(file.getUri())) {
+                    File file = FileUtil.createFile(parentDir, filename);
+                    try (FileOutputStream out = new FileOutputStream(file)) {
                         int bytesRead;
                         while ((bytesRead = zipIn.read(b)) > 0) {
                             out.write(b, 0, bytesRead);

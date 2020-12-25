@@ -53,6 +53,7 @@ import com.qsp.player.util.ViewUtil;
 import com.qsp.player.util.ZipUtil;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -104,7 +105,7 @@ public class GameStockActivity extends AppCompatActivity {
     private ProgressDialog progressDialog;
     private ConnectivityManager connectivityManager;
     private Collection<GameStockItem> remoteGames;
-    private DocumentFile gamesDir;
+    private File gamesDir;
     private DownloadGameAsyncTask downloadTask;
     private LoadGameListAsyncTask loadGameListTask;
     private InstallType lastInstallType = InstallType.ARCHIVE;
@@ -253,7 +254,7 @@ public class GameStockActivity extends AppCompatActivity {
     private void playGame(final GameStockItem game) {
         final Intent data = new Intent();
         data.putExtra("gameTitle", game.title);
-        data.putExtra("gameDirUri", game.gameDir.getUri().toString());
+        data.putExtra("gameDirUri", game.gameDir.getAbsolutePath());
 
         int gameFileCount = game.gameFiles.size();
         switch (gameFileCount) {
@@ -261,7 +262,7 @@ public class GameStockActivity extends AppCompatActivity {
                 Log.w(TAG, "Game has no game files");
                 return;
             case 1:
-                data.putExtra("gameFileUri", game.gameFiles.get(0).getUri().toString());
+                data.putExtra("gameFileUri", game.gameFiles.get(0).getAbsolutePath());
                 setResult(RESULT_OK, data);
                 finish();
                 return;
@@ -270,7 +271,7 @@ public class GameStockActivity extends AppCompatActivity {
         }
 
         ArrayList<String> names = new ArrayList<>();
-        for (DocumentFile file : game.gameFiles) {
+        for (File file : game.gameFiles) {
             names.add(file.getName());
         }
         new AlertDialog.Builder(GameStockActivity.this)
@@ -279,7 +280,7 @@ public class GameStockActivity extends AppCompatActivity {
                 .setItems(names.toArray(new String[0]), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        data.putExtra("gameFileUri", game.gameFiles.get(which).getUri().toString());
+                        data.putExtra("gameFileUri", game.gameFiles.get(which).getAbsolutePath());
                         setResult(RESULT_OK, data);
                         finish();
                     }
@@ -355,23 +356,18 @@ public class GameStockActivity extends AppCompatActivity {
     }
 
     private void refreshGamesDirectory() {
-        File dirFile = getExternalFilesDir(null);
-        if (dirFile == null) {
+        File extFilesDir = getExternalFilesDir(null);
+        if (extFilesDir == null) {
             Log.e(TAG, "External files directory not found");
             return;
         }
-        DocumentFile extFilesDir = DocumentFile.fromFile(dirFile);
-        DocumentFile dir = extFilesDir.findFile("games");
-        if (dir == null) {
-            dir = extFilesDir.createDirectory("games");
-        }
+        File dir = FileUtil.getOrCreateDirectory(extFilesDir, "games");
         if (!FileUtil.isWritableDirectory(dir)) {
             Log.e(TAG, "Games directory is not writable");
             String message = getString(R.string.gamesDirError);
             ViewUtil.showErrorDialog(context, message);
             return;
         }
-
         gamesDir = dir;
         localGameRepository.setGamesDirectory(gamesDir);
         refreshGames();
@@ -484,7 +480,7 @@ public class GameStockActivity extends AppCompatActivity {
     private void doInstallGame(GameInstaller installer, Uri uri) {
         installer.load(uri);
 
-        DocumentFile gameDir = getOrCreateGameDirectory(installer.getGameName());
+        File gameDir = getOrCreateGameDirectory(installer.getGameName());
         if (!FileUtil.isWritableDirectory(gameDir)) {
             Log.e(TAG, "Game directory is not writable");
             return;
@@ -499,21 +495,17 @@ public class GameStockActivity extends AppCompatActivity {
         updateProgressDialog(false, "", "", null);
     }
 
-    private DocumentFile getOrCreateGameDirectory(String gameName) {
+    private File getOrCreateGameDirectory(String gameName) {
         String folderName = FileUtil.normalizeGameFolderName(gameName);
-        DocumentFile dir = gamesDir.findFile(folderName);
-        if (dir == null) {
-            dir = gamesDir.createDirectory(folderName);
-        }
-        return dir;
+        return FileUtil.getOrCreateDirectory(gamesDir, folderName);
     }
 
-    private boolean unzip(DocumentFile zipFile, DocumentFile dir) {
+    private boolean unzip(File zipFile, File dir) {
         if (!FileUtil.isWritableDirectory(dir)) {
             Log.e(TAG, "Game directory is not writable");
             return false;
         }
-        return ZipUtil.unzip(context, zipFile, dir);
+        return ZipUtil.unzip(context, DocumentFile.fromFile(zipFile), dir);
     }
 
     @Override
@@ -666,21 +658,20 @@ public class GameStockActivity extends AppCompatActivity {
     }
 
     private void showDeleteGameDialog() {
-        final ArrayList<DocumentFile> gameDirs = new ArrayList<>();
+        final ArrayList<File> gameDirs = new ArrayList<>();
         List<String> items = new ArrayList<>();
-        for (DocumentFile file : gamesDir.listFiles()) {
+        for (File file : gamesDir.listFiles()) {
             if (file.isDirectory()) {
                 gameDirs.add(file);
                 items.add(file.getName());
             }
         }
-
         new AlertDialog.Builder(context)
                 .setTitle(getString(R.string.deleteGameCmd))
                 .setItems(items.toArray(new String[0]), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        DocumentFile dir = gameDirs.get(which);
+                        File dir = gameDirs.get(which);
                         showConfirmDeleteDialog(dir);
                     }
                 })
@@ -693,7 +684,7 @@ public class GameStockActivity extends AppCompatActivity {
                 .show();
     }
 
-    private void showConfirmDeleteDialog(final DocumentFile gameDir) {
+    private void showConfirmDeleteDialog(final File gameDir) {
         new AlertDialog.Builder(context)
                 .setMessage(getString(R.string.deleteGameQuery).replace("-GAMENAME-", "\"" + gameDir.getName() + "\""))
                 .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
@@ -873,22 +864,21 @@ public class GameStockActivity extends AppCompatActivity {
                 return DownloadResult.DOWNLOAD_FAILED;
             }
 
-            File dirFile = activity.getCacheDir();
-            DocumentFile cacheDir = DocumentFile.fromFile(dirFile);
+            File cacheDir = activity.getCacheDir();
             if (!FileUtil.isWritableDirectory(cacheDir)) {
                 Log.e(TAG, "Cache directory is not writable");
                 return DownloadResult.DOWNLOAD_FAILED;
             }
 
             String zipFilename = String.valueOf(SystemClock.elapsedRealtime()).concat("_game");
-            DocumentFile zipFile = cacheDir.createFile("application/zip", zipFilename);
+            File zipFile = FileUtil.createFile(cacheDir, zipFilename);
             if (zipFile == null) {
                 Log.e(TAG, "Failed to create a ZIP file: " + zipFilename);
                 return DownloadResult.DOWNLOAD_FAILED;
             }
 
             boolean downloaded = download(zipFile);
-            DocumentFile gameDir = null;
+            File gameDir = null;
             boolean extracted = false;
 
             if (downloaded) {
@@ -915,7 +905,7 @@ public class GameStockActivity extends AppCompatActivity {
             return DownloadResult.OK;
         }
 
-        private boolean download(DocumentFile zipFile) {
+        private boolean download(File zipFile) {
             GameStockActivity activity = this.activity.get();
             if (activity == null) {
                 return false;
@@ -928,7 +918,7 @@ public class GameStockActivity extends AppCompatActivity {
                 conn.connect();
 
                 try (InputStream in = conn.getInputStream()) {
-                    try (OutputStream out = activity.getContentResolver().openOutputStream(zipFile.getUri())) {
+                    try (FileOutputStream out = new FileOutputStream(zipFile)) {
                         byte[] b = new byte[8192];
                         int totalBytesRead = 0;
                         int bytesRead;
@@ -955,20 +945,20 @@ public class GameStockActivity extends AppCompatActivity {
                 return false;
             }
             String folderName = FileUtil.normalizeGameFolderName(game.title);
-            DocumentFile gameDir = activity.gamesDir.findFile(folderName);
+            File gameDir = FileUtil.findFileOrDirectory(activity.gamesDir, folderName);
             if (!FileUtil.isWritableDirectory(gameDir)) {
                 Log.e(TAG, "Game directory is not writable");
                 return false;
             }
-            DocumentFile infoFile = gameDir.findFile(GAME_INFO_FILENAME);
+            File infoFile = FileUtil.findFileOrDirectory(gameDir, GAME_INFO_FILENAME);
             if (infoFile == null) {
-                infoFile = FileUtil.createBinaryFile(gameDir, GAME_INFO_FILENAME);
+                infoFile = FileUtil.createFile(gameDir, GAME_INFO_FILENAME);
             }
             if (!FileUtil.isWritableFile(infoFile)) {
                 Log.e(TAG, "Game info file is not writable");
                 return false;
             }
-            try (OutputStream out = activity.getContentResolver().openOutputStream(infoFile.getUri())) {
+            try (FileOutputStream out = new FileOutputStream(infoFile)) {
                 try (OutputStreamWriter writer = new OutputStreamWriter(out)) {
                     writer.write("<game>\n");
                     writer.write("\t<id><![CDATA[".concat(game.gameId.substring(3)).concat("]]></id>\n"));

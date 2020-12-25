@@ -5,10 +5,9 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
-import androidx.documentfile.provider.DocumentFile;
-
 import com.qsp.player.util.FileUtil;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
@@ -22,14 +21,14 @@ class AudioPlayer {
     private volatile boolean audioThreadRunning;
     private volatile Handler audioHandler;
     private boolean soundEnabled;
-    private DocumentFile gameDir;
+    private File gameDir;
     private boolean paused;
 
     void setSoundEnabled(boolean enabled) {
         soundEnabled = enabled;
     }
 
-    void setGameDirectory(DocumentFile dir) {
+    void setGameDirectory(File dir) {
         gameDir = dir;
     }
 
@@ -96,7 +95,7 @@ class AudioPlayer {
             return;
         }
 
-        DocumentFile file = FileUtil.findFileByPath(gameDir, sound.path);
+        File file = new File(sound.path);
         if (file == null) {
             Log.e(TAG, "Sound file not found: " + sound.path);
             return;
@@ -104,7 +103,7 @@ class AudioPlayer {
 
         MediaPlayer player = new MediaPlayer();
         try {
-            player.setDataSource(file.getUri().toString());
+            player.setDataSource(file.getAbsolutePath());
             player.prepare();
         } catch (IOException e) {
             Log.e(TAG, "Failed to initialize media player", e);

@@ -479,8 +479,10 @@ jboolean Java_com_qsp_player_game_LibQspProxyImpl_QSPLoadGameWorldFromData(JNIEn
 		return JNI_FALSE; /* OutOfMemoryError already thrown */
 	}
 
-	jboolean result = QSPLoadGameWorldFromData(mydata, size, str);
+	QSP_CHAR *wcs = qspC2W(str);
+	jboolean result = QSPLoadGameWorldFromData(mydata, size, wcs);
 	(*env)->ReleaseStringUTFChars(env, fileName, str);
+	free(wcs);
 
 	free(jbuf);
 	return result;

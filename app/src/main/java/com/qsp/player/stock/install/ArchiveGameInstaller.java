@@ -10,6 +10,8 @@ import com.qsp.player.util.FileUtil;
 import com.qsp.player.util.ViewUtil;
 import com.qsp.player.util.ZipUtil;
 
+import java.io.File;
+
 public class ArchiveGameInstaller extends GameInstaller {
 
     public ArchiveGameInstaller(Context context) {
@@ -30,7 +32,7 @@ public class ArchiveGameInstaller extends GameInstaller {
     }
 
     @Override
-    public boolean install(DocumentFile gameDir) {
+    public boolean install(File gameDir) {
         boolean extracted = ZipUtil.unzip(context, gameFileOrDir, gameDir);
         if (!extracted) {
             String message = context.getString(R.string.extractError).replace("-GAMENAME-", gameName);

@@ -2,7 +2,7 @@ package com.qsp.player.game;
 
 import android.net.Uri;
 
-import androidx.documentfile.provider.DocumentFile;
+import java.io.File;
 
 public interface LibQspProxy {
     PlayerViewState getViewState();
@@ -12,7 +12,7 @@ public interface LibQspProxy {
     void onActionClicked(int index);
     void onObjectSelected(int index);
     void onInputAreaClicked();
-    void runGame(String title, DocumentFile dir, DocumentFile file);
+    void runGame(String title, File dir, File file);
     void restartGame();
     void resumeGame();
     void pauseGame();
