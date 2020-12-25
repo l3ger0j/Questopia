@@ -1,12 +1,12 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 29
+    compileSdkVersion 30
     buildToolsVersion "29.0.2"
     defaultConfig {
         applicationId "com.qsp.player"
         minSdkVersion 19
-        targetSdkVersion 29
+        targetSdkVersion 30
         versionCode 242
         versionName "2.1.5"
     }
@@ -32,15 +32,15 @@ android {
 }
 
 dependencies {
-    implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'androidx.documentfile:documentfile:1.0.1'
-    implementation 'androidx.preference:preference:1.1.0'
+    implementation 'androidx.preference:preference:1.1.1'
     implementation 'com.github.kizitonwose.colorpreference:core:1.1.0'
     implementation 'com.github.kizitonwose.colorpreference:support:1.1.0'
     implementation 'com.pes.materialcolorpicker:library:1.2.5'
     implementation 'org.apache.commons:commons-compress:1.19'
     implementation 'org.jsoup:jsoup:1.12.1'
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.1'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.4.2'
     testImplementation "org.mockito:mockito-core:3.6.28"
     testImplementation "org.mockito:mockito-junit-jupiter:3.6.28"
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
