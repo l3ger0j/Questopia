@@ -15,7 +15,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -24,9 +23,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -52,6 +48,9 @@ import com.qsp.player.util.FileUtil;
 import com.qsp.player.util.ViewUtil;
 import com.qsp.player.util.ZipUtil;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -63,7 +62,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -73,8 +71,6 @@ import static com.qsp.player.util.GameDirUtil.doesDirectoryContainGameFiles;
 import static com.qsp.player.util.GameDirUtil.normalizeGameDirectory;
 
 public class GameStockActivity extends AppCompatActivity {
-
-    private static final String TAG = GameStockActivity.class.getName();
     private static final int REQUEST_CODE_INSTALL_GAME = 1;
 
     private static final int TAB_LOCAL = 0;
@@ -89,6 +85,8 @@ public class GameStockActivity extends AppCompatActivity {
             "a:link{color: QSPLINKCOLOR; }\n" +
             "table{font-size: QSPFONTSIZE; font-family: QSPFONTSTYLE; }\n" +
             "</style></head><body>REPLACETEXT</body></html>";
+
+    private static final Logger logger = LoggerFactory.getLogger(GameStockActivity.class);
 
     private final Context context = this;
     private final HashMap<String, GameStockItem> gamesMap = new HashMap<>();
@@ -182,7 +180,7 @@ public class GameStockActivity extends AppCompatActivity {
             if (game != null) {
                 playGame(game);
             } else {
-                Log.e(TAG, "Game not found: " + gameId);
+                logger.error("Game not found: " + gameId);
             }
 
             return true;
@@ -197,7 +195,7 @@ public class GameStockActivity extends AppCompatActivity {
     private void showGameInfo(String gameId) {
         final GameStockItem game = gamesMap.get(gameId);
         if (game == null) {
-            Log.e(TAG, "Game not found: " + gameId);
+            logger.error("Game not found: " + gameId);
             return;
         }
 
@@ -237,7 +235,7 @@ public class GameStockActivity extends AppCompatActivity {
         int gameFileCount = game.gameFiles.size();
         switch (gameFileCount) {
             case 0:
-                Log.w(TAG, "Game has no game files");
+                logger.warn("Game has no game files");
                 return;
             case 1:
                 data.putExtra("gameFileUri", game.gameFiles.get(0).getAbsolutePath());
@@ -333,12 +331,12 @@ public class GameStockActivity extends AppCompatActivity {
     private void refreshGamesDirectory() {
         File extFilesDir = getExternalFilesDir(null);
         if (extFilesDir == null) {
-            Log.e(TAG, "External files directory not found");
+            logger.error("External files directory not found");
             return;
         }
         File dir = FileUtil.getOrCreateDirectory(extFilesDir, "games");
         if (!FileUtil.isWritableDirectory(dir)) {
-            Log.e(TAG, "Games directory is not writable");
+            logger.error("Games directory is not writable");
             String message = getString(R.string.gamesDirError);
             ViewUtil.showErrorDialog(context, message);
             return;
@@ -424,7 +422,7 @@ public class GameStockActivity extends AppCompatActivity {
 
         Uri uri;
         if (data == null || (uri = data.getData()) == null) {
-            Log.e(TAG, "Game archive is not selected");
+            logger.error("Game archive is not selected");
             return;
         }
         installGame(uri, lastInstallType);
@@ -432,18 +430,18 @@ public class GameStockActivity extends AppCompatActivity {
 
     private void installGame(Uri uri, InstallType type) {
         if (!FileUtil.isWritableDirectory(gamesDir)) {
-            Log.e(TAG, "Games directory is not writable");
+            logger.error("Games directory is not writable");
             return;
         }
         GameInstaller installer = installers.get(type);
         if (installer == null) {
-            Log.e(TAG, String.format("Installer not found by install type '%s'", type));
+            logger.error(String.format("Installer not found by install type '%s'", type));
             return;
         }
         try {
             doInstallGame(installer, uri);
         } catch (InstallException ex) {
-            Log.e(TAG, ex.getMessage());
+            logger.error(ex.getMessage());
         }
     }
 
@@ -452,7 +450,7 @@ public class GameStockActivity extends AppCompatActivity {
 
         File gameDir = getOrCreateGameDirectory(installer.getGameName());
         if (!FileUtil.isWritableDirectory(gameDir)) {
-            Log.e(TAG, "Game directory is not writable");
+            logger.error("Game directory is not writable");
             return;
         }
         updateProgressDialog(true, installer.getGameName(), getString(R.string.installing), null);
@@ -472,7 +470,7 @@ public class GameStockActivity extends AppCompatActivity {
 
     private boolean unzip(File zipFile, File dir) {
         if (!FileUtil.isWritableDirectory(dir)) {
-            Log.e(TAG, "Game directory is not writable");
+            logger.error("Game directory is not writable");
             return false;
         }
         return ZipUtil.unzip(context, DocumentFile.fromFile(zipFile), dir);
@@ -813,14 +811,14 @@ public class GameStockActivity extends AppCompatActivity {
 
             File cacheDir = activity.getCacheDir();
             if (!FileUtil.isWritableDirectory(cacheDir)) {
-                Log.e(TAG, "Cache directory is not writable");
+                logger.error("Cache directory is not writable");
                 return DownloadResult.DOWNLOAD_FAILED;
             }
 
             String zipFilename = String.valueOf(SystemClock.elapsedRealtime()).concat("_game");
             File zipFile = FileUtil.createFile(cacheDir, zipFilename);
             if (zipFile == null) {
-                Log.e(TAG, "Failed to create a ZIP file: " + zipFilename);
+                logger.error("Failed to create a ZIP file: " + zipFilename);
                 return DownloadResult.DOWNLOAD_FAILED;
             }
 
@@ -871,7 +869,7 @@ public class GameStockActivity extends AppCompatActivity {
                         int bytesRead;
                         while ((bytesRead = in.read(b)) > 0) {
                             if (cancelled) {
-                                Log.i(TAG, "Game download was cancelled");
+                                logger.info("Game download was cancelled");
                                 return false;
                             }
                             out.write(b, 0, bytesRead);
@@ -881,7 +879,7 @@ public class GameStockActivity extends AppCompatActivity {
                     }
                 }
             } catch (IOException e) {
-                Log.e(TAG, "Failed to download a ZIP file", e);
+                logger.error("Failed to download a ZIP file", e);
                 return false;
             }
         }
@@ -894,7 +892,7 @@ public class GameStockActivity extends AppCompatActivity {
             String folderName = FileUtil.normalizeGameFolderName(game.title);
             File gameDir = FileUtil.findFileOrDirectory(activity.gamesDir, folderName);
             if (!FileUtil.isWritableDirectory(gameDir)) {
-                Log.e(TAG, "Game directory is not writable");
+                logger.error("Game directory is not writable");
                 return false;
             }
             File infoFile = FileUtil.findFileOrDirectory(gameDir, GAME_INFO_FILENAME);
@@ -902,7 +900,7 @@ public class GameStockActivity extends AppCompatActivity {
                 infoFile = FileUtil.createFile(gameDir, GAME_INFO_FILENAME);
             }
             if (!FileUtil.isWritableFile(infoFile)) {
-                Log.e(TAG, "Game info file is not writable");
+                logger.error("Game info file is not writable");
                 return false;
             }
             try (FileOutputStream out = new FileOutputStream(infoFile)) {
@@ -926,7 +924,7 @@ public class GameStockActivity extends AppCompatActivity {
 
                 return true;
             } catch (IOException e) {
-                Log.e(TAG, "Failed to write to a game info file", e);
+                logger.error("Failed to write to a game info file", e);
                 return false;
             }
         }

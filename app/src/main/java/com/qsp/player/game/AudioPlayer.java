@@ -5,14 +5,16 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 
 class AudioPlayer {
-
-    private static final String TAG = AudioPlayer.class.getName();
+    private static Logger logger = LoggerFactory.getLogger(AudioPlayer.class);
 
     private final ConcurrentHashMap<String, Sound> sounds = new ConcurrentHashMap<>();
 
@@ -66,8 +68,8 @@ class AudioPlayer {
 
         try {
             latch.await();
-        } catch (InterruptedException e) {
-            Log.e(TAG, "Wait failed", e);
+        } catch (InterruptedException ex) {
+            logger.error("Wait failed", ex);
         }
     }
 
@@ -84,7 +86,7 @@ class AudioPlayer {
 
         File file = new File(sound.path);
         if (!file.exists()) {
-            Log.e(TAG, "Sound file not found: " + sound.path);
+            logger.error("Sound file not found: " + sound.path);
             return;
         }
 
@@ -92,8 +94,8 @@ class AudioPlayer {
         try {
             player.setDataSource(file.getAbsolutePath());
             player.prepare();
-        } catch (IOException e) {
-            Log.e(TAG, "Failed to initialize media player", e);
+        } catch (IOException ex) {
+            logger.error("Failed to initialize media player", ex);
             return;
         }
         player.setOnCompletionListener(mp -> sounds.remove(sound.path));

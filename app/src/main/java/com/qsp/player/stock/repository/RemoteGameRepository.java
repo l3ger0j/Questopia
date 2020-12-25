@@ -1,9 +1,9 @@
 package com.qsp.player.stock.repository;
 
-import android.util.Log;
-
 import com.qsp.player.stock.GameStockItem;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
@@ -18,8 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RemoteGameRepository {
-
-    private static final String TAG = RemoteGameRepository.class.getName();
+    private static final Logger logger = LoggerFactory.getLogger(RemoteGameRepository.class);
 
     private static List<GameStockItem> cachedGames = null;
 
@@ -49,7 +48,7 @@ public class RemoteGameRepository {
                 }
             }
         } catch (IOException e) {
-            Log.e(TAG, "Failed to fetch game stock XML", e);
+            logger.error("Failed to fetch game stock XML", e);
             return null;
         }
     }
@@ -111,7 +110,7 @@ public class RemoteGameRepository {
 
             return items;
         } catch (XmlPullParserException | IOException e) {
-            Log.e(TAG, "Failed to parse game stock XML", e);
+            logger.error("Failed to parse game stock XML", e);
             return null;
         }
     }

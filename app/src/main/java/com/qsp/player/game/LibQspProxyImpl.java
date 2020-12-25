@@ -6,7 +6,6 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
-import android.util.Log;
 
 import androidx.preference.PreferenceManager;
 
@@ -14,6 +13,10 @@ import com.qsp.player.JniResult;
 import com.qsp.player.R;
 import com.qsp.player.util.FileUtil;
 import com.qsp.player.util.HtmlUtil;
+import com.qsp.player.util.ZipUtil;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -27,8 +30,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class LibQspProxyImpl implements LibQspProxy {
-
-    private static final String TAG = LibQspProxyImpl.class.getName();
+    private static final Logger logger = LoggerFactory.getLogger(LibQspProxyImpl.class);
 
     private final Handler counterHandler = new Handler();
     private final ReentrantLock qspLock = new ReentrantLock();
@@ -83,9 +85,9 @@ public class LibQspProxyImpl implements LibQspProxy {
 
         try {
             latch.await();
-            Log.i(TAG, "QSP library thread started");
+            logger.info("QSP library thread started");
         } catch (InterruptedException e) {
-            Log.e(TAG, "Wait failed", e);
+            logger.error("Wait failed", e);
         }
     }
 
@@ -102,7 +104,7 @@ public class LibQspProxyImpl implements LibQspProxy {
         if (handler != null) {
             handler.getLooper().quitSafely();
         }
-        Log.i(TAG, "QSP library thread stopped");
+        logger.info("QSP library thread stopped");
     }
 
     private void showLastQspError() {
@@ -127,7 +129,7 @@ public class LibQspProxyImpl implements LibQspProxy {
                 errorNumber,
                 desc);
 
-        Log.e(TAG, message);
+        logger.error(message);
 
         PlayerView view = playerView;
         if (view != null) {
@@ -164,7 +166,7 @@ public class LibQspProxyImpl implements LibQspProxy {
                 gameData = out.toByteArray();
             }
         } catch (IOException e) {
-            Log.e(TAG, "Failed to load the game world", e);
+            logger.error("Failed to load the game world", e);
             return false;
         }
         String fileName = viewState.gameFile.getAbsolutePath();
@@ -380,7 +382,7 @@ public class LibQspProxyImpl implements LibQspProxy {
                 gameData = out.toByteArray();
             }
         } catch (IOException e) {
-            Log.e(TAG, "Failed to load game state", e);
+            logger.error("Failed to load game state", e);
             return;
         }
 
@@ -407,7 +409,7 @@ public class LibQspProxyImpl implements LibQspProxy {
         try (OutputStream out = context.getContentResolver().openOutputStream(uri, "w")) {
             out.write(gameData);
         } catch (IOException e) {
-            Log.e(TAG, "Failed to save the game state", e);
+            logger.error("Failed to save the game state", e);
         }
     }
 
@@ -494,7 +496,7 @@ public class LibQspProxyImpl implements LibQspProxy {
         File savesDir = FileUtil.getOrCreateDirectory(viewState.gameDir, "saves");
         File saveFile = FileUtil.findFileOrDirectory(savesDir, filename);
         if (saveFile == null) {
-            Log.e(TAG, "Save file not found: " + filename);
+            logger.error("Save file not found: " + filename);
             return;
         }
         loadGameState(Uri.fromFile(saveFile));
@@ -549,7 +551,7 @@ public class LibQspProxyImpl implements LibQspProxy {
         try {
             Thread.sleep(msecs);
         } catch (InterruptedException e) {
-            Log.e(TAG, "Wait failed", e);
+            logger.error("Wait failed", e);
         }
     }
 
@@ -566,7 +568,7 @@ public class LibQspProxyImpl implements LibQspProxy {
     private void ChangeQuestPath(String path) {
         File dir = new File(path);
         if (!dir.exists()) {
-            Log.e(TAG, "Game directory not found: " + path);
+            logger.error("Game directory not found: " + path);
             return;
         }
         if (!viewState.gameDir.equals(dir)) {

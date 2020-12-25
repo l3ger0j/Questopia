@@ -1,12 +1,13 @@
 package com.qsp.player.util;
 
 import android.content.Context;
-import android.util.Log;
 
 import androidx.documentfile.provider.DocumentFile;
 
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -14,8 +15,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public final class ZipUtil {
-
-    private static final String TAG = ZipUtil.class.getName();
+    private static final Logger logger = LoggerFactory.getLogger(ZipUtil.class);
 
     /**
      * Extracts the ZIP archive <code>zipFile</code> to a directory <code>gameDir</code>.
@@ -43,8 +43,8 @@ public final class ZipUtil {
 
                 return true;
             }
-        } catch (IOException e) {
-            Log.e(TAG, "Failed to extract a ZIP file", e);
+        } catch (IOException ex) {
+            logger.error("Failed to extract a ZIP file", ex);
             return false;
         }
     }

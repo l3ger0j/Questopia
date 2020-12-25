@@ -2,11 +2,13 @@ package com.qsp.player.stock.install;
 
 import android.content.Context;
 import android.net.Uri;
-import android.util.Log;
 
 import androidx.documentfile.provider.DocumentFile;
 
 import com.qsp.player.util.FileUtil;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -15,9 +17,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 public class FolderGameInstaller extends GameInstaller {
-
-    private static final String TAG = FolderGameInstaller.class.getName();
     private static final int BUFFER_SIZE = 8192;
+
+    private static final Logger logger = LoggerFactory.getLogger(FolderGameInstaller.class);
 
     public FolderGameInstaller(Context context) {
         super(context);
@@ -54,7 +56,7 @@ public class FolderGameInstaller extends GameInstaller {
     private void copyFile(DocumentFile file, File parentDir) {
         File destFile = FileUtil.createFile(parentDir, file.getName());
         if (destFile == null) {
-            Log.e(TAG, "Destination file is null");
+            logger.error("Destination file is null");
             return;
         }
         byte[] buffer = new byte[BUFFER_SIZE];

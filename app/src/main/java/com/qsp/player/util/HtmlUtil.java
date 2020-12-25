@@ -1,22 +1,22 @@
 package com.qsp.player.util;
 
 import android.util.Base64;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public final class HtmlUtil {
-
-    private static final String TAG = HtmlUtil.class.getName();
-    private static final Pattern EXEC_PATTERN = Pattern.compile("href=\"exec:([\\s\\S]*?)\"", Pattern.CASE_INSENSITIVE);
+    private static final Logger logger = LoggerFactory.getLogger(HtmlUtil.class);
+    private static final Pattern execPattern = Pattern.compile("href=\"exec:([\\s\\S]*?)\"", Pattern.CASE_INSENSITIVE);
 
     public static String preprocessQspHtml(String html) {
         if (html == null || html.isEmpty()) {
@@ -42,7 +42,7 @@ public final class HtmlUtil {
     }
 
     private static String encodeExec(String html) {
-        Matcher matcher = EXEC_PATTERN.matcher(html);
+        Matcher matcher = execPattern.matcher(html);
         StringBuffer sb = new StringBuffer();
         while (matcher.find()) {
             String exec = normalizePathsInExec(matcher.group(1));
@@ -91,7 +91,7 @@ public final class HtmlUtil {
             result.append(html, fromIdx, idx);
             int endIdx = html.indexOf('>', idx + 1);
             if (endIdx == -1) {
-                Log.w(TAG, String.format("Invalid HTML: element at %d is not closed", idx));
+                logger.warn("Invalid HTML: element at {} is not closed", idx);
                 result.append(html.substring(idx));
                 break;
             }

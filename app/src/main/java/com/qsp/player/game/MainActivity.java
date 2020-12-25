@@ -49,6 +49,9 @@ import com.qsp.player.util.FileUtil;
 import com.qsp.player.util.HtmlUtil;
 import com.qsp.player.util.ViewUtil;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -59,8 +62,6 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CountDownLatch;
 
 public class MainActivity extends AppCompatActivity implements PlayerView {
-
-    private static final String TAG = MainActivity.class.getName();
     private static final int MAX_SAVE_SLOTS = 5;
     private static final String SHOW_ADVANCED_EXTRA_NAME = Build.VERSION.SDK_INT < Build.VERSION_CODES.Q ?
             "android.content.extra.SHOW_ADVANCED" :
@@ -90,6 +91,8 @@ public class MainActivity extends AppCompatActivity implements PlayerView {
             + "</style></head>";
 
     private static final String PAGE_BODY_TEMPLATE = "<body>REPLACETEXT</body>";
+
+    private static final Logger logger = LoggerFactory.getLogger(MainActivity.class);
 
     private final Context uiContext = this;
     private final ImageProvider imageProvider = new ImageProvider();
@@ -767,7 +770,7 @@ public class MainActivity extends AppCompatActivity implements PlayerView {
         try {
             latch.await();
         } catch (InterruptedException e) {
-            Log.e(TAG, "Wait failed", e);
+            logger.error("Wait failed", e);
         }
     }
 
@@ -798,7 +801,7 @@ public class MainActivity extends AppCompatActivity implements PlayerView {
         try {
             return inputQueue.take();
         } catch (InterruptedException e) {
-            Log.e(TAG, "Wait for input failed", e);
+            logger.error("Wait for input failed", e);
             return null;
         }
     }
@@ -821,7 +824,7 @@ public class MainActivity extends AppCompatActivity implements PlayerView {
         try {
             return resultQueue.take();
         } catch (InterruptedException e) {
-            Log.e(TAG, "Wait failed", e);
+            logger.error("Wait failed", e);
             return -1;
         }
     }
@@ -836,7 +839,7 @@ public class MainActivity extends AppCompatActivity implements PlayerView {
         if (type == WindowType.Actions) {
             runOnUiThread(() -> actionsView.setVisibility(show ? View.VISIBLE : View.GONE));
         } else {
-            Log.d(TAG, "Unsupported window type: " + type);
+            logger.debug("Unsupported window type: " + type);
         }
     }
 
@@ -866,7 +869,7 @@ public class MainActivity extends AppCompatActivity implements PlayerView {
                 String path = FileUtil.normalizePath(Uri.decode(url.substring(8)));
                 File file = FileUtil.findFileRecursively(viewState.gameDir, path);
                 if (file == null) {
-                    Log.e(TAG, "File not found: " + path);
+                    logger.error("File not found: " + path);
                     return null;
                 }
                 try {
@@ -875,7 +878,7 @@ public class MainActivity extends AppCompatActivity implements PlayerView {
                     InputStream in = uiContext.getContentResolver().openInputStream(Uri.fromFile(file));
                     return new WebResourceResponse(mimeType, null, in);
                 } catch (FileNotFoundException e) {
-                    Log.e(TAG, "File not found", e);
+                    logger.error("File not found", e);
                     return null;
                 }
             }

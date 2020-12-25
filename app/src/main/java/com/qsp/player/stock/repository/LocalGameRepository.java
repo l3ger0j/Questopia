@@ -1,30 +1,26 @@
 package com.qsp.player.stock.repository;
 
-import android.content.Context;
-import android.util.Log;
-
 import com.qsp.player.stock.GameStockItem;
 import com.qsp.player.util.FileUtil;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import static com.qsp.player.util.FileUtil.GAME_INFO_FILENAME;
 
 public class LocalGameRepository {
-
-    private static final String TAG = LocalGameRepository.class.getName();
+    private static final Logger logger = LoggerFactory.getLogger(LocalGameRepository.class);
 
     private File gamesDir;
 
@@ -34,7 +30,7 @@ public class LocalGameRepository {
 
     public List<GameStockItem> getGames() {
         if (gamesDir == null) {
-            Log.e(TAG, "Games directory is not specified");
+            logger.error("Games directory is not specified");
             return Collections.emptyList();
         }
 
@@ -107,7 +103,7 @@ public class LocalGameRepository {
     private String getGameInfo(GameFolder game) {
         File[] gameInfoFiles = game.dir.listFiles((dir, name) -> name.equalsIgnoreCase(GAME_INFO_FILENAME));
         if (gameInfoFiles == null || gameInfoFiles.length == 0) {
-            Log.w(TAG, "Game info file not found in " + game.dir.getName());
+            logger.warn("Game info file not found in " + game.dir.getName());
             return null;
         }
 
@@ -165,7 +161,7 @@ public class LocalGameRepository {
                 eventType = xpp.nextToken();
             }
         } catch (XmlPullParserException | IOException e) {
-            Log.e(TAG, "Failed to parse game info file", e);
+            logger.error("Failed to parse game info file", e);
         }
 
         return result;

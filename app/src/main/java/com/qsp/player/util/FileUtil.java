@@ -1,13 +1,12 @@
 package com.qsp.player.util;
 
-import android.content.Context;
-import android.util.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
@@ -15,7 +14,7 @@ public final class FileUtil {
 
     public static final String GAME_INFO_FILENAME = "gamestockInfo";
 
-    private static final String TAG = FileUtil.class.getName();
+    private static final Logger logger = LoggerFactory.getLogger(FileUtil.class);
 
     public static boolean isWritableFile(File file) {
         return file != null && file.exists() && file.canWrite();
@@ -63,7 +62,7 @@ public final class FileUtil {
             try {
                 file.createNewFile();
             } catch (IOException ex) {
-                Log.e(TAG, "Error creating a file: " + name, ex);
+                logger.error("Error creating a file: " + name, ex);
                 return null;
             }
         }
@@ -115,7 +114,7 @@ public final class FileUtil {
                 }
             }
         } catch (IOException ex) {
-            Log.e(TAG, "Error reading a file", ex);
+            logger.error("Error reading a file", ex);
             return null;
         }
         return result.toString();
@@ -188,7 +187,7 @@ public final class FileUtil {
                 return out.toByteArray();
             }
         } catch (IOException ex) {
-            Log.e(TAG, "Error reading file: " + path, ex);
+            logger.error("Error reading file: " + path, ex);
             return null;
         }
     }
