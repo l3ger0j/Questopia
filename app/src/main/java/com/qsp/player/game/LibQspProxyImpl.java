@@ -14,7 +14,6 @@ import com.qsp.player.R;
 import com.qsp.player.util.FileUtil;
 import com.qsp.player.util.HtmlUtil;
 import com.qsp.player.util.StreamUtil;
-import com.qsp.player.util.ZipUtil;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

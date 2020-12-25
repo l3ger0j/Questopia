@@ -10,7 +10,6 @@ import androidx.preference.PreferenceFragmentCompat;
 
 import com.kizitonwose.colorpreferencecompat.ColorPreferenceCompat;
 import com.pes.androidmaterialcolorpickerdialog.ColorPicker;
-import com.pes.androidmaterialcolorpickerdialog.ColorPickerCallback;
 import com.qsp.player.R;
 import com.qsp.player.util.ViewUtil;
 
