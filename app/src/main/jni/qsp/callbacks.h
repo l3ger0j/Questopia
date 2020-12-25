@@ -61,5 +61,6 @@
 	void qspCallDeleteMenu();
 	QSP_CHAR *qspCallInputBox(QSP_CHAR *);
 	char *qspCallGetFileContents(QSP_CHAR *, int *);
+	void qspCallChangeQuestPath(QSP_CHAR *);
 
 #endif

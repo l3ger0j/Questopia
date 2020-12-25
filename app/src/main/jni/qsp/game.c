@@ -296,6 +296,9 @@ void qspOpenQuestFromData(char *data, int dataSize, QSP_CHAR *fileName, QSP_BOOL
 		qspQstPath = qspGetAddText(qspQstPath, qspQstFullPath, 0, qspQstPathLen);
 		qspQstCRC = crc;
 		qspCurLoc = -1;
+
+		// Notify application on quest path change
+		qspCallChangeQuestPath(qspQstPath);
 	}
 }
 
@@ -316,26 +319,6 @@ void qspOpenQuest(QSP_CHAR *fileName, QSP_BOOL isAddLocs)
 	buf[fileSize] = buf[fileSize + 1] = buf[fileSize + 2] = 0;
 	qspOpenQuestFromData(buf, fileSize, fileName, isAddLocs);
 	free(buf);
-
-	/*
-	FILE *f;
-	char *buf;
-	int fileSize;
-	if (!(f = QSP_FOPEN(fileName, QSP_FMT("rb"))))
-	{
-		qspSetError(QSP_ERR_FILENOTFOUND);
-		return;
-	}
-	fseek(f, 0, SEEK_END);
-	fileSize = ftell(f);
-	buf = (char *)malloc(fileSize + 3);
-	fseek(f, 0, SEEK_SET);
-	fread(buf, 1, fileSize, f);
-	fclose(f);
-	buf[fileSize] = buf[fileSize + 1] = buf[fileSize + 2] = 0;
-	qspOpenQuestFromData(buf, fileSize + 3, fileName, isAddLocs);
-	free(buf);
-	 */
 }
 
 int qspSaveGameStatusToString(QSP_CHAR **buf)

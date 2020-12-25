@@ -471,4 +471,20 @@ char *qspCallGetFileContents(QSP_CHAR *fileName, int *filesize) {
 	return result;
 }
 
+void qspCallChangeQuestPath(QSP_CHAR *path) {
+	// Get ChangeQuestPath method
+	jclass cls = (*qspCallbackEnv)->GetObjectClass(qspCallbackEnv, qspCallbackObject);
+	jmethodID mid = (*qspCallbackEnv)->GetMethodID(qspCallbackEnv, cls, "ChangeQuestPath", "(Ljava/lang/String;)V");
+	(*qspCallbackEnv)->DeleteLocalRef(qspCallbackEnv, cls);
+
+	// Convert QSP path to Java
+	char *cPath = qspW2C(path);
+	jstring javaPath = (*qspCallbackEnv)->NewStringUTF(qspCallbackEnv, cPath);
+	free(cPath);
+
+	// Call ChangeQuestPath
+	(*qspCallbackEnv)->CallVoidMethod(qspCallbackEnv, qspCallbackObject, mid, javaPath);
+	(*qspCallbackEnv)->DeleteLocalRef(qspCallbackEnv, javaPath);
+}
+
 #endif

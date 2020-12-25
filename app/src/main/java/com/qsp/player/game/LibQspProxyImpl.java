@@ -351,7 +351,6 @@ public class LibQspProxyImpl implements LibQspProxy {
         viewState.gameDir = dir;
         viewState.gameFile = file;
 
-        audioPlayer.setGameDirectory(dir);
         imageProvider.setGameDirectory(dir);
 
         if (!loadGameWorld()) {
@@ -601,23 +600,19 @@ public class LibQspProxyImpl implements LibQspProxy {
     }
 
     private byte[] GetFileContents(String path) {
-        File file = new File(path);
-        try (FileInputStream in = new FileInputStream(file)) {
-            try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-                byte[] buf = new byte[8192];
-                int bytesRead;
-                do {
-                    bytesRead = in.read(buf);
-                    if (bytesRead > 0) {
-                        out.write(buf, 0, bytesRead);
-                    }
-                } while (bytesRead != -1);
+        String normPath = FileUtil.normalizePath(path);
+        return FileUtil.getFileContents(normPath);
+    }
 
-                return out.toByteArray();
-            }
-        } catch (IOException ex) {
-            Log.e(TAG, "Error reading file: " + path, ex);
-            return null;
+    private void ChangeQuestPath(String path) {
+        File dir = new File(path);
+        if (!dir.exists()) {
+            Log.e(TAG, "Game directory not found: " + path);
+            return;
+        }
+        if (!viewState.gameDir.equals(dir)) {
+            viewState.gameDir = dir;
+            imageProvider.setGameDirectory(dir);
         }
     }
 

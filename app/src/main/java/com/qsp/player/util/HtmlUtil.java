@@ -45,13 +45,17 @@ public final class HtmlUtil {
         Matcher matcher = EXEC_PATTERN.matcher(html);
         StringBuffer sb = new StringBuffer();
         while (matcher.find()) {
-            String group = matcher.group(1);
-            String encodedExec = Base64.encodeToString(group.getBytes(), Base64.NO_WRAP);
+            String exec = normalizePathsInExec(matcher.group(1));
+            String encodedExec = Base64.encodeToString(exec.getBytes(), Base64.NO_WRAP);
             matcher.appendReplacement(sb, "href=\"exec:" + encodedExec + "\"");
         }
         matcher.appendTail(sb);
 
         return sb.toString();
+    }
+
+    private static String normalizePathsInExec(String exec) {
+        return exec.replace("\\", "/");
     }
 
     private static String htmlizeLineBreaks(String s) {

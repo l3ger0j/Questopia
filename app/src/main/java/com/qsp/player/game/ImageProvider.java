@@ -32,7 +32,7 @@ class ImageProvider implements ImageGetter {
             return drawable;
         }
         File file = new File(source);
-        if (file == null) {
+        if (!file.exists()) {
             Log.e(TAG, "Image file not found: " + source);
             return null;
         }
