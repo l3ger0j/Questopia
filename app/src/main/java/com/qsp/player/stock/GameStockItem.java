@@ -21,7 +21,7 @@ public class GameStockItem {
     public List<File> gameFiles;
 
     public  boolean hasRemoteUrl() {
-        return fileUrl != null;
+        return fileUrl != null && !fileUrl.isEmpty();
     }
 
     public boolean isInstalled() {
