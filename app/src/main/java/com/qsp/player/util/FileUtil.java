@@ -3,8 +3,6 @@ package com.qsp.player.util;
 import android.content.Context;
 import android.util.Log;
 
-import androidx.documentfile.provider.DocumentFile;
-
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -87,12 +85,7 @@ public final class FileUtil {
     }
 
     public static File findFileOrDirectory(File parentDir, final String name) {
-        File[] files = parentDir.listFiles(new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String filename) {
-                return filename.equalsIgnoreCase(name);
-            }
-        });
+        File[] files = parentDir.listFiles((dir, filename) -> filename.equalsIgnoreCase(name));
         if (files == null || files.length == 0) return null;
 
         return files[0];

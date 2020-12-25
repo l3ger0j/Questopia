@@ -106,22 +106,12 @@ public class LocalGameRepository {
     private void sortFilesByName(List<File> files) {
         if (files.size() < 2) return;
 
-        Collections.sort(files, new Comparator<File>() {
-            @Override
-            public int compare(File o1, File o2) {
-                return o1.getName().toLowerCase()
-                        .compareTo(o2.getName().toLowerCase());
-            }
-        });
+        Collections.sort(files, (o1, o2) -> o1.getName().toLowerCase()
+                .compareTo(o2.getName().toLowerCase()));
     }
 
     private String getGameInfo(GameFolder game) {
-        File[] gameInfoFiles = game.dir.listFiles(new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String name) {
-                return name.equalsIgnoreCase(GAME_INFO_FILENAME);
-            }
-        });
+        File[] gameInfoFiles = game.dir.listFiles((dir, name) -> name.equalsIgnoreCase(GAME_INFO_FILENAME));
         if (gameInfoFiles == null || gameInfoFiles.length == 0) {
             Log.w(TAG, "Game info file not found in " + game.dir.getName());
             return null;

@@ -1,6 +1,5 @@
 package com.qsp.player.game;
 
-import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.text.Html.ImageGetter;
 import android.util.Log;
@@ -14,14 +13,6 @@ class ImageProvider implements ImageGetter {
 
     private static final String TAG = ImageProvider.class.getName();
     private static final HashMap<String, Drawable> CACHE = new HashMap<>();
-
-    private final Context context;
-
-    private File gameDir;
-
-    ImageProvider(Context context) {
-        this.context = context;
-    }
 
     @Override
     public Drawable getDrawable(String source) {
@@ -49,7 +40,6 @@ class ImageProvider implements ImageGetter {
     }
 
     void setGameDirectory(File dir) {
-        gameDir = dir;
         CACHE.clear();
     }
 }

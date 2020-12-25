@@ -1,6 +1,5 @@
 package com.qsp.player.game;
 
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -16,7 +15,7 @@ import java.io.File;
 
 public class ImageBoxActivity extends AppCompatActivity {
 
-    private final ImageProvider imageProvider = new ImageProvider(this);
+    private final ImageProvider imageProvider = new ImageProvider();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,11 +35,6 @@ public class ImageBoxActivity extends AppCompatActivity {
     private void initImageView(Drawable drawable) {
         ImageView imageView = findViewById(R.id.imagebox);
         imageView.setImageDrawable(drawable);
-        imageView.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
+        imageView.setOnClickListener(v -> finish());
     }
 }

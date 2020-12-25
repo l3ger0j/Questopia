@@ -56,7 +56,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
@@ -172,27 +171,21 @@ public class GameStockActivity extends AppCompatActivity {
         gamesView.setTextFilterEnabled(true);
         gamesView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 
-        gamesView.setOnItemClickListener(new OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String gameId = getGameIdByPosition(position);
-                showGameInfo(gameId);
-            }
+        gamesView.setOnItemClickListener((parent, view, position, id) -> {
+            String gameId = getGameIdByPosition(position);
+            showGameInfo(gameId);
         });
 
-        gamesView.setOnItemLongClickListener(new OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                String gameId = getGameIdByPosition(position);
-                GameStockItem game = gamesMap.get(gameId);
-                if (game != null) {
-                    playGame(game);
-                } else {
-                    Log.e(TAG, "Game not found: " + gameId);
-                }
-
-                return true;
+        gamesView.setOnItemLongClickListener((parent, view, position, id) -> {
+            String gameId = getGameIdByPosition(position);
+            GameStockItem game = gamesMap.get(gameId);
+            if (game != null) {
+                playGame(game);
+            } else {
+                Log.e(TAG, "Game not found: " + gameId);
             }
+
+            return true;
         });
     }
 
@@ -225,28 +218,13 @@ public class GameStockActivity extends AppCompatActivity {
                 .setMessage(message)
                 .setTitle(game.title)
                 .setIcon(R.drawable.icon)
-                .setNegativeButton(getString(R.string.close), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.cancel();
-                    }
-                });
+                .setNegativeButton(getString(R.string.close), (dialog, which) -> dialog.cancel());
 
         if (game.isInstalled()) {
-            alertBuilder.setNeutralButton(getString(R.string.play), new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    playGame(game);
-                }
-            });
+            alertBuilder.setNeutralButton(getString(R.string.play), (dialog, which) -> playGame(game));
         }
         if (game.hasRemoteUrl()) {
-            alertBuilder.setPositiveButton(game.isInstalled() ? getString(R.string.update) : getString(R.string.download), new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    downloadGame(game);
-                }
-            });
+            alertBuilder.setPositiveButton(game.isInstalled() ? getString(R.string.update) : getString(R.string.download), (dialog, which) -> downloadGame(game));
         }
         alertBuilder.create().show();
     }
@@ -277,13 +255,10 @@ public class GameStockActivity extends AppCompatActivity {
         new AlertDialog.Builder(GameStockActivity.this)
                 .setTitle(getString(R.string.selectGameFile))
                 .setCancelable(false)
-                .setItems(names.toArray(new String[0]), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        data.putExtra("gameFileUri", game.gameFiles.get(which).getAbsolutePath());
-                        setResult(RESULT_OK, data);
-                        finish();
-                    }
+                .setItems(names.toArray(new String[0]), (dialog, which) -> {
+                    data.putExtra("gameFileUri", game.gameFiles.get(which).getAbsolutePath());
+                    setResult(RESULT_OK, data);
+                    finish();
                 })
                 .show();
     }
@@ -425,13 +400,8 @@ public class GameStockActivity extends AppCompatActivity {
         if (games.size() < 2) {
             return games;
         }
-        Collections.sort(games, new Comparator<GameStockItem>() {
-            @Override
-            public int compare(GameStockItem first, GameStockItem second) {
-                return first.title.toLowerCase()
-                        .compareTo(second.title.toLowerCase());
-            }
-        });
+        Collections.sort(games, (first, second) -> first.title.toLowerCase()
+                .compareTo(second.title.toLowerCase()));
 
         return games;
     }
@@ -601,10 +571,7 @@ public class GameStockActivity extends AppCompatActivity {
         descView.loadDataWithBaseURL("", desc, "text/html", "utf-8", "");
 
         new AlertDialog.Builder(this)
-                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                    }
+                .setPositiveButton(android.R.string.ok, (dialog, whichButton) -> {
                 })
                 .setView(messageView)
                 .create()
@@ -638,13 +605,10 @@ public class GameStockActivity extends AppCompatActivity {
             progressDialog.setCancelable(false);
             progressDialog.setCanceledOnTouchOutside(false);
             if (onCancel != null) {
-                progressDialog.setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.cancel), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        if (which == DialogInterface.BUTTON_NEGATIVE) {
-                            dialog.dismiss();
-                            onCancel.run();
-                        }
+                progressDialog.setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.cancel), (dialog, which) -> {
+                    if (which == DialogInterface.BUTTON_NEGATIVE) {
+                        dialog.dismiss();
+                        onCancel.run();
                     }
                 });
             }
@@ -668,17 +632,11 @@ public class GameStockActivity extends AppCompatActivity {
         }
         new AlertDialog.Builder(context)
                 .setTitle(getString(R.string.deleteGameCmd))
-                .setItems(items.toArray(new String[0]), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        File dir = gameDirs.get(which);
-                        showConfirmDeleteDialog(dir);
-                    }
+                .setItems(items.toArray(new String[0]), (dialog, which) -> {
+                    File dir = gameDirs.get(which);
+                    showConfirmDeleteDialog(dir);
                 })
-                .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                    }
+                .setNegativeButton(android.R.string.cancel, (dialog, whichButton) -> {
                 })
                 .create()
                 .show();
@@ -687,24 +645,18 @@ public class GameStockActivity extends AppCompatActivity {
     private void showConfirmDeleteDialog(final File gameDir) {
         new AlertDialog.Builder(context)
                 .setMessage(getString(R.string.deleteGameQuery).replace("-GAMENAME-", "\"" + gameDir.getName() + "\""))
-                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        if (which == DialogInterface.BUTTON_POSITIVE) {
-                            if (gameRunning != null && gameRunning.equals(gameDir.getName())) {
-                                gameRunning = null;
-                                invalidateOptionsMenu();
-                            }
-                            FileUtil.deleteDirectory(gameDir);
-                            ViewUtil.showToast(context, getString(R.string.gameDeleted));
-                            refreshGames();
+                .setPositiveButton(android.R.string.yes, (dialog, which) -> {
+                    if (which == DialogInterface.BUTTON_POSITIVE) {
+                        if (gameRunning != null && gameRunning.equals(gameDir.getName())) {
+                            gameRunning = null;
+                            invalidateOptionsMenu();
                         }
+                        FileUtil.deleteDirectory(gameDir);
+                        ViewUtil.showToast(context, getString(R.string.gameDeleted));
+                        refreshGames();
                     }
                 })
-                .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                    }
+                .setNegativeButton(android.R.string.no, (dialog, whichButton) -> {
                 })
                 .create()
                 .show();
@@ -848,12 +800,7 @@ public class GameStockActivity extends AppCompatActivity {
         protected void onPreExecute() {
             GameStockActivity activity = this.activity.get();
             if (activity != null) {
-                activity.updateProgressDialog(true, game.title, activity.getString(R.string.downloading), new Runnable() {
-                    @Override
-                    public void run() {
-                        cancelled = true;
-                    }
-                });
+                activity.updateProgressDialog(true, game.title, activity.getString(R.string.downloading), () -> cancelled = true);
             }
         }
 

@@ -8,7 +8,6 @@ import android.os.Looper;
 import android.os.SystemClock;
 import android.util.Log;
 
-import androidx.documentfile.provider.DocumentFile;
 import androidx.preference.PreferenceManager;
 
 import com.qsp.player.JniResult;
@@ -22,7 +21,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.concurrent.CountDownLatch;
@@ -43,12 +41,9 @@ public class LibQspProxyImpl implements LibQspProxy {
     private final Runnable counterTask = new Runnable() {
         @Override
         public void run() {
-            runOnQspThread(new Runnable() {
-                @Override
-                public void run() {
-                    if (!QSPExecCounter(true)) {
-                        showLastQspError();
-                    }
+            runOnQspThread(() -> {
+                if (!QSPExecCounter(true)) {
+                    showLastQspError();
                 }
             });
             counterHandler.postDelayed(this, timerInterval);
@@ -65,7 +60,7 @@ public class LibQspProxyImpl implements LibQspProxy {
     public LibQspProxyImpl(Context context) {
         this.context = context;
         settings = PreferenceManager.getDefaultSharedPreferences(context);
-        imageProvider = new ImageProvider(context);
+        imageProvider = new ImageProvider();
     }
 
     private void startQspThread() {
@@ -147,15 +142,12 @@ public class LibQspProxyImpl implements LibQspProxy {
         if (!qspThreadRunning) {
             startQspThread();
         }
-        qspHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                qspLock.lock();
-                try {
-                    runnable.run();
-                } finally {
-                    qspLock.unlock();
-                }
+        qspHandler.post(() -> {
+            qspLock.lock();
+            try {
+                runnable.run();
+            } finally {
+                qspLock.unlock();
             }
         });
     }
@@ -263,51 +255,39 @@ public class LibQspProxyImpl implements LibQspProxy {
 
     @Override
     public void execute(final String code) {
-        runOnQspThread(new Runnable() {
-            @Override
-            public void run() {
-                if (!QSPExecString(code, true)) {
-                    showLastQspError();
-                }
+        runOnQspThread(() -> {
+            if (!QSPExecString(code, true)) {
+                showLastQspError();
             }
         });
     }
 
     @Override
     public void onActionSelected(final int index) {
-        runOnQspThread(new Runnable() {
-            @Override
-            public void run() {
-                if (!QSPSetSelActionIndex(index, true)) {
-                    showLastQspError();
-                }
+        runOnQspThread(() -> {
+            if (!QSPSetSelActionIndex(index, true)) {
+                showLastQspError();
             }
         });
     }
 
     @Override
     public void onActionClicked(final int index) {
-        runOnQspThread(new Runnable() {
-            @Override
-            public void run() {
-                if (!QSPSetSelActionIndex(index, false)) {
-                    showLastQspError();
-                }
-                if (!QSPExecuteSelActionCode(true)) {
-                    showLastQspError();
-                }
+        runOnQspThread(() -> {
+            if (!QSPSetSelActionIndex(index, false)) {
+                showLastQspError();
+            }
+            if (!QSPExecuteSelActionCode(true)) {
+                showLastQspError();
             }
         });
     }
 
     @Override
     public void onObjectSelected(final int index) {
-        runOnQspThread(new Runnable() {
-            @Override
-            public void run() {
-                if (!QSPSetSelObjectIndex(index, true)) {
-                    showLastQspError();
-                }
+        runOnQspThread(() -> {
+            if (!QSPSetSelObjectIndex(index, true)) {
+                showLastQspError();
             }
         });
     }
@@ -318,27 +298,19 @@ public class LibQspProxyImpl implements LibQspProxy {
         if (view == null) {
             return;
         }
-        runOnQspThread(new Runnable() {
-            @Override
-            public void run() {
-                String input = view.showInputBox(context.getString(R.string.userInput));
-                QSPSetInputStrText(input);
+        runOnQspThread(() -> {
+            String input = view.showInputBox(context.getString(R.string.userInput));
+            QSPSetInputStrText(input);
 
-                if (!QSPExecUserInput(true)) {
-                    showLastQspError();
-                }
+            if (!QSPExecUserInput(true)) {
+                showLastQspError();
             }
         });
     }
 
     @Override
     public void runGame(final String title, final File dir, final File file) {
-        runOnQspThread(new Runnable() {
-            @Override
-            public void run() {
-                doRunGame(title, dir, file);
-            }
-        });
+        runOnQspThread(() -> doRunGame(title, dir, file));
     }
 
     private void doRunGame(final String title, final File dir, final File file) {
@@ -370,12 +342,9 @@ public class LibQspProxyImpl implements LibQspProxy {
 
     @Override
     public void restartGame() {
-        runOnQspThread(new Runnable() {
-            @Override
-            public void run() {
-                PlayerViewState state = viewState;
-                doRunGame(state.gameTitle, state.gameDir, state.gameFile);
-            }
+        runOnQspThread(() -> {
+            PlayerViewState state = viewState;
+            doRunGame(state.gameTitle, state.gameDir, state.gameFile);
         });
     }
 
@@ -395,12 +364,7 @@ public class LibQspProxyImpl implements LibQspProxy {
     @Override
     public void loadGameState(final Uri uri) {
         if (Thread.currentThread() != qspHandler.getLooper().getThread()) {
-            runOnQspThread(new Runnable() {
-                @Override
-                public void run() {
-                    loadGameState(uri);
-                }
-            });
+            runOnQspThread(() -> loadGameState(uri));
             return;
         }
 
@@ -432,12 +396,7 @@ public class LibQspProxyImpl implements LibQspProxy {
     @Override
     public void saveGameState(final Uri uri) {
         if (Thread.currentThread() != qspHandler.getLooper().getThread()) {
-            runOnQspThread(new Runnable() {
-                @Override
-                public void run() {
-                    saveGameState(uri);
-                }
-            });
+            runOnQspThread(() -> saveGameState(uri));
             return;
         }
 

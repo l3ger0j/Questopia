@@ -92,7 +92,7 @@ public class MainActivity extends AppCompatActivity implements PlayerView {
     private static final String PAGE_BODY_TEMPLATE = "<body>REPLACETEXT</body>";
 
     private final Context uiContext = this;
-    private final ImageProvider imageProvider = new ImageProvider(this);
+    private final ImageProvider imageProvider = new ImageProvider();
 
     private LibQspProxy libQspProxy;
     private SharedPreferences settings;
@@ -169,12 +169,7 @@ public class MainActivity extends AppCompatActivity implements PlayerView {
         actionsView = findViewById(R.id.acts);
         actionsView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 
-        actionsView.setOnItemClickListener(new OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                libQspProxy.onActionClicked(position);
-            }
-        });
+        actionsView.setOnItemClickListener((parent, view, position, id) -> libQspProxy.onActionClicked(position));
 
         actionsView.setOnItemSelectedListener(new OnItemSelectedListener() {
             @Override
@@ -192,12 +187,7 @@ public class MainActivity extends AppCompatActivity implements PlayerView {
         objectsView = findViewById(R.id.inv);
         objectsView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 
-        objectsView.setOnItemClickListener(new OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
-                libQspProxy.onObjectSelected(position);
-            }
-        });
+        objectsView.setOnItemClickListener((parent, view, position, id) -> libQspProxy.onObjectSelected(position));
     }
 
     private void setActiveTab(int tab) {
@@ -443,14 +433,11 @@ public class MainActivity extends AppCompatActivity implements PlayerView {
         items[1] = getString(R.string.closeApp);
 
         new AlertDialog.Builder(uiContext)
-                .setItems(items, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        if (which == 0) {
-                            startSelectGame();
-                        } else if (which == 1) {
-                            System.exit(0);
-                        }
+                .setItems(items, (dialog, which) -> {
+                    if (which == 0) {
+                        startSelectGame();
+                    } else if (which == 1) {
+                        System.exit(0);
                     }
                 })
                 .create()
@@ -508,45 +495,36 @@ public class MainActivity extends AppCompatActivity implements PlayerView {
             }
 
             item = subMenu.add(title);
-            item.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-                @Override
-                public boolean onMenuItemClick(MenuItem item) {
-                    switch (action) {
-                        case LOAD:
-                            if (file != null) {
-                                proxy.loadGameState(Uri.fromFile(file));
-                            }
-                            break;
-                        case SAVE:
-                            File file = FileUtil.getOrCreateFile(savesDir, filename);
-                            proxy.saveGameState(Uri.fromFile(file));
-                            break;
-                    }
-
-                    return true;
+            item.setOnMenuItemClickListener(item13 -> {
+                switch (action) {
+                    case LOAD:
+                        if (file != null) {
+                            proxy.loadGameState(Uri.fromFile(file));
+                        }
+                        break;
+                    case SAVE:
+                        File file1 = FileUtil.getOrCreateFile(savesDir, filename);
+                        proxy.saveGameState(Uri.fromFile(file1));
+                        break;
                 }
+
+                return true;
             });
         }
 
         switch (action) {
             case LOAD:
                 item = subMenu.add(getString(R.string.loadFrom));
-                item.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-                    @Override
-                    public boolean onMenuItemClick(MenuItem item) {
-                        startLoadFromFile();
-                        return true;
-                    }
+                item.setOnMenuItemClickListener(item12 -> {
+                    startLoadFromFile();
+                    return true;
                 });
                 break;
             case SAVE:
                 item = subMenu.add(getString(R.string.saveTo));
-                item.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-                    @Override
-                    public boolean onMenuItemClick(MenuItem item) {
-                        startSaveToFile();
-                        return true;
-                    }
+                item.setOnMenuItemClickListener(item1 -> {
+                    startSaveToFile();
+                    return true;
                 });
                 break;
         }
@@ -728,54 +706,43 @@ public class MainActivity extends AppCompatActivity implements PlayerView {
             final boolean objectsChanged,
             final boolean varsDescChanged) {
 
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                viewState = libQspProxy.getViewState();
+        runOnUiThread(() -> {
+            viewState = libQspProxy.getViewState();
 
-                if (confChanged) {
-                    applyTextSettings();
-                }
-                if (confChanged || mainDescChanged) {
-                    refreshMainDesc();
-                }
-                if (actionsChanged) {
-                    refreshActions();
-                }
-                if (objectsChanged) {
-                    refreshObjects();
-                }
-                if (varsDescChanged && activeTab != TAB_VARS_DESC) {
-                    varsDescUnread = true;
-                    updateTitle();
-                }
-                if (confChanged || varsDescChanged) {
-                    refreshVarsDesc();
-                }
+            if (confChanged) {
+                applyTextSettings();
+            }
+            if (confChanged || mainDescChanged) {
+                refreshMainDesc();
+            }
+            if (actionsChanged) {
+                refreshActions();
+            }
+            if (objectsChanged) {
+                refreshObjects();
+            }
+            if (varsDescChanged && activeTab != TAB_VARS_DESC) {
+                varsDescUnread = true;
+                updateTitle();
+            }
+            if (confChanged || varsDescChanged) {
+                refreshVarsDesc();
             }
         });
     }
 
     @Override
     public void showError(final String message) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                ViewUtil.showErrorDialog(uiContext, message);
-            }
-        });
+        runOnUiThread(() -> ViewUtil.showErrorDialog(uiContext, message));
     }
 
     @Override
     public void showPicture(final String path) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Intent intent = new Intent(uiContext, ImageBoxActivity.class);
-                intent.putExtra("gameDirUri", viewState.gameDir.getAbsolutePath());
-                intent.putExtra("imagePath", FileUtil.normalizePath(path));
-                startActivity(intent);
-            }
+        runOnUiThread(() -> {
+            Intent intent = new Intent(uiContext, ImageBoxActivity.class);
+            intent.putExtra("gameDirUri", viewState.gameDir.getAbsolutePath());
+            intent.putExtra("imagePath", FileUtil.normalizePath(path));
+            startActivity(intent);
         });
     }
 
@@ -783,26 +750,18 @@ public class MainActivity extends AppCompatActivity implements PlayerView {
     public void showMessage(final String message) {
         final CountDownLatch latch = new CountDownLatch(1);
 
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                String processedMsg = viewState.useHtml ? HtmlUtil.removeHtmlTags(message) : message;
-                if (processedMsg == null) {
-                    processedMsg = "";
-                }
-
-                new AlertDialog.Builder(uiContext)
-                        .setMessage(processedMsg)
-                        .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                latch.countDown();
-                            }
-                        })
-                        .setCancelable(false)
-                        .create()
-                        .show();
+        runOnUiThread(() -> {
+            String processedMsg = viewState.useHtml ? HtmlUtil.removeHtmlTags(message) : message;
+            if (processedMsg == null) {
+                processedMsg = "";
             }
+
+            new AlertDialog.Builder(uiContext)
+                    .setMessage(processedMsg)
+                    .setPositiveButton(android.R.string.ok, (dialog, which) -> latch.countDown())
+                    .setCancelable(false)
+                    .create()
+                    .show();
         });
 
         try {
@@ -816,30 +775,24 @@ public class MainActivity extends AppCompatActivity implements PlayerView {
     public String showInputBox(final String prompt) {
         final ArrayBlockingQueue<String> inputQueue = new ArrayBlockingQueue<>(1);
 
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                final View view = getLayoutInflater().inflate(R.layout.inputbox, null);
+        runOnUiThread(() -> {
+            final View view = getLayoutInflater().inflate(R.layout.inputbox, null);
 
-                String message = viewState.useHtml ? HtmlUtil.removeHtmlTags(prompt) : prompt;
-                if (message == null) {
-                    message = "";
-                }
-
-                new AlertDialog.Builder(uiContext)
-                        .setView(view)
-                        .setMessage(message)
-                        .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                EditText editView = view.findViewById(R.id.inputbox_edit);
-                                inputQueue.add(editView.getText().toString());
-                            }
-                        })
-                        .setCancelable(false)
-                        .create()
-                        .show();
+            String message = viewState.useHtml ? HtmlUtil.removeHtmlTags(prompt) : prompt;
+            if (message == null) {
+                message = "";
             }
+
+            new AlertDialog.Builder(uiContext)
+                    .setView(view)
+                    .setMessage(message)
+                    .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                        EditText editView = view.findViewById(R.id.inputbox_edit);
+                        inputQueue.add(editView.getText().toString());
+                    })
+                    .setCancelable(false)
+                    .create()
+                    .show();
         });
 
         try {
@@ -859,26 +812,11 @@ public class MainActivity extends AppCompatActivity implements PlayerView {
             items.add(item.name);
         }
 
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                new AlertDialog.Builder(uiContext)
-                        .setItems(items.toArray(new CharSequence[0]), new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                resultQueue.add(which);
-                            }
-                        })
-                        .setOnCancelListener(new DialogInterface.OnCancelListener() {
-                            @Override
-                            public void onCancel(DialogInterface dialog) {
-                                resultQueue.add(-1);
-                            }
-                        })
-                        .create()
-                        .show();
-            }
-        });
+        runOnUiThread(() -> new AlertDialog.Builder(uiContext)
+                .setItems(items.toArray(new CharSequence[0]), (dialog, which) -> resultQueue.add(which))
+                .setOnCancelListener(dialog -> resultQueue.add(-1))
+                .create()
+                .show());
 
         try {
             return resultQueue.take();
@@ -896,12 +834,7 @@ public class MainActivity extends AppCompatActivity implements PlayerView {
     @Override
     public void showWindow(WindowType type, final boolean show) {
         if (type == WindowType.Actions) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    actionsView.setVisibility(show ? View.VISIBLE : View.GONE);
-                }
-            });
+            runOnUiThread(() -> actionsView.setVisibility(show ? View.VISIBLE : View.GONE));
         } else {
             Log.d(TAG, "Unsupported window type: " + type);
         }

@@ -33,10 +33,7 @@ public final class ViewUtil {
         new AlertDialog.Builder(context)
                 .setTitle(R.string.error)
                 .setMessage(message)
-                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                    }
+                .setPositiveButton(android.R.string.ok, (dialog, which) -> {
                 })
                 .show();
     }

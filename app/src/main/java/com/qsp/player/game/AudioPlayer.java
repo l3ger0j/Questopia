@@ -37,12 +37,9 @@ class AudioPlayer {
         if (!soundEnabled) {
             return;
         }
-        runOnAudioThread(new Runnable() {
-            @Override
-            public void run() {
-                for (Sound sound : sounds.values()) {
-                    doPlay(sound);
-                }
+        runOnAudioThread(() -> {
+            for (Sound sound : sounds.values()) {
+                doPlay(sound);
             }
         });
     }
@@ -57,16 +54,13 @@ class AudioPlayer {
     private void startAudioThread() {
         final CountDownLatch latch = new CountDownLatch(1);
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                audioThreadRunning = true;
-                Looper.prepare();
-                audioHandler = new Handler();
-                latch.countDown();
-                Looper.loop();
-                audioThreadRunning = false;
-            }
+        new Thread(() -> {
+            audioThreadRunning = true;
+            Looper.prepare();
+            audioHandler = new Handler();
+            latch.countDown();
+            Looper.loop();
+            audioThreadRunning = false;
         })
                 .start();
 
@@ -89,7 +83,7 @@ class AudioPlayer {
         }
 
         File file = new File(sound.path);
-        if (file == null) {
+        if (!file.exists()) {
             Log.e(TAG, "Sound file not found: " + sound.path);
             return;
         }
@@ -102,12 +96,7 @@ class AudioPlayer {
             Log.e(TAG, "Failed to initialize media player", e);
             return;
         }
-        player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-            @Override
-            public void onCompletion(MediaPlayer mp) {
-                sounds.remove(sound.path);
-            }
-        });
+        player.setOnCompletionListener(mp -> sounds.remove(sound.path));
         player.setVolume(sysVolume, sysVolume);
         player.start();
 
@@ -117,34 +106,28 @@ class AudioPlayer {
     void pause() {
         paused = true;
 
-        runOnAudioThread(new Runnable() {
-            @Override
-            public void run() {
-                for (Sound sound : sounds.values()) {
-                    if (sound.player.isPlaying()) {
-                        sound.player.pause();
-                    }
+        runOnAudioThread(() -> {
+            for (Sound sound : sounds.values()) {
+                if (sound.player.isPlaying()) {
+                    sound.player.pause();
                 }
             }
         });
     }
 
     void playFile(final String path, final int volume) {
-        runOnAudioThread(new Runnable() {
-            @Override
-            public void run() {
-                Sound sound = sounds.get(path);
-                if (sound != null) {
-                    sound.volume = volume;
-                } else {
-                    sound = new Sound();
-                    sound.path = path;
-                    sound.volume = volume;
-                    sounds.put(path, sound);
-                }
-                if (soundEnabled && !paused) {
-                    doPlay(sound);
-                }
+        runOnAudioThread(() -> {
+            Sound sound = sounds.get(path);
+            if (sound != null) {
+                sound.volume = volume;
+            } else {
+                sound = new Sound();
+                sound.path = path;
+                sound.volume = volume;
+                sounds.put(path, sound);
+            }
+            if (soundEnabled && !paused) {
+                doPlay(sound);
             }
         });
     }
@@ -162,13 +145,10 @@ class AudioPlayer {
     }
 
     void closeFile(final String path) {
-        runOnAudioThread(new Runnable() {
-            @Override
-            public void run() {
-                Sound sound = sounds.remove(path);
-                if (sound != null) {
-                    doClose(sound);
-                }
+        runOnAudioThread(() -> {
+            Sound sound = sounds.remove(path);
+            if (sound != null) {
+                doClose(sound);
             }
         });
     }
@@ -184,14 +164,11 @@ class AudioPlayer {
     }
 
     void closeAllFiles() {
-        runOnAudioThread(new Runnable() {
-            @Override
-            public void run() {
-                for (Sound sound : sounds.values()) {
-                    doClose(sound);
-                }
-                sounds.clear();
+        runOnAudioThread(() -> {
+            for (Sound sound : sounds.values()) {
+                doClose(sound);
             }
+            sounds.clear();
         });
     }
 

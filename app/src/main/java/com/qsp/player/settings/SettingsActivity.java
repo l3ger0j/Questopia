@@ -1,16 +1,13 @@
 package com.qsp.player.settings;
 
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.os.Bundle;
-import android.provider.Settings;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 
-import com.kizitonwose.colorpreference.ColorDialog;
 import com.kizitonwose.colorpreferencecompat.ColorPreferenceCompat;
 import com.pes.androidmaterialcolorpickerdialog.ColorPicker;
 import com.pes.androidmaterialcolorpickerdialog.ColorPickerCallback;
@@ -65,12 +62,7 @@ public class SettingsActivity extends AppCompatActivity {
 
                     ColorPicker picker = new ColorPicker(getActivity(), r, g, b);
                     picker.enableAutoClose();
-                    picker.setCallback(new ColorPickerCallback() {
-                        @Override
-                        public void onColorChosen(int color) {
-                            colorPref.setValue(color);
-                        }
-                    });
+                    picker.setCallback(colorPref::setValue);
 
                     picker.show();
 
