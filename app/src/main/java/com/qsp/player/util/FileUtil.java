@@ -175,15 +175,7 @@ public final class FileUtil {
         File file = new File(path);
         try (FileInputStream in = new FileInputStream(file)) {
             try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-                byte[] buf = new byte[8192];
-                int bytesRead;
-                do {
-                    bytesRead = in.read(buf);
-                    if (bytesRead > 0) {
-                        out.write(buf, 0, bytesRead);
-                    }
-                } while (bytesRead != -1);
-
+                StreamUtil.copy(in, out);
                 return out.toByteArray();
             }
         } catch (IOException ex) {

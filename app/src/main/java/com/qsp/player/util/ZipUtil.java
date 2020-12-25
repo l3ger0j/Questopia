@@ -34,10 +34,7 @@ public final class ZipUtil {
                     String filename = FileUtil.getFilename(entry.getName());
                     File file = FileUtil.createFile(parentDir, filename);
                     try (FileOutputStream out = new FileOutputStream(file)) {
-                        int bytesRead;
-                        while ((bytesRead = zipIn.read(b)) > 0) {
-                            out.write(b, 0, bytesRead);
-                        }
+                        StreamUtil.copy(zipIn, out);
                     }
                 }
 

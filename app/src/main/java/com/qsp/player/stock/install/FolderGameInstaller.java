@@ -6,6 +6,7 @@ import android.net.Uri;
 import androidx.documentfile.provider.DocumentFile;
 
 import com.qsp.player.util.FileUtil;
+import com.qsp.player.util.StreamUtil;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,8 +18,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 public class FolderGameInstaller extends GameInstaller {
-    private static final int BUFFER_SIZE = 8192;
-
     private static final Logger logger = LoggerFactory.getLogger(FolderGameInstaller.class);
 
     public FolderGameInstaller(Context context) {
@@ -59,16 +58,9 @@ public class FolderGameInstaller extends GameInstaller {
             logger.error("Destination file is null");
             return;
         }
-        byte[] buffer = new byte[BUFFER_SIZE];
         try (InputStream in = context.getContentResolver().openInputStream(file.getUri())) {
             try (OutputStream out = new FileOutputStream(destFile)) {
-                int bytesRead;
-                do {
-                    bytesRead = in.read(buffer);
-                    if (bytesRead > 0) {
-                        out.write(buffer, 0, bytesRead);
-                    }
-                } while (bytesRead > 0);
+                StreamUtil.copy(in, out);
             }
         } catch (IOException ex) {
             throw new InstallException("Error copying game files");

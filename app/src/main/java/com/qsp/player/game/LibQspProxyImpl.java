@@ -13,6 +13,7 @@ import com.qsp.player.JniResult;
 import com.qsp.player.R;
 import com.qsp.player.util.FileUtil;
 import com.qsp.player.util.HtmlUtil;
+import com.qsp.player.util.StreamUtil;
 import com.qsp.player.util.ZipUtil;
 
 import org.slf4j.Logger;
@@ -158,11 +159,7 @@ public class LibQspProxyImpl implements LibQspProxy {
         byte[] gameData;
         try (FileInputStream in = new FileInputStream(viewState.gameFile)) {
             try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-                byte[] b = new byte[8192];
-                int bytesRead;
-                while ((bytesRead = in.read(b)) > 0) {
-                    out.write(b, 0, bytesRead);
-                }
+                StreamUtil.copy(in, out);
                 gameData = out.toByteArray();
             }
         } catch (IOException e) {
@@ -374,11 +371,7 @@ public class LibQspProxyImpl implements LibQspProxy {
 
         try (InputStream in = context.getContentResolver().openInputStream(uri)) {
             try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-                byte[] b = new byte[8192];
-                int bytesRead;
-                while ((bytesRead = in.read(b)) > 0) {
-                    out.write(b, 0, bytesRead);
-                }
+                StreamUtil.copy(in, out);
                 gameData = out.toByteArray();
             }
         } catch (IOException e) {

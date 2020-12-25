@@ -1,6 +1,7 @@
 package com.qsp.player.stock.repository;
 
 import com.qsp.player.stock.GameStockItem;
+import com.qsp.player.util.StreamUtil;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,12 +40,9 @@ public class RemoteGameRepository {
             URLConnection conn = url.openConnection();
             byte[] b = new byte[8192];
             try (InputStream in = conn.getInputStream()) {
-                try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
-                    int bytesRead;
-                    while ((bytesRead = in.read(b)) > 0) {
-                        os.write(b, 0, bytesRead);
-                    }
-                    return new String(os.toByteArray());
+                try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+                    StreamUtil.copy(in, out);
+                    return new String(out.toByteArray());
                 }
             }
         } catch (IOException e) {
