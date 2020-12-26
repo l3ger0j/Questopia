@@ -29,7 +29,6 @@
                 android:text=""
                 android:textColor="@color/web_text"
                 android:textSize="16sp" />
-
             <ListView
                 android:id="@+id/acts"
                 android:layout_width="fill_parent"
@@ -39,14 +38,13 @@
                 android:layout_marginTop="8dp"
                 android:paddingTop="0dp"
                 android:paddingBottom="0dp" />
-
         </LinearLayout>
     </ScrollView>
 
     <ListView
         android:id="@+id/inv"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="match_parent" />
 
     <ScrollView
         android:id="@+id/vars_tab"
@@ -63,6 +61,6 @@
             android:text=""
             android:textColor="@color/web_text"
             android:textSize="16sp" />
-
     </ScrollView>
+
 </LinearLayout>

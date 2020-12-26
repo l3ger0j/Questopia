@@ -1,5 +1,6 @@
 package com.qsp.player.game;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -13,11 +14,13 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.text.format.DateFormat;
 import android.util.TypedValue;
+import android.view.GestureDetector;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.SubMenu;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,10 +36,12 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.GestureDetectorCompat;
 
 import com.qsp.player.QuestPlayerApplication;
 import com.qsp.player.R;
@@ -58,7 +63,8 @@ import java.util.Locale;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CountDownLatch;
 
-public class MainActivity extends AppCompatActivity implements PlayerView {
+@SuppressLint("ClickableViewAccessibility")
+public class MainActivity extends AppCompatActivity implements PlayerView, GestureDetector.OnGestureListener {
     private static final int MAX_SAVE_SLOTS = 5;
     private static final String SHOW_ADVANCED_EXTRA_NAME = Build.VERSION.SDK_INT < Build.VERSION_CODES.Q ?
             "android.content.extra.SHOW_ADVANCED" :
@@ -89,9 +95,11 @@ public class MainActivity extends AppCompatActivity implements PlayerView {
 
     private static final String PAGE_BODY_TEMPLATE = "<body>REPLACETEXT</body>";
 
+    private static final int SWIPE_THRESHOLD = 100;
+
     private static final Logger logger = LoggerFactory.getLogger(MainActivity.class);
 
-    private final Context uiContext = this;
+    private final Context context = this;
     private final ImageProvider imageProvider = new ImageProvider();
 
     private LibQspProxy libQspProxy;
@@ -103,6 +111,7 @@ public class MainActivity extends AppCompatActivity implements PlayerView {
     private String pageTemplate = "";
     private boolean selectingGame;
     private PlayerViewState viewState;
+    private GestureDetectorCompat gestureDetector;
 
     private View mainView;
     private ImageButton mainDescButton;
@@ -132,32 +141,54 @@ public class MainActivity extends AppCompatActivity implements PlayerView {
         setContentView(R.layout.main);
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
-        settings = PreferenceManager.getDefaultSharedPreferences(uiContext);
+        settings = PreferenceManager.getDefaultSharedPreferences(context);
 
         loadLocale();
 
-        mainView = findViewById(R.id.main);
         mainDescButton = findViewById(R.id.title_main_desc_btn);
         invButton = findViewById(R.id.title_inv_btn);
         varsDescButton = findViewById(R.id.title_vars_desc_btn);
         inputButton = findViewById(R.id.title_input_btn);
 
+        initMainView();
+        initMainTab();
         initMainDescView();
+        initVarsTab();
         initVarsDescView();
         initActionsView();
         initObjectsView();
         setActiveTab(TAB_MAIN_DESC);
+
+        gestureDetector = new GestureDetectorCompat(this, this);
     }
 
     private void loadLocale() {
         String language = settings.getString("lang", "ru");
-        ViewUtil.setLocale(uiContext, language);
+        ViewUtil.setLocale(context, language);
         currentLanguage = language;
+    }
+
+    private void initMainView() {
+        mainView = findViewById(R.id.main);
+    }
+
+    private void initMainTab() {
+        ScrollView mainTab = findViewById(R.id.main_tab);
+        mainTab.setOnTouchListener(this::handleTouchEvent);
+    }
+
+    private boolean handleTouchEvent(View v, MotionEvent event) {
+        return gestureDetector.onTouchEvent(event);
     }
 
     private void initMainDescView() {
         mainDescView = findViewById(R.id.main_desc);
         mainDescView.setWebViewClient(new QspWebViewClient());
+    }
+
+    private void initVarsTab() {
+        ScrollView varsTab = findViewById(R.id.vars_tab);
+        varsTab.setOnTouchListener(this::handleTouchEvent);
     }
 
     private void initVarsDescView() {
@@ -168,9 +199,7 @@ public class MainActivity extends AppCompatActivity implements PlayerView {
     private void initActionsView() {
         actionsView = findViewById(R.id.acts);
         actionsView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-
         actionsView.setOnItemClickListener((parent, view, position, id) -> libQspProxy.onActionClicked(position));
-
         actionsView.setOnItemSelectedListener(new OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, final int position, long id) {
@@ -186,8 +215,8 @@ public class MainActivity extends AppCompatActivity implements PlayerView {
     private void initObjectsView() {
         objectsView = findViewById(R.id.inv);
         objectsView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-
         objectsView.setOnItemClickListener((parent, view, position, id) -> libQspProxy.onObjectSelected(position));
+        objectsView.setOnTouchListener(this::handleTouchEvent);
     }
 
     private void setActiveTab(int tab) {
@@ -282,7 +311,7 @@ public class MainActivity extends AppCompatActivity implements PlayerView {
         if (currentLanguage.equals(language)) {
             return;
         }
-        ViewUtil.setLocale(uiContext, language);
+        ViewUtil.setLocale(context, language);
         setTitle(R.string.appName);
         invalidateOptionsMenu();
         setActiveTab(activeTab);
@@ -393,12 +422,12 @@ public class MainActivity extends AppCompatActivity implements PlayerView {
     }
 
     private void refreshActions() {
-        actionsView.setAdapter(new QspItemAdapter(uiContext, R.layout.act_item, viewState.actions));
+        actionsView.setAdapter(new QspItemAdapter(context, R.layout.act_item, viewState.actions));
         adjustListViewHeight(actionsView);
     }
 
     private void refreshObjects() {
-        objectsView.setAdapter(new QspItemAdapter(uiContext, R.layout.obj_item, viewState.objects));
+        objectsView.setAdapter(new QspItemAdapter(context, R.layout.obj_item, viewState.objects));
         adjustListViewHeight(objectsView);
     }
 
@@ -432,7 +461,7 @@ public class MainActivity extends AppCompatActivity implements PlayerView {
         items[0] = getString(R.string.gameStock);
         items[1] = getString(R.string.closeApp);
 
-        new AlertDialog.Builder(uiContext)
+        new AlertDialog.Builder(context)
                 .setItems(items, (dialog, which) -> {
                     if (which == 0) {
                         startSelectGame();
@@ -585,7 +614,7 @@ public class MainActivity extends AppCompatActivity implements PlayerView {
     private void showAboutDialog() {
         View messageView = getLayoutInflater().inflate(R.layout.about, null, false);
 
-        new AlertDialog.Builder(uiContext)
+        new AlertDialog.Builder(context)
                 .setIcon(R.drawable.icon)
                 .setTitle(R.string.appName)
                 .setView(messageView)
@@ -643,6 +672,10 @@ public class MainActivity extends AppCompatActivity implements PlayerView {
     }
 
     public void onTitleClick(View v) {
+        selectNextTab();
+    }
+
+    private void selectNextTab() {
         int tab;
         switch (activeTab) {
             case TAB_VARS_DESC:
@@ -696,7 +729,31 @@ public class MainActivity extends AppCompatActivity implements PlayerView {
         view.requestLayout();
     }
 
-    // Begin PlayerView implementation
+    private void selectPreviousTab() {
+        int tab;
+        switch (activeTab) {
+            case TAB_VARS_DESC:
+                tab = TAB_OBJECTS;
+                break;
+            case TAB_OBJECTS:
+                tab = TAB_MAIN_DESC;
+                break;
+            case TAB_MAIN_DESC:
+            default:
+                tab = TAB_VARS_DESC;
+                break;
+        }
+        setActiveTab(tab);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if (gestureDetector.onTouchEvent(event)) return true;
+
+        return super.onTouchEvent(event);
+    }
+
+    // Begin PlayerView
 
     @Override
     public void refreshGameView(
@@ -733,13 +790,13 @@ public class MainActivity extends AppCompatActivity implements PlayerView {
 
     @Override
     public void showError(final String message) {
-        runOnUiThread(() -> ViewUtil.showErrorDialog(uiContext, message));
+        runOnUiThread(() -> ViewUtil.showErrorDialog(context, message));
     }
 
     @Override
     public void showPicture(final String path) {
         runOnUiThread(() -> {
-            Intent intent = new Intent(uiContext, ImageBoxActivity.class);
+            Intent intent = new Intent(context, ImageBoxActivity.class);
             intent.putExtra("gameDirUri", viewState.gameDir.getAbsolutePath());
             intent.putExtra("imagePath", FileUtil.normalizePath(path));
             startActivity(intent);
@@ -756,7 +813,7 @@ public class MainActivity extends AppCompatActivity implements PlayerView {
                 processedMsg = "";
             }
 
-            new AlertDialog.Builder(uiContext)
+            new AlertDialog.Builder(context)
                     .setMessage(processedMsg)
                     .setPositiveButton(android.R.string.ok, (dialog, which) -> latch.countDown())
                     .setCancelable(false)
@@ -783,7 +840,7 @@ public class MainActivity extends AppCompatActivity implements PlayerView {
                 message = "";
             }
 
-            new AlertDialog.Builder(uiContext)
+            new AlertDialog.Builder(context)
                     .setView(view)
                     .setMessage(message)
                     .setPositiveButton(android.R.string.ok, (dialog, which) -> {
@@ -812,7 +869,7 @@ public class MainActivity extends AppCompatActivity implements PlayerView {
             items.add(item.name);
         }
 
-        runOnUiThread(() -> new AlertDialog.Builder(uiContext)
+        runOnUiThread(() -> new AlertDialog.Builder(context)
                 .setItems(items.toArray(new CharSequence[0]), (dialog, which) -> resultQueue.add(which))
                 .setOnCancelListener(dialog -> resultQueue.add(-1))
                 .create()
@@ -840,7 +897,52 @@ public class MainActivity extends AppCompatActivity implements PlayerView {
         }
     }
 
-    // End PlayerView implementation
+    // End PlayerView
+
+    // Begin GestureDetector.OnGestureListener
+
+    @Override
+    public boolean onDown(MotionEvent e) {
+        return false;
+    }
+
+    @Override
+    public void onShowPress(MotionEvent e) {
+    }
+
+    @Override
+    public boolean onSingleTapUp(MotionEvent e) {
+        return false;
+    }
+
+    @Override
+    public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+        return false;
+    }
+
+    @Override
+    public void onLongPress(MotionEvent e) {
+    }
+
+    @Override
+    public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+        float diffX = e2.getX() - e1.getX();
+        float absVelocityX = Math.abs(velocityX);
+        float absVelocityY = Math.abs(velocityY);
+
+        if (Math.abs(diffX) > SWIPE_THRESHOLD && absVelocityX > absVelocityY) {
+            if (diffX < 0.0f) {
+                selectNextTab();
+            } else {
+                selectPreviousTab();
+            }
+            return true;
+        }
+
+        return false;
+    }
+
+    // End GestureDetector.OnGestureListener
 
     private enum SlotAction {
         LOAD,
@@ -872,7 +974,7 @@ public class MainActivity extends AppCompatActivity implements PlayerView {
                 try {
                     String extension = FileUtil.getExtension(file.getName());
                     String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
-                    InputStream in = uiContext.getContentResolver().openInputStream(Uri.fromFile(file));
+                    InputStream in = context.getContentResolver().openInputStream(Uri.fromFile(file));
                     return new WebResourceResponse(mimeType, null, in);
                 } catch (FileNotFoundException e) {
                     logger.error("File not found", e);
