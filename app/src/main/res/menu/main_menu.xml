@@ -1,18 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <group android:id="@+id/menugroup_running">
-
+        <item
+            android:id="@+id/menu_maindesc"
+            android:contentDescription="@string/mainDescContentDesc"
+            android:icon="@drawable/ic_tab_main"
+            android:title="@string/mainDesc"
+            app:showAsAction="always" />
+        <item
+            android:id="@+id/menu_varsdesc"
+            android:contentDescription="@string/varsDescContentDesc"
+            android:icon="@drawable/ic_tab_vars"
+            android:title="@string/varsDesc"
+            app:showAsAction="always" />
+        <item
+            android:id="@+id/menu_inventory"
+            android:contentDescription="@string/inventoryContentDesc"
+            android:icon="@drawable/ic_tab_inv"
+            android:title="@string/inventory"
+            app:showAsAction="always" />
+        <item
+            android:id="@+id/menu_userinput"
+            android:contentDescription="@string/userInputContentDesc"
+            android:icon="@drawable/ic_tab_inp"
+            android:title="@string/userInput"
+            app:showAsAction="always" />
         <item
             android:id="@+id/menu_newgame"
             android:orderInCategory="1"
             android:title="@string/restartGame" />
-
         <item
             android:id="@+id/menu_loadgame"
             android:orderInCategory="2"
             android:title="@string/load" />
-
         <item
             android:id="@+id/menu_savegame"
             android:orderInCategory="3"
@@ -24,12 +46,10 @@
         android:id="@+id/menu_gamestock"
         android:orderInCategory="4"
         android:title="@string/gameStock" />
-
     <item
         android:id="@+id/menu_options"
         android:orderInCategory="5"
         android:title="@string/settings" />
-
     <item
         android:id="@+id/menu_exit"
         android:orderInCategory="6"

@@ -32,7 +32,6 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
@@ -40,6 +39,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GestureDetectorCompat;
 
@@ -106,18 +106,13 @@ public class MainActivity extends AppCompatActivity implements PlayerView, Gestu
     private SharedPreferences settings;
     private String currentLanguage = Locale.getDefault().getLanguage();
     private int activeTab;
-    private boolean varsDescUnread;
-    private int varsDescBackground;
     private String pageTemplate = "";
     private boolean selectingGame;
     private PlayerViewState viewState;
     private GestureDetectorCompat gestureDetector;
 
+    private ActionBar actionBar;
     private View mainView;
-    private ImageButton mainDescButton;
-    private ImageButton invButton;
-    private ImageButton varsDescButton;
-    private ImageButton inputButton;
     private WebView mainDescView;
     private WebView varsDescView;
     private ListView actionsView;
@@ -144,12 +139,7 @@ public class MainActivity extends AppCompatActivity implements PlayerView, Gestu
         settings = PreferenceManager.getDefaultSharedPreferences(context);
 
         loadLocale();
-
-        mainDescButton = findViewById(R.id.title_main_desc_btn);
-        invButton = findViewById(R.id.title_inv_btn);
-        varsDescButton = findViewById(R.id.title_vars_desc_btn);
-        inputButton = findViewById(R.id.title_input_btn);
-
+        initActionBar();
         initMainView();
         initMainTab();
         initMainDescView();
@@ -166,6 +156,11 @@ public class MainActivity extends AppCompatActivity implements PlayerView, Gestu
         String language = settings.getString("lang", "ru");
         ViewUtil.setLocale(context, language);
         currentLanguage = language;
+    }
+
+    private void initActionBar() {
+        setSupportActionBar(findViewById(R.id.toolbar));
+        actionBar = getSupportActionBar();
     }
 
     private void initMainView() {
@@ -242,8 +237,6 @@ public class MainActivity extends AppCompatActivity implements PlayerView, Gestu
                 toggleObjects(false);
                 toggleMainDesc(false);
                 toggleVarsDesc(true);
-                varsDescUnread = false;
-                varsDescBackground = 0;
                 setTitle(getString(R.string.varsDesc));
                 break;
         }
@@ -253,36 +246,18 @@ public class MainActivity extends AppCompatActivity implements PlayerView, Gestu
 
     private void toggleObjects(boolean show) {
         findViewById(R.id.inv).setVisibility(show ? View.VISIBLE : View.GONE);
-        invButton.setBackgroundResource(show ? R.drawable.btn_bg_active : 0);
-        invButton.setEnabled(!show);
     }
 
     private void toggleMainDesc(boolean show) {
         findViewById(R.id.main_tab).setVisibility(show ? View.VISIBLE : View.GONE);
-        mainDescButton.setBackgroundResource(show ? R.drawable.btn_bg_active : 0);
-        mainDescButton.setEnabled(!show);
     }
 
     private void toggleVarsDesc(boolean show) {
         findViewById(R.id.vars_tab).setVisibility(show ? View.VISIBLE : View.GONE);
-        varsDescButton.setBackgroundResource(show ? R.drawable.btn_bg_active : varsDescBackground);
-        varsDescButton.setEnabled(!show);
     }
 
-    private void setTitle(String second) {
-        TextView winTitle = findViewById(R.id.title_text);
-        winTitle.setText(second);
-        updateTitle();
-    }
-
-    private void updateTitle() {
-        invButton.clearAnimation();
-        varsDescButton.clearAnimation();
-
-        if (varsDescUnread) {
-            varsDescButton.setBackgroundResource(varsDescBackground = R.drawable.btn_bg_pressed);
-            varsDescUnread = false;
-        }
+    private void setTitle(String title) {
+        actionBar.setTitle(title);
     }
 
     @Override
@@ -583,6 +558,22 @@ public class MainActivity extends AppCompatActivity implements PlayerView, Gestu
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.menu_maindesc:
+                setActiveTab(TAB_MAIN_DESC);
+                return true;
+
+            case R.id.menu_inventory:
+                setActiveTab(TAB_OBJECTS);
+                return true;
+
+            case R.id.menu_varsdesc:
+                setActiveTab(TAB_VARS_DESC);
+                return true;
+
+            case R.id.menu_userinput:
+                libQspProxy.onInputAreaClicked();
+                return true;
+
             case R.id.menu_gamestock:
                 startSelectGame();
                 return true;
@@ -609,9 +600,10 @@ public class MainActivity extends AppCompatActivity implements PlayerView, Gestu
             case R.id.menu_loadgame:
             case R.id.menu_savegame:
                 return true;
-        }
 
-        return false;
+            default:
+                return false;
+        }
     }
 
     private void showAboutDialog() {
@@ -674,10 +666,6 @@ public class MainActivity extends AppCompatActivity implements PlayerView, Gestu
         libQspProxy.saveGameState(uri);
     }
 
-    public void onTitleClick(View v) {
-        selectNextTab();
-    }
-
     private void selectNextTab() {
         int tab;
         switch (activeTab) {
@@ -693,23 +681,6 @@ public class MainActivity extends AppCompatActivity implements PlayerView, Gestu
                 break;
         }
         setActiveTab(tab);
-    }
-
-    public void onMainDescTabClick(View v) {
-        setActiveTab(TAB_MAIN_DESC);
-    }
-
-    public void onObjectsTabClick(View v) {
-        setActiveTab(TAB_OBJECTS);
-    }
-
-    public void onVarsDescTabClick(View v) {
-        setActiveTab(TAB_VARS_DESC);
-    }
-
-    public void onInputButtonClick(View v) {
-        inputButton.clearAnimation();
-        libQspProxy.onInputAreaClicked();
     }
 
     private void adjustListViewHeight(ListView view) {
@@ -780,10 +751,6 @@ public class MainActivity extends AppCompatActivity implements PlayerView, Gestu
             }
             if (objectsChanged) {
                 refreshObjects();
-            }
-            if (varsDescChanged && activeTab != TAB_VARS_DESC) {
-                varsDescUnread = true;
-                updateTitle();
             }
             if (confChanged || varsDescChanged) {
                 refreshVarsDesc();
