@@ -184,6 +184,7 @@ public class MainActivity extends AppCompatActivity implements PlayerView, Gestu
     private void initMainDescView() {
         mainDescView = findViewById(R.id.main_desc);
         mainDescView.setWebViewClient(new QspWebViewClient());
+        mainDescView.setOnTouchListener(this::handleTouchEvent);
     }
 
     private void initVarsTab() {
@@ -194,11 +195,13 @@ public class MainActivity extends AppCompatActivity implements PlayerView, Gestu
     private void initVarsDescView() {
         varsDescView = findViewById(R.id.vars_desc);
         varsDescView.setWebViewClient(new QspWebViewClient());
+        varsDescView.setOnTouchListener(this::handleTouchEvent);
     }
 
     private void initActionsView() {
         actionsView = findViewById(R.id.acts);
         actionsView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+        actionsView.setOnTouchListener(this::handleTouchEvent);
         actionsView.setOnItemClickListener((parent, view, position, id) -> libQspProxy.onActionClicked(position));
         actionsView.setOnItemSelectedListener(new OnItemSelectedListener() {
             @Override
