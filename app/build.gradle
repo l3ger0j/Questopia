@@ -40,7 +40,7 @@ dependencies {
     implementation 'com.pes.materialcolorpicker:library:1.2.5'
     implementation 'org.apache.commons:commons-compress:1.19'
     implementation 'org.jsoup:jsoup:1.12.1'
-    implementation 'org.slf4j:slf4j-android:1.7.30'
+    implementation 'sk.baka.slf4j:slf4j-handroid:1.7.32'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.4.2'
     testImplementation "org.mockito:mockito-core:3.6.28"
     testImplementation "org.mockito:mockito-junit-jupiter:3.6.28"

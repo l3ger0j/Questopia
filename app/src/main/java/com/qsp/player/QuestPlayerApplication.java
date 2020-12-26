@@ -1,16 +1,21 @@
 package com.qsp.player;
 
 import android.app.Application;
+import android.os.Build;
 
 import com.qsp.player.game.LibQspProxy;
 import com.qsp.player.game.LibQspProxyImpl;
+
+import org.slf4j.impl.HandroidLoggerAdapter;
 
 public class QuestPlayerApplication extends Application {
 
     private LibQspProxyImpl libQspProxy;
 
-    public LibQspProxy getLibQspProxy() {
-        return libQspProxy;
+    public QuestPlayerApplication() {
+        HandroidLoggerAdapter.DEBUG = BuildConfig.DEBUG;
+        HandroidLoggerAdapter.ANDROID_API_LEVEL = Build.VERSION.SDK_INT;
+        HandroidLoggerAdapter.APP_NAME = "Quest Player";
     }
 
     @Override
@@ -23,5 +28,9 @@ public class QuestPlayerApplication extends Application {
     public void onTerminate() {
         libQspProxy.close();
         super.onTerminate();
+    }
+
+    public LibQspProxy getLibQspProxy() {
+        return libQspProxy;
     }
 }
