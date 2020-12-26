@@ -926,17 +926,21 @@ public class MainActivity extends AppCompatActivity implements PlayerView, Gestu
 
     @Override
     public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-        float diffX = e2.getX() - e1.getX();
-        float absVelocityX = Math.abs(velocityX);
-        float absVelocityY = Math.abs(velocityY);
+        try {
+            float diffX = e2.getX() - e1.getX();
+            float absVelocityX = Math.abs(velocityX);
+            float absVelocityY = Math.abs(velocityY);
 
-        if (Math.abs(diffX) > SWIPE_THRESHOLD && absVelocityX > absVelocityY) {
-            if (diffX < 0.0f) {
-                selectNextTab();
-            } else {
-                selectPreviousTab();
+            if (Math.abs(diffX) > SWIPE_THRESHOLD && absVelocityX > absVelocityY) {
+                if (diffX < 0.0f) {
+                    selectNextTab();
+                } else {
+                    selectPreviousTab();
+                }
+                return true;
             }
-            return true;
+        } catch (Exception ex) {
+            logger.error("Error handling fling event", ex);
         }
 
         return false;
