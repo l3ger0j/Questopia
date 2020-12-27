@@ -115,6 +115,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
     private boolean selectingGame;
     private PlayerViewState viewState;
     private GestureDetectorCompat gestureDetector;
+    private boolean showActions = true;
 
     private ActionBar actionBar;
     private View layoutTop;
@@ -228,21 +229,21 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
         switch (tab) {
             case TAB_OBJECTS:
                 toggleObjects(true);
-                toggleMainDesc(false);
+                toggleMainDescAndActions(false);
                 toggleVarsDesc(false);
                 setTitle(getString(R.string.inventory));
                 break;
 
             case TAB_MAIN_DESC:
                 toggleObjects(false);
-                toggleMainDesc(true);
+                toggleMainDescAndActions(true);
                 toggleVarsDesc(false);
                 setTitle(getString(R.string.mainDesc));
                 break;
 
             case TAB_VARS_DESC:
                 toggleObjects(false);
-                toggleMainDesc(false);
+                toggleMainDescAndActions(false);
                 toggleVarsDesc(true);
                 setTitle(getString(R.string.varsDesc));
                 break;
@@ -256,9 +257,12 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
         findViewById(R.id.objects).setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
-    private void toggleMainDesc(boolean show) {
+    private void toggleMainDescAndActions(boolean show) {
         findViewById(R.id.main_description).setVisibility(show ? View.VISIBLE : View.GONE);
-        findViewById(R.id.actions).setVisibility(show ? View.VISIBLE : View.GONE);
+        if (showActions) {
+            findViewById(R.id.separator).setVisibility(show ? View.VISIBLE : View.GONE);
+            findViewById(R.id.actions).setVisibility(show ? View.VISIBLE : View.GONE);
+        }
     }
 
     private void toggleVarsDesc(boolean show) {
@@ -859,6 +863,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
     public void showWindow(WindowType type, final boolean show) {
         if (type == WindowType.ACTIONS) {
             runOnUiThread(() -> {
+                showActions = show;
                 separatorView.setVisibility(show ? View.VISIBLE : View.GONE);
                 actionsView.setVisibility(show ? View.VISIBLE : View.GONE);
             });
