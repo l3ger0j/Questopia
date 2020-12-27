@@ -43,6 +43,8 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
     private final ReentrantLock libQspLock = new ReentrantLock();
     private final PlayerViewState viewState = new PlayerViewState();
     private final AudioPlayer audioPlayer = new AudioPlayer();
+    private final NativeMethods nativeMethods = new NativeMethods(this);
+
     private final Context context;
     private final SharedPreferences settings;
     private final ImageProvider imageProvider;
@@ -51,7 +53,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
         @Override
         public void run() {
             runOnQspThread(() -> {
-                if (!QSPExecCounter(true)) {
+                if (!nativeMethods.QSPExecCounter(true)) {
                     showLastQspError();
                 }
             });
@@ -90,14 +92,14 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
     }
 
     private void showLastQspError() {
-        JniResult errorResult = (JniResult) QSPGetLastErrorData();
+        JniResult errorResult = (JniResult) nativeMethods.QSPGetLastErrorData();
 
         String locName = errorResult.str1 == null ? "" : errorResult.str1;
         int action = errorResult.int2;
         int line = errorResult.int3;
         int errorNumber = errorResult.int1;
 
-        String desc = QSPGetErrorDesc(errorResult.int1);
+        String desc = nativeMethods.QSPGetErrorDesc(errorResult.int1);
         if (desc == null) {
             desc = "";
         }
@@ -143,12 +145,12 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
             @Override
             public void run() {
                 libQspThreadRunning = true;
-                QSPInit();
+                nativeMethods.QSPInit();
                 Looper.prepare();
                 libQspHandler = new Handler();
                 latch.countDown();
                 Looper.loop();
-                QSPDeInit();
+                nativeMethods.QSPDeInit();
                 libQspThreadRunning = false;
             }
         }
@@ -174,7 +176,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
             return false;
         }
         String fileName = viewState.gameFile.getAbsolutePath();
-        if (!QSPLoadGameWorldFromData(gameData, gameData.length, fileName)) {
+        if (!nativeMethods.QSPLoadGameWorldFromData(gameData, gameData.length, fileName)) {
             showLastQspError();
             return false;
         }
@@ -185,7 +187,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
     private boolean loadUIConfiguration() {
         boolean changed = false;
 
-        JniResult htmlResult = (JniResult) QSPGetVarValues("USEHTML", 0);
+        JniResult htmlResult = (JniResult) nativeMethods.QSPGetVarValues("USEHTML", 0);
         if (htmlResult.success) {
             boolean useHtml = htmlResult.int1 != 0;
             if (viewState.useHtml != useHtml) {
@@ -194,25 +196,25 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
             }
         }
 
-        JniResult fSizeResult = (JniResult) QSPGetVarValues("FSIZE", 0);
+        JniResult fSizeResult = (JniResult) nativeMethods.QSPGetVarValues("FSIZE", 0);
         if (fSizeResult.success && viewState.fontSize != fSizeResult.int1) {
             viewState.fontSize = fSizeResult.int1;
             changed = true;
         }
 
-        JniResult bColorResult = (JniResult) QSPGetVarValues("BCOLOR", 0);
+        JniResult bColorResult = (JniResult) nativeMethods.QSPGetVarValues("BCOLOR", 0);
         if (bColorResult.success && viewState.backColor != bColorResult.int1) {
             viewState.backColor = bColorResult.int1;
             changed = true;
         }
 
-        JniResult fColorResult = (JniResult) QSPGetVarValues("FCOLOR", 0);
+        JniResult fColorResult = (JniResult) nativeMethods.QSPGetVarValues("FCOLOR", 0);
         if (fColorResult.success && viewState.fontColor != fColorResult.int1) {
             viewState.fontColor = fColorResult.int1;
             changed = true;
         }
 
-        JniResult lColorResult = (JniResult) QSPGetVarValues("LCOLOR", 0);
+        JniResult lColorResult = (JniResult) nativeMethods.QSPGetVarValues("LCOLOR", 0);
         if (lColorResult.success && viewState.linkColor != lColorResult.int1) {
             viewState.linkColor = lColorResult.int1;
             changed = true;
@@ -223,9 +225,9 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
 
     private void loadActions() {
         ArrayList<QspListItem> actions = new ArrayList<>();
-        int count = QSPGetActionsCount();
+        int count = nativeMethods.QSPGetActionsCount();
         for (int i = 0; i < count; ++i) {
-            JniResult actionResult = (JniResult) QSPGetActionData(i);
+            JniResult actionResult = (JniResult) nativeMethods.QSPGetActionData(i);
             QspListItem action = new QspListItem();
             action.icon = imageProvider.getDrawable(FileUtil.normalizePath(actionResult.str2));
             action.text = viewState.useHtml ? HtmlUtil.removeHtmlTags(actionResult.str1) : actionResult.str1;
@@ -236,9 +238,9 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
 
     private void loadObjects() {
         ArrayList<QspListItem> objects = new ArrayList<>();
-        int count = QSPGetObjectsCount();
+        int count = nativeMethods.QSPGetObjectsCount();
         for (int i = 0; i < count; i++) {
-            JniResult objectResult = (JniResult) QSPGetObjectData(i);
+            JniResult objectResult = (JniResult) nativeMethods.QSPGetObjectData(i);
             QspListItem object = new QspListItem();
             object.icon = imageProvider.getDrawable(FileUtil.normalizePath(objectResult.str2));
             object.text = viewState.useHtml ? HtmlUtil.removeHtmlTags(objectResult.str1) : objectResult.str1;
@@ -262,7 +264,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
     @Override
     public void execute(final String code) {
         runOnQspThread(() -> {
-            if (!QSPExecString(code, true)) {
+            if (!nativeMethods.QSPExecString(code, true)) {
                 showLastQspError();
             }
         });
@@ -271,7 +273,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
     @Override
     public void onActionSelected(final int index) {
         runOnQspThread(() -> {
-            if (!QSPSetSelActionIndex(index, true)) {
+            if (!nativeMethods.QSPSetSelActionIndex(index, true)) {
                 showLastQspError();
             }
         });
@@ -280,10 +282,10 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
     @Override
     public void onActionClicked(final int index) {
         runOnQspThread(() -> {
-            if (!QSPSetSelActionIndex(index, false)) {
+            if (!nativeMethods.QSPSetSelActionIndex(index, false)) {
                 showLastQspError();
             }
-            if (!QSPExecuteSelActionCode(true)) {
+            if (!nativeMethods.QSPExecuteSelActionCode(true)) {
                 showLastQspError();
             }
         });
@@ -292,7 +294,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
     @Override
     public void onObjectSelected(final int index) {
         runOnQspThread(() -> {
-            if (!QSPSetSelObjectIndex(index, true)) {
+            if (!nativeMethods.QSPSetSelObjectIndex(index, true)) {
                 showLastQspError();
             }
         });
@@ -306,9 +308,9 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
         }
         runOnQspThread(() -> {
             String input = view.showInputBox(context.getString(R.string.userInput));
-            QSPSetInputStrText(input);
+            nativeMethods.QSPSetInputStrText(input);
 
-            if (!QSPExecUserInput(true)) {
+            if (!nativeMethods.QSPExecUserInput(true)) {
                 showLastQspError();
             }
         });
@@ -339,7 +341,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
         lastMsCountCallTime = 0;
         timerInterval = 500;
 
-        if (!QSPRestartGame(true)) {
+        if (!nativeMethods.QSPRestartGame(true)) {
             showLastQspError();
         }
 
@@ -388,7 +390,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
 
         counterHandler.removeCallbacks(counterTask);
 
-        if (!QSPOpenSavedGameFromData(gameData, gameData.length, true)) {
+        if (!nativeMethods.QSPOpenSavedGameFromData(gameData, gameData.length, true)) {
             showLastQspError();
         }
 
@@ -402,7 +404,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
             return;
         }
 
-        byte[] gameData = QSPSaveGameAsData(false);
+        byte[] gameData = nativeMethods.QSPSaveGameAsData(false);
         if (gameData == null) {
             return;
         }
@@ -420,24 +422,24 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
     public void RefreshInt() {
         boolean confChanged = loadUIConfiguration();
 
-        boolean mainDescChanged = QSPIsMainDescChanged();
+        boolean mainDescChanged = nativeMethods.QSPIsMainDescChanged();
         if (mainDescChanged) {
-            viewState.mainDesc = QSPGetMainDesc();
+            viewState.mainDesc = nativeMethods.QSPGetMainDesc();
         }
 
-        boolean actionsChanged = QSPIsActionsChanged();
+        boolean actionsChanged = nativeMethods.QSPIsActionsChanged();
         if (actionsChanged) {
             loadActions();
         }
 
-        boolean objectsChanged = QSPIsObjectsChanged();
+        boolean objectsChanged = nativeMethods.QSPIsObjectsChanged();
         if (objectsChanged) {
             loadObjects();
         }
 
-        boolean varsDescChanged = QSPIsVarsDescChanged();
+        boolean varsDescChanged = nativeMethods.QSPIsVarsDescChanged();
         if (varsDescChanged) {
-            viewState.varsDesc = QSPGetVarsDesc();
+            viewState.varsDesc = nativeMethods.QSPGetVarsDesc();
         }
 
         PlayerView view = playerView;
@@ -539,7 +541,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
         }
         int result = view.showMenu();
         if (result != -1) {
-            QSPSelectMenuItem(result);
+            nativeMethods.QSPSelectMenuItem(result);
         }
     }
 
@@ -578,59 +580,4 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
     }
 
     // endregion LibQspCallbacks
-
-    // region JNI
-
-    public native void QSPInit();
-    public native void QSPDeInit();
-    public native boolean QSPIsInCallBack();
-    public native void QSPEnableDebugMode(boolean isDebug);
-    public native Object QSPGetCurStateData();//!!!STUB
-    public native String QSPGetVersion();
-    public native int QSPGetFullRefreshCount();
-    public native String QSPGetQstFullPath();
-    public native String QSPGetCurLoc();
-    public native String QSPGetMainDesc();
-    public native boolean QSPIsMainDescChanged();
-    public native String QSPGetVarsDesc();
-    public native boolean QSPIsVarsDescChanged();
-    public native Object QSPGetExprValue();//!!!STUB
-    public native void QSPSetInputStrText(String val);
-    public native int QSPGetActionsCount();
-    public native Object QSPGetActionData(int ind);//!!!STUB
-    public native boolean QSPExecuteSelActionCode(boolean isRefresh);
-    public native boolean QSPSetSelActionIndex(int ind, boolean isRefresh);
-    public native int QSPGetSelActionIndex();
-    public native boolean QSPIsActionsChanged();
-    public native int QSPGetObjectsCount();
-    public native Object QSPGetObjectData(int ind);//!!!STUB
-    public native boolean QSPSetSelObjectIndex(int ind, boolean isRefresh);
-    public native int QSPGetSelObjectIndex();
-    public native boolean QSPIsObjectsChanged();
-    public native void QSPShowWindow(int type, boolean isShow);
-    public native Object QSPGetVarValuesCount(String name);
-    public native Object QSPGetVarValues(String name, int ind);//!!!STUB
-    public native int QSPGetMaxVarsCount();
-    public native Object QSPGetVarNameByIndex(int index);//!!!STUB
-    public native boolean QSPExecString(String s, boolean isRefresh);
-    public native boolean QSPExecLocationCode(String name, boolean isRefresh);
-    public native boolean QSPExecCounter(boolean isRefresh);
-    public native boolean QSPExecUserInput(boolean isRefresh);
-    public native Object QSPGetLastErrorData();
-    public native String QSPGetErrorDesc(int errorNum);
-    public native boolean QSPLoadGameWorld(String fileName);
-    public native boolean QSPLoadGameWorldFromData(byte data[], int dataSize, String fileName);
-    public native boolean QSPSaveGame(String fileName, boolean isRefresh);
-    public native byte[] QSPSaveGameAsData(boolean isRefresh);
-    public native boolean QSPOpenSavedGame(String fileName, boolean isRefresh);
-    public native boolean QSPOpenSavedGameFromData(byte data[], int dataSize, boolean isRefresh);
-    public native boolean QSPRestartGame(boolean isRefresh);
-    public native void QSPSelectMenuItem(int index);
-    //public native void QSPSetCallBack(int type, QSP_CALLBACK func)
-
-    static {
-        System.loadLibrary("ndkqsp");
-    }
-
-    // endregion JNI
 }

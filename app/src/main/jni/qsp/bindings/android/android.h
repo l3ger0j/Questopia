@@ -28,8 +28,8 @@
 	char *qspW2C(QSP_CHAR *);
 	QSP_CHAR *qspC2W(char *);
 
-	JNIEnv* qspCallbackEnv;
-	jobject qspCallbackObject;
+	JNIEnv *qspJniEnv;
+	jobject qspCallbacksObj;
 
 	#ifdef __cplusplus
 		typedef int (*QSP_CALLBACK)(...);
