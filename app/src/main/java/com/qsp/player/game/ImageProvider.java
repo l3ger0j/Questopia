@@ -20,9 +20,8 @@ public class ImageProvider implements ImageGetter {
         if (source == null || source.isEmpty()) return null;
 
         Drawable drawable = cache.get(source);
-        if (drawable != null) {
-            return drawable;
-        }
+        if (drawable != null) return drawable;
+
         File file = new File(source);
         if (!file.exists()) {
             logger.error("Image file not found: " + source);
@@ -30,17 +29,17 @@ public class ImageProvider implements ImageGetter {
         }
         try (FileInputStream in = new FileInputStream(file)) {
             drawable = Drawable.createFromStream(in, source);
-        } catch (IOException e) {
-            logger.error("Failed reading from the image file", e);
-            drawable = null;
+        } catch (IOException ex) {
+            logger.error("Error reading the image file", ex);
         }
         if (drawable != null) {
             cache.put(file.getAbsolutePath(), drawable);
         }
+
         return drawable;
     }
 
-    public void setGameDirectory(File dir) {
+    public void invalidateCache() {
         cache.clear();
     }
 }

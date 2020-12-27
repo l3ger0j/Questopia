@@ -361,7 +361,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
     }
 
     private void applyViewState() {
-        imageProvider.setGameDirectory(viewState.gameDir);
+        imageProvider.invalidateCache();
 
         applyTextSettings();
         refreshMainDesc();
@@ -647,7 +647,6 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
 
         String gameDirUri = data.getStringExtra("gameDirUri");
         File gameDir = new File(gameDirUri);
-        imageProvider.setGameDirectory(gameDir);
 
         String gameFileUri = data.getStringExtra("gameFileUri");
         File gameFile = new File(gameFileUri);

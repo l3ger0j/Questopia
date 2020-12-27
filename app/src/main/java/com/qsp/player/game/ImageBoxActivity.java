@@ -24,9 +24,7 @@ public class ImageBoxActivity extends AppCompatActivity {
     }
 
     private void initImageProvider() {
-        String gameDirUri = getIntent().getStringExtra("gameDirUri");
         imageProvider = ((QuestPlayerApplication) getApplication()).getImageProvider();
-        imageProvider.setGameDirectory(new File(gameDirUri));
     }
 
     private void initImageView() {
