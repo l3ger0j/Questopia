@@ -280,7 +280,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
         applyTextSettings();
 
         viewState = libQspProxy.getViewState();
-        if (viewState.gameRunning) {
+        if (viewState.isGameRunning()) {
             applyViewState();
             libQspProxy.resumeGame();
         } else if (!selectingGame) {
@@ -322,8 +322,8 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
     }
 
     private int getBackgroundColor() {
-        return viewState != null && viewState.backColor != 0 ?
-                reverseColor(viewState.backColor) :
+        return viewState != null && viewState.getBackColor() != 0 ?
+                reverseColor(viewState.getBackColor()) :
                 backColor;
     }
 
@@ -346,20 +346,20 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
     }
 
     private int getTextColor() {
-        return viewState != null && viewState.fontColor != 0 ?
-                reverseColor(viewState.fontColor) :
+        return viewState != null && viewState.getFontColor() != 0 ?
+                reverseColor(viewState.getFontColor()) :
                 textColor;
     }
 
     private int getLinkColor() {
-        return viewState != null && viewState.linkColor != 0 ?
-                reverseColor(viewState.linkColor) :
+        return viewState != null && viewState.getLinkColor() != 0 ?
+                reverseColor(viewState.getLinkColor()) :
                 linkColor;
     }
 
     private String getFontSize() {
-        return useGameFont && viewState != null && viewState.fontSize != 0 ?
-                Integer.toString(viewState.fontSize) :
+        return useGameFont && viewState != null && viewState.getFontSize() != 0 ?
+                Integer.toString(viewState.getFontSize()) :
                 fontSize;
     }
 
@@ -378,7 +378,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
     }
 
     private void refreshMainDesc() {
-        String text = getHtml(viewState.mainDesc);
+        String text = getHtml(viewState.getMainDesc());
         mainDescView.loadDataWithBaseURL(
                 "file:///",
                 pageTemplate.replace("REPLACETEXT", text),
@@ -388,13 +388,13 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
     }
 
     private String getHtml(String str) {
-        return viewState.useHtml ?
+        return viewState.isUseHtml() ?
                 htmlProcessor.preprocessQspHtml(str) :
                 htmlProcessor.convertQspStringToHtml(str);
     }
 
     private void refreshVarsDesc() {
-        String text = getHtml(viewState.varsDesc);
+        String text = getHtml(viewState.getVarsDesc());
         varsDescView.loadDataWithBaseURL(
                 "file:///",
                 pageTemplate.replace("REPLACETEXT", text),
@@ -404,18 +404,18 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
     }
 
     private void refreshActions() {
-        actionsView.setAdapter(new QspItemAdapter(context, R.layout.list_item_action, viewState.actions));
+        actionsView.setAdapter(new QspItemAdapter(context, R.layout.list_item_action, viewState.getActions()));
     }
 
     private void refreshObjects() {
-        objectsView.setAdapter(new QspItemAdapter(context, R.layout.list_item_object, viewState.objects));
+        objectsView.setAdapter(new QspItemAdapter(context, R.layout.list_item_object, viewState.getObjects()));
     }
 
     private void startSelectGame() {
         selectingGame = true;
         Intent intent = new Intent(this, GameStockActivity.class);
-        if (viewState.gameRunning) {
-            intent.putExtra("gameRunning", viewState.gameDir.getName());
+        if (viewState.isGameRunning()) {
+            intent.putExtra("gameRunning", viewState.getGameDir().getName());
         }
         startActivityForResult(intent, REQUEST_CODE_SELECT_GAME);
     }
@@ -475,7 +475,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        boolean gameRunning = viewState.gameRunning;
+        boolean gameRunning = viewState.isGameRunning();
         menu.setGroupVisible(R.id.menugroup_running, gameRunning);
 
         if (gameRunning) {
@@ -498,7 +498,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
         subMenu.setHeaderTitle(getString(R.string.selectSlot));
 
         MenuItem item;
-        final File savesDir = getOrCreateDirectory(viewState.gameDir, "saves");
+        final File savesDir = getOrCreateDirectory(viewState.getGameDir(), "saves");
         final LibQspProxy proxy = libQspProxy;
 
         for (int i = 0; i < MAX_SAVE_SLOTS; ++i) {
@@ -559,7 +559,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
     private void startSaveToFile() {
         Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
         intent.setType("application/octet-stream");
-        intent.putExtra(Intent.EXTRA_TITLE, viewState.gameTitle + ".sav");
+        intent.putExtra(Intent.EXTRA_TITLE, viewState.getGameFile() + ".sav");
         startActivityForResult(intent, REQUEST_CODE_SAVE_TO_FILE);
     }
 
@@ -758,7 +758,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
     public void showPicture(final String path) {
         runOnUiThread(() -> {
             Intent intent = new Intent(context, ImageBoxActivity.class);
-            intent.putExtra("gameDirUri", viewState.gameDir.getAbsolutePath());
+            intent.putExtra("gameDirUri", viewState.getGameDir().getAbsolutePath());
             intent.putExtra("imagePath", normalizePath(path));
             startActivity(intent);
         });
@@ -769,7 +769,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
         final CountDownLatch latch = new CountDownLatch(1);
 
         runOnUiThread(() -> {
-            String processedMsg = viewState.useHtml ? htmlProcessor.removeHtmlTags(message) : message;
+            String processedMsg = viewState.isUseHtml() ? htmlProcessor.removeHtmlTags(message) : message;
             if (processedMsg == null) {
                 processedMsg = "";
             }
@@ -796,7 +796,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
         runOnUiThread(() -> {
             final View view = getLayoutInflater().inflate(R.layout.dialog_input, null);
 
-            String message = viewState.useHtml ? htmlProcessor.removeHtmlTags(prompt) : prompt;
+            String message = viewState.isUseHtml() ? htmlProcessor.removeHtmlTags(prompt) : prompt;
             if (message == null) {
                 message = "";
             }
@@ -826,7 +826,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
         final ArrayBlockingQueue<Integer> resultQueue = new ArrayBlockingQueue<>(1);
         final ArrayList<String> items = new ArrayList<>();
 
-        for (QspMenuItem item : viewState.menuItems) {
+        for (QspMenuItem item : viewState.getMenuItems()) {
             items.add(item.name);
         }
 
@@ -931,7 +931,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
         public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
             if (url.startsWith("file:///")) {
                 String path = normalizePath(Uri.decode(url.substring(8)));
-                File file = findFileRecursively(viewState.gameDir, path);
+                File file = findFileRecursively(viewState.getGameDir(), path);
                 if (file == null) {
                     logger.error("File not found: " + path);
                     return null;

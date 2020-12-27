@@ -171,7 +171,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
 
     private boolean loadGameWorld() {
         byte[] gameData;
-        try (FileInputStream in = new FileInputStream(viewState.gameFile)) {
+        try (FileInputStream in = new FileInputStream(viewState.getGameFile())) {
             try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
                 StreamUtil.copy(in, out);
                 gameData = out.toByteArray();
@@ -180,7 +180,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
             logger.error("Failed to load the game world", e);
             return false;
         }
-        String fileName = viewState.gameFile.getAbsolutePath();
+        String fileName = viewState.getGameFile().getAbsolutePath();
         if (!nativeMethods.QSPLoadGameWorldFromData(gameData, gameData.length, fileName)) {
             showLastQspError();
             return false;
@@ -195,33 +195,33 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
         GetVarValuesResponse htmlResult = (GetVarValuesResponse) nativeMethods.QSPGetVarValues("USEHTML", 0);
         if (htmlResult.isSuccess()) {
             boolean useHtml = htmlResult.getIntValue() != 0;
-            if (viewState.useHtml != useHtml) {
-                viewState.useHtml = useHtml;
+            if (viewState.isUseHtml() != useHtml) {
+                viewState.setUseHtml(useHtml);
                 changed = true;
             }
         }
 
         GetVarValuesResponse fSizeResult = (GetVarValuesResponse) nativeMethods.QSPGetVarValues("FSIZE", 0);
-        if (fSizeResult.isSuccess() && viewState.fontSize != fSizeResult.getIntValue()) {
-            viewState.fontSize = fSizeResult.getIntValue();
+        if (fSizeResult.isSuccess() && viewState.getFontSize() != fSizeResult.getIntValue()) {
+            viewState.setFontSize(fSizeResult.getIntValue());
             changed = true;
         }
 
         GetVarValuesResponse bColorResult = (GetVarValuesResponse) nativeMethods.QSPGetVarValues("BCOLOR", 0);
-        if (bColorResult.isSuccess() && viewState.backColor != bColorResult.getIntValue()) {
-            viewState.backColor = bColorResult.getIntValue();
+        if (bColorResult.isSuccess() && viewState.getBackColor() != bColorResult.getIntValue()) {
+            viewState.setBackColor(bColorResult.getIntValue());
             changed = true;
         }
 
         GetVarValuesResponse fColorResult = (GetVarValuesResponse) nativeMethods.QSPGetVarValues("FCOLOR", 0);
-        if (fColorResult.isSuccess() && viewState.fontColor != fColorResult.getIntValue()) {
-            viewState.fontColor = fColorResult.getIntValue();
+        if (fColorResult.isSuccess() && viewState.getFontColor() != fColorResult.getIntValue()) {
+            viewState.setFontColor(fColorResult.getIntValue());
             changed = true;
         }
 
         GetVarValuesResponse lColorResult = (GetVarValuesResponse) nativeMethods.QSPGetVarValues("LCOLOR", 0);
-        if (lColorResult.isSuccess() && viewState.linkColor != lColorResult.getIntValue()) {
-            viewState.linkColor = lColorResult.getIntValue();
+        if (lColorResult.isSuccess() && viewState.getLinkColor() != lColorResult.getIntValue()) {
+            viewState.setLinkColor(lColorResult.getIntValue());
             changed = true;
         }
 
@@ -235,10 +235,10 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
             ActionData actionData = (ActionData) nativeMethods.QSPGetActionData(i);
             QspListItem action = new QspListItem();
             action.icon = imageProvider.getDrawable(normalizePath(actionData.getImage()));
-            action.text = viewState.useHtml ? htmlProcessor.removeHtmlTags(actionData.getName()) : actionData.getName();
+            action.text = viewState.isUseHtml() ? htmlProcessor.removeHtmlTags(actionData.getName()) : actionData.getName();
             actions.add(action);
         }
-        viewState.actions = actions;
+        viewState.setActions(actions);
     }
 
     private void loadObjects() {
@@ -248,10 +248,10 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
             ObjectData objectResult = (ObjectData) nativeMethods.QSPGetObjectData(i);
             QspListItem object = new QspListItem();
             object.icon = imageProvider.getDrawable(normalizePath(objectResult.getImage()));
-            object.text = viewState.useHtml ? htmlProcessor.removeHtmlTags(objectResult.getName()) : objectResult.getName();
+            object.text = viewState.isUseHtml() ? htmlProcessor.removeHtmlTags(objectResult.getName()) : objectResult.getName();
             objects.add(object);
         }
-        viewState.objects = objects;
+        viewState.setObjects(objects);
     }
 
     // region LibQspProxy
@@ -331,10 +331,10 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
         audioPlayer.closeAllFiles();
 
         viewState.reset();
-        viewState.gameRunning = true;
-        viewState.gameTitle = title;
-        viewState.gameDir = dir;
-        viewState.gameFile = file;
+        viewState.setGameRunning(true);
+        viewState.setGameTitle(title);
+        viewState.setGameDir(dir);
+        viewState.setGameFile(file);
 
         imageProvider.invalidateCache();
 
@@ -357,7 +357,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
     public void restartGame() {
         runOnQspThread(() -> {
             PlayerViewState state = viewState;
-            doRunGame(state.gameTitle, state.gameDir, state.gameFile);
+            doRunGame(state.getGameTitle(), state.getGameDir(), state.getGameFile());
         });
     }
 
@@ -429,24 +429,20 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
 
         boolean mainDescChanged = nativeMethods.QSPIsMainDescChanged();
         if (mainDescChanged) {
-            viewState.mainDesc = nativeMethods.QSPGetMainDesc();
+            viewState.setMainDesc(nativeMethods.QSPGetMainDesc());
         }
-
         boolean actionsChanged = nativeMethods.QSPIsActionsChanged();
         if (actionsChanged) {
             loadActions();
         }
-
         boolean objectsChanged = nativeMethods.QSPIsObjectsChanged();
         if (objectsChanged) {
             loadObjects();
         }
-
         boolean varsDescChanged = nativeMethods.QSPIsVarsDescChanged();
         if (varsDescChanged) {
-            viewState.varsDesc = nativeMethods.QSPGetVarsDesc();
+            viewState.setVarsDesc(nativeMethods.QSPGetVarsDesc());
         }
-
         PlayerView view = playerView;
         if (view != null) {
             playerView.refreshGameView(
@@ -500,7 +496,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
     }
 
     public void OpenGame(String filename) {
-        File savesDir = getOrCreateDirectory(viewState.gameDir, "saves");
+        File savesDir = getOrCreateDirectory(viewState.getGameDir(), "saves");
         File saveFile = findFileOrDirectory(savesDir, filename);
         if (saveFile == null) {
             logger.error("Save file not found: " + filename);
@@ -536,7 +532,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
         QspMenuItem item = new QspMenuItem();
         item.imgPath = normalizePath(imgPath);
         item.name = name;
-        viewState.menuItems.add(item);
+        viewState.getMenuItems().add(item);
     }
 
     public void ShowMenu() {
@@ -551,7 +547,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
     }
 
     public void DeleteMenu() {
-        viewState.menuItems.clear();
+        viewState.getMenuItems().clear();
     }
 
     public void Wait(int msecs) {
@@ -578,8 +574,8 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
             logger.error("Game directory not found: " + path);
             return;
         }
-        if (!viewState.gameDir.equals(dir)) {
-            viewState.gameDir = dir;
+        if (!viewState.getGameDir().equals(dir)) {
+            viewState.setGameDir(dir);
             imageProvider.invalidateCache();
         }
     }
