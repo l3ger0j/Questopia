@@ -120,6 +120,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
     private View layoutTop;
     private WebView mainDescView;
     private WebView varsDescView;
+    private View separatorView;
     private ListView actionsView;
     private ListView objectsView;
     private Menu mainMenu;
@@ -146,6 +147,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
         initLayoutTopView();
         initMainDescView();
         initVarsDescView();
+        initSeparatorView();
         initActionsView();
         initObjectsView();
         setActiveTab(TAB_MAIN_DESC);
@@ -192,6 +194,10 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
         varsDescView = findViewById(R.id.vars_desc);
         varsDescView.setWebViewClient(new QspWebViewClient());
         varsDescView.setOnTouchListener(this::handleTouchEvent);
+    }
+
+    private void initSeparatorView() {
+        separatorView = findViewById(R.id.separator);
     }
 
     private void initActionsView() {
@@ -852,7 +858,10 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
     @Override
     public void showWindow(WindowType type, final boolean show) {
         if (type == WindowType.ACTIONS) {
-            runOnUiThread(() -> actionsView.setVisibility(show ? View.VISIBLE : View.GONE));
+            runOnUiThread(() -> {
+                separatorView.setVisibility(show ? View.VISIBLE : View.GONE);
+                actionsView.setVisibility(show ? View.VISIBLE : View.GONE);
+            });
         } else {
             logger.debug("Unsupported window type: " + type);
         }
