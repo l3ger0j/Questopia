@@ -1,6 +1,7 @@
 package com.qsp.player.stock.repository;
 
 import com.qsp.player.stock.GameStockItem;
+import com.qsp.player.stock.GameStockItemBuilder;
 import com.qsp.player.util.FileUtil;
 
 import org.slf4j.Logger;
@@ -48,11 +49,11 @@ public class LocalGameRepository {
             } else {
                 String name = folder.dir.getName();
                 item = new GameStockItem();
-                item.gameId = name;
-                item.title = name;
+                item.setId(name);
+                item.setTitle(name);
             }
-            item.gameDir = folder.dir;
-            item.gameFiles = folder.gameFiles;
+            item.setGameDir(folder.dir);
+            item.setGameFiles(folder.gameFiles);
             items.add(item);
         }
 
@@ -124,7 +125,7 @@ public class LocalGameRepository {
             boolean docStarted = false;
             String tagName = "";
             boolean gameStarted = false;
-            GameStockItem item = null;
+            GameStockItemBuilder itemBuilder = null;
 
             while (eventType != XmlPullParser.END_DOCUMENT) {
                 switch (eventType) {
@@ -137,7 +138,7 @@ public class LocalGameRepository {
                             tagName = xpp.getName();
                             if (tagName.equals("game")) {
                                 gameStarted = true;
-                                item = new GameStockItem();
+                                itemBuilder = new GameStockItemBuilder();
                             }
                         }
                         break;
@@ -145,7 +146,7 @@ public class LocalGameRepository {
                     case XmlPullParser.END_TAG:
                         if (docStarted && gameStarted) {
                             if (xpp.getName().equals("game")) {
-                                result = item;
+                                result = itemBuilder.build();
                             }
                             tagName = "";
                         }
@@ -153,7 +154,7 @@ public class LocalGameRepository {
 
                     case XmlPullParser.CDSECT:
                         if (docStarted && gameStarted) {
-                            fillGameItemFromCDATA(item, tagName, xpp.getText());
+                            itemBuilder.setFromXML(tagName, xpp.getText());
                         }
                         break;
                 }
@@ -165,50 +166,6 @@ public class LocalGameRepository {
         }
 
         return result;
-    }
-
-    private void fillGameItemFromCDATA(GameStockItem item, String tagName, String value) {
-        switch (tagName) {
-            case "id":
-                item.gameId = "id:".concat(value);
-                break;
-            case "list_id":
-                item.listId = value;
-                break;
-            case "author":
-                item.author = value;
-                break;
-            case "ported_by":
-                item.portedBy = value;
-                break;
-            case "version":
-                item.version = value;
-                break;
-            case "title":
-                item.title = value;
-                break;
-            case "lang":
-                item.lang = value;
-                break;
-            case "player":
-                item.player = value;
-                break;
-            case "file_url":
-                item.fileUrl = value;
-                break;
-            case "file_size":
-                item.fileSize = Integer.parseInt(value);
-                break;
-            case "desc_url":
-                item.descUrl = value;
-                break;
-            case "pub_date":
-                item.pubDate = value;
-                break;
-            case "mod_date":
-                item.modDate = value;
-                break;
-        }
     }
 
     private static class GameFolder {

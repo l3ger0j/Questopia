@@ -1,6 +1,7 @@
 package com.qsp.player.stock.repository;
 
 import com.qsp.player.stock.GameStockItem;
+import com.qsp.player.stock.GameStockItemBuilder;
 import com.qsp.player.util.StreamUtil;
 
 import org.slf4j.Logger;
@@ -66,7 +67,7 @@ public class RemoteGameRepository {
             String tagName = "";
             boolean listStarted = false;
             String listId = "unknown";
-            GameStockItem item = null;
+            GameStockItemBuilder itemBuilder = null;
 
             while (eventType != XmlPullParser.END_DOCUMENT) {
                 switch (eventType) {
@@ -82,8 +83,8 @@ public class RemoteGameRepository {
                                 listId = xpp.getAttributeValue(null, "id");
                             }
                             if (listStarted && tagName.equals("game")) {
-                                item = new GameStockItem();
-                                item.listId = listId;
+                                itemBuilder = new GameStockItemBuilder();
+                                itemBuilder.setListId(listId);
                             }
                         }
                         break;
@@ -91,7 +92,7 @@ public class RemoteGameRepository {
                     case XmlPullParser.END_TAG:
                         if (docStarted && listStarted) {
                             if (xpp.getName().equals("game")) {
-                                items.add(item);
+                                items.add(itemBuilder.build());
                             }
                             tagName = "";
                         }
@@ -99,7 +100,7 @@ public class RemoteGameRepository {
 
                     case XmlPullParser.CDSECT:
                         if (docStarted && listStarted) {
-                            fillGameItemFromCDATA(item, tagName, xpp.getText());
+                            itemBuilder.setFromXML(tagName, xpp.getText());
                         }
                         break;
                 }
@@ -110,47 +111,6 @@ public class RemoteGameRepository {
         } catch (XmlPullParserException | IOException e) {
             logger.error("Failed to parse game stock XML", e);
             return null;
-        }
-    }
-
-    private void fillGameItemFromCDATA(GameStockItem item, String tagName, String value) {
-        switch (tagName) {
-            case "id":
-                item.gameId = "id:".concat(value);
-                break;
-            case "author":
-                item.author = value;
-                break;
-            case "ported_by":
-                item.portedBy = value;
-                break;
-            case "version":
-                item.version = value;
-                break;
-            case "title":
-                item.title = value;
-                break;
-            case "lang":
-                item.lang = value;
-                break;
-            case "player":
-                item.player = value;
-                break;
-            case "file_url":
-                item.fileUrl = value;
-                break;
-            case "file_size":
-                item.fileSize = Integer.parseInt(value);
-                break;
-            case "desc_url":
-                item.descUrl = value;
-                break;
-            case "pub_date":
-                item.pubDate = value;
-                break;
-            case "mod_date":
-                item.modDate = value;
-                break;
         }
     }
 }
