@@ -42,7 +42,7 @@
         app:layout_constraintVertical_weight="0.33" />
 
     <WebView
-        android:id="@+id/vars"
+        android:id="@+id/vars_desc"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:background="@color/web_background"

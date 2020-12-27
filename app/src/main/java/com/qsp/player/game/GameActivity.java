@@ -46,7 +46,6 @@ import com.qsp.player.R;
 import com.qsp.player.game.libqsp.LibQspProxy;
 import com.qsp.player.settings.SettingsActivity;
 import com.qsp.player.stock.GameStockActivity;
-import com.qsp.player.util.FileUtil;
 import com.qsp.player.util.ViewUtil;
 
 import org.slf4j.Logger;
@@ -145,8 +144,8 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
         loadLocale();
         initActionBar();
         initLayoutTopView();
-        initMainDescriptionView();
-        initVarsView();
+        initMainDescView();
+        initVarsDescView();
         initActionsView();
         initObjectsView();
         setActiveTab(TAB_MAIN_DESC);
@@ -183,14 +182,14 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
         return gestureDetector.onTouchEvent(event);
     }
 
-    private void initMainDescriptionView() {
+    private void initMainDescView() {
         mainDescView = findViewById(R.id.main_description);
         mainDescView.setWebViewClient(new QspWebViewClient());
         mainDescView.setOnTouchListener(this::handleTouchEvent);
     }
 
-    private void initVarsView() {
-        varsDescView = findViewById(R.id.vars);
+    private void initVarsDescView() {
+        varsDescView = findViewById(R.id.vars_desc);
         varsDescView.setWebViewClient(new QspWebViewClient());
         varsDescView.setOnTouchListener(this::handleTouchEvent);
     }
@@ -257,7 +256,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
     }
 
     private void toggleVarsDesc(boolean show) {
-        findViewById(R.id.vars).setVisibility(show ? View.VISIBLE : View.GONE);
+        findViewById(R.id.vars_desc).setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
     private void setTitle(String title) {
