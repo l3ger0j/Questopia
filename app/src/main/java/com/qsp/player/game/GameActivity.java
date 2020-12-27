@@ -99,8 +99,8 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
     private static final Logger logger = LoggerFactory.getLogger(GameActivity.class);
 
     private final Context context = this;
-    private final ImageProvider imageProvider = new ImageProvider();
 
+    private ImageProvider imageProvider;
     private LibQspProxy libQspProxy;
     private SharedPreferences settings;
     private String currentLanguage = Locale.getDefault().getLanguage();
@@ -128,12 +128,10 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        libQspProxy = ((QuestPlayerApplication) getApplication()).getLibQspProxy();
-        libQspProxy.setPlayerView(this);
-
         setContentView(R.layout.activity_game);
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
+
+        initDependenices();
 
         settings = PreferenceManager.getDefaultSharedPreferences(context);
 
@@ -147,6 +145,15 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
         setActiveTab(TAB_MAIN_DESC);
 
         gestureDetector = new GestureDetectorCompat(this, this);
+    }
+
+    private void initDependenices() {
+        QuestPlayerApplication application = (QuestPlayerApplication) getApplication();
+
+        imageProvider = application.getImageProvider();
+
+        libQspProxy = application.getLibQspProxy();
+        libQspProxy.setPlayerView(this);
     }
 
     private void loadLocale() {

@@ -40,7 +40,7 @@ public class LibQspProxyImpl implements LibQspProxy {
     private static final Logger logger = LoggerFactory.getLogger(LibQspProxyImpl.class);
 
     private final Handler counterHandler = new Handler();
-    private final ReentrantLock qspLock = new ReentrantLock();
+    private final ReentrantLock libQspLock = new ReentrantLock();
     private final PlayerViewState viewState = new PlayerViewState();
     private final AudioPlayer audioPlayer = new AudioPlayer();
     private final Context context;
@@ -59,43 +59,18 @@ public class LibQspProxyImpl implements LibQspProxy {
         }
     };
 
-    private volatile boolean qspThreadRunning;
-    private volatile Handler qspHandler;
+    private volatile boolean libQspThreadRunning;
+    private volatile Handler libQspHandler;
     private volatile long gameStartTime;
     private volatile long lastMsCountCallTime;
     private volatile int timerInterval;
     private PlayerView playerView;
 
-    public LibQspProxyImpl(Context context) {
+    public LibQspProxyImpl(Context context, ImageProvider imageProvider) {
         this.context = context;
+        this.imageProvider = imageProvider;
+
         settings = PreferenceManager.getDefaultSharedPreferences(context);
-        imageProvider = new ImageProvider();
-    }
-
-    private void startQspThread() {
-        final CountDownLatch latch = new CountDownLatch(1);
-
-        new Thread("qsp") {
-            @Override
-            public void run() {
-                qspThreadRunning = true;
-                QSPInit();
-                Looper.prepare();
-                qspHandler = new Handler();
-                latch.countDown();
-                Looper.loop();
-                QSPDeInit();
-                qspThreadRunning = false;
-            }
-        }
-                .start();
-
-        try {
-            latch.await();
-            logger.info("QSP library thread started");
-        } catch (InterruptedException e) {
-            logger.error("Wait failed", e);
-        }
     }
 
     public void close() {
@@ -104,10 +79,10 @@ public class LibQspProxyImpl implements LibQspProxy {
     }
 
     private void stopQspThread() {
-        if (!qspThreadRunning) {
+        if (!libQspThreadRunning) {
             return;
         }
-        Handler handler = qspHandler;
+        Handler handler = libQspHandler;
         if (handler != null) {
             handler.getLooper().quitSafely();
         }
@@ -145,20 +120,46 @@ public class LibQspProxyImpl implements LibQspProxy {
     }
 
     private void runOnQspThread(final Runnable runnable) {
-        if (qspLock.isLocked()) {
+        if (libQspLock.isLocked()) {
             return;
         }
-        if (!qspThreadRunning) {
-            startQspThread();
+        if (!libQspThreadRunning) {
+            runLibQspThread();
         }
-        qspHandler.post(() -> {
-            qspLock.lock();
+        libQspHandler.post(() -> {
+            libQspLock.lock();
             try {
                 runnable.run();
             } finally {
-                qspLock.unlock();
+                libQspLock.unlock();
             }
         });
+    }
+
+    private void runLibQspThread() {
+        final CountDownLatch latch = new CountDownLatch(1);
+
+        new Thread("libqsp") {
+            @Override
+            public void run() {
+                libQspThreadRunning = true;
+                QSPInit();
+                Looper.prepare();
+                libQspHandler = new Handler();
+                latch.countDown();
+                Looper.loop();
+                QSPDeInit();
+                libQspThreadRunning = false;
+            }
+        }
+                .start();
+
+        try {
+            latch.await();
+            logger.info("QSP library thread started");
+        } catch (InterruptedException e) {
+            logger.error("Wait failed", e);
+        }
     }
 
     private boolean loadGameWorld() {
@@ -368,7 +369,7 @@ public class LibQspProxyImpl implements LibQspProxy {
 
     @Override
     public void loadGameState(final Uri uri) {
-        if (Thread.currentThread() != qspHandler.getLooper().getThread()) {
+        if (Thread.currentThread() != libQspHandler.getLooper().getThread()) {
             runOnQspThread(() -> loadGameState(uri));
             return;
         }
@@ -396,7 +397,7 @@ public class LibQspProxyImpl implements LibQspProxy {
 
     @Override
     public void saveGameState(final Uri uri) {
-        if (Thread.currentThread() != qspHandler.getLooper().getThread()) {
+        if (Thread.currentThread() != libQspHandler.getLooper().getThread()) {
             runOnQspThread(() -> saveGameState(uri));
             return;
         }
