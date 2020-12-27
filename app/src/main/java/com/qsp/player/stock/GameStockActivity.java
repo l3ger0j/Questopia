@@ -381,9 +381,9 @@ public class GameStockActivity extends AppCompatActivity {
             }
         }
 
-        gameAdapters.put(TAB_LOCAL, new GameStockItemAdapter(this, R.layout.game_item, localGames));
-        gameAdapters.put(TAB_REMOTE, new GameStockItemAdapter(this, R.layout.game_item, remoteGames));
-        gameAdapters.put(TAB_ALL, new GameStockItemAdapter(this, R.layout.game_item, games));
+        gameAdapters.put(TAB_LOCAL, new GameStockItemAdapter(this, R.layout.list_item_game, localGames));
+        gameAdapters.put(TAB_REMOTE, new GameStockItemAdapter(this, R.layout.list_item_game, remoteGames));
+        gameAdapters.put(TAB_ALL, new GameStockItemAdapter(this, R.layout.list_item_game, games));
 
         ActionBar bar = getSupportActionBar();
         if (bar != null) {
@@ -479,7 +479,7 @@ public class GameStockActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.gamestock_menu, menu);
+        inflater.inflate(R.menu.menu_stock, menu);
         return true;
     }
 
@@ -549,7 +549,7 @@ public class GameStockActivity extends AppCompatActivity {
     }
 
     private void showAboutDialog() {
-        View messageView = getLayoutInflater().inflate(R.layout.about, null, false);
+        View messageView = getLayoutInflater().inflate(R.layout.dialog_about, null, false);
 
         String typeface = settings.getString("typeface", "0");
         String fontSize = settings.getString("fontsize", "16");
@@ -688,7 +688,7 @@ public class GameStockActivity extends AppCompatActivity {
         public View getView(int position, View convertView, ViewGroup parent) {
             if (convertView == null) {
                 LayoutInflater inflater = getLayoutInflater();
-                convertView = inflater.inflate(R.layout.game_item, null);
+                convertView = inflater.inflate(R.layout.list_item_game, null);
             }
             GameStockItem item = items.get(position);
             if (item != null) {

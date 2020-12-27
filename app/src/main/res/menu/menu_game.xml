@@ -18,13 +18,13 @@
         <item
             android:id="@+id/menu_inventory"
             android:contentDescription="@string/inventoryContentDesc"
-            android:icon="@drawable/ic_tab_inv"
+            android:icon="@drawable/ic_tab_objects"
             android:title="@string/inventory"
             app:showAsAction="always" />
         <item
             android:id="@+id/menu_userinput"
             android:contentDescription="@string/userInputContentDesc"
-            android:icon="@drawable/ic_tab_inp"
+            android:icon="@drawable/ic_tab_input"
             android:title="@string/userInput"
             app:showAsAction="always" />
         <item

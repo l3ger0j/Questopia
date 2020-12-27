@@ -16,7 +16,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-        app:titleTextAppearance="@style/TextAppearance.AppCompat.Medium" />
+        app:titleTextAppearance="@style/TextAppearance.AppCompat.Small" />
 
     <WebView
         android:id="@+id/main_desc"

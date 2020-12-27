@@ -397,11 +397,11 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
     }
 
     private void refreshActions() {
-        actionsView.setAdapter(new QspItemAdapter(context, R.layout.act_item, viewState.actions));
+        actionsView.setAdapter(new QspItemAdapter(context, R.layout.list_item_action, viewState.actions));
     }
 
     private void refreshObjects() {
-        objectsView.setAdapter(new QspItemAdapter(context, R.layout.obj_item, viewState.objects));
+        objectsView.setAdapter(new QspItemAdapter(context, R.layout.list_item_object, viewState.objects));
     }
 
     private void startSelectGame() {
@@ -451,7 +451,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
         mainMenu = menu;
 
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.main_menu, menu);
+        inflater.inflate(R.menu.menu_game, menu);
 
         updateTabIcons();
 
@@ -461,7 +461,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
     private void updateTabIcons() {
         if (mainMenu == null) return;
 
-        mainMenu.findItem(R.id.menu_inventory).setIcon(activeTab == TAB_OBJECTS ? R.drawable.ic_tab_inv : R.drawable.ic_tab_inv_alt);
+        mainMenu.findItem(R.id.menu_inventory).setIcon(activeTab == TAB_OBJECTS ? R.drawable.ic_tab_objects : R.drawable.ic_tab_objects_alt);
         mainMenu.findItem(R.id.menu_maindesc).setIcon(activeTab == TAB_MAIN_DESC ? R.drawable.ic_tab_main : R.drawable.ic_tab_main_alt);
         mainMenu.findItem(R.id.menu_varsdesc).setIcon(activeTab == TAB_VARS_DESC ? R.drawable.ic_tab_vars : R.drawable.ic_tab_vars_alt);
     }
@@ -612,7 +612,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
     }
 
     private void showAboutDialog() {
-        View messageView = getLayoutInflater().inflate(R.layout.about, null, false);
+        View messageView = getLayoutInflater().inflate(R.layout.dialog_about, null, false);
 
         new AlertDialog.Builder(context)
                 .setIcon(R.drawable.icon)
@@ -788,7 +788,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
         final ArrayBlockingQueue<String> inputQueue = new ArrayBlockingQueue<>(1);
 
         runOnUiThread(() -> {
-            final View view = getLayoutInflater().inflate(R.layout.inputbox, null);
+            final View view = getLayoutInflater().inflate(R.layout.dialog_input, null);
 
             String message = viewState.useHtml ? htmlProcessor.removeHtmlTags(prompt) : prompt;
             if (message == null) {
