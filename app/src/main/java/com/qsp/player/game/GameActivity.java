@@ -79,7 +79,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
     private static final int REQUEST_CODE_SAVE_TO_FILE = 3;
 
     private static final int TAB_OBJECTS = 0;
-    private static final int TAB_MAIN_DESC = 1;
+    private static final int TAB_MAIN_DESC_AND_ACTIONS = 1;
     private static final int TAB_VARS_DESC = 2;
 
     private static final String PAGE_HEAD_TEMPLATE = "<head>\n"
@@ -151,7 +151,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
         initSeparatorView();
         initActionsView();
         initObjectsView();
-        setActiveTab(TAB_MAIN_DESC);
+        setActiveTab(TAB_MAIN_DESC_AND_ACTIONS);
 
         gestureDetector = new GestureDetectorCompat(this, this);
     }
@@ -234,7 +234,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
                 setTitle(getString(R.string.inventory));
                 break;
 
-            case TAB_MAIN_DESC:
+            case TAB_MAIN_DESC_AND_ACTIONS:
                 toggleObjects(false);
                 toggleMainDescAndActions(true);
                 toggleVarsDesc(false);
@@ -478,7 +478,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
         if (mainMenu == null) return;
 
         mainMenu.findItem(R.id.menu_inventory).setIcon(activeTab == TAB_OBJECTS ? R.drawable.ic_tab_objects : R.drawable.ic_tab_objects_alt);
-        mainMenu.findItem(R.id.menu_maindesc).setIcon(activeTab == TAB_MAIN_DESC ? R.drawable.ic_tab_main : R.drawable.ic_tab_main_alt);
+        mainMenu.findItem(R.id.menu_maindesc).setIcon(activeTab == TAB_MAIN_DESC_AND_ACTIONS ? R.drawable.ic_tab_main : R.drawable.ic_tab_main_alt);
         mainMenu.findItem(R.id.menu_varsdesc).setIcon(activeTab == TAB_VARS_DESC ? R.drawable.ic_tab_vars : R.drawable.ic_tab_vars_alt);
     }
 
@@ -580,7 +580,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_maindesc:
-                setActiveTab(TAB_MAIN_DESC);
+                setActiveTab(TAB_MAIN_DESC_AND_ACTIONS);
                 return true;
 
             case R.id.menu_inventory:
@@ -615,7 +615,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
 
             case R.id.menu_newgame:
                 libQspProxy.restartGame();
-                setActiveTab(TAB_MAIN_DESC);
+                setActiveTab(TAB_MAIN_DESC_AND_ACTIONS);
                 return true;
 
             case R.id.menu_loadgame:
@@ -691,12 +691,12 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
         int tab;
         switch (activeTab) {
             case TAB_VARS_DESC:
-                tab = TAB_MAIN_DESC;
+                tab = TAB_MAIN_DESC_AND_ACTIONS;
                 break;
             case TAB_OBJECTS:
                 tab = TAB_VARS_DESC;
                 break;
-            case TAB_MAIN_DESC:
+            case TAB_MAIN_DESC_AND_ACTIONS:
             default:
                 tab = TAB_OBJECTS;
                 break;
@@ -711,9 +711,9 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
                 tab = TAB_OBJECTS;
                 break;
             case TAB_OBJECTS:
-                tab = TAB_MAIN_DESC;
+                tab = TAB_MAIN_DESC_AND_ACTIONS;
                 break;
-            case TAB_MAIN_DESC:
+            case TAB_MAIN_DESC_AND_ACTIONS:
             default:
                 tab = TAB_VARS_DESC;
                 break;
@@ -862,11 +862,13 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
     @Override
     public void showWindow(WindowType type, final boolean show) {
         if (type == WindowType.ACTIONS) {
-            runOnUiThread(() -> {
-                showActions = show;
-                separatorView.setVisibility(show ? View.VISIBLE : View.GONE);
-                actionsView.setVisibility(show ? View.VISIBLE : View.GONE);
-            });
+            showActions = show;
+            if (activeTab == TAB_MAIN_DESC_AND_ACTIONS) {
+                runOnUiThread(() -> {
+                    separatorView.setVisibility(show ? View.VISIBLE : View.GONE);
+                    actionsView.setVisibility(show ? View.VISIBLE : View.GONE);
+                });
+            }
         } else {
             logger.debug("Unsupported window type: " + type);
         }
