@@ -845,7 +845,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
 
     @Override
     public void showWindow(WindowType type, final boolean show) {
-        if (type == WindowType.Actions) {
+        if (type == WindowType.ACTIONS) {
             runOnUiThread(() -> actionsView.setVisibility(show ? View.VISIBLE : View.GONE));
         } else {
             logger.debug("Unsupported window type: " + type);
