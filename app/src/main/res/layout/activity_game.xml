@@ -25,11 +25,21 @@
         android:text=""
         android:textColor="@color/web_text"
         android:textSize="16sp"
-        app:layout_constraintBottom_toTopOf="@id/actions"
+        app:layout_constraintBottom_toTopOf="@id/separator"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/toolbar"
         app:layout_constraintVertical_weight="0.67" />
+
+    <View
+        android:id="@+id/separator"
+        android:layout_width="0dp"
+        android:layout_height="4dp"
+        android:background="@color/materialcolorpicker__grey"
+        app:layout_constraintBottom_toTopOf="@id/actions"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/main_description" />
 
     <ListView
         android:id="@+id/actions"
@@ -38,7 +48,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/main_description"
+        app:layout_constraintTop_toBottomOf="@id/separator"
         app:layout_constraintVertical_weight="0.33" />
 
     <WebView
