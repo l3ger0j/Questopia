@@ -36,7 +36,7 @@ import java.util.Locale;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class LibQspProxyImpl implements LibQspProxy {
+public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
     private static final Logger logger = LoggerFactory.getLogger(LibQspProxyImpl.class);
 
     private final Handler counterHandler = new Handler();
@@ -415,9 +415,9 @@ public class LibQspProxyImpl implements LibQspProxy {
 
     // End LibQspProxy
 
-    // Begin QSP library callbacks
+    // region LibQspCallbacks
 
-    private void RefreshInt() {
+    public void RefreshInt() {
         boolean confChanged = loadUIConfiguration();
 
         boolean mainDescChanged = QSPIsMainDescChanged();
@@ -451,7 +451,7 @@ public class LibQspProxyImpl implements LibQspProxy {
         }
     }
 
-    private void ShowPicture(String path) {
+    public void ShowPicture(String path) {
         PlayerView view = playerView;
         if (view == null || path == null || path.isEmpty()) {
             return;
@@ -459,24 +459,24 @@ public class LibQspProxyImpl implements LibQspProxy {
         view.showPicture(path);
     }
 
-    private void SetTimer(int msecs) {
+    public void SetTimer(int msecs) {
         timerInterval = msecs;
     }
 
-    private void ShowMessage(String message) {
+    public void ShowMessage(String message) {
         PlayerView view = playerView;
         if (view != null) {
             view.showMessage(message);
         }
     }
 
-    private void PlayFile(String path, int volume) {
+    public void PlayFile(String path, int volume) {
         if (path != null && !path.isEmpty()) {
             audioPlayer.playFile(FileUtil.normalizePath(path), volume);
         }
     }
 
-    private boolean IsPlayingFile(final String path) {
+    public boolean IsPlayingFile(final String path) {
         if (path == null || path.isEmpty()) {
             return false;
         }
@@ -484,7 +484,7 @@ public class LibQspProxyImpl implements LibQspProxy {
         return audioPlayer.isPlayingFile(FileUtil.normalizePath(path));
     }
 
-    private void CloseFile(String path) {
+    public void CloseFile(String path) {
         if (path == null || path.isEmpty()) {
             audioPlayer.closeAllFiles();
         } else {
@@ -492,7 +492,7 @@ public class LibQspProxyImpl implements LibQspProxy {
         }
     }
 
-    private void OpenGame(String filename) {
+    public void OpenGame(String filename) {
         File savesDir = FileUtil.getOrCreateDirectory(viewState.gameDir, "saves");
         File saveFile = FileUtil.findFileOrDirectory(savesDir, filename);
         if (saveFile == null) {
@@ -502,19 +502,19 @@ public class LibQspProxyImpl implements LibQspProxy {
         loadGameState(Uri.fromFile(saveFile));
     }
 
-    private void SaveGame(String filename) {
+    public void SaveGame(String filename) {
         PlayerView view = playerView;
         if (view != null) {
             view.showSaveGamePopup(filename);
         }
     }
 
-    private String InputBox(String prompt) {
+    public String InputBox(String prompt) {
         PlayerView view = playerView;
         return view != null ? view.showInputBox(prompt) : null;
     }
 
-    private int GetMSCount() {
+    public int GetMSCount() {
         long now = SystemClock.elapsedRealtime();
         if (lastMsCountCallTime == 0) {
             lastMsCountCallTime = gameStartTime;
@@ -525,14 +525,14 @@ public class LibQspProxyImpl implements LibQspProxy {
         return dt;
     }
 
-    private void AddMenuItem(String name, String imgPath) {
+    public void AddMenuItem(String name, String imgPath) {
         QspMenuItem item = new QspMenuItem();
         item.imgPath = FileUtil.normalizePath(imgPath);
         item.name = name;
         viewState.menuItems.add(item);
     }
 
-    private void ShowMenu() {
+    public void ShowMenu() {
         PlayerView view = playerView;
         if (view == null) {
             return;
@@ -543,11 +543,11 @@ public class LibQspProxyImpl implements LibQspProxy {
         }
     }
 
-    private void DeleteMenu() {
+    public void DeleteMenu() {
         viewState.menuItems.clear();
     }
 
-    private void Wait(int msecs) {
+    public void Wait(int msecs) {
         try {
             Thread.sleep(msecs);
         } catch (InterruptedException e) {
@@ -555,17 +555,17 @@ public class LibQspProxyImpl implements LibQspProxy {
         }
     }
 
-    private void ShowWindow(int type, boolean isShow) {
+    public void ShowWindow(int type, boolean isShow) {
         WindowType windowType = WindowType.values()[type];
         playerView.showWindow(windowType, isShow);
     }
 
-    private byte[] GetFileContents(String path) {
+    public byte[] GetFileContents(String path) {
         String normPath = FileUtil.normalizePath(path);
         return FileUtil.getFileContents(normPath);
     }
 
-    private void ChangeQuestPath(String path) {
+    public void ChangeQuestPath(String path) {
         File dir = new File(path);
         if (!dir.exists()) {
             logger.error("Game directory not found: " + path);
@@ -577,7 +577,7 @@ public class LibQspProxyImpl implements LibQspProxy {
         }
     }
 
-    // End QSP library callbacks
+    // endregion LibQspCallbacks
 
     // Begin JNI
 
