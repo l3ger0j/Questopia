@@ -236,6 +236,7 @@ public class GameStockActivity extends AppCompatActivity {
 
     private void playGame(final GameStockItem game) {
         final Intent data = new Intent();
+        data.putExtra("gameId", game.getId());
         data.putExtra("gameTitle", game.getTitle());
         data.putExtra("gameDirUri", game.getGameDir().getAbsolutePath());
 
@@ -641,8 +642,8 @@ public class GameStockActivity extends AppCompatActivity {
         new AlertDialog.Builder(context)
                 .setTitle(getString(R.string.deleteGameCmd))
                 .setItems(items.toArray(new String[0]), (dialog, which) -> {
-                    File dir = deletableGames.get(which).getGameDir();
-                    showConfirmDeleteDialog(dir);
+                    GameStockItem game = deletableGames.get(which);
+                    showConfirmDeleteDialog(game);
                 })
                 .setNegativeButton(android.R.string.cancel, (dialog, whichButton) -> {
                 })
@@ -650,16 +651,16 @@ public class GameStockActivity extends AppCompatActivity {
                 .show();
     }
 
-    private void showConfirmDeleteDialog(final File gameDir) {
+    private void showConfirmDeleteDialog(final GameStockItem game) {
         new AlertDialog.Builder(context)
-                .setMessage(getString(R.string.deleteGameQuery).replace("-GAMENAME-", "\"" + gameDir.getName() + "\""))
+                .setMessage(getString(R.string.deleteGameQuery).replace("-GAMENAME-", "\"" + game.getTitle() + "\""))
                 .setPositiveButton(android.R.string.yes, (dialog, which) -> {
                     if (which == DialogInterface.BUTTON_POSITIVE) {
-                        if (gameRunning != null && gameRunning.equals(gameDir.getName())) {
+                        if (gameRunning != null && gameRunning.equals(game.getId())) {
                             gameRunning = null;
                             invalidateOptionsMenu();
                         }
-                        deleteDirectory(gameDir);
+                        deleteDirectory(game.getGameDir());
                         ViewUtil.showToast(context, getString(R.string.gameDeleted));
                         refreshGames();
                     }

@@ -414,7 +414,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
         selectingGame = true;
         Intent intent = new Intent(this, GameStockActivity.class);
         if (viewState.isGameRunning()) {
-            intent.putExtra("gameRunning", viewState.getGameDir().getName());
+            intent.putExtra("gameRunning", viewState.getGameId());
         }
         startActivityForResult(intent, REQUEST_CODE_SELECT_GAME);
     }
@@ -649,6 +649,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
         if (resultCode != RESULT_OK || data == null) {
             return;
         }
+        String gameId = data.getStringExtra("gameId");
         String gameTitle = data.getStringExtra("gameTitle");
 
         String gameDirUri = data.getStringExtra("gameDirUri");
@@ -657,7 +658,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
         String gameFileUri = data.getStringExtra("gameFileUri");
         File gameFile = new File(gameFileUri);
 
-        libQspProxy.runGame(gameTitle, gameDir, gameFile);
+        libQspProxy.runGame(gameId, gameTitle, gameDir, gameFile);
     }
 
     private void handleLoadFromFile(int resultCode, Intent data) {

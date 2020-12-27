@@ -322,16 +322,17 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
     }
 
     @Override
-    public void runGame(final String title, final File dir, final File file) {
-        runOnQspThread(() -> doRunGame(title, dir, file));
+    public void runGame(final String id, final String title, final File dir, final File file) {
+        runOnQspThread(() -> doRunGame(id, title, dir, file));
     }
 
-    private void doRunGame(final String title, final File dir, final File file) {
+    private void doRunGame(final String id, final String title, final File dir, final File file) {
         counterHandler.removeCallbacks(counterTask);
         audioPlayer.closeAllFiles();
 
         viewState.reset();
         viewState.setGameRunning(true);
+        viewState.setGameId(id);
         viewState.setGameTitle(title);
         viewState.setGameDir(dir);
         viewState.setGameFile(file);
@@ -357,7 +358,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
     public void restartGame() {
         runOnQspThread(() -> {
             PlayerViewState state = viewState;
-            doRunGame(state.getGameTitle(), state.getGameDir(), state.getGameFile());
+            doRunGame(state.getGameId(), state.getGameTitle(), state.getGameDir(), state.getGameFile());
         });
     }
 

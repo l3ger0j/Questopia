@@ -15,7 +15,7 @@ public interface LibQspProxy {
     void onActionClicked(int index);
     void onObjectSelected(int index);
     void onInputAreaClicked();
-    void runGame(String title, File dir, File file);
+    void runGame(String id, String title, File dir, File file);
     void restartGame();
     void resumeGame();
     void pauseGame();

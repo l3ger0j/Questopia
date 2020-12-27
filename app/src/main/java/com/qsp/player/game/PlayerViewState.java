@@ -5,6 +5,7 @@ import java.util.ArrayList;
 
 public class PlayerViewState {
     private boolean gameRunning;
+    private String gameId;
     private String gameTitle;
     private File gameDir;
     private File gameFile;
@@ -21,6 +22,7 @@ public class PlayerViewState {
 
     public void reset() {
         gameRunning = false;
+        gameId = null;
         gameTitle = null;
         gameDir = null;
         gameFile = null;
@@ -42,6 +44,14 @@ public class PlayerViewState {
 
     public void setGameRunning(boolean gameRunning) {
         this.gameRunning = gameRunning;
+    }
+
+    public String getGameId() {
+        return gameId;
+    }
+
+    public void setGameId(String gameId) {
+        this.gameId = gameId;
     }
 
     public String getGameTitle() {
