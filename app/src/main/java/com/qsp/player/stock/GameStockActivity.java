@@ -115,7 +115,7 @@ public class GameStockActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.gamestock);
+        setContentView(R.layout.activity_stock);
 
         settings = PreferenceManager.getDefaultSharedPreferences(context);
         connectivityManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);

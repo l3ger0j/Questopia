@@ -63,7 +63,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CountDownLatch;
 
 @SuppressLint("ClickableViewAccessibility")
-public class MainActivity extends AppCompatActivity implements PlayerView, GestureDetector.OnGestureListener {
+public class GameActivity extends AppCompatActivity implements PlayerView, GestureDetector.OnGestureListener {
     private static final int MAX_SAVE_SLOTS = 5;
     private static final String SHOW_ADVANCED_EXTRA_NAME = Build.VERSION.SDK_INT < Build.VERSION_CODES.Q ?
             "android.content.extra.SHOW_ADVANCED" :
@@ -96,7 +96,7 @@ public class MainActivity extends AppCompatActivity implements PlayerView, Gestu
 
     private static final int SWIPE_THRESHOLD = 100;
 
-    private static final Logger logger = LoggerFactory.getLogger(MainActivity.class);
+    private static final Logger logger = LoggerFactory.getLogger(GameActivity.class);
 
     private final Context context = this;
     private final ImageProvider imageProvider = new ImageProvider();
@@ -132,7 +132,7 @@ public class MainActivity extends AppCompatActivity implements PlayerView, Gestu
         libQspProxy = ((QuestPlayerApplication) getApplication()).getLibQspProxy();
         libQspProxy.setPlayerView(this);
 
-        setContentView(R.layout.main);
+        setContentView(R.layout.activity_game);
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
         settings = PreferenceManager.getDefaultSharedPreferences(context);

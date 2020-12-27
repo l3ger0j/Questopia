@@ -17,7 +17,7 @@
         android:usesCleartextTraffic="true">
 
         <activity
-            android:name=".game.MainActivity"
+            android:name=".game.GameActivity"
             android:alwaysRetainTaskState="true"
             android:configChanges="orientation"
             android:label="@string/appName"
