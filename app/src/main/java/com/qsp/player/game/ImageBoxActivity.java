@@ -18,7 +18,7 @@ public class ImageBoxActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.image_box);
+        setContentView(R.layout.activity_image_box);
 
         Intent intent = getIntent();
 
