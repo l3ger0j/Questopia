@@ -259,10 +259,10 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
 
     private void toggleMainDescAndActions(boolean show) {
         findViewById(R.id.main_description).setVisibility(show ? View.VISIBLE : View.GONE);
-        if (showActions) {
-            findViewById(R.id.separator).setVisibility(show ? View.VISIBLE : View.GONE);
-            findViewById(R.id.actions).setVisibility(show ? View.VISIBLE : View.GONE);
-        }
+
+        boolean shouldShowActions = show && showActions;
+        findViewById(R.id.separator).setVisibility(shouldShowActions ? View.VISIBLE : View.GONE);
+        findViewById(R.id.actions).setVisibility(shouldShowActions ? View.VISIBLE : View.GONE);
     }
 
     private void toggleVarsDesc(boolean show) {
