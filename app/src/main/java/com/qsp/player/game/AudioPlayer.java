@@ -109,7 +109,7 @@ class AudioPlayer {
 
         runOnAudioThread(() -> {
             for (Sound sound : sounds.values()) {
-                if (sound.player.isPlaying()) {
+                if (sound.player != null && sound.player.isPlaying()) {
                     sound.player.pause();
                 }
             }
