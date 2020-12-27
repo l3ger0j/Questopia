@@ -178,12 +178,12 @@ jobject Java_com_qsp_player_game_libqsp_NativeMethods_QSPGetActionData(JNIEnv *e
     if (isz != NULL)
         free(isz);
 
-    jclass clazz = (*env)->FindClass(env, "com/qsp/player/JniResult");
+    jclass clazz = (*env)->FindClass(env, "com/qsp/player/game/libqsp/dto/ActionData");
     if (clazz == 0)
         return 0;
     jobject obj = (*env)->AllocObject(env, clazz);
-    jfieldID fid = (*env)->GetFieldID(env, clazz, "str1", "Ljava/lang/String;");
-    jfieldID fid2 = (*env)->GetFieldID(env, clazz, "str2", "Ljava/lang/String;");
+    jfieldID fid = (*env)->GetFieldID(env, clazz, "name", "Ljava/lang/String;");
+    jfieldID fid2 = (*env)->GetFieldID(env, clazz, "image", "Ljava/lang/String;");
     (*env)->DeleteLocalRef(env, clazz);
     if (fid == 0 || fid2 == 0)
         return 0;
@@ -244,12 +244,12 @@ jobject Java_com_qsp_player_game_libqsp_NativeMethods_QSPGetObjectData(JNIEnv *e
     if (isz != NULL)
         free(isz);
 
-    jclass clazz = (*env)->FindClass(env, "com/qsp/player/JniResult");
+    jclass clazz = (*env)->FindClass(env, "com/qsp/player/game/libqsp/dto/ObjectData");
     if (clazz == 0)
         return 0;
     jobject obj = (*env)->AllocObject(env, clazz);
-    jfieldID fid = (*env)->GetFieldID(env, clazz, "str1", "Ljava/lang/String;");
-    jfieldID fid2 = (*env)->GetFieldID(env, clazz, "str2", "Ljava/lang/String;");
+    jfieldID fid = (*env)->GetFieldID(env, clazz, "name", "Ljava/lang/String;");
+    jfieldID fid2 = (*env)->GetFieldID(env, clazz, "image", "Ljava/lang/String;");
     (*env)->DeleteLocalRef(env, clazz);
     if (fid == 0 || fid2 == 0)
         return 0;
@@ -322,35 +322,35 @@ jobject Java_com_qsp_player_game_libqsp_NativeMethods_QSPGetVarValues(JNIEnv *en
     char *strVal;
     QSP_BOOL result = QSPGetVarValues(strConverted, (int) ind, &numVal, &strVal);
 
-    // Attempt to find the JniResult class.
-    jclass clazz = (*env)->FindClass(env, "com/qsp/player/JniResult");
+    // Attempt to find the GetVarValuesResponse class.
+    jclass clazz = (*env)->FindClass(env, "com/qsp/player/game/libqsp/dto/GetVarValuesResponse");
     // If this class does not exist then return null.
     if (clazz == 0)
         return NULL;
     jobject obj = (*env)->AllocObject(env, clazz);
 
-    jfieldID fid = (*env)->GetFieldID(env, clazz, "success", "Z");
-    if (fid == 0)
+    jfieldID successFid = (*env)->GetFieldID(env, clazz, "success", "Z");
+    if (successFid == 0)
         return NULL;
     if (result == QSP_TRUE) {
-        (*env)->SetBooleanField(env, obj, fid, JNI_TRUE);
+        (*env)->SetBooleanField(env, obj, successFid, JNI_TRUE);
 
         char *sz = qspW2C(strVal);
         jstring jstringVal = (*env)->NewStringUTF(env, sz);
         if (sz != NULL)
             free(sz);
 
-        fid = (*env)->GetFieldID(env, clazz, "str1", "Ljava/lang/String;");
-        if (fid == 0)
+        jfieldID stringValueFid = (*env)->GetFieldID(env, clazz, "stringValue", "Ljava/lang/String;");
+        if (stringValueFid == 0)
             return NULL;
-        (*env)->SetObjectField(env, obj, fid, jstringVal);
+        (*env)->SetObjectField(env, obj, stringValueFid, jstringVal);
 
-        jfieldID fid = (*env)->GetFieldID(env, clazz, "int1", "I");
-        if (fid == 0)
+        jfieldID intValueFid = (*env)->GetFieldID(env, clazz, "intValue", "I");
+        if (intValueFid == 0)
             return NULL;
-        (*env)->SetIntField(env, obj, fid, numVal);
+        (*env)->SetIntField(env, obj, intValueFid, numVal);
     } else {
-        (*env)->SetBooleanField(env, obj, fid, JNI_FALSE);
+        (*env)->SetBooleanField(env, obj, successFid, JNI_FALSE);
     }
 
     (*env)->DeleteLocalRef(env, clazz);
@@ -429,13 +429,13 @@ jboolean Java_com_qsp_player_game_libqsp_NativeMethods_QSPExecUserInput(JNIEnv *
 ///* Получить информацию о последней ошибке */
 jobject
 Java_com_qsp_player_game_libqsp_NativeMethods_QSPGetLastErrorData(JNIEnv *env, jobject this) {
-    jclass clazz = (*env)->FindClass(env, "com/qsp/player/JniResult");
+    jclass clazz = (*env)->FindClass(env, "com/qsp/player/game/libqsp/dto/ErrorData");
     if (clazz == 0)
         return NULL;
-    jfieldID fid = (*env)->GetFieldID(env, clazz, "str1", "Ljava/lang/String;");
-    jfieldID fid2 = (*env)->GetFieldID(env, clazz, "int1", "I");
-    jfieldID fid3 = (*env)->GetFieldID(env, clazz, "int2", "I");
-    jfieldID fid4 = (*env)->GetFieldID(env, clazz, "int3", "I");
+    jfieldID fid = (*env)->GetFieldID(env, clazz, "locName", "Ljava/lang/String;");
+    jfieldID fid2 = (*env)->GetFieldID(env, clazz, "errorNum", "I");
+    jfieldID fid3 = (*env)->GetFieldID(env, clazz, "index", "I");
+    jfieldID fid4 = (*env)->GetFieldID(env, clazz, "line", "I");
     if (fid == 0 || fid2 == 0 || fid3 == 0 || fid4 == 0)
         return NULL;
     jobject obj = (*env)->AllocObject(env, clazz);

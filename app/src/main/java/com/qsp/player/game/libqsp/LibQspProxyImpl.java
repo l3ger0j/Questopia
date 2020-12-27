@@ -9,7 +9,6 @@ import android.os.SystemClock;
 
 import androidx.preference.PreferenceManager;
 
-import com.qsp.player.JniResult;
 import com.qsp.player.R;
 import com.qsp.player.game.AudioPlayer;
 import com.qsp.player.game.ImageProvider;
@@ -18,6 +17,10 @@ import com.qsp.player.game.PlayerViewState;
 import com.qsp.player.game.QspListItem;
 import com.qsp.player.game.QspMenuItem;
 import com.qsp.player.game.WindowType;
+import com.qsp.player.game.libqsp.dto.ActionData;
+import com.qsp.player.game.libqsp.dto.ErrorData;
+import com.qsp.player.game.libqsp.dto.GetVarValuesResponse;
+import com.qsp.player.game.libqsp.dto.ObjectData;
 import com.qsp.player.util.FileUtil;
 import com.qsp.player.util.HtmlUtil;
 import com.qsp.player.util.StreamUtil;
@@ -35,6 +38,8 @@ import java.util.ArrayList;
 import java.util.Locale;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.locks.ReentrantLock;
+
+import static com.qsp.player.util.StringUtil.getStringOrEmpty;
 
 public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
     private static final Logger logger = LoggerFactory.getLogger(LibQspProxyImpl.class);
@@ -92,25 +97,17 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
     }
 
     private void showLastQspError() {
-        JniResult errorResult = (JniResult) nativeMethods.QSPGetLastErrorData();
-
-        String locName = errorResult.str1 == null ? "" : errorResult.str1;
-        int action = errorResult.int2;
-        int line = errorResult.int3;
-        int errorNumber = errorResult.int1;
-
-        String desc = nativeMethods.QSPGetErrorDesc(errorResult.int1);
-        if (desc == null) {
-            desc = "";
-        }
+        ErrorData errorData = (ErrorData) nativeMethods.QSPGetLastErrorData();
+        String locName = getStringOrEmpty(errorData.getLocName());
+        String desc = getStringOrEmpty(nativeMethods.QSPGetErrorDesc(errorData.getErrorNum()));
 
         final String message = String.format(
                 Locale.getDefault(),
                 "Location: %s\nAction: %d\nLine: %d\nError number: %d\nDescription: %s",
                 locName,
-                action,
-                line,
-                errorNumber,
+                errorData.getIndex(),
+                errorData.getLine(),
+                errorData.getErrorNum(),
                 desc);
 
         logger.error(message);
@@ -187,36 +184,36 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
     private boolean loadUIConfiguration() {
         boolean changed = false;
 
-        JniResult htmlResult = (JniResult) nativeMethods.QSPGetVarValues("USEHTML", 0);
-        if (htmlResult.success) {
-            boolean useHtml = htmlResult.int1 != 0;
+        GetVarValuesResponse htmlResult = (GetVarValuesResponse) nativeMethods.QSPGetVarValues("USEHTML", 0);
+        if (htmlResult.isSuccess()) {
+            boolean useHtml = htmlResult.getIntValue() != 0;
             if (viewState.useHtml != useHtml) {
                 viewState.useHtml = useHtml;
                 changed = true;
             }
         }
 
-        JniResult fSizeResult = (JniResult) nativeMethods.QSPGetVarValues("FSIZE", 0);
-        if (fSizeResult.success && viewState.fontSize != fSizeResult.int1) {
-            viewState.fontSize = fSizeResult.int1;
+        GetVarValuesResponse fSizeResult = (GetVarValuesResponse) nativeMethods.QSPGetVarValues("FSIZE", 0);
+        if (fSizeResult.isSuccess() && viewState.fontSize != fSizeResult.getIntValue()) {
+            viewState.fontSize = fSizeResult.getIntValue();
             changed = true;
         }
 
-        JniResult bColorResult = (JniResult) nativeMethods.QSPGetVarValues("BCOLOR", 0);
-        if (bColorResult.success && viewState.backColor != bColorResult.int1) {
-            viewState.backColor = bColorResult.int1;
+        GetVarValuesResponse bColorResult = (GetVarValuesResponse) nativeMethods.QSPGetVarValues("BCOLOR", 0);
+        if (bColorResult.isSuccess() && viewState.backColor != bColorResult.getIntValue()) {
+            viewState.backColor = bColorResult.getIntValue();
             changed = true;
         }
 
-        JniResult fColorResult = (JniResult) nativeMethods.QSPGetVarValues("FCOLOR", 0);
-        if (fColorResult.success && viewState.fontColor != fColorResult.int1) {
-            viewState.fontColor = fColorResult.int1;
+        GetVarValuesResponse fColorResult = (GetVarValuesResponse) nativeMethods.QSPGetVarValues("FCOLOR", 0);
+        if (fColorResult.isSuccess() && viewState.fontColor != fColorResult.getIntValue()) {
+            viewState.fontColor = fColorResult.getIntValue();
             changed = true;
         }
 
-        JniResult lColorResult = (JniResult) nativeMethods.QSPGetVarValues("LCOLOR", 0);
-        if (lColorResult.success && viewState.linkColor != lColorResult.int1) {
-            viewState.linkColor = lColorResult.int1;
+        GetVarValuesResponse lColorResult = (GetVarValuesResponse) nativeMethods.QSPGetVarValues("LCOLOR", 0);
+        if (lColorResult.isSuccess() && viewState.linkColor != lColorResult.getIntValue()) {
+            viewState.linkColor = lColorResult.getIntValue();
             changed = true;
         }
 
@@ -227,10 +224,10 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
         ArrayList<QspListItem> actions = new ArrayList<>();
         int count = nativeMethods.QSPGetActionsCount();
         for (int i = 0; i < count; ++i) {
-            JniResult actionResult = (JniResult) nativeMethods.QSPGetActionData(i);
+            ActionData actionData = (ActionData) nativeMethods.QSPGetActionData(i);
             QspListItem action = new QspListItem();
-            action.icon = imageProvider.getDrawable(FileUtil.normalizePath(actionResult.str2));
-            action.text = viewState.useHtml ? HtmlUtil.removeHtmlTags(actionResult.str1) : actionResult.str1;
+            action.icon = imageProvider.getDrawable(FileUtil.normalizePath(actionData.getImage()));
+            action.text = viewState.useHtml ? HtmlUtil.removeHtmlTags(actionData.getName()) : actionData.getName();
             actions.add(action);
         }
         viewState.actions = actions;
@@ -240,10 +237,10 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
         ArrayList<QspListItem> objects = new ArrayList<>();
         int count = nativeMethods.QSPGetObjectsCount();
         for (int i = 0; i < count; i++) {
-            JniResult objectResult = (JniResult) nativeMethods.QSPGetObjectData(i);
+            ObjectData objectResult = (ObjectData) nativeMethods.QSPGetObjectData(i);
             QspListItem object = new QspListItem();
-            object.icon = imageProvider.getDrawable(FileUtil.normalizePath(objectResult.str2));
-            object.text = viewState.useHtml ? HtmlUtil.removeHtmlTags(objectResult.str1) : objectResult.str1;
+            object.icon = imageProvider.getDrawable(FileUtil.normalizePath(objectResult.getImage()));
+            object.text = viewState.useHtml ? HtmlUtil.removeHtmlTags(objectResult.getName()) : objectResult.getName();
             objects.add(object);
         }
         viewState.objects = objects;
