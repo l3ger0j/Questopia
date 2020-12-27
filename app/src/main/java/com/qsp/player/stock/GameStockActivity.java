@@ -629,18 +629,19 @@ public class GameStockActivity extends AppCompatActivity {
     }
 
     private void showDeleteGameDialog() {
-        final ArrayList<File> gameDirs = new ArrayList<>();
-        List<String> items = new ArrayList<>();
-        for (File file : gamesDir.listFiles()) {
-            if (file.isDirectory()) {
-                gameDirs.add(file);
-                items.add(file.getName());
-            }
+        ArrayList<GameStockItem> deletableGames = new ArrayList<>();
+        ArrayList<String> items = new ArrayList<>();
+
+        for (GameStockItem game : gamesMap.values()) {
+            if (!game.isInstalled()) continue;
+
+            deletableGames.add(game);
+            items.add(game.getTitle());
         }
         new AlertDialog.Builder(context)
                 .setTitle(getString(R.string.deleteGameCmd))
                 .setItems(items.toArray(new String[0]), (dialog, which) -> {
-                    File dir = gameDirs.get(which);
+                    File dir = deletableGames.get(which).getGameDir();
                     showConfirmDeleteDialog(dir);
                 })
                 .setNegativeButton(android.R.string.cancel, (dialog, whichButton) -> {
