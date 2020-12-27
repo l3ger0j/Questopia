@@ -18,7 +18,7 @@ public final class ZipUtil {
     private static final Logger logger = LoggerFactory.getLogger(ZipUtil.class);
 
     /**
-     * Extracts the ZIP archive <code>zipFile</code> to a directory <code>gameDir</code>.
+     * Распаковывает ZIP-архив <code>zipFile</code> в папку <code>gameDir</code>.
      */
     public static boolean unzip(Context context, DocumentFile zipFile, File gameDir) {
         try (InputStream in = context.getContentResolver().openInputStream(zipFile.getUri())) {
