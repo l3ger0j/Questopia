@@ -13,14 +13,15 @@
         android:icon="@drawable/icon"
         android:label="@string/appName"
         android:largeHeap="true"
-        android:theme="@style/Theme.AppCompat.NoActionBar"
+        android:theme="@style/Theme.AppCompat"
         android:usesCleartextTraffic="true">
 
         <activity
             android:name=".game.MainActivity"
             android:alwaysRetainTaskState="true"
             android:configChanges="orientation"
-            android:label="@string/appName">
+            android:label="@string/appName"
+            android:theme="@style/Theme.AppCompat.NoActionBar">
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -33,12 +34,10 @@
             android:theme="@style/Theme.QSP.Translucent" />
         <activity
             android:name=".settings.SettingsActivity"
-            android:label="@string/settings"
-            android:theme="@style/Theme.AppCompat" />
+            android:label="@string/settings" />
         <activity
             android:name=".stock.GameStockActivity"
-            android:label="@string/gameStock"
-            android:theme="@style/Theme.AppCompat" />
+            android:label="@string/gameStock" />
 
     </application>
 </manifest>
