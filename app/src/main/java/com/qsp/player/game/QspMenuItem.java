@@ -1,6 +1,6 @@
 package com.qsp.player.game;
 
-class QspMenuItem {
-    String name;
-    String imgPath;
+public class QspMenuItem {
+    public String name;
+    public String imgPath;
 }

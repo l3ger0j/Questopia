@@ -3,8 +3,8 @@ package com.qsp.player;
 import android.app.Application;
 import android.os.Build;
 
-import com.qsp.player.game.LibQspProxy;
-import com.qsp.player.game.LibQspProxyImpl;
+import com.qsp.player.game.libqsp.LibQspProxy;
+import com.qsp.player.game.libqsp.LibQspProxyImpl;
 
 import org.slf4j.impl.HandroidLoggerAdapter;
 

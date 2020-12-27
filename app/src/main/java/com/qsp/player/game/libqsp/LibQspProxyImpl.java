@@ -1,4 +1,4 @@
-package com.qsp.player.game;
+package com.qsp.player.game.libqsp;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -11,6 +11,13 @@ import androidx.preference.PreferenceManager;
 
 import com.qsp.player.JniResult;
 import com.qsp.player.R;
+import com.qsp.player.game.AudioPlayer;
+import com.qsp.player.game.ImageProvider;
+import com.qsp.player.game.PlayerView;
+import com.qsp.player.game.PlayerViewState;
+import com.qsp.player.game.QspListItem;
+import com.qsp.player.game.QspMenuItem;
+import com.qsp.player.game.WindowType;
 import com.qsp.player.util.FileUtil;
 import com.qsp.player.util.HtmlUtil;
 import com.qsp.player.util.StreamUtil;

@@ -6,14 +6,14 @@
 jobject qspCallbackObject;
 JNIEnv* qspCallbackEnv;
 
-void Java_com_qsp_player_game_LibQspProxyImpl_QSPInit(JNIEnv * env, jobject thisObj)
+void Java_com_qsp_player_game_libqsp_LibQspProxyImpl_QSPInit(JNIEnv * env, jobject thisObj)
 {
 	qspCallbackEnv = env;
 	qspCallbackObject = (*env)->NewGlobalRef(env, thisObj);
 	QSPInit();
 }
 
-void Java_com_qsp_player_game_LibQspProxyImpl_QSPDeInit(JNIEnv * env, jobject thisObj)
+void Java_com_qsp_player_game_libqsp_LibQspProxyImpl_QSPDeInit(JNIEnv * env, jobject thisObj)
 {
 	QSPDeInit();
 	(*qspCallbackEnv)->DeleteGlobalRef(qspCallbackEnv, qspCallbackObject);
@@ -21,24 +21,24 @@ void Java_com_qsp_player_game_LibQspProxyImpl_QSPDeInit(JNIEnv * env, jobject th
 	qspCallbackEnv = NULL;
 }
 
-jboolean Java_com_qsp_player_game_LibQspProxyImpl_QSPIsInCallBack(JNIEnv * env, jobject this)
+jboolean Java_com_qsp_player_game_libqsp_LibQspProxyImpl_QSPIsInCallBack(JNIEnv * env, jobject this)
 {
 	return QSPIsInCallBack();
 }
 
-void Java_com_qsp_player_game_LibQspProxyImpl_QSPEnableDebugMode(JNIEnv * env, jobject this, jboolean isDebug)
+void Java_com_qsp_player_game_libqsp_LibQspProxyImpl_QSPEnableDebugMode(JNIEnv * env, jobject this, jboolean isDebug)
 {
 	QSPEnableDebugMode((QSP_BOOL) isDebug);
 }
 
-jobject Java_com_qsp_player_game_LibQspProxyImpl_QSPGetCurStateData(JNIEnv * env, jobject this)
+jobject Java_com_qsp_player_game_libqsp_LibQspProxyImpl_QSPGetCurStateData(JNIEnv * env, jobject this)
 {
 	//!!!STUB
 	//QSPGetCurStateData(jstring *loc, (int *)actIndex, (int *)line);
 	return NULL;
 }
 
-jstring Java_com_qsp_player_game_LibQspProxyImpl_QSPGetVersion(JNIEnv * env, jobject this)
+jstring Java_com_qsp_player_game_libqsp_LibQspProxyImpl_QSPGetVersion(JNIEnv * env, jobject this)
 {
 	char * sz = qspW2C(QSPGetVersion());
 	jstring result = (*env)->NewStringUTF(env, sz);
@@ -49,13 +49,13 @@ jstring Java_com_qsp_player_game_LibQspProxyImpl_QSPGetVersion(JNIEnv * env, job
 
 
 ///* Количество полных обновлений локаций */
-jint Java_com_qsp_player_game_LibQspProxyImpl_QSPGetFullRefreshCount(JNIEnv * env, jobject this)
+jint Java_com_qsp_player_game_libqsp_LibQspProxyImpl_QSPGetFullRefreshCount(JNIEnv * env, jobject this)
 {
 	return QSPGetFullRefreshCount();
 }
 ///* ------------------------------------------------------------ */
 ///* Полный путь к загруженному файлу игры */
-jstring Java_com_qsp_player_game_LibQspProxyImpl_QSPGetQstFullPath(JNIEnv * env, jobject this)
+jstring Java_com_qsp_player_game_libqsp_LibQspProxyImpl_QSPGetQstFullPath(JNIEnv * env, jobject this)
 {
 	char * sz = qspW2C(QSPGetQstFullPath());
 	jstring result = (*env)->NewStringUTF(env, sz);
@@ -65,7 +65,7 @@ jstring Java_com_qsp_player_game_LibQspProxyImpl_QSPGetQstFullPath(JNIEnv * env,
 }
 ///* ------------------------------------------------------------ */
 ///* Название текущей локации */
-jstring Java_com_qsp_player_game_LibQspProxyImpl_QSPGetCurLoc(JNIEnv * env, jobject this)
+jstring Java_com_qsp_player_game_libqsp_LibQspProxyImpl_QSPGetCurLoc(JNIEnv * env, jobject this)
 {
 	char * sz = qspW2C(QSPGetCurLoc());
 	jstring result = (*env)->NewStringUTF(env, sz);
@@ -77,7 +77,7 @@ jstring Java_com_qsp_player_game_LibQspProxyImpl_QSPGetCurLoc(JNIEnv * env, jobj
 ///* Основное описание локации */
 //
 ///* Текст основного окна описания локации */
-jstring Java_com_qsp_player_game_LibQspProxyImpl_QSPGetMainDesc(JNIEnv * env, jobject this)
+jstring Java_com_qsp_player_game_libqsp_LibQspProxyImpl_QSPGetMainDesc(JNIEnv * env, jobject this)
 {
 	char * sz = qspW2C(QSPGetMainDesc());
 	jstring result = (*env)->NewStringUTF(env, sz);
@@ -86,7 +86,7 @@ jstring Java_com_qsp_player_game_LibQspProxyImpl_QSPGetMainDesc(JNIEnv * env, jo
 	return result;
 }
 ///* Возможность изменения текста основного описания */
-jboolean Java_com_qsp_player_game_LibQspProxyImpl_QSPIsMainDescChanged(JNIEnv * env, jobject this)
+jboolean Java_com_qsp_player_game_libqsp_LibQspProxyImpl_QSPIsMainDescChanged(JNIEnv * env, jobject this)
 {
 	return QSPIsMainDescChanged();
 }
@@ -94,7 +94,7 @@ jboolean Java_com_qsp_player_game_LibQspProxyImpl_QSPIsMainDescChanged(JNIEnv * 
 ///* Дополнительное описание локации */
 //
 ///* Текст дополнительного окна описания локации */
-jstring Java_com_qsp_player_game_LibQspProxyImpl_QSPGetVarsDesc(JNIEnv * env, jobject this)
+jstring Java_com_qsp_player_game_libqsp_LibQspProxyImpl_QSPGetVarsDesc(JNIEnv * env, jobject this)
 {
 	char * sz = qspW2C(QSPGetVarsDesc());
 	jstring result = (*env)->NewStringUTF(env, sz);
@@ -104,14 +104,14 @@ jstring Java_com_qsp_player_game_LibQspProxyImpl_QSPGetVarsDesc(JNIEnv * env, jo
 }
 ///* Возможность изменения текста дополнительного описания */
 //QSP_BOOL QSPIsVarsDescChanged()
-jboolean Java_com_qsp_player_game_LibQspProxyImpl_QSPIsVarsDescChanged(JNIEnv * env, jobject this)
+jboolean Java_com_qsp_player_game_libqsp_LibQspProxyImpl_QSPIsVarsDescChanged(JNIEnv * env, jobject this)
 {
 	return QSPIsVarsDescChanged();
 }
 ///* ------------------------------------------------------------ */
 ///* Получить значение указанного выражения */
 //(const QSP_CHAR *expr, QSP_BOOL *isString, int *numVal, QSP_CHAR *strVal, int strValBufSize)
-jobject Java_com_qsp_player_game_LibQspProxyImpl_QSPGetExprValue(JNIEnv * env, jobject this)
+jobject Java_com_qsp_player_game_libqsp_LibQspProxyImpl_QSPGetExprValue(JNIEnv * env, jobject this)
 {
 	//!!!STUB
 	//{
@@ -136,7 +136,7 @@ jobject Java_com_qsp_player_game_LibQspProxyImpl_QSPGetExprValue(JNIEnv * env, j
 }
 ///* ------------------------------------------------------------ */
 ///* Текст строки ввода */
-void Java_com_qsp_player_game_LibQspProxyImpl_QSPSetInputStrText(JNIEnv * env, jobject this, jstring val)
+void Java_com_qsp_player_game_libqsp_LibQspProxyImpl_QSPSetInputStrText(JNIEnv * env, jobject this, jstring val)
 {
 	const char *str = (*env)->GetStringUTFChars(env, val, NULL);
 	if (str == NULL)
@@ -151,13 +151,13 @@ void Java_com_qsp_player_game_LibQspProxyImpl_QSPSetInputStrText(JNIEnv * env, j
 ///* Список действий */
 //
 ///* Количество действий */
-jint Java_com_qsp_player_game_LibQspProxyImpl_QSPGetActionsCount(JNIEnv * env, jobject this)
+jint Java_com_qsp_player_game_libqsp_LibQspProxyImpl_QSPGetActionsCount(JNIEnv * env, jobject this)
 {
 	return QSPGetActionsCount();
 }
 ///* Данные действия с указанным индексом */
 //void QSPGetActionData(int ind, QSP_CHAR **image, QSP_CHAR **desc)
-jobject Java_com_qsp_player_game_LibQspProxyImpl_QSPGetActionData(JNIEnv * env, jobject this, jint ind)
+jobject Java_com_qsp_player_game_libqsp_LibQspProxyImpl_QSPGetActionData(JNIEnv * env, jobject this, jint ind)
 {
 	char * qspImgFileName;
 	char * qspActName;
@@ -187,22 +187,22 @@ jobject Java_com_qsp_player_game_LibQspProxyImpl_QSPGetActionData(JNIEnv * env, 
 	return obj;
 }
 ///* Выполнение кода выбранного действия */
-jboolean Java_com_qsp_player_game_LibQspProxyImpl_QSPExecuteSelActionCode(JNIEnv * env, jobject this, jboolean isRefresh)
+jboolean Java_com_qsp_player_game_libqsp_LibQspProxyImpl_QSPExecuteSelActionCode(JNIEnv * env, jobject this, jboolean isRefresh)
 {
 	return QSPExecuteSelActionCode((QSP_BOOL)isRefresh);
 }
 ///* Установить индекс выбранного действия */
-jboolean Java_com_qsp_player_game_LibQspProxyImpl_QSPSetSelActionIndex(JNIEnv * env, jobject this, jint ind, jboolean isRefresh)
+jboolean Java_com_qsp_player_game_libqsp_LibQspProxyImpl_QSPSetSelActionIndex(JNIEnv * env, jobject this, jint ind, jboolean isRefresh)
 {
 	return QSPSetSelActionIndex(ind, (QSP_BOOL)isRefresh);
 }
 ///* Получить индекс выбранного действия */
-jint Java_com_qsp_player_game_LibQspProxyImpl_QSPGetSelActionIndex(JNIEnv * env, jobject this)
+jint Java_com_qsp_player_game_libqsp_LibQspProxyImpl_QSPGetSelActionIndex(JNIEnv * env, jobject this)
 {
 	return QSPGetSelActionIndex();
 }
 ///* Возможность изменения списка действий */
-jboolean Java_com_qsp_player_game_LibQspProxyImpl_QSPIsActionsChanged(JNIEnv * env, jobject this)
+jboolean Java_com_qsp_player_game_libqsp_LibQspProxyImpl_QSPIsActionsChanged(JNIEnv * env, jobject this)
 {
 	return QSPIsActionsChanged();
 }
@@ -210,13 +210,13 @@ jboolean Java_com_qsp_player_game_LibQspProxyImpl_QSPIsActionsChanged(JNIEnv * e
 ///* Список объектов */
 //
 ///* Количество объектов */
-jint Java_com_qsp_player_game_LibQspProxyImpl_QSPGetObjectsCount(JNIEnv * env, jobject this)
+jint Java_com_qsp_player_game_libqsp_LibQspProxyImpl_QSPGetObjectsCount(JNIEnv * env, jobject this)
 {
 	return QSPGetObjectsCount();
 }
 ///* Данные объекта с указанным индексом */
 //void QSPGetObjectData(int ind, QSP_CHAR **image, QSP_CHAR **desc)
-jobject Java_com_qsp_player_game_LibQspProxyImpl_QSPGetObjectData(JNIEnv * env, jobject this, jint ind)
+jobject Java_com_qsp_player_game_libqsp_LibQspProxyImpl_QSPGetObjectData(JNIEnv * env, jobject this, jint ind)
 {
 	char * qspImgFileName;
 	char * qspObjName;
@@ -248,23 +248,23 @@ jobject Java_com_qsp_player_game_LibQspProxyImpl_QSPGetObjectData(JNIEnv * env, 
 	return obj;
 }
 ///* Установить индекс выбранного объекта */
-jboolean Java_com_qsp_player_game_LibQspProxyImpl_QSPSetSelObjectIndex(JNIEnv * env, jobject this, jint ind, jboolean isRefresh)
+jboolean Java_com_qsp_player_game_libqsp_LibQspProxyImpl_QSPSetSelObjectIndex(JNIEnv * env, jobject this, jint ind, jboolean isRefresh)
 {
 	return QSPSetSelObjectIndex(ind, (QSP_BOOL) isRefresh);
 }
 ///* Получить индекс выбранного объекта */
-jint Java_com_qsp_player_game_LibQspProxyImpl_QSPGetSelObjectIndex(JNIEnv * env, jobject this)
+jint Java_com_qsp_player_game_libqsp_LibQspProxyImpl_QSPGetSelObjectIndex(JNIEnv * env, jobject this)
 {
 	return QSPGetSelObjectIndex();
 }
 ///* Возможность изменения списка объектов */
-jboolean Java_com_qsp_player_game_LibQspProxyImpl_QSPIsObjectsChanged(JNIEnv * env, jobject this)
+jboolean Java_com_qsp_player_game_libqsp_LibQspProxyImpl_QSPIsObjectsChanged(JNIEnv * env, jobject this)
 {
 	return QSPIsObjectsChanged();
 }
 ///* ------------------------------------------------------------ */
 ///* Показ / скрытие окон */
-void Java_com_qsp_player_game_LibQspProxyImpl_QSPShowWindow(JNIEnv * env, jobject this, jint type, jboolean isShow)
+void Java_com_qsp_player_game_libqsp_LibQspProxyImpl_QSPShowWindow(JNIEnv * env, jobject this, jint type, jboolean isShow)
 {
 	QSPShowWindow(type, (QSP_BOOL)isShow);
 }
@@ -273,7 +273,7 @@ void Java_com_qsp_player_game_LibQspProxyImpl_QSPShowWindow(JNIEnv * env, jobjec
 //
 ///* Получить количество элементов массива */
 //QSP_BOOL QSPGetVarValuesCount(const QSP_CHAR *name, int *count)
-jobject Java_com_qsp_player_game_LibQspProxyImpl_QSPGetVarValuesCount(JNIEnv * env, jobject this, jstring name)
+jobject Java_com_qsp_player_game_libqsp_LibQspProxyImpl_QSPGetVarValuesCount(JNIEnv * env, jobject this, jstring name)
 {
 	//!!!STUB
 	//{
@@ -289,7 +289,7 @@ jobject Java_com_qsp_player_game_LibQspProxyImpl_QSPGetVarValuesCount(JNIEnv * e
 }
 ///* Получить значения указанного элемента массива */
 //QSP_BOOL QSPGetVarValues(const QSP_CHAR *name, int ind, int *numVal, QSP_CHAR **strVal)
-jobject Java_com_qsp_player_game_LibQspProxyImpl_QSPGetVarValues(JNIEnv * env, jobject this, jstring name, jint ind)
+jobject Java_com_qsp_player_game_libqsp_LibQspProxyImpl_QSPGetVarValues(JNIEnv * env, jobject this, jstring name, jint ind)
 {
 	//Convert array name to QSP string
 	const char *str = (*env)->GetStringUTFChars(env, name, NULL);
@@ -341,13 +341,13 @@ jobject Java_com_qsp_player_game_LibQspProxyImpl_QSPGetVarValues(JNIEnv * env, j
 	return obj;
 }
 ///* Получить максимальное количество переменных */
-jint Java_com_qsp_player_game_LibQspProxyImpl_QSPGetMaxVarsCount(JNIEnv * env, jobject this)
+jint Java_com_qsp_player_game_libqsp_LibQspProxyImpl_QSPGetMaxVarsCount(JNIEnv * env, jobject this)
 {
 	return QSPGetMaxVarsCount();
 }
 ///* Получить имя переменной с указанным индексом */
 //QSP_BOOL QSPGetVarNameByIndex(int index, QSP_CHAR **name)
-jobject Java_com_qsp_player_game_LibQspProxyImpl_QSPGetVarNameByIndex(JNIEnv * env, jobject this, jint index)
+jobject Java_com_qsp_player_game_libqsp_LibQspProxyImpl_QSPGetVarNameByIndex(JNIEnv * env, jobject this, jint index)
 {
 	//!!!STUB
 //{
@@ -361,7 +361,7 @@ jobject Java_com_qsp_player_game_LibQspProxyImpl_QSPGetVarNameByIndex(JNIEnv * e
 ///* Выполнение кода */
 //
 ///* Выполнение строки кода */
-jboolean Java_com_qsp_player_game_LibQspProxyImpl_QSPExecString(JNIEnv * env, jobject this, jstring s, jboolean isRefresh)
+jboolean Java_com_qsp_player_game_libqsp_LibQspProxyImpl_QSPExecString(JNIEnv * env, jobject this, jstring s, jboolean isRefresh)
 {
 	const char *str = (*env)->GetStringUTFChars(env, s, NULL);
 	if (str == NULL)
@@ -374,7 +374,7 @@ jboolean Java_com_qsp_player_game_LibQspProxyImpl_QSPExecString(JNIEnv * env, jo
 	return result;
 }
 ///* Выполнение кода указанной локации */
-jboolean Java_com_qsp_player_game_LibQspProxyImpl_QSPExecLocationCode(JNIEnv * env, jobject this, jstring name, jboolean isRefresh)
+jboolean Java_com_qsp_player_game_libqsp_LibQspProxyImpl_QSPExecLocationCode(JNIEnv * env, jobject this, jstring name, jboolean isRefresh)
 {
 	const char *str = (*env)->GetStringUTFChars(env, name, NULL);
 	if (str == NULL)
@@ -387,12 +387,12 @@ jboolean Java_com_qsp_player_game_LibQspProxyImpl_QSPExecLocationCode(JNIEnv * e
 	return result;
 }
 ///* Выполнение кода локации-счетчика */
-jboolean Java_com_qsp_player_game_LibQspProxyImpl_QSPExecCounter(JNIEnv * env, jobject this, jboolean isRefresh)
+jboolean Java_com_qsp_player_game_libqsp_LibQspProxyImpl_QSPExecCounter(JNIEnv * env, jobject this, jboolean isRefresh)
 {
 	return QSPExecCounter((QSP_BOOL)isRefresh);
 }
 ///* Выполнение кода локации-обработчика строки ввода */
-jboolean Java_com_qsp_player_game_LibQspProxyImpl_QSPExecUserInput(JNIEnv * env, jobject this, jboolean isRefresh)
+jboolean Java_com_qsp_player_game_libqsp_LibQspProxyImpl_QSPExecUserInput(JNIEnv * env, jobject this, jboolean isRefresh)
 {
 	return QSPExecUserInput((QSP_BOOL)isRefresh);
 }
@@ -400,7 +400,7 @@ jboolean Java_com_qsp_player_game_LibQspProxyImpl_QSPExecUserInput(JNIEnv * env,
 ///* Ошибки */
 //
 ///* Получить информацию о последней ошибке */
-jobject Java_com_qsp_player_game_LibQspProxyImpl_QSPGetLastErrorData(JNIEnv * env, jobject this)
+jobject Java_com_qsp_player_game_libqsp_LibQspProxyImpl_QSPGetLastErrorData(JNIEnv * env, jobject this)
 {
 	jclass clazz = (*env)->FindClass (env, "com/qsp/player/JniResult");
 	if (clazz == 0)
@@ -433,7 +433,7 @@ jobject Java_com_qsp_player_game_LibQspProxyImpl_QSPGetLastErrorData(JNIEnv * en
 	return obj;
 }
 ///* Получить описание ошибки по ее номеру */
-jstring Java_com_qsp_player_game_LibQspProxyImpl_QSPGetErrorDesc(JNIEnv * env, jobject this, jint errorNum)
+jstring Java_com_qsp_player_game_libqsp_LibQspProxyImpl_QSPGetErrorDesc(JNIEnv * env, jobject this, jint errorNum)
 {
 	char * sz = qspW2C(QSPGetErrorDesc(errorNum));
 	jstring result = (*env)->NewStringUTF(env, sz);
@@ -445,7 +445,7 @@ jstring Java_com_qsp_player_game_LibQspProxyImpl_QSPGetErrorDesc(JNIEnv * env, j
 ///* Управление игрой */
 //
 ///* Загрузка новой игры из файла */
-jboolean Java_com_qsp_player_game_LibQspProxyImpl_QSPLoadGameWorld(JNIEnv * env, jobject this, jstring fileName )
+jboolean Java_com_qsp_player_game_libqsp_LibQspProxyImpl_QSPLoadGameWorld(JNIEnv * env, jobject this, jstring fileName )
 {
 	const char *str = (*env)->GetStringUTFChars(env, fileName, NULL);
 	if (str == NULL)
@@ -457,7 +457,7 @@ jboolean Java_com_qsp_player_game_LibQspProxyImpl_QSPLoadGameWorld(JNIEnv * env,
 	return result;
 }
 ///* Загрузка новой игры из памяти */
-jboolean Java_com_qsp_player_game_LibQspProxyImpl_QSPLoadGameWorldFromData(JNIEnv * env, jobject this, jbyteArray data, jint dataSize, jstring fileName )
+jboolean Java_com_qsp_player_game_libqsp_LibQspProxyImpl_QSPLoadGameWorldFromData(JNIEnv * env, jobject this, jbyteArray data, jint dataSize, jstring fileName )
 {
 	//converting data
 	jbyte* jbuf = malloc(dataSize * sizeof (jbyte));
@@ -488,7 +488,7 @@ jboolean Java_com_qsp_player_game_LibQspProxyImpl_QSPLoadGameWorldFromData(JNIEn
 	return result;
 }
 ///* Сохранение состояния в файл */
-jboolean Java_com_qsp_player_game_LibQspProxyImpl_QSPSaveGame(JNIEnv * env, jobject this, jstring fileName, jboolean isRefresh)
+jboolean Java_com_qsp_player_game_libqsp_LibQspProxyImpl_QSPSaveGame(JNIEnv * env, jobject this, jstring fileName, jboolean isRefresh)
 {
 	const char *str = (*env)->GetStringUTFChars(env, fileName, NULL);
 	if (str == NULL)
@@ -500,7 +500,7 @@ jboolean Java_com_qsp_player_game_LibQspProxyImpl_QSPSaveGame(JNIEnv * env, jobj
 	return result;
 }
 ///* Сохранение состояния в память */
-jbyteArray Java_com_qsp_player_game_LibQspProxyImpl_QSPSaveGameAsData(JNIEnv * env, jobject this, jboolean isRefresh)
+jbyteArray Java_com_qsp_player_game_libqsp_LibQspProxyImpl_QSPSaveGameAsData(JNIEnv * env, jobject this, jboolean isRefresh)
 {
 	void * buffer = NULL;
 	int	bufferSize = 0;
@@ -517,7 +517,7 @@ jbyteArray Java_com_qsp_player_game_LibQspProxyImpl_QSPSaveGameAsData(JNIEnv * e
 	return result;
 }
 ///* Загрузка состояния из файла */
-jboolean Java_com_qsp_player_game_LibQspProxyImpl_QSPOpenSavedGame(JNIEnv * env, jobject this, jstring fileName, jboolean isRefresh)
+jboolean Java_com_qsp_player_game_libqsp_LibQspProxyImpl_QSPOpenSavedGame(JNIEnv * env, jobject this, jstring fileName, jboolean isRefresh)
 {
 	const char *str = (*env)->GetStringUTFChars(env, fileName, NULL);
 	if (str == NULL)
@@ -529,7 +529,7 @@ jboolean Java_com_qsp_player_game_LibQspProxyImpl_QSPOpenSavedGame(JNIEnv * env,
 	return result;
 }
 ///* Загрузка состояния из памяти */
-jboolean Java_com_qsp_player_game_LibQspProxyImpl_QSPOpenSavedGameFromData(JNIEnv * env, jobject this, jbyteArray data, jint dataSize, jboolean isRefresh)
+jboolean Java_com_qsp_player_game_libqsp_LibQspProxyImpl_QSPOpenSavedGameFromData(JNIEnv * env, jobject this, jbyteArray data, jint dataSize, jboolean isRefresh)
 {
 	//converting data
 	jbyte* jbuf = malloc(dataSize * sizeof (jbyte));
@@ -546,13 +546,13 @@ jboolean Java_com_qsp_player_game_LibQspProxyImpl_QSPOpenSavedGameFromData(JNIEn
 	return result;
 }
 ///* Перезапуск игры */
-jboolean Java_com_qsp_player_game_LibQspProxyImpl_QSPRestartGame(JNIEnv * env, jobject this, jboolean isRefresh)
+jboolean Java_com_qsp_player_game_libqsp_LibQspProxyImpl_QSPRestartGame(JNIEnv * env, jobject this, jboolean isRefresh)
 {
 	return QSPRestartGame((QSP_BOOL)isRefresh);
 }
 ///* ------------------------------------------------------------ */
 ///* Меню */
-void Java_com_qsp_player_game_LibQspProxyImpl_QSPSelectMenuItem(JNIEnv * env, jobject this, jint ind)
+void Java_com_qsp_player_game_libqsp_LibQspProxyImpl_QSPSelectMenuItem(JNIEnv * env, jobject this, jint ind)
 {
 	QSPSelectMenuItem(ind);
 }

@@ -1,6 +1,6 @@
 package com.qsp.player.game;
 
-interface PlayerView {
+public interface PlayerView {
 
     void refreshGameView(
             boolean confChanged,

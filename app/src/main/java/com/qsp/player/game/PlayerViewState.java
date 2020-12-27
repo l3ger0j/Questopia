@@ -3,24 +3,24 @@ package com.qsp.player.game;
 import java.io.File;
 import java.util.ArrayList;
 
-class PlayerViewState {
+public class PlayerViewState {
 
-    boolean gameRunning;
-    String gameTitle;
-    File gameDir;
-    File gameFile;
-    boolean useHtml;
-    int fontSize;
-    int backColor;
-    int fontColor;
-    int linkColor;
-    String mainDesc = "";
-    String varsDesc = "";
-    ArrayList<QspListItem> actions = new ArrayList<>();
-    ArrayList<QspListItem> objects = new ArrayList<>();
-    ArrayList<QspMenuItem> menuItems = new ArrayList<>();
+    public boolean gameRunning;
+    public String gameTitle;
+    public File gameDir;
+    public File gameFile;
+    public boolean useHtml;
+    public int fontSize;
+    public int backColor;
+    public int fontColor;
+    public int linkColor;
+    public String mainDesc = "";
+    public String varsDesc = "";
+    public ArrayList<QspListItem> actions = new ArrayList<>();
+    public ArrayList<QspListItem> objects = new ArrayList<>();
+    public ArrayList<QspMenuItem> menuItems = new ArrayList<>();
 
-    void reset() {
+    public void reset() {
         gameRunning = false;
         gameTitle = null;
         gameDir = null;

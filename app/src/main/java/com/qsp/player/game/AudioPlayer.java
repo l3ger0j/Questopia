@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 
-class AudioPlayer {
+public class AudioPlayer {
     private static Logger logger = LoggerFactory.getLogger(AudioPlayer.class);
 
     private final ConcurrentHashMap<String, Sound> sounds = new ConcurrentHashMap<>();
@@ -22,17 +22,17 @@ class AudioPlayer {
     private boolean soundEnabled;
     private boolean paused;
 
-    void setSoundEnabled(boolean enabled) {
+    public void setSoundEnabled(boolean enabled) {
         soundEnabled = enabled;
     }
 
-    void destroy() {
+    public void destroy() {
         if (audioHandler != null) {
             audioHandler.getLooper().quitSafely();
         }
     }
 
-    void resume() {
+    public void resume() {
         paused = false;
 
         if (!soundEnabled) {
@@ -104,7 +104,7 @@ class AudioPlayer {
         sound.player = player;
     }
 
-    void pause() {
+    public void pause() {
         paused = true;
 
         runOnAudioThread(() -> {
@@ -116,7 +116,7 @@ class AudioPlayer {
         });
     }
 
-    void playFile(final String path, final int volume) {
+    public void playFile(final String path, final int volume) {
         runOnAudioThread(() -> {
             Sound sound = sounds.get(path);
             if (sound != null) {
@@ -137,7 +137,7 @@ class AudioPlayer {
         return volume / 100.f;
     }
 
-    boolean isPlayingFile(String path) {
+    public boolean isPlayingFile(String path) {
         if (path == null || path.isEmpty()) {
             return false;
         }
@@ -145,7 +145,7 @@ class AudioPlayer {
         return sounds.containsKey(path);
     }
 
-    void closeFile(final String path) {
+    public void closeFile(final String path) {
         runOnAudioThread(() -> {
             Sound sound = sounds.remove(path);
             if (sound != null) {
@@ -164,7 +164,7 @@ class AudioPlayer {
         sound.player.release();
     }
 
-    void closeAllFiles() {
+    public void closeAllFiles() {
         runOnAudioThread(() -> {
             for (Sound sound : sounds.values()) {
                 doClose(sound);

@@ -43,6 +43,7 @@ import androidx.core.view.GestureDetectorCompat;
 
 import com.qsp.player.QuestPlayerApplication;
 import com.qsp.player.R;
+import com.qsp.player.game.libqsp.LibQspProxy;
 import com.qsp.player.settings.SettingsActivity;
 import com.qsp.player.stock.GameStockActivity;
 import com.qsp.player.util.FileUtil;

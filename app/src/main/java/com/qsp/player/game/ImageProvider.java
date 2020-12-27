@@ -11,7 +11,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.HashMap;
 
-class ImageProvider implements ImageGetter {
+public class ImageProvider implements ImageGetter {
     private static final Logger logger = LoggerFactory.getLogger(ImageProvider.class);
     private static final HashMap<String, Drawable> cache = new HashMap<>();
 
@@ -40,7 +40,7 @@ class ImageProvider implements ImageGetter {
         return drawable;
     }
 
-    void setGameDirectory(File dir) {
+    public void setGameDirectory(File dir) {
         cache.clear();
     }
 }
