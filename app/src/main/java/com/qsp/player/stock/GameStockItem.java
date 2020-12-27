@@ -3,7 +3,7 @@ package com.qsp.player.stock;
 import java.io.File;
 import java.util.List;
 
-public class GameStockItem {
+public class GameStockItem implements Cloneable {
     private String id = "";
     private String listId = "";
     private String author = "";
@@ -20,6 +20,27 @@ public class GameStockItem {
 
     private File gameDir;
     private List<File> gameFiles;
+
+    public GameStockItem() {
+    }
+
+    public GameStockItem(GameStockItem other) {
+        id = other.id;
+        listId = other.listId;
+        author = other.author;
+        portedBy = other.portedBy;
+        version = other.version;
+        title = other.title;
+        lang = other.lang;
+        player = other.player;
+        fileUrl = other.fileUrl;
+        fileSize = other.fileSize;
+        descUrl = other.descUrl;
+        pubDate = other.pubDate;
+        modDate = other.modDate;
+        gameDir = other.gameDir;
+        gameFiles = other.gameFiles;
+    }
 
     public  boolean hasRemoteUrl() {
         return fileUrl != null && !fileUrl.isEmpty();

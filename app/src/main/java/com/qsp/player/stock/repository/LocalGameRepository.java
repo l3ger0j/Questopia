@@ -2,7 +2,6 @@ package com.qsp.player.stock.repository;
 
 import com.qsp.player.stock.GameStockItem;
 import com.qsp.player.stock.GameStockItemBuilder;
-import com.qsp.player.util.FileUtil;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

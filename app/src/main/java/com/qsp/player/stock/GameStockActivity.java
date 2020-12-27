@@ -361,13 +361,15 @@ public class GameStockActivity extends AppCompatActivity {
                 gamesMap.put(game.getId(), game);
             }
         }
-        for (GameStockItem game : localGameRepository.getGames()) {
-            GameStockItem existingGame = gamesMap.get(game.getId());
-            if (existingGame != null) {
-                existingGame.setGameDir(game.getGameDir());
-                existingGame.setGameFiles(game.getGameFiles());
+        for (GameStockItem localGame : localGameRepository.getGames()) {
+            GameStockItem remoteGame = gamesMap.get(localGame.getId());
+            if (remoteGame != null) {
+                GameStockItem aggregateGame = new GameStockItem(remoteGame);
+                aggregateGame.setGameDir(localGame.getGameDir());
+                aggregateGame.setGameFiles(localGame.getGameFiles());
+                gamesMap.put(localGame.getId(), aggregateGame);
             } else {
-                gamesMap.put(game.getId(), game);
+                gamesMap.put(localGame.getId(), localGame);
             }
         }
 
