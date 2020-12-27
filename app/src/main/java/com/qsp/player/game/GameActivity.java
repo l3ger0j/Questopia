@@ -61,6 +61,13 @@ import java.util.Locale;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CountDownLatch;
 
+import static com.qsp.player.util.FileUtil.findFileOrDirectory;
+import static com.qsp.player.util.FileUtil.findFileRecursively;
+import static com.qsp.player.util.FileUtil.getExtension;
+import static com.qsp.player.util.FileUtil.getOrCreateDirectory;
+import static com.qsp.player.util.FileUtil.getOrCreateFile;
+import static com.qsp.player.util.FileUtil.normalizePath;
+
 @SuppressLint("ClickableViewAccessibility")
 public class GameActivity extends AppCompatActivity implements PlayerView, GestureDetector.OnGestureListener {
     private static final int MAX_SAVE_SLOTS = 5;
@@ -491,12 +498,12 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
         subMenu.setHeaderTitle(getString(R.string.selectSlot));
 
         MenuItem item;
-        final File savesDir = FileUtil.getOrCreateDirectory(viewState.gameDir, "saves");
+        final File savesDir = getOrCreateDirectory(viewState.gameDir, "saves");
         final LibQspProxy proxy = libQspProxy;
 
         for (int i = 0; i < MAX_SAVE_SLOTS; ++i) {
             final String filename = getSaveSlotFilename(i);
-            final File file = FileUtil.findFileOrDirectory(savesDir, filename);
+            final File file = findFileOrDirectory(savesDir, filename);
             String title;
 
             if (file != null) {
@@ -515,7 +522,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
                         }
                         break;
                     case SAVE:
-                        File file1 = FileUtil.getOrCreateFile(savesDir, filename);
+                        File file1 = getOrCreateFile(savesDir, filename);
                         proxy.saveGameState(Uri.fromFile(file1));
                         break;
                 }
@@ -752,7 +759,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
         runOnUiThread(() -> {
             Intent intent = new Intent(context, ImageBoxActivity.class);
             intent.putExtra("gameDirUri", viewState.gameDir.getAbsolutePath());
-            intent.putExtra("imagePath", FileUtil.normalizePath(path));
+            intent.putExtra("imagePath", normalizePath(path));
             startActivity(intent);
         });
     }
@@ -923,14 +930,14 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
         @Override
         public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
             if (url.startsWith("file:///")) {
-                String path = FileUtil.normalizePath(Uri.decode(url.substring(8)));
-                File file = FileUtil.findFileRecursively(viewState.gameDir, path);
+                String path = normalizePath(Uri.decode(url.substring(8)));
+                File file = findFileRecursively(viewState.gameDir, path);
                 if (file == null) {
                     logger.error("File not found: " + path);
                     return null;
                 }
                 try {
-                    String extension = FileUtil.getExtension(file.getName());
+                    String extension = getExtension(file.getName());
                     String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
                     InputStream in = context.getContentResolver().openInputStream(Uri.fromFile(file));
                     return new WebResourceResponse(mimeType, null, in);

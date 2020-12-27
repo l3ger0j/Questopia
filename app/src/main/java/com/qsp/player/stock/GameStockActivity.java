@@ -67,6 +67,13 @@ import java.util.List;
 import java.util.Locale;
 
 import static com.qsp.player.util.FileUtil.GAME_INFO_FILENAME;
+import static com.qsp.player.util.FileUtil.createFile;
+import static com.qsp.player.util.FileUtil.deleteDirectory;
+import static com.qsp.player.util.FileUtil.findFileOrDirectory;
+import static com.qsp.player.util.FileUtil.getOrCreateDirectory;
+import static com.qsp.player.util.FileUtil.isWritableDirectory;
+import static com.qsp.player.util.FileUtil.isWritableFile;
+import static com.qsp.player.util.FileUtil.normalizeGameFolderName;
 import static com.qsp.player.util.GameDirUtil.doesDirectoryContainGameFiles;
 import static com.qsp.player.util.GameDirUtil.normalizeGameDirectory;
 
@@ -334,8 +341,8 @@ public class GameStockActivity extends AppCompatActivity {
             logger.error("External files directory not found");
             return;
         }
-        File dir = FileUtil.getOrCreateDirectory(extFilesDir, "games");
-        if (!FileUtil.isWritableDirectory(dir)) {
+        File dir = getOrCreateDirectory(extFilesDir, "games");
+        if (!isWritableDirectory(dir)) {
             logger.error("Games directory is not writable");
             String message = getString(R.string.gamesDirError);
             ViewUtil.showErrorDialog(context, message);
@@ -429,7 +436,7 @@ public class GameStockActivity extends AppCompatActivity {
     }
 
     private void installGame(Uri uri, InstallType type) {
-        if (!FileUtil.isWritableDirectory(gamesDir)) {
+        if (!isWritableDirectory(gamesDir)) {
             logger.error("Games directory is not writable");
             return;
         }
@@ -449,7 +456,7 @@ public class GameStockActivity extends AppCompatActivity {
         installer.load(uri);
 
         File gameDir = getOrCreateGameDirectory(installer.getGameName());
-        if (!FileUtil.isWritableDirectory(gameDir)) {
+        if (!isWritableDirectory(gameDir)) {
             logger.error("Game directory is not writable");
             return;
         }
@@ -464,12 +471,12 @@ public class GameStockActivity extends AppCompatActivity {
     }
 
     private File getOrCreateGameDirectory(String gameName) {
-        String folderName = FileUtil.normalizeGameFolderName(gameName);
-        return FileUtil.getOrCreateDirectory(gamesDir, folderName);
+        String folderName = normalizeGameFolderName(gameName);
+        return getOrCreateDirectory(gamesDir, folderName);
     }
 
     private boolean unzip(File zipFile, File dir) {
-        if (!FileUtil.isWritableDirectory(dir)) {
+        if (!isWritableDirectory(dir)) {
             logger.error("Game directory is not writable");
             return false;
         }
@@ -649,7 +656,7 @@ public class GameStockActivity extends AppCompatActivity {
                             gameRunning = null;
                             invalidateOptionsMenu();
                         }
-                        FileUtil.deleteDirectory(gameDir);
+                        deleteDirectory(gameDir);
                         ViewUtil.showToast(context, getString(R.string.gameDeleted));
                         refreshGames();
                     }
@@ -810,13 +817,13 @@ public class GameStockActivity extends AppCompatActivity {
             }
 
             File cacheDir = activity.getCacheDir();
-            if (!FileUtil.isWritableDirectory(cacheDir)) {
+            if (!isWritableDirectory(cacheDir)) {
                 logger.error("Cache directory is not writable");
                 return DownloadResult.DOWNLOAD_FAILED;
             }
 
             String zipFilename = String.valueOf(SystemClock.elapsedRealtime()).concat("_game");
-            File zipFile = FileUtil.createFile(cacheDir, zipFilename);
+            File zipFile = createFile(cacheDir, zipFilename);
             if (zipFile == null) {
                 logger.error("Failed to create a ZIP file: " + zipFilename);
                 return DownloadResult.DOWNLOAD_FAILED;
@@ -889,17 +896,17 @@ public class GameStockActivity extends AppCompatActivity {
             if (activity == null) {
                 return false;
             }
-            String folderName = FileUtil.normalizeGameFolderName(game.getTitle());
-            File gameDir = FileUtil.findFileOrDirectory(activity.gamesDir, folderName);
-            if (!FileUtil.isWritableDirectory(gameDir)) {
+            String folderName = normalizeGameFolderName(game.getTitle());
+            File gameDir = findFileOrDirectory(activity.gamesDir, folderName);
+            if (!isWritableDirectory(gameDir)) {
                 logger.error("Game directory is not writable");
                 return false;
             }
-            File infoFile = FileUtil.findFileOrDirectory(gameDir, GAME_INFO_FILENAME);
+            File infoFile = findFileOrDirectory(gameDir, GAME_INFO_FILENAME);
             if (infoFile == null) {
-                infoFile = FileUtil.createFile(gameDir, GAME_INFO_FILENAME);
+                infoFile = createFile(gameDir, GAME_INFO_FILENAME);
             }
-            if (!FileUtil.isWritableFile(infoFile)) {
+            if (!isWritableFile(infoFile)) {
                 logger.error("Game info file is not writable");
                 return false;
             }

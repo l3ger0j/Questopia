@@ -17,6 +17,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import static com.qsp.player.util.FileUtil.createFile;
+import static com.qsp.player.util.FileUtil.getOrCreateDirectory;
+
 public class FolderGameInstaller extends GameInstaller {
     private static final Logger logger = LoggerFactory.getLogger(FolderGameInstaller.class);
 
@@ -43,7 +46,7 @@ public class FolderGameInstaller extends GameInstaller {
 
     private void copyFileOrDirectory(DocumentFile fileOrDir, File parentDir) {
         if (fileOrDir.isDirectory()) {
-            File subDir = FileUtil.getOrCreateDirectory(parentDir, fileOrDir.getName());
+            File subDir = getOrCreateDirectory(parentDir, fileOrDir.getName());
             for (DocumentFile dirFile : fileOrDir.listFiles()) {
                 copyFileOrDirectory(dirFile, subDir);
             }
@@ -53,7 +56,7 @@ public class FolderGameInstaller extends GameInstaller {
     }
 
     private void copyFile(DocumentFile file, File parentDir) {
-        File destFile = FileUtil.createFile(parentDir, file.getName());
+        File destFile = createFile(parentDir, file.getName());
         if (destFile == null) {
             logger.error("Destination file is null");
             return;

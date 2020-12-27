@@ -12,6 +12,8 @@ import com.qsp.player.util.ZipUtil;
 
 import java.io.File;
 
+import static com.qsp.player.util.FileUtil.removeFileExtension;
+
 public class ArchiveGameInstaller extends GameInstaller {
 
     public ArchiveGameInstaller(Context context) {
@@ -28,7 +30,7 @@ public class ArchiveGameInstaller extends GameInstaller {
         if (filename == null) {
             throw new InstallException("ZIP filename is null");
         }
-        gameName = FileUtil.removeFileExtension(filename);
+        gameName = removeFileExtension(filename);
     }
 
     @Override

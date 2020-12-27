@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static com.qsp.player.util.FileUtil.GAME_INFO_FILENAME;
+import static com.qsp.player.util.FileUtil.readFileAsString;
 
 public class LocalGameRepository {
     private static final Logger logger = LoggerFactory.getLogger(LocalGameRepository.class);
@@ -108,7 +109,7 @@ public class LocalGameRepository {
             return null;
         }
 
-        return FileUtil.readFileAsString(gameInfoFiles[0]);
+        return readFileAsString(gameInfoFiles[0]);
     }
 
     private GameStockItem parseGameInfo(String xml) {
