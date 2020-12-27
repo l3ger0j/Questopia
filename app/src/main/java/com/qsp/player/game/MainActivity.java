@@ -33,9 +33,7 @@ import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.ListAdapter;
 import android.widget.ListView;
-import android.widget.ScrollView;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
@@ -141,17 +139,13 @@ public class MainActivity extends AppCompatActivity implements PlayerView, Gestu
         loadLocale();
         initActionBar();
         initMainView();
-        initMainTab();
         initMainDescView();
-        initVarsTab();
         initVarsDescView();
         initActionsView();
         initObjectsView();
         setActiveTab(TAB_MAIN_DESC);
 
         gestureDetector = new GestureDetectorCompat(this, this);
-
-        invalidateOptionsMenu();
     }
 
     private void loadLocale() {
@@ -169,11 +163,6 @@ public class MainActivity extends AppCompatActivity implements PlayerView, Gestu
         mainView = findViewById(R.id.main);
     }
 
-    private void initMainTab() {
-        ScrollView mainTab = findViewById(R.id.main_tab);
-        mainTab.setOnTouchListener(this::handleTouchEvent);
-    }
-
     private boolean handleTouchEvent(View v, MotionEvent event) {
         return gestureDetector.onTouchEvent(event);
     }
@@ -182,11 +171,6 @@ public class MainActivity extends AppCompatActivity implements PlayerView, Gestu
         mainDescView = findViewById(R.id.main_desc);
         mainDescView.setWebViewClient(new QspWebViewClient());
         mainDescView.setOnTouchListener(this::handleTouchEvent);
-    }
-
-    private void initVarsTab() {
-        ScrollView varsTab = findViewById(R.id.vars_tab);
-        varsTab.setOnTouchListener(this::handleTouchEvent);
     }
 
     private void initVarsDescView() {
@@ -252,11 +236,12 @@ public class MainActivity extends AppCompatActivity implements PlayerView, Gestu
     }
 
     private void toggleMainDesc(boolean show) {
-        findViewById(R.id.main_tab).setVisibility(show ? View.VISIBLE : View.GONE);
+        findViewById(R.id.main_desc).setVisibility(show ? View.VISIBLE : View.GONE);
+        findViewById(R.id.acts).setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
     private void toggleVarsDesc(boolean show) {
-        findViewById(R.id.vars_tab).setVisibility(show ? View.VISIBLE : View.GONE);
+        findViewById(R.id.vars_desc).setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
     private void setTitle(String title) {
@@ -404,12 +389,10 @@ public class MainActivity extends AppCompatActivity implements PlayerView, Gestu
 
     private void refreshActions() {
         actionsView.setAdapter(new QspItemAdapter(context, R.layout.act_item, viewState.actions));
-        adjustListViewHeight(actionsView);
     }
 
     private void refreshObjects() {
         objectsView.setAdapter(new QspItemAdapter(context, R.layout.obj_item, viewState.objects));
-        adjustListViewHeight(objectsView);
     }
 
     private void startSelectGame() {
@@ -696,26 +679,6 @@ public class MainActivity extends AppCompatActivity implements PlayerView, Gestu
         setActiveTab(tab);
     }
 
-    private void adjustListViewHeight(ListView view) {
-        ListAdapter adapter = view.getAdapter();
-        if (adapter == null) {
-            return;
-        }
-
-        int totalHeight = 0;
-        int desiredWidth = View.MeasureSpec.makeMeasureSpec(view.getWidth(), View.MeasureSpec.AT_MOST);
-        for (int i = 0; i < adapter.getCount(); i++) {
-            View item = adapter.getView(i, null, view);
-            item.measure(desiredWidth, View.MeasureSpec.UNSPECIFIED);
-            totalHeight += item.getMeasuredHeight();
-        }
-
-        ViewGroup.LayoutParams params = view.getLayoutParams();
-        params.height = totalHeight + (view.getDividerHeight() * (adapter.getCount() - 1));
-        view.setLayoutParams(params);
-        view.requestLayout();
-    }
-
     private void selectPreviousTab() {
         int tab;
         switch (activeTab) {
@@ -1000,7 +963,7 @@ public class MainActivity extends AppCompatActivity implements PlayerView, Gestu
                 if (textView != null) {
                     textView.setTypeface(getTypeface());
                     textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, Float.parseFloat(getFontSize()));
-                    textView.setBackgroundColor(getBackgroundColor());
+                    //textView.setBackgroundColor(getBackgroundColor());
                     textView.setTextColor(getTextColor());
                     textView.setLinkTextColor(getLinkColor());
                     textView.setText(item.text);

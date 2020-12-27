@@ -1,75 +1,74 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:orientation="vertical">
+    android:layout_height="fill_parent">
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
         android:background="?attr/colorPrimary"
         android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
         app:titleTextAppearance="@style/TextAppearance.AppCompat.Medium" />
 
-    <ScrollView
-        android:id="@+id/main_tab"
-        android:layout_width="match_parent"
-        android:layout_height="fill_parent">
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.67" />
 
-        <LinearLayout
-            android:layout_width="fill_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
+    <WebView
+        android:id="@+id/main_desc"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@color/web_background"
+        android:text=""
+        android:textColor="@color/web_text"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toTopOf="@+id/guideline"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/toolbar" />
 
-            <WebView
-                android:id="@+id/main_desc"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:background="@color/web_background"
-                android:paddingLeft="16dp"
-                android:paddingRight="16dp"
-                android:text=""
-                android:textColor="@color/web_text"
-                android:textSize="16sp" />
+    <WebView
+        android:id="@+id/vars_desc"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@color/web_background"
+        android:text=""
+        android:textColor="@color/web_text"
+        android:textSize="16sp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/toolbar" />
 
-            <ListView
-                android:id="@+id/acts"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="0dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="8dp"
-                android:paddingTop="0dp"
-                android:paddingBottom="0dp" />
-        </LinearLayout>
-    </ScrollView>
+    <ListView
+        android:id="@+id/acts"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/guideline" />
 
     <ListView
         android:id="@+id/inv"
-        android:layout_width="fill_parent"
-        android:layout_height="match_parent"
-        android:visibility="gone" />
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/toolbar" />
 
-    <ScrollView
-        android:id="@+id/vars_tab"
-        android:layout_width="match_parent"
-        android:layout_height="fill_parent"
-        android:visibility="gone">
-
-        <WebView
-            android:id="@+id/vars_desc"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/web_background"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp"
-            android:text=""
-            android:textColor="@color/web_text"
-            android:textSize="16sp" />
-    </ScrollView>
-
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
