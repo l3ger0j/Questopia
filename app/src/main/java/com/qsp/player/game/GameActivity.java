@@ -711,7 +711,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
         return super.onTouchEvent(event);
     }
 
-    // Begin PlayerView
+    // region PlayerView
 
     @Override
     public void refreshGameView(
@@ -851,9 +851,9 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
         }
     }
 
-    // End PlayerView
+    // endregion PlayerView
 
-    // Begin GestureDetector.OnGestureListener
+    // region GestureDetector.OnGestureListener
 
     @Override
     public boolean onDown(MotionEvent e) {
@@ -900,7 +900,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
         return false;
     }
 
-    // End GestureDetector.OnGestureListener
+    // endregion GestureDetector.OnGestureListener
 
     private enum SlotAction {
         LOAD,

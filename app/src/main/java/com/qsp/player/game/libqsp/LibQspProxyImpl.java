@@ -247,7 +247,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
         viewState.objects = objects;
     }
 
-    // Begin LibQspProxy implementation
+    // region LibQspProxy
 
     @Override
     public PlayerViewState getViewState() {
@@ -413,7 +413,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
         }
     }
 
-    // End LibQspProxy
+    // endregion LibQspProxy
 
     // region LibQspCallbacks
 
@@ -579,7 +579,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
 
     // endregion LibQspCallbacks
 
-    // Begin JNI
+    // region JNI
 
     public native void QSPInit();
     public native void QSPDeInit();
@@ -632,5 +632,5 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
         System.loadLibrary("ndkqsp");
     }
 
-    // End JNI
+    // endregion JNI
 }
