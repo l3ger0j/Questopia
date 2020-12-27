@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
+    android:id="@+id/layout_top"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent">
 
@@ -19,31 +18,31 @@
         app:titleTextAppearance="@style/TextAppearance.AppCompat.Small" />
 
     <WebView
-        android:id="@+id/main_desc"
+        android:id="@+id/main_description"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:background="@color/web_background"
         android:text=""
         android:textColor="@color/web_text"
         android:textSize="16sp"
-        app:layout_constraintBottom_toTopOf="@id/acts"
+        app:layout_constraintBottom_toTopOf="@id/actions"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/toolbar"
         app:layout_constraintVertical_weight="0.67" />
 
     <ListView
-        android:id="@+id/acts"
+        android:id="@+id/actions"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/main_desc"
+        app:layout_constraintTop_toBottomOf="@id/main_description"
         app:layout_constraintVertical_weight="0.33" />
 
     <WebView
-        android:id="@+id/vars_desc"
+        android:id="@+id/vars"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:background="@color/web_background"
@@ -57,7 +56,7 @@
         app:layout_constraintTop_toBottomOf="@id/toolbar" />
 
     <ListView
-        android:id="@+id/inv"
+        android:id="@+id/objects"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:visibility="gone"

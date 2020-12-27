@@ -111,7 +111,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
     private GestureDetectorCompat gestureDetector;
 
     private ActionBar actionBar;
-    private View mainView;
+    private View layoutTop;
     private WebView mainDescView;
     private WebView varsDescView;
     private ListView actionsView;
@@ -137,9 +137,9 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
 
         loadLocale();
         initActionBar();
-        initMainView();
-        initMainDescView();
-        initVarsDescView();
+        initLayoutTopView();
+        initMainDescriptionView();
+        initVarsView();
         initActionsView();
         initObjectsView();
         setActiveTab(TAB_MAIN_DESC);
@@ -168,28 +168,28 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
         actionBar = getSupportActionBar();
     }
 
-    private void initMainView() {
-        mainView = findViewById(R.id.main);
+    private void initLayoutTopView() {
+        layoutTop = findViewById(R.id.layout_top);
     }
 
     private boolean handleTouchEvent(View v, MotionEvent event) {
         return gestureDetector.onTouchEvent(event);
     }
 
-    private void initMainDescView() {
-        mainDescView = findViewById(R.id.main_desc);
+    private void initMainDescriptionView() {
+        mainDescView = findViewById(R.id.main_description);
         mainDescView.setWebViewClient(new QspWebViewClient());
         mainDescView.setOnTouchListener(this::handleTouchEvent);
     }
 
-    private void initVarsDescView() {
-        varsDescView = findViewById(R.id.vars_desc);
+    private void initVarsView() {
+        varsDescView = findViewById(R.id.vars);
         varsDescView.setWebViewClient(new QspWebViewClient());
         varsDescView.setOnTouchListener(this::handleTouchEvent);
     }
 
     private void initActionsView() {
-        actionsView = findViewById(R.id.acts);
+        actionsView = findViewById(R.id.actions);
         actionsView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         actionsView.setOnTouchListener(this::handleTouchEvent);
         actionsView.setOnItemClickListener((parent, view, position, id) -> libQspProxy.onActionClicked(position));
@@ -206,7 +206,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
     }
 
     private void initObjectsView() {
-        objectsView = findViewById(R.id.inv);
+        objectsView = findViewById(R.id.objects);
         objectsView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         objectsView.setOnItemClickListener((parent, view, position, id) -> libQspProxy.onObjectSelected(position));
         objectsView.setOnTouchListener(this::handleTouchEvent);
@@ -241,16 +241,16 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
     }
 
     private void toggleObjects(boolean show) {
-        findViewById(R.id.inv).setVisibility(show ? View.VISIBLE : View.GONE);
+        findViewById(R.id.objects).setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
     private void toggleMainDesc(boolean show) {
-        findViewById(R.id.main_desc).setVisibility(show ? View.VISIBLE : View.GONE);
-        findViewById(R.id.acts).setVisibility(show ? View.VISIBLE : View.GONE);
+        findViewById(R.id.main_description).setVisibility(show ? View.VISIBLE : View.GONE);
+        findViewById(R.id.actions).setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
     private void toggleVarsDesc(boolean show) {
-        findViewById(R.id.vars_desc).setVisibility(show ? View.VISIBLE : View.GONE);
+        findViewById(R.id.vars).setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
     private void setTitle(String title) {
@@ -305,7 +305,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
     private void applyTextSettings() {
         int backColor = getBackgroundColor();
 
-        mainView.setBackgroundColor(backColor);
+        layoutTop.setBackgroundColor(backColor);
         mainDescView.setBackgroundColor(backColor);
         varsDescView.setBackgroundColor(backColor);
         actionsView.setBackgroundColor(backColor);
