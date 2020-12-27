@@ -47,7 +47,6 @@ import com.qsp.player.game.libqsp.LibQspProxy;
 import com.qsp.player.settings.SettingsActivity;
 import com.qsp.player.stock.GameStockActivity;
 import com.qsp.player.util.FileUtil;
-import com.qsp.player.util.HtmlUtil;
 import com.qsp.player.util.ViewUtil;
 
 import org.slf4j.Logger;
@@ -101,6 +100,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
     private final Context context = this;
 
     private ImageProvider imageProvider;
+    private HtmlProcessor htmlProcessor;
     private LibQspProxy libQspProxy;
     private SharedPreferences settings;
     private String currentLanguage = Locale.getDefault().getLanguage();
@@ -151,6 +151,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
         QuestPlayerApplication application = (QuestPlayerApplication) getApplication();
 
         imageProvider = application.getImageProvider();
+        htmlProcessor = application.getHtmlProcessor();
 
         libQspProxy = application.getLibQspProxy();
         libQspProxy.setPlayerView(this);
@@ -381,8 +382,8 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
 
     private String getHtml(String str) {
         return viewState.useHtml ?
-                HtmlUtil.preprocessQspHtml(str) :
-                HtmlUtil.convertQspStringToHtml(str);
+                htmlProcessor.preprocessQspHtml(str) :
+                htmlProcessor.convertQspStringToHtml(str);
     }
 
     private void refreshVarsDesc() {
@@ -762,7 +763,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
         final CountDownLatch latch = new CountDownLatch(1);
 
         runOnUiThread(() -> {
-            String processedMsg = viewState.useHtml ? HtmlUtil.removeHtmlTags(message) : message;
+            String processedMsg = viewState.useHtml ? htmlProcessor.removeHtmlTags(message) : message;
             if (processedMsg == null) {
                 processedMsg = "";
             }
@@ -789,7 +790,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
         runOnUiThread(() -> {
             final View view = getLayoutInflater().inflate(R.layout.inputbox, null);
 
-            String message = viewState.useHtml ? HtmlUtil.removeHtmlTags(prompt) : prompt;
+            String message = viewState.useHtml ? htmlProcessor.removeHtmlTags(prompt) : prompt;
             if (message == null) {
                 message = "";
             }
@@ -912,7 +913,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, final String href) {
             if (href.toLowerCase().startsWith("exec:")) {
-                String code = HtmlUtil.decodeExec(href.substring(5));
+                String code = htmlProcessor.decodeExec(href.substring(5));
                 libQspProxy.execute(code);
             }
 

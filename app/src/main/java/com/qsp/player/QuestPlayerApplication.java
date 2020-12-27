@@ -3,6 +3,7 @@ package com.qsp.player;
 import android.app.Application;
 import android.os.Build;
 
+import com.qsp.player.game.HtmlProcessor;
 import com.qsp.player.game.ImageProvider;
 import com.qsp.player.game.libqsp.LibQspProxy;
 import com.qsp.player.game.libqsp.LibQspProxyImpl;
@@ -11,8 +12,9 @@ import org.slf4j.impl.HandroidLoggerAdapter;
 
 public class QuestPlayerApplication extends Application {
 
-    private ImageProvider imageProvider;
-    private LibQspProxyImpl libQspProxy;
+    private final ImageProvider imageProvider = new ImageProvider();
+    private final HtmlProcessor htmlProcessor = new HtmlProcessor();
+    private final LibQspProxyImpl libQspProxy = new LibQspProxyImpl(this, imageProvider, htmlProcessor);
 
     public QuestPlayerApplication() {
         HandroidLoggerAdapter.DEBUG = BuildConfig.DEBUG;
@@ -23,8 +25,7 @@ public class QuestPlayerApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        imageProvider = new ImageProvider();
-        libQspProxy = new LibQspProxyImpl(this, imageProvider);
+        libQspProxy.init();
     }
 
     @Override
@@ -35,6 +36,10 @@ public class QuestPlayerApplication extends Application {
 
     public ImageProvider getImageProvider() {
         return imageProvider;
+    }
+
+    public HtmlProcessor getHtmlProcessor() {
+        return htmlProcessor;
     }
 
     public LibQspProxy getLibQspProxy() {

@@ -1,4 +1,4 @@
-package com.qsp.player.util;
+package com.qsp.player.game;
 
 import android.util.Base64;
 
@@ -14,11 +14,11 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public final class HtmlUtil {
-    private static final Logger logger = LoggerFactory.getLogger(HtmlUtil.class);
+public class HtmlProcessor {
+    private static final Logger logger = LoggerFactory.getLogger(HtmlProcessor.class);
     private static final Pattern execPattern = Pattern.compile("href=\"exec:([\\s\\S]*?)\"", Pattern.CASE_INSENSITIVE);
 
-    public static String preprocessQspHtml(String html) {
+    public String preprocessQspHtml(String html) {
         if (html == null || html.isEmpty()) {
             return "";
         }
@@ -37,11 +37,11 @@ public final class HtmlUtil {
         return document.toString();
     }
 
-    private static String unescapeQuotes(String str) {
+    private String unescapeQuotes(String str) {
         return str.replace("\\\"", "'");
     }
 
-    private static String encodeExec(String html) {
+    private String encodeExec(String html) {
         Matcher matcher = execPattern.matcher(html);
         StringBuffer sb = new StringBuffer();
         while (matcher.find()) {
@@ -54,16 +54,16 @@ public final class HtmlUtil {
         return sb.toString();
     }
 
-    private static String normalizePathsInExec(String exec) {
+    private String normalizePathsInExec(String exec) {
         return exec.replace("\\", "/");
     }
 
-    private static String htmlizeLineBreaks(String s) {
+    private String htmlizeLineBreaks(String s) {
         return s.replace("\n", "<br>")
                 .replace("\r", "");
     }
 
-    public static String convertQspStringToHtml(String str) {
+    public String convertQspStringToHtml(String str) {
         if (str == null || str.isEmpty()) {
             return "";
         }
@@ -71,7 +71,7 @@ public final class HtmlUtil {
         return htmlizeLineBreaks(str);
     }
 
-    public static String removeHtmlTags(@NonNull String html) {
+    public String removeHtmlTags(@NonNull String html) {
         Objects.requireNonNull(html, "html must not be null");
 
         if (html.isEmpty()) {
@@ -101,7 +101,7 @@ public final class HtmlUtil {
         return result.toString();
     }
 
-    public static String decodeExec(String code) {
+    public String decodeExec(String code) {
         return new String(Base64.decode(code, Base64.DEFAULT));
     }
 }

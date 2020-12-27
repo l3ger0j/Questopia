@@ -11,6 +11,7 @@ import androidx.preference.PreferenceManager;
 
 import com.qsp.player.R;
 import com.qsp.player.game.AudioPlayer;
+import com.qsp.player.game.HtmlProcessor;
 import com.qsp.player.game.ImageProvider;
 import com.qsp.player.game.PlayerView;
 import com.qsp.player.game.PlayerViewState;
@@ -22,7 +23,6 @@ import com.qsp.player.game.libqsp.dto.ErrorData;
 import com.qsp.player.game.libqsp.dto.GetVarValuesResponse;
 import com.qsp.player.game.libqsp.dto.ObjectData;
 import com.qsp.player.util.FileUtil;
-import com.qsp.player.util.HtmlUtil;
 import com.qsp.player.util.StreamUtil;
 
 import org.slf4j.Logger;
@@ -51,8 +51,8 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
     private final NativeMethods nativeMethods = new NativeMethods(this);
 
     private final Context context;
-    private final SharedPreferences settings;
     private final ImageProvider imageProvider;
+    private final HtmlProcessor htmlProcessor;
 
     private final Runnable counterTask = new Runnable() {
         @Override
@@ -66,6 +66,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
         }
     };
 
+    private SharedPreferences settings;
     private volatile boolean libQspThreadRunning;
     private volatile Handler libQspHandler;
     private volatile long gameStartTime;
@@ -73,10 +74,13 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
     private volatile int timerInterval;
     private PlayerView playerView;
 
-    public LibQspProxyImpl(Context context, ImageProvider imageProvider) {
+    public LibQspProxyImpl(Context context, ImageProvider imageProvider, HtmlProcessor htmlProcessor) {
         this.context = context;
         this.imageProvider = imageProvider;
+        this.htmlProcessor = htmlProcessor;
+    }
 
+    public void init() {
         settings = PreferenceManager.getDefaultSharedPreferences(context);
     }
 
@@ -227,7 +231,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
             ActionData actionData = (ActionData) nativeMethods.QSPGetActionData(i);
             QspListItem action = new QspListItem();
             action.icon = imageProvider.getDrawable(FileUtil.normalizePath(actionData.getImage()));
-            action.text = viewState.useHtml ? HtmlUtil.removeHtmlTags(actionData.getName()) : actionData.getName();
+            action.text = viewState.useHtml ? htmlProcessor.removeHtmlTags(actionData.getName()) : actionData.getName();
             actions.add(action);
         }
         viewState.actions = actions;
@@ -240,7 +244,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
             ObjectData objectResult = (ObjectData) nativeMethods.QSPGetObjectData(i);
             QspListItem object = new QspListItem();
             object.icon = imageProvider.getDrawable(FileUtil.normalizePath(objectResult.getImage()));
-            object.text = viewState.useHtml ? HtmlUtil.removeHtmlTags(objectResult.getName()) : objectResult.getName();
+            object.text = viewState.useHtml ? htmlProcessor.removeHtmlTags(objectResult.getName()) : objectResult.getName();
             objects.add(object);
         }
         viewState.objects = objects;
