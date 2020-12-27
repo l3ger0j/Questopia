@@ -150,6 +150,8 @@ public class MainActivity extends AppCompatActivity implements PlayerView, Gestu
         setActiveTab(TAB_MAIN_DESC);
 
         gestureDetector = new GestureDetectorCompat(this, this);
+
+        invalidateOptionsMenu();
     }
 
     private void loadLocale() {
@@ -242,6 +244,7 @@ public class MainActivity extends AppCompatActivity implements PlayerView, Gestu
         }
 
         activeTab = tab;
+        updateTabIcons();
     }
 
     private void toggleObjects(boolean show) {
@@ -458,7 +461,17 @@ public class MainActivity extends AppCompatActivity implements PlayerView, Gestu
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main_menu, menu);
 
+        updateTabIcons();
+
         return true;
+    }
+
+    private void updateTabIcons() {
+        if (mainMenu == null) return;
+
+        mainMenu.findItem(R.id.menu_inventory).setIcon(activeTab == TAB_OBJECTS ? R.drawable.ic_tab_inv : R.drawable.ic_tab_inv_alt);
+        mainMenu.findItem(R.id.menu_maindesc).setIcon(activeTab == TAB_MAIN_DESC ? R.drawable.ic_tab_main : R.drawable.ic_tab_main_alt);
+        mainMenu.findItem(R.id.menu_varsdesc).setIcon(activeTab == TAB_VARS_DESC ? R.drawable.ic_tab_vars : R.drawable.ic_tab_vars_alt);
     }
 
     @Override
@@ -902,7 +915,7 @@ public class MainActivity extends AppCompatActivity implements PlayerView, Gestu
             float absVelocityY = Math.abs(velocityY);
 
             if (Math.abs(diffX) > SWIPE_THRESHOLD && absVelocityX > absVelocityY) {
-                if (diffX < 0.0f) {
+                if (diffX > 0.0f) {
                     selectNextTab();
                 } else {
                     selectPreviousTab();

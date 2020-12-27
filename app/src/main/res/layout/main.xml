@@ -51,12 +51,14 @@
     <ListView
         android:id="@+id/inv"
         android:layout_width="fill_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:visibility="gone" />
 
     <ScrollView
         android:id="@+id/vars_tab"
         android:layout_width="match_parent"
-        android:layout_height="fill_parent">
+        android:layout_height="fill_parent"
+        android:visibility="gone">
 
         <WebView
             android:id="@+id/vars_desc"
