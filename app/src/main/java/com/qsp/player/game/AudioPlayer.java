@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static com.qsp.player.util.StringUtil.isNotEmpty;
-import static com.qsp.player.util.ThreadUtil.throwIfThreadIsNotMain;
+import static com.qsp.player.util.ThreadUtil.throwIfNotMainThread;
 
 public class AudioPlayer {
     private static final Logger logger = LoggerFactory.getLogger(AudioPlayer.class);
@@ -26,7 +26,7 @@ public class AudioPlayer {
     private boolean paused;
 
     public void start() {
-        throwIfThreadIsNotMain();
+        throwIfNotMainThread();
 
         audioThread = new Thread(() -> {
             try {
@@ -42,7 +42,7 @@ public class AudioPlayer {
     }
 
     public void stop() {
-        throwIfThreadIsNotMain();
+        throwIfNotMainThread();
 
         if (audioThread == null) return;
 

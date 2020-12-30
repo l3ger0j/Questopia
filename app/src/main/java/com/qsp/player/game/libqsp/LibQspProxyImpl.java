@@ -43,7 +43,8 @@ import static com.qsp.player.util.FileUtil.getOrCreateDirectory;
 import static com.qsp.player.util.FileUtil.normalizePath;
 import static com.qsp.player.util.StringUtil.getStringOrEmpty;
 import static com.qsp.player.util.StringUtil.isNotEmpty;
-import static com.qsp.player.util.ThreadUtil.throwIfThreadIsNotMain;
+import static com.qsp.player.util.ThreadUtil.isSameThread;
+import static com.qsp.player.util.ThreadUtil.throwIfNotMainThread;
 
 public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
     private static final Logger logger = LoggerFactory.getLogger(LibQspProxyImpl.class);
@@ -119,7 +120,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
     }
 
     private void runOnQspThread(final Runnable runnable) {
-        throwIfThreadIsNotMain();
+        throwIfNotMainThread();
 
         if (libQspThread == null) {
             logger.warn("libqsp thread has not been started");
@@ -144,7 +145,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
     }
 
     public void stop() {
-        throwIfThreadIsNotMain();
+        throwIfNotMainThread();
 
         if (libQspThread == null) return;
 
@@ -388,7 +389,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
 
     @Override
     public void loadGameState(final Uri uri) {
-        if (Thread.currentThread() != libQspHandler.getLooper().getThread()) {
+        if (!isSameThread(libQspHandler.getLooper().getThread())) {
             runOnQspThread(() -> loadGameState(uri));
             return;
         }
@@ -415,7 +416,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
 
     @Override
     public void saveGameState(final Uri uri) {
-        if (Thread.currentThread() != libQspHandler.getLooper().getThread()) {
+        if (!isSameThread(libQspHandler.getLooper().getThread())) {
             runOnQspThread(() -> saveGameState(uri));
             return;
         }
