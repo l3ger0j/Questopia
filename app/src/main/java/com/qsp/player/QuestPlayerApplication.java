@@ -3,11 +3,11 @@ package com.qsp.player;
 import android.app.Application;
 import android.os.Build;
 
-import com.qsp.player.common.AudioPlayer;
-import com.qsp.player.common.HtmlProcessor;
-import com.qsp.player.common.ImageProvider;
 import com.qsp.player.libqsp.LibQspProxy;
 import com.qsp.player.libqsp.LibQspProxyImpl;
+import com.qsp.player.service.AudioPlayer;
+import com.qsp.player.service.HtmlProcessor;
+import com.qsp.player.service.ImageProvider;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

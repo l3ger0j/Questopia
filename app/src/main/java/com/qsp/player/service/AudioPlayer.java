@@ -1,4 +1,4 @@
-package com.qsp.player.common;
+package com.qsp.player.service;
 
 import android.media.MediaPlayer;
 import android.os.Handler;
@@ -156,6 +156,8 @@ public class AudioPlayer {
     }
 
     public void pause() {
+        if (paused) return;
+
         paused = true;
 
         runOnAudioThread(() -> {
@@ -168,6 +170,8 @@ public class AudioPlayer {
     }
 
     public void resume() {
+        if (!paused) return;
+
         paused = false;
 
         if (!soundEnabled) return;

@@ -7,9 +7,6 @@ import android.os.Looper;
 import android.os.SystemClock;
 
 import com.qsp.player.R;
-import com.qsp.player.common.AudioPlayer;
-import com.qsp.player.common.HtmlProcessor;
-import com.qsp.player.common.ImageProvider;
 import com.qsp.player.libqsp.dto.ActionData;
 import com.qsp.player.libqsp.dto.ErrorData;
 import com.qsp.player.libqsp.dto.GetVarValuesResponse;
@@ -20,6 +17,9 @@ import com.qsp.player.libqsp.model.QspListItem;
 import com.qsp.player.libqsp.model.QspMenuItem;
 import com.qsp.player.libqsp.model.RefreshInterfaceRequest;
 import com.qsp.player.libqsp.model.WindowType;
+import com.qsp.player.service.AudioPlayer;
+import com.qsp.player.service.HtmlProcessor;
+import com.qsp.player.service.ImageProvider;
 import com.qsp.player.util.StreamUtil;
 
 import org.slf4j.Logger;

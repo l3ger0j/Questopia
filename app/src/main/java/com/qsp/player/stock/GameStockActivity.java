@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -14,7 +13,6 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
-import android.preference.PreferenceManager;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -34,8 +32,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.collection.SparseArrayCompat;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.preference.PreferenceManager;
 
 import com.qsp.player.R;
+import com.qsp.player.Settings;
 import com.qsp.player.SettingsActivity;
 import com.qsp.player.stock.install.ArchiveGameInstaller;
 import com.qsp.player.stock.install.FolderGameInstaller;
@@ -75,6 +75,8 @@ import static com.qsp.player.util.FileUtil.isWritableFile;
 import static com.qsp.player.util.FileUtil.normalizeGameFolderName;
 import static com.qsp.player.util.GameDirUtil.doesDirectoryContainGameFiles;
 import static com.qsp.player.util.GameDirUtil.normalizeGameDirectory;
+import static com.qsp.player.util.ViewUtil.getFontStyle;
+import static com.qsp.player.util.ViewUtil.setLocale;
 
 public class GameStockActivity extends AppCompatActivity {
     private static final int REQUEST_CODE_INSTALL_GAME = 1;
@@ -99,9 +101,9 @@ public class GameStockActivity extends AppCompatActivity {
     private final LocalGameRepository localGameRepository = new LocalGameRepository();
     private final HashMap<InstallType, GameInstaller> installers = new HashMap<>();
 
+    private Settings settings;
     private String gameRunning;
     private boolean showProgressDialog;
-    private SharedPreferences settings;
     private String currentLanguage = Locale.getDefault().getLanguage();
     private ListView gamesView;
     private ProgressDialog progressDialog;
@@ -122,12 +124,12 @@ public class GameStockActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_stock);
 
-        settings = PreferenceManager.getDefaultSharedPreferences(this);
         connectivityManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
 
         Intent intent = getIntent();
         gameRunning = intent.getStringExtra("gameRunning");
 
+        loadSettings();
         loadLocale();
         initGamesListView();
         initActionBar(savedInstanceState);
@@ -136,11 +138,15 @@ public class GameStockActivity extends AppCompatActivity {
         logger.info("GameStockActivity created");
     }
 
+    private void loadSettings() {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        settings = Settings.from(preferences);
+    }
+
     private void loadLocale() {
-        String language = settings.getString("lang", "ru");
-        ViewUtil.setLocale(this, language);
+        setLocale(this, settings.getLanguage());
         setTitle(R.string.gameStock);
-        currentLanguage = language;
+        currentLanguage = settings.getLanguage();
     }
 
     private void initActionBar(Bundle savedInstanceState) {
@@ -175,12 +181,10 @@ public class GameStockActivity extends AppCompatActivity {
         gamesView = findViewById(R.id.games);
         gamesView.setTextFilterEnabled(true);
         gamesView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-
         gamesView.setOnItemClickListener((parent, view, position, id) -> {
             String gameId = getGameIdByPosition(position);
             showGameInfo(gameId);
         });
-
         gamesView.setOnItemLongClickListener((parent, view, position, id) -> {
             String gameId = getGameIdByPosition(position);
             GameStockItem game = gamesMap.get(gameId);
@@ -189,7 +193,6 @@ public class GameStockActivity extends AppCompatActivity {
             } else {
                 logger.error("Game not found: " + gameId);
             }
-
             return true;
         });
     }
@@ -306,6 +309,8 @@ public class GameStockActivity extends AppCompatActivity {
     @Override
     public void onResume() {
         super.onResume();
+
+        loadSettings();
         updateLocale();
         refreshGamesDirectory();
 
@@ -315,14 +320,14 @@ public class GameStockActivity extends AppCompatActivity {
     }
 
     private void updateLocale() {
-        String language = settings.getString("lang", "ru");
-        if (!currentLanguage.equals(language)) {
-            ViewUtil.setLocale(this, language);
-            setTitle(getString(R.string.gameStock));
-            refreshActionBar();
-            invalidateOptionsMenu();
-            currentLanguage = language;
-        }
+        if (currentLanguage.equals(settings.getLanguage())) return;
+
+        setLocale(this, settings.getLanguage());
+        setTitle(getString(R.string.gameStock));
+        refreshActionBar();
+        invalidateOptionsMenu();
+
+        currentLanguage = settings.getLanguage();
     }
 
     private void refreshActionBar() {
@@ -559,18 +564,12 @@ public class GameStockActivity extends AppCompatActivity {
     private void showAboutDialog() {
         View messageView = getLayoutInflater().inflate(R.layout.dialog_about, null, false);
 
-        String typeface = settings.getString("typeface", "0");
-        String fontSize = settings.getString("fontsize", "16");
-        String backColor = String.format("#%06X", (0xFFFFFF & settings.getInt("backColor", Color.parseColor("#e0e0e0"))));
-        String textColor = String.format("#%06X", (0xFFFFFF & settings.getInt("textColor", Color.parseColor("#000000"))));
-        String linkColor = String.format("#%06X", (0xFFFFFF & settings.getInt("linkColor", Color.parseColor("#0000ff"))));
-
         String desc = ABOUT_TEMPLATE
-                .replace("QSPFONTSTYLE", ViewUtil.getFontStyle(typeface))
-                .replace("QSPFONTSIZE", fontSize)
-                .replace("QSPTEXTCOLOR", textColor)
-                .replace("QSPBACKCOLOR", backColor)
-                .replace("QSPLINKCOLOR", linkColor)
+                .replace("QSPFONTSTYLE", getFontStyle(settings.getTypeface()))
+                .replace("QSPFONTSIZE", Integer.toString(settings.getFontSize()))
+                .replace("QSPTEXTCOLOR", Integer.toString(settings.getTextColor()))
+                .replace("QSPBACKCOLOR", Integer.toString(settings.getBackColor()))
+                .replace("QSPLINKCOLOR", Integer.toString(settings.getLinkColor()))
                 .replace("REPLACETEXT", getString(R.string.appDescription) + getString(R.string.appCredits));
 
         WebView descView = messageView.findViewById(R.id.about_descrip);

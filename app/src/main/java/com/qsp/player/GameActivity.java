@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.graphics.Typeface;
 import android.media.AudioManager;
 import android.net.Uri;
@@ -47,9 +46,6 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.core.view.GestureDetectorCompat;
 
-import com.qsp.player.common.AudioPlayer;
-import com.qsp.player.common.HtmlProcessor;
-import com.qsp.player.common.ImageProvider;
 import com.qsp.player.libqsp.GameInterface;
 import com.qsp.player.libqsp.LibQspProxy;
 import com.qsp.player.libqsp.model.InterfaceConfiguration;
@@ -57,6 +53,9 @@ import com.qsp.player.libqsp.model.QspListItem;
 import com.qsp.player.libqsp.model.QspMenuItem;
 import com.qsp.player.libqsp.model.RefreshInterfaceRequest;
 import com.qsp.player.libqsp.model.WindowType;
+import com.qsp.player.service.AudioPlayer;
+import com.qsp.player.service.HtmlProcessor;
+import com.qsp.player.service.ImageProvider;
 import com.qsp.player.stock.GameStockActivity;
 import com.qsp.player.util.ViewUtil;
 
@@ -81,6 +80,7 @@ import static com.qsp.player.util.FileUtil.getOrCreateDirectory;
 import static com.qsp.player.util.FileUtil.getOrCreateFile;
 import static com.qsp.player.util.FileUtil.normalizePath;
 import static com.qsp.player.util.ThreadUtil.isMainThread;
+import static com.qsp.player.util.ViewUtil.setLocale;
 
 @SuppressLint("ClickableViewAccessibility")
 public class GameActivity extends AppCompatActivity implements GameInterface, GestureDetector.OnGestureListener {
@@ -94,8 +94,8 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
     private static final int REQUEST_CODE_LOAD_FROM_FILE = 2;
     private static final int REQUEST_CODE_SAVE_TO_FILE = 3;
 
-    private static final int TAB_OBJECTS = 0;
-    private static final int TAB_MAIN_DESC_AND_ACTIONS = 1;
+    private static final int TAB_MAIN_DESC_AND_ACTIONS = 0;
+    private static final int TAB_OBJECTS = 1;
     private static final int TAB_VARS_DESC = 2;
 
     private static final String PAGE_HEAD_TEMPLATE = "<head>\n"
@@ -127,35 +127,35 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
         }
     };
 
-    private SharedPreferences settings;
+    private Settings settings;
     private String currentLanguage = Locale.getDefault().getLanguage();
     private int activeTab;
     private String pageTemplate = "";
-    private boolean selectingGame;
-    private GestureDetectorCompat gestureDetector;
     private boolean showActions = true;
+    private boolean selectingGame;
+
+    // region Контролы
 
     private ActionBar actionBar;
+    private Menu mainMenu;
     private ConstraintLayout layoutTop;
     private WebView mainDescView;
     private WebView varsDescView;
     private View separatorView;
     private ListView actionsView;
     private ListView objectsView;
-    private Menu mainMenu;
 
-    private float actionsHeightRatio;
-    private String typeface = "";
-    private String fontSize = "";
-    private boolean useGameFont;
-    private int backColor;
-    private int textColor;
-    private int linkColor;
+    // endregion Контролы
+
+    // region Сервисы
 
     private HtmlProcessor htmlProcessor;
     private ImageProvider imageProvider;
     private LibQspProxy libQspProxy;
     private AudioPlayer audioPlayer;
+    private GestureDetectorCompat gestureDetector;
+
+    // endregion Сервисы
 
     // region Локация-счётчик
 
@@ -177,23 +177,15 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
-        setVolumeControlStream(AudioManager.STREAM_MUSIC);
         bindBackgroundService();
+        setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
-        settings = PreferenceManager.getDefaultSharedPreferences(this);
-        gestureDetector = new GestureDetectorCompat(this, this);
-
+        initServices();
+        initControls();
+        loadSettings();
         loadLocale();
-        initDependencies();
-        initActionBar();
-        initLayoutTopView();
-        initMainDescView();
-        initVarsDescView();
-        initSeparatorView();
-        initActionsView();
-        initObjectsView();
-
         setActiveTab(TAB_MAIN_DESC_AND_ACTIONS);
+
         logger.info("GameActivity created");
     }
 
@@ -202,36 +194,20 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
         bindService(intent, backgroundServiceConn, BIND_AUTO_CREATE);
     }
 
-    private void initDependencies() {
-        QuestPlayerApplication application = (QuestPlayerApplication) getApplication();
+    private void initControls() {
+        layoutTop = findViewById(R.id.layout_top);
+        separatorView = findViewById(R.id.separator);
 
-        htmlProcessor = application.getHtmlProcessor();
-        imageProvider = application.getImageProvider();
-
-        audioPlayer = application.getAudioPlayer();
-        audioPlayer.start();
-
-        libQspProxy = application.getLibQspProxy();
-        libQspProxy.setGameInterface(this);
-    }
-
-    private void loadLocale() {
-        String language = settings.getString("lang", "ru");
-        ViewUtil.setLocale(this, language);
-        currentLanguage = language;
+        initActionBar();
+        initMainDescView();
+        initActionsView();
+        initObjectsView();
+        initVarsDescView();
     }
 
     private void initActionBar() {
         setSupportActionBar(findViewById(R.id.toolbar));
         actionBar = getSupportActionBar();
-    }
-
-    private void initLayoutTopView() {
-        layoutTop = findViewById(R.id.layout_top);
-    }
-
-    private boolean handleTouchEvent(View v, MotionEvent event) {
-        return gestureDetector.onTouchEvent(event);
     }
 
     private void initMainDescView() {
@@ -240,14 +216,8 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
         mainDescView.setOnTouchListener(this::handleTouchEvent);
     }
 
-    private void initVarsDescView() {
-        varsDescView = findViewById(R.id.vars_desc);
-        varsDescView.setWebViewClient(new QspWebViewClient());
-        varsDescView.setOnTouchListener(this::handleTouchEvent);
-    }
-
-    private void initSeparatorView() {
-        separatorView = findViewById(R.id.separator);
+    private boolean handleTouchEvent(View v, MotionEvent event) {
+        return gestureDetector.onTouchEvent(event);
     }
 
     private void initActionsView() {
@@ -274,25 +244,51 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
         objectsView.setOnTouchListener(this::handleTouchEvent);
     }
 
+    private void initVarsDescView() {
+        varsDescView = findViewById(R.id.vars_desc);
+        varsDescView.setWebViewClient(new QspWebViewClient());
+        varsDescView.setOnTouchListener(this::handleTouchEvent);
+    }
+
+    private void initServices() {
+        gestureDetector = new GestureDetectorCompat(this, this);
+
+        QuestPlayerApplication application = (QuestPlayerApplication) getApplication();
+
+        htmlProcessor = application.getHtmlProcessor();
+        imageProvider = application.getImageProvider();
+
+        audioPlayer = application.getAudioPlayer();
+        audioPlayer.start();
+
+        libQspProxy = application.getLibQspProxy();
+        libQspProxy.setGameInterface(this);
+    }
+
+    private void loadLocale() {
+        setLocale(this, settings.getLanguage());
+        currentLanguage = settings.getLanguage();
+    }
+
     private void setActiveTab(int tab) {
         switch (tab) {
-            case TAB_OBJECTS:
-                toggleObjects(true);
-                toggleMainDescAndActions(false);
-                toggleVarsDesc(false);
-                setTitle(getString(R.string.inventory));
-                break;
-
             case TAB_MAIN_DESC_AND_ACTIONS:
-                toggleObjects(false);
                 toggleMainDescAndActions(true);
+                toggleObjects(false);
                 toggleVarsDesc(false);
                 setTitle(getString(R.string.mainDesc));
                 break;
 
-            case TAB_VARS_DESC:
-                toggleObjects(false);
+            case TAB_OBJECTS:
                 toggleMainDescAndActions(false);
+                toggleObjects(true);
+                toggleVarsDesc(false);
+                setTitle(getString(R.string.inventory));
+                break;
+
+            case TAB_VARS_DESC:
+                toggleMainDescAndActions(false);
+                toggleObjects(false);
                 toggleVarsDesc(true);
                 setTitle(getString(R.string.varsDesc));
                 break;
@@ -300,10 +296,6 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
 
         activeTab = tab;
         updateTabIcons();
-    }
-
-    private void toggleObjects(boolean show) {
-        findViewById(R.id.objects).setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
     private void toggleMainDescAndActions(boolean show) {
@@ -314,6 +306,10 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
         findViewById(R.id.actions).setVisibility(shouldShowActions ? View.VISIBLE : View.GONE);
     }
 
+    private void toggleObjects(boolean show) {
+        findViewById(R.id.objects).setVisibility(show ? View.VISIBLE : View.GONE);
+    }
+
     private void toggleVarsDesc(boolean show) {
         findViewById(R.id.vars_desc).setVisibility(show ? View.VISIBLE : View.GONE);
     }
@@ -322,11 +318,19 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
         actionBar.setTitle(title);
     }
 
+    private void updateTabIcons() {
+        if (mainMenu == null) return;
+
+        mainMenu.findItem(R.id.menu_inventory).setIcon(activeTab == TAB_OBJECTS ? R.drawable.ic_tab_objects : R.drawable.ic_tab_objects_alt);
+        mainMenu.findItem(R.id.menu_maindesc).setIcon(activeTab == TAB_MAIN_DESC_AND_ACTIONS ? R.drawable.ic_tab_main : R.drawable.ic_tab_main_alt);
+        mainMenu.findItem(R.id.menu_varsdesc).setIcon(activeTab == TAB_VARS_DESC ? R.drawable.ic_tab_vars : R.drawable.ic_tab_vars_alt);
+    }
+
     @Override
     protected void onDestroy() {
         audioPlayer.stop();
-        counterHandler.removeCallbacks(counterTask);
         libQspProxy.setGameInterface(null);
+        counterHandler.removeCallbacks(counterTask);
         unbindService(backgroundServiceConn);
         super.onDestroy();
         logger.info("GameActivity destroyed");
@@ -343,13 +347,13 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
     public void onResume() {
         super.onResume();
 
-        updateLocale();
         loadSettings();
+        updateLocale();
         applySettings();
 
         if (libQspProxy.getGameState().isGameRunning()) {
-            applyViewState();
-            audioPlayer.setSoundEnabled(settings.getBoolean("sound", true));
+            applyGameState();
+            audioPlayer.setSoundEnabled(settings.isSoundEnabled());
             audioPlayer.resume();
             counterHandler.postDelayed(counterTask, counterInterval);
 
@@ -358,47 +362,24 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
         }
     }
 
-    private void updateLocale() {
-        String language = settings.getString("lang", "ru");
-        if (currentLanguage.equals(language)) return;
+    private void loadSettings() {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        settings = Settings.from(preferences);
+    }
 
-        ViewUtil.setLocale(this, language);
+    private void updateLocale() {
+        if (currentLanguage.equals(settings.getLanguage())) return;
+
+        setLocale(this, settings.getLanguage());
         setTitle(R.string.appName);
         invalidateOptionsMenu();
         setActiveTab(activeTab);
-        currentLanguage = language;
-    }
 
-    private void loadSettings() {
-        loadActionsHeight();
-
-        typeface = settings.getString("typeface", "0");
-        fontSize = settings.getString("fontSize", "16");
-        useGameFont = settings.getBoolean("useGameFont", false);
-        backColor = settings.getInt("backColor", Color.parseColor("#e0e0e0"));
-        textColor = settings.getInt("textColor", Color.parseColor("#000000"));
-        linkColor = settings.getInt("linkColor", Color.parseColor("#0000ff"));
-    }
-
-    private void loadActionsHeight() {
-        String strValue = settings.getString("actsHeight", "1/3");
-        switch (strValue) {
-            case "1/3":
-                actionsHeightRatio = 0.33f;
-                break;
-            case "1/2":
-                actionsHeightRatio = 0.5f;
-                break;
-            case "2/3":
-                actionsHeightRatio = 0.67f;
-                break;
-            default:
-                throw new RuntimeException("Unsupported value of actsHeight: " + strValue);
-        }
+        currentLanguage = settings.getLanguage();
     }
 
     private void applySettings() {
-        updateActionsHeight();
+        applyActionsHeightRatio();
 
         int backColor = getBackgroundColor();
         layoutTop.setBackgroundColor(backColor);
@@ -410,17 +391,17 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
         updatePageTemplate();
     }
 
-    private void updateActionsHeight() {
-        ConstraintSet constraintSet = new ConstraintSet();
-        constraintSet.clone(layoutTop);
-        constraintSet.setVerticalWeight(R.id.main_desc, 1.0f - actionsHeightRatio);
-        constraintSet.setVerticalWeight(R.id.actions, actionsHeightRatio);
-        constraintSet.applyTo(layoutTop);
-    }
-
     private int getBackgroundColor() {
         InterfaceConfiguration config = libQspProxy.getGameState().getInterfaceConfig();
-        return config.getBackColor() != 0 ? convertRgbaToBgra(config.getBackColor()) : backColor;
+        return config.getBackColor() != 0 ? convertRgbaToBgra(config.getBackColor()) : settings.getBackColor();
+    }
+
+    private void applyActionsHeightRatio() {
+        ConstraintSet constraintSet = new ConstraintSet();
+        constraintSet.clone(layoutTop);
+        constraintSet.setVerticalWeight(R.id.main_desc, 1.0f - settings.getActionsHeightRatio());
+        constraintSet.setVerticalWeight(R.id.actions, settings.getActionsHeightRatio());
+        constraintSet.applyTo(layoutTop);
     }
 
     private void updatePageTemplate() {
@@ -428,28 +409,28 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
                 .replace("QSPTEXTCOLOR", getHexColor(getTextColor()))
                 .replace("QSPBACKCOLOR", getHexColor(getBackgroundColor()))
                 .replace("QSPLINKCOLOR", getHexColor(getLinkColor()))
-                .replace("QSPFONTSTYLE", ViewUtil.getFontStyle(typeface))
-                .replace("QSPFONTSIZE", getFontSize());
+                .replace("QSPFONTSTYLE", ViewUtil.getFontStyle(settings.getTypeface()))
+                .replace("QSPFONTSIZE", Integer.toString(getFontSize()));
 
         pageTemplate = pageHeadTemplate + PAGE_BODY_TEMPLATE;
     }
 
     private int getTextColor() {
         InterfaceConfiguration config = libQspProxy.getGameState().getInterfaceConfig();
-        return config.getFontColor() != 0 ? convertRgbaToBgra(config.getFontColor()) : textColor;
+        return config.getFontColor() != 0 ? convertRgbaToBgra(config.getFontColor()) : settings.getTextColor();
     }
 
     private int getLinkColor() {
         InterfaceConfiguration config = libQspProxy.getGameState().getInterfaceConfig();
-        return config.getLinkColor() != 0 ? convertRgbaToBgra(config.getLinkColor()) : linkColor;
+        return config.getLinkColor() != 0 ? convertRgbaToBgra(config.getLinkColor()) : settings.getLinkColor();
     }
 
-    private String getFontSize() {
+    private int getFontSize() {
         InterfaceConfiguration config = libQspProxy.getGameState().getInterfaceConfig();
-        return useGameFont && config.getFontSize() != 0 ? Integer.toString(config.getFontSize()) : fontSize;
+        return settings.isUseGameFont() && config.getFontSize() != 0 ? config.getFontSize() : settings.getFontSize();
     }
 
-    private void applyViewState() {
+    private void applyGameState() {
         imageProvider.invalidateCache();
 
         applySettings();
@@ -472,6 +453,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
 
     private String getHtml(String str) {
         InterfaceConfiguration config = libQspProxy.getGameState().getInterfaceConfig();
+
         return config.isUseHtml() ?
                 htmlProcessor.preprocessQspHtml(str) :
                 htmlProcessor.convertQspStringToHtml(str);
@@ -526,14 +508,6 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
         updateTabIcons();
 
         return true;
-    }
-
-    private void updateTabIcons() {
-        if (mainMenu == null) return;
-
-        mainMenu.findItem(R.id.menu_inventory).setIcon(activeTab == TAB_OBJECTS ? R.drawable.ic_tab_objects : R.drawable.ic_tab_objects_alt);
-        mainMenu.findItem(R.id.menu_maindesc).setIcon(activeTab == TAB_MAIN_DESC_AND_ACTIONS ? R.drawable.ic_tab_main : R.drawable.ic_tab_main_alt);
-        mainMenu.findItem(R.id.menu_varsdesc).setIcon(activeTab == TAB_VARS_DESC ? R.drawable.ic_tab_vars : R.drawable.ic_tab_vars_alt);
     }
 
     @Override
@@ -1056,7 +1030,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
                 }
                 if (textView != null) {
                     textView.setTypeface(getTypeface());
-                    textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, Float.parseFloat(getFontSize()));
+                    textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, getFontSize());
                     //textView.setBackgroundColor(getBackgroundColor());
                     textView.setTextColor(getTextColor());
                     textView.setLinkTextColor(getLinkColor());
@@ -1068,14 +1042,13 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
         }
 
         private Typeface getTypeface() {
-            switch (Integer.parseInt(typeface)) {
+            switch (settings.getTypeface()) {
                 case 1:
                     return Typeface.SANS_SERIF;
                 case 2:
                     return Typeface.SERIF;
                 case 3:
                     return Typeface.MONOSPACE;
-                case 0:
                 default:
                     return Typeface.DEFAULT;
             }

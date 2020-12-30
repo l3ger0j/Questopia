@@ -6,7 +6,7 @@ import android.widget.ImageView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.qsp.player.common.ImageProvider;
+import com.qsp.player.service.ImageProvider;
 
 public class ImageBoxActivity extends AppCompatActivity {
     private ImageProvider imageProvider;

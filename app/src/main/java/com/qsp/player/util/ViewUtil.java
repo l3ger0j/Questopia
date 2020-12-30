@@ -37,14 +37,14 @@ public final class ViewUtil {
                 .show();
     }
 
-    public static String getFontStyle(String typeface) {
+    public static String getFontStyle(int typeface) {
         switch (typeface) {
-            case "2":
+            case 2:
                 return "serif";
-            case "3":
+            case 3:
                 return "courier";
-            case "0":
-            case "1":
+            case 0:
+            case 1:
             default:
                 return "sans-serif";
         }
