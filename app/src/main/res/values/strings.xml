@@ -62,6 +62,8 @@
     <string name="soundSummary">Play music and sounds</string>
     <string name="lang">Language</string>
     <string name="langSummary">Choose display language</string>
+    <string name="actsHeight">Actions List Height</string>
+    <string name="actsHeightSummary">Actions List Height To Screen Height Ratio</string>
     <string name="closeToApply">Close settings to apply changes</string>
 
     <string name="error">Error</string>

@@ -18,7 +18,7 @@
         app:titleTextAppearance="@style/TextAppearance.AppCompat.Small" />
 
     <WebView
-        android:id="@+id/main_description"
+        android:id="@+id/main_desc"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:background="@color/web_background"
@@ -39,7 +39,7 @@
         app:layout_constraintBottom_toTopOf="@id/actions"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/main_description" />
+        app:layout_constraintTop_toBottomOf="@id/main_desc" />
 
     <ListView
         android:id="@+id/actions"

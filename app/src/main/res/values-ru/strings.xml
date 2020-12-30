@@ -62,6 +62,8 @@
     <string name="soundSummary">Проигрывать звуки и музыку</string>
     <string name="lang">Язык</string>
     <string name="langSummary">Выберите язык интерфейса</string>
+    <string name="actsHeight">Высота списка действий</string>
+    <string name="actsHeightSummary">Соотношение высоты списка действий к высоте экрана</string>
     <string name="closeToApply">Закройте настройки для применения изменений</string>
 
     <string name="error">Ошибка</string>

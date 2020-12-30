@@ -10,13 +10,18 @@
             android:key="lang"
             android:summary="@string/langSummary"
             android:title="@string/lang" />
-
         <CheckBoxPreference
             android:defaultValue="true"
             android:key="sound"
             android:summary="@string/soundSummary"
             android:title="@string/sound" />
-
+        <ListPreference
+            android:defaultValue="1/3"
+            android:entries="@array/actsHeight"
+            android:entryValues="@array/actsHeight"
+            android:key="actsHeight"
+            android:summary="@string/actsHeightSummary"
+            android:title="@string/actsHeight" />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/textSettings">
@@ -26,37 +31,31 @@
             android:entryValues="@array/fontValue"
             android:key="typeface"
             android:title="@string/fontStyle" />
-
         <ListPreference
             android:defaultValue="16"
             android:entries="@array/fontSize"
             android:entryValues="@array/fontSize"
             android:key="fontSize"
             android:title="@string/fontSize" />
-
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="useGameFont"
             android:title="@string/useGameFont" />
-
         <com.kizitonwose.colorpreferencecompat.ColorPreferenceCompat
             android:defaultValue="@color/def_back_color"
             android:key="backColor"
             android:title="@string/backColor"
             app:showDialog="false" />
-
         <com.kizitonwose.colorpreferencecompat.ColorPreferenceCompat
             android:defaultValue="@color/def_text_color"
             android:key="textColor"
             android:title="@string/textColor"
             app:showDialog="false" />
-
         <com.kizitonwose.colorpreferencecompat.ColorPreferenceCompat
             android:defaultValue="@color/def_link_color"
             android:key="linkColor"
             android:title="@string/linkColor"
             app:showDialog="false" />
-
     </PreferenceCategory>
 
 </androidx.preference.PreferenceScreen>

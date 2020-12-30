@@ -39,6 +39,8 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.core.view.GestureDetectorCompat;
 
 import com.qsp.player.QuestPlayerApplication;
@@ -118,7 +120,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
     private boolean showActions = true;
 
     private ActionBar actionBar;
-    private View layoutTop;
+    private ConstraintLayout layoutTop;
     private WebView mainDescView;
     private WebView varsDescView;
     private View separatorView;
@@ -126,6 +128,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
     private ListView objectsView;
     private Menu mainMenu;
 
+    private float actionsHeightRatio;
     private String typeface = "";
     private String fontSize = "";
     private boolean useGameFont;
@@ -186,7 +189,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
     }
 
     private void initMainDescView() {
-        mainDescView = findViewById(R.id.main_description);
+        mainDescView = findViewById(R.id.main_desc);
         mainDescView.setWebViewClient(new QspWebViewClient());
         mainDescView.setOnTouchListener(this::handleTouchEvent);
     }
@@ -258,7 +261,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
     }
 
     private void toggleMainDescAndActions(boolean show) {
-        findViewById(R.id.main_description).setVisibility(show ? View.VISIBLE : View.GONE);
+        findViewById(R.id.main_desc).setVisibility(show ? View.VISIBLE : View.GONE);
 
         boolean shouldShowActions = show && showActions;
         findViewById(R.id.separator).setVisibility(shouldShowActions ? View.VISIBLE : View.GONE);
@@ -285,8 +288,8 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
         super.onResume();
 
         updateLocale();
-        loadTextSettings();
-        applyTextSettings();
+        loadSettings();
+        applySettings();
 
         viewState = libQspProxy.getViewState();
         if (viewState.isGameRunning()) {
@@ -309,7 +312,9 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
         currentLanguage = language;
     }
 
-    private void loadTextSettings() {
+    private void loadSettings() {
+        loadActionsHeight();
+
         typeface = settings.getString("typeface", "0");
         fontSize = settings.getString("fontSize", "16");
         useGameFont = settings.getBoolean("useGameFont", false);
@@ -318,9 +323,27 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
         linkColor = settings.getInt("linkColor", Color.parseColor("#0000ff"));
     }
 
-    private void applyTextSettings() {
-        int backColor = getBackgroundColor();
+    private void loadActionsHeight() {
+        String strValue = settings.getString("actsHeight", "1/3");
+        switch (strValue) {
+            case "1/3":
+                actionsHeightRatio = 0.33f;
+                break;
+            case "1/2":
+                actionsHeightRatio = 0.5f;
+                break;
+            case "2/3":
+                actionsHeightRatio = 0.67f;
+                break;
+            default:
+                throw new RuntimeException("Unsupported value of actsHeight: " + strValue);
+        }
+    }
 
+    private void applySettings() {
+        updateActionsHeight();
+
+        int backColor = getBackgroundColor();
         layoutTop.setBackgroundColor(backColor);
         mainDescView.setBackgroundColor(backColor);
         varsDescView.setBackgroundColor(backColor);
@@ -328,6 +351,14 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
         objectsView.setBackgroundColor(backColor);
 
         updatePageTemplate();
+    }
+
+    private void updateActionsHeight() {
+        ConstraintSet constraintSet = new ConstraintSet();
+        constraintSet.clone(layoutTop);
+        constraintSet.setVerticalWeight(R.id.main_desc, 1.0f - actionsHeightRatio);
+        constraintSet.setVerticalWeight(R.id.actions, actionsHeightRatio);
+        constraintSet.applyTo(layoutTop);
     }
 
     private int getBackgroundColor() {
@@ -379,7 +410,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
     private void applyViewState() {
         imageProvider.invalidateCache();
 
-        applyTextSettings();
+        applySettings();
         refreshMainDesc();
         refreshVarsDesc();
         refreshActions();
@@ -720,7 +751,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
             viewState = libQspProxy.getViewState();
 
             if (confChanged) {
-                applyTextSettings();
+                applySettings();
             }
             if (confChanged || mainDescChanged) {
                 refreshMainDesc();
