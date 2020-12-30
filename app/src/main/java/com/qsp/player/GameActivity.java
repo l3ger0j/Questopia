@@ -50,11 +50,12 @@ import androidx.core.view.GestureDetectorCompat;
 import com.qsp.player.common.AudioPlayer;
 import com.qsp.player.common.HtmlProcessor;
 import com.qsp.player.common.ImageProvider;
+import com.qsp.player.libqsp.GameInterface;
 import com.qsp.player.libqsp.LibQspProxy;
-import com.qsp.player.libqsp.PlayerView;
-import com.qsp.player.libqsp.PlayerViewState;
+import com.qsp.player.libqsp.model.InterfaceConfiguration;
 import com.qsp.player.libqsp.model.QspListItem;
 import com.qsp.player.libqsp.model.QspMenuItem;
+import com.qsp.player.libqsp.model.RefreshInterfaceRequest;
 import com.qsp.player.libqsp.model.WindowType;
 import com.qsp.player.stock.GameStockActivity;
 import com.qsp.player.util.ViewUtil;
@@ -71,6 +72,8 @@ import java.util.Locale;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CountDownLatch;
 
+import static com.qsp.player.util.ColorUtil.convertRgbaToBgra;
+import static com.qsp.player.util.ColorUtil.getHexColor;
 import static com.qsp.player.util.FileUtil.findFileOrDirectory;
 import static com.qsp.player.util.FileUtil.findFileRecursively;
 import static com.qsp.player.util.FileUtil.getExtension;
@@ -80,7 +83,7 @@ import static com.qsp.player.util.FileUtil.normalizePath;
 import static com.qsp.player.util.ThreadUtil.isMainThread;
 
 @SuppressLint("ClickableViewAccessibility")
-public class GameActivity extends AppCompatActivity implements PlayerView, GestureDetector.OnGestureListener {
+public class GameActivity extends AppCompatActivity implements GameInterface, GestureDetector.OnGestureListener {
     private static final int MAX_SAVE_SLOTS = 5;
 
     private static final String SHOW_ADVANCED_EXTRA_NAME = Build.VERSION.SDK_INT < Build.VERSION_CODES.Q ?
@@ -129,7 +132,6 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
     private int activeTab;
     private String pageTemplate = "";
     private boolean selectingGame;
-    private PlayerViewState viewState;
     private GestureDetectorCompat gestureDetector;
     private boolean showActions = true;
 
@@ -210,7 +212,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
         audioPlayer.start();
 
         libQspProxy = application.getLibQspProxy();
-        libQspProxy.setPlayerView(this);
+        libQspProxy.setGameInterface(this);
     }
 
     private void loadLocale() {
@@ -324,7 +326,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
     protected void onDestroy() {
         audioPlayer.stop();
         counterHandler.removeCallbacks(counterTask);
-        libQspProxy.setPlayerView(null);
+        libQspProxy.setGameInterface(null);
         unbindService(backgroundServiceConn);
         super.onDestroy();
         logger.info("GameActivity destroyed");
@@ -345,12 +347,12 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
         loadSettings();
         applySettings();
 
-        viewState = libQspProxy.getViewState();
-        if (viewState.isGameRunning()) {
+        if (libQspProxy.getGameState().isGameRunning()) {
             applyViewState();
             audioPlayer.setSoundEnabled(settings.getBoolean("sound", true));
             audioPlayer.resume();
             counterHandler.postDelayed(counterTask, counterInterval);
+
         } else if (!selectingGame) {
             startSelectGame();
         }
@@ -417,16 +419,8 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
     }
 
     private int getBackgroundColor() {
-        return viewState != null && viewState.getBackColor() != 0 ?
-                reverseColor(viewState.getBackColor()) :
-                backColor;
-    }
-
-    private int reverseColor(int color) {
-        return 0xff000000 |
-                ((color & 0x0000ff) << 16) |
-                (color & 0x00ff00) |
-                ((color & 0xff0000) >> 16);
+        InterfaceConfiguration config = libQspProxy.getGameState().getInterfaceConfig();
+        return config.getBackColor() != 0 ? convertRgbaToBgra(config.getBackColor()) : backColor;
     }
 
     private void updatePageTemplate() {
@@ -441,25 +435,18 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
     }
 
     private int getTextColor() {
-        return viewState != null && viewState.getFontColor() != 0 ?
-                reverseColor(viewState.getFontColor()) :
-                textColor;
+        InterfaceConfiguration config = libQspProxy.getGameState().getInterfaceConfig();
+        return config.getFontColor() != 0 ? convertRgbaToBgra(config.getFontColor()) : textColor;
     }
 
     private int getLinkColor() {
-        return viewState != null && viewState.getLinkColor() != 0 ?
-                reverseColor(viewState.getLinkColor()) :
-                linkColor;
+        InterfaceConfiguration config = libQspProxy.getGameState().getInterfaceConfig();
+        return config.getLinkColor() != 0 ? convertRgbaToBgra(config.getLinkColor()) : linkColor;
     }
 
     private String getFontSize() {
-        return useGameFont && viewState != null && viewState.getFontSize() != 0 ?
-                Integer.toString(viewState.getFontSize()) :
-                fontSize;
-    }
-
-    private String getHexColor(int color) {
-        return String.format("#%06X", 0xFFFFFF & color);
+        InterfaceConfiguration config = libQspProxy.getGameState().getInterfaceConfig();
+        return useGameFont && config.getFontSize() != 0 ? Integer.toString(config.getFontSize()) : fontSize;
     }
 
     private void applyViewState() {
@@ -473,44 +460,49 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
     }
 
     private void refreshMainDesc() {
-        String text = getHtml(viewState.getMainDesc());
+        String mainDesc = getHtml(libQspProxy.getGameState().getMainDesc());
+
         mainDescView.loadDataWithBaseURL(
                 "file:///",
-                pageTemplate.replace("REPLACETEXT", text),
+                pageTemplate.replace("REPLACETEXT", mainDesc),
                 "text/html",
                 "UTF-8",
                 "");
     }
 
     private String getHtml(String str) {
-        return viewState.isUseHtml() ?
+        InterfaceConfiguration config = libQspProxy.getGameState().getInterfaceConfig();
+        return config.isUseHtml() ?
                 htmlProcessor.preprocessQspHtml(str) :
                 htmlProcessor.convertQspStringToHtml(str);
     }
 
     private void refreshVarsDesc() {
-        String text = getHtml(viewState.getVarsDesc());
+        String varsDesc = getHtml(libQspProxy.getGameState().getVarsDesc());
+
         varsDescView.loadDataWithBaseURL(
                 "file:///",
-                pageTemplate.replace("REPLACETEXT", text),
+                pageTemplate.replace("REPLACETEXT", varsDesc),
                 "text/html",
                 "UTF-8",
                 "");
     }
 
     private void refreshActions() {
-        actionsView.setAdapter(new QspItemAdapter(this, R.layout.list_item_action, viewState.getActions()));
+        ArrayList<QspListItem> actions = libQspProxy.getGameState().getActions();
+        actionsView.setAdapter(new QspItemAdapter(this, R.layout.list_item_action, actions));
     }
 
     private void refreshObjects() {
-        objectsView.setAdapter(new QspItemAdapter(this, R.layout.list_item_object, viewState.getObjects()));
+        ArrayList<QspListItem> objects = libQspProxy.getGameState().getObjects();
+        objectsView.setAdapter(new QspItemAdapter(this, R.layout.list_item_object, objects));
     }
 
     private void startSelectGame() {
         selectingGame = true;
         Intent intent = new Intent(this, GameStockActivity.class);
-        if (viewState.isGameRunning()) {
-            intent.putExtra("gameRunning", viewState.getGameId());
+        if (libQspProxy.getGameState().isGameRunning()) {
+            intent.putExtra("gameRunning", libQspProxy.getGameState().getGameId());
         }
         startActivityForResult(intent, REQUEST_CODE_SELECT_GAME);
     }
@@ -546,7 +538,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        boolean gameRunning = viewState.isGameRunning();
+        boolean gameRunning = libQspProxy.getGameState().isGameRunning();
         menu.setGroupVisible(R.id.menugroup_running, gameRunning);
 
         if (gameRunning) {
@@ -569,7 +561,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
         subMenu.setHeaderTitle(getString(R.string.selectSlot));
 
         MenuItem item;
-        final File savesDir = getOrCreateDirectory(viewState.getGameDir(), "saves");
+        final File savesDir = getOrCreateDirectory(libQspProxy.getGameState().getGameDir(), "saves");
         final LibQspProxy proxy = libQspProxy;
 
         for (int i = 0; i < MAX_SAVE_SLOTS; ++i) {
@@ -630,7 +622,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
     private void startSaveToFile() {
         Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
         intent.setType("application/octet-stream");
-        intent.putExtra(Intent.EXTRA_TITLE, viewState.getGameFile() + ".sav");
+        intent.putExtra(Intent.EXTRA_TITLE, libQspProxy.getGameState().getGameFile() + ".sav");
         startActivityForResult(intent, REQUEST_CODE_SAVE_TO_FILE);
     }
 
@@ -786,44 +778,24 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
         return super.onTouchEvent(event);
     }
 
-    // region PlayerView
+    // region GameInterface
 
     @Override
-    public void setCounterInterval(int millis) {
-        counterInterval = millis;
-    }
-
-    @Override
-    public void doWithCounterDisabled(Runnable runnable) {
-        counterHandler.removeCallbacks(counterTask);
-        runnable.run();
-        counterHandler.postDelayed(counterTask, counterInterval);
-    }
-
-    @Override
-    public void refreshGameView(
-            final boolean confChanged,
-            final boolean mainDescChanged,
-            final boolean actionsChanged,
-            final boolean objectsChanged,
-            final boolean varsDescChanged) {
-
+    public void refresh(final RefreshInterfaceRequest request) {
         runOnUiThread(() -> {
-            viewState = libQspProxy.getViewState();
-
-            if (confChanged) {
+            if (request.isInterfaceConfigChanged()) {
                 applySettings();
             }
-            if (confChanged || mainDescChanged) {
+            if (request.isInterfaceConfigChanged() || request.isMainDescChanged()) {
                 refreshMainDesc();
             }
-            if (actionsChanged) {
+            if (request.isActionsChanged()) {
                 refreshActions();
             }
-            if (objectsChanged) {
+            if (request.isObjectsChanged()) {
                 refreshObjects();
             }
-            if (confChanged || varsDescChanged) {
+            if (request.isInterfaceConfigChanged() || request.isVarsDescChanged()) {
                 refreshVarsDesc();
             }
         });
@@ -838,7 +810,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
     public void showPicture(final String path) {
         runOnUiThread(() -> {
             Intent intent = new Intent(this, ImageBoxActivity.class);
-            intent.putExtra("gameDirUri", viewState.getGameDir().getAbsolutePath());
+            intent.putExtra("gameDirUri", libQspProxy.getGameState().getGameDir().getAbsolutePath());
             intent.putExtra("imagePath", normalizePath(path));
             startActivity(intent);
         });
@@ -852,7 +824,8 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
         final CountDownLatch latch = new CountDownLatch(1);
 
         runOnUiThread(() -> {
-            String processedMsg = viewState.isUseHtml() ? htmlProcessor.removeHtmlTags(message) : message;
+            InterfaceConfiguration config = libQspProxy.getGameState().getInterfaceConfig();
+            String processedMsg = config.isUseHtml() ? htmlProcessor.removeHtmlTags(message) : message;
             if (processedMsg == null) {
                 processedMsg = "";
             }
@@ -881,7 +854,8 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
         runOnUiThread(() -> {
             final View view = getLayoutInflater().inflate(R.layout.dialog_input, null);
 
-            String message = viewState.isUseHtml() ? htmlProcessor.removeHtmlTags(prompt) : prompt;
+            InterfaceConfiguration config = libQspProxy.getGameState().getInterfaceConfig();
+            String message = config.isUseHtml() ? htmlProcessor.removeHtmlTags(prompt) : prompt;
             if (message == null) {
                 message = "";
             }
@@ -913,7 +887,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
         final ArrayBlockingQueue<Integer> resultQueue = new ArrayBlockingQueue<>(1);
         final ArrayList<String> items = new ArrayList<>();
 
-        for (QspMenuItem item : viewState.getMenuItems()) {
+        for (QspMenuItem item : libQspProxy.getGameState().getMenuItems()) {
             items.add(item.name);
         }
         runOnUiThread(() -> new AlertDialog.Builder(this)
@@ -950,7 +924,19 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
         }
     }
 
-    // endregion PlayerView
+    @Override
+    public void setCounterInterval(int millis) {
+        counterInterval = millis;
+    }
+
+    @Override
+    public void doWithCounterDisabled(Runnable runnable) {
+        counterHandler.removeCallbacks(counterTask);
+        runnable.run();
+        counterHandler.postDelayed(counterTask, counterInterval);
+    }
+
+    // endregion GameInterface
 
     // region GestureDetector.OnGestureListener
 
@@ -1025,7 +1011,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
         public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
             if (url.startsWith("file:///")) {
                 String path = normalizePath(Uri.decode(url.substring(8)));
-                File file = findFileRecursively(viewState.getGameDir(), path);
+                File file = findFileRecursively(libQspProxy.getGameState().getGameDir(), path);
                 if (file == null) {
                     logger.error("File not found: " + path);
                     return null;
@@ -1046,7 +1032,6 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
     }
 
     private class QspItemAdapter extends ArrayAdapter<QspListItem> {
-
         private final int resource;
         private final List<QspListItem> items;
 

@@ -2,6 +2,8 @@ package com.qsp.player.libqsp;
 
 import android.net.Uri;
 
+import com.qsp.player.libqsp.model.GameState;
+
 import java.io.File;
 
 public interface LibQspProxy {
@@ -35,7 +37,7 @@ public interface LibQspProxy {
      */
     void executeCounter();
 
-    PlayerViewState getViewState();
+    GameState getGameState();
 
-    void setPlayerView(PlayerView view);
+    void setGameInterface(GameInterface view);
 }

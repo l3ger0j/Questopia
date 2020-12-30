@@ -1,22 +1,16 @@
-package com.qsp.player.libqsp;
-
-import com.qsp.player.libqsp.model.QspListItem;
-import com.qsp.player.libqsp.model.QspMenuItem;
+package com.qsp.player.libqsp.model;
 
 import java.io.File;
 import java.util.ArrayList;
 
-public class PlayerViewState {
+public class GameState {
+    private final InterfaceConfiguration interfaceConfig = new InterfaceConfiguration();
+
     private boolean gameRunning;
     private String gameId;
     private String gameTitle;
     private File gameDir;
     private File gameFile;
-    private boolean useHtml;
-    private int fontSize;
-    private int backColor;
-    private int fontColor;
-    private int linkColor;
     private String mainDesc = "";
     private String varsDesc = "";
     private ArrayList<QspListItem> actions = new ArrayList<>();
@@ -29,16 +23,15 @@ public class PlayerViewState {
         gameTitle = null;
         gameDir = null;
         gameFile = null;
-        useHtml = false;
-        fontSize = 0;
-        backColor = 0;
-        fontColor = 0;
-        linkColor = 0;
         mainDesc = "";
         varsDesc = "";
         actions = new ArrayList<>();
         objects = new ArrayList<>();
         menuItems = new ArrayList<>();
+    }
+
+    public InterfaceConfiguration getInterfaceConfig() {
+        return interfaceConfig;
     }
 
     public boolean isGameRunning() {
@@ -81,46 +74,6 @@ public class PlayerViewState {
         this.gameFile = gameFile;
     }
 
-    public boolean isUseHtml() {
-        return useHtml;
-    }
-
-    public void setUseHtml(boolean useHtml) {
-        this.useHtml = useHtml;
-    }
-
-    public int getFontSize() {
-        return fontSize;
-    }
-
-    public void setFontSize(int fontSize) {
-        this.fontSize = fontSize;
-    }
-
-    public int getBackColor() {
-        return backColor;
-    }
-
-    public void setBackColor(int backColor) {
-        this.backColor = backColor;
-    }
-
-    public int getFontColor() {
-        return fontColor;
-    }
-
-    public void setFontColor(int fontColor) {
-        this.fontColor = fontColor;
-    }
-
-    public int getLinkColor() {
-        return linkColor;
-    }
-
-    public void setLinkColor(int linkColor) {
-        this.linkColor = linkColor;
-    }
-
     public String getMainDesc() {
         return mainDesc;
     }
@@ -155,9 +108,5 @@ public class PlayerViewState {
 
     public ArrayList<QspMenuItem> getMenuItems() {
         return menuItems;
-    }
-
-    public void setMenuItems(ArrayList<QspMenuItem> menuItems) {
-        this.menuItems = menuItems;
     }
 }
