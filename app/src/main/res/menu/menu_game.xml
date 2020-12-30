@@ -50,9 +50,5 @@
         android:id="@+id/menu_options"
         android:orderInCategory="5"
         android:title="@string/settings" />
-    <item
-        android:id="@+id/menu_exit"
-        android:orderInCategory="6"
-        android:title="@string/closeApp" />
 
 </menu>

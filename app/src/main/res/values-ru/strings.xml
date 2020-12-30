@@ -42,7 +42,6 @@
     <string name="installGame">Установить игру</string>
     <string name="installFromArchive">Из ZIP-архива</string>
     <string name="installFromFolder">Из папки</string>
-    <string name="closeApp">Закрыть Quest Player</string>
     <string name="selectSlot">Выберите слот</string>
     <string name="slotPresent">Слот %d - %s</string>
     <string name="slotEmpty">Слот %d [Пусто]</string>

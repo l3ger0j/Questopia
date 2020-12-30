@@ -44,7 +44,6 @@ import com.qsp.player.stock.install.InstallException;
 import com.qsp.player.stock.install.InstallType;
 import com.qsp.player.stock.repository.LocalGameRepository;
 import com.qsp.player.stock.repository.RemoteGameRepository;
-import com.qsp.player.util.FileUtil;
 import com.qsp.player.util.ViewUtil;
 import com.qsp.player.util.ZipUtil;
 

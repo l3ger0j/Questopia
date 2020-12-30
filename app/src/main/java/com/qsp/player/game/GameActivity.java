@@ -438,28 +438,10 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
-            showExitDialog();
+            startSelectGame();
             return true;
         }
-
         return super.onKeyDown(keyCode, event);
-    }
-
-    private void showExitDialog() {
-        final CharSequence[] items = new String[2];
-        items[0] = getString(R.string.gameStock);
-        items[1] = getString(R.string.closeApp);
-
-        new AlertDialog.Builder(context)
-                .setItems(items, (dialog, which) -> {
-                    if (which == 0) {
-                        startSelectGame();
-                    } else if (which == 1) {
-                        System.exit(0);
-                    }
-                })
-                .create()
-                .show();
     }
 
     @Override
@@ -597,10 +579,6 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
 
             case R.id.menu_gamestock:
                 startSelectGame();
-                return true;
-
-            case R.id.menu_exit:
-                System.exit(0);
                 return true;
 
             case R.id.menu_options:
