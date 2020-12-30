@@ -43,6 +43,7 @@ public class AudioPlayer {
 
     public void stop() {
         throwIfNotMainThread();
+        pause();
 
         if (audioThread == null) return;
 

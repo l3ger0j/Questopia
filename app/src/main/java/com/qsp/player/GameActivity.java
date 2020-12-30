@@ -316,6 +316,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
 
     @Override
     public void onPause() {
+        audioPlayer.pause();
         libQspProxy.pauseGame();
         super.onPause();
     }
@@ -331,6 +332,8 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
         viewState = libQspProxy.getViewState();
         if (viewState.isGameRunning()) {
             applyViewState();
+            audioPlayer.setSoundEnabled(settings.getBoolean("sound", true));
+            audioPlayer.resume();
             libQspProxy.resumeGame();
         } else if (!selectingGame) {
             startSelectGame();

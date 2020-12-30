@@ -67,7 +67,6 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
         }
     };
 
-    private SharedPreferences settings;
     private Thread libQspThread;
     private volatile Handler libQspHandler;
     private volatile boolean libQspThreadInited;
@@ -86,10 +85,6 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
         this.htmlProcessor = htmlProcessor;
         this.imageProvider = imageProvider;
         this.audioPlayer = audioPlayer;
-    }
-
-    public void init() {
-        settings = PreferenceManager.getDefaultSharedPreferences(context);
     }
 
     public void start() {
@@ -369,15 +364,12 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
 
     @Override
     public void resumeGame() {
-        audioPlayer.setSoundEnabled(settings.getBoolean("sound", true));
-        audioPlayer.resume();
         counterHandler.postDelayed(counterTask, timerInterval);
     }
 
     @Override
     public void pauseGame() {
         counterHandler.removeCallbacks(counterTask);
-        audioPlayer.pause();
     }
 
     @Override
