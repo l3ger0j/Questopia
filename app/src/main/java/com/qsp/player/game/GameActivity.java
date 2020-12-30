@@ -832,8 +832,8 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
 
         try {
             latch.await();
-        } catch (InterruptedException e) {
-            logger.error("Wait failed", e);
+        } catch (InterruptedException ex) {
+            logger.error("Wait failed", ex);
         }
     }
 
@@ -862,8 +862,8 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
 
         try {
             return inputQueue.take();
-        } catch (InterruptedException e) {
-            logger.error("Wait for input failed", e);
+        } catch (InterruptedException ex) {
+            logger.error("Wait for input failed", ex);
             return null;
         }
     }
@@ -884,8 +884,8 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
 
         try {
             return resultQueue.take();
-        } catch (InterruptedException e) {
-            logger.error("Wait failed", e);
+        } catch (InterruptedException ex) {
+            logger.error("Wait failed", ex);
             return -1;
         }
     }
@@ -996,8 +996,8 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
                     String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
                     InputStream in = GameActivity.this.getContentResolver().openInputStream(Uri.fromFile(file));
                     return new WebResourceResponse(mimeType, null, in);
-                } catch (FileNotFoundException e) {
-                    logger.error("File not found", e);
+                } catch (FileNotFoundException ex) {
+                    logger.error("File not found", ex);
                     return null;
                 }
             }

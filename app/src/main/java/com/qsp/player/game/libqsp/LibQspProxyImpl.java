@@ -190,8 +190,8 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
                 StreamUtil.copy(in, out);
                 gameData = out.toByteArray();
             }
-        } catch (IOException e) {
-            logger.error("Failed to load the game world", e);
+        } catch (IOException ex) {
+            logger.error("Failed to load the game world", ex);
             return false;
         }
         String fileName = viewState.getGameFile().getAbsolutePath();
@@ -322,9 +322,8 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
     @Override
     public void onInputAreaClicked() {
         final PlayerView view = playerView;
-        if (view == null) {
-            return;
-        }
+        if (view == null) return;
+
         runOnQspThread(() -> {
             String input = view.showInputBox(context.getString(R.string.userInput));
             nativeMethods.QSPSetInputStrText(input);
@@ -400,8 +399,8 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
                 StreamUtil.copy(in, out);
                 gameData = out.toByteArray();
             }
-        } catch (IOException e) {
-            logger.error("Failed to load game state", e);
+        } catch (IOException ex) {
+            logger.error("Failed to load game state", ex);
             return;
         }
 
@@ -425,8 +424,8 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
 
         try (OutputStream out = context.getContentResolver().openOutputStream(uri, "w")) {
             out.write(gameData);
-        } catch (IOException e) {
-            logger.error("Failed to save the game state", e);
+        } catch (IOException ex) {
+            logger.error("Failed to save the game state", ex);
         }
     }
 
@@ -558,8 +557,8 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
     public void Wait(int msecs) {
         try {
             Thread.sleep(msecs);
-        } catch (InterruptedException e) {
-            logger.error("Wait failed", e);
+        } catch (InterruptedException ex) {
+            logger.error("Wait failed", ex);
         }
     }
 

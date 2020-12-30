@@ -46,8 +46,8 @@ public class RemoteGameRepository {
                     return new String(out.toByteArray());
                 }
             }
-        } catch (IOException e) {
-            logger.error("Failed to fetch game stock XML", e);
+        } catch (IOException ex) {
+            logger.error("Failed to fetch game stock XML", ex);
             return null;
         }
     }
@@ -108,8 +108,8 @@ public class RemoteGameRepository {
             }
 
             return items;
-        } catch (XmlPullParserException | IOException e) {
-            logger.error("Failed to parse game stock XML", e);
+        } catch (XmlPullParserException | IOException ex) {
+            logger.error("Failed to parse game stock XML", ex);
             return null;
         }
     }

@@ -888,8 +888,8 @@ public class GameStockActivity extends AppCompatActivity {
                         return totalBytesRead == game.getFileSize();
                     }
                 }
-            } catch (IOException e) {
-                logger.error("Failed to download a ZIP file", e);
+            } catch (IOException ex) {
+                logger.error("Failed to download a ZIP file", ex);
                 return false;
             }
         }
@@ -933,8 +933,8 @@ public class GameStockActivity extends AppCompatActivity {
                 }
 
                 return true;
-            } catch (IOException e) {
-                logger.error("Failed to write to a game info file", e);
+            } catch (IOException ex) {
+                logger.error("Failed to write to a game info file", ex);
                 return false;
             }
         }

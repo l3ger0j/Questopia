@@ -161,8 +161,8 @@ public class LocalGameRepository {
 
                 eventType = xpp.nextToken();
             }
-        } catch (XmlPullParserException | IOException e) {
-            logger.error("Failed to parse game info file", e);
+        } catch (XmlPullParserException | IOException ex) {
+            logger.error("Failed to parse game info file", ex);
         }
 
         return result;
