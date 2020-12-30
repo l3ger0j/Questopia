@@ -71,6 +71,7 @@ import static com.qsp.player.util.FileUtil.getExtension;
 import static com.qsp.player.util.FileUtil.getOrCreateDirectory;
 import static com.qsp.player.util.FileUtil.getOrCreateFile;
 import static com.qsp.player.util.FileUtil.normalizePath;
+import static com.qsp.player.util.ThreadUtil.isMainThread;
 
 @SuppressLint("ClickableViewAccessibility")
 public class GameActivity extends AppCompatActivity implements PlayerView, GestureDetector.OnGestureListener {
@@ -815,6 +816,9 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
 
     @Override
     public void showMessage(final String message) {
+        if (isMainThread()) {
+            throw new RuntimeException("Must not be called on the main thread");
+        }
         final CountDownLatch latch = new CountDownLatch(1);
 
         runOnUiThread(() -> {
@@ -839,6 +843,9 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
 
     @Override
     public String showInputBox(final String prompt) {
+        if (isMainThread()) {
+            throw new RuntimeException("Must not be called on the main thread");
+        }
         final ArrayBlockingQueue<String> inputQueue = new ArrayBlockingQueue<>(1);
 
         runOnUiThread(() -> {
@@ -870,6 +877,9 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
 
     @Override
     public int showMenu() {
+        if (isMainThread()) {
+            throw new RuntimeException("Must not be called on the main thread");
+        }
         final ArrayBlockingQueue<Integer> resultQueue = new ArrayBlockingQueue<>(1);
         final ArrayList<String> items = new ArrayList<>();
 
