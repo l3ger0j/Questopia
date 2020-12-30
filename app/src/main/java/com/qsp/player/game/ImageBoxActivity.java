@@ -9,8 +9,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.qsp.player.QuestPlayerApplication;
 import com.qsp.player.R;
 
-import java.io.File;
-
 public class ImageBoxActivity extends AppCompatActivity {
 
     private ImageProvider imageProvider;

@@ -5,7 +5,6 @@ import android.net.Uri;
 
 import androidx.documentfile.provider.DocumentFile;
 
-import com.qsp.player.util.FileUtil;
 import com.qsp.player.util.StreamUtil;
 
 import org.slf4j.Logger;
