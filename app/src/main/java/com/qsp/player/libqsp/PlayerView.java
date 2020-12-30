@@ -1,4 +1,6 @@
-package com.qsp.player.game;
+package com.qsp.player.libqsp;
+
+import com.qsp.player.libqsp.model.WindowType;
 
 public interface PlayerView {
 

@@ -1,4 +1,4 @@
-package com.qsp.player.game;
+package com.qsp.player;
 
 import android.app.Service;
 import android.content.Intent;
@@ -7,8 +7,7 @@ import android.os.IBinder;
 
 import androidx.annotation.Nullable;
 
-import com.qsp.player.QuestPlayerApplication;
-import com.qsp.player.game.libqsp.LibQspProxy;
+import com.qsp.player.libqsp.LibQspProxy;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

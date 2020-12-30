@@ -1,4 +1,4 @@
-package com.qsp.player.game.libqsp.dto;
+package com.qsp.player.libqsp.dto;
 
 public class ActionData {
     private String name;

@@ -1,4 +1,4 @@
-package com.qsp.player.game;
+package com.qsp.player.common;
 
 import android.media.MediaPlayer;
 import android.os.Handler;

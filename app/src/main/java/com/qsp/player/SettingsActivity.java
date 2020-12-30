@@ -1,4 +1,4 @@
-package com.qsp.player.settings;
+package com.qsp.player;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -10,7 +10,6 @@ import androidx.preference.PreferenceFragmentCompat;
 
 import com.kizitonwose.colorpreferencecompat.ColorPreferenceCompat;
 import com.pes.androidmaterialcolorpickerdialog.ColorPicker;
-import com.qsp.player.R;
 import com.qsp.player.util.ViewUtil;
 
 public class SettingsActivity extends AppCompatActivity {

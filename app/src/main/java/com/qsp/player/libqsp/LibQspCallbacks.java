@@ -1,4 +1,4 @@
-package com.qsp.player.game.libqsp;
+package com.qsp.player.libqsp;
 
 /**
  * Методы данного интерфейса вызываются из нативного кода. См. <code>android_callbacks.c</code>.

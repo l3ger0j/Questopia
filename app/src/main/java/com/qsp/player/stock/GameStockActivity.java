@@ -36,7 +36,7 @@ import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.qsp.player.R;
-import com.qsp.player.settings.SettingsActivity;
+import com.qsp.player.SettingsActivity;
 import com.qsp.player.stock.install.ArchiveGameInstaller;
 import com.qsp.player.stock.install.FolderGameInstaller;
 import com.qsp.player.stock.install.GameInstaller;

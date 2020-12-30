@@ -1,4 +1,4 @@
-package com.qsp.player.game.libqsp;
+package com.qsp.player.libqsp;
 
 import java.util.Objects;
 

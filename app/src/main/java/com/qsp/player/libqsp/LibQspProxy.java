@@ -1,9 +1,6 @@
-package com.qsp.player.game.libqsp;
+package com.qsp.player.libqsp;
 
 import android.net.Uri;
-
-import com.qsp.player.game.PlayerView;
-import com.qsp.player.game.PlayerViewState;
 
 import java.io.File;
 

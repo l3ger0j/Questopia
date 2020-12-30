@@ -1,4 +1,4 @@
-package com.qsp.player.game;
+package com.qsp.player;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
@@ -46,10 +46,15 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.core.view.GestureDetectorCompat;
 
-import com.qsp.player.QuestPlayerApplication;
-import com.qsp.player.R;
-import com.qsp.player.game.libqsp.LibQspProxy;
-import com.qsp.player.settings.SettingsActivity;
+import com.qsp.player.common.AudioPlayer;
+import com.qsp.player.common.ImageProvider;
+import com.qsp.player.common.HtmlProcessor;
+import com.qsp.player.libqsp.LibQspProxy;
+import com.qsp.player.libqsp.PlayerView;
+import com.qsp.player.libqsp.PlayerViewState;
+import com.qsp.player.libqsp.model.QspListItem;
+import com.qsp.player.libqsp.model.QspMenuItem;
+import com.qsp.player.libqsp.model.WindowType;
 import com.qsp.player.stock.GameStockActivity;
 import com.qsp.player.util.ViewUtil;
 

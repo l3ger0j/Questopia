@@ -1,4 +1,4 @@
-package com.qsp.player.game;
+package com.qsp.player.libqsp.model;
 
 public enum WindowType {
     ACTIONS,

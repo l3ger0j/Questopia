@@ -1,4 +1,4 @@
-package com.qsp.player.game;
+package com.qsp.player.common;
 
 import android.graphics.drawable.Drawable;
 import android.text.Html.ImageGetter;

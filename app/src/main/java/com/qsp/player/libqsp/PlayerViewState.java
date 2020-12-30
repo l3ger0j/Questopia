@@ -1,4 +1,7 @@
-package com.qsp.player.game;
+package com.qsp.player.libqsp;
+
+import com.qsp.player.libqsp.model.QspListItem;
+import com.qsp.player.libqsp.model.QspMenuItem;
 
 import java.io.File;
 import java.util.ArrayList;

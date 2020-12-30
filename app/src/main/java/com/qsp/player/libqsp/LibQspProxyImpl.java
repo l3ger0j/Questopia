@@ -1,4 +1,4 @@
-package com.qsp.player.game.libqsp;
+package com.qsp.player.libqsp;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -10,18 +10,16 @@ import android.os.SystemClock;
 import androidx.preference.PreferenceManager;
 
 import com.qsp.player.R;
-import com.qsp.player.game.AudioPlayer;
-import com.qsp.player.game.HtmlProcessor;
-import com.qsp.player.game.ImageProvider;
-import com.qsp.player.game.PlayerView;
-import com.qsp.player.game.PlayerViewState;
-import com.qsp.player.game.QspListItem;
-import com.qsp.player.game.QspMenuItem;
-import com.qsp.player.game.WindowType;
-import com.qsp.player.game.libqsp.dto.ActionData;
-import com.qsp.player.game.libqsp.dto.ErrorData;
-import com.qsp.player.game.libqsp.dto.GetVarValuesResponse;
-import com.qsp.player.game.libqsp.dto.ObjectData;
+import com.qsp.player.common.AudioPlayer;
+import com.qsp.player.common.HtmlProcessor;
+import com.qsp.player.common.ImageProvider;
+import com.qsp.player.libqsp.dto.ActionData;
+import com.qsp.player.libqsp.dto.ErrorData;
+import com.qsp.player.libqsp.dto.GetVarValuesResponse;
+import com.qsp.player.libqsp.dto.ObjectData;
+import com.qsp.player.libqsp.model.QspListItem;
+import com.qsp.player.libqsp.model.QspMenuItem;
+import com.qsp.player.libqsp.model.WindowType;
 import com.qsp.player.util.StreamUtil;
 
 import org.slf4j.Logger;

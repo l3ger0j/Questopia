@@ -1,4 +1,4 @@
-package com.qsp.player.game;
+package com.qsp.player;
 
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -6,8 +6,7 @@ import android.widget.ImageView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.qsp.player.QuestPlayerApplication;
-import com.qsp.player.R;
+import com.qsp.player.common.ImageProvider;
 
 public class ImageBoxActivity extends AppCompatActivity {
     private ImageProvider imageProvider;
