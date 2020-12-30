@@ -8,6 +8,16 @@ import com.qsp.player.game.PlayerViewState;
 import java.io.File;
 
 public interface LibQspProxy {
+    /**
+     * Запускает поток библиотеки.
+     */
+    void start();
+
+    /**
+     * Останавливает поток библиотеки.
+     */
+    void stop();
+
     PlayerViewState getViewState();
     void setPlayerView(PlayerView view);
     void execute(String code);

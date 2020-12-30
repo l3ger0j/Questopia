@@ -54,7 +54,7 @@ public class AudioPlayer {
                 Looper.loop();
 
             } catch (Throwable t) {
-                logger.error("Audio thread has been stopped exceptionally", t);
+                logger.error("Audio thread has stopped exceptionally", t);
             }
         });
         audioThread.start();

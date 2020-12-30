@@ -2,8 +2,10 @@ package com.qsp.player.game;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -11,6 +13,7 @@ import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.text.format.DateFormat;
 import android.util.TypedValue;
@@ -134,17 +137,38 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
     private int textColor;
     private int linkColor;
 
+    // region BackgroundService
+
+    private final ServiceConnection backgroundServiceConn = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            backgroundService = ((BackgroundService.LocalBinder) service).getService();
+            backgroundServiceBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            backgroundServiceBound = false;
+        }
+    };
+
+    private BackgroundService backgroundService;
+    private boolean backgroundServiceBound;
+
+    // endregion BackgroundService
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
-
-        initDependenices();
+        bindBackgroundService();
 
         settings = PreferenceManager.getDefaultSharedPreferences(context);
+        gestureDetector = new GestureDetectorCompat(this, this);
 
         loadLocale();
+        initDependencies();
         initActionBar();
         initLayoutTopView();
         initMainDescView();
@@ -152,12 +176,17 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
         initSeparatorView();
         initActionsView();
         initObjectsView();
-        setActiveTab(TAB_MAIN_DESC_AND_ACTIONS);
 
-        gestureDetector = new GestureDetectorCompat(this, this);
+        setActiveTab(TAB_MAIN_DESC_AND_ACTIONS);
+        logger.info("GameActivity created");
     }
 
-    private void initDependenices() {
+    private void bindBackgroundService() {
+        Intent intent = new Intent(this, BackgroundService.class);
+        bindService(intent, backgroundServiceConn, BIND_AUTO_CREATE);
+    }
+
+    private void initDependencies() {
         QuestPlayerApplication application = (QuestPlayerApplication) getApplication();
 
         imageProvider = application.getImageProvider();
@@ -278,7 +307,9 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
     protected void onDestroy() {
         libQspProxy.pauseGame();
         libQspProxy.setPlayerView(null);
+        unbindService(backgroundServiceConn);
         super.onDestroy();
+        logger.info("GameActivity destroyed");
     }
 
     @Override

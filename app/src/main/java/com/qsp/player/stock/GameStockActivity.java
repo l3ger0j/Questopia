@@ -133,6 +133,8 @@ public class GameStockActivity extends AppCompatActivity {
         initGamesListView();
         initActionBar(savedInstanceState);
         setResult(RESULT_CANCELED);
+
+        logger.info("GameStockActivity created");
     }
 
     private void loadLocale() {
@@ -292,6 +294,7 @@ public class GameStockActivity extends AppCompatActivity {
             loadGameListTask.cancel(true);
         }
         super.onDestroy();
+        logger.info("GameStockActivity destroyed");
     }
 
     @Override

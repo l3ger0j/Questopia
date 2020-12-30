@@ -19,6 +19,9 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="m">
 
+        <service
+            android:name=".game.BackgroundService" />
+
         <activity
             android:name=".game.GameActivity"
             android:alwaysRetainTaskState="true"

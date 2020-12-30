@@ -91,6 +91,27 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
         settings = PreferenceManager.getDefaultSharedPreferences(context);
     }
 
+    public void start() {
+        libQspThread = new Thread("libqsp") {
+            @Override
+            public void run() {
+                try {
+                    nativeMethods.QSPInit();
+                    Looper.prepare();
+                    libQspHandler = new Handler();
+                    libQspThreadInited = true;
+
+                    Looper.loop();
+
+                    nativeMethods.QSPDeInit();
+                } catch (Throwable t) {
+                    logger.error("libqsp thread has stopped exceptionally", t);
+                }
+            }
+        };
+        libQspThread.start();
+    }
+
     private void runOnQspThread(final Runnable runnable) {
         throwIfThreadIsNotMain();
 
@@ -104,12 +125,6 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
             }
         };
 
-        // Запустить поток библиотеки, если он ещё не был запущен
-        if (libQspThread == null) {
-            startLibQspThread(runnableWithLock);
-            return;
-        }
-
         // Выйти если поток был запущен, но не был проинициализирован
         if (!libQspThreadInited) {
             logger.warn("libqsp thread has been started, but not initialized");
@@ -122,32 +137,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
         }
     }
 
-    /**
-     * @param onInit callback, который необходимо вызвать после инициализации потока
-     */
-    private void startLibQspThread(final Runnable onInit) {
-        libQspThread = new Thread("libqsp") {
-            @Override
-            public void run() {
-                try {
-                    nativeMethods.QSPInit();
-                    Looper.prepare();
-                    libQspHandler = new Handler();
-                    libQspThreadInited = true;
-
-                    onInit.run();
-                    Looper.loop();
-
-                    nativeMethods.QSPDeInit();
-                } catch (Throwable t) {
-                    logger.error("libqsp thread has stopped exceptionally", t);
-                }
-            }
-        };
-        libQspThread.start();
-    }
-
-    public void close() {
+    public void stop() {
         audioPlayer.close();
         stopLibQspThread();
     }

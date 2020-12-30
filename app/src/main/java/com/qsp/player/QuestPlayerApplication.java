@@ -8,9 +8,12 @@ import com.qsp.player.game.ImageProvider;
 import com.qsp.player.game.libqsp.LibQspProxy;
 import com.qsp.player.game.libqsp.LibQspProxyImpl;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slf4j.impl.HandroidLoggerAdapter;
 
 public class QuestPlayerApplication extends Application {
+    private static final Logger logger = LoggerFactory.getLogger(QuestPlayerApplication.class);
 
     private final ImageProvider imageProvider = new ImageProvider();
     private final HtmlProcessor htmlProcessor = new HtmlProcessor();
@@ -26,12 +29,7 @@ public class QuestPlayerApplication extends Application {
     public void onCreate() {
         super.onCreate();
         libQspProxy.init();
-    }
-
-    @Override
-    public void onTerminate() {
-        libQspProxy.close();
-        super.onTerminate();
+        logger.info("QuestPlayerApplication created");
     }
 
     public ImageProvider getImageProvider() {
