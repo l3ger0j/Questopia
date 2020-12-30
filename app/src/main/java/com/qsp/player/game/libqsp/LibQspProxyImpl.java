@@ -43,7 +43,6 @@ import static com.qsp.player.util.FileUtil.getOrCreateDirectory;
 import static com.qsp.player.util.FileUtil.normalizePath;
 import static com.qsp.player.util.StringUtil.getStringOrEmpty;
 import static com.qsp.player.util.StringUtil.isNotEmpty;
-import static com.qsp.player.util.StringUtil.isNullOrEmpty;
 import static com.qsp.player.util.ThreadUtil.throwIfThreadIsNotMain;
 
 public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
@@ -393,7 +392,6 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
             runOnQspThread(() -> loadGameState(uri));
             return;
         }
-
         final byte[] gameData;
 
         try (InputStream in = context.getContentResolver().openInputStream(uri)) {
@@ -421,7 +419,6 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
             runOnQspThread(() -> saveGameState(uri));
             return;
         }
-
         byte[] gameData = nativeMethods.QSPSaveGameAsData(false);
         if (gameData == null) return;
 
@@ -545,9 +542,8 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
 
     public void ShowMenu() {
         PlayerView view = playerView;
-        if (view == null) {
-            return;
-        }
+        if (view == null) return;
+
         int result = view.showMenu();
         if (result != -1) {
             nativeMethods.QSPSelectMenuItem(result);

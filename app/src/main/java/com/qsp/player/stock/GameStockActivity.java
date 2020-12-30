@@ -94,7 +94,6 @@ public class GameStockActivity extends AppCompatActivity {
 
     private static final Logger logger = LoggerFactory.getLogger(GameStockActivity.class);
 
-    private final Context context = this;
     private final HashMap<String, GameStockItem> gamesMap = new HashMap<>();
     private final SparseArrayCompat<GameStockItemAdapter> gameAdapters = new SparseArrayCompat<>();
     private final LocalGameRepository localGameRepository = new LocalGameRepository();
@@ -123,7 +122,7 @@ public class GameStockActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_stock);
 
-        settings = PreferenceManager.getDefaultSharedPreferences(context);
+        settings = PreferenceManager.getDefaultSharedPreferences(this);
         connectivityManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
 
         Intent intent = getIntent();
@@ -139,7 +138,7 @@ public class GameStockActivity extends AppCompatActivity {
 
     private void loadLocale() {
         String language = settings.getString("lang", "ru");
-        ViewUtil.setLocale(context, language);
+        ViewUtil.setLocale(this, language);
         setTitle(R.string.gameStock);
         currentLanguage = language;
     }
@@ -206,7 +205,6 @@ public class GameStockActivity extends AppCompatActivity {
             logger.error("Game not found: " + gameId);
             return;
         }
-
         StringBuilder message = new StringBuilder();
         if (game.getAuthor().length() > 0) {
             message.append(getString(R.string.author).replace("-AUTHOR-", game.getAuthor()));
@@ -219,8 +217,7 @@ public class GameStockActivity extends AppCompatActivity {
             message.append('\n');
             message.append(getString(R.string.fileSize).replace("-SIZE-", Integer.toString(game.getFileSize() / 1024)));
         }
-
-        AlertDialog.Builder alertBuilder = new AlertDialog.Builder(context)
+        AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this)
                 .setMessage(message)
                 .setTitle(game.getTitle())
                 .setIcon(R.drawable.icon)
@@ -272,7 +269,7 @@ public class GameStockActivity extends AppCompatActivity {
 
     private void downloadGame(GameStockItem game) {
         if (!isNetworkConnected()) {
-            ViewUtil.showErrorDialog(context, getString(R.string.downloadNetworkError));
+            ViewUtil.showErrorDialog(this, getString(R.string.downloadNetworkError));
             return;
         }
         DownloadGameAsyncTask task = new DownloadGameAsyncTask(this, game);
@@ -320,7 +317,7 @@ public class GameStockActivity extends AppCompatActivity {
     private void updateLocale() {
         String language = settings.getString("lang", "ru");
         if (!currentLanguage.equals(language)) {
-            ViewUtil.setLocale(context, language);
+            ViewUtil.setLocale(this, language);
             setTitle(getString(R.string.gameStock));
             refreshActionBar();
             invalidateOptionsMenu();
@@ -348,7 +345,7 @@ public class GameStockActivity extends AppCompatActivity {
         if (!isWritableDirectory(dir)) {
             logger.error("Games directory is not writable");
             String message = getString(R.string.gamesDirError);
-            ViewUtil.showErrorDialog(context, message);
+            ViewUtil.showErrorDialog(this, message);
             return;
         }
         gamesDir = dir;
@@ -485,7 +482,7 @@ public class GameStockActivity extends AppCompatActivity {
             logger.error("Game directory is not writable");
             return false;
         }
-        return ZipUtil.unzip(context, DocumentFile.fromFile(zipFile), dir);
+        return ZipUtil.unzip(this, DocumentFile.fromFile(zipFile), dir);
     }
 
     @Override
@@ -556,7 +553,7 @@ public class GameStockActivity extends AppCompatActivity {
     }
 
     private void showSettings() {
-        Intent intent = new Intent(context, SettingsActivity.class);
+        Intent intent = new Intent(this, SettingsActivity.class);
         startActivity(intent);
     }
 
@@ -607,7 +604,7 @@ public class GameStockActivity extends AppCompatActivity {
 
         if (show) {
             if (progressDialog == null) {
-                progressDialog = new ProgressDialog(context);
+                progressDialog = new ProgressDialog(this);
                 progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
             }
             progressDialog.setTitle(title);
@@ -641,7 +638,7 @@ public class GameStockActivity extends AppCompatActivity {
             deletableGames.add(game);
             items.add(game.getTitle());
         }
-        new AlertDialog.Builder(context)
+        new AlertDialog.Builder(this)
                 .setTitle(getString(R.string.deleteGameCmd))
                 .setItems(items.toArray(new String[0]), (dialog, which) -> {
                     GameStockItem game = deletableGames.get(which);
@@ -654,7 +651,7 @@ public class GameStockActivity extends AppCompatActivity {
     }
 
     private void showConfirmDeleteDialog(final GameStockItem game) {
-        new AlertDialog.Builder(context)
+        new AlertDialog.Builder(this)
                 .setMessage(getString(R.string.deleteGameQuery).replace("-GAMENAME-", "\"" + game.getTitle() + "\""))
                 .setPositiveButton(android.R.string.yes, (dialog, which) -> {
                     if (which == DialogInterface.BUTTON_POSITIVE) {
@@ -663,7 +660,7 @@ public class GameStockActivity extends AppCompatActivity {
                             invalidateOptionsMenu();
                         }
                         deleteDirectory(game.getGameDir());
-                        ViewUtil.showToast(context, getString(R.string.gameDeleted));
+                        ViewUtil.showToast(this, getString(R.string.gameDeleted));
                         refreshGames();
                     }
                 })
@@ -741,7 +738,7 @@ public class GameStockActivity extends AppCompatActivity {
                     loadGameListTask = task;
                     task.execute();
                 } else {
-                    ViewUtil.showErrorDialog(context, getString(R.string.loadGameListNetworkError));
+                    ViewUtil.showErrorDialog(GameStockActivity.this, getString(R.string.loadGameListNetworkError));
                 }
             }
             setGameAdapterFromTab(position);

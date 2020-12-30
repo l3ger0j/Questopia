@@ -106,8 +106,6 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
 
     private static final Logger logger = LoggerFactory.getLogger(GameActivity.class);
 
-    private final Context context = this;
-
     private SharedPreferences settings;
     private String currentLanguage = Locale.getDefault().getLanguage();
     private int activeTab;
@@ -160,7 +158,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
         bindBackgroundService();
 
-        settings = PreferenceManager.getDefaultSharedPreferences(context);
+        settings = PreferenceManager.getDefaultSharedPreferences(this);
         gestureDetector = new GestureDetectorCompat(this, this);
 
         loadLocale();
@@ -197,7 +195,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
 
     private void loadLocale() {
         String language = settings.getString("lang", "ru");
-        ViewUtil.setLocale(context, language);
+        ViewUtil.setLocale(this, language);
         currentLanguage = language;
     }
 
@@ -304,12 +302,12 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
 
     @Override
     protected void onDestroy() {
-        unbindService(backgroundServiceConn);
-
         audioPlayer.stop();
 
         libQspProxy.pauseGame();
         libQspProxy.setPlayerView(null);
+
+        unbindService(backgroundServiceConn);
 
         super.onDestroy();
 
@@ -341,10 +339,9 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
 
     private void updateLocale() {
         String language = settings.getString("lang", "ru");
-        if (currentLanguage.equals(language)) {
-            return;
-        }
-        ViewUtil.setLocale(context, language);
+        if (currentLanguage.equals(language)) return;
+
+        ViewUtil.setLocale(this, language);
         setTitle(R.string.appName);
         invalidateOptionsMenu();
         setActiveTab(activeTab);
@@ -483,11 +480,11 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
     }
 
     private void refreshActions() {
-        actionsView.setAdapter(new QspItemAdapter(context, R.layout.list_item_action, viewState.getActions()));
+        actionsView.setAdapter(new QspItemAdapter(this, R.layout.list_item_action, viewState.getActions()));
     }
 
     private void refreshObjects() {
-        objectsView.setAdapter(new QspItemAdapter(context, R.layout.list_item_object, viewState.getObjects()));
+        objectsView.setAdapter(new QspItemAdapter(this, R.layout.list_item_object, viewState.getObjects()));
     }
 
     private void startSelectGame() {
@@ -672,7 +669,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
     private void showAboutDialog() {
         View messageView = getLayoutInflater().inflate(R.layout.dialog_about, null, false);
 
-        new AlertDialog.Builder(context)
+        new AlertDialog.Builder(this)
                 .setIcon(R.drawable.icon)
                 .setTitle(R.string.appName)
                 .setView(messageView)
@@ -803,13 +800,13 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
 
     @Override
     public void showError(final String message) {
-        runOnUiThread(() -> ViewUtil.showErrorDialog(context, message));
+        runOnUiThread(() -> ViewUtil.showErrorDialog(this, message));
     }
 
     @Override
     public void showPicture(final String path) {
         runOnUiThread(() -> {
-            Intent intent = new Intent(context, ImageBoxActivity.class);
+            Intent intent = new Intent(this, ImageBoxActivity.class);
             intent.putExtra("gameDirUri", viewState.getGameDir().getAbsolutePath());
             intent.putExtra("imagePath", normalizePath(path));
             startActivity(intent);
@@ -825,8 +822,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
             if (processedMsg == null) {
                 processedMsg = "";
             }
-
-            new AlertDialog.Builder(context)
+            new AlertDialog.Builder(this)
                     .setMessage(processedMsg)
                     .setPositiveButton(android.R.string.ok, (dialog, which) -> latch.countDown())
                     .setCancelable(false)
@@ -852,8 +848,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
             if (message == null) {
                 message = "";
             }
-
-            new AlertDialog.Builder(context)
+            new AlertDialog.Builder(this)
                     .setView(view)
                     .setMessage(message)
                     .setPositiveButton(android.R.string.ok, (dialog, which) -> {
@@ -881,8 +876,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
         for (QspMenuItem item : viewState.getMenuItems()) {
             items.add(item.name);
         }
-
-        runOnUiThread(() -> new AlertDialog.Builder(context)
+        runOnUiThread(() -> new AlertDialog.Builder(this)
                 .setItems(items.toArray(new CharSequence[0]), (dialog, which) -> resultQueue.add(which))
                 .setOnCancelListener(dialog -> resultQueue.add(-1))
                 .create()
@@ -1000,7 +994,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
                 try {
                     String extension = getExtension(file.getName());
                     String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
-                    InputStream in = context.getContentResolver().openInputStream(Uri.fromFile(file));
+                    InputStream in = GameActivity.this.getContentResolver().openInputStream(Uri.fromFile(file));
                     return new WebResourceResponse(mimeType, null, in);
                 } catch (FileNotFoundException e) {
                     logger.error("File not found", e);
