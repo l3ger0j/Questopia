@@ -2,37 +2,42 @@ package com.qsp.player.service;
 
 import android.util.Base64;
 
-import androidx.annotation.NonNull;
-
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static com.qsp.player.util.Base64Util.encodeBase64;
+import static com.qsp.player.util.StringUtil.isNotEmpty;
+import static com.qsp.player.util.StringUtil.isNullOrEmpty;
 
 public class HtmlProcessor {
     private static final Logger logger = LoggerFactory.getLogger(HtmlProcessor.class);
     private static final Pattern execPattern = Pattern.compile("href=\"exec:([\\s\\S]*?)\"", Pattern.CASE_INSENSITIVE);
 
-    public String preprocessQspHtml(String html) {
-        if (html == null || html.isEmpty()) {
-            return "";
-        }
+    /**
+     * Привести HTML-код <code>html</code>, полученный из библиотеки к
+     * HTML-коду, приемлемому для отображения в {@linkplain android.webkit.WebView}.
+     */
+    public String convertQspHtmlToWebViewHtml(String html) {
+        if (isNullOrEmpty(html)) return "";
+
         String result = unescapeQuotes(html);
         result = encodeExec(result);
         result = htmlizeLineBreaks(result);
 
         Document document = Jsoup.parse(result);
+        document.outputSettings().prettyPrint(false);
+
         Element body = document.body();
         body.select("img").attr("style", "max-width: 100%;");
-
-        // video setting
-        body.select("video").attr("style", "max-width: 100%;");
-        body.select("video").attr("muted", "true");
+        body.select("video")
+                .attr("style", "max-width: 100%;")
+                .attr("muted", "true");
 
         return document.toString();
     }
@@ -46,7 +51,7 @@ public class HtmlProcessor {
         StringBuffer sb = new StringBuffer();
         while (matcher.find()) {
             String exec = normalizePathsInExec(matcher.group(1));
-            String encodedExec = Base64.encodeToString(exec.getBytes(), Base64.NO_WRAP);
+            String encodedExec = encodeBase64(exec, Base64.NO_WRAP);
             matcher.appendReplacement(sb, "href=\"exec:" + encodedExec + "\"");
         }
         matcher.appendTail(sb);
@@ -63,20 +68,19 @@ public class HtmlProcessor {
                 .replace("\r", "");
     }
 
-    public String convertQspStringToHtml(String str) {
-        if (str == null || str.isEmpty()) {
-            return "";
-        }
-
-        return htmlizeLineBreaks(str);
+    /**
+     * Привести строку <code>str</code>, полученную из библиотеки, к HTML-коду,
+     * приемлемому для отобрабежния в {@linkplain android.webkit.WebView}.
+     */
+    public String convertQspStringToWebViewHtml(String str) {
+        return isNotEmpty(str) ? htmlizeLineBreaks(str) : "";
     }
 
-    public String removeHtmlTags(@NonNull String html) {
-        Objects.requireNonNull(html, "html must not be null");
-
-        if (html.isEmpty()) {
-            return html;
-        }
+    /**
+     * Удалить HTML-теги из строки <code>html</code> и вернуть результирующую строку.
+     */
+    public String removeHtmlTags(String html) {
+        if (isNullOrEmpty(html)) return "";
 
         StringBuilder result = new StringBuilder();
 
@@ -99,9 +103,5 @@ public class HtmlProcessor {
         }
 
         return result.toString();
-    }
-
-    public String decodeExec(String code) {
-        return new String(Base64.decode(code, Base64.DEFAULT));
     }
 }

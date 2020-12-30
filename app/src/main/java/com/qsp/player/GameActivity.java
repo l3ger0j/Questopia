@@ -71,6 +71,7 @@ import java.util.Locale;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CountDownLatch;
 
+import static com.qsp.player.util.Base64Util.decodeBase64;
 import static com.qsp.player.util.ColorUtil.convertRgbaToBgra;
 import static com.qsp.player.util.ColorUtil.getHexColor;
 import static com.qsp.player.util.FileUtil.findFileOrDirectory;
@@ -455,8 +456,8 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
         InterfaceConfiguration config = libQspProxy.getGameState().getInterfaceConfig();
 
         return config.isUseHtml() ?
-                htmlProcessor.preprocessQspHtml(str) :
-                htmlProcessor.convertQspStringToHtml(str);
+                htmlProcessor.convertQspHtmlToWebViewHtml(str) :
+                htmlProcessor.convertQspStringToWebViewHtml(str);
     }
 
     private void refreshVarsDesc() {
@@ -973,10 +974,9 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, final String href) {
             if (href.toLowerCase().startsWith("exec:")) {
-                String code = htmlProcessor.decodeExec(href.substring(5));
+                String code = decodeBase64(href.substring(5));
                 libQspProxy.execute(code);
             }
-
             return true;
         }
 
