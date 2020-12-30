@@ -101,8 +101,6 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
 
     private static final String PAGE_BODY_TEMPLATE = "<body>REPLACETEXT</body>";
 
-    private static final int SWIPE_THRESHOLD = 100;
-
     private static final Logger logger = LoggerFactory.getLogger(GameActivity.class);
 
     private final Context context = this;
@@ -914,10 +912,13 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
     public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
         try {
             float diffX = e2.getX() - e1.getX();
-            float absVelocityX = Math.abs(velocityX);
-            float absVelocityY = Math.abs(velocityY);
+            float diffY = e2.getY() - e1.getY();
+            float absDiffX = Math.abs(diffX);
+            float absDiffY = Math.abs(diffY);
 
-            if (Math.abs(diffX) > SWIPE_THRESHOLD && absVelocityX > absVelocityY) {
+            int screenW = layoutTop.getMeasuredWidth();
+
+            if (absDiffX > 0.33f * screenW && absDiffX > 2.0f * absDiffY) {
                 if (diffX > 0.0f) {
                     selectNextTab();
                 } else {
