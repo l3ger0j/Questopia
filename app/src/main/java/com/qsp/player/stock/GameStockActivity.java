@@ -327,9 +327,8 @@ public class GameStockActivity extends AppCompatActivity {
 
     private void refreshActionBar() {
         ActionBar bar = getSupportActionBar();
-        if (bar == null) {
-            return;
-        }
+        if (bar == null) return;
+
         bar.getTabAt(2).setText(getString(R.string.tabAll));
         bar.getTabAt(1).setText(getString(R.string.tabRemote));
         bar.getTabAt(0).setText(getString(R.string.tabLocal));
@@ -686,7 +685,6 @@ public class GameStockActivity extends AppCompatActivity {
     }
 
     private class GameStockItemAdapter extends ArrayAdapter<GameStockItem> {
-
         private final ArrayList<GameStockItem> items;
 
         GameStockItemAdapter(Context context, int resource, ArrayList<GameStockItem> items) {
@@ -725,7 +723,6 @@ public class GameStockActivity extends AppCompatActivity {
     }
 
     private class TabListener implements ActionBar.TabListener {
-
         @Override
         public void onTabSelected(ActionBar.Tab tab, FragmentTransaction ft) {
             int position = tab.getPosition();
@@ -754,7 +751,6 @@ public class GameStockActivity extends AppCompatActivity {
     }
 
     private static class LoadGameListAsyncTask extends AsyncTask<Void, Void, List<GameStockItem>> {
-
         private final WeakReference<GameStockActivity> activity;
         private final RemoteGameRepository remoteGameRepository = new RemoteGameRepository();
 
@@ -793,7 +789,6 @@ public class GameStockActivity extends AppCompatActivity {
     }
 
     private static class DownloadGameAsyncTask extends AsyncTask<Void, DownloadGameAsyncTask.DownloadPhase, DownloadGameAsyncTask.DownloadResult> {
-
         private final WeakReference<GameStockActivity> activity;
         private final GameStockItem game;
 

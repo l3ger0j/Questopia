@@ -11,13 +11,15 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.HashMap;
 
+import static com.qsp.player.util.StringUtil.isNullOrEmpty;
+
 public class ImageProvider implements ImageGetter {
     private static final Logger logger = LoggerFactory.getLogger(ImageProvider.class);
     private static final HashMap<String, Drawable> cache = new HashMap<>();
 
     @Override
     public Drawable getDrawable(String source) {
-        if (source == null || source.isEmpty()) return null;
+        if (isNullOrEmpty(source)) return null;
 
         Drawable drawable = cache.get(source);
         if (drawable != null) return drawable;

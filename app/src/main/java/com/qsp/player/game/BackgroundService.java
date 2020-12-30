@@ -16,7 +16,8 @@ import org.slf4j.LoggerFactory;
 public class BackgroundService extends Service {
     private static final Logger logger = LoggerFactory.getLogger(BackgroundService.class);
 
-    private final LocalBinder binder = new LocalBinder();
+    private final Binder binder = new Binder() {
+    };
 
     private LibQspProxy libQspProxy;
 
@@ -33,19 +34,13 @@ public class BackgroundService extends Service {
     @Override
     public void onDestroy() {
         libQspProxy.stop();
-        logger.info("BackgroundService destroyed");
         super.onDestroy();
+        logger.info("BackgroundService destroyed");
     }
 
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
         return binder;
-    }
-
-    public class LocalBinder extends Binder {
-        public BackgroundService getService() {
-            return BackgroundService.this;
-        }
     }
 }

@@ -309,9 +309,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
         libQspProxy.setPlayerView(null);
 
         unbindService(backgroundServiceConn);
-
         super.onDestroy();
-
         logger.info("GameActivity destroyed");
     }
 
@@ -980,7 +978,6 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
     }
 
     private class QspWebViewClient extends WebViewClient {
-
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, final String href) {
             if (href.toLowerCase().startsWith("exec:")) {

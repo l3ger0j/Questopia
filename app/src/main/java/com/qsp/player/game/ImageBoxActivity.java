@@ -10,7 +10,6 @@ import com.qsp.player.QuestPlayerApplication;
 import com.qsp.player.R;
 
 public class ImageBoxActivity extends AppCompatActivity {
-
     private ImageProvider imageProvider;
 
     @Override

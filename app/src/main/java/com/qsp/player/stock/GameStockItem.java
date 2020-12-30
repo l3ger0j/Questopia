@@ -3,6 +3,8 @@ package com.qsp.player.stock;
 import java.io.File;
 import java.util.List;
 
+import static com.qsp.player.util.StringUtil.isNotEmpty;
+
 public class GameStockItem implements Cloneable {
     private String id = "";
     private String listId = "";
@@ -43,7 +45,7 @@ public class GameStockItem implements Cloneable {
     }
 
     public  boolean hasRemoteUrl() {
-        return fileUrl != null && !fileUrl.isEmpty();
+        return isNotEmpty(fileUrl);
     }
 
     public boolean isInstalled() {
