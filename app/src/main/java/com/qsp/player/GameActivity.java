@@ -47,8 +47,8 @@ import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.core.view.GestureDetectorCompat;
 
 import com.qsp.player.common.AudioPlayer;
-import com.qsp.player.common.ImageProvider;
 import com.qsp.player.common.HtmlProcessor;
+import com.qsp.player.common.ImageProvider;
 import com.qsp.player.libqsp.LibQspProxy;
 import com.qsp.player.libqsp.PlayerView;
 import com.qsp.player.libqsp.PlayerViewState;
@@ -148,14 +148,10 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
         }
     };
 
-    // region Dependencies
-
-    private ImageProvider imageProvider;
     private HtmlProcessor htmlProcessor;
+    private ImageProvider imageProvider;
     private LibQspProxy libQspProxy;
     private AudioPlayer audioPlayer;
-
-    // endregion Dependencies
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -189,14 +185,14 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
     private void initDependencies() {
         QuestPlayerApplication application = (QuestPlayerApplication) getApplication();
 
-        imageProvider = application.getImageProvider();
         htmlProcessor = application.getHtmlProcessor();
-
-        libQspProxy = application.getLibQspProxy();
-        libQspProxy.setPlayerView(this);
+        imageProvider = application.getImageProvider();
 
         audioPlayer = application.getAudioPlayer();
         audioPlayer.start();
+
+        libQspProxy = application.getLibQspProxy();
+        libQspProxy.setPlayerView(this);
     }
 
     private void loadLocale() {

@@ -16,12 +16,16 @@ import org.slf4j.impl.HandroidLoggerAdapter;
 public class QuestPlayerApplication extends Application {
     private static final Logger logger = LoggerFactory.getLogger(QuestPlayerApplication.class);
 
-    private final ImageProvider imageProvider = new ImageProvider();
     private final HtmlProcessor htmlProcessor = new HtmlProcessor();
+    private final ImageProvider imageProvider = new ImageProvider();
     private final AudioPlayer audioPlayer = new AudioPlayer();
-    private final LibQspProxyImpl libQspProxy = new LibQspProxyImpl(this, imageProvider, htmlProcessor, audioPlayer);
+    private final LibQspProxyImpl libQspProxy = new LibQspProxyImpl(this, htmlProcessor, imageProvider, audioPlayer);
 
     public QuestPlayerApplication() {
+        initLogging();
+    }
+
+    private void initLogging() {
         HandroidLoggerAdapter.DEBUG = BuildConfig.DEBUG;
         HandroidLoggerAdapter.ANDROID_API_LEVEL = Build.VERSION.SDK_INT;
         HandroidLoggerAdapter.APP_NAME = "Quest Player";
@@ -34,12 +38,12 @@ public class QuestPlayerApplication extends Application {
         logger.info("QuestPlayerApplication created");
     }
 
-    public ImageProvider getImageProvider() {
-        return imageProvider;
-    }
-
     public HtmlProcessor getHtmlProcessor() {
         return htmlProcessor;
+    }
+
+    public ImageProvider getImageProvider() {
+        return imageProvider;
     }
 
     public AudioPlayer getAudioPlayer() {

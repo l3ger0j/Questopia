@@ -76,19 +76,15 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
     private volatile int timerInterval;
     private PlayerView playerView;
 
-    // region Dependencies
-
     private final Context context;
-    private final ImageProvider imageProvider;
     private final HtmlProcessor htmlProcessor;
+    private final ImageProvider imageProvider;
     private final AudioPlayer audioPlayer;
 
-    // endregion Dependencies
-
-    public LibQspProxyImpl(Context context, ImageProvider imageProvider, HtmlProcessor htmlProcessor, AudioPlayer audioPlayer) {
+    public LibQspProxyImpl(Context context, HtmlProcessor htmlProcessor, ImageProvider imageProvider, AudioPlayer audioPlayer) {
         this.context = context;
-        this.imageProvider = imageProvider;
         this.htmlProcessor = htmlProcessor;
+        this.imageProvider = imageProvider;
         this.audioPlayer = audioPlayer;
     }
 
