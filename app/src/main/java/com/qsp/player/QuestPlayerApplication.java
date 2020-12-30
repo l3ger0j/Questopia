@@ -3,6 +3,7 @@ package com.qsp.player;
 import android.app.Application;
 import android.os.Build;
 
+import com.qsp.player.game.AudioPlayer;
 import com.qsp.player.game.HtmlProcessor;
 import com.qsp.player.game.ImageProvider;
 import com.qsp.player.game.libqsp.LibQspProxy;
@@ -17,7 +18,8 @@ public class QuestPlayerApplication extends Application {
 
     private final ImageProvider imageProvider = new ImageProvider();
     private final HtmlProcessor htmlProcessor = new HtmlProcessor();
-    private final LibQspProxyImpl libQspProxy = new LibQspProxyImpl(this, imageProvider, htmlProcessor);
+    private final AudioPlayer audioPlayer = new AudioPlayer();
+    private final LibQspProxyImpl libQspProxy = new LibQspProxyImpl(this, imageProvider, htmlProcessor, audioPlayer);
 
     public QuestPlayerApplication() {
         HandroidLoggerAdapter.DEBUG = BuildConfig.DEBUG;
@@ -38,6 +40,10 @@ public class QuestPlayerApplication extends Application {
 
     public HtmlProcessor getHtmlProcessor() {
         return htmlProcessor;
+    }
+
+    public AudioPlayer getAudioPlayer() {
+        return audioPlayer;
     }
 
     public LibQspProxy getLibQspProxy() {

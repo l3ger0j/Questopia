@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static com.qsp.player.util.StringUtil.isNotEmpty;
+import static com.qsp.player.util.ThreadUtil.throwIfThreadIsNotMain;
 
 public class AudioPlayer {
     private static final Logger logger = LoggerFactory.getLogger(AudioPlayer.class);
@@ -24,35 +25,15 @@ public class AudioPlayer {
     private boolean soundEnabled;
     private boolean paused;
 
-    private void runOnAudioThread(final Runnable runnable) {
-        // Запустить аудио-поток, если он ещё не был запущен
-        if (audioThread == null) {
-            startAudioThread(runnable);
-            return;
-        }
+    public void start() {
+        throwIfThreadIsNotMain();
 
-        // Выйти если поток был запущен, но не был проинициализирован
-        if (!audioThreadInited) {
-            logger.warn("Audio thread has been started, but not initialized");
-            return;
-        }
-
-        Handler handler = audioHandler;
-        if (handler != null) {
-            handler.post(runnable);
-        }
-    }
-
-    private void startAudioThread(final Runnable runnable) {
         audioThread = new Thread(() -> {
             try {
                 Looper.prepare();
                 audioHandler = new Handler();
                 audioThreadInited = true;
-
-                runnable.run();
                 Looper.loop();
-
             } catch (Throwable t) {
                 logger.error("Audio thread has stopped exceptionally", t);
             }
@@ -60,11 +41,9 @@ public class AudioPlayer {
         audioThread.start();
     }
 
-    public void close() {
-        stopAudioThread();
-    }
+    public void stop() {
+        throwIfThreadIsNotMain();
 
-    private void stopAudioThread() {
         if (audioThread == null) return;
 
         if (audioThreadInited) {
@@ -94,6 +73,21 @@ public class AudioPlayer {
                 doPlay(sound);
             }
         });
+    }
+
+    private void runOnAudioThread(final Runnable runnable) {
+        if (audioThread == null) {
+            logger.warn("Audio thread has not been started");
+            return;
+        }
+        if (!audioThreadInited) {
+            logger.warn("Audio thread has not been initialized");
+            return;
+        }
+        Handler handler = audioHandler;
+        if (handler != null) {
+            handler.post(runnable);
+        }
     }
 
     private void doPlay(final Sound sound) {

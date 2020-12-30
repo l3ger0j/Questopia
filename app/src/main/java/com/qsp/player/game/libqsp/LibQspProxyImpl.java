@@ -42,6 +42,8 @@ import static com.qsp.player.util.FileUtil.getFileContents;
 import static com.qsp.player.util.FileUtil.getOrCreateDirectory;
 import static com.qsp.player.util.FileUtil.normalizePath;
 import static com.qsp.player.util.StringUtil.getStringOrEmpty;
+import static com.qsp.player.util.StringUtil.isNotEmpty;
+import static com.qsp.player.util.StringUtil.isNullOrEmpty;
 import static com.qsp.player.util.ThreadUtil.throwIfThreadIsNotMain;
 
 public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
@@ -50,12 +52,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
     private final Handler counterHandler = new Handler();
     private final ReentrantLock libQspLock = new ReentrantLock();
     private final PlayerViewState viewState = new PlayerViewState();
-    private final AudioPlayer audioPlayer = new AudioPlayer();
     private final NativeMethods nativeMethods = new NativeMethods(this);
-
-    private final Context context;
-    private final ImageProvider imageProvider;
-    private final HtmlProcessor htmlProcessor;
 
     private final Runnable counterTask = new Runnable() {
         @Override
@@ -81,10 +78,20 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
     private volatile int timerInterval;
     private PlayerView playerView;
 
-    public LibQspProxyImpl(Context context, ImageProvider imageProvider, HtmlProcessor htmlProcessor) {
+    // region Dependencies
+
+    private final Context context;
+    private final ImageProvider imageProvider;
+    private final HtmlProcessor htmlProcessor;
+    private final AudioPlayer audioPlayer;
+
+    // endregion Dependencies
+
+    public LibQspProxyImpl(Context context, ImageProvider imageProvider, HtmlProcessor htmlProcessor, AudioPlayer audioPlayer) {
         this.context = context;
         this.imageProvider = imageProvider;
         this.htmlProcessor = htmlProcessor;
+        this.audioPlayer = audioPlayer;
     }
 
     public void init() {
@@ -115,17 +122,10 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
     private void runOnQspThread(final Runnable runnable) {
         throwIfThreadIsNotMain();
 
-        // Callback с блокировкой, который необходимо выполнить
-        final Runnable runnableWithLock = () -> {
-            libQspLock.lock();
-            try {
-                runnable.run();
-            } finally {
-                libQspLock.unlock();
-            }
-        };
-
-        // Выйти если поток был запущен, но не был проинициализирован
+        if (libQspThread == null) {
+            logger.warn("libqsp thread has not been started");
+            return;
+        }
         if (!libQspThreadInited) {
             logger.warn("libqsp thread has been started, but not initialized");
             return;
@@ -133,16 +133,18 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
 
         Handler handler = libQspHandler;
         if (handler != null) {
-            handler.post(runnableWithLock);
+            handler.post(() -> {
+                libQspLock.lock();
+                try {
+                    runnable.run();
+                } finally {
+                    libQspLock.unlock();
+                }
+            });
         }
     }
 
     public void stop() {
-        audioPlayer.close();
-        stopLibQspThread();
-    }
-
-    private void stopLibQspThread() {
         throwIfThreadIsNotMain();
 
         if (libQspThread == null) return;
@@ -351,9 +353,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
 
         imageProvider.invalidateCache();
 
-        if (!loadGameWorld()) {
-            return;
-        }
+        if (!loadGameWorld()) return;
 
         gameStartTime = SystemClock.elapsedRealtime();
         lastMsCountCallTime = 0;
@@ -423,9 +423,8 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
         }
 
         byte[] gameData = nativeMethods.QSPSaveGameAsData(false);
-        if (gameData == null) {
-            return;
-        }
+        if (gameData == null) return;
+
         try (OutputStream out = context.getContentResolver().openOutputStream(uri, "w")) {
             out.write(gameData);
         } catch (IOException e) {
@@ -487,24 +486,20 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
     }
 
     public void PlayFile(String path, int volume) {
-        if (path != null && !path.isEmpty()) {
+        if (isNotEmpty(path)) {
             audioPlayer.playFile(normalizePath(path), volume);
         }
     }
 
     public boolean IsPlayingFile(final String path) {
-        if (path == null || path.isEmpty()) {
-            return false;
-        }
-
-        return audioPlayer.isPlayingFile(normalizePath(path));
+        return isNotEmpty(path) && audioPlayer.isPlayingFile(normalizePath(path));
     }
 
     public void CloseFile(String path) {
-        if (path == null || path.isEmpty()) {
-            audioPlayer.closeAllFiles();
-        } else {
+        if (isNotEmpty(path)) {
             audioPlayer.closeFile(normalizePath(path));
+        } else {
+            audioPlayer.closeAllFiles();
         }
     }
 

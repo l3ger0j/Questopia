@@ -108,9 +108,6 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
 
     private final Context context = this;
 
-    private ImageProvider imageProvider;
-    private HtmlProcessor htmlProcessor;
-    private LibQspProxy libQspProxy;
     private SharedPreferences settings;
     private String currentLanguage = Locale.getDefault().getLanguage();
     private int activeTab;
@@ -137,25 +134,24 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
     private int textColor;
     private int linkColor;
 
-    // region BackgroundService
-
     private final ServiceConnection backgroundServiceConn = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            backgroundService = ((BackgroundService.LocalBinder) service).getService();
-            backgroundServiceBound = true;
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            backgroundServiceBound = false;
         }
     };
 
-    private BackgroundService backgroundService;
-    private boolean backgroundServiceBound;
+    // region Dependencies
 
-    // endregion BackgroundService
+    private ImageProvider imageProvider;
+    private HtmlProcessor htmlProcessor;
+    private LibQspProxy libQspProxy;
+    private AudioPlayer audioPlayer;
+
+    // endregion Dependencies
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -194,6 +190,9 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
 
         libQspProxy = application.getLibQspProxy();
         libQspProxy.setPlayerView(this);
+
+        audioPlayer = application.getAudioPlayer();
+        audioPlayer.start();
     }
 
     private void loadLocale() {
@@ -305,11 +304,22 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
 
     @Override
     protected void onDestroy() {
+        unbindService(backgroundServiceConn);
+
+        audioPlayer.stop();
+
         libQspProxy.pauseGame();
         libQspProxy.setPlayerView(null);
-        unbindService(backgroundServiceConn);
+
         super.onDestroy();
+
         logger.info("GameActivity destroyed");
+    }
+
+    @Override
+    public void onPause() {
+        libQspProxy.pauseGame();
+        super.onPause();
     }
 
     @Override
@@ -487,12 +497,6 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
             intent.putExtra("gameRunning", viewState.getGameId());
         }
         startActivityForResult(intent, REQUEST_CODE_SELECT_GAME);
-    }
-
-    @Override
-    public void onPause() {
-        libQspProxy.pauseGame();
-        super.onPause();
     }
 
     @Override

@@ -18,17 +18,22 @@ public interface LibQspProxy {
      */
     void stop();
 
-    PlayerViewState getViewState();
-    void setPlayerView(PlayerView view);
+    void runGame(String id, String title, File dir, File file);
+    void pauseGame();
+    void resumeGame();
+    void restartGame();
+
+    void loadGameState(Uri uri);
+    void saveGameState(Uri uri);
+
     void execute(String code);
+
     void onActionSelected(int index);
     void onActionClicked(int index);
     void onObjectSelected(int index);
     void onInputAreaClicked();
-    void runGame(String id, String title, File dir, File file);
-    void restartGame();
-    void resumeGame();
-    void pauseGame();
-    void loadGameState(Uri uri);
-    void saveGameState(Uri uri);
+
+    PlayerViewState getViewState();
+
+    void setPlayerView(PlayerView view);
 }

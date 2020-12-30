@@ -6,6 +6,10 @@ public final class StringUtil {
         return str != null && !str.isEmpty();
     }
 
+    public static boolean isNullOrEmpty(String str) {
+        return str == null || str.isEmpty();
+    }
+
     public static String getStringOrEmpty(String str) {
         return str != null ? str : "";
     }

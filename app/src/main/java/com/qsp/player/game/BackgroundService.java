@@ -23,16 +23,18 @@ public class BackgroundService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+
         libQspProxy = ((QuestPlayerApplication) getApplication()).getLibQspProxy();
         libQspProxy.start();
+
         logger.info("BackgroundService created");
     }
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
         libQspProxy.stop();
         logger.info("BackgroundService destroyed");
+        super.onDestroy();
     }
 
     @Nullable
