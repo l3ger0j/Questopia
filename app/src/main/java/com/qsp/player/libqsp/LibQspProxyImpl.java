@@ -1,13 +1,10 @@
 package com.qsp.player.libqsp;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
-
-import androidx.preference.PreferenceManager;
 
 import com.qsp.player.R;
 import com.qsp.player.common.AudioPlayer;
@@ -47,32 +44,15 @@ import static com.qsp.player.util.ThreadUtil.throwIfNotMainThread;
 public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
     private static final Logger logger = LoggerFactory.getLogger(LibQspProxyImpl.class);
 
-    private final Handler counterHandler = new Handler();
     private final ReentrantLock libQspLock = new ReentrantLock();
     private final PlayerViewState viewState = new PlayerViewState();
     private final NativeMethods nativeMethods = new NativeMethods(this);
-
-    private final Runnable counterTask = new Runnable() {
-        @Override
-        public void run() {
-            // Обрабатывать локацию-счётчик, только если поток библиотеки сейчас ничего не делает
-            if (!libQspLock.isLocked()) {
-                runOnQspThread(() -> {
-                    if (!nativeMethods.QSPExecCounter(true)) {
-                        showLastQspError();
-                    }
-                });
-            }
-            counterHandler.postDelayed(this, timerInterval);
-        }
-    };
 
     private Thread libQspThread;
     private volatile Handler libQspHandler;
     private volatile boolean libQspThreadInited;
     private volatile long gameStartTime;
     private volatile long lastMsCountCallTime;
-    private volatile int timerInterval;
     private PlayerView playerView;
 
     private final Context context;
@@ -85,27 +65,6 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
         this.htmlProcessor = htmlProcessor;
         this.imageProvider = imageProvider;
         this.audioPlayer = audioPlayer;
-    }
-
-    public void start() {
-        libQspThread = new Thread("libqsp") {
-            @Override
-            public void run() {
-                try {
-                    nativeMethods.QSPInit();
-                    Looper.prepare();
-                    libQspHandler = new Handler();
-                    libQspThreadInited = true;
-
-                    Looper.loop();
-
-                    nativeMethods.QSPDeInit();
-                } catch (Throwable t) {
-                    logger.error("libqsp thread has stopped exceptionally", t);
-                }
-            }
-        };
-        libQspThread.start();
     }
 
     private void runOnQspThread(final Runnable runnable) {
@@ -131,23 +90,6 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
                 }
             });
         }
-    }
-
-    public void stop() {
-        throwIfNotMainThread();
-
-        if (libQspThread == null) return;
-
-        if (libQspThreadInited) {
-            Handler handler = libQspHandler;
-            if (handler != null) {
-                handler.getLooper().quitSafely();
-            }
-            libQspThreadInited = false;
-        } else {
-            logger.warn("libqsp thread has been started, but not initialized");
-        }
-        libQspThread = null;
     }
 
     private void showLastQspError() {
@@ -259,23 +201,118 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
 
     // region LibQspProxy
 
-    @Override
-    public PlayerViewState getViewState() {
-        return viewState;
+    public void start() {
+        libQspThread = new Thread("libqsp") {
+            @Override
+            public void run() {
+                try {
+                    nativeMethods.QSPInit();
+                    Looper.prepare();
+                    libQspHandler = new Handler();
+                    libQspThreadInited = true;
+
+                    Looper.loop();
+
+                    nativeMethods.QSPDeInit();
+                } catch (Throwable t) {
+                    logger.error("libqsp thread has stopped exceptionally", t);
+                }
+            }
+        };
+        libQspThread.start();
+    }
+
+    public void stop() {
+        throwIfNotMainThread();
+
+        if (libQspThread == null) return;
+
+        if (libQspThreadInited) {
+            Handler handler = libQspHandler;
+            if (handler != null) {
+                handler.getLooper().quitSafely();
+            }
+            libQspThreadInited = false;
+        } else {
+            logger.warn("libqsp thread has been started, but not initialized");
+        }
+        libQspThread = null;
     }
 
     @Override
-    public void setPlayerView(PlayerView view) {
-        playerView = view;
+    public void runGame(final String id, final String title, final File dir, final File file) {
+        runOnQspThread(() -> doRunGame(id, title, dir, file));
     }
 
-    @Override
-    public void execute(final String code) {
-        runOnQspThread(() -> {
-            if (!nativeMethods.QSPExecString(code, true)) {
+    private void doRunGame(final String id, final String title, final File dir, final File file) {
+        playerView.doWithCounterDisabled(() -> {
+            audioPlayer.closeAllFiles();
+
+            viewState.reset();
+            viewState.setGameRunning(true);
+            viewState.setGameId(id);
+            viewState.setGameTitle(title);
+            viewState.setGameDir(dir);
+            viewState.setGameFile(file);
+
+            imageProvider.invalidateCache();
+
+            if (!loadGameWorld()) return;
+
+            gameStartTime = SystemClock.elapsedRealtime();
+            lastMsCountCallTime = 0;
+
+            if (!nativeMethods.QSPRestartGame(true)) {
                 showLastQspError();
             }
         });
+    }
+
+    @Override
+    public void restartGame() {
+        runOnQspThread(() -> {
+            PlayerViewState state = viewState;
+            doRunGame(state.getGameId(), state.getGameTitle(), state.getGameDir(), state.getGameFile());
+        });
+    }
+
+    @Override
+    public void loadGameState(final Uri uri) {
+        if (!isSameThread(libQspHandler.getLooper().getThread())) {
+            runOnQspThread(() -> loadGameState(uri));
+            return;
+        }
+        final byte[] gameData;
+
+        try (InputStream in = context.getContentResolver().openInputStream(uri)) {
+            try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+                StreamUtil.copy(in, out);
+                gameData = out.toByteArray();
+            }
+        } catch (IOException ex) {
+            logger.error("Failed to load game state", ex);
+            return;
+        }
+
+        if (!nativeMethods.QSPOpenSavedGameFromData(gameData, gameData.length, true)) {
+            showLastQspError();
+        }
+    }
+
+    @Override
+    public void saveGameState(final Uri uri) {
+        if (!isSameThread(libQspHandler.getLooper().getThread())) {
+            runOnQspThread(() -> saveGameState(uri));
+            return;
+        }
+        byte[] gameData = nativeMethods.QSPSaveGameAsData(false);
+        if (gameData == null) return;
+
+        try (OutputStream out = context.getContentResolver().openOutputStream(uri, "w")) {
+            out.write(gameData);
+        } catch (IOException ex) {
+            logger.error("Failed to save the game state", ex);
+        }
     }
 
     @Override
@@ -324,101 +361,40 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
     }
 
     @Override
-    public void runGame(final String id, final String title, final File dir, final File file) {
-        runOnQspThread(() -> doRunGame(id, title, dir, file));
-    }
-
-    private void doRunGame(final String id, final String title, final File dir, final File file) {
-        counterHandler.removeCallbacks(counterTask);
-        audioPlayer.closeAllFiles();
-
-        viewState.reset();
-        viewState.setGameRunning(true);
-        viewState.setGameId(id);
-        viewState.setGameTitle(title);
-        viewState.setGameDir(dir);
-        viewState.setGameFile(file);
-
-        imageProvider.invalidateCache();
-
-        if (!loadGameWorld()) return;
-
-        gameStartTime = SystemClock.elapsedRealtime();
-        lastMsCountCallTime = 0;
-        timerInterval = 500;
-
-        if (!nativeMethods.QSPRestartGame(true)) {
-            showLastQspError();
-        }
-
-        counterHandler.postDelayed(counterTask, timerInterval);
-    }
-
-    @Override
-    public void restartGame() {
+    public void execute(final String code) {
         runOnQspThread(() -> {
-            PlayerViewState state = viewState;
-            doRunGame(state.getGameId(), state.getGameTitle(), state.getGameDir(), state.getGameFile());
+            if (!nativeMethods.QSPExecString(code, true)) {
+                showLastQspError();
+            }
         });
     }
 
     @Override
-    public void resumeGame() {
-        counterHandler.postDelayed(counterTask, timerInterval);
-    }
+    public void executeCounter() {
+        if (libQspLock.isLocked()) return;
 
-    @Override
-    public void pauseGame() {
-        counterHandler.removeCallbacks(counterTask);
-    }
-
-    @Override
-    public void loadGameState(final Uri uri) {
-        if (!isSameThread(libQspHandler.getLooper().getThread())) {
-            runOnQspThread(() -> loadGameState(uri));
-            return;
-        }
-        final byte[] gameData;
-
-        try (InputStream in = context.getContentResolver().openInputStream(uri)) {
-            try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-                StreamUtil.copy(in, out);
-                gameData = out.toByteArray();
+        runOnQspThread(() -> {
+            if (!nativeMethods.QSPExecCounter(true)) {
+                showLastQspError();
             }
-        } catch (IOException ex) {
-            logger.error("Failed to load game state", ex);
-            return;
-        }
-
-        counterHandler.removeCallbacks(counterTask);
-
-        if (!nativeMethods.QSPOpenSavedGameFromData(gameData, gameData.length, true)) {
-            showLastQspError();
-        }
-
-        counterHandler.postDelayed(counterTask, timerInterval);
+        });
     }
 
     @Override
-    public void saveGameState(final Uri uri) {
-        if (!isSameThread(libQspHandler.getLooper().getThread())) {
-            runOnQspThread(() -> saveGameState(uri));
-            return;
-        }
-        byte[] gameData = nativeMethods.QSPSaveGameAsData(false);
-        if (gameData == null) return;
+    public PlayerViewState getViewState() {
+        return viewState;
+    }
 
-        try (OutputStream out = context.getContentResolver().openOutputStream(uri, "w")) {
-            out.write(gameData);
-        } catch (IOException ex) {
-            logger.error("Failed to save the game state", ex);
-        }
+    @Override
+    public void setPlayerView(PlayerView view) {
+        playerView = view;
     }
 
     // endregion LibQspProxy
 
     // region LibQspCallbacks
 
+    @Override
     public void RefreshInt() {
         boolean confChanged = loadUIConfiguration();
 
@@ -449,18 +425,23 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
         }
     }
 
+    @Override
     public void ShowPicture(String path) {
         PlayerView view = playerView;
-        if (view == null || path == null || path.isEmpty()) {
-            return;
+        if (view != null && isNotEmpty(path)) {
+            view.showPicture(path);
         }
-        view.showPicture(path);
     }
 
+    @Override
     public void SetTimer(int msecs) {
-        timerInterval = msecs;
+        PlayerView view = playerView;
+        if (view != null) {
+            view.setCounterInterval(msecs);
+        }
     }
 
+    @Override
     public void ShowMessage(String message) {
         PlayerView view = playerView;
         if (view != null) {
@@ -468,16 +449,19 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
         }
     }
 
+    @Override
     public void PlayFile(String path, int volume) {
         if (isNotEmpty(path)) {
             audioPlayer.playFile(normalizePath(path), volume);
         }
     }
 
+    @Override
     public boolean IsPlayingFile(final String path) {
         return isNotEmpty(path) && audioPlayer.isPlayingFile(normalizePath(path));
     }
 
+    @Override
     public void CloseFile(String path) {
         if (isNotEmpty(path)) {
             audioPlayer.closeFile(normalizePath(path));
@@ -486,6 +470,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
         }
     }
 
+    @Override
     public void OpenGame(String filename) {
         File savesDir = getOrCreateDirectory(viewState.getGameDir(), "saves");
         File saveFile = findFileOrDirectory(savesDir, filename);
@@ -493,9 +478,10 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
             logger.error("Save file not found: " + filename);
             return;
         }
-        loadGameState(Uri.fromFile(saveFile));
+        playerView.doWithCounterDisabled(() -> loadGameState(Uri.fromFile(saveFile)));
     }
 
+    @Override
     public void SaveGame(String filename) {
         PlayerView view = playerView;
         if (view != null) {
@@ -503,11 +489,13 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
         }
     }
 
+    @Override
     public String InputBox(String prompt) {
         PlayerView view = playerView;
         return view != null ? view.showInputBox(prompt) : null;
     }
 
+    @Override
     public int GetMSCount() {
         long now = SystemClock.elapsedRealtime();
         if (lastMsCountCallTime == 0) {
@@ -519,6 +507,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
         return dt;
     }
 
+    @Override
     public void AddMenuItem(String name, String imgPath) {
         QspMenuItem item = new QspMenuItem();
         item.imgPath = normalizePath(imgPath);
@@ -526,6 +515,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
         viewState.getMenuItems().add(item);
     }
 
+    @Override
     public void ShowMenu() {
         PlayerView view = playerView;
         if (view == null) return;
@@ -536,10 +526,12 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
         }
     }
 
+    @Override
     public void DeleteMenu() {
         viewState.getMenuItems().clear();
     }
 
+    @Override
     public void Wait(int msecs) {
         try {
             Thread.sleep(msecs);
@@ -548,16 +540,19 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
         }
     }
 
+    @Override
     public void ShowWindow(int type, boolean isShow) {
         WindowType windowType = WindowType.values()[type];
         playerView.showWindow(windowType, isShow);
     }
 
+    @Override
     public byte[] GetFileContents(String path) {
         String normPath = normalizePath(path);
         return getFileContents(normPath);
     }
 
+    @Override
     public void ChangeQuestPath(String path) {
         File dir = new File(path);
         if (!dir.exists()) {

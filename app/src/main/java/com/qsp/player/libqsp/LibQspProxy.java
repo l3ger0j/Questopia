@@ -16,19 +16,24 @@ public interface LibQspProxy {
     void stop();
 
     void runGame(String id, String title, File dir, File file);
-    void pauseGame();
-    void resumeGame();
     void restartGame();
-
     void loadGameState(Uri uri);
     void saveGameState(Uri uri);
-
-    void execute(String code);
 
     void onActionSelected(int index);
     void onActionClicked(int index);
     void onObjectSelected(int index);
     void onInputAreaClicked();
+
+    /**
+     * Запускает выполнение указанной строки кода в библиотеке.
+     */
+    void execute(String code);
+
+    /**
+     * Запускает обработку локации-счётчика в библиотеке.
+     */
+    void executeCounter();
 
     PlayerViewState getViewState();
 

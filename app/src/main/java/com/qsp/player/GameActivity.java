@@ -13,6 +13,7 @@ import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.text.format.DateFormat;
@@ -81,6 +82,7 @@ import static com.qsp.player.util.ThreadUtil.isMainThread;
 @SuppressLint("ClickableViewAccessibility")
 public class GameActivity extends AppCompatActivity implements PlayerView, GestureDetector.OnGestureListener {
     private static final int MAX_SAVE_SLOTS = 5;
+
     private static final String SHOW_ADVANCED_EXTRA_NAME = Build.VERSION.SDK_INT < Build.VERSION_CODES.Q ?
             "android.content.extra.SHOW_ADVANCED" :
             "android.provider.extra.SHOW_ADVANCED";
@@ -112,6 +114,16 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
 
     private static final Logger logger = LoggerFactory.getLogger(GameActivity.class);
 
+    private final ServiceConnection backgroundServiceConn = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+        }
+    };
+
     private SharedPreferences settings;
     private String currentLanguage = Locale.getDefault().getLanguage();
     private int activeTab;
@@ -138,20 +150,26 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
     private int textColor;
     private int linkColor;
 
-    private final ServiceConnection backgroundServiceConn = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-        }
-    };
-
     private HtmlProcessor htmlProcessor;
     private ImageProvider imageProvider;
     private LibQspProxy libQspProxy;
     private AudioPlayer audioPlayer;
+
+    // region Локация-счётчик
+
+    private final Handler counterHandler = new Handler();
+
+    private int counterInterval = 500;
+
+    private final Runnable counterTask = new Runnable() {
+        @Override
+        public void run() {
+            libQspProxy.executeCounter();
+            counterHandler.postDelayed(this, counterInterval);
+        }
+    };
+
+    // endregion Локация-счётчик
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -305,10 +323,8 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
     @Override
     protected void onDestroy() {
         audioPlayer.stop();
-
-        libQspProxy.pauseGame();
+        counterHandler.removeCallbacks(counterTask);
         libQspProxy.setPlayerView(null);
-
         unbindService(backgroundServiceConn);
         super.onDestroy();
         logger.info("GameActivity destroyed");
@@ -317,7 +333,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
     @Override
     public void onPause() {
         audioPlayer.pause();
-        libQspProxy.pauseGame();
+        counterHandler.removeCallbacks(counterTask);
         super.onPause();
     }
 
@@ -334,7 +350,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
             applyViewState();
             audioPlayer.setSoundEnabled(settings.getBoolean("sound", true));
             audioPlayer.resume();
-            libQspProxy.resumeGame();
+            counterHandler.postDelayed(counterTask, counterInterval);
         } else if (!selectingGame) {
             startSelectGame();
         }
@@ -573,7 +589,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
                 switch (action) {
                     case LOAD:
                         if (file != null) {
-                            proxy.loadGameState(Uri.fromFile(file));
+                            doWithCounterDisabled(() -> proxy.loadGameState(Uri.fromFile(file)));
                         }
                         break;
                     case SAVE:
@@ -718,7 +734,7 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
             return;
         }
         Uri uri = data.getData();
-        libQspProxy.loadGameState(uri);
+        doWithCounterDisabled(() -> libQspProxy.loadGameState(uri));
     }
 
     private void handleSaveToFile(int resultCode, Intent data) {
@@ -771,6 +787,18 @@ public class GameActivity extends AppCompatActivity implements PlayerView, Gestu
     }
 
     // region PlayerView
+
+    @Override
+    public void setCounterInterval(int millis) {
+        counterInterval = millis;
+    }
+
+    @Override
+    public void doWithCounterDisabled(Runnable runnable) {
+        counterHandler.removeCallbacks(counterTask);
+        runnable.run();
+        counterHandler.postDelayed(counterTask, counterInterval);
+    }
 
     @Override
     public void refreshGameView(
