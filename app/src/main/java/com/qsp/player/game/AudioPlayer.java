@@ -10,66 +10,91 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CountDownLatch;
+
+import static com.qsp.player.util.StringUtil.isNotEmpty;
+import static com.qsp.player.util.ThreadUtil.throwIfThreadIsNotMain;
 
 public class AudioPlayer {
-    private static Logger logger = LoggerFactory.getLogger(AudioPlayer.class);
+    private static final Logger logger = LoggerFactory.getLogger(AudioPlayer.class);
 
     private final ConcurrentHashMap<String, Sound> sounds = new ConcurrentHashMap<>();
 
-    private volatile boolean audioThreadRunning;
+    private Thread audioThread;
     private volatile Handler audioHandler;
+    private volatile boolean audioThreadInited;
     private boolean soundEnabled;
     private boolean paused;
 
-    public void setSoundEnabled(boolean enabled) {
-        soundEnabled = enabled;
-    }
-
-    public void destroy() {
-        if (audioHandler != null) {
-            audioHandler.getLooper().quitSafely();
-        }
-    }
-
-    public void resume() {
-        paused = false;
-
-        if (!soundEnabled) {
+    private void runOnAudioThread(final Runnable runnable) {
+        // Запустить аудио-поток, если он ещё не был запущен
+        if (audioThread == null) {
+            startAudioThread(runnable);
             return;
         }
+
+        // Выйти если поток был запущен, но не был проинициализирован
+        if (!audioThreadInited) {
+            logger.warn("Audio thread has been started, but not initialized");
+            return;
+        }
+
+        Handler handler = audioHandler;
+        if (handler != null) {
+            handler.post(runnable);
+        }
+    }
+
+    private void startAudioThread(final Runnable runnable) {
+        audioThread = new Thread(() -> {
+            try {
+                Looper.prepare();
+                audioHandler = new Handler();
+                audioThreadInited = true;
+
+                runnable.run();
+                Looper.loop();
+
+            } catch (Throwable t) {
+                logger.error("Audio thread has been stopped exceptionally", t);
+            }
+        });
+        audioThread.start();
+    }
+
+    public void close() {
+        stopAudioThread();
+    }
+
+    private void stopAudioThread() {
+        if (audioThread == null) return;
+
+        if (audioThreadInited) {
+            Handler handler = audioHandler;
+            if (handler != null) {
+                handler.getLooper().quitSafely();
+            }
+            audioThreadInited = false;
+        } else {
+            logger.warn("Audio thread has been started, but not initialized");
+        }
+        audioThread = null;
+    }
+
+    public void playFile(final String path, final int volume) {
         runOnAudioThread(() -> {
-            for (Sound sound : sounds.values()) {
+            Sound sound = sounds.get(path);
+            if (sound != null) {
+                sound.volume = volume;
+            } else {
+                sound = new Sound();
+                sound.path = path;
+                sound.volume = volume;
+                sounds.put(path, sound);
+            }
+            if (soundEnabled && !paused) {
                 doPlay(sound);
             }
         });
-    }
-
-    private void runOnAudioThread(final Runnable r) {
-        if (!audioThreadRunning) {
-            startAudioThread();
-        }
-        audioHandler.post(r);
-    }
-
-    private void startAudioThread() {
-        final CountDownLatch latch = new CountDownLatch(1);
-
-        new Thread(() -> {
-            audioThreadRunning = true;
-            Looper.prepare();
-            audioHandler = new Handler();
-            latch.countDown();
-            Looper.loop();
-            audioThreadRunning = false;
-        })
-                .start();
-
-        try {
-            latch.await();
-        } catch (InterruptedException ex) {
-            logger.error("Wait failed", ex);
-        }
     }
 
     private void doPlay(final Sound sound) {
@@ -104,53 +129,16 @@ public class AudioPlayer {
         sound.player = player;
     }
 
-    public void pause() {
-        paused = true;
-
-        runOnAudioThread(() -> {
-            for (Sound sound : sounds.values()) {
-                if (sound.player != null && sound.player.isPlaying()) {
-                    sound.player.pause();
-                }
-            }
-        });
-    }
-
-    public void playFile(final String path, final int volume) {
-        runOnAudioThread(() -> {
-            Sound sound = sounds.get(path);
-            if (sound != null) {
-                sound.volume = volume;
-            } else {
-                sound = new Sound();
-                sound.path = path;
-                sound.volume = volume;
-                sounds.put(path, sound);
-            }
-            if (soundEnabled && !paused) {
-                doPlay(sound);
-            }
-        });
-    }
-
     private float getSystemVolume(int volume) {
         return volume / 100.f;
     }
 
-    public boolean isPlayingFile(String path) {
-        if (path == null || path.isEmpty()) {
-            return false;
-        }
-
-        return sounds.containsKey(path);
-    }
-
-    public void closeFile(final String path) {
+    public void closeAllFiles() {
         runOnAudioThread(() -> {
-            Sound sound = sounds.remove(path);
-            if (sound != null) {
+            for (Sound sound : sounds.values()) {
                 doClose(sound);
             }
+            sounds.clear();
         });
     }
 
@@ -164,13 +152,45 @@ public class AudioPlayer {
         sound.player.release();
     }
 
-    public void closeAllFiles() {
+    public void closeFile(final String path) {
         runOnAudioThread(() -> {
-            for (Sound sound : sounds.values()) {
+            Sound sound = sounds.remove(path);
+            if (sound != null) {
                 doClose(sound);
             }
-            sounds.clear();
         });
+    }
+
+    public void pause() {
+        paused = true;
+
+        runOnAudioThread(() -> {
+            for (Sound sound : sounds.values()) {
+                if (sound.player != null && sound.player.isPlaying()) {
+                    sound.player.pause();
+                }
+            }
+        });
+    }
+
+    public void resume() {
+        paused = false;
+
+        if (!soundEnabled) return;
+
+        runOnAudioThread(() -> {
+            for (Sound sound : sounds.values()) {
+                doPlay(sound);
+            }
+        });
+    }
+
+    public boolean isPlayingFile(String path) {
+        return isNotEmpty(path) && sounds.containsKey(path);
+    }
+
+    public void setSoundEnabled(boolean enabled) {
+        soundEnabled = enabled;
     }
 
     private static class Sound {

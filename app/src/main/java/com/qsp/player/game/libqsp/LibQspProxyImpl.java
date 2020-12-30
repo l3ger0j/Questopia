@@ -22,7 +22,6 @@ import com.qsp.player.game.libqsp.dto.ActionData;
 import com.qsp.player.game.libqsp.dto.ErrorData;
 import com.qsp.player.game.libqsp.dto.GetVarValuesResponse;
 import com.qsp.player.game.libqsp.dto.ObjectData;
-import com.qsp.player.util.FileUtil;
 import com.qsp.player.util.StreamUtil;
 
 import org.slf4j.Logger;
@@ -36,7 +35,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Locale;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.locks.ReentrantLock;
 
 import static com.qsp.player.util.FileUtil.findFileOrDirectory;
@@ -44,6 +42,7 @@ import static com.qsp.player.util.FileUtil.getFileContents;
 import static com.qsp.player.util.FileUtil.getOrCreateDirectory;
 import static com.qsp.player.util.FileUtil.normalizePath;
 import static com.qsp.player.util.StringUtil.getStringOrEmpty;
+import static com.qsp.player.util.ThreadUtil.throwIfThreadIsNotMain;
 
 public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
     private static final Logger logger = LoggerFactory.getLogger(LibQspProxyImpl.class);
@@ -61,18 +60,22 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
     private final Runnable counterTask = new Runnable() {
         @Override
         public void run() {
-            runOnQspThread(() -> {
-                if (!nativeMethods.QSPExecCounter(true)) {
-                    showLastQspError();
-                }
-            });
+            // Обрабатывать локацию-счётчик, только если поток библиотеки сейчас ничего не делает
+            if (!libQspLock.isLocked()) {
+                runOnQspThread(() -> {
+                    if (!nativeMethods.QSPExecCounter(true)) {
+                        showLastQspError();
+                    }
+                });
+            }
             counterHandler.postDelayed(this, timerInterval);
         }
     };
 
     private SharedPreferences settings;
-    private volatile boolean libQspThreadRunning;
+    private Thread libQspThread;
     private volatile Handler libQspHandler;
+    private volatile boolean libQspThreadInited;
     private volatile long gameStartTime;
     private volatile long lastMsCountCallTime;
     private volatile int timerInterval;
@@ -88,20 +91,82 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
         settings = PreferenceManager.getDefaultSharedPreferences(context);
     }
 
-    public void close() {
-        audioPlayer.destroy();
-        stopQspThread();
-    }
+    private void runOnQspThread(final Runnable runnable) {
+        throwIfThreadIsNotMain();
 
-    private void stopQspThread() {
-        if (!libQspThreadRunning) {
+        // Callback с блокировкой, который необходимо выполнить
+        final Runnable runnableWithLock = () -> {
+            libQspLock.lock();
+            try {
+                runnable.run();
+            } finally {
+                libQspLock.unlock();
+            }
+        };
+
+        // Запустить поток библиотеки, если он ещё не был запущен
+        if (libQspThread == null) {
+            startLibQspThread(runnableWithLock);
             return;
         }
+
+        // Выйти если поток был запущен, но не был проинициализирован
+        if (!libQspThreadInited) {
+            logger.warn("libqsp thread has been started, but not initialized");
+            return;
+        }
+
         Handler handler = libQspHandler;
         if (handler != null) {
-            handler.getLooper().quitSafely();
+            handler.post(runnableWithLock);
         }
-        logger.info("QSP library thread stopped");
+    }
+
+    /**
+     * @param onInit callback, который необходимо вызвать после инициализации потока
+     */
+    private void startLibQspThread(final Runnable onInit) {
+        libQspThread = new Thread("libqsp") {
+            @Override
+            public void run() {
+                try {
+                    nativeMethods.QSPInit();
+                    Looper.prepare();
+                    libQspHandler = new Handler();
+                    libQspThreadInited = true;
+
+                    onInit.run();
+                    Looper.loop();
+
+                    nativeMethods.QSPDeInit();
+                } catch (Throwable t) {
+                    logger.error("libqsp thread has stopped exceptionally", t);
+                }
+            }
+        };
+        libQspThread.start();
+    }
+
+    public void close() {
+        audioPlayer.close();
+        stopLibQspThread();
+    }
+
+    private void stopLibQspThread() {
+        throwIfThreadIsNotMain();
+
+        if (libQspThread == null) return;
+
+        if (libQspThreadInited) {
+            Handler handler = libQspHandler;
+            if (handler != null) {
+                handler.getLooper().quitSafely();
+            }
+            libQspThreadInited = false;
+        } else {
+            logger.warn("libqsp thread has been started, but not initialized");
+        }
+        libQspThread = null;
     }
 
     private void showLastQspError() {
@@ -123,49 +188,6 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
         PlayerView view = playerView;
         if (view != null) {
             playerView.showError(message);
-        }
-    }
-
-    private void runOnQspThread(final Runnable runnable) {
-        if (libQspLock.isLocked()) {
-            return;
-        }
-        if (!libQspThreadRunning) {
-            runLibQspThread();
-        }
-        libQspHandler.post(() -> {
-            libQspLock.lock();
-            try {
-                runnable.run();
-            } finally {
-                libQspLock.unlock();
-            }
-        });
-    }
-
-    private void runLibQspThread() {
-        final CountDownLatch latch = new CountDownLatch(1);
-
-        new Thread("libqsp") {
-            @Override
-            public void run() {
-                libQspThreadRunning = true;
-                nativeMethods.QSPInit();
-                Looper.prepare();
-                libQspHandler = new Handler();
-                latch.countDown();
-                Looper.loop();
-                nativeMethods.QSPDeInit();
-                libQspThreadRunning = false;
-            }
-        }
-                .start();
-
-        try {
-            latch.await();
-            logger.info("QSP library thread started");
-        } catch (InterruptedException e) {
-            logger.error("Wait failed", e);
         }
     }
 
