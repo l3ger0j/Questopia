@@ -7,8 +7,8 @@ android {
         applicationId "com.qsp.player"
         minSdkVersion 19
         targetSdkVersion 29
-        versionCode 245
-        versionName "2.3.0-git"
+        versionCode 246
+        versionName "2.4.0-git"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     externalNativeBuild {
