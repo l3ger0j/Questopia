@@ -29,7 +29,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.MimeTypeMap;
 import android.webkit.WebResourceResponse;
-import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.AdapterView;
@@ -444,7 +443,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
     }
 
     private void refreshMainDesc() {
-        String mainDesc = getHtml(libQspProxy.getGameState().getMainDesc(), mainDescView.getMeasuredWidth());
+        String mainDesc = getHtml(libQspProxy.getGameState().getMainDesc());
 
         mainDescView.loadDataWithBaseURL(
                 "file:///",
@@ -454,7 +453,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
                 "");
     }
 
-    private String getHtml(String str, int maxImageWidth) {
+    private String getHtml(String str) {
         InterfaceConfiguration config = libQspProxy.getGameState().getInterfaceConfig();
 
         return config.isUseHtml() ?
@@ -463,7 +462,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
     }
 
     private void refreshVarsDesc() {
-        String varsDesc = getHtml(libQspProxy.getGameState().getVarsDesc(), varsDescView.getMeasuredWidth());
+        String varsDesc = getHtml(libQspProxy.getGameState().getVarsDesc());
 
         varsDescView.loadDataWithBaseURL(
                 "file:///",
