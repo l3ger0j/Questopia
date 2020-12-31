@@ -356,8 +356,10 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
 
         if (libQspProxy.getGameState().isGameRunning()) {
             applyGameState();
+
             audioPlayer.setSoundEnabled(settings.isSoundEnabled());
             audioPlayer.resume();
+
             counterHandler.postDelayed(counterTask, counterInterval);
 
         } else if (!selectingGame) {
@@ -434,9 +436,6 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
     }
 
     private void applyGameState() {
-        imageProvider.invalidateCache();
-
-        applySettings();
         refreshMainDesc();
         refreshVarsDesc();
         refreshActions();

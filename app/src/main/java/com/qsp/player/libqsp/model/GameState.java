@@ -18,6 +18,7 @@ public class GameState {
     private ArrayList<QspMenuItem> menuItems = new ArrayList<>();
 
     public void reset() {
+        interfaceConfig.reset();
         gameRunning = false;
         gameId = null;
         gameTitle = null;

@@ -7,6 +7,14 @@ public class InterfaceConfiguration {
     private int fontColor;
     private int linkColor;
 
+    public void reset() {
+        useHtml = false;
+        fontSize = 0;
+        backColor = 0;
+        fontColor = 0;
+        linkColor = 0;
+    }
+
     public boolean isUseHtml() {
         return useHtml;
     }
