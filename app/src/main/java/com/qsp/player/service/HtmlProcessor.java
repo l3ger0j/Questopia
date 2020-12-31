@@ -107,7 +107,7 @@ public class HtmlProcessor {
 
     /**
      * Привести строку <code>str</code>, полученную из библиотеки, к HTML-коду,
-     * приемлемому для отобрабежния в {@linkplain android.webkit.WebView}.
+     * приемлемому для отображения в {@linkplain android.webkit.WebView}.
      */
     public String convertQspStringToWebViewHtml(String str) {
         return isNotEmpty(str) ? htmlizeLineBreaks(str) : "";
