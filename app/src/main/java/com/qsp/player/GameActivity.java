@@ -29,6 +29,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.MimeTypeMap;
 import android.webkit.WebResourceResponse;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.AdapterView;
@@ -54,6 +55,7 @@ import com.qsp.player.libqsp.model.QspMenuItem;
 import com.qsp.player.libqsp.model.RefreshInterfaceRequest;
 import com.qsp.player.libqsp.model.WindowType;
 import com.qsp.player.service.AudioPlayer;
+import com.qsp.player.service.GameContentResolver;
 import com.qsp.player.service.HtmlProcessor;
 import com.qsp.player.service.ImageProvider;
 import com.qsp.player.stock.GameStockActivity;
@@ -75,11 +77,9 @@ import static com.qsp.player.util.Base64Util.decodeBase64;
 import static com.qsp.player.util.ColorUtil.convertRgbaToBgra;
 import static com.qsp.player.util.ColorUtil.getHexColor;
 import static com.qsp.player.util.FileUtil.findFileOrDirectory;
-import static com.qsp.player.util.FileUtil.findFileRecursively;
 import static com.qsp.player.util.FileUtil.getExtension;
 import static com.qsp.player.util.FileUtil.getOrCreateDirectory;
 import static com.qsp.player.util.FileUtil.getOrCreateFile;
-import static com.qsp.player.util.FileUtil.normalizePath;
 import static com.qsp.player.util.ThreadUtil.isMainThread;
 import static com.qsp.player.util.ViewUtil.setLocale;
 
@@ -150,8 +150,9 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
 
     // region Сервисы
 
-    private HtmlProcessor htmlProcessor;
+    private GameContentResolver gameContentResolver;
     private ImageProvider imageProvider;
+    private HtmlProcessor htmlProcessor;
     private LibQspProxy libQspProxy;
     private AudioPlayer audioPlayer;
     private GestureDetectorCompat gestureDetector;
@@ -256,8 +257,9 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
 
         QuestPlayerApplication application = (QuestPlayerApplication) getApplication();
 
-        htmlProcessor = application.getHtmlProcessor();
+        gameContentResolver = application.getGameContentResolver();
         imageProvider = application.getImageProvider();
+        htmlProcessor = application.getHtmlProcessor();
 
         audioPlayer = application.getAudioPlayer();
         audioPlayer.start();
@@ -442,7 +444,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
     }
 
     private void refreshMainDesc() {
-        String mainDesc = getHtml(libQspProxy.getGameState().getMainDesc());
+        String mainDesc = getHtml(libQspProxy.getGameState().getMainDesc(), mainDescView.getMeasuredWidth());
 
         mainDescView.loadDataWithBaseURL(
                 "file:///",
@@ -452,7 +454,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
                 "");
     }
 
-    private String getHtml(String str) {
+    private String getHtml(String str, int maxImageWidth) {
         InterfaceConfiguration config = libQspProxy.getGameState().getInterfaceConfig();
 
         return config.isUseHtml() ?
@@ -461,7 +463,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
     }
 
     private void refreshVarsDesc() {
-        String varsDesc = getHtml(libQspProxy.getGameState().getVarsDesc());
+        String varsDesc = getHtml(libQspProxy.getGameState().getVarsDesc(), varsDescView.getMeasuredWidth());
 
         varsDescView.loadDataWithBaseURL(
                 "file:///",
@@ -786,7 +788,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
         runOnUiThread(() -> {
             Intent intent = new Intent(this, ImageBoxActivity.class);
             intent.putExtra("gameDirUri", libQspProxy.getGameState().getGameDir().getAbsolutePath());
-            intent.putExtra("imagePath", normalizePath(path));
+            intent.putExtra("imagePath", path);
             startActivity(intent);
         });
     }
@@ -984,10 +986,10 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
         @Override
         public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
             if (url.startsWith("file:///")) {
-                String path = normalizePath(Uri.decode(url.substring(8)));
-                File file = findFileRecursively(libQspProxy.getGameState().getGameDir(), path);
+                String relPath = Uri.decode(url.substring(8));
+                File file = gameContentResolver.getFile(relPath);
                 if (file == null) {
-                    logger.error("File not found: " + path);
+                    logger.error("File not found: " + relPath);
                     return null;
                 }
                 try {

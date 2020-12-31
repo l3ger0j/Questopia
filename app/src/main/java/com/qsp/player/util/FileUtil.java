@@ -24,18 +24,6 @@ public final class FileUtil {
         return dir != null && dir.exists() && dir.isDirectory() && dir.canWrite();
     }
 
-    public static String normalizePath(String path) {
-        if (path == null) {
-            return null;
-        }
-        String result = path;
-        if (result.startsWith("./")) {
-            result = result.substring(2);
-        }
-
-        return result.replace("\\", "/");
-    }
-
     public static String normalizeGameFolderName(String name) {
         String result = name.endsWith("...") ? name.substring(0, name.length() - 3) : name;
 
@@ -95,7 +83,6 @@ public final class FileUtil {
         if (idx == -1) {
             return findFileOrDirectory(parentDir, path);
         }
-
         String dirName = path.substring(0, idx);
         File dir = findFileOrDirectory(parentDir, dirName);
         if (dir == null) return null;

@@ -1,5 +1,7 @@
 package com.qsp.player.service;
 
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.util.Base64;
 
 import org.jsoup.Jsoup;
@@ -16,8 +18,18 @@ import static com.qsp.player.util.StringUtil.isNotEmpty;
 import static com.qsp.player.util.StringUtil.isNullOrEmpty;
 
 public class HtmlProcessor {
+    private static final int IMAGE_WIDTH_THRESHOLD = 400;
+
     private static final Logger logger = LoggerFactory.getLogger(HtmlProcessor.class);
     private static final Pattern execPattern = Pattern.compile("href=\"exec:([\\s\\S]*?)\"", Pattern.CASE_INSENSITIVE);
+
+    private final GameContentResolver gameContentResolver;
+    private final ImageProvider imageProvider;
+
+    public HtmlProcessor(GameContentResolver gameContentResolver, ImageProvider imageProvider) {
+        this.gameContentResolver = gameContentResolver;
+        this.imageProvider = imageProvider;
+    }
 
     /**
      * Привести HTML-код <code>html</code>, полученный из библиотеки к
@@ -34,10 +46,8 @@ public class HtmlProcessor {
         document.outputSettings().prettyPrint(false);
 
         Element body = document.body();
-        body.select("img").attr("style", "max-width: 100%;");
-        body.select("video")
-                .attr("style", "max-width: 100%;")
-                .attr("muted", "true");
+        processHtmlImages(body);
+        processHtmlVideos(body);
 
         return document.toString();
     }
@@ -66,6 +76,33 @@ public class HtmlProcessor {
     private String htmlizeLineBreaks(String s) {
         return s.replace("\n", "<br>")
                 .replace("\r", "");
+    }
+
+    private void processHtmlImages(Element documentBody) {
+        for (Element img : documentBody.select("img")) {
+            boolean resize = shouldImageBeResized(img);
+            if (resize) {
+                img.attr("style", "max-width:100%;");
+            }
+        }
+    }
+
+    private boolean shouldImageBeResized(Element img) {
+        String relPath = img.attr("src");
+        String absPath = gameContentResolver.getAbsolutePath(relPath);
+
+        Drawable drawable = imageProvider.get(absPath);
+        if (drawable == null) return false;
+
+        int width = ((BitmapDrawable) drawable).getBitmap().getWidth();
+
+        return width > IMAGE_WIDTH_THRESHOLD;
+    }
+
+    private void processHtmlVideos(Element documentBody) {
+        documentBody.select("video")
+                .attr("style", "max-width:100%;")
+                .attr("muted", "true");
     }
 
     /**

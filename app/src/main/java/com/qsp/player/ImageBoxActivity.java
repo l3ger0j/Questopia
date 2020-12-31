@@ -6,26 +6,33 @@ import android.widget.ImageView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.qsp.player.service.GameContentResolver;
 import com.qsp.player.service.ImageProvider;
 
 public class ImageBoxActivity extends AppCompatActivity {
+    private GameContentResolver gameContentResolver;
     private ImageProvider imageProvider;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_image);
-        initImageProvider();
+        initServices();
         initImageView();
     }
 
-    private void initImageProvider() {
-        imageProvider = ((QuestPlayerApplication) getApplication()).getImageProvider();
+    private void initServices() {
+        QuestPlayerApplication application = (QuestPlayerApplication) getApplication();
+        gameContentResolver = application.getGameContentResolver();
+        imageProvider = application.getImageProvider();
     }
 
     private void initImageView() {
-        String imagePath = getIntent().getStringExtra("imagePath");
-        Drawable drawable = imageProvider.getDrawable(imagePath);
+        String relPath = getIntent().getStringExtra("imagePath");
+        String absPath = gameContentResolver.getAbsolutePath(relPath);
+
+        Drawable drawable = imageProvider.get(absPath);
+        if (drawable == null) return;
 
         ImageView imageView = findViewById(R.id.imagebox);
         imageView.setImageDrawable(drawable);

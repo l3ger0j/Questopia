@@ -18,6 +18,7 @@ import com.qsp.player.libqsp.model.QspMenuItem;
 import com.qsp.player.libqsp.model.RefreshInterfaceRequest;
 import com.qsp.player.libqsp.model.WindowType;
 import com.qsp.player.service.AudioPlayer;
+import com.qsp.player.service.GameContentResolver;
 import com.qsp.player.service.HtmlProcessor;
 import com.qsp.player.service.ImageProvider;
 import com.qsp.player.util.StreamUtil;
@@ -38,7 +39,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import static com.qsp.player.util.FileUtil.findFileOrDirectory;
 import static com.qsp.player.util.FileUtil.getFileContents;
 import static com.qsp.player.util.FileUtil.getOrCreateDirectory;
-import static com.qsp.player.util.FileUtil.normalizePath;
 import static com.qsp.player.util.StringUtil.getStringOrEmpty;
 import static com.qsp.player.util.StringUtil.isNotEmpty;
 import static com.qsp.player.util.ThreadUtil.isSameThread;
@@ -59,14 +59,21 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
     private GameInterface gameInterface;
 
     private final Context context;
-    private final HtmlProcessor htmlProcessor;
+    private final GameContentResolver gameContentResolver;
     private final ImageProvider imageProvider;
+    private final HtmlProcessor htmlProcessor;
     private final AudioPlayer audioPlayer;
 
-    public LibQspProxyImpl(Context context, HtmlProcessor htmlProcessor, ImageProvider imageProvider, AudioPlayer audioPlayer) {
+    public LibQspProxyImpl(
+            Context context,
+            GameContentResolver gameContentResolver,
+            ImageProvider imageProvider,
+            HtmlProcessor htmlProcessor,
+            AudioPlayer audioPlayer) {
         this.context = context;
-        this.htmlProcessor = htmlProcessor;
+        this.gameContentResolver = gameContentResolver;
         this.imageProvider = imageProvider;
+        this.htmlProcessor = htmlProcessor;
         this.audioPlayer = audioPlayer;
     }
 
@@ -183,7 +190,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
         for (int i = 0; i < count; ++i) {
             ActionData actionData = (ActionData) nativeMethods.QSPGetActionData(i);
             QspListItem action = new QspListItem();
-            action.icon = imageProvider.getDrawable(normalizePath(actionData.getImage()));
+            action.icon = imageProvider.get(actionData.getImage());
             action.text = gameState.getInterfaceConfig().isUseHtml() ? htmlProcessor.removeHtmlTags(actionData.getName()) : actionData.getName();
             actions.add(action);
         }
@@ -196,7 +203,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
         for (int i = 0; i < count; i++) {
             ObjectData objectResult = (ObjectData) nativeMethods.QSPGetObjectData(i);
             QspListItem object = new QspListItem();
-            object.icon = imageProvider.getDrawable(normalizePath(objectResult.getImage()));
+            object.icon = imageProvider.get(objectResult.getImage());
             object.text = gameState.getInterfaceConfig().isUseHtml() ? htmlProcessor.removeHtmlTags(objectResult.getName()) : objectResult.getName();
             objects.add(object);
         }
@@ -259,6 +266,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
             gameState.setGameDir(dir);
             gameState.setGameFile(file);
 
+            gameContentResolver.setGameDir(dir);
             imageProvider.invalidateCache();
 
             if (!loadGameWorld()) return;
@@ -456,19 +464,19 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
     @Override
     public void PlayFile(String path, int volume) {
         if (isNotEmpty(path)) {
-            audioPlayer.playFile(normalizePath(path), volume);
+            audioPlayer.playFile(path, volume);
         }
     }
 
     @Override
     public boolean IsPlayingFile(final String path) {
-        return isNotEmpty(path) && audioPlayer.isPlayingFile(normalizePath(path));
+        return isNotEmpty(path) && audioPlayer.isPlayingFile(path);
     }
 
     @Override
     public void CloseFile(String path) {
         if (isNotEmpty(path)) {
-            audioPlayer.closeFile(normalizePath(path));
+            audioPlayer.closeFile(path);
         } else {
             audioPlayer.closeAllFiles();
         }
@@ -517,7 +525,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
     @Override
     public void AddMenuItem(String name, String imgPath) {
         QspMenuItem item = new QspMenuItem();
-        item.imgPath = normalizePath(imgPath);
+        item.imgPath = imgPath;
         item.name = name;
         gameState.getMenuItems().add(item);
     }
@@ -558,8 +566,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
 
     @Override
     public byte[] GetFileContents(String path) {
-        String normPath = normalizePath(path);
-        return getFileContents(normPath);
+        return getFileContents(path);
     }
 
     @Override
@@ -571,6 +578,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
         }
         if (!gameState.getGameDir().equals(dir)) {
             gameState.setGameDir(dir);
+            gameContentResolver.setGameDir(dir);
             imageProvider.invalidateCache();
         }
     }
