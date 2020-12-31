@@ -28,10 +28,9 @@ public class ImageBoxActivity extends AppCompatActivity {
     }
 
     private void initImageView() {
-        String relPath = getIntent().getStringExtra("imagePath");
-        String absPath = gameContentResolver.getAbsolutePath(relPath);
+        String path = getIntent().getStringExtra("imagePath");
 
-        Drawable drawable = imageProvider.get(absPath);
+        Drawable drawable = imageProvider.get(path);
         if (drawable == null) return;
 
         ImageView imageView = findViewById(R.id.imagebox);
