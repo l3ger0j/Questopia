@@ -65,6 +65,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
+import static com.qsp.player.util.ColorUtil.getHexColor;
 import static com.qsp.player.util.FileUtil.GAME_INFO_FILENAME;
 import static com.qsp.player.util.FileUtil.createFile;
 import static com.qsp.player.util.FileUtil.deleteDirectory;
@@ -567,9 +568,9 @@ public class GameStockActivity extends AppCompatActivity {
         String desc = ABOUT_TEMPLATE
                 .replace("QSPFONTSTYLE", getFontStyle(settings.getTypeface()))
                 .replace("QSPFONTSIZE", Integer.toString(settings.getFontSize()))
-                .replace("QSPTEXTCOLOR", Integer.toString(settings.getTextColor()))
-                .replace("QSPBACKCOLOR", Integer.toString(settings.getBackColor()))
-                .replace("QSPLINKCOLOR", Integer.toString(settings.getLinkColor()))
+                .replace("QSPTEXTCOLOR", getHexColor(settings.getTextColor()))
+                .replace("QSPBACKCOLOR", getHexColor(settings.getBackColor()))
+                .replace("QSPLINKCOLOR", getHexColor(settings.getLinkColor()))
                 .replace("REPLACETEXT", getString(R.string.appDescription) + getString(R.string.appCredits));
 
         WebView descView = messageView.findViewById(R.id.about_descrip);

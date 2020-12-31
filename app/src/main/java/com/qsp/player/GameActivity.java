@@ -80,6 +80,7 @@ import static com.qsp.player.util.FileUtil.getExtension;
 import static com.qsp.player.util.FileUtil.getOrCreateDirectory;
 import static com.qsp.player.util.FileUtil.getOrCreateFile;
 import static com.qsp.player.util.ThreadUtil.isMainThread;
+import static com.qsp.player.util.ViewUtil.getFontStyle;
 import static com.qsp.player.util.ViewUtil.setLocale;
 
 @SuppressLint("ClickableViewAccessibility")
@@ -411,7 +412,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
                 .replace("QSPTEXTCOLOR", getHexColor(getTextColor()))
                 .replace("QSPBACKCOLOR", getHexColor(getBackgroundColor()))
                 .replace("QSPLINKCOLOR", getHexColor(getLinkColor()))
-                .replace("QSPFONTSTYLE", ViewUtil.getFontStyle(settings.getTypeface()))
+                .replace("QSPFONTSTYLE", getFontStyle(settings.getTypeface()))
                 .replace("QSPFONTSIZE", Integer.toString(getFontSize()));
 
         pageTemplate = pageHeadTemplate + PAGE_BODY_TEMPLATE;
