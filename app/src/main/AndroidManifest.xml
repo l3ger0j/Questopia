@@ -26,6 +26,7 @@
             android:alwaysRetainTaskState="true"
             android:configChanges="orientation"
             android:label="@string/appName"
+            android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.NoActionBar">
 
             <intent-filter>
@@ -36,12 +37,18 @@
 
         <activity
             android:name=".ImageBoxActivity"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait"
             android:theme="@style/Theme.QSP.Translucent" />
         <activity
             android:name=".SettingsActivity"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait"
             android:label="@string/settings" />
         <activity
             android:name=".stock.GameStockActivity"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait"
             android:label="@string/gameStock" />
 
     </application>
