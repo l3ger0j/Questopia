@@ -475,6 +475,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
     private void refreshActions() {
         ArrayList<QspListItem> actions = libQspProxy.getGameState().getActions();
         actionsView.setAdapter(new QspItemAdapter(this, R.layout.list_item_action, actions));
+        refreshActionsVisibility();
     }
 
     private void refreshObjects() {
@@ -890,14 +891,18 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
         if (type == WindowType.ACTIONS) {
             showActions = show;
             if (activeTab == TAB_MAIN_DESC_AND_ACTIONS) {
-                runOnUiThread(() -> {
-                    separatorView.setVisibility(show ? View.VISIBLE : View.GONE);
-                    actionsView.setVisibility(show ? View.VISIBLE : View.GONE);
-                });
+                runOnUiThread(this::refreshActionsVisibility);
             }
         } else {
             logger.debug("Unsupported window type: " + type);
         }
+    }
+
+    private void refreshActionsVisibility() {
+        int count = actionsView.getAdapter().getCount();
+        boolean show = showActions && count > 0;
+        separatorView.setVisibility(show ? View.VISIBLE : View.GONE);
+        actionsView.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
     @Override
