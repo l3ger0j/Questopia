@@ -30,6 +30,10 @@ public class Settings {
 
     private static float parseActionsHeightRatio(String str) {
         switch (str) {
+            case "1/5":
+                return 0.2f;
+            case "1/4":
+                return 0.25f;
             case "1/3":
                 return 0.33f;
             case "1/2":
