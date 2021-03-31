@@ -24,7 +24,7 @@
         <activity
             android:name=".GameActivity"
             android:alwaysRetainTaskState="true"
-            android:configChanges="orientation"
+            android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/appName"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.NoActionBar">
@@ -37,19 +37,19 @@
 
         <activity
             android:name=".ImageBoxActivity"
-            android:configChanges="orientation"
+            android:configChanges="orientation|keyboardHidden|screenSize"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.QSP.Translucent" />
         <activity
             android:name=".SettingsActivity"
             android:configChanges="orientation"
-            android:screenOrientation="portrait"
-            android:label="@string/settings" />
+            android:label="@string/settings"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".stock.GameStockActivity"
-            android:configChanges="orientation"
-            android:screenOrientation="portrait"
-            android:label="@string/gameStock" />
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/gameStock"
+            android:screenOrientation="portrait" />
 
     </application>
 </manifest>
