@@ -45,7 +45,7 @@ import com.qsp.player.stock.install.InstallType;
 import com.qsp.player.stock.repository.LocalGameRepository;
 import com.qsp.player.stock.repository.RemoteGameRepository;
 import com.qsp.player.util.ViewUtil;
-import com.qsp.player.util.ZipUtil;
+import com.qsp.player.util.ArchiveUtil;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,9 +73,9 @@ import static com.qsp.player.util.FileUtil.findFileOrDirectory;
 import static com.qsp.player.util.FileUtil.getOrCreateDirectory;
 import static com.qsp.player.util.FileUtil.isWritableDirectory;
 import static com.qsp.player.util.FileUtil.isWritableFile;
-import static com.qsp.player.util.FileUtil.normalizeGameFolderName;
 import static com.qsp.player.util.GameDirUtil.doesDirectoryContainGameFiles;
 import static com.qsp.player.util.GameDirUtil.normalizeGameDirectory;
+import static com.qsp.player.util.PathUtil.normalizeGameFolderName;
 import static com.qsp.player.util.ViewUtil.getFontStyle;
 import static com.qsp.player.util.ViewUtil.setLocale;
 
@@ -482,12 +482,19 @@ public class GameStockActivity extends AppCompatActivity {
         return getOrCreateDirectory(gamesDir, folderName);
     }
 
-    private boolean unzip(File zipFile, File dir) {
-        if (!isWritableDirectory(dir)) {
+    private boolean extractArchive(File archiveFile, String archiveType, File destination) {
+        if (!isWritableDirectory(destination)) {
             logger.error("Game directory is not writable");
             return false;
         }
-        return ZipUtil.unzip(this, DocumentFile.fromFile(zipFile), dir);
+        if (archiveType.equals("zip")) {
+            return ArchiveUtil.unzip(this, DocumentFile.fromFile(archiveFile), destination);
+        } else if (archiveType.equals("rar")) {
+            return ArchiveUtil.unrar(this, DocumentFile.fromFile(archiveFile), destination);
+        } else {
+            logger.error("Unsupported archive type: " + archiveType);
+            return false;
+        }
     }
 
     @Override
@@ -820,24 +827,24 @@ public class GameStockActivity extends AppCompatActivity {
                 return DownloadResult.DOWNLOAD_FAILED;
             }
 
-            String zipFilename = String.valueOf(SystemClock.elapsedRealtime()).concat("_game");
-            File zipFile = createFile(cacheDir, zipFilename);
-            if (zipFile == null) {
-                logger.error("Failed to create a ZIP file: " + zipFilename);
+            String archiveFilename = String.valueOf(SystemClock.elapsedRealtime()).concat("_game");
+            File archiveFile = createFile(cacheDir, archiveFilename);
+            if (archiveFile == null) {
+                logger.error("Failed to create an archive file: " + archiveFilename);
                 return DownloadResult.DOWNLOAD_FAILED;
             }
 
-            boolean downloaded = download(zipFile);
+            boolean downloaded = download(archiveFile);
             File gameDir = null;
             boolean extracted = false;
 
             if (downloaded) {
                 publishProgress(DownloadPhase.EXTRACT);
                 gameDir = activity.getOrCreateGameDirectory(game.getTitle());
-                extracted = activity.unzip(zipFile, gameDir);
+                extracted = activity.extractArchive(archiveFile, game.getFileExt(), gameDir);
             }
-            if (zipFile.exists()) {
-                zipFile.delete();
+            if (archiveFile.exists()) {
+                archiveFile.delete();
             }
             if (!downloaded) {
                 return cancelled ? DownloadResult.CANCELLED : DownloadResult.DOWNLOAD_FAILED;

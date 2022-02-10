@@ -20,6 +20,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RemoteGameRepository {
+    private static final String GAMESTOCK_URL_V1 = "http://qsp.su/tools/gamestock/gamestock.php";
+    private static final String GAMESTOCK_URL_V2 = "http://qsp.su/gamestock/gamestock2.php";
+
     private static final Logger logger = LoggerFactory.getLogger(RemoteGameRepository.class);
 
     private static List<GameStockItem> cachedGames = null;
@@ -37,13 +40,12 @@ public class RemoteGameRepository {
 
     private String getGameStockXml() {
         try {
-            URL url = new URL("http://qsp.su/tools/gamestock/gamestock.php");
+            URL url = new URL(GAMESTOCK_URL_V2);
             URLConnection conn = url.openConnection();
-            byte[] b = new byte[8192];
             try (InputStream in = conn.getInputStream()) {
                 try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
                     StreamUtil.copy(in, out);
-                    return new String(out.toByteArray());
+                    return out.toString();
                 }
             }
         } catch (IOException ex) {
@@ -92,7 +94,12 @@ public class RemoteGameRepository {
                     case XmlPullParser.END_TAG:
                         if (docStarted && listStarted) {
                             if (xpp.getName().equals("game")) {
-                                items.add(itemBuilder.build());
+                                GameStockItem item = itemBuilder.build();
+                                if (item.getFileExt().isEmpty() || item.getFileExt().equals("zip") || item.getFileExt().equals("rar")) {
+                                    items.add(item);
+                                } else {
+                                    logger.warn("Unsupported file extension: " + item.getFileExt());
+                                }
                             }
                             tagName = "";
                         }

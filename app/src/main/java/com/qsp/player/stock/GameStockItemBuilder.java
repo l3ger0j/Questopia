@@ -39,6 +39,9 @@ public class GameStockItemBuilder {
             case "file_size":
                 item.setFileSize(Integer.parseInt(value));
                 break;
+            case "file_ext":
+                item.setFileExt(value);
+                break;
             case "desc_url":
                 item.setDescUrl(value);
                 break;

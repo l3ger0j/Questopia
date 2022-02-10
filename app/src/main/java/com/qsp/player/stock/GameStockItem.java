@@ -16,6 +16,7 @@ public class GameStockItem implements Cloneable {
     private String player = "";
     private String fileUrl = "";
     private int fileSize;
+    private String fileExt = "";
     private String descUrl = "";
     private String pubDate = "";
     private String modDate = "";
@@ -37,6 +38,7 @@ public class GameStockItem implements Cloneable {
         player = other.player;
         fileUrl = other.fileUrl;
         fileSize = other.fileSize;
+        fileExt = other.fileExt;
         descUrl = other.descUrl;
         pubDate = other.pubDate;
         modDate = other.modDate;
@@ -44,7 +46,7 @@ public class GameStockItem implements Cloneable {
         gameFiles = other.gameFiles;
     }
 
-    public  boolean hasRemoteUrl() {
+    public boolean hasRemoteUrl() {
         return isNotEmpty(fileUrl);
     }
 
@@ -55,6 +57,7 @@ public class GameStockItem implements Cloneable {
     public String getId() {
         return id;
     }
+
     public void setId(String id) {
         this.id = id;
     }
@@ -129,6 +132,14 @@ public class GameStockItem implements Cloneable {
 
     public void setFileSize(int fileSize) {
         this.fileSize = fileSize;
+    }
+
+    public String getFileExt() {
+        return fileExt;
+    }
+
+    public void setFileExt(String fileExt) {
+        this.fileExt = fileExt;
     }
 
     public String getDescUrl() {

@@ -1,5 +1,7 @@
 package com.qsp.player.stock.install;
 
+import static com.qsp.player.util.PathUtil.removeFileExtension;
+
 import android.content.Context;
 import android.net.Uri;
 
@@ -7,11 +9,9 @@ import androidx.documentfile.provider.DocumentFile;
 
 import com.qsp.player.R;
 import com.qsp.player.util.ViewUtil;
-import com.qsp.player.util.ZipUtil;
+import com.qsp.player.util.ArchiveUtil;
 
 import java.io.File;
-
-import static com.qsp.player.util.FileUtil.removeFileExtension;
 
 public class ArchiveGameInstaller extends GameInstaller {
 
@@ -34,7 +34,7 @@ public class ArchiveGameInstaller extends GameInstaller {
 
     @Override
     public boolean install(File gameDir) {
-        boolean extracted = ZipUtil.unzip(context, gameFileOrDir, gameDir);
+        boolean extracted = ArchiveUtil.unzip(context, gameFileOrDir, gameDir);
         if (!extracted) {
             String message = context.getString(R.string.extractError).replace("-GAMENAME-", gameName);
             ViewUtil.showErrorDialog(context, message);
