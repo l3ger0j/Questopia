@@ -23,17 +23,18 @@ public class ImageProvider {
      */
     public Drawable get(String path) {
         if (isNullOrEmpty(path)) return null;
+        String normPath = path.replace("\\", "/");
 
-        Drawable drawable = cache.get(path);
+        Drawable drawable = cache.get(normPath);
         if (drawable != null) return drawable;
 
-        File file = new File(path);
+        File file = new File(normPath);
         if (!file.exists()) {
-            logger.error("Image file not found: " + path);
+            logger.error("Image file not found: " + normPath);
             return null;
         }
         try (FileInputStream in = new FileInputStream(file)) {
-            drawable = Drawable.createFromStream(in, path);
+            drawable = Drawable.createFromStream(in, normPath);
         } catch (IOException ex) {
             logger.error("Error reading the image file", ex);
         }
