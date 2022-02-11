@@ -40,7 +40,8 @@
     <string name="save">Save</string>
     <string name="deleteGame">Delete Game</string>
     <string name="installGame">Install Game</string>
-    <string name="installFromArchive">From ZIP archive</string>
+    <string name="installFromZIP">From ZIP Archive</string>
+    <string name="installFromRAR">From RAR Archive</string>
     <string name="installFromFolder">From Folder</string>
     <string name="selectSlot">Select a slot</string>
     <string name="slotPresent">Slot %d - %s</string>

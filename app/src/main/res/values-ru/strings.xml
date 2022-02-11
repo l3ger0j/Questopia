@@ -40,7 +40,8 @@
     <string name="save">Сохранить</string>
     <string name="deleteGame">Удалить игру</string>
     <string name="installGame">Установить игру</string>
-    <string name="installFromArchive">Из ZIP-архива</string>
+    <string name="installFromZIP">Из ZIP-архива</string>
+    <string name="installFromRAR">Из RAR-архива</string>
     <string name="installFromFolder">Из папки</string>
     <string name="selectSlot">Выберите слот</string>
     <string name="slotPresent">Слот %d - %s</string>

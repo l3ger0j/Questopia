@@ -1,6 +1,7 @@
 package com.qsp.player.stock.install;
 
 public enum InstallType {
-    ARCHIVE,
+    ZIP_ARCHIVE,
+    RAR_ARCHIVE,
     FOLDER
 }

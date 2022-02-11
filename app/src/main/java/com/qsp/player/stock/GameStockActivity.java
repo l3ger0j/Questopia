@@ -1,5 +1,22 @@
 package com.qsp.player.stock;
 
+import static android.content.Intent.ACTION_OPEN_DOCUMENT;
+import static android.content.Intent.ACTION_OPEN_DOCUMENT_TREE;
+import static com.qsp.player.util.ArchiveUtil.unrar;
+import static com.qsp.player.util.ArchiveUtil.unzip;
+import static com.qsp.player.util.ColorUtil.getHexColor;
+import static com.qsp.player.util.FileUtil.GAME_INFO_FILENAME;
+import static com.qsp.player.util.FileUtil.createFile;
+import static com.qsp.player.util.FileUtil.deleteDirectory;
+import static com.qsp.player.util.FileUtil.findFileOrDirectory;
+import static com.qsp.player.util.FileUtil.getOrCreateDirectory;
+import static com.qsp.player.util.FileUtil.isWritableDirectory;
+import static com.qsp.player.util.FileUtil.isWritableFile;
+import static com.qsp.player.util.GameDirUtil.doesDirectoryContainGameFiles;
+import static com.qsp.player.util.GameDirUtil.normalizeGameDirectory;
+import static com.qsp.player.util.ViewUtil.getFontStyle;
+import static com.qsp.player.util.ViewUtil.setLocale;
+
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -20,6 +37,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.MimeTypeMap;
 import android.webkit.WebView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -38,6 +56,7 @@ import com.qsp.player.R;
 import com.qsp.player.Settings;
 import com.qsp.player.SettingsActivity;
 import com.qsp.player.stock.install.ArchiveGameInstaller;
+import com.qsp.player.stock.install.ArchiveType;
 import com.qsp.player.stock.install.FolderGameInstaller;
 import com.qsp.player.stock.install.GameInstaller;
 import com.qsp.player.stock.install.InstallException;
@@ -45,7 +64,6 @@ import com.qsp.player.stock.install.InstallType;
 import com.qsp.player.stock.repository.LocalGameRepository;
 import com.qsp.player.stock.repository.RemoteGameRepository;
 import com.qsp.player.util.ViewUtil;
-import com.qsp.player.util.ArchiveUtil;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,19 +82,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-
-import static com.qsp.player.util.ColorUtil.getHexColor;
-import static com.qsp.player.util.FileUtil.GAME_INFO_FILENAME;
-import static com.qsp.player.util.FileUtil.createFile;
-import static com.qsp.player.util.FileUtil.deleteDirectory;
-import static com.qsp.player.util.FileUtil.findFileOrDirectory;
-import static com.qsp.player.util.FileUtil.getOrCreateDirectory;
-import static com.qsp.player.util.FileUtil.isWritableDirectory;
-import static com.qsp.player.util.FileUtil.isWritableFile;
-import static com.qsp.player.util.GameDirUtil.doesDirectoryContainGameFiles;
-import static com.qsp.player.util.GameDirUtil.normalizeGameDirectory;
-import static com.qsp.player.util.ViewUtil.getFontStyle;
-import static com.qsp.player.util.ViewUtil.setLocale;
 
 public class GameStockActivity extends AppCompatActivity {
     private static final int REQUEST_CODE_INSTALL_GAME = 1;
@@ -112,10 +117,11 @@ public class GameStockActivity extends AppCompatActivity {
     private File gamesDir;
     private DownloadGameAsyncTask downloadTask;
     private LoadGameListAsyncTask loadGameListTask;
-    private InstallType lastInstallType = InstallType.ARCHIVE;
+    private InstallType lastInstallType = InstallType.ZIP_ARCHIVE;
 
     public GameStockActivity() {
-        installers.put(InstallType.ARCHIVE, new ArchiveGameInstaller(this));
+        installers.put(InstallType.ZIP_ARCHIVE, new ArchiveGameInstaller(this, ArchiveType.ZIP));
+        installers.put(InstallType.RAR_ARCHIVE, new ArchiveGameInstaller(this, ArchiveType.RAR));
         installers.put(InstallType.FOLDER, new FolderGameInstaller(this));
     }
 
@@ -487,9 +493,9 @@ public class GameStockActivity extends AppCompatActivity {
             return false;
         }
         if (archiveType.equals("zip")) {
-            return ArchiveUtil.unzip(this, DocumentFile.fromFile(archiveFile), destination);
+            return unzip(this, DocumentFile.fromFile(archiveFile), destination);
         } else if (archiveType.equals("rar")) {
-            return ArchiveUtil.unrar(this, DocumentFile.fromFile(archiveFile), destination);
+            return unrar(this, DocumentFile.fromFile(archiveFile), destination);
         } else {
             logger.error("Unsupported archive type: " + archiveType);
             return false;
@@ -532,8 +538,12 @@ public class GameStockActivity extends AppCompatActivity {
                 showAboutDialog();
                 return true;
 
-            case R.id.menu_installfromarchive:
-                showInstallGameDialog(InstallType.ARCHIVE);
+            case R.id.menu_installfromzip:
+                showInstallGameDialog(InstallType.ZIP_ARCHIVE);
+                return true;
+
+            case R.id.menu_installfromrar:
+                showInstallGameDialog(InstallType.RAR_ARCHIVE);
                 return true;
 
             case R.id.menu_installfromfolder:
@@ -549,17 +559,29 @@ public class GameStockActivity extends AppCompatActivity {
     }
 
     private void showInstallGameDialog(InstallType installType) {
-        boolean installFromArchive = installType == InstallType.ARCHIVE;
-        String action = installFromArchive ?
-                Intent.ACTION_OPEN_DOCUMENT :
-                Intent.ACTION_OPEN_DOCUMENT_TREE;
-
+        String action;
+        String extension = null;
+        switch (installType) {
+            case ZIP_ARCHIVE:
+                action = ACTION_OPEN_DOCUMENT;
+                extension = "zip";
+                break;
+            case RAR_ARCHIVE:
+                action = ACTION_OPEN_DOCUMENT;
+                extension = "rar";
+                break;
+            case FOLDER:
+                action = ACTION_OPEN_DOCUMENT_TREE;
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported install type: " + installType);
+        }
         lastInstallType = installType;
         Intent intent = new Intent(action);
-        if (installFromArchive) {
-            intent.setType("application/zip");
-        }
         intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        if (extension != null) {
+            intent.setType(MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension));
+        }
         startActivityForResult(intent, REQUEST_CODE_INSTALL_GAME);
     }
 
@@ -934,6 +956,7 @@ public class GameStockActivity extends AppCompatActivity {
                     writer.write("\t<player><![CDATA[".concat(game.getPlayer()).concat("]]></player>\n"));
                     writer.write("\t<file_url><![CDATA[".concat(game.getFileUrl()).concat("]]></file_url>\n"));
                     writer.write("\t<file_size><![CDATA[".concat(String.valueOf(game.getFileSize())).concat("]]></file_size>\n"));
+                    writer.write("\t<file_ext><![CDATA[".concat(game.getFileExt()).concat("]]></file_ext>\n"));
                     writer.write("\t<desc_url><![CDATA[".concat(game.getDescUrl()).concat("]]></desc_url>\n"));
                     writer.write("\t<pub_date><![CDATA[".concat(game.getPubDate()).concat("]]></pub_date>\n"));
                     writer.write("\t<mod_date><![CDATA[".concat(game.getModDate()).concat("]]></mod_date>\n"));

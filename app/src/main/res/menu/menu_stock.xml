@@ -9,12 +9,14 @@
 
         <menu>
             <item
-                android:id="@+id/menu_installfromarchive"
-                android:title="@string/installFromArchive" />
+                android:id="@+id/menu_installfromzip"
+                android:title="@string/installFromZIP" />
+            <item
+                android:id="@+id/menu_installfromrar"
+                android:title="@string/installFromRAR" />
             <item
                 android:id="@+id/menu_installfromfolder"
-                android:title="@string/installFromFolder"
-                android:enabled="false" />
+                android:title="@string/installFromFolder" />
         </menu>
     </item>
     <item
