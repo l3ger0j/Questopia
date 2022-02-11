@@ -1,6 +1,6 @@
 package com.qsp.player.stock.install;
 
-import static com.qsp.player.util.PathUtil.removeFileExtension;
+import static com.qsp.player.util.PathUtil.removeExtension;
 
 import android.content.Context;
 import android.net.Uri;
@@ -29,7 +29,7 @@ public class ArchiveGameInstaller extends GameInstaller {
         if (filename == null) {
             throw new InstallException("ZIP filename is null");
         }
-        gameName = removeFileExtension(filename);
+        gameName = removeExtension(filename);
     }
 
     @Override

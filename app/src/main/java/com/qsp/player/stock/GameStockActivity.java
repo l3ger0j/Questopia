@@ -75,7 +75,6 @@ import static com.qsp.player.util.FileUtil.isWritableDirectory;
 import static com.qsp.player.util.FileUtil.isWritableFile;
 import static com.qsp.player.util.GameDirUtil.doesDirectoryContainGameFiles;
 import static com.qsp.player.util.GameDirUtil.normalizeGameDirectory;
-import static com.qsp.player.util.PathUtil.normalizeGameFolderName;
 import static com.qsp.player.util.ViewUtil.getFontStyle;
 import static com.qsp.player.util.ViewUtil.setLocale;
 
@@ -689,6 +688,13 @@ public class GameStockActivity extends AppCompatActivity {
                 gamesView.setAdapter(gameAdapters.get(tab));
                 break;
         }
+    }
+
+    private static String normalizeGameFolderName(String name) {
+        String result = name.endsWith("...") ? name.substring(0, name.length() - 3) : name;
+
+        return result.replaceAll("[:\"?*|<> ]", "_")
+                .replace("__", "_");
     }
 
     private class GameStockItemAdapter extends ArrayAdapter<GameStockItem> {
