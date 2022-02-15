@@ -102,9 +102,10 @@ public class AudioPlayer {
             return;
         }
 
-        File file = new File(sound.path);
+        final String normPath = sound.path.replace("\\", "/");
+        File file = new File(normPath);
         if (!file.exists()) {
-            logger.error("Sound file not found: " + sound.path);
+            logger.error("Sound file not found: " + normPath);
             return;
         }
 
