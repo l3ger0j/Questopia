@@ -94,9 +94,7 @@ public class HtmlProcessor {
         Drawable drawable = imageProvider.get(absPath);
         if (drawable == null) return false;
 
-        int width = ((BitmapDrawable) drawable).getBitmap().getWidth();
-
-        return width > IMAGE_WIDTH_THRESHOLD;
+        return drawable.getIntrinsicWidth() > IMAGE_WIDTH_THRESHOLD;
     }
 
     private void processHtmlVideos(Element documentBody) {
