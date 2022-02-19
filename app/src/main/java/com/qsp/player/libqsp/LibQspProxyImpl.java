@@ -17,11 +17,11 @@ import com.qsp.player.libqsp.model.QspListItem;
 import com.qsp.player.libqsp.model.QspMenuItem;
 import com.qsp.player.libqsp.model.RefreshInterfaceRequest;
 import com.qsp.player.libqsp.model.WindowType;
-import com.qsp.player.service.AudioPlayer;
-import com.qsp.player.service.GameContentResolver;
-import com.qsp.player.service.HtmlProcessor;
-import com.qsp.player.service.ImageProvider;
-import com.qsp.player.util.StreamUtil;
+import com.qsp.player.game.service.AudioPlayer;
+import com.qsp.player.game.service.GameContentResolver;
+import com.qsp.player.game.service.HtmlProcessor;
+import com.qsp.player.game.service.ImageProvider;
+import com.qsp.player.shared.util.StreamUtil;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,13 +36,13 @@ import java.util.ArrayList;
 import java.util.Locale;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static com.qsp.player.util.FileUtil.findFileOrDirectory;
-import static com.qsp.player.util.FileUtil.getFileContents;
-import static com.qsp.player.util.FileUtil.getOrCreateDirectory;
-import static com.qsp.player.util.StringUtil.getStringOrEmpty;
-import static com.qsp.player.util.StringUtil.isNotEmpty;
-import static com.qsp.player.util.ThreadUtil.isSameThread;
-import static com.qsp.player.util.ThreadUtil.throwIfNotMainThread;
+import static com.qsp.player.shared.util.FileUtil.findFileOrDirectory;
+import static com.qsp.player.shared.util.FileUtil.getFileContents;
+import static com.qsp.player.shared.util.FileUtil.getOrCreateDirectory;
+import static com.qsp.player.shared.util.StringUtil.getStringOrEmpty;
+import static com.qsp.player.shared.util.StringUtil.isNotEmpty;
+import static com.qsp.player.game.util.ThreadUtil.isSameThread;
+import static com.qsp.player.game.util.ThreadUtil.throwIfNotMainThread;
 
 public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
     private static final Logger logger = LoggerFactory.getLogger(LibQspProxyImpl.class);

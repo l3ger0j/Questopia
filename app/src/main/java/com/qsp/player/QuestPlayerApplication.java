@@ -5,10 +5,10 @@ import android.os.Build;
 
 import com.qsp.player.libqsp.LibQspProxy;
 import com.qsp.player.libqsp.LibQspProxyImpl;
-import com.qsp.player.service.AudioPlayer;
-import com.qsp.player.service.GameContentResolver;
-import com.qsp.player.service.HtmlProcessor;
-import com.qsp.player.service.ImageProvider;
+import com.qsp.player.game.service.AudioPlayer;
+import com.qsp.player.game.service.GameContentResolver;
+import com.qsp.player.game.service.HtmlProcessor;
+import com.qsp.player.game.service.ImageProvider;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

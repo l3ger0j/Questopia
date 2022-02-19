@@ -17,8 +17,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static com.qsp.player.util.FileUtil.GAME_INFO_FILENAME;
-import static com.qsp.player.util.FileUtil.readFileAsString;
+import static com.qsp.player.shared.util.FileUtil.GAME_INFO_FILENAME;
+import static com.qsp.player.shared.util.FileUtil.readFileAsString;
 
 public class LocalGameRepository {
     private static final Logger logger = LoggerFactory.getLogger(LocalGameRepository.class);
