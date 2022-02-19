@@ -49,11 +49,11 @@ public class LocalGameRepository {
             } else {
                 String name = folder.dir.getName();
                 item = new GameStockItem();
-                item.setId(name);
-                item.setTitle(name);
+                item.id = name;
+                item.title = name;
             }
-            item.setGameDir(folder.dir);
-            item.setGameFiles(folder.gameFiles);
+            item.gameDir = folder.dir;
+            item.gameFiles = folder.gameFiles;
             items.add(item);
         }
 

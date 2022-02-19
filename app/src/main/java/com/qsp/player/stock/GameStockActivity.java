@@ -205,7 +205,7 @@ public class GameStockActivity extends AppCompatActivity {
 
     private String getGameIdByPosition(int position) {
         GameStockItem game = (GameStockItem) gamesView.getAdapter().getItem(position);
-        return game.getId();
+        return game.id;
     }
 
     private void showGameInfo(String gameId) {
@@ -215,20 +215,20 @@ public class GameStockActivity extends AppCompatActivity {
             return;
         }
         StringBuilder message = new StringBuilder();
-        if (game.getAuthor().length() > 0) {
-            message.append(getString(R.string.author).replace("-AUTHOR-", game.getAuthor()));
+        if (game.author.length() > 0) {
+            message.append(getString(R.string.author).replace("-AUTHOR-", game.author));
         }
-        if (game.getVersion().length() > 0) {
+        if (game.version.length() > 0) {
             message.append('\n');
-            message.append(getString(R.string.version).replace("-VERSION-", game.getVersion()));
+            message.append(getString(R.string.version).replace("-VERSION-", game.version));
         }
-        if (game.getFileSize() > 0) {
+        if (game.fileSize > 0) {
             message.append('\n');
-            message.append(getString(R.string.fileSize).replace("-SIZE-", Integer.toString(game.getFileSize() / 1024)));
+            message.append(getString(R.string.fileSize).replace("-SIZE-", Integer.toString(game.fileSize / 1024)));
         }
         AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this)
                 .setMessage(message)
-                .setTitle(game.getTitle())
+                .setTitle(game.title)
                 .setIcon(R.drawable.icon)
                 .setNegativeButton(getString(R.string.close), (dialog, which) -> dialog.cancel());
 
@@ -243,17 +243,17 @@ public class GameStockActivity extends AppCompatActivity {
 
     private void playGame(final GameStockItem game) {
         final Intent data = new Intent();
-        data.putExtra("gameId", game.getId());
-        data.putExtra("gameTitle", game.getTitle());
-        data.putExtra("gameDirUri", game.getGameDir().getAbsolutePath());
+        data.putExtra("gameId", game.id);
+        data.putExtra("gameTitle", game.title);
+        data.putExtra("gameDirUri", game.gameDir.getAbsolutePath());
 
-        int gameFileCount = game.getGameFiles().size();
+        int gameFileCount = game.gameFiles.size();
         switch (gameFileCount) {
             case 0:
                 logger.warn("Game has no game files");
                 return;
             case 1:
-                data.putExtra("gameFileUri", game.getGameFiles().get(0).getAbsolutePath());
+                data.putExtra("gameFileUri", game.gameFiles.get(0).getAbsolutePath());
                 setResult(RESULT_OK, data);
                 finish();
                 return;
@@ -262,14 +262,14 @@ public class GameStockActivity extends AppCompatActivity {
         }
 
         ArrayList<String> names = new ArrayList<>();
-        for (File file : game.getGameFiles()) {
+        for (File file : game.gameFiles) {
             names.add(file.getName());
         }
         new AlertDialog.Builder(GameStockActivity.this)
                 .setTitle(getString(R.string.selectGameFile))
                 .setCancelable(false)
                 .setItems(names.toArray(new String[0]), (dialog, which) -> {
-                    data.putExtra("gameFileUri", game.getGameFiles().get(which).getAbsolutePath());
+                    data.putExtra("gameFileUri", game.gameFiles.get(which).getAbsolutePath());
                     setResult(RESULT_OK, data);
                     finish();
                 })
@@ -368,18 +368,18 @@ public class GameStockActivity extends AppCompatActivity {
 
         if (remoteGames != null) {
             for (GameStockItem game : remoteGames) {
-                gamesMap.put(game.getId(), game);
+                gamesMap.put(game.id, game);
             }
         }
         for (GameStockItem localGame : localGameRepository.getGames()) {
-            GameStockItem remoteGame = gamesMap.get(localGame.getId());
+            GameStockItem remoteGame = gamesMap.get(localGame.id);
             if (remoteGame != null) {
                 GameStockItem aggregateGame = new GameStockItem(remoteGame);
-                aggregateGame.setGameDir(localGame.getGameDir());
-                aggregateGame.setGameFiles(localGame.getGameFiles());
-                gamesMap.put(localGame.getId(), aggregateGame);
+                aggregateGame.gameDir = localGame.gameDir;
+                aggregateGame.gameFiles = localGame.gameFiles;
+                gamesMap.put(localGame.id, aggregateGame);
             } else {
-                gamesMap.put(localGame.getId(), localGame);
+                gamesMap.put(localGame.id, localGame);
             }
         }
 
@@ -417,8 +417,8 @@ public class GameStockActivity extends AppCompatActivity {
         if (games.size() < 2) {
             return games;
         }
-        Collections.sort(games, (first, second) -> first.getTitle().toLowerCase()
-                .compareTo(second.getTitle().toLowerCase()));
+        Collections.sort(games, (first, second) -> first.title.toLowerCase()
+                .compareTo(second.title.toLowerCase()));
 
         return games;
     }
@@ -663,7 +663,7 @@ public class GameStockActivity extends AppCompatActivity {
             if (!game.isInstalled()) continue;
 
             deletableGames.add(game);
-            items.add(game.getTitle());
+            items.add(game.title);
         }
         new AlertDialog.Builder(this)
                 .setTitle(getString(R.string.deleteGameCmd))
@@ -679,14 +679,14 @@ public class GameStockActivity extends AppCompatActivity {
 
     private void showConfirmDeleteDialog(final GameStockItem game) {
         new AlertDialog.Builder(this)
-                .setMessage(getString(R.string.deleteGameQuery).replace("-GAMENAME-", "\"" + game.getTitle() + "\""))
+                .setMessage(getString(R.string.deleteGameQuery).replace("-GAMENAME-", "\"" + game.title + "\""))
                 .setPositiveButton(android.R.string.yes, (dialog, which) -> {
                     if (which == DialogInterface.BUTTON_POSITIVE) {
-                        if (gameRunning != null && gameRunning.equals(game.getId())) {
+                        if (gameRunning != null && gameRunning.equals(game.id)) {
                             gameRunning = null;
                             invalidateOptionsMenu();
                         }
-                        deleteDirectory(game.getGameDir());
+                        deleteDirectory(game.gameDir);
                         ViewUtil.showToast(this, getString(R.string.gameDeleted));
                         refreshGames();
                     }
@@ -737,7 +737,7 @@ public class GameStockActivity extends AppCompatActivity {
             if (item != null) {
                 TextView titleView = convertView.findViewById(R.id.game_title);
                 if (titleView != null) {
-                    titleView.setText(item.getTitle());
+                    titleView.setText(item.title);
                     if (item.isInstalled()) {
                         titleView.setTextColor(0xFFE0E0E0);
                     } else {
@@ -745,8 +745,8 @@ public class GameStockActivity extends AppCompatActivity {
                     }
                 }
                 TextView authorView = convertView.findViewById(R.id.game_author);
-                if (item.getAuthor().length() > 0) {
-                    String text = getString(R.string.author).replace("-AUTHOR-", item.getAuthor());
+                if (item.author.length() > 0) {
+                    String text = getString(R.string.author).replace("-AUTHOR-", item.author);
                     authorView.setText(text);
                 } else {
                     authorView.setText("");
@@ -838,7 +838,7 @@ public class GameStockActivity extends AppCompatActivity {
         protected void onPreExecute() {
             GameStockActivity activity = this.activity.get();
             if (activity != null) {
-                activity.updateProgressDialog(true, game.getTitle(), activity.getString(R.string.downloading), () -> cancelled = true);
+                activity.updateProgressDialog(true, game.title, activity.getString(R.string.downloading), () -> cancelled = true);
             }
         }
 
@@ -868,8 +868,8 @@ public class GameStockActivity extends AppCompatActivity {
 
             if (downloaded) {
                 publishProgress(DownloadPhase.EXTRACT);
-                gameDir = activity.getOrCreateGameDirectory(game.getTitle());
-                extracted = activity.extractArchive(archiveFile, game.getFileExt(), gameDir);
+                gameDir = activity.getOrCreateGameDirectory(game.title);
+                extracted = activity.extractArchive(archiveFile, game.fileExt, gameDir);
             }
             if (archiveFile.exists()) {
                 archiveFile.delete();
@@ -896,7 +896,7 @@ public class GameStockActivity extends AppCompatActivity {
                 return false;
             }
             try {
-                URL url = new URL(game.getFileUrl());
+                URL url = new URL(game.fileUrl);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("GET");
                 conn.setDoOutput(true);
@@ -915,7 +915,7 @@ public class GameStockActivity extends AppCompatActivity {
                             out.write(b, 0, bytesRead);
                             totalBytesRead += bytesRead;
                         }
-                        return totalBytesRead == game.getFileSize();
+                        return totalBytesRead == game.fileSize;
                     }
                 }
             } catch (IOException ex) {
@@ -929,7 +929,7 @@ public class GameStockActivity extends AppCompatActivity {
             if (activity == null) {
                 return false;
             }
-            String folderName = normalizeGameFolderName(game.getTitle());
+            String folderName = normalizeGameFolderName(game.title);
             File gameDir = findFileOrDirectory(activity.gamesDir, folderName);
             if (!isWritableDirectory(gameDir)) {
                 logger.error("Game directory is not writable");
@@ -946,20 +946,20 @@ public class GameStockActivity extends AppCompatActivity {
             try (FileOutputStream out = new FileOutputStream(infoFile)) {
                 try (OutputStreamWriter writer = new OutputStreamWriter(out)) {
                     writer.write("<game>\n");
-                    writer.write("\t<id><![CDATA[".concat(game.getId().substring(3)).concat("]]></id>\n"));
-                    writer.write("\t<list_id><![CDATA[".concat(game.getListId()).concat("]]></list_id>\n"));
-                    writer.write("\t<author><![CDATA[".concat(game.getAuthor()).concat("]]></author>\n"));
-                    writer.write("\t<ported_by><![CDATA[".concat(game.getPortedBy()).concat("]]></ported_by>\n"));
-                    writer.write("\t<version><![CDATA[".concat(game.getVersion()).concat("]]></version>\n"));
-                    writer.write("\t<title><![CDATA[".concat(game.getTitle()).concat("]]></title>\n"));
-                    writer.write("\t<lang><![CDATA[".concat(game.getLang()).concat("]]></lang>\n"));
-                    writer.write("\t<player><![CDATA[".concat(game.getPlayer()).concat("]]></player>\n"));
-                    writer.write("\t<file_url><![CDATA[".concat(game.getFileUrl()).concat("]]></file_url>\n"));
-                    writer.write("\t<file_size><![CDATA[".concat(String.valueOf(game.getFileSize())).concat("]]></file_size>\n"));
-                    writer.write("\t<file_ext><![CDATA[".concat(game.getFileExt()).concat("]]></file_ext>\n"));
-                    writer.write("\t<desc_url><![CDATA[".concat(game.getDescUrl()).concat("]]></desc_url>\n"));
-                    writer.write("\t<pub_date><![CDATA[".concat(game.getPubDate()).concat("]]></pub_date>\n"));
-                    writer.write("\t<mod_date><![CDATA[".concat(game.getModDate()).concat("]]></mod_date>\n"));
+                    writer.write("\t<id><![CDATA[".concat(game.id.substring(3)).concat("]]></id>\n"));
+                    writer.write("\t<list_id><![CDATA[".concat(game.listId).concat("]]></list_id>\n"));
+                    writer.write("\t<author><![CDATA[".concat(game.author).concat("]]></author>\n"));
+                    writer.write("\t<ported_by><![CDATA[".concat(game.portedBy).concat("]]></ported_by>\n"));
+                    writer.write("\t<version><![CDATA[".concat(game.version).concat("]]></version>\n"));
+                    writer.write("\t<title><![CDATA[".concat(game.title).concat("]]></title>\n"));
+                    writer.write("\t<lang><![CDATA[".concat(game.lang).concat("]]></lang>\n"));
+                    writer.write("\t<player><![CDATA[".concat(game.player).concat("]]></player>\n"));
+                    writer.write("\t<file_url><![CDATA[".concat(game.fileUrl).concat("]]></file_url>\n"));
+                    writer.write("\t<file_size><![CDATA[".concat(String.valueOf(game.fileSize)).concat("]]></file_size>\n"));
+                    writer.write("\t<file_ext><![CDATA[".concat(game.fileExt).concat("]]></file_ext>\n"));
+                    writer.write("\t<desc_url><![CDATA[".concat(game.descUrl).concat("]]></desc_url>\n"));
+                    writer.write("\t<pub_date><![CDATA[".concat(game.pubDate).concat("]]></pub_date>\n"));
+                    writer.write("\t<mod_date><![CDATA[".concat(game.modDate).concat("]]></mod_date>\n"));
                     writer.write("</game>");
                 }
 
@@ -977,7 +977,7 @@ public class GameStockActivity extends AppCompatActivity {
             if (activity == null) {
                 return;
             }
-            activity.updateProgressDialog(true, game.getTitle(), activity.getString(R.string.installing), null);
+            activity.updateProgressDialog(true, game.title, activity.getString(R.string.installing), null);
         }
 
         @Override
@@ -992,14 +992,14 @@ public class GameStockActivity extends AppCompatActivity {
             switch (result) {
                 case OK:
                     activity.refreshGames();
-                    activity.showGameInfo(game.getId());
+                    activity.showGameInfo(game.id);
                     break;
                 case DOWNLOAD_FAILED:
-                    message = activity.getString(R.string.downloadError).replace("-GAMENAME-", game.getTitle());
+                    message = activity.getString(R.string.downloadError).replace("-GAMENAME-", game.title);
                     ViewUtil.showErrorDialog(activity, message);
                     break;
                 case EXTRACT_FAILED:
-                    message = activity.getString(R.string.extractError).replace("-GAMENAME-", game.getTitle());
+                    message = activity.getString(R.string.extractError).replace("-GAMENAME-", game.title);
                     ViewUtil.showErrorDialog(activity, message);
                     break;
                 case GAME_FILES_NOT_FOUND:

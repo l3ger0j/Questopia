@@ -95,10 +95,10 @@ public class RemoteGameRepository {
                         if (docStarted && listStarted) {
                             if (xpp.getName().equals("game")) {
                                 GameStockItem item = itemBuilder.build();
-                                if (item.getFileExt().isEmpty() || item.getFileExt().equals("zip") || item.getFileExt().equals("rar")) {
+                                if (item.fileExt.isEmpty() || item.fileExt.equals("zip") || item.fileExt.equals("rar")) {
                                     items.add(item);
                                 } else {
-                                    logger.warn("Unsupported file extension: " + item.getFileExt());
+                                    logger.warn("Unsupported file extension: " + item.fileExt);
                                 }
                             }
                             tagName = "";

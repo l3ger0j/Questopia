@@ -4,52 +4,52 @@ public class GameStockItemBuilder {
     private final GameStockItem item = new GameStockItem();
 
     public void setListId(String value) {
-        item.setListId(value);
+        item.listId = value;
     }
 
     public void setFromXML(String tag, String value) {
         switch (tag) {
             case "id":
-                item.setId("id:".concat(value));
+                item.id = "id:".concat(value);
                 break;
             case "list_id":
-                item.setListId(value);
+                item.listId = value;
                 break;
             case "author":
-                item.setAuthor(value);
+                item.author = value;
                 break;
             case "ported_by":
-                item.setPortedBy(value);
+                item.portedBy = value;
                 break;
             case "version":
-                item.setVersion(value);
+                item.version = value;
                 break;
             case "title":
-                item.setTitle(value);
+                item.title = value;
                 break;
             case "lang":
-                item.setLang(value);
+                item.lang = value;
                 break;
             case "player":
-                item.setPlayer(value);
+                item.player = value;
                 break;
             case "file_url":
-                item.setFileUrl(value);
+                item.fileUrl = value;
                 break;
             case "file_size":
-                item.setFileSize(Integer.parseInt(value));
+                item.fileSize = Integer.parseInt(value);
                 break;
             case "file_ext":
-                item.setFileExt(value);
+                item.fileExt = value;
                 break;
             case "desc_url":
-                item.setDescUrl(value);
+                item.descUrl = value;
                 break;
             case "pub_date":
-                item.setPubDate(value);
+                item.pubDate = value;
                 break;
             case "mod_date":
-                item.setModDate(value);
+                item.modDate = value;
                 break;
         }
     }
