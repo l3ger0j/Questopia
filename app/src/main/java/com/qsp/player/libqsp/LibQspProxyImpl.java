@@ -103,7 +103,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
 
     private boolean loadGameWorld() {
         byte[] gameData;
-        try (FileInputStream in = new FileInputStream(gameState.getGameFile())) {
+        try (FileInputStream in = new FileInputStream(gameState.gameFile)) {
             try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
                 StreamUtil.copy(in, out);
                 gameData = out.toByteArray();
@@ -112,7 +112,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
             logger.error("Failed to load the game world", ex);
             return false;
         }
-        String fileName = gameState.getGameFile().getAbsolutePath();
+        String fileName = gameState.gameFile.getAbsolutePath();
         if (!nativeMethods.QSPLoadGameWorldFromData(gameData, gameData.length, fileName)) {
             showLastQspError();
             return false;
@@ -123,16 +123,16 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
 
     private void showLastQspError() {
         ErrorData errorData = (ErrorData) nativeMethods.QSPGetLastErrorData();
-        String locName = getStringOrEmpty(errorData.getLocName());
-        String desc = getStringOrEmpty(nativeMethods.QSPGetErrorDesc(errorData.getErrorNum()));
+        String locName = getStringOrEmpty(errorData.locName);
+        String desc = getStringOrEmpty(nativeMethods.QSPGetErrorDesc(errorData.errorNum));
 
         final String message = String.format(
                 Locale.getDefault(),
                 "Location: %s\nAction: %d\nLine: %d\nError number: %d\nDescription: %s",
                 locName,
-                errorData.getIndex(),
-                errorData.getLine(),
-                errorData.getErrorNum(),
+                errorData.index,
+                errorData.line,
+                errorData.errorNum,
                 desc);
 
         logger.error(message);
@@ -149,35 +149,35 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
      * @return <code>true</code> если конфигурация изменилась, иначе <code>false</code>
      */
     private boolean loadInterfaceConfiguration() {
-        InterfaceConfiguration config = gameState.getInterfaceConfig();
+        InterfaceConfiguration config = gameState.interfaceConfig;
         boolean changed = false;
 
         GetVarValuesResponse htmlResult = (GetVarValuesResponse) nativeMethods.QSPGetVarValues("USEHTML", 0);
-        if (htmlResult.isSuccess()) {
-            boolean useHtml = htmlResult.getIntValue() != 0;
-            if (config.isUseHtml() != useHtml) {
-                config.setUseHtml(useHtml);
+        if (htmlResult.success) {
+            boolean useHtml = htmlResult.intValue != 0;
+            if (config.useHtml != useHtml) {
+                config.useHtml = useHtml;
                 changed = true;
             }
         }
         GetVarValuesResponse fSizeResult = (GetVarValuesResponse) nativeMethods.QSPGetVarValues("FSIZE", 0);
-        if (fSizeResult.isSuccess() && config.getFontSize() != fSizeResult.getIntValue()) {
-            config.setFontSize(fSizeResult.getIntValue());
+        if (fSizeResult.success && config.fontSize != fSizeResult.intValue) {
+            config.fontSize = fSizeResult.intValue;
             changed = true;
         }
         GetVarValuesResponse bColorResult = (GetVarValuesResponse) nativeMethods.QSPGetVarValues("BCOLOR", 0);
-        if (bColorResult.isSuccess() && config.getBackColor() != bColorResult.getIntValue()) {
-            config.setBackColor(bColorResult.getIntValue());
+        if (bColorResult.success && config.backColor != bColorResult.intValue) {
+            config.backColor = bColorResult.intValue;
             changed = true;
         }
         GetVarValuesResponse fColorResult = (GetVarValuesResponse) nativeMethods.QSPGetVarValues("FCOLOR", 0);
-        if (fColorResult.isSuccess() && config.getFontColor() != fColorResult.getIntValue()) {
-            config.setFontColor(fColorResult.getIntValue());
+        if (fColorResult.success && config.fontColor != fColorResult.intValue) {
+            config.fontColor = fColorResult.intValue;
             changed = true;
         }
         GetVarValuesResponse lColorResult = (GetVarValuesResponse) nativeMethods.QSPGetVarValues("LCOLOR", 0);
-        if (lColorResult.isSuccess() && config.getLinkColor() != lColorResult.getIntValue()) {
-            config.setLinkColor(lColorResult.getIntValue());
+        if (lColorResult.success && config.linkColor != lColorResult.intValue) {
+            config.linkColor = lColorResult.intValue;
             changed = true;
         }
 
@@ -190,8 +190,8 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
         for (int i = 0; i < count; ++i) {
             ActionData actionData = (ActionData) nativeMethods.QSPGetActionData(i);
             QspListItem action = new QspListItem();
-            action.icon = imageProvider.get(actionData.getImage());
-            action.text = gameState.getInterfaceConfig().isUseHtml() ? htmlProcessor.removeHtmlTags(actionData.getName()) : actionData.getName();
+            action.icon = imageProvider.get(actionData.image);
+            action.text = gameState.interfaceConfig.useHtml ? htmlProcessor.removeHtmlTags(actionData.name) : actionData.name;
             actions.add(action);
         }
         return actions;
@@ -203,8 +203,8 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
         for (int i = 0; i < count; i++) {
             ObjectData objectResult = (ObjectData) nativeMethods.QSPGetObjectData(i);
             QspListItem object = new QspListItem();
-            object.icon = imageProvider.get(objectResult.getImage());
-            object.text = gameState.getInterfaceConfig().isUseHtml() ? htmlProcessor.removeHtmlTags(objectResult.getName()) : objectResult.getName();
+            object.icon = imageProvider.get(objectResult.image);
+            object.text = gameState.interfaceConfig.useHtml ? htmlProcessor.removeHtmlTags(objectResult.name) : objectResult.name;
             objects.add(object);
         }
         return objects;
@@ -260,11 +260,11 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
             audioPlayer.closeAllFiles();
 
             gameState.reset();
-            gameState.setGameRunning(true);
-            gameState.setGameId(id);
-            gameState.setGameTitle(title);
-            gameState.setGameDir(dir);
-            gameState.setGameFile(file);
+            gameState.gameRunning = true;
+            gameState.gameId = id;
+            gameState.gameTitle = title;
+            gameState.gameDir = dir;
+            gameState.gameFile = file;
 
             gameContentResolver.setGameDir(dir);
             imageProvider.invalidateCache();
@@ -284,7 +284,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
     public void restartGame() {
         runOnQspThread(() -> {
             GameState state = gameState;
-            doRunGame(state.getGameId(), state.getGameTitle(), state.getGameDir(), state.getGameFile());
+            doRunGame(state.gameId, state.gameTitle, state.gameDir, state.gameFile);
         });
     }
 
@@ -412,23 +412,23 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
 
         boolean configChanged = loadInterfaceConfiguration();
         if (configChanged) {
-            request.setInterfaceConfigChanged(true);
+            request.interfaceConfigChanged = true;
         }
         if (nativeMethods.QSPIsMainDescChanged()) {
-            gameState.setMainDesc(nativeMethods.QSPGetMainDesc());
-            request.setMainDescChanged(true);
+            gameState.mainDesc = nativeMethods.QSPGetMainDesc();
+            request.mainDescChanged = true;
         }
         if (nativeMethods.QSPIsActionsChanged()) {
-            gameState.setActions(getActions());
-            request.setActionsChanged(true);
+            gameState.actions = getActions();
+            request.actionsChanged = true;
         }
         if (nativeMethods.QSPIsObjectsChanged()) {
-            gameState.setObjects(getObjects());
-            request.setObjectsChanged(true);
+            gameState.objects = getObjects();
+            request.objectsChanged = true;
         }
         if (nativeMethods.QSPIsVarsDescChanged()) {
-            gameState.setVarsDesc(nativeMethods.QSPGetVarsDesc());
-            request.setVarsDescChanged(true);
+            gameState.varsDesc = nativeMethods.QSPGetVarsDesc();
+            request.varsDescChanged = true;
         }
 
         GameInterface inter = gameInterface;
@@ -484,7 +484,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
 
     @Override
     public void OpenGame(String filename) {
-        File savesDir = getOrCreateDirectory(gameState.getGameDir(), "saves");
+        File savesDir = getOrCreateDirectory(gameState.gameDir, "saves");
         File saveFile = findFileOrDirectory(savesDir, filename);
         if (saveFile == null) {
             logger.error("Save file not found: " + filename);
@@ -527,7 +527,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
         QspMenuItem item = new QspMenuItem();
         item.imgPath = imgPath;
         item.name = name;
-        gameState.getMenuItems().add(item);
+        gameState.menuItems.add(item);
     }
 
     @Override
@@ -543,7 +543,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
 
     @Override
     public void DeleteMenu() {
-        gameState.getMenuItems().clear();
+        gameState.menuItems.clear();
     }
 
     @Override
@@ -576,8 +576,8 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
             logger.error("Game directory not found: " + path);
             return;
         }
-        if (!gameState.getGameDir().equals(dir)) {
-            gameState.setGameDir(dir);
+        if (!gameState.gameDir.equals(dir)) {
+            gameState.gameDir = dir;
             gameContentResolver.setGameDir(dir);
             imageProvider.invalidateCache();
         }

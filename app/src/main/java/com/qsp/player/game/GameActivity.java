@@ -275,8 +275,8 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
     }
 
     private void loadLocale() {
-        setLocale(this, settings.getLanguage());
-        currentLanguage = settings.getLanguage();
+        setLocale(this, settings.language);
+        currentLanguage = settings.language;
     }
 
     private void setActiveTab(int tab) {
@@ -360,10 +360,10 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
         updateLocale();
         applySettings();
 
-        if (libQspProxy.getGameState().isGameRunning()) {
+        if (libQspProxy.getGameState().gameRunning) {
             applyGameState();
 
-            audioPlayer.setSoundEnabled(settings.isSoundEnabled());
+            audioPlayer.setSoundEnabled(settings.soundEnabled);
             audioPlayer.resume();
 
             counterHandler.postDelayed(counterTask, counterInterval);
@@ -379,14 +379,14 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
     }
 
     private void updateLocale() {
-        if (currentLanguage.equals(settings.getLanguage())) return;
+        if (currentLanguage.equals(settings.language)) return;
 
-        setLocale(this, settings.getLanguage());
+        setLocale(this, settings.language);
         setTitle(R.string.appName);
         invalidateOptionsMenu();
         setActiveTab(activeTab);
 
-        currentLanguage = settings.getLanguage();
+        currentLanguage = settings.language;
     }
 
     private void applySettings() {
@@ -403,15 +403,15 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
     }
 
     private int getBackgroundColor() {
-        InterfaceConfiguration config = libQspProxy.getGameState().getInterfaceConfig();
-        return config.getBackColor() != 0 ? convertRgbaToBgra(config.getBackColor()) : settings.getBackColor();
+        InterfaceConfiguration config = libQspProxy.getGameState().interfaceConfig;
+        return config.backColor != 0 ? convertRgbaToBgra(config.backColor) : settings.backColor;
     }
 
     private void applyActionsHeightRatio() {
         ConstraintSet constraintSet = new ConstraintSet();
         constraintSet.clone(layoutTop);
-        constraintSet.setVerticalWeight(R.id.main_desc, 1.0f - settings.getActionsHeightRatio());
-        constraintSet.setVerticalWeight(R.id.actions, settings.getActionsHeightRatio());
+        constraintSet.setVerticalWeight(R.id.main_desc, 1.0f - settings.actionsHeightRatio);
+        constraintSet.setVerticalWeight(R.id.actions, settings.actionsHeightRatio);
         constraintSet.applyTo(layoutTop);
     }
 
@@ -420,25 +420,25 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
                 .replace("QSPTEXTCOLOR", getHexColor(getTextColor()))
                 .replace("QSPBACKCOLOR", getHexColor(getBackgroundColor()))
                 .replace("QSPLINKCOLOR", getHexColor(getLinkColor()))
-                .replace("QSPFONTSTYLE", getFontStyle(settings.getTypeface()))
+                .replace("QSPFONTSTYLE", getFontStyle(settings.typeface))
                 .replace("QSPFONTSIZE", Integer.toString(getFontSize()));
 
         pageTemplate = pageHeadTemplate + PAGE_BODY_TEMPLATE;
     }
 
     private int getTextColor() {
-        InterfaceConfiguration config = libQspProxy.getGameState().getInterfaceConfig();
-        return config.getFontColor() != 0 ? convertRgbaToBgra(config.getFontColor()) : settings.getTextColor();
+        InterfaceConfiguration config = libQspProxy.getGameState().interfaceConfig;
+        return config.fontColor != 0 ? convertRgbaToBgra(config.fontColor) : settings.textColor;
     }
 
     private int getLinkColor() {
-        InterfaceConfiguration config = libQspProxy.getGameState().getInterfaceConfig();
-        return config.getLinkColor() != 0 ? convertRgbaToBgra(config.getLinkColor()) : settings.getLinkColor();
+        InterfaceConfiguration config = libQspProxy.getGameState().interfaceConfig;
+        return config.linkColor != 0 ? convertRgbaToBgra(config.linkColor) : settings.linkColor;
     }
 
     private int getFontSize() {
-        InterfaceConfiguration config = libQspProxy.getGameState().getInterfaceConfig();
-        return settings.isUseGameFont() && config.getFontSize() != 0 ? config.getFontSize() : settings.getFontSize();
+        InterfaceConfiguration config = libQspProxy.getGameState().interfaceConfig;
+        return settings.useGameFont && config.fontSize != 0 ? config.fontSize : settings.fontSize;
     }
 
     private void applyGameState() {
@@ -449,7 +449,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
     }
 
     private void refreshMainDesc() {
-        String mainDesc = getHtml(libQspProxy.getGameState().getMainDesc());
+        String mainDesc = getHtml(libQspProxy.getGameState().mainDesc);
 
         mainDescView.loadDataWithBaseURL(
                 "file:///",
@@ -460,15 +460,15 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
     }
 
     private String getHtml(String str) {
-        InterfaceConfiguration config = libQspProxy.getGameState().getInterfaceConfig();
+        InterfaceConfiguration config = libQspProxy.getGameState().interfaceConfig;
 
-        return config.isUseHtml() ?
+        return config.useHtml ?
                 htmlProcessor.convertQspHtmlToWebViewHtml(str) :
                 htmlProcessor.convertQspStringToWebViewHtml(str);
     }
 
     private void refreshVarsDesc() {
-        String varsDesc = getHtml(libQspProxy.getGameState().getVarsDesc());
+        String varsDesc = getHtml(libQspProxy.getGameState().varsDesc);
 
         varsDescView.loadDataWithBaseURL(
                 "file:///",
@@ -479,21 +479,21 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
     }
 
     private void refreshActions() {
-        ArrayList<QspListItem> actions = libQspProxy.getGameState().getActions();
+        ArrayList<QspListItem> actions = libQspProxy.getGameState().actions;
         actionsView.setAdapter(new QspItemAdapter(this, R.layout.list_item_action, actions));
         refreshActionsVisibility();
     }
 
     private void refreshObjects() {
-        ArrayList<QspListItem> objects = libQspProxy.getGameState().getObjects();
+        ArrayList<QspListItem> objects = libQspProxy.getGameState().objects;
         objectsView.setAdapter(new QspItemAdapter(this, R.layout.list_item_object, objects));
     }
 
     private void startSelectGame() {
         selectingGame = true;
         Intent intent = new Intent(this, GameStockActivity.class);
-        if (libQspProxy.getGameState().isGameRunning()) {
-            intent.putExtra("gameRunning", libQspProxy.getGameState().getGameId());
+        if (libQspProxy.getGameState().gameRunning) {
+            intent.putExtra("gameRunning", libQspProxy.getGameState().gameId);
         }
         startActivityForResult(intent, REQUEST_CODE_SELECT_GAME);
     }
@@ -526,7 +526,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        boolean gameRunning = libQspProxy.getGameState().isGameRunning();
+        boolean gameRunning = libQspProxy.getGameState().gameRunning;
         menu.setGroupVisible(R.id.menugroup_running, gameRunning);
 
         if (gameRunning) {
@@ -549,7 +549,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
         subMenu.setHeaderTitle(getString(R.string.selectSlot));
 
         MenuItem item;
-        final File savesDir = getOrCreateDirectory(libQspProxy.getGameState().getGameDir(), "saves");
+        final File savesDir = getOrCreateDirectory(libQspProxy.getGameState().gameDir, "saves");
         final LibQspProxy proxy = libQspProxy;
 
         for (int i = 0; i < MAX_SAVE_SLOTS; ++i) {
@@ -610,7 +610,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
     private void startSaveToFile() {
         Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
         intent.setType("application/octet-stream");
-        intent.putExtra(Intent.EXTRA_TITLE, libQspProxy.getGameState().getGameFile() + ".sav");
+        intent.putExtra(Intent.EXTRA_TITLE, libQspProxy.getGameState().gameFile + ".sav");
         startActivityForResult(intent, REQUEST_CODE_SAVE_TO_FILE);
     }
 
@@ -771,19 +771,19 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
     @Override
     public void refresh(final RefreshInterfaceRequest request) {
         runOnUiThread(() -> {
-            if (request.isInterfaceConfigChanged()) {
+            if (request.interfaceConfigChanged) {
                 applySettings();
             }
-            if (request.isInterfaceConfigChanged() || request.isMainDescChanged()) {
+            if (request.interfaceConfigChanged || request.mainDescChanged) {
                 refreshMainDesc();
             }
-            if (request.isActionsChanged()) {
+            if (request.actionsChanged) {
                 refreshActions();
             }
-            if (request.isObjectsChanged()) {
+            if (request.objectsChanged) {
                 refreshObjects();
             }
-            if (request.isInterfaceConfigChanged() || request.isVarsDescChanged()) {
+            if (request.interfaceConfigChanged || request.varsDescChanged) {
                 refreshVarsDesc();
             }
         });
@@ -798,7 +798,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
     public void showPicture(final String path) {
         runOnUiThread(() -> {
             Intent intent = new Intent(this, ImageBoxActivity.class);
-            intent.putExtra("gameDirUri", libQspProxy.getGameState().getGameDir().getAbsolutePath());
+            intent.putExtra("gameDirUri", libQspProxy.getGameState().gameDir.getAbsolutePath());
             intent.putExtra("imagePath", path);
             startActivity(intent);
         });
@@ -812,8 +812,8 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
         final CountDownLatch latch = new CountDownLatch(1);
 
         runOnUiThread(() -> {
-            InterfaceConfiguration config = libQspProxy.getGameState().getInterfaceConfig();
-            String processedMsg = config.isUseHtml() ? htmlProcessor.removeHtmlTags(message) : message;
+            InterfaceConfiguration config = libQspProxy.getGameState().interfaceConfig;
+            String processedMsg = config.useHtml ? htmlProcessor.removeHtmlTags(message) : message;
             if (processedMsg == null) {
                 processedMsg = "";
             }
@@ -842,8 +842,8 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
         runOnUiThread(() -> {
             final View view = getLayoutInflater().inflate(R.layout.dialog_input, null);
 
-            InterfaceConfiguration config = libQspProxy.getGameState().getInterfaceConfig();
-            String message = config.isUseHtml() ? htmlProcessor.removeHtmlTags(prompt) : prompt;
+            InterfaceConfiguration config = libQspProxy.getGameState().interfaceConfig;
+            String message = config.useHtml ? htmlProcessor.removeHtmlTags(prompt) : prompt;
             if (message == null) {
                 message = "";
             }
@@ -875,7 +875,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
         final ArrayBlockingQueue<Integer> resultQueue = new ArrayBlockingQueue<>(1);
         final ArrayList<String> items = new ArrayList<>();
 
-        for (QspMenuItem item : libQspProxy.getGameState().getMenuItems()) {
+        for (QspMenuItem item : libQspProxy.getGameState().menuItems) {
             items.add(item.name);
         }
         runOnUiThread(() -> new AlertDialog.Builder(this)
@@ -1059,7 +1059,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
         }
 
         private Typeface getTypeface() {
-            switch (settings.getTypeface()) {
+            switch (settings.typeface) {
                 case 1:
                     return Typeface.SANS_SERIF;
                 case 2:

@@ -150,9 +150,9 @@ public class GameStockActivity extends AppCompatActivity {
     }
 
     private void loadLocale() {
-        setLocale(this, settings.getLanguage());
+        setLocale(this, settings.language);
         setTitle(R.string.gameStock);
-        currentLanguage = settings.getLanguage();
+        currentLanguage = settings.language;
     }
 
     private void initActionBar(Bundle savedInstanceState) {
@@ -326,14 +326,14 @@ public class GameStockActivity extends AppCompatActivity {
     }
 
     private void updateLocale() {
-        if (currentLanguage.equals(settings.getLanguage())) return;
+        if (currentLanguage.equals(settings.language)) return;
 
-        setLocale(this, settings.getLanguage());
+        setLocale(this, settings.language);
         setTitle(getString(R.string.gameStock));
         refreshActionBar();
         invalidateOptionsMenu();
 
-        currentLanguage = settings.getLanguage();
+        currentLanguage = settings.language;
     }
 
     private void refreshActionBar() {
@@ -594,11 +594,11 @@ public class GameStockActivity extends AppCompatActivity {
         View messageView = getLayoutInflater().inflate(R.layout.dialog_about, null, false);
 
         String desc = ABOUT_TEMPLATE
-                .replace("QSPFONTSTYLE", getFontStyle(settings.getTypeface()))
-                .replace("QSPFONTSIZE", Integer.toString(settings.getFontSize()))
-                .replace("QSPTEXTCOLOR", getHexColor(settings.getTextColor()))
-                .replace("QSPBACKCOLOR", getHexColor(settings.getBackColor()))
-                .replace("QSPLINKCOLOR", getHexColor(settings.getLinkColor()))
+                .replace("QSPFONTSTYLE", getFontStyle(settings.typeface))
+                .replace("QSPFONTSIZE", Integer.toString(settings.fontSize))
+                .replace("QSPTEXTCOLOR", getHexColor(settings.textColor))
+                .replace("QSPBACKCOLOR", getHexColor(settings.backColor))
+                .replace("QSPLINKCOLOR", getHexColor(settings.linkColor))
                 .replace("REPLACETEXT", getString(R.string.appDescription) + getString(R.string.appCredits));
 
         WebView descView = messageView.findViewById(R.id.about_descrip);

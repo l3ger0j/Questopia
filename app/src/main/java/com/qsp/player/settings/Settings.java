@@ -4,15 +4,15 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 
 public class Settings {
-    private boolean soundEnabled;
-    private String language;
-    private float actionsHeightRatio;
-    private int typeface;
-    private int fontSize;
-    private boolean useGameFont;
-    private int backColor;
-    private int textColor;
-    private int linkColor;
+    public boolean soundEnabled;
+    public String language;
+    public float actionsHeightRatio;
+    public int typeface;
+    public int fontSize;
+    public boolean useGameFont;
+    public int backColor;
+    public int textColor;
+    public int linkColor;
 
     public static Settings from(SharedPreferences preferences) {
         Settings settings = new Settings();
@@ -43,41 +43,5 @@ public class Settings {
             default:
                 throw new RuntimeException("Unsupported value of actsHeight: " + str);
         }
-    }
-
-    public boolean isSoundEnabled() {
-        return soundEnabled;
-    }
-
-    public String getLanguage() {
-        return language;
-    }
-
-    public float getActionsHeightRatio() {
-        return actionsHeightRatio;
-    }
-
-    public int getTypeface() {
-        return typeface;
-    }
-
-    public int getFontSize() {
-        return fontSize;
-    }
-
-    public boolean isUseGameFont() {
-        return useGameFont;
-    }
-
-    public int getBackColor() {
-        return backColor;
-    }
-
-    public int getTextColor() {
-        return textColor;
-    }
-
-    public int getLinkColor() {
-        return linkColor;
     }
 }
