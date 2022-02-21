@@ -225,6 +225,10 @@ public class GameStockActivity extends AppCompatActivity {
             message.append('\n');
             message.append(getString(R.string.fileSize).replace("-SIZE-", Integer.toString(game.getFileSize() / 1024)));
         }
+        if (game.fileExt.length() > 0) {
+            message.append('\n');
+            message.append(getString(R.string.fileType).replace("-TYPE-", game.fileExt));
+        }
         AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this)
                 .setMessage(message)
                 .setTitle(game.title)
