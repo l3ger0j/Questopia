@@ -2,6 +2,8 @@ package com.qsp.player.stock;
 
 import static android.content.Intent.ACTION_OPEN_DOCUMENT;
 import static android.content.Intent.ACTION_OPEN_DOCUMENT_TREE;
+import static com.qsp.player.game.util.GameDirUtil.doesDirectoryContainGameFiles;
+import static com.qsp.player.game.util.GameDirUtil.normalizeGameDirectory;
 import static com.qsp.player.shared.util.ArchiveUtil.unrar;
 import static com.qsp.player.shared.util.ArchiveUtil.unzip;
 import static com.qsp.player.shared.util.ColorUtil.getHexColor;
@@ -12,10 +14,9 @@ import static com.qsp.player.shared.util.FileUtil.findFileOrDirectory;
 import static com.qsp.player.shared.util.FileUtil.getOrCreateDirectory;
 import static com.qsp.player.shared.util.FileUtil.isWritableDirectory;
 import static com.qsp.player.shared.util.FileUtil.isWritableFile;
-import static com.qsp.player.game.util.GameDirUtil.doesDirectoryContainGameFiles;
-import static com.qsp.player.game.util.GameDirUtil.normalizeGameDirectory;
 import static com.qsp.player.shared.util.ViewUtil.getFontStyle;
 import static com.qsp.player.shared.util.ViewUtil.setLocale;
+import static com.qsp.player.shared.util.XmlUtil.objectToXml;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -53,17 +54,19 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.preference.PreferenceManager;
 
 import com.qsp.player.R;
-import com.qsp.player.settings.Settings;
-import com.qsp.player.settings.SettingsActivity;
 import com.qsp.player.install.ArchiveGameInstaller;
 import com.qsp.player.install.ArchiveType;
 import com.qsp.player.install.FolderGameInstaller;
 import com.qsp.player.install.GameInstaller;
 import com.qsp.player.install.InstallException;
 import com.qsp.player.install.InstallType;
+import com.qsp.player.settings.Settings;
+import com.qsp.player.settings.SettingsActivity;
+import com.qsp.player.shared.util.ViewUtil;
+import com.qsp.player.shared.util.XmlUtil;
+import com.qsp.player.stock.dto.Game;
 import com.qsp.player.stock.repository.LocalGameRepository;
 import com.qsp.player.stock.repository.RemoteGameRepository;
-import com.qsp.player.shared.util.ViewUtil;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -101,7 +104,7 @@ public class GameStockActivity extends AppCompatActivity {
 
     private static final Logger logger = LoggerFactory.getLogger(GameStockActivity.class);
 
-    private final HashMap<String, GameStockItem> gamesMap = new HashMap<>();
+    private final HashMap<String, Game> gamesMap = new HashMap<>();
     private final SparseArrayCompat<GameStockItemAdapter> gameAdapters = new SparseArrayCompat<>();
     private final LocalGameRepository localGameRepository = new LocalGameRepository();
     private final HashMap<InstallType, GameInstaller> installers = new HashMap<>();
@@ -113,7 +116,7 @@ public class GameStockActivity extends AppCompatActivity {
     private ListView gamesView;
     private ProgressDialog progressDialog;
     private ConnectivityManager connectivityManager;
-    private Collection<GameStockItem> remoteGames;
+    private Collection<Game> remoteGames;
     private File gamesDir;
     private DownloadGameAsyncTask downloadTask;
     private LoadGameListAsyncTask loadGameListTask;
@@ -193,7 +196,7 @@ public class GameStockActivity extends AppCompatActivity {
         });
         gamesView.setOnItemLongClickListener((parent, view, position, id) -> {
             String gameId = getGameIdByPosition(position);
-            GameStockItem game = gamesMap.get(gameId);
+            Game game = gamesMap.get(gameId);
             if (game != null) {
                 playGame(game);
             } else {
@@ -204,12 +207,12 @@ public class GameStockActivity extends AppCompatActivity {
     }
 
     private String getGameIdByPosition(int position) {
-        GameStockItem game = (GameStockItem) gamesView.getAdapter().getItem(position);
+        Game game = (Game) gamesView.getAdapter().getItem(position);
         return game.id;
     }
 
     private void showGameInfo(String gameId) {
-        final GameStockItem game = gamesMap.get(gameId);
+        final Game game = gamesMap.get(gameId);
         if (game == null) {
             logger.error("Game not found: " + gameId);
             return;
@@ -222,9 +225,9 @@ public class GameStockActivity extends AppCompatActivity {
             message.append('\n');
             message.append(getString(R.string.version).replace("-VERSION-", game.version));
         }
-        if (game.fileSize > 0) {
+        if (game.getFileSize() > 0) {
             message.append('\n');
-            message.append(getString(R.string.fileSize).replace("-SIZE-", Integer.toString(game.fileSize / 1024)));
+            message.append(getString(R.string.fileSize).replace("-SIZE-", Integer.toString(game.getFileSize() / 1024)));
         }
         AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this)
                 .setMessage(message)
@@ -241,7 +244,7 @@ public class GameStockActivity extends AppCompatActivity {
         alertBuilder.create().show();
     }
 
-    private void playGame(final GameStockItem game) {
+    private void playGame(final Game game) {
         final Intent data = new Intent();
         data.putExtra("gameId", game.id);
         data.putExtra("gameTitle", game.title);
@@ -276,7 +279,7 @@ public class GameStockActivity extends AppCompatActivity {
                 .show();
     }
 
-    private void downloadGame(GameStockItem game) {
+    private void downloadGame(Game game) {
         if (!isNetworkConnected()) {
             ViewUtil.showErrorDialog(this, getString(R.string.downloadNetworkError));
             return;
@@ -367,14 +370,14 @@ public class GameStockActivity extends AppCompatActivity {
         gamesMap.clear();
 
         if (remoteGames != null) {
-            for (GameStockItem game : remoteGames) {
+            for (Game game : remoteGames) {
                 gamesMap.put(game.id, game);
             }
         }
-        for (GameStockItem localGame : localGameRepository.getGames()) {
-            GameStockItem remoteGame = gamesMap.get(localGame.id);
+        for (Game localGame : localGameRepository.getGames()) {
+            Game remoteGame = gamesMap.get(localGame.id);
             if (remoteGame != null) {
-                GameStockItem aggregateGame = new GameStockItem(remoteGame);
+                Game aggregateGame = new Game(remoteGame);
                 aggregateGame.gameDir = localGame.gameDir;
                 aggregateGame.gameFiles = localGame.gameFiles;
                 gamesMap.put(localGame.id, aggregateGame);
@@ -387,11 +390,11 @@ public class GameStockActivity extends AppCompatActivity {
     }
 
     private void refreshGameAdapters() {
-        ArrayList<GameStockItem> games = getSortedGames();
-        ArrayList<GameStockItem> localGames = new ArrayList<>();
-        ArrayList<GameStockItem> remoteGames = new ArrayList<>();
+        ArrayList<Game> games = getSortedGames();
+        ArrayList<Game> localGames = new ArrayList<>();
+        ArrayList<Game> remoteGames = new ArrayList<>();
 
-        for (GameStockItem game : games) {
+        for (Game game : games) {
             if (game.isInstalled()) {
                 localGames.add(game);
             }
@@ -410,9 +413,9 @@ public class GameStockActivity extends AppCompatActivity {
         }
     }
 
-    private ArrayList<GameStockItem> getSortedGames() {
-        Collection<GameStockItem> unsortedGames = gamesMap.values();
-        ArrayList<GameStockItem> games = new ArrayList<>(unsortedGames);
+    private ArrayList<Game> getSortedGames() {
+        Collection<Game> unsortedGames = gamesMap.values();
+        ArrayList<Game> games = new ArrayList<>(unsortedGames);
 
         if (games.size() < 2) {
             return games;
@@ -656,10 +659,10 @@ public class GameStockActivity extends AppCompatActivity {
     }
 
     private void showDeleteGameDialog() {
-        ArrayList<GameStockItem> deletableGames = new ArrayList<>();
+        ArrayList<Game> deletableGames = new ArrayList<>();
         ArrayList<String> items = new ArrayList<>();
 
-        for (GameStockItem game : gamesMap.values()) {
+        for (Game game : gamesMap.values()) {
             if (!game.isInstalled()) continue;
 
             deletableGames.add(game);
@@ -668,7 +671,7 @@ public class GameStockActivity extends AppCompatActivity {
         new AlertDialog.Builder(this)
                 .setTitle(getString(R.string.deleteGameCmd))
                 .setItems(items.toArray(new String[0]), (dialog, which) -> {
-                    GameStockItem game = deletableGames.get(which);
+                    Game game = deletableGames.get(which);
                     showConfirmDeleteDialog(game);
                 })
                 .setNegativeButton(android.R.string.cancel, (dialog, whichButton) -> {
@@ -677,7 +680,7 @@ public class GameStockActivity extends AppCompatActivity {
                 .show();
     }
 
-    private void showConfirmDeleteDialog(final GameStockItem game) {
+    private void showConfirmDeleteDialog(final Game game) {
         new AlertDialog.Builder(this)
                 .setMessage(getString(R.string.deleteGameQuery).replace("-GAMENAME-", "\"" + game.title + "\""))
                 .setPositiveButton(android.R.string.yes, (dialog, which) -> {
@@ -697,7 +700,7 @@ public class GameStockActivity extends AppCompatActivity {
                 .show();
     }
 
-    private void setRemoteGames(List<GameStockItem> games) {
+    private void setRemoteGames(List<Game> games) {
         remoteGames = games;
         refreshGames();
     }
@@ -719,10 +722,10 @@ public class GameStockActivity extends AppCompatActivity {
                 .replace("__", "_");
     }
 
-    private class GameStockItemAdapter extends ArrayAdapter<GameStockItem> {
-        private final ArrayList<GameStockItem> items;
+    private class GameStockItemAdapter extends ArrayAdapter<Game> {
+        private final ArrayList<Game> items;
 
-        GameStockItemAdapter(Context context, int resource, ArrayList<GameStockItem> items) {
+        GameStockItemAdapter(Context context, int resource, ArrayList<Game> items) {
             super(context, resource, items);
             this.items = items;
         }
@@ -733,7 +736,7 @@ public class GameStockActivity extends AppCompatActivity {
                 LayoutInflater inflater = getLayoutInflater();
                 convertView = inflater.inflate(R.layout.list_item_game, null);
             }
-            GameStockItem item = items.get(position);
+            Game item = items.get(position);
             if (item != null) {
                 TextView titleView = convertView.findViewById(R.id.game_title);
                 if (titleView != null) {
@@ -785,7 +788,7 @@ public class GameStockActivity extends AppCompatActivity {
         }
     }
 
-    private static class LoadGameListAsyncTask extends AsyncTask<Void, Void, List<GameStockItem>> {
+    private static class LoadGameListAsyncTask extends AsyncTask<Void, Void, List<Game>> {
         private final WeakReference<GameStockActivity> activity;
         private final RemoteGameRepository remoteGameRepository = new RemoteGameRepository();
 
@@ -802,12 +805,12 @@ public class GameStockActivity extends AppCompatActivity {
         }
 
         @Override
-        protected List<GameStockItem> doInBackground(Void... params) {
+        protected List<Game> doInBackground(Void... params) {
             return remoteGameRepository.getGames();
         }
 
         @Override
-        protected void onPostExecute(List<GameStockItem> result) {
+        protected void onPostExecute(List<Game> result) {
             GameStockActivity activity = this.activity.get();
             if (activity == null) {
                 return;
@@ -825,11 +828,11 @@ public class GameStockActivity extends AppCompatActivity {
 
     private static class DownloadGameAsyncTask extends AsyncTask<Void, DownloadGameAsyncTask.DownloadPhase, DownloadGameAsyncTask.DownloadResult> {
         private final WeakReference<GameStockActivity> activity;
-        private final GameStockItem game;
+        private final Game game;
 
         private volatile boolean cancelled = false;
 
-        private DownloadGameAsyncTask(GameStockActivity activity, GameStockItem game) {
+        private DownloadGameAsyncTask(GameStockActivity activity, Game game) {
             this.activity = new WeakReference<>(activity);
             this.game = game;
         }
@@ -915,7 +918,7 @@ public class GameStockActivity extends AppCompatActivity {
                             out.write(b, 0, bytesRead);
                             totalBytesRead += bytesRead;
                         }
-                        return totalBytesRead == game.fileSize;
+                        return totalBytesRead == game.getFileSize();
                     }
                 }
             } catch (IOException ex) {
@@ -943,28 +946,11 @@ public class GameStockActivity extends AppCompatActivity {
                 logger.error("Game info file is not writable");
                 return false;
             }
-            try (FileOutputStream out = new FileOutputStream(infoFile)) {
-                try (OutputStreamWriter writer = new OutputStreamWriter(out)) {
-                    writer.write("<game>\n");
-                    writer.write("\t<id><![CDATA[".concat(game.id.substring(3)).concat("]]></id>\n"));
-                    writer.write("\t<list_id><![CDATA[".concat(game.listId).concat("]]></list_id>\n"));
-                    writer.write("\t<author><![CDATA[".concat(game.author).concat("]]></author>\n"));
-                    writer.write("\t<ported_by><![CDATA[".concat(game.portedBy).concat("]]></ported_by>\n"));
-                    writer.write("\t<version><![CDATA[".concat(game.version).concat("]]></version>\n"));
-                    writer.write("\t<title><![CDATA[".concat(game.title).concat("]]></title>\n"));
-                    writer.write("\t<lang><![CDATA[".concat(game.lang).concat("]]></lang>\n"));
-                    writer.write("\t<player><![CDATA[".concat(game.player).concat("]]></player>\n"));
-                    writer.write("\t<file_url><![CDATA[".concat(game.fileUrl).concat("]]></file_url>\n"));
-                    writer.write("\t<file_size><![CDATA[".concat(String.valueOf(game.fileSize)).concat("]]></file_size>\n"));
-                    writer.write("\t<file_ext><![CDATA[".concat(game.fileExt).concat("]]></file_ext>\n"));
-                    writer.write("\t<desc_url><![CDATA[".concat(game.descUrl).concat("]]></desc_url>\n"));
-                    writer.write("\t<pub_date><![CDATA[".concat(game.pubDate).concat("]]></pub_date>\n"));
-                    writer.write("\t<mod_date><![CDATA[".concat(game.modDate).concat("]]></mod_date>\n"));
-                    writer.write("</game>");
-                }
-
+            try (FileOutputStream out = new FileOutputStream(infoFile);
+                 OutputStreamWriter writer = new OutputStreamWriter(out)) {
+                writer.write(objectToXml(game));
                 return true;
-            } catch (IOException ex) {
+            } catch (Exception ex) {
                 logger.error("Failed to write to a game info file", ex);
                 return false;
             }

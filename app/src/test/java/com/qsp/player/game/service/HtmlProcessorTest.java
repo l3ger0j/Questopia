@@ -1,10 +1,10 @@
 package com.qsp.player.game.service;
 
-import org.junit.jupiter.api.Test;
+import static org.junit.Assert.assertEquals;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.Test;
 
-class HtmlProcessorTest {
+public class HtmlProcessorTest {
     private final GameContentResolver gameContentResolver = new GameContentResolver();
     private final ImageProvider imageProvider = new ImageProvider();
     private final HtmlProcessor sut = new HtmlProcessor(gameContentResolver, imageProvider);
