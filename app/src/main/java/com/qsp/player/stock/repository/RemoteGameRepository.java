@@ -14,7 +14,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class RemoteGameRepository {
     private static final String GAMESTOCK_URL_V1 = "http://qsp.su/tools/gamestock/gamestock.php";
@@ -54,10 +56,22 @@ public class RemoteGameRepository {
     private List<Game> parseGameStockXml(String xml) {
         try {
             GameList gameList = xmlToObject(xml, GameList.class);
-            return gameList.gameList;
+            return filterSupported(gameList.gameList);
         } catch (Exception ex) {
             logger.error("Failed to parse game stock XML", ex);
             return null;
         }
+    }
+
+    private List<Game> filterSupported(List<Game> games) {
+        ArrayList<Game> supported = new ArrayList<>();
+        for (Game game : games) {
+            if (game.fileExt.equals("zip") || game.fileExt.equals("rar")) {
+                supported.add(game);
+            } else {
+                logger.warn("Skipping game '{}' because of unsupported file type '{}'", game.title, game.fileExt);
+            }
+        }
+        return supported;
     }
 }
