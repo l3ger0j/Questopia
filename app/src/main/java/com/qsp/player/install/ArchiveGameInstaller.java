@@ -2,15 +2,13 @@ package com.qsp.player.install;
 
 import static com.qsp.player.shared.util.ArchiveUtil.unrar;
 import static com.qsp.player.shared.util.ArchiveUtil.unzip;
-import static com.qsp.player.shared.util.PathUtil.removeExtension;
+import static com.qsp.player.shared.util.ViewUtil.showErrorDialog;
 
 import android.content.Context;
-import android.net.Uri;
 
 import androidx.documentfile.provider.DocumentFile;
 
 import com.qsp.player.R;
-import com.qsp.player.shared.util.ViewUtil;
 
 import java.io.File;
 
@@ -23,32 +21,18 @@ public class ArchiveGameInstaller extends GameInstaller {
     }
 
     @Override
-    public void load(Uri uri) {
-        gameFileOrDir = DocumentFile.fromSingleUri(context, uri);
-        if (gameFileOrDir == null || !gameFileOrDir.exists()) {
-            throw new InstallException("Archive file not found: " + uri);
-        }
-        String filename = gameFileOrDir.getName();
-        if (filename == null) {
-            throw new InstallException("Archive filename is null");
-        }
-        gameName = removeExtension(filename);
-    }
-
-    @Override
-    public boolean install(File gameDir) {
+    public boolean install(String gameName, DocumentFile srcFile, File destDir) {
         boolean extracted = false;
         if (archiveType == ArchiveType.ZIP) {
-            extracted = unzip(context, gameFileOrDir, gameDir);
+            extracted = unzip(context, srcFile, destDir);
         } else if (archiveType == ArchiveType.RAR) {
-            extracted = unrar(context, gameFileOrDir, gameDir);
+            extracted = unrar(context, srcFile, destDir);
         }
-        if (extracted) {
-            return postInstall(gameDir);
-        } else {
-            String message = context.getString(R.string.extractError).replace("-GAMENAME-", gameName);
-            ViewUtil.showErrorDialog(context, message);
+        if (!extracted) {
+            String message = context.getString(R.string.installError).replace("-GAMENAME-", gameName);
+            showErrorDialog(context, message);
             return false;
         }
+        return postInstall(destDir);
     }
 }

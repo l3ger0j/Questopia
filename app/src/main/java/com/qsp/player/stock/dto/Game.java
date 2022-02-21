@@ -66,7 +66,7 @@ public class Game {
     }
 
     public int getFileSize() {
-        return Integer.parseInt(fileSize);
+        return (fileSize != null) ? Integer.parseInt(fileSize) : 0;
     }
 
     public boolean hasRemoteUrl() {

@@ -1,14 +1,13 @@
 package com.qsp.player.install;
 
+import static com.qsp.player.shared.util.FileUtil.createFile;
+import static com.qsp.player.shared.util.FileUtil.getOrCreateDirectory;
+
 import android.content.Context;
-import android.net.Uri;
 
 import androidx.documentfile.provider.DocumentFile;
 
 import com.qsp.player.shared.util.StreamUtil;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -16,54 +15,39 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import static com.qsp.player.shared.util.FileUtil.createFile;
-import static com.qsp.player.shared.util.FileUtil.getOrCreateDirectory;
-
 public class FolderGameInstaller extends GameInstaller {
-    private static final Logger logger = LoggerFactory.getLogger(FolderGameInstaller.class);
 
     public FolderGameInstaller(Context context) {
         super(context);
     }
 
     @Override
-    public void load(Uri uri) {
-        gameFileOrDir = DocumentFile.fromTreeUri(context, uri);
-        if (gameFileOrDir == null || !gameFileOrDir.exists()) {
-            throw new InstallException("Folder not found: " + uri);
+    public boolean install(String gameName, DocumentFile srcFile, File destDir) {
+        for (DocumentFile file : srcFile.listFiles()) {
+            copyFileOrDirectory(file, destDir);
         }
-        gameName = gameFileOrDir.getName();
+        return postInstall(destDir);
     }
 
-    @Override
-    public boolean install(File gameDir) {
-        for (DocumentFile file : gameFileOrDir.listFiles()) {
-            copyFileOrDirectory(file, gameDir);
-        }
-        return postInstall(gameDir);
-    }
-
-    private void copyFileOrDirectory(DocumentFile fileOrDir, File parentDir) {
-        if (fileOrDir.isDirectory()) {
-            File subDir = getOrCreateDirectory(parentDir, fileOrDir.getName());
-            for (DocumentFile dirFile : fileOrDir.listFiles()) {
-                copyFileOrDirectory(dirFile, subDir);
+    private void copyFileOrDirectory(DocumentFile srcFile, File destDir) {
+        if (srcFile.isDirectory()) {
+            File subDestDir = getOrCreateDirectory(destDir, srcFile.getName());
+            for (DocumentFile subSrcFile : srcFile.listFiles()) {
+                copyFileOrDirectory(subSrcFile, subDestDir);
             }
         } else {
-            copyFile(fileOrDir, parentDir);
+            copyFile(srcFile, destDir);
         }
     }
 
-    private void copyFile(DocumentFile file, File parentDir) {
-        File destFile = createFile(parentDir, file.getName());
+    private void copyFile(DocumentFile srcFile, File destDir) {
+        File destFile = createFile(destDir, srcFile.getName());
         if (destFile == null) {
-            logger.error("Destination file is null");
             return;
         }
-        try (InputStream in = context.getContentResolver().openInputStream(file.getUri())) {
-            try (OutputStream out = new FileOutputStream(destFile)) {
+        try (InputStream in = context.getContentResolver().openInputStream(srcFile.getUri());
+             OutputStream out = new FileOutputStream(destFile)) {
                 StreamUtil.copy(in, out);
-            }
         } catch (IOException ex) {
             throw new InstallException("Error copying game files");
         }

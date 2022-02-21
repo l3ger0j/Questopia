@@ -37,11 +37,12 @@ public class LocalGameRepository {
 
         ArrayList<Game> items = new ArrayList<>();
         for (GameFolder folder : getGameFolders(gameDirs)) {
+            Game item = null;
             String info = getGameInfo(folder);
-            Game item;
             if (info != null) {
                 item = parseGameInfo(info);
-            } else {
+            }
+            if (item == null) {
                 String name = folder.dir.getName();
                 item = new Game();
                 item.id = name;

@@ -1,7 +1,9 @@
 package com.qsp.player.install;
 
+import static com.qsp.player.shared.util.GameDirUtil.doesDirectoryContainGameFiles;
+import static com.qsp.player.shared.util.GameDirUtil.normalizeGameDirectory;
+
 import android.content.Context;
-import android.net.Uri;
 
 import androidx.documentfile.provider.DocumentFile;
 
@@ -10,15 +12,8 @@ import com.qsp.player.shared.util.ViewUtil;
 
 import java.io.File;
 
-import static com.qsp.player.shared.util.GameDirUtil.doesDirectoryContainGameFiles;
-import static com.qsp.player.shared.util.GameDirUtil.normalizeGameDirectory;
-
 public abstract class GameInstaller {
-
     protected final Context context;
-
-    protected DocumentFile gameFileOrDir;
-    protected String gameName;
 
     public GameInstaller(Context context) {
         this.context = context;
@@ -27,16 +22,7 @@ public abstract class GameInstaller {
     /**
      * @throws InstallException непредвиденная ошибка
      */
-    public abstract void load(Uri uri);
-
-    /**
-     * @throws InstallException непредвиденная ошибка
-     */
-    public abstract boolean install(File gameDir);
-
-    public String getGameName() {
-        return gameName;
-    }
+    public abstract boolean install(String gameName, DocumentFile srcFile, File destDir);
 
     protected boolean postInstall(File gameDir) {
         normalizeGameDirectory(gameDir);
