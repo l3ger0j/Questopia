@@ -2,8 +2,8 @@ package com.qsp.player.stock;
 
 import static android.content.Intent.ACTION_OPEN_DOCUMENT;
 import static android.content.Intent.ACTION_OPEN_DOCUMENT_TREE;
-import static com.qsp.player.game.util.GameDirUtil.doesDirectoryContainGameFiles;
-import static com.qsp.player.game.util.GameDirUtil.normalizeGameDirectory;
+import static com.qsp.player.shared.util.GameDirUtil.doesDirectoryContainGameFiles;
+import static com.qsp.player.shared.util.GameDirUtil.normalizeGameDirectory;
 import static com.qsp.player.shared.util.ArchiveUtil.unrar;
 import static com.qsp.player.shared.util.ArchiveUtil.unzip;
 import static com.qsp.player.shared.util.ColorUtil.getHexColor;
@@ -63,7 +63,6 @@ import com.qsp.player.install.InstallType;
 import com.qsp.player.settings.Settings;
 import com.qsp.player.settings.SettingsActivity;
 import com.qsp.player.shared.util.ViewUtil;
-import com.qsp.player.shared.util.XmlUtil;
 import com.qsp.player.stock.dto.Game;
 import com.qsp.player.stock.repository.LocalGameRepository;
 import com.qsp.player.stock.repository.RemoteGameRepository;

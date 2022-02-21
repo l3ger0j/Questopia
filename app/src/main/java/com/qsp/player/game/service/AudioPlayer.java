@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static com.qsp.player.shared.util.StringUtil.isNotEmpty;
-import static com.qsp.player.game.util.ThreadUtil.throwIfNotMainThread;
+import static com.qsp.player.shared.util.ThreadUtil.throwIfNotMainThread;
 
 public class AudioPlayer {
     private static final Logger logger = LoggerFactory.getLogger(AudioPlayer.class);

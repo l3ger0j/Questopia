@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.qsp.player.game.util.Base64Util.encodeBase64;
+import static com.qsp.player.shared.util.Base64Util.encodeBase64;
 import static com.qsp.player.shared.util.StringUtil.isNotEmpty;
 import static com.qsp.player.shared.util.StringUtil.isNullOrEmpty;
 

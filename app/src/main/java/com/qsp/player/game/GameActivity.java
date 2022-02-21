@@ -78,14 +78,14 @@ import java.util.Locale;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CountDownLatch;
 
-import static com.qsp.player.game.util.Base64Util.decodeBase64;
+import static com.qsp.player.shared.util.Base64Util.decodeBase64;
 import static com.qsp.player.shared.util.ColorUtil.convertRgbaToBgra;
 import static com.qsp.player.shared.util.ColorUtil.getHexColor;
 import static com.qsp.player.shared.util.FileUtil.findFileOrDirectory;
 import static com.qsp.player.shared.util.FileUtil.getOrCreateDirectory;
 import static com.qsp.player.shared.util.FileUtil.getOrCreateFile;
 import static com.qsp.player.shared.util.PathUtil.getExtension;
-import static com.qsp.player.game.util.ThreadUtil.isMainThread;
+import static com.qsp.player.shared.util.ThreadUtil.isMainThread;
 import static com.qsp.player.shared.util.ViewUtil.getFontStyle;
 import static com.qsp.player.shared.util.ViewUtil.setLocale;
 

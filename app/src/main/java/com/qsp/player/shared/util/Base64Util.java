@@ -1,4 +1,4 @@
-package com.qsp.player.game.util;
+package com.qsp.player.shared.util;
 
 import android.util.Base64;
 

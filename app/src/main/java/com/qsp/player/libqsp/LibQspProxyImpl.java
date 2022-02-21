@@ -41,8 +41,8 @@ import static com.qsp.player.shared.util.FileUtil.getFileContents;
 import static com.qsp.player.shared.util.FileUtil.getOrCreateDirectory;
 import static com.qsp.player.shared.util.StringUtil.getStringOrEmpty;
 import static com.qsp.player.shared.util.StringUtil.isNotEmpty;
-import static com.qsp.player.game.util.ThreadUtil.isSameThread;
-import static com.qsp.player.game.util.ThreadUtil.throwIfNotMainThread;
+import static com.qsp.player.shared.util.ThreadUtil.isSameThread;
+import static com.qsp.player.shared.util.ThreadUtil.throwIfNotMainThread;
 
 public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
     private static final Logger logger = LoggerFactory.getLogger(LibQspProxyImpl.class);

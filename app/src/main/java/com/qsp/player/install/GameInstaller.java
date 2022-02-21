@@ -10,8 +10,8 @@ import com.qsp.player.shared.util.ViewUtil;
 
 import java.io.File;
 
-import static com.qsp.player.game.util.GameDirUtil.doesDirectoryContainGameFiles;
-import static com.qsp.player.game.util.GameDirUtil.normalizeGameDirectory;
+import static com.qsp.player.shared.util.GameDirUtil.doesDirectoryContainGameFiles;
+import static com.qsp.player.shared.util.GameDirUtil.normalizeGameDirectory;
 
 public abstract class GameInstaller {
 
