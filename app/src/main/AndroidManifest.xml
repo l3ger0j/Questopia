@@ -25,7 +25,6 @@
             android:name=".game.GameActivity"
             android:alwaysRetainTaskState="true"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="@string/appName"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.NoActionBar"
             android:exported="true">
