@@ -123,6 +123,7 @@ public class GameStockActivity extends AppCompatActivity {
     public GameStockActivity() {
         installers.put(InstallType.ZIP_ARCHIVE, new ArchiveGameInstaller(this, ArchiveType.ZIP));
         installers.put(InstallType.RAR_ARCHIVE, new ArchiveGameInstaller(this, ArchiveType.RAR));
+        installers.put(InstallType.AQSP_ARCHIVE, new ArchiveGameInstaller(this, ArchiveType.ZIP));
         installers.put(InstallType.FOLDER, new FolderGameInstaller(this));
     }
 
@@ -230,6 +231,10 @@ public class GameStockActivity extends AppCompatActivity {
         if (game.fileExt.length() > 0) {
             message.append('\n');
             message.append(getString(R.string.fileType).replace("-TYPE-", game.fileExt));
+            if (game.fileExt.equals("aqsp")) {
+                message.append(" ");
+                message.append(getString(R.string.experimental));
+            }
         }
         AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this)
                 .setMessage(message)
@@ -940,6 +945,8 @@ public class GameStockActivity extends AppCompatActivity {
                 return InstallType.ZIP_ARCHIVE;
             } else if (ext.equals("rar")) {
                 return InstallType.RAR_ARCHIVE;
+            } else if (ext.equals("aqsp")) {
+                return InstallType.AQSP_ARCHIVE;
             } else {
                 throw new IllegalArgumentException("Unsupported file type: " + ext);
             }

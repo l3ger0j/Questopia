@@ -66,12 +66,16 @@ public class RemoteGameRepository {
     private List<Game> filterSupported(List<Game> games) {
         ArrayList<Game> supported = new ArrayList<>();
         for (Game game : games) {
-            if (game.fileExt.equals("zip") || game.fileExt.equals("rar")) {
+            if (isSupportedFileType(game.fileExt)) {
                 supported.add(game);
             } else {
                 logger.warn("Skipping game '{}' because of unsupported file type '{}'", game.title, game.fileExt);
             }
         }
         return supported;
+    }
+
+    private boolean isSupportedFileType(String ext) {
+        return ext.equals("zip") || ext.equals("rar") || ext.equals("aqsp");
     }
 }

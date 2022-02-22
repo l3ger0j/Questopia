@@ -102,4 +102,5 @@
     <string name="selectGameFile">Select a game file to run</string>
     <string name="cancel">Cancel</string>
     <string name="update">Update</string>
+    <string name="experimental">(experimental)</string>
 </resources>
