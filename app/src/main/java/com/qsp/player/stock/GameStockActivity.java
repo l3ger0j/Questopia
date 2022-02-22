@@ -12,6 +12,7 @@ import static com.qsp.player.shared.util.FileUtil.getOrCreateDirectory;
 import static com.qsp.player.shared.util.FileUtil.isWritableDirectory;
 import static com.qsp.player.shared.util.FileUtil.isWritableFile;
 import static com.qsp.player.shared.util.PathUtil.removeExtension;
+import static com.qsp.player.shared.util.ThreadUtil.isMainThread;
 import static com.qsp.player.shared.util.ViewUtil.getFontStyle;
 import static com.qsp.player.shared.util.ViewUtil.setLocale;
 import static com.qsp.player.shared.util.XmlUtil.objectToXml;
@@ -59,6 +60,7 @@ import com.qsp.player.install.InstallException;
 import com.qsp.player.install.InstallType;
 import com.qsp.player.settings.Settings;
 import com.qsp.player.settings.SettingsActivity;
+import com.qsp.player.shared.util.ThreadUtil;
 import com.qsp.player.shared.util.ViewUtil;
 import com.qsp.player.stock.dto.Game;
 import com.qsp.player.stock.repository.LocalGameRepository;
@@ -386,7 +388,12 @@ public class GameStockActivity extends AppCompatActivity {
             }
         }
 
-        refreshGameAdapters();
+
+        if (isMainThread()) {
+            refreshGameAdapters();
+        } else {
+            runOnUiThread(this::refreshGameAdapters);
+        }
     }
 
     private void refreshGameAdapters() {

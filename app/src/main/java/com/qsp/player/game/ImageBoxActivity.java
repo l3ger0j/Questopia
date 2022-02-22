@@ -1,11 +1,9 @@
 package com.qsp.player.game;
 
-import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.widget.ImageView;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.qsp.player.QuestPlayerApplication;
@@ -40,10 +38,5 @@ public class ImageBoxActivity extends AppCompatActivity {
         ImageView imageView = findViewById(R.id.imagebox);
         imageView.setImageDrawable(drawable);
         imageView.setOnClickListener(v -> finish());
-    }
-
-    @Override
-    public void onConfigurationChanged(@NonNull Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
     }
 }

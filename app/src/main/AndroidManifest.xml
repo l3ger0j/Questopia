@@ -19,13 +19,9 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="m">
 
-        <service android:name=".game.BackgroundService" />
-
         <activity
             android:name=".game.GameActivity"
             android:alwaysRetainTaskState="true"
-            android:configChanges="orientation|keyboardHidden|screenSize"
-            android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.NoActionBar"
             android:exported="true">
 
@@ -37,19 +33,15 @@
 
         <activity
             android:name=".game.ImageBoxActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize"
-            android:screenOrientation="portrait"
             android:theme="@style/Theme.QSP.Translucent" />
+
         <activity
             android:name=".settings.SettingsActivity"
-            android:configChanges="orientation"
-            android:label="@string/settings"
-            android:screenOrientation="portrait" />
+            android:label="@string/settings" />
+
         <activity
             android:name=".stock.GameStockActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="@string/gameStock"
-            android:screenOrientation="portrait" />
+            android:label="@string/gameStock" />
 
     </application>
 </manifest>

@@ -36,7 +36,15 @@ public class QuestPlayerApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        libQspProxy.start();
         logger.info("QuestPlayerApplication created");
+    }
+
+    @Override
+    public void onTerminate() {
+        super.onTerminate();
+        libQspProxy.stop();
+        logger.info("QuestPlayerApplication terminated");
     }
 
     public GameContentResolver getGameContentResolver() {

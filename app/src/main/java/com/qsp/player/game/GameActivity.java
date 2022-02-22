@@ -1,5 +1,16 @@
 package com.qsp.player.game;
 
+import static com.qsp.player.shared.util.Base64Util.decodeBase64;
+import static com.qsp.player.shared.util.ColorUtil.convertRgbaToBgra;
+import static com.qsp.player.shared.util.ColorUtil.getHexColor;
+import static com.qsp.player.shared.util.FileUtil.findFileOrDirectory;
+import static com.qsp.player.shared.util.FileUtil.getOrCreateDirectory;
+import static com.qsp.player.shared.util.FileUtil.getOrCreateFile;
+import static com.qsp.player.shared.util.PathUtil.getExtension;
+import static com.qsp.player.shared.util.ThreadUtil.isMainThread;
+import static com.qsp.player.shared.util.ViewUtil.getFontStyle;
+import static com.qsp.player.shared.util.ViewUtil.setLocale;
+
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.ComponentName;
@@ -7,7 +18,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.content.res.Configuration;
 import android.graphics.Typeface;
 import android.media.AudioManager;
 import android.net.Uri;
@@ -40,7 +50,6 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
@@ -50,6 +59,10 @@ import androidx.core.view.GestureDetectorCompat;
 
 import com.qsp.player.QuestPlayerApplication;
 import com.qsp.player.R;
+import com.qsp.player.game.service.AudioPlayer;
+import com.qsp.player.game.service.GameContentResolver;
+import com.qsp.player.game.service.HtmlProcessor;
+import com.qsp.player.game.service.ImageProvider;
 import com.qsp.player.libqsp.GameInterface;
 import com.qsp.player.libqsp.LibQspProxy;
 import com.qsp.player.libqsp.model.InterfaceConfiguration;
@@ -57,14 +70,10 @@ import com.qsp.player.libqsp.model.QspListItem;
 import com.qsp.player.libqsp.model.QspMenuItem;
 import com.qsp.player.libqsp.model.RefreshInterfaceRequest;
 import com.qsp.player.libqsp.model.WindowType;
-import com.qsp.player.game.service.AudioPlayer;
-import com.qsp.player.game.service.GameContentResolver;
-import com.qsp.player.game.service.HtmlProcessor;
-import com.qsp.player.game.service.ImageProvider;
 import com.qsp.player.settings.Settings;
 import com.qsp.player.settings.SettingsActivity;
-import com.qsp.player.stock.GameStockActivity;
 import com.qsp.player.shared.util.ViewUtil;
+import com.qsp.player.stock.GameStockActivity;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,17 +86,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CountDownLatch;
-
-import static com.qsp.player.shared.util.Base64Util.decodeBase64;
-import static com.qsp.player.shared.util.ColorUtil.convertRgbaToBgra;
-import static com.qsp.player.shared.util.ColorUtil.getHexColor;
-import static com.qsp.player.shared.util.FileUtil.findFileOrDirectory;
-import static com.qsp.player.shared.util.FileUtil.getOrCreateDirectory;
-import static com.qsp.player.shared.util.FileUtil.getOrCreateFile;
-import static com.qsp.player.shared.util.PathUtil.getExtension;
-import static com.qsp.player.shared.util.ThreadUtil.isMainThread;
-import static com.qsp.player.shared.util.ViewUtil.getFontStyle;
-import static com.qsp.player.shared.util.ViewUtil.setLocale;
 
 @SuppressLint("ClickableViewAccessibility")
 public class GameActivity extends AppCompatActivity implements GameInterface, GestureDetector.OnGestureListener {
@@ -124,16 +122,6 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
 
     private static final Logger logger = LoggerFactory.getLogger(GameActivity.class);
 
-    private final ServiceConnection backgroundServiceConn = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-        }
-    };
-
     private Settings settings;
     private String currentLanguage = Locale.getDefault().getLanguage();
     private int activeTab;
@@ -157,7 +145,6 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
     // region Сервисы
 
     private GameContentResolver gameContentResolver;
-    private ImageProvider imageProvider;
     private HtmlProcessor htmlProcessor;
     private LibQspProxy libQspProxy;
     private AudioPlayer audioPlayer;
@@ -185,7 +172,6 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
-        bindBackgroundService();
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
         initServices();
@@ -195,11 +181,6 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
         setActiveTab(TAB_MAIN_DESC_AND_ACTIONS);
 
         logger.info("GameActivity created");
-    }
-
-    private void bindBackgroundService() {
-        Intent intent = new Intent(this, BackgroundService.class);
-        bindService(intent, backgroundServiceConn, BIND_AUTO_CREATE);
     }
 
     private void initControls() {
@@ -264,7 +245,6 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
         QuestPlayerApplication application = (QuestPlayerApplication) getApplication();
 
         gameContentResolver = application.getGameContentResolver();
-        imageProvider = application.getImageProvider();
         htmlProcessor = application.getHtmlProcessor();
 
         audioPlayer = application.getAudioPlayer();
@@ -340,7 +320,6 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
         audioPlayer.stop();
         libQspProxy.setGameInterface(null);
         counterHandler.removeCallbacks(counterTask);
-        unbindService(backgroundServiceConn);
         super.onDestroy();
         logger.info("GameActivity destroyed");
     }
@@ -496,11 +475,6 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
             intent.putExtra("gameRunning", libQspProxy.getGameState().gameId);
         }
         startActivityForResult(intent, REQUEST_CODE_SELECT_GAME);
-    }
-
-    @Override
-    public void onConfigurationChanged(@NonNull Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
     }
 
     @Override
