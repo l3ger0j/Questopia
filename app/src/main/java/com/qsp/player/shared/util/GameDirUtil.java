@@ -1,8 +1,12 @@
 package com.qsp.player.shared.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 
 public final class GameDirUtil {
+    private static final Logger logger = LoggerFactory.getLogger(GameDirUtil.class);
 
     /**
      * Если в папке есть только одна папка, и больше ничего, рекурсивно разворачивает папку до тех
@@ -10,25 +14,33 @@ public final class GameDirUtil {
      * одной вложенной папки.
      */
     public static void normalizeGameDirectory(File dir) {
-        File[] files = dir.listFiles();
-        if (files == null || files.length != 1 || !files[0].isDirectory()) return;
-
-        for (File file : files[0].listFiles()) {
-            file.renameTo(new File(dir.getAbsolutePath(), file.getName()));
+        File it = dir;
+        while (true) {
+            File[] files = it.listFiles();
+            if (files.length != 1 || !files[0].isDirectory()) {
+                break;
+            }
+            it = files[0];
         }
-        files[0].delete();
-        normalizeGameDirectory(dir);
+        if (it == dir) {
+            return;
+        }
+        logger.info("Normalizing game directory '{}'", dir.getAbsolutePath());
+        for (File file : it.listFiles()) {
+            File dest = new File(dir.getAbsolutePath(), file.getName());
+            logger.debug("Moving game file '{}' to '{}'", file.getAbsolutePath(), dest.getAbsolutePath());
+            file.renameTo(dest);
+        }
     }
 
     public static boolean doesDirectoryContainGameFiles(File dir) {
         for (File file : dir.listFiles()) {
             String name = file.getName();
-            if (name == null) continue;
-
             String lcName = name.toLowerCase();
-            if (lcName.endsWith(".qsp") || lcName.endsWith(".gam")) return true;
+            if (lcName.endsWith(".qsp") || lcName.endsWith(".gam")) {
+                return true;
+            }
         }
-
         return false;
     }
 }
