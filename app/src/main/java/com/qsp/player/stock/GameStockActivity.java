@@ -911,7 +911,6 @@ public class GameStockActivity extends AppCompatActivity {
                 URL url = new URL(game.fileUrl);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("GET");
-                conn.setDoOutput(true);
                 conn.connect();
 
                 try (InputStream in = conn.getInputStream()) {
