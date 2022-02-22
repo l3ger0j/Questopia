@@ -868,7 +868,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
 
     @Override
     public void showSaveGamePopup(String filename) {
-        mainMenu.performIdentifierAction(R.id.menu_savegame, 0);
+        runOnUiThread(() -> mainMenu.performIdentifierAction(R.id.menu_savegame, 0));
     }
 
     @Override
