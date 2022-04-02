@@ -3,6 +3,8 @@ package com.qsp.player.settings;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 
+import androidx.annotation.NonNull;
+
 public class Settings {
     public boolean soundEnabled;
     public String language;
@@ -14,7 +16,8 @@ public class Settings {
     public int textColor;
     public int linkColor;
 
-    public static Settings from(SharedPreferences preferences) {
+    @NonNull
+    public static Settings from(@NonNull SharedPreferences preferences) {
         Settings settings = new Settings();
         settings.soundEnabled = preferences.getBoolean("sound", true);
         settings.language = preferences.getString("lang", "ru");
@@ -28,7 +31,7 @@ public class Settings {
         return settings;
     }
 
-    private static float parseActionsHeightRatio(String str) {
+    private static float parseActionsHeightRatio(@NonNull String str) {
         switch (str) {
             case "1/5":
                 return 0.2f;

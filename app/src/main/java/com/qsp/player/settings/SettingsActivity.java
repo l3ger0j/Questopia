@@ -13,6 +13,8 @@ import com.pes.androidmaterialcolorpickerdialog.ColorPicker;
 import com.qsp.player.R;
 import com.qsp.player.shared.util.ViewUtil;
 
+import java.util.Objects;
+
 public class SettingsActivity extends AppCompatActivity {
 
     @Override
@@ -27,6 +29,7 @@ public class SettingsActivity extends AppCompatActivity {
     public static class SettingsFragment extends PreferenceFragmentCompat implements SharedPreferences.OnSharedPreferenceChangeListener {
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+            requireActivity().setTitle(R.string.settings);
             addPreferencesFromResource(R.xml.settings);
         }
 
