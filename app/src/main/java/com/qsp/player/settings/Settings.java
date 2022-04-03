@@ -9,6 +9,7 @@ public class Settings {
     public boolean soundEnabled;
     public String language;
     public float actionsHeightRatio;
+    public boolean isSeparator;
     public int typeface;
     public int fontSize;
     public boolean useGameFont;
@@ -22,6 +23,7 @@ public class Settings {
         settings.soundEnabled = preferences.getBoolean("sound", true);
         settings.language = preferences.getString("lang", "ru");
         settings.actionsHeightRatio = parseActionsHeightRatio(preferences.getString("actsHeight", "1/3"));
+        settings.isSeparator = preferences.getBoolean("separator", false);
         settings.typeface = Integer.parseInt(preferences.getString("typeface", "0"));
         settings.fontSize = Integer.parseInt(preferences.getString("fontSize", "16"));
         settings.useGameFont = preferences.getBoolean("useGameFont", false);

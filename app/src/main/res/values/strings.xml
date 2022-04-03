@@ -107,4 +107,6 @@
     <string name="cancel">Cancel</string>
     <string name="update">Update</string>
     <string name="experimental">(experimental)</string>
+    <string name="separator">Separator</string>
+    <string name="separatorSummary">On or off separator line in game</string>
 </resources>

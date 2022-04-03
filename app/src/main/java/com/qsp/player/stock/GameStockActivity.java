@@ -2,7 +2,6 @@ package com.qsp.player.stock;
 
 import static android.content.Intent.ACTION_OPEN_DOCUMENT;
 import static android.content.Intent.ACTION_OPEN_DOCUMENT_TREE;
-import static com.qsp.player.shared.util.GameDirUtil.doesDirectoryContainGameFiles;
 import static com.qsp.player.shared.util.ColorUtil.getHexColor;
 import static com.qsp.player.shared.util.FileUtil.GAME_INFO_FILENAME;
 import static com.qsp.player.shared.util.FileUtil.createFile;
@@ -60,7 +59,6 @@ import com.qsp.player.install.InstallException;
 import com.qsp.player.install.InstallType;
 import com.qsp.player.settings.Settings;
 import com.qsp.player.settings.SettingsActivity;
-import com.qsp.player.shared.util.ThreadUtil;
 import com.qsp.player.shared.util.ViewUtil;
 import com.qsp.player.stock.dto.Game;
 import com.qsp.player.stock.repository.LocalGameRepository;
@@ -83,6 +81,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 public class GameStockActivity extends AppCompatActivity {
     private static final int REQUEST_CODE_INSTALL_GAME = 1;
@@ -251,7 +250,7 @@ public class GameStockActivity extends AppCompatActivity {
         alertBuilder.create().show();
     }
 
-    private void playGame(final Game game) {
+    private void playGame(@NonNull final Game game) {
         final Intent data = new Intent();
         data.putExtra("gameId", game.id);
         data.putExtra("gameTitle", game.title);
@@ -425,6 +424,7 @@ public class GameStockActivity extends AppCompatActivity {
         }
     }
 
+    @NonNull
     private ArrayList<Game> getSortedGames() {
         Collection<Game> unsortedGames = gamesMap.values();
         ArrayList<Game> games = new ArrayList<>(unsortedGames);
@@ -466,7 +466,8 @@ public class GameStockActivity extends AppCompatActivity {
         } else {
             file = DocumentFile.fromSingleUri(this, uri);
         }
-        String gameName = removeExtension(file.getName());
+        assert file != null;
+        String gameName = removeExtension(Objects.requireNonNull(file.getName()));
         Game game = new Game();
         game.id = gameName;
         game.title = gameName;
@@ -492,7 +493,7 @@ public class GameStockActivity extends AppCompatActivity {
         }
     }
 
-    private void doInstallGame(GameInstaller installer, DocumentFile gameFile, Game game) {
+    private void doInstallGame(GameInstaller installer, DocumentFile gameFile, @NonNull Game game) {
         File gameDir = getOrCreateGameDirectory(game.title);
         if (!isWritableDirectory(gameDir)) {
             logger.error("Game directory is not writable");
@@ -650,7 +651,7 @@ public class GameStockActivity extends AppCompatActivity {
         return super.onKeyDown(keyCode, event);
     }
 
-    private void updateProgressDialog(boolean show, String title, String message, final Runnable onCancel) {
+    private void updateProgressDialog(boolean show, @NonNull String title, String message, final Runnable onCancel) {
         showProgressDialog = show;
 
         if (show) {
@@ -701,7 +702,7 @@ public class GameStockActivity extends AppCompatActivity {
                 .show();
     }
 
-    private void showConfirmDeleteDialog(final Game game) {
+    private void showConfirmDeleteDialog(@NonNull final Game game) {
         new AlertDialog.Builder(this)
                 .setMessage(getString(R.string.deleteGameQuery).replace("-GAMENAME-", "\"" + game.title + "\""))
                 .setPositiveButton(android.R.string.yes, (dialog, which) -> {
@@ -783,7 +784,7 @@ public class GameStockActivity extends AppCompatActivity {
 
     private class TabListener implements ActionBar.TabListener {
         @Override
-        public void onTabSelected(ActionBar.Tab tab, FragmentTransaction ft) {
+        public void onTabSelected(@NonNull ActionBar.Tab tab, FragmentTransaction ft) {
             int position = tab.getPosition();
             boolean tabHasRemoteGames = position == TAB_REMOTE || position == TAB_ALL;
             boolean gamesNotBeingLoaded = loadGameListTask == null || loadGameListTask.getStatus() == AsyncTask.Status.FINISHED;
@@ -940,15 +941,16 @@ public class GameStockActivity extends AppCompatActivity {
             }
         }
 
-        private InstallType installTypeFromExtension(String ext) {
-            if (ext.equals("zip")) {
-                return InstallType.ZIP_ARCHIVE;
-            } else if (ext.equals("rar")) {
-                return InstallType.RAR_ARCHIVE;
-            } else if (ext.equals("aqsp")) {
-                return InstallType.AQSP_ARCHIVE;
-            } else {
-                throw new IllegalArgumentException("Unsupported file type: " + ext);
+        private InstallType installTypeFromExtension(@NonNull String ext) {
+            switch (ext) {
+                case "zip":
+                    return InstallType.ZIP_ARCHIVE;
+                case "rar":
+                    return InstallType.RAR_ARCHIVE;
+                case "aqsp":
+                    return InstallType.AQSP_ARCHIVE;
+                default:
+                    throw new IllegalArgumentException("Unsupported file type: " + ext);
             }
         }
 

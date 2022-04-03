@@ -3,6 +3,8 @@ package com.qsp.player;
 import android.app.Application;
 import android.os.Build;
 
+import androidx.activity.result.ActivityResultLauncher;
+
 import com.qsp.player.libqsp.LibQspProxy;
 import com.qsp.player.libqsp.LibQspProxyImpl;
 import com.qsp.player.game.service.AudioPlayer;
@@ -15,8 +17,8 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.impl.HandroidLoggerAdapter;
 
 public class QuestPlayerApplication extends Application {
-    private static final Logger logger = LoggerFactory.getLogger(QuestPlayerApplication.class);
 
+    private static final Logger logger = LoggerFactory.getLogger(QuestPlayerApplication.class);
     private final GameContentResolver gameContentResolver = new GameContentResolver();
     private final ImageProvider imageProvider = new ImageProvider();
     private final HtmlProcessor htmlProcessor = new HtmlProcessor(gameContentResolver, imageProvider);

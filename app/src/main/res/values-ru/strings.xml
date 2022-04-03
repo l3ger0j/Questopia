@@ -24,7 +24,7 @@
         <li>Illume (Китайский упрощенный / Китайский традиционный/Английский~v1.3)</li>
         <li>Unregistred (Русский)</li>
     </ul>
-    <li><b>Форк сделан:</b>
+    <li><b>Форк сделал:</b>
     <ul style="list-style-type:none:none">
         <li>l3ger0j</li>
     </ul>
@@ -92,8 +92,8 @@
     <string name="userInputContentDesc">Пользовательский ввод</string>
     <string name="play">Играть</string>
     <string name="download">Скачать</string>
-    <string name="downloading">Скачивается...</string>
-    <string name="installing">Устанавливается...</string>
+    <string name="downloading">Скачивается…</string>
+    <string name="installing">Устанавливается…</string>
     <string name="gameListLoading">Загрузка списка игр</string>
     <string name="deleteGameCmd">Удалить игру</string>
     <string name="gameDeleted">Игра удалена.</string>
@@ -107,6 +107,8 @@
     <string name="cancel">Отмена</string>
     <string name="update">Обновить</string>
     <string name="experimental">(экспериментально)</string>
+    <string name="separator">Разделитель</string>
+    <string name="separatorSummary">Включить или выключить разделитель в игре</string>
 </resources>
 
 
