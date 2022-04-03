@@ -653,30 +653,57 @@ public class GameStockActivity extends AppCompatActivity {
 
     private void updateProgressDialog(boolean show, @NonNull String title, String message, final Runnable onCancel) {
         showProgressDialog = show;
-
-        if (show) {
-            if (progressDialog == null) {
-                progressDialog = new ProgressDialog(this);
-                progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        if (title.isEmpty()) {
+            if (show) {
+                if (progressDialog == null) {
+                    progressDialog = new ProgressDialog(this);
+                    progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                }
+                progressDialog.setTitle(title);
+                progressDialog.setMessage(message);
+                progressDialog.setCancelable(false);
+                progressDialog.setCanceledOnTouchOutside(false);
+                if (onCancel != null) {
+                    progressDialog.setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.cancel), (dialog, which) -> {
+                        if (which == DialogInterface.BUTTON_NEGATIVE) {
+                            dialog.dismiss();
+                            onCancel.run();
+                        }
+                    });
+                }
+                if (!progressDialog.isShowing()) {
+                    progressDialog.show();
+                }
+            } else if (progressDialog != null && progressDialog.isShowing()) {
+                progressDialog.dismiss();
+                progressDialog = null;
             }
-            progressDialog.setTitle(title);
-            progressDialog.setMessage(message);
-            progressDialog.setCancelable(false);
-            progressDialog.setCanceledOnTouchOutside(false);
-            if (onCancel != null) {
-                progressDialog.setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.cancel), (dialog, which) -> {
-                    if (which == DialogInterface.BUTTON_NEGATIVE) {
-                        dialog.dismiss();
-                        onCancel.run();
-                    }
-                });
+        } else {
+            if (show) {
+                if (progressDialog == null) {
+                    progressDialog = new ProgressDialog(this);
+                    progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                }
+                progressDialog.setTitle(title);
+                progressDialog.setMessage(message);
+                progressDialog.setCancelable(false);
+                progressDialog.setIndeterminate(true);
+                progressDialog.setCanceledOnTouchOutside(false);
+                if (onCancel != null) {
+                    progressDialog.setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.cancel), (dialog, which) -> {
+                        if (which == DialogInterface.BUTTON_NEGATIVE) {
+                            dialog.dismiss();
+                            onCancel.run();
+                        }
+                    });
+                }
+                if (!progressDialog.isShowing()) {
+                    progressDialog.show();
+                }
+            } else if (progressDialog != null && progressDialog.isShowing()) {
+                progressDialog.dismiss();
+                progressDialog = null;
             }
-            if (!progressDialog.isShowing()) {
-                progressDialog.show();
-            }
-        } else if (progressDialog != null && progressDialog.isShowing()) {
-            progressDialog.dismiss();
-            progressDialog = null;
         }
     }
 
@@ -848,7 +875,9 @@ public class GameStockActivity extends AppCompatActivity {
         }
     }
 
-    private static class DownloadGameAsyncTask extends AsyncTask<Void, DownloadGameAsyncTask.DownloadPhase, DownloadGameAsyncTask.DownloadResult> {
+    private static class DownloadGameAsyncTask extends AsyncTask<Void,
+            DownloadGameAsyncTask.DownloadPhase,
+            DownloadGameAsyncTask.DownloadResult> {
         private final WeakReference<GameStockActivity> activity;
         private final Game game;
 
@@ -864,6 +893,8 @@ public class GameStockActivity extends AppCompatActivity {
             GameStockActivity activity = this.activity.get();
             if (activity != null) {
                 activity.updateProgressDialog(true, game.title, activity.getString(R.string.downloading), () -> cancelled = true);
+                activity.progressDialog.setIndeterminate(false);
+                activity.progressDialog.setMax(game.getFileSize());
             }
         }
 
@@ -924,11 +955,13 @@ public class GameStockActivity extends AppCompatActivity {
                         byte[] b = new byte[8192];
                         int totalBytesRead = 0;
                         int bytesRead;
-                        while ((bytesRead = in.read(b)) > 0) {
+                        while ((bytesRead = in.read(b)) > 0 ||
+                                activity.progressDialog.getProgress() < activity.progressDialog.getMax()) {
                             if (cancelled) {
                                 logger.info("Game download was cancelled");
                                 return false;
                             }
+                            activity.progressDialog.incrementProgressBy(bytesRead);
                             out.write(b, 0, bytesRead);
                             totalBytesRead += bytesRead;
                         }

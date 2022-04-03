@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 public class LocalGameRepository {
     private static final Logger logger = LoggerFactory.getLogger(LocalGameRepository.class);
@@ -58,7 +59,7 @@ public class LocalGameRepository {
 
     private ArrayList<File> getGameDirectories() {
         ArrayList<File> dirs = new ArrayList<>();
-        for (File f : gamesDir.listFiles()) {
+        for (File f : Objects.requireNonNull(gamesDir.listFiles())) {
             if (f.isDirectory()) {
                 dirs.add(f);
             }
@@ -74,7 +75,7 @@ public class LocalGameRepository {
         for (File dir : dirs) {
             ArrayList<File> gameFiles = new ArrayList<>();
 
-            List<File> files = Arrays.asList(dir.listFiles());
+            List<File> files = Arrays.asList(Objects.requireNonNull(dir.listFiles()));
             sortFilesByName(files);
 
             for (File file : files) {

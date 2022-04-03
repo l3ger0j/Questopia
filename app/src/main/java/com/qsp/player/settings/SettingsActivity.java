@@ -36,14 +36,14 @@ public class SettingsActivity extends AppCompatActivity {
         @Override
         public void onResume() {
             super.onResume();
-            getPreferenceScreen().getSharedPreferences()
+            Objects.requireNonNull(getPreferenceScreen().getSharedPreferences())
                     .registerOnSharedPreferenceChangeListener(this);
         }
 
         @Override
         public void onPause() {
             super.onPause();
-            getPreferenceScreen().getSharedPreferences()
+            Objects.requireNonNull(getPreferenceScreen().getSharedPreferences())
                     .unregisterOnSharedPreferenceChangeListener(this);
         }
 

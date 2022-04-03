@@ -16,10 +16,8 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class RemoteGameRepository {
-    private static final String GAMESTOCK_URL_V1 = "http://qsp.su/tools/gamestock/gamestock.php";
     private static final String GAMESTOCK_URL_V2 = "http://qsp.su/gamestock/gamestock2.php";
 
     private static final Logger logger = LoggerFactory.getLogger(RemoteGameRepository.class);
@@ -33,7 +31,6 @@ public class RemoteGameRepository {
                 cachedGames = parseGameStockXml(xml);
             }
         }
-
         return cachedGames;
     }
 

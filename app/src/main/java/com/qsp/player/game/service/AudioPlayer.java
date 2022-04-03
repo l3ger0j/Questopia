@@ -14,6 +14,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import static com.qsp.player.shared.util.StringUtil.isNotEmpty;
 import static com.qsp.player.shared.util.ThreadUtil.throwIfNotMainThread;
 
+import androidx.annotation.NonNull;
+
 public class AudioPlayer {
     private static final Logger logger = LoggerFactory.getLogger(AudioPlayer.class);
 

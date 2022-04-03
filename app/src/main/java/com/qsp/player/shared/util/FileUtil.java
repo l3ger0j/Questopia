@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Objects;
 
 public final class FileUtil {
 
@@ -36,7 +37,9 @@ public final class FileUtil {
         File file = new File(parentDir, name);
         if (!file.exists()) {
             try {
-                file.createNewFile();
+                if (file.createNewFile()) {
+                   logger.info("File created");
+                }
             } catch (IOException ex) {
                 logger.error("Error creating a file: " + name, ex);
                 return null;
@@ -55,7 +58,11 @@ public final class FileUtil {
 
     public static File createDirectory(File parentDir, String name) {
         File dir = new File(parentDir, name);
-        dir.mkdir();
+        if (dir.mkdir()) {
+            logger.info("Directory created");
+        } else {
+            logger.error("Directory not created");
+        }
         return dir;
     }
 
@@ -96,14 +103,22 @@ public final class FileUtil {
     }
 
     public static void deleteDirectory(File dir) {
-        for (File file : dir.listFiles()) {
+        for (File file : Objects.requireNonNull(dir.listFiles())) {
             if (file.isDirectory()) {
                 deleteDirectory(file);
             } else {
-                file.delete();
+                if (file.delete()) {
+                    logger.info("File delete");
+                } else {
+                    logger.error("File not delete");
+                }
             }
         }
-        dir.delete();
+        if (dir.delete()) {
+            logger.info("Directory delete");
+        } else {
+            logger.error("Directory not delete");
+        }
     }
 
     public static File getParentDirectory(File parentDir, String path) {
@@ -113,7 +128,7 @@ public final class FileUtil {
         String dirName = path.substring(0, idx);
         File dir = findFileOrDirectory(parentDir, dirName);
         if (dir == null) {
-            dir =  createDirectory(parentDir, dirName);;
+            dir =  createDirectory(parentDir, dirName);
         }
 
         return getParentDirectory(dir, path.substring(idx + 1));

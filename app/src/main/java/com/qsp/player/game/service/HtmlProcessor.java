@@ -9,6 +9,7 @@ import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -59,7 +60,7 @@ public class HtmlProcessor {
         Matcher matcher = execPattern.matcher(html);
         StringBuffer sb = new StringBuffer();
         while (matcher.find()) {
-            String exec = normalizePathsInExec(matcher.group(1));
+            String exec = normalizePathsInExec(Objects.requireNonNull(matcher.group(1)));
             String encodedExec = encodeBase64(exec, Base64.NO_WRAP);
             matcher.appendReplacement(sb, "href=\"exec:" + encodedExec + "\"");
         }

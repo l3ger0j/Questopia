@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.util.Objects;
 
 public final class GameDirUtil {
     private static final Logger logger = LoggerFactory.getLogger(GameDirUtil.class);
@@ -17,7 +18,7 @@ public final class GameDirUtil {
         File it = dir;
         while (true) {
             File[] files = it.listFiles();
-            if (files.length != 1 || !files[0].isDirectory()) {
+            if (Objects.requireNonNull(files).length != 1 || !files[0].isDirectory()) {
                 break;
             }
             it = files[0];
@@ -26,15 +27,19 @@ public final class GameDirUtil {
             return;
         }
         logger.info("Normalizing game directory '{}'", dir.getAbsolutePath());
-        for (File file : it.listFiles()) {
+        for (File file : Objects.requireNonNull(it.listFiles())) {
             File dest = new File(dir.getAbsolutePath(), file.getName());
             logger.debug("Moving game file '{}' to '{}'", file.getAbsolutePath(), dest.getAbsolutePath());
-            file.renameTo(dest);
+            if (file.renameTo(dest)) {
+                logger.info("Renaming file success");
+            } else {
+                logger.error("Renaming file error");
+            }
         }
     }
 
     public static boolean doesDirectoryContainGameFiles(File dir) {
-        for (File file : dir.listFiles()) {
+        for (File file : Objects.requireNonNull(dir.listFiles())) {
             String name = file.getName();
             String lcName = name.toLowerCase();
             if (lcName.endsWith(".qsp") || lcName.endsWith(".gam")) {

@@ -37,7 +37,6 @@ import android.view.SubMenu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.MimeTypeMap;
-import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -969,9 +968,8 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
 
         @Nullable
         @Override
-        public WebResourceResponse shouldInterceptRequest(WebView view ,
-                                                          @NonNull WebResourceRequest request) {
-            String url = request.getUrl().toString();
+        public WebResourceResponse shouldInterceptRequest(WebView view,
+                                                          @NonNull String url) {
             if (url.startsWith("file:///")) {
                 String relPath = Uri.decode(url.substring(8));
                 File file = gameContentResolver.getFile(relPath);
@@ -989,7 +987,8 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
                     return null;
                 }
             }
-            return super.shouldInterceptRequest(view, request);
+
+            return super.shouldInterceptRequest(view, url);
         }
     }
 
