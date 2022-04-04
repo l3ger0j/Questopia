@@ -1,5 +1,7 @@
 package com.qsp.player.shared.util;
 
+import androidx.annotation.NonNull;
+
 import org.simpleframework.xml.core.Persister;
 
 import java.io.ByteArrayOutputStream;
@@ -7,6 +9,7 @@ import java.io.ByteArrayOutputStream;
 public final class XmlUtil {
     private static final Persister PERSISTER = new Persister();
 
+    @NonNull
     public static String objectToXml(Object o) throws Exception {
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             PERSISTER.write(o, baos);

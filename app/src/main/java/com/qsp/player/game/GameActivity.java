@@ -12,7 +12,6 @@ import static com.qsp.player.shared.util.ViewUtil.getFontStyle;
 import static com.qsp.player.shared.util.ViewUtil.setLocale;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -96,10 +95,6 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
             "android.content.extra.SHOW_ADVANCED" :
             "android.provider.extra.SHOW_ADVANCED";
 
-    private static final int REQUEST_CODE_SELECT_GAME = 1;
-    private static final int REQUEST_CODE_LOAD_FROM_FILE = 2;
-    private static final int REQUEST_CODE_SAVE_TO_FILE = 3;
-
     private static final int TAB_MAIN_DESC_AND_ACTIONS = 0;
     private static final int TAB_OBJECTS = 1;
     private static final int TAB_VARS_DESC = 2;
@@ -129,8 +124,6 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
     private String pageTemplate = "";
     private boolean showActions = true;
     private boolean selectingGame;
-    // FIXME: 03.04.2022
-    private int requestCode;
 
     // region Контролы
 
@@ -171,33 +164,41 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
 
     // endregion Локация-счётчик
 
-    ActivityResultLauncher<Intent> activityResultLauncher = registerForActivityResult(
+    private final ActivityResultLauncher<Intent> selectGameLaunch = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                Intent data = result.getData();
+                assert data != null;
+                if (result.getResultCode() == RESULT_OK) {
+                    String gameId = data.getStringExtra("gameId");
+                    String gameTitle = data.getStringExtra("gameTitle");
+                    String gameDirUri = data.getStringExtra("gameDirUri");
+                    File gameDir = new File(gameDirUri);
+                    String gameFileUri = data.getStringExtra("gameFileUri");
+                    File gameFile = new File(gameFileUri);
+                    libQspProxy.runGame(gameId, gameTitle, gameDir, gameFile);
+                }
+            });
+
+    private final ActivityResultLauncher<Intent> loadFileLaunch = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             result -> {
                 Intent data = result.getData();
                 assert data != null;
                 Uri uri = data.getData();
+                doWithCounterDisabled(() -> libQspProxy.loadGameState(uri));
+            }
+    );
 
-                if (result.getResultCode() == Activity.RESULT_OK) {
-                    switch (requestCode) {
-                        case REQUEST_CODE_SELECT_GAME:
-                            String gameId = data.getStringExtra("gameId");
-                            String gameTitle = data.getStringExtra("gameTitle");
-                            String gameDirUri = data.getStringExtra("gameDirUri");
-                            File gameDir = new File(gameDirUri);
-                            String gameFileUri = data.getStringExtra("gameFileUri");
-                            File gameFile = new File(gameFileUri);
-                            libQspProxy.runGame(gameId, gameTitle, gameDir, gameFile);
-                            break;
-                        case REQUEST_CODE_LOAD_FROM_FILE:
-                            doWithCounterDisabled(() -> libQspProxy.loadGameState(uri));
-                            break;
-                        case REQUEST_CODE_SAVE_TO_FILE:
-                            libQspProxy.saveGameState(uri);
-                            break;
-                    }
-                }
-            });
+    private final ActivityResultLauncher<Intent> saveFileLaunch = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                Intent data = result.getData();
+                assert data != null;
+                Uri uri = data.getData();
+                libQspProxy.saveGameState(uri);
+            }
+    );
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -511,8 +512,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
         if (libQspProxy.getGameState().gameRunning) {
             intent.putExtra("gameRunning", libQspProxy.getGameState().gameId);
         }
-        requestCode = REQUEST_CODE_SELECT_GAME;
-        activityResultLauncher.launch(intent);
+        selectGameLaunch.launch(intent);
     }
 
     @Override
@@ -616,16 +616,14 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         intent.putExtra(SHOW_ADVANCED_EXTRA_NAME, true);
         intent.setType("application/octet-stream");
-        requestCode = REQUEST_CODE_LOAD_FROM_FILE;
-        activityResultLauncher.launch(intent);
+        loadFileLaunch.launch(intent);
     }
 
     private void startSaveToFile() {
         Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
         intent.setType("application/octet-stream");
         intent.putExtra(Intent.EXTRA_TITLE, libQspProxy.getGameState().gameFile + ".sav");
-        requestCode = REQUEST_CODE_SAVE_TO_FILE;
-        activityResultLauncher.launch(intent);
+        saveFileLaunch.launch(intent);
     }
 
     @NonNull

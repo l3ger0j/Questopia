@@ -1,13 +1,11 @@
-## QuestPlayer
+## QuestPlayAndroid (fork **[QuestPlayer](https://github.com/seedhartha/QuestPlayer)**)
 
-Android-приложение для запуска текстовых игр формата [QSP](https://github.com/seedhartha/qsp).
+Android application for launching text format games [QSP](https://github.com/seedhartha/qsp).
 
-Отличия данного форка от родительского репозитория:
-* Исправлена сборка проекта
-* Целевая версия SDK обновлена до 29 (Android 10)
-* Использована версия 5.7.0 библиотеки QSP, для большей совместимости с играми
-* Реализован пользовательский ввод
-* Реализован выбор пунктов меню в игре
-* Реализована загрузка настроек интерфейса из игры
-* Обновлён пользовательский интерфейс
-* Выполнен значительный рефакторинг кода, исправлены многочисленные ошибки
+**This fork was made WhoYouAndM3. The original project (hereinafter **[QuestPlayer](https://github.com/seedhartha/QuestPlayer)**) with an no license does not bear any responsibility for this fork **[QuestPlayAndroid](https://github.com/l3ger0j/QuestPlayer.git)**.**
+
+The differences between this fork and the parent fork are the same, except:
+1. Updating dependencies to current versions;
+2. Added the ability to "disable" the separator
+3. Added a separate ProgressDialog for downloading the game
+4. Added the "fork" item in "About Quest Player Android"
