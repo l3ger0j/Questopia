@@ -35,7 +35,6 @@
     <string name="settings">Настройки</string>
     <string name="aboutApp">О программе</string>
     <string name="restartGame">Начать заново</string>
-    <string name="resumeGame">Продолжить игру</string>
     <string name="load">Загрузить</string>
     <string name="save">Сохранить</string>
     <string name="deleteGame">Удалить игру</string>
@@ -103,6 +102,7 @@
     <string name="cancel">Отмена</string>
     <string name="update">Обновить</string>
     <string name="experimental">(экспериментально)</string>
+    <string name="promptCloseGame">Уверены, что хотите закрыть игру?</string>
 </resources>
 
 

@@ -13,10 +13,8 @@ import static com.qsp.player.shared.util.ViewUtil.setLocale;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.media.AudioManager;
@@ -24,7 +22,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.text.format.DateFormat;
 import android.util.TypedValue;
@@ -62,7 +59,6 @@ import com.qsp.player.R;
 import com.qsp.player.game.service.AudioPlayer;
 import com.qsp.player.game.service.GameContentResolver;
 import com.qsp.player.game.service.HtmlProcessor;
-import com.qsp.player.game.service.ImageProvider;
 import com.qsp.player.libqsp.GameInterface;
 import com.qsp.player.libqsp.LibQspProxy;
 import com.qsp.player.libqsp.model.InterfaceConfiguration;
@@ -73,7 +69,6 @@ import com.qsp.player.libqsp.model.WindowType;
 import com.qsp.player.settings.Settings;
 import com.qsp.player.settings.SettingsActivity;
 import com.qsp.player.shared.util.ViewUtil;
-import com.qsp.player.stock.GameStockActivity;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,9 +90,8 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
             "android.content.extra.SHOW_ADVANCED" :
             "android.provider.extra.SHOW_ADVANCED";
 
-    private static final int REQUEST_CODE_SELECT_GAME = 1;
-    private static final int REQUEST_CODE_LOAD_FROM_FILE = 2;
-    private static final int REQUEST_CODE_SAVE_TO_FILE = 3;
+    private static final int REQUEST_CODE_LOAD_FROM_FILE = 1;
+    private static final int REQUEST_CODE_SAVE_TO_FILE = 2;
 
     private static final int TAB_MAIN_DESC_AND_ACTIONS = 0;
     private static final int TAB_OBJECTS = 1;
@@ -127,7 +121,6 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
     private int activeTab;
     private String pageTemplate = "";
     private boolean showActions = true;
-    private boolean selectingGame;
 
     // region Контролы
 
@@ -178,6 +171,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
         initControls();
         loadSettings();
         loadLocale();
+        initGame();
         setActiveTab(TAB_MAIN_DESC_AND_ACTIONS);
 
         logger.info("GameActivity created");
@@ -252,6 +246,22 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
 
         libQspProxy = application.getLibQspProxy();
         libQspProxy.setGameInterface(this);
+        libQspProxy.start();
+    }
+
+    private void initGame() {
+        Intent intent = getIntent();
+
+        String gameId = intent.getStringExtra("gameId");
+        String gameTitle = intent.getStringExtra("gameTitle");
+
+        String gameDirUri = intent.getStringExtra("gameDirUri");
+        File gameDir = new File(gameDirUri);
+
+        String gameFileUri = intent.getStringExtra("gameFileUri");
+        File gameFile = new File(gameFileUri);
+
+        libQspProxy.runGame(gameId, gameTitle, gameDir, gameFile);
     }
 
     private void loadLocale() {
@@ -318,6 +328,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
     @Override
     protected void onDestroy() {
         audioPlayer.stop();
+        libQspProxy.stop();
         libQspProxy.setGameInterface(null);
         counterHandler.removeCallbacks(counterTask);
         super.onDestroy();
@@ -346,9 +357,6 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
             audioPlayer.resume();
 
             counterHandler.postDelayed(counterTask, counterInterval);
-
-        } else if (!selectingGame) {
-            startSelectGame();
         }
     }
 
@@ -468,19 +476,20 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
         objectsView.setAdapter(new QspItemAdapter(this, R.layout.list_item_object, objects));
     }
 
-    private void startSelectGame() {
-        selectingGame = true;
-        Intent intent = new Intent(this, GameStockActivity.class);
-        if (libQspProxy.getGameState().gameRunning) {
-            intent.putExtra("gameRunning", libQspProxy.getGameState().gameId);
-        }
-        startActivityForResult(intent, REQUEST_CODE_SELECT_GAME);
+    private void promptCloseGame() {
+        new AlertDialog.Builder(this)
+                .setMessage(R.string.promptCloseGame)
+                .setPositiveButton(android.R.string.yes, (dialog, which) -> finish())
+                .setNegativeButton(android.R.string.no, (dialog, which) -> { })
+                .setCancelable(false)
+                .create()
+                .show();
     }
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
-            startSelectGame();
+            promptCloseGame();
             return true;
         }
         return super.onKeyDown(keyCode, event);
@@ -612,7 +621,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
                 return true;
 
             case R.id.menu_gamestock:
-                startSelectGame();
+                promptCloseGame();
                 return true;
 
             case R.id.menu_options:
@@ -653,9 +662,6 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
-            case REQUEST_CODE_SELECT_GAME:
-                handleSelectGame(resultCode, data);
-                break;
             case REQUEST_CODE_LOAD_FROM_FILE:
                 handleLoadFromFile(resultCode, data);
                 break;
@@ -665,22 +671,6 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
             default:
                 super.onActivityResult(requestCode, resultCode, data);
         }
-    }
-
-    private void handleSelectGame(int resultCode, Intent data) {
-        if (resultCode != RESULT_OK || data == null) {
-            return;
-        }
-        String gameId = data.getStringExtra("gameId");
-        String gameTitle = data.getStringExtra("gameTitle");
-
-        String gameDirUri = data.getStringExtra("gameDirUri");
-        File gameDir = new File(gameDirUri);
-
-        String gameFileUri = data.getStringExtra("gameFileUri");
-        File gameFile = new File(gameFileUri);
-
-        libQspProxy.runGame(gameId, gameTitle, gameDir, gameFile);
     }
 
     private void handleLoadFromFile(int resultCode, Intent data) {

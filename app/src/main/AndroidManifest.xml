@@ -20,17 +20,22 @@
         tools:targetApi="m">
 
         <activity
-            android:name=".game.GameActivity"
-            android:alwaysRetainTaskState="true"
+            android:name=".stock.GameStockActivity"
             android:exported="true"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.AppCompat.NoActionBar">
+            android:label="@string/gameStock"
+            android:screenOrientation="portrait">
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".game.GameActivity"
+            android:alwaysRetainTaskState="true"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.NoActionBar" />
 
         <activity
             android:name=".game.ImageBoxActivity"
@@ -40,11 +45,6 @@
         <activity
             android:name=".settings.SettingsActivity"
             android:label="@string/settings"
-            android:screenOrientation="portrait" />
-
-        <activity
-            android:name=".stock.GameStockActivity"
-            android:label="@string/gameStock"
             android:screenOrientation="portrait" />
 
     </application>
