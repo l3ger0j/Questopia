@@ -22,8 +22,9 @@
         <activity
             android:name=".game.GameActivity"
             android:alwaysRetainTaskState="true"
-            android:theme="@style/Theme.AppCompat.NoActionBar"
-            android:exported="true">
+            android:exported="true"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.NoActionBar">
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -33,15 +34,18 @@
 
         <activity
             android:name=".game.ImageBoxActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/Theme.QSP.Translucent" />
 
         <activity
             android:name=".settings.SettingsActivity"
-            android:label="@string/settings" />
+            android:label="@string/settings"
+            android:screenOrientation="portrait" />
 
         <activity
             android:name=".stock.GameStockActivity"
-            android:label="@string/gameStock" />
+            android:label="@string/gameStock"
+            android:screenOrientation="portrait" />
 
     </application>
 </manifest>
