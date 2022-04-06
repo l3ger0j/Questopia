@@ -22,7 +22,6 @@
         <activity
             android:name=".stock.GameStockActivity"
             android:exported="true"
-            android:label="@string/gameStock"
             android:screenOrientation="portrait">
 
             <intent-filter>
