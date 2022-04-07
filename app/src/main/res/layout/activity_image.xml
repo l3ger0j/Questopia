@@ -8,7 +8,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center_vertical|center_horizontal"
-        android:scaleType="fitCenter" />
+        android:scaleType="fitCenter"
+        android:contentDescription="@string/image" />
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -25,7 +26,8 @@
             android:backgroundTint="#ff7700"
             android:backgroundTintMode="screen"
             android:padding="10dp"
-            android:src="@drawable/baseline_zoom_24" />
+            android:src="@drawable/ic_zoom"
+            android:contentDescription="@string/zoom_image" />
 
     </LinearLayout>
 </FrameLayout>

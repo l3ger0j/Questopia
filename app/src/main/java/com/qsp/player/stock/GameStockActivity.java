@@ -51,6 +51,7 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.preference.PreferenceManager;
 
 import com.qsp.player.R;
+import com.qsp.player.game.GameActivity;
 import com.qsp.player.install.ArchiveGameInstaller;
 import com.qsp.player.install.ArchiveType;
 import com.qsp.player.install.FolderGameInstaller;
@@ -107,7 +108,6 @@ public class GameStockActivity extends AppCompatActivity {
     private final HashMap<InstallType, GameInstaller> installers = new HashMap<>();
 
     private Settings settings;
-    private String gameRunning;
     private boolean showProgressDialog;
     private String currentLanguage = Locale.getDefault().getLanguage();
     private ListView gamesView;
@@ -133,14 +133,10 @@ public class GameStockActivity extends AppCompatActivity {
 
         connectivityManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
 
-        Intent intent = getIntent();
-        gameRunning = intent.getStringExtra("gameRunning");
-
         loadSettings();
         loadLocale();
         initGamesListView();
         initActionBar(savedInstanceState);
-        setResult(RESULT_CANCELED);
 
         logger.info("GameStockActivity created");
     }
@@ -250,39 +246,34 @@ public class GameStockActivity extends AppCompatActivity {
         alertBuilder.create().show();
     }
 
-    private void playGame(@NonNull final Game game) {
-        final Intent data = new Intent();
-        data.putExtra("gameId", game.id);
-        data.putExtra("gameTitle", game.title);
-        data.putExtra("gameDirUri", game.gameDir.getAbsolutePath());
+    private void playGame(final Game game) {
+        Intent intent = new Intent(this, GameActivity.class);
+        intent.putExtra("gameId", game.id);
+        intent.putExtra("gameTitle", game.title);
+        intent.putExtra("gameDirUri", game.gameDir.getAbsolutePath());
 
         int gameFileCount = game.gameFiles.size();
-        switch (gameFileCount) {
-            case 0:
-                logger.warn("Game has no game files");
-                return;
-            case 1:
-                data.putExtra("gameFileUri", game.gameFiles.get(0).getAbsolutePath());
-                setResult(RESULT_OK, data);
-                finish();
-                return;
-            default:
-                break;
+        if (gameFileCount == 0) {
+            logger.warn("Game has no game files");
+            return;
         }
-
-        ArrayList<String> names = new ArrayList<>();
-        for (File file : game.gameFiles) {
-            names.add(file.getName());
+        if (gameFileCount == 1) {
+            intent.putExtra("gameFileUri", game.gameFiles.get(0).getAbsolutePath());
+            startActivity(intent);
+        } else {
+            ArrayList<String> names = new ArrayList<>();
+            for (File file : game.gameFiles) {
+                names.add(file.getName());
+            }
+            new AlertDialog.Builder(GameStockActivity.this)
+                    .setTitle(getString(R.string.selectGameFile))
+                    .setCancelable(false)
+                    .setItems(names.toArray(new String[0]), (dialog, which) -> {
+                        intent.putExtra("gameFileUri", game.gameFiles.get(which).getAbsolutePath());
+                        startActivity(intent);
+                    })
+                    .show();
         }
-        new AlertDialog.Builder(GameStockActivity.this)
-                .setTitle(getString(R.string.selectGameFile))
-                .setCancelable(false)
-                .setItems(names.toArray(new String[0]), (dialog, which) -> {
-                    data.putExtra("gameFileUri", game.gameFiles.get(which).getAbsolutePath());
-                    setResult(RESULT_OK, data);
-                    finish();
-                })
-                .show();
     }
 
     private void downloadGame(Game game) {
@@ -493,7 +484,7 @@ public class GameStockActivity extends AppCompatActivity {
         }
     }
 
-    private void doInstallGame(GameInstaller installer, DocumentFile gameFile, @NonNull Game game) {
+    private void doInstallGame(GameInstaller installer, DocumentFile gameFile, Game game) {
         File gameDir = getOrCreateGameDirectory(game.title);
         if (!isWritableDirectory(gameDir)) {
             logger.error("Game directory is not writable");
@@ -510,6 +501,7 @@ public class GameStockActivity extends AppCompatActivity {
         updateProgressDialog(false, "", "", null);
     }
 
+    @NonNull
     private File getOrCreateGameDirectory(String gameName) {
         String folderName = normalizeGameFolderName(gameName);
         return getOrCreateDirectory(gamesDir, folderName);
@@ -540,46 +532,27 @@ public class GameStockActivity extends AppCompatActivity {
     }
 
     @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        MenuItem resumeGameItem = menu.findItem(R.id.menu_resumegame);
-        resumeGameItem.setVisible(gameRunning != null);
-
-        return true;
-    }
-
-    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.menu_resumegame:
-                setResult(RESULT_CANCELED, null);
-                finish();
-                return true;
-
-            case R.id.menu_options:
-                showSettings();
-                return true;
-
-            case R.id.menu_about:
-                showAboutDialog();
-                return true;
-
-            case R.id.menu_installfromzip:
-                showInstallGameDialog(InstallType.ZIP_ARCHIVE);
-                return true;
-
-            case R.id.menu_installfromrar:
-                showInstallGameDialog(InstallType.RAR_ARCHIVE);
-                return true;
-
-            case R.id.menu_installfromfolder:
-                showInstallGameDialog(InstallType.FOLDER);
-                return true;
-
-            case R.id.menu_deletegame:
-                showDeleteGameDialog();
-                return true;
+        int itemId = item.getItemId();
+        if (itemId == R.id.menu_options) {
+            showSettings();
+            return true;
+        } else if (itemId == R.id.menu_about) {
+            showAboutDialog();
+            return true;
+        } else if (itemId == R.id.menu_installfromzip) {
+            showInstallGameDialog(InstallType.ZIP_ARCHIVE);
+            return true;
+        } else if (itemId == R.id.menu_installfromrar) {
+            showInstallGameDialog(InstallType.RAR_ARCHIVE);
+            return true;
+        } else if (itemId == R.id.menu_installfromfolder) {
+            showInstallGameDialog(InstallType.FOLDER);
+            return true;
+        } else if (itemId == R.id.menu_deletegame) {
+            showDeleteGameDialog();
+            return true;
         }
-
         return false;
     }
 
@@ -639,19 +612,10 @@ public class GameStockActivity extends AppCompatActivity {
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (downloadTask != null &&
-                downloadTask.getStatus() == AsyncTask.Status.RUNNING &&
-                keyCode == KeyEvent.KEYCODE_BACK &&
-                event.getRepeatCount() == 0) {
-
-            moveTaskToBack(true);
-            return true;
-        }
-
         return super.onKeyDown(keyCode, event);
     }
 
-    private void updateProgressDialog(boolean show, @NonNull String title, String message, final Runnable onCancel) {
+    private void updateProgressDialog(boolean show, String title, String message, final Runnable onCancel) {
         showProgressDialog = show;
         if (title.isEmpty()) {
             if (show) {
@@ -729,15 +693,11 @@ public class GameStockActivity extends AppCompatActivity {
                 .show();
     }
 
-    private void showConfirmDeleteDialog(@NonNull final Game game) {
+    private void showConfirmDeleteDialog(final Game game) {
         new AlertDialog.Builder(this)
                 .setMessage(getString(R.string.deleteGameQuery).replace("-GAMENAME-", "\"" + game.title + "\""))
                 .setPositiveButton(android.R.string.yes, (dialog, which) -> {
                     if (which == DialogInterface.BUTTON_POSITIVE) {
-                        if (gameRunning != null && gameRunning.equals(game.id)) {
-                            gameRunning = null;
-                            invalidateOptionsMenu();
-                        }
                         deleteDirectory(game.gameDir);
                         ViewUtil.showToast(this, getString(R.string.gameDeleted));
                         refreshGames();
@@ -764,6 +724,7 @@ public class GameStockActivity extends AppCompatActivity {
         }
     }
 
+    @NonNull
     private static String normalizeGameFolderName(String name) {
         String result = name.endsWith("...") ? name.substring(0, name.length() - 3) : name;
 
@@ -811,7 +772,7 @@ public class GameStockActivity extends AppCompatActivity {
 
     private class TabListener implements ActionBar.TabListener {
         @Override
-        public void onTabSelected(@NonNull ActionBar.Tab tab, FragmentTransaction ft) {
+        public void onTabSelected(ActionBar.Tab tab, FragmentTransaction ft) {
             int position = tab.getPosition();
             boolean tabHasRemoteGames = position == TAB_REMOTE || position == TAB_ALL;
             boolean gamesNotBeingLoaded = loadGameListTask == null || loadGameListTask.getStatus() == AsyncTask.Status.FINISHED;
@@ -927,7 +888,11 @@ public class GameStockActivity extends AppCompatActivity {
                 installed = activity.installGame(DocumentFile.fromFile(archiveFile), installType, game);
             }
             if (archiveFile.exists()) {
-                archiveFile.delete();
+                if (archiveFile.delete()) {
+                    logger.info("Archive was delete");
+                } else {
+                    logger.error("Archive was no delete");
+                }
             }
             if (!downloaded) {
                 return cancelled ? DownloadResult.CANCELLED : DownloadResult.DOWNLOAD_FAILED;
@@ -965,6 +930,7 @@ public class GameStockActivity extends AppCompatActivity {
                             out.write(b, 0, bytesRead);
                             totalBytesRead += bytesRead;
                         }
+                        activity.progressDialog.setProgress(totalBytesRead);
                         return totalBytesRead == game.getFileSize();
                     }
                 }
@@ -974,7 +940,7 @@ public class GameStockActivity extends AppCompatActivity {
             }
         }
 
-        private InstallType installTypeFromExtension(@NonNull String ext) {
+        private InstallType installTypeFromExtension(String ext) {
             switch (ext) {
                 case "zip":
                     return InstallType.ZIP_ARCHIVE;

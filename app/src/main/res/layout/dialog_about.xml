@@ -9,7 +9,7 @@
         android:id="@+id/about_descrip"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Description"
+        android:text="@string/description"
         android:textColor="?android:attr/textColorPrimaryInverse"
         android:textSize="16sp" />
 

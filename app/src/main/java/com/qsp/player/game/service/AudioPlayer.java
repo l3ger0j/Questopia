@@ -1,5 +1,8 @@
 package com.qsp.player.game.service;
 
+import static com.qsp.player.shared.util.StringUtil.isNotEmpty;
+import static com.qsp.player.shared.util.ThreadUtil.throwIfNotMainThread;
+
 import android.media.MediaPlayer;
 import android.os.Handler;
 import android.os.Looper;
@@ -10,11 +13,6 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
-
-import static com.qsp.player.shared.util.StringUtil.isNotEmpty;
-import static com.qsp.player.shared.util.ThreadUtil.throwIfNotMainThread;
-
-import androidx.annotation.NonNull;
 
 public class AudioPlayer {
     private static final Logger logger = LoggerFactory.getLogger(AudioPlayer.class);

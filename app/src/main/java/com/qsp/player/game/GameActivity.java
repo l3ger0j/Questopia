@@ -72,7 +72,6 @@ import com.qsp.player.libqsp.model.WindowType;
 import com.qsp.player.settings.Settings;
 import com.qsp.player.settings.SettingsActivity;
 import com.qsp.player.shared.util.ViewUtil;
-import com.qsp.player.stock.GameStockActivity;
 
 import org.jetbrains.annotations.Contract;
 import org.slf4j.Logger;
@@ -94,6 +93,8 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
     private static final String SHOW_ADVANCED_EXTRA_NAME = Build.VERSION.SDK_INT < Build.VERSION_CODES.Q ?
             "android.content.extra.SHOW_ADVANCED" :
             "android.provider.extra.SHOW_ADVANCED";
+
+    private int requestCode; // 1 - to load, 2 - to save
 
     private static final int TAB_MAIN_DESC_AND_ACTIONS = 0;
     private static final int TAB_OBJECTS = 1;
@@ -123,8 +124,6 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
     private int activeTab;
     private String pageTemplate = "";
     private boolean showActions = true;
-    private boolean selectingGame;
-
     // region Контролы
 
     private ActionBar actionBar;
@@ -164,39 +163,31 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
 
     // endregion Локация-счётчик
 
-    private final ActivityResultLauncher<Intent> selectGameLaunch = registerForActivityResult(
+    private final ActivityResultLauncher<Intent> resultLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             result -> {
+                Uri uri;
                 Intent data = result.getData();
-                assert data != null;
                 if (result.getResultCode() == RESULT_OK) {
-                    String gameId = data.getStringExtra("gameId");
-                    String gameTitle = data.getStringExtra("gameTitle");
-                    String gameDirUri = data.getStringExtra("gameDirUri");
-                    File gameDir = new File(gameDirUri);
-                    String gameFileUri = data.getStringExtra("gameFileUri");
-                    File gameFile = new File(gameFileUri);
-                    libQspProxy.runGame(gameId, gameTitle, gameDir, gameFile);
+                    switch (requestCode) {
+                        case 1:
+                            if (data != null) {
+                                uri = data.getData();
+                                doWithCounterDisabled(() -> libQspProxy.loadGameState(uri));
+                            } else {
+                                break;
+                            }
+                            break;
+                        case 2:
+                            if (data != null) {
+                                uri = data.getData();
+                                libQspProxy.saveGameState(uri);
+                            } else {
+                                break;
+                            }
+                            break;
+                    }
                 }
-            });
-
-    private final ActivityResultLauncher<Intent> loadFileLaunch = registerForActivityResult(
-            new ActivityResultContracts.StartActivityForResult(),
-            result -> {
-                Intent data = result.getData();
-                assert data != null;
-                Uri uri = data.getData();
-                doWithCounterDisabled(() -> libQspProxy.loadGameState(uri));
-            }
-    );
-
-    private final ActivityResultLauncher<Intent> saveFileLaunch = registerForActivityResult(
-            new ActivityResultContracts.StartActivityForResult(),
-            result -> {
-                Intent data = result.getData();
-                assert data != null;
-                Uri uri = data.getData();
-                libQspProxy.saveGameState(uri);
             }
     );
 
@@ -210,6 +201,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
         initControls();
         loadSettings();
         loadLocale();
+        initGame();
         setActiveTab(TAB_MAIN_DESC_AND_ACTIONS);
 
         logger.info("GameActivity created");
@@ -284,6 +276,22 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
 
         libQspProxy = application.getLibQspProxy();
         libQspProxy.setGameInterface(this);
+        libQspProxy.start();
+    }
+
+    private void initGame() {
+        Intent intent = getIntent();
+
+        String gameId = intent.getStringExtra("gameId");
+        String gameTitle = intent.getStringExtra("gameTitle");
+
+        String gameDirUri = intent.getStringExtra("gameDirUri");
+        File gameDir = new File(gameDirUri);
+
+        String gameFileUri = intent.getStringExtra("gameFileUri");
+        File gameFile = new File(gameFileUri);
+
+        libQspProxy.runGame(gameId, gameTitle, gameDir, gameFile);
     }
 
     private void loadLocale() {
@@ -350,6 +358,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
     @Override
     protected void onDestroy() {
         audioPlayer.stop();
+        libQspProxy.stop();
         libQspProxy.setGameInterface(null);
         counterHandler.removeCallbacks(counterTask);
         super.onDestroy();
@@ -378,9 +387,6 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
             audioPlayer.resume();
 
             counterHandler.postDelayed(counterTask, counterInterval);
-
-        } else if (!selectingGame) {
-            startSelectGame();
         }
     }
 
@@ -506,19 +512,20 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
         objectsView.setAdapter(new QspItemAdapter(this, R.layout.list_item_object, objects));
     }
 
-    private void startSelectGame() {
-        selectingGame = true;
-        Intent intent = new Intent(this, GameStockActivity.class);
-        if (libQspProxy.getGameState().gameRunning) {
-            intent.putExtra("gameRunning", libQspProxy.getGameState().gameId);
-        }
-        selectGameLaunch.launch(intent);
+    private void promptCloseGame() {
+        new AlertDialog.Builder(this)
+                .setMessage(R.string.promptCloseGame)
+                .setPositiveButton(android.R.string.yes, (dialog, which) -> finish())
+                .setNegativeButton(android.R.string.no, (dialog, which) -> { })
+                .setCancelable(false)
+                .create()
+                .show();
     }
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
-            startSelectGame();
+            promptCloseGame();
             return true;
         }
         return super.onKeyDown(keyCode, event);
@@ -612,18 +619,21 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
         }
     }
 
+    // FIXME: 06.04.2022 startActivityForResult -> ActivityLauncher
     private void startLoadFromFile() {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         intent.putExtra(SHOW_ADVANCED_EXTRA_NAME, true);
         intent.setType("application/octet-stream");
-        loadFileLaunch.launch(intent);
+        requestCode = 1;
+        resultLauncher.launch(intent);
     }
 
     private void startSaveToFile() {
         Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
         intent.setType("application/octet-stream");
         intent.putExtra(Intent.EXTRA_TITLE, libQspProxy.getGameState().gameFile + ".sav");
-        saveFileLaunch.launch(intent);
+        requestCode = 2;
+        resultLauncher.launch(intent);
     }
 
     @NonNull
@@ -654,7 +664,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
                 return true;
 
             case R.id.menu_gamestock:
-                startSelectGame();
+                promptCloseGame();
                 return true;
 
             case R.id.menu_options:
@@ -964,6 +974,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
             return true;
         }
 
+        // FIXME: 06.04.2022 shouldInterceptRequest (WebView view, String url) -> shoudlInterceptRequest (WebView view, WebResourceRequest request)
         @Nullable
         @Override
         public WebResourceResponse shouldInterceptRequest(WebView view,

@@ -2,6 +2,9 @@ package com.qsp.player.stock.repository;
 
 import static com.qsp.player.shared.util.XmlUtil.xmlToObject;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.qsp.player.shared.util.StreamUtil;
 import com.qsp.player.stock.dto.Game;
 import com.qsp.player.stock.dto.GameList;
@@ -34,6 +37,7 @@ public class RemoteGameRepository {
         return cachedGames;
     }
 
+    @Nullable
     private String getGameStockXml() {
         try {
             URL url = new URL(GAMESTOCK_URL_V2);
@@ -50,6 +54,7 @@ public class RemoteGameRepository {
         }
     }
 
+    @Nullable
     private List<Game> parseGameStockXml(String xml) {
         try {
             GameList gameList = xmlToObject(xml, GameList.class);
@@ -60,6 +65,7 @@ public class RemoteGameRepository {
         }
     }
 
+    @NonNull
     private List<Game> filterSupported(List<Game> games) {
         ArrayList<Game> supported = new ArrayList<>();
         for (Game game : games) {

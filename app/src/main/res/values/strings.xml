@@ -39,7 +39,6 @@
     <string name="settings">Settings</string>
     <string name="aboutApp">About Quest Player</string>
     <string name="restartGame">Restart Game</string>
-    <string name="resumeGame">Resume Game</string>
     <string name="load">Load</string>
     <string name="save">Save</string>
     <string name="deleteGame">Delete Game</string>
@@ -52,6 +51,7 @@
     <string name="slotEmpty">Slot %d [Empty]</string>
     <string name="loadFrom">From File…</string>
     <string name="saveTo">To File…</string>
+    <string name="description">Description</string>
 
     <!-- Settings -->
     <string name="generalSettings">General</string>
@@ -109,4 +109,7 @@
     <string name="experimental">(experimental)</string>
     <string name="separator">Separator</string>
     <string name="separatorSummary">On or off separator line in game</string>
+    <string name="promptCloseGame">Are you sure you want to close the game?</string>
+    <string name="zoom_image">Zoom image</string>
+    <string name="image">Image</string>
 </resources>

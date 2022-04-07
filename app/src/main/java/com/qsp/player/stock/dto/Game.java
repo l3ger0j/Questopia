@@ -1,13 +1,13 @@
 package com.qsp.player.stock.dto;
 
-import java.io.File;
-import java.util.List;
-import java.util.Objects;
-
 import static com.qsp.player.shared.util.StringUtil.isNotEmpty;
 
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.Root;
+
+import java.io.File;
+import java.util.List;
+import java.util.Objects;
 
 @Root(name = "game", strict = false)
 public class Game {

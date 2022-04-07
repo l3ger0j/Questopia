@@ -39,7 +39,6 @@
     <string name="settings">Настройки</string>
     <string name="aboutApp">О программе</string>
     <string name="restartGame">Начать заново</string>
-    <string name="resumeGame">Продолжить игру</string>
     <string name="load">Загрузить</string>
     <string name="save">Сохранить</string>
     <string name="deleteGame">Удалить игру</string>
@@ -52,6 +51,7 @@
     <string name="slotEmpty">Слот %d [Пусто]</string>
     <string name="loadFrom">Из файла…</string>
     <string name="saveTo">В файл…</string>
+    <string name="description">Описание</string>
 
     <!-- Настройки -->
     <string name="generalSettings">Главное</string>
@@ -109,6 +109,9 @@
     <string name="experimental">(экспериментально)</string>
     <string name="separator">Разделитель</string>
     <string name="separatorSummary">Включить или выключить разделитель в игре</string>
+    <string name="promptCloseGame">Уверены, что хотите закрыть игру?</string>
+    <string name="zoom_image">Увеличить изображение</string>
+    <string name="image">Изображение</string>
 </resources>
 
 

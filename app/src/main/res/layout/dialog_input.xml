@@ -7,7 +7,9 @@
         android:id="@+id/inputbox_edit"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:autofillHints="Write command"
         android:gravity="fill_horizontal"
+        android:inputType="textNoSuggestions"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
 </LinearLayout>

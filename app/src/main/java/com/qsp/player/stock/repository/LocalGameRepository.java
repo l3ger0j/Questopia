@@ -4,6 +4,9 @@ import static com.qsp.player.shared.util.FileUtil.GAME_INFO_FILENAME;
 import static com.qsp.player.shared.util.FileUtil.readFileAsString;
 import static com.qsp.player.shared.util.XmlUtil.xmlToObject;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.qsp.player.stock.dto.Game;
 
 import org.slf4j.Logger;
@@ -57,6 +60,7 @@ public class LocalGameRepository {
         return items;
     }
 
+    @NonNull
     private ArrayList<File> getGameDirectories() {
         ArrayList<File> dirs = new ArrayList<>();
         for (File f : Objects.requireNonNull(gamesDir.listFiles())) {
@@ -68,6 +72,7 @@ public class LocalGameRepository {
         return dirs;
     }
 
+    @NonNull
     private List<GameFolder> getGameFolders(List<File> dirs) {
         ArrayList<GameFolder> folders = new ArrayList<>();
         sortFilesByName(dirs);
@@ -98,6 +103,7 @@ public class LocalGameRepository {
                 .compareTo(o2.getName().toLowerCase()));
     }
 
+    @Nullable
     private String getGameInfo(GameFolder game) {
         File[] gameInfoFiles = game.dir.listFiles((dir, name) -> name.equalsIgnoreCase(GAME_INFO_FILENAME));
         if (gameInfoFiles == null || gameInfoFiles.length == 0) {
@@ -108,6 +114,7 @@ public class LocalGameRepository {
         return readFileAsString(gameInfoFiles[0]);
     }
 
+    @Nullable
     private Game parseGameInfo(String xml) {
         try {
             return xmlToObject(xml, Game.class);

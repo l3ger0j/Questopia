@@ -7,5 +7,5 @@ Android application for launching text format games [QSP](https://github.com/see
 The differences between this fork and the parent fork are the same, except:
 1. Updating dependencies to current versions;
 2. Added the ability to "disable" the separator
-3. Added a separate ProgressDialog for downloading the game
+3. Added a separate ProgressDialog for downloading game and for loading list games
 4. Added the "fork" item in "About Quest Player Android"
