@@ -5,11 +5,8 @@ import android.os.Bundle;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 
-import com.kizitonwose.colorpreferencecompat.ColorPreferenceCompat;
-import com.pes.androidmaterialcolorpickerdialog.ColorPicker;
 import com.qsp.player.R;
 import com.qsp.player.shared.util.ViewUtil;
 
@@ -45,33 +42,6 @@ public class SettingsActivity extends AppCompatActivity {
             super.onPause();
             Objects.requireNonNull(getPreferenceScreen().getSharedPreferences())
                     .unregisterOnSharedPreferenceChangeListener(this);
-        }
-
-        @Override
-        public boolean onPreferenceTreeClick(Preference preference) {
-            String key = preference.getKey();
-            switch (key) {
-                case "backColor":
-                case "textColor":
-                case "linkColor":
-                    final ColorPreferenceCompat colorPref = (ColorPreferenceCompat) preference;
-
-                    int curColor = colorPref.getValue();
-                    int r = (0xff0000 & curColor) >> 16;
-                    int g = (0x00ff00 & curColor) >> 8;
-                    int b = 0x0000ff & curColor;
-
-                    ColorPicker picker = new ColorPicker(getActivity(), r, g, b);
-                    picker.enableAutoClose();
-                    picker.setCallback(colorPref::setValue);
-
-                    picker.show();
-
-                    return true;
-
-                default:
-                    return super.onPreferenceTreeClick(preference);
-            }
         }
 
         @Override

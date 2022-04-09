@@ -9,4 +9,5 @@
     <color name="def_text_color">#000000</color>
     <color name="def_back_color">#e0e0e0</color>
     <color name="def_link_color">#0000ff</color>
+    <color name="materialcolorpicker__grey">#b3b3b3</color>
 </resources>

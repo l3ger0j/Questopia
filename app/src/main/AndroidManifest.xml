@@ -22,7 +22,7 @@
         <activity
             android:name=".stock.GameStockActivity"
             android:exported="true"
-            android:screenOrientation="portrait">
+            android:screenOrientation="fullSensor">
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -33,18 +33,18 @@
         <activity
             android:name=".game.GameActivity"
             android:alwaysRetainTaskState="true"
-            android:screenOrientation="portrait"
+            android:screenOrientation="fullSensor"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
 
         <activity
             android:name=".game.ImageBoxActivity"
-            android:screenOrientation="portrait"
+            android:screenOrientation="fullSensor"
             android:theme="@style/Theme.QSP.Translucent" />
 
         <activity
             android:name=".settings.SettingsActivity"
             android:label="@string/settings"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="fullSensor" />
 
     </application>
 </manifest>

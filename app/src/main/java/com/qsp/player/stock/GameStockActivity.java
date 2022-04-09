@@ -26,6 +26,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.view.KeyEvent;
@@ -79,6 +80,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -423,9 +425,13 @@ public class GameStockActivity extends AppCompatActivity {
         if (games.size() < 2) {
             return games;
         }
-        Collections.sort(games, (first, second) -> first.title.toLowerCase()
-                .compareTo(second.title.toLowerCase()));
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            Collections.sort(games, Comparator.comparing(game -> game.title.toLowerCase()));
+        } else {
+            Collections.sort(games, (first, second) -> first.title.toLowerCase()
+                    .compareTo(second.title.toLowerCase()));
+        }
         return games;
     }
 

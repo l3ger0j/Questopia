@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+<androidx.preference.PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory android:title="@string/generalSettings">
         <ListPreference
@@ -46,21 +46,18 @@
             android:defaultValue="false"
             android:key="useGameFont"
             android:title="@string/useGameFont" />
-        <com.kizitonwose.colorpreferencecompat.ColorPreferenceCompat
+        <com.jaredrummler.android.colorpicker.ColorPreferenceCompat
             android:defaultValue="@color/def_back_color"
             android:key="backColor"
-            android:title="@string/backColor"
-            app:showDialog="false" />
-        <com.kizitonwose.colorpreferencecompat.ColorPreferenceCompat
+            android:title="@string/backColor" />
+        <com.jaredrummler.android.colorpicker.ColorPreferenceCompat
             android:defaultValue="@color/def_text_color"
             android:key="textColor"
-            android:title="@string/textColor"
-            app:showDialog="false" />
-        <com.kizitonwose.colorpreferencecompat.ColorPreferenceCompat
+            android:title="@string/textColor" />
+        <com.jaredrummler.android.colorpicker.ColorPreferenceCompat
             android:defaultValue="@color/def_link_color"
             android:key="linkColor"
-            android:title="@string/linkColor"
-            app:showDialog="false" />
+            android:title="@string/linkColor" />
     </PreferenceCategory>
 
 </androidx.preference.PreferenceScreen>
