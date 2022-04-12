@@ -7,7 +7,11 @@ import android.content.res.Resources;
 import android.util.DisplayMetrics;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+
 import com.qsp.player.R;
+
+import org.jetbrains.annotations.Contract;
 
 import java.util.Locale;
 
@@ -37,6 +41,8 @@ public final class ViewUtil {
                 .show();
     }
 
+    @NonNull
+    @Contract(pure = true)
     public static String getFontStyle(int typeface) {
         switch (typeface) {
             case 2:

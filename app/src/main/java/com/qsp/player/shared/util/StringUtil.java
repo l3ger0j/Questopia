@@ -1,5 +1,9 @@
 package com.qsp.player.shared.util;
 
+import androidx.annotation.NonNull;
+
+import org.jetbrains.annotations.Contract;
+
 public final class StringUtil {
 
     public static boolean isNotEmpty(String str) {
@@ -10,6 +14,8 @@ public final class StringUtil {
         return str == null || str.isEmpty();
     }
 
+    @NonNull
+    @Contract(value = "!null -> param1", pure = true)
     public static String getStringOrEmpty(String str) {
         return str != null ? str : "";
     }

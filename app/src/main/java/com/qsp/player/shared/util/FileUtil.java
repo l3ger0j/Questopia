@@ -1,5 +1,8 @@
 package com.qsp.player.shared.util;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,6 +51,7 @@ public final class FileUtil {
         return file;
     }
 
+    @NonNull
     public static File getOrCreateDirectory(File parentDir, String name) {
         File dir = findFileOrDirectory(parentDir, name);
         if (dir == null) {
@@ -56,6 +60,7 @@ public final class FileUtil {
         return dir;
     }
 
+    @NonNull
     public static File createDirectory(File parentDir, String name) {
         File dir = new File(parentDir, name);
         if (dir.mkdir()) {
@@ -66,6 +71,7 @@ public final class FileUtil {
         return dir;
     }
 
+    @Nullable
     public static File findFileOrDirectory(File parentDir, final String name) {
         File[] files = parentDir.listFiles((dir, filename) -> filename.equalsIgnoreCase(name));
         if (files == null || files.length == 0) return null;
@@ -73,6 +79,7 @@ public final class FileUtil {
         return files[0];
     }
 
+    @Nullable
     public static File findFileRecursively(File parentDir, String path) {
         int idx = path.indexOf("/");
         if (idx == -1) {
@@ -85,6 +92,7 @@ public final class FileUtil {
         return findFileRecursively(dir, path.substring(idx + 1));
     }
 
+    @Nullable
     public static String readFileAsString(File file) {
         StringBuilder result = new StringBuilder();
         try (FileInputStream in = new FileInputStream(file)) {
@@ -146,6 +154,7 @@ public final class FileUtil {
         }
     }
 
+    @Nullable
     public static byte[] getFileContents(String path) {
         File file = new File(path);
         try (FileInputStream in = new FileInputStream(file)) {

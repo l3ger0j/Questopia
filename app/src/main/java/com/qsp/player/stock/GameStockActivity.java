@@ -936,7 +936,6 @@ public class GameStockActivity extends AppCompatActivity {
                             out.write(b, 0, bytesRead);
                             totalBytesRead += bytesRead;
                         }
-                        activity.progressDialog.setProgress(totalBytesRead);
                         return totalBytesRead == game.getFileSize();
                     }
                 }

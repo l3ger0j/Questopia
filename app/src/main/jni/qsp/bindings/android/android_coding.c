@@ -38,7 +38,7 @@ static int qspUTF8_mbtowc(int *pwc, unsigned char *s, int n)
 	else if (c < 0xe0)
 	{
 		if (n < 2) return 0;
-		if ((s[1] ^ 0x80) >= 0x40) return 0;
+		if (!((s[1] ^ 0x80) < 0x40)) return 0;
 		*pwc = ((int)(c & 0x1f) << 6)
 			| (int)(s[1] ^ 0x80);
 		return 2;

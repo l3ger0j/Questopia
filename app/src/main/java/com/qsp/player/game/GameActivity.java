@@ -36,6 +36,7 @@ import android.view.SubMenu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.MimeTypeMap;
+import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -619,7 +620,6 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
         }
     }
 
-    // FIXME: 06.04.2022 startActivityForResult -> ActivityLauncher
     private void startLoadFromFile() {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         intent.putExtra(SHOW_ADVANCED_EXTRA_NAME, true);
@@ -974,18 +974,13 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
             return true;
         }
 
-        // FIXME: 06.04.2022 shouldInterceptRequest (WebView view, String url) -> shoudlInterceptRequest (WebView view, WebResourceRequest request)
         @Nullable
         @Override
-        public WebResourceResponse shouldInterceptRequest(WebView view,
-                                                          @NonNull String url) {
-            if (url.startsWith("file:///")) {
-                String relPath = Uri.decode(url.substring(8));
-                File file = gameContentResolver.getFile(relPath);
-                if (file == null) {
-                    logger.error("File not found: " + relPath);
-                    return null;
-                }
+        public WebResourceResponse shouldInterceptRequest(WebView view , WebResourceRequest request) {
+            Uri uri = request.getUrl();
+            logger.info(uri.toString());
+            if (uri.getScheme().equals("file:///")) {
+                File file = gameContentResolver.getFile(uri.getPath());
                 try {
                     String extension = getExtension(file.getName());
                     String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
@@ -996,8 +991,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
                     return null;
                 }
             }
-
-            return super.shouldInterceptRequest(view, url);
+            return super.shouldInterceptRequest(view , request);
         }
     }
 
