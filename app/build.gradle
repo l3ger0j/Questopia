@@ -2,16 +2,20 @@ plugins {
     id 'com.android.application'
 }
 
+def viewBind = true
+
 android {
     compileSdkVersion 31
+
     defaultConfig {
         applicationId "com.qsp.player"
         minSdkVersion 21
         targetSdkVersion 31
-        versionCode 51
-        versionName "1.4.1"
+        versionCode 52
+        versionName "1.4.2"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
+
     externalNativeBuild {
         ndkBuild {
             path 'src/main/jni/Android.mk'
@@ -27,6 +31,11 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+
+    buildFeatures {
+        viewBinding viewBind
+    }
+
     ndkVersion = '21.0.6113669'
     lint {
         abortOnError false

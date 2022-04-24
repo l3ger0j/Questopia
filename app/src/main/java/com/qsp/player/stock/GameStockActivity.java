@@ -52,6 +52,8 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.preference.PreferenceManager;
 
 import com.qsp.player.R;
+import com.qsp.player.databinding.ActivityStockBinding;
+import com.qsp.player.databinding.ListItemGameBinding;
 import com.qsp.player.game.GameActivity;
 import com.qsp.player.install.ArchiveGameInstaller;
 import com.qsp.player.install.ArchiveType;
@@ -121,6 +123,8 @@ public class GameStockActivity extends AppCompatActivity {
     private LoadGameListAsyncTask loadGameListTask;
     private InstallType lastInstallType = InstallType.ZIP_ARCHIVE;
 
+    private ActivityStockBinding activityStockBinding;
+
     public GameStockActivity() {
         installers.put(InstallType.ZIP_ARCHIVE, new ArchiveGameInstaller(this, ArchiveType.ZIP));
         installers.put(InstallType.RAR_ARCHIVE, new ArchiveGameInstaller(this, ArchiveType.RAR));
@@ -131,7 +135,8 @@ public class GameStockActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_stock);
+
+        activityStockBinding = ActivityStockBinding.inflate(getLayoutInflater());
 
         connectivityManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
 
@@ -141,6 +146,8 @@ public class GameStockActivity extends AppCompatActivity {
         initActionBar(savedInstanceState);
 
         logger.info("GameStockActivity created");
+
+        setContentView(activityStockBinding.getRoot());
     }
 
     private void loadSettings() {
@@ -183,7 +190,7 @@ public class GameStockActivity extends AppCompatActivity {
     }
 
     private void initGamesListView() {
-        gamesView = findViewById(R.id.games);
+        gamesView = activityStockBinding.games;
         gamesView.setTextFilterEnabled(true);
         gamesView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         gamesView.setOnItemClickListener((parent, view, position, id) -> {
@@ -194,7 +201,11 @@ public class GameStockActivity extends AppCompatActivity {
             String gameId = getGameIdByPosition(position);
             Game game = gamesMap.get(gameId);
             if (game != null) {
-                playGame(game);
+                if (game.isInstalled()) {
+                    playGame(game);
+                } else {
+                    showGameInfo(gameId);
+                }
             } else {
                 logger.error("Game not found: " + gameId);
             }
