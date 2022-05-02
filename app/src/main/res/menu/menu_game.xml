@@ -7,25 +7,25 @@
         <item
             android:id="@+id/menu_maindesc"
             android:contentDescription="@string/mainDescContentDesc"
-            android:icon="@drawable/ic_tab_main"
+            android:icon="@drawable/tab_main"
             android:title="@string/mainDesc"
             app:showAsAction="always" />
         <item
             android:id="@+id/menu_varsdesc"
             android:contentDescription="@string/varsDescContentDesc"
-            android:icon="@drawable/ic_tab_vars"
+            android:icon="@drawable/tab_vars"
             android:title="@string/varsDesc"
             app:showAsAction="always" />
         <item
             android:id="@+id/menu_inventory"
             android:contentDescription="@string/inventoryContentDesc"
-            android:icon="@drawable/ic_tab_objects"
+            android:icon="@drawable/tab_object"
             android:title="@string/inventory"
             app:showAsAction="always" />
         <item
             android:id="@+id/menu_userinput"
             android:contentDescription="@string/userInputContentDesc"
-            android:icon="@drawable/ic_tab_input"
+            android:icon="@drawable/tab_input"
             android:title="@string/userInput"
             app:showAsAction="always" />
         <item

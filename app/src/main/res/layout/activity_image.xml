@@ -26,7 +26,7 @@
             android:backgroundTint="#ff7700"
             android:backgroundTintMode="screen"
             android:padding="10dp"
-            android:src="@drawable/ic_zoom"
+            android:src="@drawable/zoom"
             android:contentDescription="@string/zoom_image" />
 
     </LinearLayout>

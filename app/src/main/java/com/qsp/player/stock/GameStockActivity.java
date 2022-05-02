@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -39,6 +40,7 @@ import android.view.ViewGroup;
 import android.webkit.MimeTypeMap;
 import android.webkit.WebView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -47,13 +49,13 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.collection.SparseArrayCompat;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.preference.PreferenceManager;
 
 import com.qsp.player.R;
 import com.qsp.player.databinding.ActivityStockBinding;
-import com.qsp.player.databinding.ListItemGameBinding;
 import com.qsp.player.game.GameActivity;
 import com.qsp.player.install.ArchiveGameInstaller;
 import com.qsp.player.install.ArchiveType;
@@ -67,6 +69,7 @@ import com.qsp.player.shared.util.ViewUtil;
 import com.qsp.player.stock.dto.Game;
 import com.qsp.player.stock.repository.LocalGameRepository;
 import com.qsp.player.stock.repository.RemoteGameRepository;
+import com.squareup.picasso.Picasso;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -780,6 +783,17 @@ public class GameStockActivity extends AppCompatActivity {
                     authorView.setText(text);
                 } else {
                     authorView.setText("");
+                }
+                ImageView iconView = convertView.findViewById(R.id.game_icon);
+                if (item.icon.isEmpty()) {
+                    Drawable drawable = ResourcesCompat.getDrawable(getResources(),
+                            R.drawable.broken_image_24, null);
+                    iconView.setImageDrawable(drawable);
+                } else {
+                    Picasso.get()
+                            .load(item.icon)
+                            .fit()
+                            .into(iconView);
                 }
             }
 

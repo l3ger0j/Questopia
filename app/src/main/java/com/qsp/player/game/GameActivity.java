@@ -351,9 +351,9 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
     private void updateTabIcons() {
         if (mainMenu == null) return;
 
-        mainMenu.findItem(R.id.menu_inventory).setIcon(activeTab == TAB_OBJECTS ? R.drawable.ic_tab_objects : R.drawable.ic_tab_objects_alt);
-        mainMenu.findItem(R.id.menu_maindesc).setIcon(activeTab == TAB_MAIN_DESC_AND_ACTIONS ? R.drawable.ic_tab_main : R.drawable.ic_tab_main_alt);
-        mainMenu.findItem(R.id.menu_varsdesc).setIcon(activeTab == TAB_VARS_DESC ? R.drawable.ic_tab_vars : R.drawable.ic_tab_vars_alt);
+        mainMenu.findItem(R.id.menu_inventory).setIcon(activeTab == TAB_OBJECTS ? R.drawable.tab_object : R.drawable.tab_object_alt);
+        mainMenu.findItem(R.id.menu_maindesc).setIcon(activeTab == TAB_MAIN_DESC_AND_ACTIONS ? R.drawable.tab_main : R.drawable.tab_main_alt);
+        mainMenu.findItem(R.id.menu_varsdesc).setIcon(activeTab == TAB_VARS_DESC ? R.drawable.tab_vars : R.drawable.tab_vars_alt);
     }
 
     @Override
@@ -978,10 +978,9 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
         @Override
         public WebResourceResponse shouldInterceptRequest(WebView view , WebResourceRequest request) {
             Uri uri = request.getUrl();
-            logger.info(uri.toString());
-            if (uri.getScheme().equals("file:///")) {
-                File file = gameContentResolver.getFile(uri.getPath());
+            if (uri.getScheme().startsWith("file")) {
                 try {
+                    File file = gameContentResolver.getFile(uri.toString().substring(8));
                     String extension = getExtension(file.getName());
                     String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
                     InputStream in = GameActivity.this.getContentResolver().openInputStream(Uri.fromFile(file));

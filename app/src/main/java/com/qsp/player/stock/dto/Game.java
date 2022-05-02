@@ -27,6 +27,8 @@ public class Game {
     public String lang = "";
     @Element(name = "player", data = true, required = false)
     public String player = "";
+    @Element(name = "icon", data = true, required = false)
+    public String icon = "";
     @Element(name = "file_url", data = true, required = false)
     public String fileUrl = "";
     @Element(name = "file_size", data = true, required = false)
@@ -55,6 +57,7 @@ public class Game {
         title = other.title;
         lang = other.lang;
         player = other.player;
+        icon = other.icon;
         fileUrl = other.fileUrl;
         fileSize = other.fileSize;
         fileExt = other.fileExt;
@@ -90,6 +93,7 @@ public class Game {
                 && Objects.equals(title, that.title)
                 && Objects.equals(lang, that.lang)
                 && Objects.equals(player, that.player)
+                && Objects.equals(icon, that.icon)
                 && Objects.equals(fileUrl, that.fileUrl)
                 && Objects.equals(fileSize, that.fileSize)
                 && Objects.equals(fileExt, that.fileExt)
@@ -100,6 +104,6 @@ public class Game {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, listId, author, portedBy, version, title, lang, player, fileUrl, fileSize, fileExt, descUrl, pubDate, modDate);
+        return Objects.hash(id, listId, author, portedBy, version, title, lang, player, icon, fileUrl, fileSize, fileExt, descUrl, pubDate, modDate);
     }
 }
