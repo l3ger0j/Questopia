@@ -5,14 +5,14 @@ plugins {
 def viewBind = true
 
 android {
-    compileSdkVersion 31
+    compileSdkVersion 32
 
     defaultConfig {
         applicationId "com.qsp.player"
         minSdkVersion 21
-        targetSdkVersion 31
-        versionCode 6
-        versionName "1.5.0"
+        targetSdkVersion 32
+        versionCode 61
+        versionName "1.5.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -40,6 +40,7 @@ android {
     lint {
         abortOnError false
     }
+    namespace 'com.qsp.player'
 }
 
 dependencies {
@@ -54,7 +55,7 @@ dependencies {
     implementation 'org.apache.commons:commons-compress:1.21'
     implementation 'org.jsoup:jsoup:1.14.3'
     implementation 'org.simpleframework:simple-xml:2.7.1'
-    implementation 'com.google.android.material:material:1.5.0'
+    implementation 'com.google.android.material:material:1.6.0'
     implementation 'com.squareup.picasso:picasso:2.71828'
 
     testImplementation 'junit:junit:4.13.2'

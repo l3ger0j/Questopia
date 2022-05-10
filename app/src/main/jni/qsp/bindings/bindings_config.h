@@ -25,7 +25,6 @@
 	#endif
 
 	/* Place your bindings here */
-
 	#ifndef QSP_BINDING
 		#define QSP_BINDING
 		#define _DEFAULT_BINDING

@@ -17,6 +17,8 @@ import static com.qsp.player.shared.util.Base64Util.encodeBase64;
 import static com.qsp.player.shared.util.StringUtil.isNotEmpty;
 import static com.qsp.player.shared.util.StringUtil.isNullOrEmpty;
 
+import androidx.annotation.NonNull;
+
 public class HtmlProcessor {
     private static final int IMAGE_WIDTH_THRESHOLD = 400;
 
@@ -52,10 +54,12 @@ public class HtmlProcessor {
         return document.toString();
     }
 
+    @NonNull
     private String unescapeQuotes(String str) {
         return str.replace("\\\"", "'");
     }
 
+    @NonNull
     private String encodeExec(String html) {
         Matcher matcher = execPattern.matcher(html);
         StringBuffer sb = new StringBuffer();
@@ -69,10 +73,12 @@ public class HtmlProcessor {
         return sb.toString();
     }
 
+    @NonNull
     private String normalizePathsInExec(String exec) {
         return exec.replace("\\", "/");
     }
 
+    @NonNull
     private String htmlizeLineBreaks(String s) {
         return s.replace("\n", "<br>")
                 .replace("\r", "");

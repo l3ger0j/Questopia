@@ -200,20 +200,6 @@ public class GameStockActivity extends AppCompatActivity {
             String gameId = getGameIdByPosition(position);
             showGameInfo(gameId);
         });
-        gamesView.setOnItemLongClickListener((parent, view, position, id) -> {
-            String gameId = getGameIdByPosition(position);
-            Game game = gamesMap.get(gameId);
-            if (game != null) {
-                if (game.isInstalled()) {
-                    playGame(game);
-                } else {
-                    showGameInfo(gameId);
-                }
-            } else {
-                logger.error("Game not found: " + gameId);
-            }
-            return true;
-        });
     }
 
     private String getGameIdByPosition(int position) {
