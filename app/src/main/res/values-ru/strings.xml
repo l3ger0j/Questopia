@@ -47,7 +47,7 @@
     <string name="installFromRAR">Из RAR-архива</string>
     <string name="installFromFolder">Из папки</string>
     <string name="selectSlot">Выберите слот</string>
-    <string name="slotPresent">Слот %d - %s</string>
+    <string name="slotPresent" formatted="false">Слот %d - %s</string>
     <string name="slotEmpty">Слот %d [Пусто]</string>
     <string name="loadFrom">Из файла…</string>
     <string name="saveTo">В файл…</string>

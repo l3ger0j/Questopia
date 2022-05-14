@@ -11,7 +11,6 @@
         android:icon="@drawable/icon"
         android:label="@string/appName"
         android:largeHeap="true"
-        android:requestLegacyExternalStorage="true"
         android:theme="@style/Theme.AppCompat"
         android:usesCleartextTraffic="true"
         tools:targetApi="m">

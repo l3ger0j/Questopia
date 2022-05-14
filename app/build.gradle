@@ -11,9 +11,15 @@ android {
         applicationId "com.qsp.player"
         minSdkVersion 21
         targetSdkVersion 32
-        versionCode 61
-        versionName "1.5.1"
+        versionCode 7
+        versionName "1.6.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    configurations {
+        all {
+            exclude group: 'xpp3', module: 'xpp3'
+        }
     }
 
     externalNativeBuild {

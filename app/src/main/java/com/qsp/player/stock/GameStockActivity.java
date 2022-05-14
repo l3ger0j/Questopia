@@ -18,11 +18,9 @@ import static com.qsp.player.shared.util.XmlUtil.objectToXml;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -31,28 +29,22 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.webkit.MimeTypeMap;
 import android.webkit.WebView;
-import android.widget.ArrayAdapter;
-import android.widget.ImageView;
-import android.widget.ListView;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.collection.SparseArrayCompat;
-import androidx.core.content.res.ResourcesCompat;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.preference.PreferenceManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.qsp.player.R;
 import com.qsp.player.databinding.ActivityStockBinding;
@@ -69,7 +61,8 @@ import com.qsp.player.shared.util.ViewUtil;
 import com.qsp.player.stock.dto.Game;
 import com.qsp.player.stock.repository.LocalGameRepository;
 import com.qsp.player.stock.repository.RemoteGameRepository;
-import com.squareup.picasso.Picasso;
+import com.qsp.player.stock.ui.GamesRecyclerView;
+import com.qsp.player.stock.ui.RecyclerItemClickListener;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -110,14 +103,15 @@ public class GameStockActivity extends AppCompatActivity {
     private static final Logger logger = LoggerFactory.getLogger(GameStockActivity.class);
 
     private final HashMap<String, Game> gamesMap = new HashMap<>();
-    private final SparseArrayCompat<GameStockItemAdapter> gameAdapters = new SparseArrayCompat<>();
+    private final SparseArrayCompat<GamesRecyclerView> gameAdapters = new SparseArrayCompat<>();
     private final LocalGameRepository localGameRepository = new LocalGameRepository();
     private final HashMap<InstallType, GameInstaller> installers = new HashMap<>();
 
     private Settings settings;
     private boolean showProgressDialog;
     private String currentLanguage = Locale.getDefault().getLanguage();
-    private ListView gamesView;
+    private RecyclerView gamesView;
+    private GamesRecyclerView gamesRecyclerView;
     private ProgressDialog progressDialog;
     private ConnectivityManager connectivityManager;
     private Collection<Game> remoteGames;
@@ -194,16 +188,33 @@ public class GameStockActivity extends AppCompatActivity {
 
     private void initGamesListView() {
         gamesView = activityStockBinding.games;
-        gamesView.setTextFilterEnabled(true);
-        gamesView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-        gamesView.setOnItemClickListener((parent, view, position, id) -> {
-            String gameId = getGameIdByPosition(position);
-            showGameInfo(gameId);
-        });
+        gamesView.addOnItemTouchListener(new RecyclerItemClickListener(this , gamesView ,
+                new RecyclerItemClickListener.OnItemClickListener() {
+            @Override
+            public void onItemClick(View view , int position) {
+                String gameId = getGameIdByPosition(position);
+                showGameInfo(gameId);
+            }
+
+            @Override
+            public void onLongItemClick(View view , int position) {
+                String gameId = getGameIdByPosition(position);
+                Game game = gamesMap.get(gameId);
+                if (game != null) {
+                    if (game.isInstalled()) {
+                        playGame(game);
+                    } else {
+                        showGameInfo(gameId);
+                    }
+                } else {
+                    logger.error("Game not found: " + gameId);
+                }
+            }
+        }));
     }
 
     private String getGameIdByPosition(int position) {
-        Game game = (Game) gamesView.getAdapter().getItem(position);
+        Game game = gamesRecyclerView.getItem(position);
         return game.id;
     }
 
@@ -407,9 +418,12 @@ public class GameStockActivity extends AppCompatActivity {
             }
         }
 
-        gameAdapters.put(TAB_LOCAL, new GameStockItemAdapter(this, R.layout.list_item_game, localGames));
-        gameAdapters.put(TAB_REMOTE, new GameStockItemAdapter(this, R.layout.list_item_game, remoteGames));
-        gameAdapters.put(TAB_ALL, new GameStockItemAdapter(this, R.layout.list_item_game, games));
+        gamesRecyclerView = new GamesRecyclerView(this, games);
+        gameAdapters.put(TAB_ALL, gamesRecyclerView);
+        gamesRecyclerView = new GamesRecyclerView(this, localGames);
+        gameAdapters.put(TAB_LOCAL, gamesRecyclerView);
+        gamesRecyclerView = new GamesRecyclerView(this, remoteGames);
+        gameAdapters.put(TAB_REMOTE, gamesRecyclerView);
 
         ActionBar bar = getSupportActionBar();
         if (bar != null) {
@@ -736,55 +750,6 @@ public class GameStockActivity extends AppCompatActivity {
 
         return result.replaceAll("[:\"?*|<> ]", "_")
                 .replace("__", "_");
-    }
-
-    private class GameStockItemAdapter extends ArrayAdapter<Game> {
-        private final ArrayList<Game> items;
-
-        GameStockItemAdapter(Context context, int resource, ArrayList<Game> items) {
-            super(context, resource, items);
-            this.items = items;
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            if (convertView == null) {
-                LayoutInflater inflater = getLayoutInflater();
-                convertView = inflater.inflate(R.layout.list_item_game, null);
-            }
-            Game item = items.get(position);
-            if (item != null) {
-                TextView titleView = convertView.findViewById(R.id.game_title);
-                if (titleView != null) {
-                    titleView.setText(item.title);
-                    if (item.isInstalled()) {
-                        titleView.setTextColor(0xFFE0E0E0);
-                    } else {
-                        titleView.setTextColor(0xFFFFD700);
-                    }
-                }
-                TextView authorView = convertView.findViewById(R.id.game_author);
-                if (item.author.length() > 0) {
-                    String text = getString(R.string.author).replace("-AUTHOR-", item.author);
-                    authorView.setText(text);
-                } else {
-                    authorView.setText("");
-                }
-                ImageView iconView = convertView.findViewById(R.id.game_icon);
-                if (item.icon.isEmpty()) {
-                    Drawable drawable = ResourcesCompat.getDrawable(getResources(),
-                            R.drawable.broken_image_24, null);
-                    iconView.setImageDrawable(drawable);
-                } else {
-                    Picasso.get()
-                            .load(item.icon)
-                            .fit()
-                            .into(iconView);
-                }
-            }
-
-            return convertView;
-        }
     }
 
     private class TabListener implements ActionBar.TabListener {

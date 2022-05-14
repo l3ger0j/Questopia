@@ -47,7 +47,7 @@
     <string name="installFromRAR">From RAR Archive</string>
     <string name="installFromFolder">From Folder</string>
     <string name="selectSlot">Select a slot</string>
-    <string name="slotPresent">Slot %d - %s</string>
+    <string name="slotPresent" formatted="false">Slot %d - %s</string>
     <string name="slotEmpty">Slot %d [Empty]</string>
     <string name="loadFrom">From File…</string>
     <string name="saveTo">To File…</string>
