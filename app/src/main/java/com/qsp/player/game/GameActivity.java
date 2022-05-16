@@ -19,7 +19,6 @@ import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.media.AudioManager;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -38,6 +37,7 @@ import android.view.ViewGroup;
 import android.webkit.MimeTypeMap;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.AdapterView;
@@ -90,12 +90,6 @@ import java.util.concurrent.CountDownLatch;
 @SuppressLint("ClickableViewAccessibility")
 public class GameActivity extends AppCompatActivity implements GameInterface, GestureDetector.OnGestureListener {
     private static final int MAX_SAVE_SLOTS = 5;
-
-    private static final String SHOW_ADVANCED_EXTRA_NAME = Build.VERSION.SDK_INT < Build.VERSION_CODES.Q ?
-            "android.content.extra.SHOW_ADVANCED" :
-            "android.provider.extra.SHOW_ADVANCED";
-
-    private int requestCode; // 1 - to load, 2 - to save
 
     private static final int TAB_MAIN_DESC_AND_ACTIONS = 0;
     private static final int TAB_OBJECTS = 1;
@@ -164,34 +158,6 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
 
     // endregion Локация-счётчик
 
-    private final ActivityResultLauncher<Intent> resultLauncher = registerForActivityResult(
-            new ActivityResultContracts.StartActivityForResult(),
-            result -> {
-                Uri uri;
-                Intent data = result.getData();
-                if (result.getResultCode() == RESULT_OK) {
-                    switch (requestCode) {
-                        case 1:
-                            if (data != null) {
-                                uri = data.getData();
-                                doWithCounterDisabled(() -> libQspProxy.loadGameState(uri));
-                            } else {
-                                break;
-                            }
-                            break;
-                        case 2:
-                            if (data != null) {
-                                uri = data.getData();
-                                libQspProxy.saveGameState(uri);
-                            } else {
-                                break;
-                            }
-                            break;
-                    }
-                }
-            }
-    );
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -228,6 +194,8 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
         mainDescView = findViewById(R.id.main_desc);
         mainDescView.setWebViewClient(new QspWebViewClient());
         mainDescView.setOnTouchListener(this::handleTouchEvent);
+        WebSettings webViewSettings = mainDescView.getSettings();
+        webViewSettings.setAllowFileAccess(true);
     }
 
     private boolean handleTouchEvent(View v, MotionEvent event) {
@@ -606,34 +574,63 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
             case LOAD:
                 item = subMenu.add(getString(R.string.loadFrom));
                 item.setOnMenuItemClickListener(item12 -> {
-                    startLoadFromFile();
+                    startReadOrWriteSave(1);
                     return true;
                 });
                 break;
             case SAVE:
                 item = subMenu.add(getString(R.string.saveTo));
                 item.setOnMenuItemClickListener(item1 -> {
-                    startSaveToFile();
+                    startReadOrWriteSave(2);
                     return true;
                 });
                 break;
         }
     }
 
-    private void startLoadFromFile() {
-        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-        intent.putExtra(SHOW_ADVANCED_EXTRA_NAME, true);
-        intent.setType("application/octet-stream");
-        requestCode = 1;
-        resultLauncher.launch(intent);
-    }
-
-    private void startSaveToFile() {
-        Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
-        intent.setType("application/octet-stream");
-        intent.putExtra(Intent.EXTRA_TITLE, libQspProxy.getGameState().gameFile + ".sav");
-        requestCode = 2;
-        resultLauncher.launch(intent);
+    private void startReadOrWriteSave (int requestCode) {
+        ActivityResultLauncher<Intent> resultLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    Uri uri;
+                    Intent data = result.getData();
+                    if (result.getResultCode() == RESULT_OK) {
+                        switch (requestCode) {
+                            case 1:
+                                if (data != null) {
+                                    uri = data.getData();
+                                    doWithCounterDisabled(() -> libQspProxy.loadGameState(uri));
+                                } else {
+                                    break;
+                                }
+                                break;
+                            case 2:
+                                if (data != null) {
+                                    uri = data.getData();
+                                    libQspProxy.saveGameState(uri);
+                                } else {
+                                    break;
+                                }
+                                break;
+                        }
+                    }
+                }
+        );
+        Intent mIntent;
+        switch (requestCode) {
+            case 1:
+                mIntent = new Intent(Intent.ACTION_GET_CONTENT);
+                mIntent.putExtra(Intent.ACTION_GET_CONTENT, true);
+                mIntent.setType("application/octet-stream");
+                resultLauncher.launch(mIntent);
+                break;
+            case 2:
+                mIntent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+                mIntent.putExtra(Intent.EXTRA_TITLE, libQspProxy.getGameState().gameFile + ".sav");
+                mIntent.setType("application/octet-stream");
+                resultLauncher.launch(mIntent);
+                break;
+        }
     }
 
     @NonNull
@@ -964,6 +961,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
         SAVE
     }
 
+    // TODO Implement WebViewAssetLoader https://developer.android.google.cn/guide/webapps/load-local-content
     private class QspWebViewClient extends WebViewClient {
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, @NonNull final String href) {
