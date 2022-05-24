@@ -7,6 +7,10 @@ import org.junit.runner.RunWith;
 
 import static org.junit.Assert.assertEquals;
 
+import com.qsp.player.model.service.GameContentResolver;
+import com.qsp.player.model.service.HtmlProcessor;
+import com.qsp.player.model.service.ImageProvider;
+
 @RunWith(AndroidJUnit4.class)
 public class HtmlProcessorAndroidTest {
     private final GameContentResolver gameContentResolver = new GameContentResolver();

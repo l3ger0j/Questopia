@@ -45,6 +45,7 @@
         android:lineSpacingExtra="8sp"
         android:text=""
         android:textAlignment="textStart"
+        android:textColor="#F9A825"
         android:textSize="12sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"

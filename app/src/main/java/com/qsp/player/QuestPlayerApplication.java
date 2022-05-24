@@ -3,12 +3,12 @@ package com.qsp.player;
 import android.app.Application;
 import android.os.Build;
 
-import com.qsp.player.game.service.AudioPlayer;
-import com.qsp.player.game.service.GameContentResolver;
-import com.qsp.player.game.service.HtmlProcessor;
-import com.qsp.player.game.service.ImageProvider;
-import com.qsp.player.libqsp.LibQspProxy;
-import com.qsp.player.libqsp.LibQspProxyImpl;
+import com.qsp.player.model.service.AudioPlayer;
+import com.qsp.player.model.service.GameContentResolver;
+import com.qsp.player.model.service.HtmlProcessor;
+import com.qsp.player.model.service.ImageProvider;
+import com.qsp.player.model.libQSP.LibQspProxy;
+import com.qsp.player.model.libQSP.LibQspProxyImpl;
 
 import org.slf4j.impl.HandroidLoggerAdapter;
 

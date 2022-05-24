@@ -2,6 +2,10 @@ package com.qsp.player.game.service;
 
 import static org.junit.Assert.assertEquals;
 
+import com.qsp.player.model.service.GameContentResolver;
+import com.qsp.player.model.service.HtmlProcessor;
+import com.qsp.player.model.service.ImageProvider;
+
 import org.junit.Test;
 
 public class HtmlProcessorTest {

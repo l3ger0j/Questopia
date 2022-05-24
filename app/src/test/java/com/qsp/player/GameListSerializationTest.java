@@ -1,13 +1,11 @@
 package com.qsp.player;
 
-import static com.qsp.player.shared.util.XmlUtil.xmlToObject;
+import static com.qsp.player.utils.XmlUtil.xmlToObject;
 import static org.junit.Assert.assertEquals;
 
-import com.qsp.player.stock.dto.Game;
-import com.qsp.player.stock.dto.GameList;
-
+import com.qsp.player.dto.stock.GameData;
+import com.qsp.player.dto.stock.GameList;
 import org.junit.Test;
-
 import java.util.ArrayList;
 
 public class GameListSerializationTest {
@@ -25,16 +23,16 @@ public class GameListSerializationTest {
                 "</game_list>";
 
         GameList expected = new GameList();
-        expected.gameList = new ArrayList<>();
-        expected.gameList.add(newGame("1"));
-        expected.gameList.add(newGame("2"));
+        expected.gameDataList = new ArrayList<>();
+        expected.gameDataList.add(newGame("1"));
+        expected.gameDataList.add(newGame("2"));
         GameList actual = xmlToObject(xml, GameList.class);
         assertEquals(expected, actual);
     }
 
-    private Game newGame(String id) {
-        Game game = new Game();
-        game.id = id;
-        return game;
+    private GameData newGame(String id) {
+        GameData gameData = new GameData();
+        gameData.id = id;
+        return gameData;
     }
 }
