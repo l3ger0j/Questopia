@@ -1,31 +1,24 @@
 package com.qsp.player.viewModel.viewModels;
 
-import androidx.databinding.ObservableField;
-import androidx.databinding.ObservableInt;
-import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.qsp.player.dto.stock.GameData;
-import com.qsp.player.view.activities.GameStockActivity;
-import com.qsp.player.view.adapters.GamesRecyclerAdapter;
-import com.qsp.player.view.adapters.RecyclerItemClickListener;
+import com.qsp.player.viewModel.repository.RemoteGameRepository;
+
+import java.util.List;
 
 public class StockViewModel extends ViewModel {
-    private MutableLiveData<GamesRecyclerAdapter> recyclerAdapter =
-            new MutableLiveData<>();
 
-    public ObservableField<GameStockActivity> activityObservableField =
-            new ObservableField<>();
+    private final MutableLiveData<List<GameData>> data = new MutableLiveData<>();
 
-    public void setRecyclerAdapter (GamesRecyclerAdapter gamesRecyclerAdapter) {
-        recyclerAdapter.setValue(gamesRecyclerAdapter);
+    public MutableLiveData<List<GameData>> getData() {
+        return data;
     }
 
-    public LiveData<GamesRecyclerAdapter> getRecyclerAdapter () {
-        if (recyclerAdapter == null) {
-            recyclerAdapter = new MutableLiveData<>();
-        }
-        return recyclerAdapter;
+    // FIXME: 04.06.2022
+    public StockViewModel () {
+        RemoteGameRepository remoteGameRepository = new RemoteGameRepository();
+        // data.postValue(remoteGameRepository.getGames());
     }
 }

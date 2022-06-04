@@ -9,6 +9,8 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.res.ResourcesCompat;
+import androidx.recyclerview.widget.AsyncListDiffer;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.imageview.ShapeableImageView;
@@ -17,18 +19,45 @@ import com.qsp.player.dto.stock.GameData;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class GamesRecyclerAdapter extends RecyclerView.Adapter<GamesRecyclerAdapter.ViewHolder>{
     private final LayoutInflater inflater;
-    private final ArrayList<GameData> gameData;
     private final Context context;
+    private final AsyncListDiffer<GameData> differ =
+            new AsyncListDiffer<>(this , DIFF_CALLBACK);
 
     public GameData getItem(int position) {
-        return gameData.get(position);
+        return differ.getCurrentList().get(position);
     }
 
-    public GamesRecyclerAdapter(Context context, ArrayList<GameData> gameData) {
-        this.gameData = gameData;
+    public List<GameData> getGameData() {
+        return differ.getCurrentList();
+    }
+
+    @Override
+    public int getItemCount() {
+        return differ.getCurrentList().size();
+    }
+
+    private static final DiffUtil.ItemCallback<GameData> DIFF_CALLBACK =
+            new DiffUtil.ItemCallback<GameData>() {
+        @Override
+        public boolean areItemsTheSame(@NonNull GameData oldItem , @NonNull GameData newItem) {
+            return oldItem.id.equals(newItem.id);
+        }
+
+        @Override
+        public boolean areContentsTheSame(@NonNull GameData oldItem , @NonNull GameData newItem) {
+            return oldItem.equals(newItem);
+        }
+    };
+
+    public void submitList(ArrayList<GameData> gameData){
+        differ.submitList(gameData);
+    }
+
+    public GamesRecyclerAdapter(Context context) {
         this.context = context;
         this.inflater = LayoutInflater.from(context);
     }
@@ -43,7 +72,7 @@ public class GamesRecyclerAdapter extends RecyclerView.Adapter<GamesRecyclerAdap
 
     @Override
     public void onBindViewHolder(@NonNull GamesRecyclerAdapter.ViewHolder holder, int position) {
-        GameData gameData = this.gameData.get(position);
+        GameData gameData = differ.getCurrentList().get(position);
 
         // gameIcon
         if (gameData.icon.isEmpty()) {
@@ -77,11 +106,6 @@ public class GamesRecyclerAdapter extends RecyclerView.Adapter<GamesRecyclerAdap
         } else {
             holder.gameAuthor.setText("");
         }
-    }
-
-    @Override
-    public int getItemCount() {
-        return gameData.size();
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {

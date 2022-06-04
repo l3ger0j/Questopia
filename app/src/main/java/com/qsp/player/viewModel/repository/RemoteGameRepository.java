@@ -6,8 +6,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.qsp.player.dto.stock.GameData;
-import com.qsp.player.utils.StreamUtil;
 import com.qsp.player.dto.stock.GameList;
+import com.qsp.player.utils.StreamUtil;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

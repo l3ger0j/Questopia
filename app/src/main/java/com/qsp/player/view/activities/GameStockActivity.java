@@ -55,11 +55,12 @@ import com.qsp.player.model.install.GameInstaller;
 import com.qsp.player.model.install.InstallException;
 import com.qsp.player.model.install.InstallType;
 import com.qsp.player.utils.ViewUtil;
-import com.qsp.player.view.adapters.GamesRecyclerAdapter;
 import com.qsp.player.view.adapters.SettingsAdapter;
 import com.qsp.player.view.adapters.StockFragmentAdapter;
 import com.qsp.player.viewModel.repository.LocalGameRepository;
-import com.qsp.player.viewModel.repository.RemoteGameRepository;
+import com.qsp.player.viewModel.viewModels.AllStockFragmentViewModel;
+import com.qsp.player.viewModel.viewModels.LocalStockFragmentViewModel;
+import com.qsp.player.viewModel.viewModels.RemoteStockFragmentViewModel;
 import com.qsp.player.viewModel.viewModels.StockViewModel;
 
 import org.slf4j.Logger;
@@ -113,10 +114,12 @@ public class GameStockActivity extends AppCompatActivity {
     private File gamesDir;
     private GameData gameData;
     private DownloadGameAsyncTask downloadTask;
-    private LoadGameListAsyncTask loadGameListTask;
     private InstallType lastInstallType = InstallType.ZIP_ARCHIVE;
 
     private StockViewModel stockViewModel;
+    private AllStockFragmentViewModel allStockViewModel;
+    private LocalStockFragmentViewModel localStockViewModel;
+    private RemoteStockFragmentViewModel remoteStockViewModel;
     private final StockFragmentAdapter stockFragmentAdapter =
             new StockFragmentAdapter(this);
     private ViewPager2 stockPager;
@@ -125,10 +128,21 @@ public class GameStockActivity extends AppCompatActivity {
 
     private ActivityStockBinding activityStockBinding;
 
-    public String getGameIdByPosition(int position) {
-        stockViewModel.getRecyclerAdapter().observe(
-                this ,
-                gamesRecyclerAdapter -> gameData = gamesRecyclerAdapter.getItem(position));
+    public String getGameIdByPosition(int position, String tag) {
+        switch (tag) {
+            case "f0":
+                localStockViewModel.getGameData().observe(this ,
+                        gameDataArrayList -> gameData = gameDataArrayList.get(position));
+                break;
+            case "f1":
+                remoteStockViewModel.getGameData().observe(this ,
+                        gameDataArrayList -> gameData = gameDataArrayList.get(position));
+                break;
+            case "f2":
+                allStockViewModel.getGameData().observe(this ,
+                        gameDataArrayList -> gameData = gameDataArrayList.get(position));
+                break;
+        }
         return gameData.id;
     }
 
@@ -136,10 +150,13 @@ public class GameStockActivity extends AppCompatActivity {
     public ArrayList<GameData> getSortedGames() {
         Collection<GameData> unsortedGameData = gamesMap.values();
         ArrayList<GameData> gameData = new ArrayList<>(unsortedGameData);
+        logger.debug(unsortedGameData+"||"+gameData);
 
         if (gameData.size() < 2) {
             return gameData;
         }
+
+
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             Collections.sort(gameData , Comparator.comparing(game -> game.title.toLowerCase()));
@@ -170,10 +187,29 @@ public class GameStockActivity extends AppCompatActivity {
 
         connectivityManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
 
+        allStockViewModel =
+                new ViewModelProvider(this).get(AllStockFragmentViewModel.class);
+        allStockViewModel.activityObservableField.set(this);
+
+        localStockViewModel =
+                new ViewModelProvider(this).get(LocalStockFragmentViewModel.class);
+        localStockViewModel.activityObservableField.set(this);
+
+        remoteStockViewModel =
+                new ViewModelProvider(this).get(RemoteStockFragmentViewModel.class);
+        remoteStockViewModel.activityObservableField.set(this);
+
         stockViewModel =
                 new ViewModelProvider(this).get(StockViewModel.class);
-
-        stockViewModel.activityObservableField.set(this);
+        stockViewModel.getData().observe(GameStockActivity.this , gameData -> {
+            if (gameData != null) {
+                setRemoteGames(gameData);
+                updateProgressDialog(false, "", "", null);
+            } else {
+                ViewUtil.showErrorDialog(GameStockActivity.this,
+                        getString(R.string.loadGameListNetworkError));
+            }
+        });
 
         loadSettings();
         loadLocale();
@@ -207,23 +243,6 @@ public class GameStockActivity extends AppCompatActivity {
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                tabPosition = tab.getPosition();
-                boolean tabHasRemoteGames = tabPosition == TAB_REMOTE ||
-                        tabPosition == TAB_ALL;
-                boolean gamesNotBeingLoaded = loadGameListTask == null ||
-                        loadGameListTask.getStatus() == AsyncTask.Status.FINISHED;
-                if (tabHasRemoteGames && gamesNotBeingLoaded) {
-                    if (isNetworkConnected()) {
-                        LoadGameListAsyncTask task = new LoadGameListAsyncTask(
-                                GameStockActivity.this);
-                        loadGameListTask = task;
-                        task.execute();
-                    } else {
-                        ViewUtil.showErrorDialog(GameStockActivity.this,
-                                getString(R.string.loadGameListNetworkError));
-                    }
-                }
-                setRecyclerAdapter();
             }
 
             @Override
@@ -242,59 +261,26 @@ public class GameStockActivity extends AppCompatActivity {
                 stockPager ,
                 (tab , position) -> {
                     switch (position) {
-                        case 0:
+                        case TAB_LOCAL:
                             tab.setText(R.string.tabLocal);
                             break;
-                        case 1:
+                        case TAB_REMOTE:
                             tab.setText(R.string.tabRemote);
                             break;
-                        case 2:
+                        case TAB_ALL:
                             tab.setText(R.string.tabAll);
                     }
                 }
         ).attach();
     }
 
-    private void setRecyclerAdapter () {
-        ArrayList<GameData> gameData = getSortedGames();
-        ArrayList<GameData> localGameData = new ArrayList<>();
-        ArrayList<GameData> remoteGameData = new ArrayList<>();
-
-        for (GameData data : gameData) {
-            if (data.isInstalled()) {
-                localGameData.add(data);
-            }
-            if (data.hasRemoteUrl()) {
-                remoteGameData.add(data);
-            }
-        }
-
-        switch (tabPosition) {
-            case 0:
-                stockViewModel
-                        .setRecyclerAdapter(
-                                new GamesRecyclerAdapter(getBaseContext(), localGameData));
-                break;
-            case 1:
-                stockViewModel
-                        .setRecyclerAdapter(
-                                new GamesRecyclerAdapter(getBaseContext(), remoteGameData));
-                break;
-            case 2:
-                stockViewModel
-                        .setRecyclerAdapter(
-                                new GamesRecyclerAdapter(getBaseContext(), gameData));
-                break;
-        }
-    }
-
-    public void onItemClick(int position) {
-        String gameId = getGameIdByPosition(position);
+    public void onItemClick(int position, String tag) {
+        String gameId = getGameIdByPosition(position, tag);
         showGameInfo(gameId);
     }
 
-    public void onLongItemClick(int position) {
-        String gameId = getGameIdByPosition(position);
+    public void onLongItemClick(int position, String tag) {
+        String gameId = getGameIdByPosition(position, tag);
         GameData game = gamesMap.get(gameId);
         if (game != null) {
             if (game.isInstalled()) {
@@ -398,9 +384,6 @@ public class GameStockActivity extends AppCompatActivity {
         if (downloadTask != null) {
             downloadTask.cancel(true);
         }
-        if (loadGameListTask != null) {
-            loadGameListTask.cancel(true);
-        }
         super.onDestroy();
         logger.info("GameStockActivity destroyed");
     }
@@ -434,6 +417,7 @@ public class GameStockActivity extends AppCompatActivity {
         Objects.requireNonNull(tabLayout.getTabAt(2)).setText(getString(R.string.tabAll));
         Objects.requireNonNull(tabLayout.getTabAt(1)).setText(getString(R.string.tabRemote));
         Objects.requireNonNull(tabLayout.getTabAt(0)).setText(getString(R.string.tabLocal));
+        refreshGames();
     }
 
     private void refreshGamesDirectory() {
@@ -660,30 +644,13 @@ public class GameStockActivity extends AppCompatActivity {
         return super.onKeyDown(keyCode, event);
     }
 
-    private void updateProgressDialog(boolean show, String title, String message, final Runnable onCancel) {
+    private void updateProgressDialog(boolean show,
+                                      String title,
+                                      String message,
+                                      final Runnable onCancel) {
         showProgressDialog = show;
         if (title.isEmpty()) {
-            if (show) {
-                if (progressDialog == null) {
-                    progressDialog = new ProgressDialog(this);
-                    progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-                }
-                progressDialog.setTitle(title);
-                progressDialog.setMessage(message);
-                progressDialog.setCancelable(false);
-                progressDialog.setCanceledOnTouchOutside(false);
-                if (onCancel != null) {
-                    progressDialog.setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.cancel), (dialog, which) -> {
-                        if (which == DialogInterface.BUTTON_NEGATIVE) {
-                            dialog.dismiss();
-                            onCancel.run();
-                        }
-                    });
-                }
-                if (!progressDialog.isShowing()) {
-                    progressDialog.show();
-                }
-            } else if (progressDialog != null && progressDialog.isShowing()) {
+            if (progressDialog != null && progressDialog.isShowing()) {
                 progressDialog.dismiss();
                 progressDialog = null;
             }
@@ -722,10 +689,10 @@ public class GameStockActivity extends AppCompatActivity {
 
         for (GameData gameData : gamesMap.values()) {
             if (!gameData.isInstalled()) continue;
-
             deletableGameData.add(gameData);
             items.add(gameData.title);
         }
+
         new AlertDialog.Builder(this)
                 .setTitle(getString(R.string.deleteGameCmd))
                 .setItems(items.toArray(new String[0]), (dialog, which) -> {
@@ -760,44 +727,6 @@ public class GameStockActivity extends AppCompatActivity {
 
         return result.replaceAll("[:\"?*|<> ]", "_")
                 .replace("__", "_");
-    }
-
-    private static class LoadGameListAsyncTask extends AsyncTask<Void, Void, List<GameData>> {
-        private final WeakReference<GameStockActivity> activity;
-        private final RemoteGameRepository remoteGameRepository = new RemoteGameRepository();
-
-        private LoadGameListAsyncTask(GameStockActivity activity) {
-            this.activity = new WeakReference<>(activity);
-        }
-
-        @Override
-        protected void onPreExecute() {
-            GameStockActivity activity = this.activity.get();
-            if (activity != null) {
-                activity.updateProgressDialog(true, "", activity.getString(R.string.gameListLoading), null);
-            }
-        }
-
-        @Override
-        protected List<GameData> doInBackground(Void... params) {
-            return remoteGameRepository.getGames();
-        }
-
-        @Override
-        protected void onPostExecute(List<GameData> result) {
-            GameStockActivity activity = this.activity.get();
-            if (activity == null) {
-                return;
-            }
-            activity.updateProgressDialog(false, "", "", null);
-
-            if (result == null) {
-                String message = activity.getString(R.string.loadGameListError);
-                ViewUtil.showErrorDialog(activity, message);
-                return;
-            }
-            activity.setRemoteGames(result);
-        }
     }
 
     private static class DownloadGameAsyncTask extends AsyncTask<Void,

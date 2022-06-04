@@ -6,7 +6,6 @@ import com.qsp.player.model.libQSP.WindowType;
 public interface GameInterface {
 
     void refresh(RefreshInterfaceRequest request);
-
     void showError(String message);
     void showPicture(String path);
     void showMessage(String message);
