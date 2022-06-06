@@ -13,7 +13,6 @@ import java.util.ArrayList;
 
 public class RemoteStockFragmentViewModel extends ViewModel {
     private final MutableLiveData<ArrayList<GameData>> gameDataList;
-    private ArrayList<GameData> gameDataArrayList;
 
     public ObservableField<GameStockActivity> activityObservableField =
             new ObservableField<>();
@@ -22,24 +21,11 @@ public class RemoteStockFragmentViewModel extends ViewModel {
         return gameDataList;
     }
 
+    public void setGameDataArrayList(ArrayList<GameData> gameDataArrayList) {
+        gameDataList.postValue(gameDataArrayList);
+    }
+
     public RemoteStockFragmentViewModel () {
         gameDataList = new MutableLiveData<>();
-        init();
-    }
-
-    private void init () {
-        populateList();
-        gameDataList.setValue(gameDataArrayList);
-    }
-
-    private void populateList () {
-        GameStockActivity activity = new GameStockActivity();
-        ArrayList<GameData> tempArrayList = activity.getSortedGames();
-        for (GameData data : tempArrayList) {
-            if (data.hasRemoteUrl()) {
-                gameDataArrayList.add(data);
-            }
-        }
-        gameDataArrayList = activity.getSortedGames();
     }
 }

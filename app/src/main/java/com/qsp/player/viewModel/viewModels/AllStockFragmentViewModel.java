@@ -15,7 +15,6 @@ import java.util.Objects;
 
 public class AllStockFragmentViewModel extends ViewModel {
     private final MutableLiveData<ArrayList<GameData>> gameDataList;
-    private ArrayList<GameData> gameDataArrayList;
 
     public ObservableField<GameStockActivity> activityObservableField =
             new ObservableField<>();
@@ -24,18 +23,11 @@ public class AllStockFragmentViewModel extends ViewModel {
         return gameDataList;
     }
 
+    public void setGameDataArrayList(ArrayList<GameData> gameDataArrayList) {
+        gameDataList.postValue(gameDataArrayList);
+    }
+
     public AllStockFragmentViewModel () {
         gameDataList = new MutableLiveData<>();
-        init();
-    }
-
-    private void init () {
-        populateList();
-        gameDataList.setValue(gameDataArrayList);
-    }
-
-    private void populateList () {
-        GameStockActivity activity = new GameStockActivity();
-        gameDataArrayList = activity.getSortedGames();
     }
 }

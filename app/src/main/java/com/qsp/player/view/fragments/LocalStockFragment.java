@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -24,9 +23,7 @@ import java.util.Objects;
 
 public class LocalStockFragment extends Fragment {
     private LocalStockFragmentViewModel localViewModel;
-    private GamesRecyclerAdapter adapter;
     private RecyclerView mRecyclerView;
-    private ProgressBar mProgressBar;
 
     public LocalStockFragment() {
     }
@@ -39,12 +36,8 @@ public class LocalStockFragment extends Fragment {
         com.qsp.player.databinding.FragmentStockLocalBinding fragmentStockLocalBinding =
                 FragmentStockLocalBinding.inflate(getLayoutInflater());
         mRecyclerView = fragmentStockLocalBinding.gamesLocal;
-        mProgressBar = fragmentStockLocalBinding.progressBar;
         localViewModel = new ViewModelProvider(requireActivity())
                 .get(LocalStockFragmentViewModel.class);
-
-        mProgressBar.setIndeterminate(true);
-
         localViewModel.getGameData().observe(getViewLifecycleOwner(), gameData);
         return fragmentStockLocalBinding.getRoot();
     }
@@ -52,12 +45,10 @@ public class LocalStockFragment extends Fragment {
     Observer<ArrayList<GameData>> gameData = new Observer<ArrayList<GameData>>() {
         @Override
         public void onChanged(ArrayList<GameData> gameData) {
-            adapter = new GamesRecyclerAdapter(requireActivity());
+            GamesRecyclerAdapter adapter =
+                    new GamesRecyclerAdapter(requireActivity());
             adapter.submitList(gameData);
             mRecyclerView.setAdapter(adapter);
-            mRecyclerView.setVisibility(View.VISIBLE);
-            mProgressBar.setIndeterminate(false);
-            mProgressBar.setVisibility(View.GONE);
         }
     };
 

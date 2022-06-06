@@ -31,7 +31,6 @@ import java.util.Objects;
 
 public class AllStockFragment extends Fragment {
     private AllStockFragmentViewModel allViewModel;
-    private GamesRecyclerAdapter adapter;
     private RecyclerView mRecyclerView;
     private ProgressBar mProgressBar;
 
@@ -59,12 +58,15 @@ public class AllStockFragment extends Fragment {
     Observer<ArrayList<GameData>> gameData = new Observer<ArrayList<GameData>>() {
         @Override
         public void onChanged(ArrayList<GameData> gameData) {
-            adapter = new GamesRecyclerAdapter(requireActivity());
-            adapter.submitList(gameData);
-            mRecyclerView.setAdapter(adapter);
-            mRecyclerView.setVisibility(View.VISIBLE);
-            mProgressBar.setIndeterminate(false);
-            mProgressBar.setVisibility(View.GONE);
+            if (gameData.size() > 3) {
+                GamesRecyclerAdapter adapter =
+                        new GamesRecyclerAdapter(requireActivity());
+                adapter.submitList(gameData);
+                mRecyclerView.setAdapter(adapter);
+                mRecyclerView.setVisibility(View.VISIBLE);
+                mProgressBar.setIndeterminate(false);
+                mProgressBar.setVisibility(View.GONE);
+            }
         }
     };
 

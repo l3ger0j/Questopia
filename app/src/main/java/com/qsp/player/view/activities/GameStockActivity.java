@@ -58,6 +58,7 @@ import com.qsp.player.utils.ViewUtil;
 import com.qsp.player.view.adapters.SettingsAdapter;
 import com.qsp.player.view.adapters.StockFragmentAdapter;
 import com.qsp.player.viewModel.repository.LocalGameRepository;
+import com.qsp.player.viewModel.repository.RemoteGameRepository;
 import com.qsp.player.viewModel.viewModels.AllStockFragmentViewModel;
 import com.qsp.player.viewModel.viewModels.LocalStockFragmentViewModel;
 import com.qsp.player.viewModel.viewModels.RemoteStockFragmentViewModel;
@@ -114,6 +115,7 @@ public class GameStockActivity extends AppCompatActivity {
     private File gamesDir;
     private GameData gameData;
     private DownloadGameAsyncTask downloadTask;
+    private LoadGameListAsyncTask loadGameListTask;
     private InstallType lastInstallType = InstallType.ZIP_ARCHIVE;
 
     private StockViewModel stockViewModel;
@@ -150,13 +152,10 @@ public class GameStockActivity extends AppCompatActivity {
     public ArrayList<GameData> getSortedGames() {
         Collection<GameData> unsortedGameData = gamesMap.values();
         ArrayList<GameData> gameData = new ArrayList<>(unsortedGameData);
-        logger.debug(unsortedGameData+"||"+gameData);
 
         if (gameData.size() < 2) {
             return gameData;
         }
-
-
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             Collections.sort(gameData , Comparator.comparing(game -> game.title.toLowerCase()));
@@ -164,6 +163,7 @@ public class GameStockActivity extends AppCompatActivity {
             Collections.sort(gameData , (first, second) -> first.title.toLowerCase()
                     .compareTo(second.title.toLowerCase()));
         }
+
         return gameData;
     }
 
@@ -243,6 +243,23 @@ public class GameStockActivity extends AppCompatActivity {
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
+                tabPosition = tab.getPosition();
+                boolean tabHasRemoteGames = tabPosition == TAB_REMOTE ||
+                        tabPosition == TAB_ALL;
+                boolean gamesNotBeingLoaded = loadGameListTask == null ||
+                        loadGameListTask.getStatus() == AsyncTask.Status.FINISHED;
+                if (tabHasRemoteGames && gamesNotBeingLoaded) {
+                    if (isNetworkConnected()) {
+                        LoadGameListAsyncTask task = new LoadGameListAsyncTask(
+                                GameStockActivity.this);
+                        loadGameListTask = task;
+                        task.execute();
+                    } else {
+                        ViewUtil.showErrorDialog(GameStockActivity.this,
+                                getString(R.string.loadGameListNetworkError));
+                    }
+                }
+                setRecyclerAdapter();
             }
 
             @Override
@@ -272,6 +289,33 @@ public class GameStockActivity extends AppCompatActivity {
                     }
                 }
         ).attach();
+    }
+
+    private void setRecyclerAdapter () {
+        ArrayList<GameData> gameData = getSortedGames();
+        ArrayList<GameData> localGameData = new ArrayList<>();
+        ArrayList<GameData> remoteGameData = new ArrayList<>();
+
+        for (GameData data : gameData) {
+            if (data.isInstalled()) {
+                localGameData.add(data);
+            }
+            if (data.hasRemoteUrl()) {
+                remoteGameData.add(data);
+            }
+        }
+
+        switch (tabPosition) {
+            case 0:
+                localStockViewModel.setGameDataArrayList(localGameData);
+                break;
+            case 1:
+                remoteStockViewModel.setGameDataArrayList(remoteGameData);
+                break;
+            case 2:
+                allStockViewModel.setGameDataArrayList(gameData);
+                break;
+        }
     }
 
     public void onItemClick(int position, String tag) {
@@ -456,6 +500,7 @@ public class GameStockActivity extends AppCompatActivity {
                 gamesMap.put(localGameData.id, localGameData);
             }
         }
+        setRecyclerAdapter();
     }
 
     @Override
@@ -727,6 +772,44 @@ public class GameStockActivity extends AppCompatActivity {
 
         return result.replaceAll("[:\"?*|<> ]", "_")
                 .replace("__", "_");
+    }
+
+    private static class LoadGameListAsyncTask extends AsyncTask<Void, Void, List<GameData>> {
+        private final WeakReference<GameStockActivity> activity;
+        private final RemoteGameRepository remoteGameRepository = new RemoteGameRepository();
+
+        private LoadGameListAsyncTask(GameStockActivity activity) {
+            this.activity = new WeakReference<>(activity);
+        }
+
+        @Override
+        protected void onPreExecute() {
+            GameStockActivity activity = this.activity.get();
+            if (activity != null) {
+                activity.updateProgressDialog(true, "", activity.getString(R.string.gameListLoading), null);
+            }
+        }
+
+        @Override
+        protected List<GameData> doInBackground(Void... params) {
+            return remoteGameRepository.getGames();
+        }
+
+        @Override
+        protected void onPostExecute(List<GameData> result) {
+            GameStockActivity activity = this.activity.get();
+            if (activity == null) {
+                return;
+            }
+            activity.updateProgressDialog(false, "", "", null);
+
+            if (result == null) {
+                String message = activity.getString(R.string.loadGameListError);
+                ViewUtil.showErrorDialog(activity, message);
+                return;
+            }
+            activity.setRemoteGames(result);
+        }
     }
 
     private static class DownloadGameAsyncTask extends AsyncTask<Void,

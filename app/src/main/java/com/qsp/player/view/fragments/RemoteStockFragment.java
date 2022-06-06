@@ -52,12 +52,14 @@ public class RemoteStockFragment extends Fragment {
     Observer<ArrayList<GameData>> gameData = new Observer<ArrayList<GameData>>() {
         @Override
         public void onChanged(ArrayList<GameData> gameData) {
-            adapter = new GamesRecyclerAdapter(requireActivity());
-            adapter.submitList(gameData);
-            mRecyclerView.setAdapter(adapter);
-            mRecyclerView.setVisibility(View.VISIBLE);
-            mProgressBar.setIndeterminate(false);
-            mProgressBar.setVisibility(View.GONE);
+            if (gameData.size() > 3) {
+                adapter = new GamesRecyclerAdapter(requireActivity());
+                adapter.submitList(gameData);
+                mRecyclerView.setAdapter(adapter);
+                mRecyclerView.setVisibility(View.VISIBLE);
+                mProgressBar.setIndeterminate(false);
+                mProgressBar.setVisibility(View.GONE);
+            }
         }
     };
 
