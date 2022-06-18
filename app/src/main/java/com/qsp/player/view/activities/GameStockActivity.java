@@ -347,13 +347,19 @@ public class GameStockActivity extends AppCompatActivity {
         if (gameData.author.length() > 0) {
             message.append(getString(R.string.author).replace("-AUTHOR-", gameData.author));
         }
+        if (gameData.portedBy.length() > 0) {
+            message.append('\n');
+            message.append(getString(R.string.ported_by)
+                    .replace("-PORTED_BY-", gameData.portedBy));
+        }
         if (gameData.version.length() > 0) {
             message.append('\n');
             message.append(getString(R.string.version).replace("-VERSION-", gameData.version));
         }
         if (gameData.getFileSize() > 0) {
             message.append('\n');
-            message.append(getString(R.string.fileSize).replace("-SIZE-", Integer.toString(gameData.getFileSize() / 1024)));
+            message.append(getString(R.string.fileSize).replace("-SIZE-",
+                    Integer.toString(gameData.getFileSize() / 1024)));
         }
         if (gameData.fileExt.length() > 0) {
             message.append('\n');
@@ -362,6 +368,14 @@ public class GameStockActivity extends AppCompatActivity {
                 message.append(" ");
                 message.append(getString(R.string.experimental));
             }
+        }
+        if (gameData.pubDate.length() > 0) {
+            message.append('\n');
+            message.append(getString(R.string.pub_data).replace("-PUB_DATA-", gameData.pubDate));
+        }
+        if (gameData.modDate.length() > 0) {
+            message.append('\n');
+            message.append(getString(R.string.mod_data).replace("-MOD_DATA-", gameData.pubDate));
         }
         AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this)
                 .setMessage(message)
@@ -831,7 +845,7 @@ public class GameStockActivity extends AppCompatActivity {
             if (activity != null) {
                 activity.updateProgressDialog(true, gameData.title, activity.getString(R.string.downloading), () -> cancelled = true);
                 activity.progressDialog.setIndeterminate(false);
-                activity.progressDialog.setMax(gameData.getFileSize());
+                activity.progressDialog.setMax(Integer.parseInt(gameData.fileSize));
             }
         }
 

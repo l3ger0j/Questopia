@@ -99,9 +99,12 @@
     <string name="gameDeleted">Игра удалена.</string>
     <string name="deleteGameQuery">Удалить игру -GAMENAME-?</string>
     <string name="author">Автор: -AUTHOR-</string>
+    <string name="ported_by">Портировал: -PORTED_BY-</string>
     <string name="version">Версия: -VERSION-</string>
     <string name="fileSize">Размер: -SIZE- КБ</string>
     <string name="fileType">Тип файла: -TYPE-</string>
+    <string name="pub_data">Опубликовано: -PUB_DATA-</string>
+    <string name="mod_data">Изменено: -MOD_DATA-</string>
     <string name="close">Закрыть</string>
     <string name="selectGameFile">Выберите файл игры для запуска</string>
     <string name="cancel">Отмена</string>

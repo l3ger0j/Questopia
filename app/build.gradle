@@ -12,8 +12,8 @@ android {
         applicationId "com.qsp.player"
         minSdkVersion 21
         targetSdkVersion 32
-        versionCode 91
-        versionName "1.8.1"
+        versionCode 10
+        versionName "1.9.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -63,7 +63,7 @@ dependencies {
     implementation 'org.apache.commons:commons-compress:1.21'
     implementation 'org.jsoup:jsoup:1.14.3'
     implementation 'org.simpleframework:simple-xml:2.7.1'
-    implementation 'com.google.android.material:material:1.6.0'
+    implementation 'com.google.android.material:material:1.6.1'
     implementation 'com.squareup.picasso:picasso:2.71828'
 
     testImplementation 'junit:junit:4.13.2'

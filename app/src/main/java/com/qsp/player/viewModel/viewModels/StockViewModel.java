@@ -16,9 +16,6 @@ public class StockViewModel extends ViewModel {
         return data;
     }
 
-    // FIXME: 04.06.2022
     public StockViewModel () {
-        RemoteGameRepository remoteGameRepository = new RemoteGameRepository();
-        // data.postValue(remoteGameRepository.getGames());
     }
 }

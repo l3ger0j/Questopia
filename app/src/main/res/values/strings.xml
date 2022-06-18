@@ -98,9 +98,12 @@
     <string name="deleteGameCmd">Delete game</string>
     <string name="gameDeleted">The game has been deleted.</string>
     <string name="author">Author: -AUTHOR-</string>
+    <string name="ported_by">Ported by: -PORTED_BY-</string>
     <string name="version">Version: -VERSION-</string>
     <string name="fileSize">Size: -SIZE- KB</string>
     <string name="fileType">File Type: -TYPE-</string>
+    <string name="pub_data">Published: -PUB_DATA-</string>
+    <string name="mod_data">Modified: -MOD_DATA-</string>
     <string name="deleteGameQuery">Delete game -GAMENAME-?</string>
     <string name="close">Close</string>
     <string name="selectGameFile">Select a game file to run</string>

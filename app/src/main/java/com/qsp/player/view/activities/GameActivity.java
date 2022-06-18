@@ -60,17 +60,17 @@ import androidx.core.view.GestureDetectorCompat;
 
 import com.qsp.player.QuestPlayerApplication;
 import com.qsp.player.R;
-import com.qsp.player.model.service.AudioPlayer;
-import com.qsp.player.model.service.GameContentResolver;
-import com.qsp.player.model.service.HtmlProcessor;
-import com.qsp.player.model.libQSP.LibQspProxy;
 import com.qsp.player.model.libQSP.InterfaceConfiguration;
+import com.qsp.player.model.libQSP.LibQspProxy;
 import com.qsp.player.model.libQSP.QspListItem;
 import com.qsp.player.model.libQSP.QspMenuItem;
 import com.qsp.player.model.libQSP.RefreshInterfaceRequest;
 import com.qsp.player.model.libQSP.WindowType;
-import com.qsp.player.view.adapters.SettingsAdapter;
+import com.qsp.player.model.service.AudioPlayer;
+import com.qsp.player.model.service.GameContentResolver;
+import com.qsp.player.model.service.HtmlProcessor;
 import com.qsp.player.utils.ViewUtil;
+import com.qsp.player.view.adapters.SettingsAdapter;
 
 import org.jetbrains.annotations.Contract;
 import org.slf4j.Logger;
@@ -959,10 +959,10 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
         SAVE
     }
 
-    // TODO Implement WebViewAssetLoader https://developer.android.google.cn/guide/webapps/load-local-content
     private class QspWebViewClient extends WebViewClient {
         @Override
-        public boolean shouldOverrideUrlLoading(WebView view, @NonNull final String href) {
+        public boolean shouldOverrideUrlLoading(WebView view,
+                                                @NonNull final String href) {
             if (href.toLowerCase().startsWith("exec:")) {
                 String code = decodeBase64(href.substring(5));
                 libQspProxy.execute(code);

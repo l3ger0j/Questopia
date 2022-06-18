@@ -88,6 +88,13 @@ public class GamesRecyclerAdapter extends RecyclerView.Adapter<GamesRecyclerAdap
                     .into(holder.gameIcon);
         }
 
+        // gameSize
+        if (!gameData.fileSize.isEmpty()) {
+            holder.gameSize.setText(context.getString(R.string.fileSize).replace("-SIZE-",
+                    Integer.toString(gameData.getFileSize() / 1024)));
+        }
+
+
         // gameTitle
         if (holder.gameTitle != null) {
             holder.gameTitle.setText(gameData.title);
@@ -110,10 +117,12 @@ public class GamesRecyclerAdapter extends RecyclerView.Adapter<GamesRecyclerAdap
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         ShapeableImageView gameIcon;
-        TextView gameTitle, gameAuthor;
+        TextView gameTitle, gameAuthor, gameSize, gameRate;
 
         ViewHolder(View view){
             super(view);
+            gameSize = view.findViewById(R.id.game_size);
+            gameRate = view.findViewById(R.id.game_rate);
             gameIcon = view.findViewById(R.id.game_icon);
             gameTitle = view.findViewById(R.id.game_title);
             gameAuthor = view.findViewById(R.id.game_author);
