@@ -15,12 +15,12 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#include "menu.h"
-#include "callbacks.h"
-#include "errors.h"
-#include "game.h"
-#include "text.h"
-#include "variables.h"
+#include <qsp/headers/menu.h>
+#include <qsp/headers/callbacks.h>
+#include <qsp/headers/errors.h>
+#include <qsp/headers/game.h>
+#include <qsp/headers/text.h>
+#include <qsp/headers/variables.h>
 
 QSP_CHAR *qspCurMenuLocs[QSP_MAXMENUITEMS];
 int qspCurMenuItems = 0;

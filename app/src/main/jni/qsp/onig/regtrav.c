@@ -27,7 +27,7 @@
  * SUCH DAMAGE.
  */
 
-#include "regint.h"
+#include "qsp/onig/headers/regint.h"
 
 #ifdef USE_CAPTURE_HISTORY
 

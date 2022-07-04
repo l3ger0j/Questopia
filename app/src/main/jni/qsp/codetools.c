@@ -15,9 +15,9 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#include "codetools.h"
-#include "statements.h"
-#include "text.h"
+#include "qsp/headers/codetools.h"
+#include "qsp/headers/statements.h"
+#include "qsp/headers/text.h"
 
 static int qspProcessPreformattedStrings(QSP_CHAR *, QSPLineOfCode **);
 static int qspProcessEOLExtensions(QSPLineOfCode *, int, QSPLineOfCode **);

@@ -330,7 +330,7 @@
 
 /* Make sure that malloc(), realloc(), calloc() and free() are declared. */
 /*lint -save -e537 */
-#include <stdlib.h>
+#include "../../../../../../../../../../Android_SDK_studio/ndk/22.1.7171670/toolchains/llvm/prebuilt/windows-x86_64/sysroot/usr/local/include/stdlib.h"
 /*lint -restore */
 
 #ifdef __cplusplus

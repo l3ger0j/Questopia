@@ -15,8 +15,8 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#include "coding.h"
-#include "text.h"
+#include <qsp/headers/coding.h>
+#include <qsp/headers/text.h>
 
 unsigned char qspCP1251ToKOI8RTable[] =
 {
@@ -193,10 +193,10 @@ unsigned char qspKOI8ROrderTable[] =
 static int qspUCS2StrLen(char *);
 static char *qspUCS2StrStr(char *, char *);
 static char qspDirectConvertSB(char, unsigned char *);
-static char qspReverseConvertSB(char, unsigned char *);
+static char qspReverseConvertSB(char, const unsigned char *);
 static wchar_t qspDirectConvertUC(char, wchar_t *);
-static char qspReverseConvertUC(wchar_t, wchar_t *);
-static char *qspQSPToGameString(QSP_CHAR *, QSP_BOOL, QSP_BOOL);
+static char qspReverseConvertUC(wchar_t, const wchar_t *);
+static char *qspQSPToGameString(QSP_CHAR *s, QSP_BOOL isUCS2);
 
 static int qspUCS2StrLen(char *str)
 {
@@ -220,9 +220,9 @@ static char *qspUCS2StrStr(char *str, char *subStr)
 	return 0;
 }
 
-int qspStrCmpSB(char *s1, char *s2, unsigned char *table)
+int qspStrCmpSB(char *s1, char *s2, const unsigned char *table)
 {
-	int ret = 0;
+	int ret;
 	while (!(ret = (int)table[*(unsigned char *)s1] - table[*(unsigned char *)s2]) && *s2)
 		++s1, ++s2;
 	return ret;
@@ -231,10 +231,10 @@ int qspStrCmpSB(char *s1, char *s2, unsigned char *table)
 static char qspDirectConvertSB(char ch, unsigned char *table)
 {
 	unsigned char ch2 = (unsigned char)ch;
-	return (ch2 >= 0x80 ? table[ch2 - 0x80] : ch);
+	return (char) (ch2 >= 0x80 ? table[ch2 - 0x80] : ch);
 }
 
-static char qspReverseConvertSB(char ch, unsigned char *table)
+static char qspReverseConvertSB(char ch, const unsigned char *table)
 {
 	int i;
 	unsigned char ch2 = (unsigned char)ch;
@@ -250,7 +250,7 @@ static wchar_t qspDirectConvertUC(char ch, wchar_t *table)
 	return (ch2 >= 0x80 ? table[ch2 - 0x80] : ch);
 }
 
-static char qspReverseConvertUC(wchar_t ch, wchar_t *table)
+static char qspReverseConvertUC(wchar_t ch, const wchar_t *table)
 {
 	int i;
 	if (ch < 0x80) return (char)ch;
@@ -299,53 +299,19 @@ char *qspFromQSPString(QSP_CHAR *s)
 	return ret;
 }
 
-static char *qspQSPToGameString(QSP_CHAR *s, QSP_BOOL isUCS2, QSP_BOOL isCode)
-{
-	unsigned short uCh, *ptr;
+static char *qspQSPToGameString(QSP_CHAR *s, QSP_BOOL isUCS2) {
+	unsigned short *ptr;
 	int len = qspStrLen(s);
-	char ch, *ret = (char *)malloc((len + 1) * (isUCS2 ? 2 : 1));
-	if (isUCS2)
-	{
+	char *ret = (char *)malloc((len + 1) * (isUCS2 ? 2 : 1));
+	if (isUCS2) {
 		ptr = (unsigned short *)ret;
 		ptr[len] = 0;
-		if (isCode)
-		{
-			while (--len >= 0)
-			{
-				uCh = QSP_BTOWC(s[len]);
-				if (uCh == QSP_CODREMOV)
-					uCh = (unsigned short)-QSP_CODREMOV;
-				else
-					uCh -= QSP_CODREMOV;
-				ptr[len] = uCh;
-			}
-		}
-		else
-		{
-			while (--len >= 0)
-				ptr[len] = QSP_BTOWC(s[len]);
-		}
-	}
-	else
-	{
+		while (--len >= 0)
+			ptr[len] = QSP_BTOWC(s[len]);
+	} else {
 		ret[len] = 0;
-		if (isCode)
-		{
-			while (--len >= 0)
-			{
-				ch = QSP_FROM_OS_CHAR(s[len]);
-				if (ch == QSP_CODREMOV)
-					ch = -QSP_CODREMOV;
-				else
-					ch -= QSP_CODREMOV;
-				ret[len] = ch;
-			}
-		}
-		else
-		{
-			while (--len >= 0)
-				ret[len] = QSP_FROM_OS_CHAR(s[len]);
-		}
+		while (--len >= 0)
+			ret[len] = QSP_FROM_OS_CHAR(s[len]);
 	}
 	return ret;
 }
@@ -407,7 +373,7 @@ int qspSplitGameStr(char *str, QSP_BOOL isUCS2, QSP_CHAR *delim, char ***res)
 	int charSize, delimSize, allocChars, count = 0, bufSize = 8;
 	charSize = (isUCS2 ? 2 : 1);
 	delimSize = qspStrLen(delim) * charSize;
-	delimStr = qspQSPToGameString(delim, isUCS2, QSP_FALSE);
+	delimStr = qspQSPToGameString(delim, isUCS2);
 	found = (isUCS2 ? qspUCS2StrStr(str, delimStr) : strstr(str, delimStr));
 	ret = (char **)malloc(bufSize * sizeof(char *));
 	while (found)

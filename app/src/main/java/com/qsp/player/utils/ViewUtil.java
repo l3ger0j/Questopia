@@ -17,17 +17,6 @@ import java.util.Locale;
 
 public final class ViewUtil {
 
-    public static void setLocale(Context context, String lang) {
-        Locale locale = new Locale(lang);
-        Resources res = context.getResources();
-        DisplayMetrics dm = res.getDisplayMetrics();
-
-        Configuration conf = res.getConfiguration();
-        conf.locale = locale;
-
-        res.updateConfiguration(conf, dm);
-    }
-
     public static void showToast(Context context, String text) {
         Toast.makeText(context, text, Toast.LENGTH_SHORT).show();
     }

@@ -27,7 +27,7 @@
  * SUCH DAMAGE.
  */
 
-#include "regint.h"
+#include "qsp/onig/headers/regint.h"
 
 #define USE_MATCH_RANGE_MUST_BE_INSIDE_OF_SPECIFIED_RANGE
 

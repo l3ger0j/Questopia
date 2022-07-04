@@ -15,8 +15,8 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#include "time.h"
-#include "callbacks.h"
+#include <qsp/headers/time.h>
+#include <qsp/headers/callbacks.h>
 
 int qspMSCount = 0;
 

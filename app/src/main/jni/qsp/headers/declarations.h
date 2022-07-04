@@ -36,8 +36,8 @@
 
 /* -------- */
 
-#include "bindings/bindings_config.h"
-#include "onig/oniguruma.h"
+#include "../bindings/bindings_config.h"
+#include "qsp/onig/headers/oniguruma.h"
 
 #ifndef QSP_DEFINES
 	#define QSP_DEFINES

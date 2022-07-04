@@ -21,11 +21,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RemoteGameRepository {
-    private static final String GAMESTOCK_URL_V2 = "http://qsp.su/gamestock/gamestock2.php";
-
+    private String STOCK_URL = "http://qsp.su/gamestock/gamestock2.php";
     private static final Logger logger = LoggerFactory.getLogger(RemoteGameRepository.class);
-
     private static List<GameData> cachedGameData = null;
+
+    public void setStockURL (String url) {
+        this.STOCK_URL = url;
+    }
 
     public List<GameData> getGames() {
         if (cachedGameData == null) {
@@ -40,7 +42,7 @@ public class RemoteGameRepository {
     @Nullable
     private String getGameStockXml() {
         try {
-            URL url = new URL(GAMESTOCK_URL_V2);
+            URL url = new URL(STOCK_URL);
             URLConnection conn = url.openConnection();
             try (InputStream in = conn.getInputStream()) {
                 try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {

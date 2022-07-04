@@ -8,6 +8,7 @@ import androidx.annotation.NonNull;
 public class SettingsAdapter {
     public boolean soundEnabled;
     public String language;
+    public String url;
     public float actionsHeightRatio;
     public boolean isSeparator;
     public int typeface;
@@ -22,6 +23,7 @@ public class SettingsAdapter {
         SettingsAdapter settingsAdapter = new SettingsAdapter();
         settingsAdapter.soundEnabled = preferences.getBoolean("sound", true);
         settingsAdapter.language = preferences.getString("lang", "ru");
+        settingsAdapter.url = preferences.getString("url", "http://qsp.su/gamestock/gamestock2.php");
         settingsAdapter.actionsHeightRatio = parseActionsHeightRatio(preferences.getString("actsHeight", "1/3"));
         settingsAdapter.isSeparator = preferences.getBoolean("separator", false);
         settingsAdapter.typeface = Integer.parseInt(preferences.getString("typeface", "0"));

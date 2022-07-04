@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/menu_installgame"
+        android:icon="@drawable/file_download"
+        app:showAsAction="always"
         android:title="@string/installGame">
         <menu>
             <item
@@ -17,11 +20,12 @@
     </item>
     <item
         android:id="@+id/menu_deletegame"
+        android:icon="@drawable/delete"
+        app:showAsAction="always"
         android:title="@string/deleteGame" />
     <item
         android:id="@+id/menu_options"
+        android:icon="@drawable/settings"
+        app:showAsAction="ifRoom"
         android:title="@string/settings" />
-    <item
-        android:id="@+id/menu_about"
-        android:title="@string/aboutApp" />
 </menu>

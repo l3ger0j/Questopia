@@ -27,7 +27,7 @@
  * SUCH DAMAGE.
  */
 
-#include "../regenc.h"
+#include "qsp/onig/headers/regenc.h"
 
 static int
 ascii_is_code_ctype(OnigCodePoint code, unsigned int ctype)

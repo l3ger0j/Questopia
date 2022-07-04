@@ -5,7 +5,7 @@ include $(CLEAR_VARS)
 # For details check http://stackoverflow.com/a/27446105
 # This isn't very clean (properly we should build and ship
 # both PIE and non-PIE builds), but does the trick for now.
-APP_PLATFORM := 16
+APP_PLATFORM := 21
 
 LOCAL_DISABLE_FATAL_LINKER_WARNINGS := true
 LOCAL_CFLAGS := -fshort-wchar -D_ANDROID -D_UNICODE -DNOT_RUBY -DEXPORT -w

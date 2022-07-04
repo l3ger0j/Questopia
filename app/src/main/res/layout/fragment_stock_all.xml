@@ -4,17 +4,15 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/games_all"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
-
-    <ProgressBar
-        android:id="@+id/progressBar"
-        style="@android:style/Widget.DeviceDefault.Light.ProgressBar.Large"
+    <TextView
+        android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center|center_horizontal|center_vertical" />
-
+        android:layout_gravity="bottom"
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:text="There will be something here O_o"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:focusable="true" />
 </FrameLayout>

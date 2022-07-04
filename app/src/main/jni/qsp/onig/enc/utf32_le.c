@@ -27,7 +27,7 @@
  * SUCH DAMAGE.
  */
 
-#include "../regenc.h"
+#include "qsp/onig/headers/regenc.h"
 
 static int
 utf32le_mbc_enc_len(const UChar* p ARG_UNUSED)

@@ -15,11 +15,11 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#include "../../declarations.h"
+#include <qsp/headers/declarations.h>
 
 #ifdef _ANDROID
 
-#include "../../text.h"
+#include <qsp/headers/text.h>
 
 #include <jni.h>
 #include <string.h>
@@ -38,7 +38,7 @@ static int qspUTF8_mbtowc(int *pwc, unsigned char *s, int n)
 	else if (c < 0xe0)
 	{
 		if (n < 2) return 0;
-		if (!((s[1] ^ 0x80) < 0x40)) return 0;
+		if ((s[1] ^ 0x80) >= 0x40) return 0;
 		*pwc = ((int)(c & 0x1f) << 6)
 			| (int)(s[1] ^ 0x80);
 		return 2;
@@ -126,8 +126,8 @@ static int qspUTF8_wctomb(unsigned char *r, int wc, int n)
 	case 3: r[2] = 0x80 | (wc & 0x3f); wc = wc >> 6; wc |= 0x800;
 	case 2: r[1] = 0x80 | (wc & 0x3f); wc = wc >> 6; wc |= 0xc0;
 	case 1: r[0] = wc;
+	default: return count;
 	}
-	return count;
 }
 
 char *qspW2C(QSP_CHAR *src)

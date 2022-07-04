@@ -10,8 +10,8 @@
 #include <malloc.h>
 #endif
 
-#include "regint.h"
-#include "st.h"
+#include "qsp/onig/headers/regint.h"
+#include "qsp/onig/headers/st.h"
 
 typedef struct st_table_entry st_table_entry;
 

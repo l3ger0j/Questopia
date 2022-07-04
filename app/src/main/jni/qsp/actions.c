@@ -15,12 +15,12 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#include "actions.h"
-#include "errors.h"
-#include "game.h"
-#include "locations.h"
-#include "statements.h"
-#include "text.h"
+#include "qsp/headers/actions.h"
+#include "qsp/headers/errors.h"
+#include "qsp/headers/game.h"
+#include "qsp/headers/locations.h"
+#include "qsp/headers/statements.h"
+#include "qsp/headers/text.h"
 
 QSPCurAct qspCurActions[QSP_MAXACTIONS];
 int qspCurActionsCount = 0;

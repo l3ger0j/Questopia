@@ -3,6 +3,13 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory android:title="@string/generalSettings">
+        <EditTextPreference
+            android:defaultValue="http://qsp.su/gamestock/gamestock2.php"
+            android:key="url"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:inputType="textUri"
+            android:title="@string/stockUrl" />
         <ListPreference
             android:defaultValue="ru"
             android:entries="@array/langName"
@@ -26,7 +33,10 @@
             android:defaultValue="false"
             android:key="separator"
             android:summary="@string/separatorSummary"
-            android:title="@string/separator"/>
+            android:title="@string/separator" />
+        <Preference
+            android:title="@string/aboutApp"
+            android:key="showAbout" />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/textSettings">

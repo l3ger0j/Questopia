@@ -15,17 +15,17 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#include "mathops.h"
-#include "callbacks.h"
-#include "common.h"
-#include "errors.h"
-#include "game.h"
-#include "locations.h"
-#include "objects.h"
-#include "statements.h"
-#include "text.h"
-#include "time.h"
-#include "variables.h"
+#include "qsp/headers/mathops.h"
+#include "qsp/headers/callbacks.h"
+#include "qsp/headers/common.h"
+#include "qsp/headers/errors.h"
+#include "qsp/headers/game.h"
+#include "qsp/headers/locations.h"
+#include "qsp/headers/objects.h"
+#include "qsp/headers/statements.h"
+#include "qsp/headers/text.h"
+#include "qsp/headers/time.h"
+#include "qsp/headers/variables.h"
 
 QSPMathOperation qspOps[qspOpLast_Operation];
 QSPMathOpName qspOpsNames[QSP_OPSLEVELS][QSP_MAXOPSNAMES];
@@ -43,7 +43,7 @@ static int qspFunctionOpCode(QSP_CHAR *);
 static int qspOperatorOpCode(QSP_CHAR **);
 static QSP_CHAR *qspGetString(QSP_CHAR **);
 static QSP_CHAR *qspGetQString(QSP_CHAR **);
-static QSPVariant qspValue(int, QSPVariant *, int *, int *);
+static QSPVariant qspValue(int, QSPVariant *, const int *, const int *);
 static void qspCompileExprPushOpCode(int *, int *, int *, int *, int);
 static void qspAppendToCompiled(int, int *, QSPVariant *, int *, int *, int, QSPVariant);
 static int qspCompileExpression(QSP_CHAR *, QSPVariant *, int *, int *);
@@ -391,7 +391,7 @@ static QSP_CHAR *qspGetQString(QSP_CHAR **expr)
 	return qspGetNewText(buf + 1, (int)(pos - buf - 1));
 }
 
-static QSPVariant qspValue(int itemsCount, QSPVariant *compValues, int *compOpCodes, int *compArgsCounts)
+static QSPVariant qspValue(int itemsCount, QSPVariant *compValues, const int *compOpCodes, const int *compArgsCounts)
 {
 	int type;
 	QSPVariant stack[QSP_STACKSIZE], args[QSP_OPMAXARGS], tos;

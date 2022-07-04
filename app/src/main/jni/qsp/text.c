@@ -15,13 +15,13 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#include "text.h"
-#include "coding.h"
-#include "errors.h"
-#include "locations.h"
-#include "mathops.h"
-#include "variables.h"
-#include "variant.h"
+#include <qsp/headers/text.h>
+#include <qsp/headers/coding.h>
+#include <qsp/headers/errors.h>
+#include <qsp/headers/locations.h>
+#include <qsp/headers/mathops.h>
+#include <qsp/headers/variables.h>
+#include <qsp/headers/variant.h>
 
 int qspAddText(QSP_CHAR **dest, QSP_CHAR *val, int destLen, int valLen, QSP_BOOL isCreate)
 {
@@ -156,7 +156,7 @@ int qspStrsNComp(QSP_CHAR *str1, QSP_CHAR *str2, int maxLen)
 
 int qspStrsComp(QSP_CHAR *str1, QSP_CHAR *str2)
 {
-	int ret = 0;
+	int ret;
 	while (!(ret = (int)*str1 - *str2) && *str2)
 		++str1, ++str2;
 	if (ret < 0)
@@ -221,7 +221,7 @@ QSP_CHAR *qspStrPBrk(QSP_CHAR *str, QSP_CHAR *strCharSet)
 	return 0;
 }
 
-QSP_CHAR *qspInStrRChars(QSP_CHAR *str, QSP_CHAR *chars, QSP_CHAR *end)
+QSP_CHAR *qspInStrRChars(QSP_CHAR *str, QSP_CHAR *chars, const QSP_CHAR *end)
 {
 	QSP_CHAR *pos = 0;
 	while (*str)

@@ -27,8 +27,8 @@
  * SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "oniguruma.h"
+#include "qsp/onig/headers/config.h"
+#include "qsp/onig/headers/oniguruma.h"
 #include <stdio.h>
 
 extern const char*

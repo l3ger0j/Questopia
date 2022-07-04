@@ -15,14 +15,14 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#include "common.h"
-#include "actions.h"
-#include "errors.h"
-#include "game.h"
-#include "menu.h"
-#include "objects.h"
-#include "playlist.h"
-#include "variables.h"
+#include "qsp/headers/common.h"
+#include "qsp/headers/actions.h"
+#include "qsp/headers/errors.h"
+#include "qsp/headers/game.h"
+#include "qsp/headers/menu.h"
+#include "qsp/headers/objects.h"
+#include "qsp/headers/playlist.h"
+#include "qsp/headers/variables.h"
 
 static unsigned int qspRandX[55], qspRandY[256], qspRandZ;
 static int qspRandI, qspRandJ;
@@ -103,10 +103,10 @@ static unsigned int qspURand()
 
 int qspRand()
 {
-	int i = qspRandZ >> 24;
+	int i = (int) qspRandZ >> 24;
 	qspRandZ = qspRandY[i];
 	if (--qspRandI < 0) qspRandI = 54;
 	if (--qspRandJ < 0) qspRandJ = 54;
 	qspRandY[i] = qspRandX[qspRandJ] += qspRandX[qspRandI];
-	return qspRandZ & QSP_RANDMASK;
+	return (int) qspRandZ & QSP_RANDMASK;
 }

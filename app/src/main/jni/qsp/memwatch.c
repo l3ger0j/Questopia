@@ -115,7 +115,7 @@
 #include <setjmp.h>
 #include <time.h>
 #include <limits.h>
-#include "memwatch.h"
+#include <qsp/headers/memwatch.h>
 
 #ifndef toupper
 #include <ctype.h>

@@ -28,7 +28,7 @@
  * SUCH DAMAGE.
  */
 
-#include "../regenc.h"
+#include "qsp/onig/headers/regenc.h"
 
 #define ENC_CP1251_TO_LOWER_CASE(c) EncCP1251_ToLowerCaseTable[c]
 #define ENC_IS_CP1251_CTYPE(code,ctype) \

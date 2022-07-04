@@ -15,7 +15,7 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#include "errors.h"
+#include <qsp/headers/errors.h>
 
 int qspErrorNum = 0;
 int qspErrorLoc = -1;

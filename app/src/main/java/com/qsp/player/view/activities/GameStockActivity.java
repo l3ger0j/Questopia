@@ -2,7 +2,6 @@ package com.qsp.player.view.activities;
 
 import static android.content.Intent.ACTION_OPEN_DOCUMENT;
 import static android.content.Intent.ACTION_OPEN_DOCUMENT_TREE;
-import static com.qsp.player.utils.ColorUtil.getHexColor;
 import static com.qsp.player.utils.FileUtil.GAME_INFO_FILENAME;
 import static com.qsp.player.utils.FileUtil.createFile;
 import static com.qsp.player.utils.FileUtil.deleteDirectory;
@@ -10,9 +9,8 @@ import static com.qsp.player.utils.FileUtil.findFileOrDirectory;
 import static com.qsp.player.utils.FileUtil.getOrCreateDirectory;
 import static com.qsp.player.utils.FileUtil.isWritableDirectory;
 import static com.qsp.player.utils.FileUtil.isWritableFile;
+import static com.qsp.player.utils.LanguageUtil.setLocale;
 import static com.qsp.player.utils.PathUtil.removeExtension;
-import static com.qsp.player.utils.ViewUtil.getFontStyle;
-import static com.qsp.player.utils.ViewUtil.setLocale;
 import static com.qsp.player.utils.XmlUtil.objectToXml;
 
 import android.app.AlertDialog;
@@ -31,9 +29,7 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 import android.webkit.MimeTypeMap;
-import android.webkit.WebView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -90,15 +86,6 @@ public class GameStockActivity extends AppCompatActivity {
     private static final int TAB_LOCAL = 0;
     private static final int TAB_REMOTE = 1;
     private static final int TAB_ALL = 2;
-
-    private static final String ABOUT_TEMPLATE = "<html><head>\n" +
-            "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1\">\n" +
-            "<style type=\"text/css\">\n" +
-            "body{margin: 0; padding: 0; color: QSPTEXTCOLOR; background-color: QSPBACKCOLOR; max-width: 100%; font-size: QSPFONTSIZE; font-family: QSPFONTSTYLE; }\n" +
-            "a{color: QSPLINKCOLOR; }\n" +
-            "a:link{color: QSPLINKCOLOR; }\n" +
-            "table{font-size: QSPFONTSIZE; font-family: QSPFONTSTYLE; }\n" +
-            "</style></head><body>REPLACETEXT</body></html>";
 
     private static final Logger logger = LoggerFactory.getLogger(GameStockActivity.class);
 
@@ -316,6 +303,10 @@ public class GameStockActivity extends AppCompatActivity {
                 allStockViewModel.setGameDataArrayList(gameData);
                 break;
         }
+    }
+
+    private String getUrl () {
+        return settingsAdapter.url;
     }
 
     public void onItemClick(int position, String tag) {
@@ -625,9 +616,6 @@ public class GameStockActivity extends AppCompatActivity {
         if (itemId == R.id.menu_options) {
             showSettings();
             return true;
-        } else if (itemId == R.id.menu_about) {
-            showAboutDialog();
-            return true;
         } else if (itemId == R.id.menu_installfromzip) {
             showInstallGameDialog(InstallType.ZIP_ARCHIVE);
             return true;
@@ -674,28 +662,6 @@ public class GameStockActivity extends AppCompatActivity {
     private void showSettings() {
         Intent intent = new Intent(this, SettingsActivity.class);
         startActivity(intent);
-    }
-
-    private void showAboutDialog() {
-        View messageView = getLayoutInflater().inflate(R.layout.dialog_about, null, false);
-
-        String desc = ABOUT_TEMPLATE
-                .replace("QSPFONTSTYLE", getFontStyle(settingsAdapter.typeface))
-                .replace("QSPFONTSIZE", Integer.toString(settingsAdapter.fontSize))
-                .replace("QSPTEXTCOLOR", getHexColor(settingsAdapter.textColor))
-                .replace("QSPBACKCOLOR", getHexColor(settingsAdapter.backColor))
-                .replace("QSPLINKCOLOR", getHexColor(settingsAdapter.linkColor))
-                .replace("REPLACETEXT", getString(R.string.appDescription) + getString(R.string.appCredits));
-
-        WebView descView = messageView.findViewById(R.id.about_descrip);
-        descView.loadDataWithBaseURL("", desc, "text/html", "utf-8", "");
-
-        new AlertDialog.Builder(this)
-                .setPositiveButton(android.R.string.ok, (dialog, whichButton) -> {
-                })
-                .setView(messageView)
-                .create()
-                .show();
     }
 
     @Override
@@ -794,6 +760,7 @@ public class GameStockActivity extends AppCompatActivity {
 
         private LoadGameListAsyncTask(GameStockActivity activity) {
             this.activity = new WeakReference<>(activity);
+            remoteGameRepository.setStockURL(activity.getUrl());
         }
 
         @Override

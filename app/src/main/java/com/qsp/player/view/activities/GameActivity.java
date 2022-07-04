@@ -6,10 +6,10 @@ import static com.qsp.player.utils.ColorUtil.getHexColor;
 import static com.qsp.player.utils.FileUtil.findFileOrDirectory;
 import static com.qsp.player.utils.FileUtil.getOrCreateDirectory;
 import static com.qsp.player.utils.FileUtil.getOrCreateFile;
+import static com.qsp.player.utils.LanguageUtil.setLocale;
 import static com.qsp.player.utils.PathUtil.getExtension;
 import static com.qsp.player.utils.ThreadUtil.isMainThread;
 import static com.qsp.player.utils.ViewUtil.getFontStyle;
-import static com.qsp.player.utils.ViewUtil.setLocale;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
@@ -637,64 +637,34 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
         return (slot + 1) + ".sav";
     }
 
-    @SuppressLint("NonConstantResourceId")
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int i = item.getItemId();
-        switch (i) {
-            case R.id.menu_maindesc:
-                setActiveTab(TAB_MAIN_DESC_AND_ACTIONS);
-                return true;
-
-            case R.id.menu_inventory:
-                setActiveTab(TAB_OBJECTS);
-                return true;
-
-            case R.id.menu_varsdesc:
-                setActiveTab(TAB_VARS_DESC);
-                return true;
-
-            case R.id.menu_userinput:
-                libQspProxy.onInputAreaClicked();
-                return true;
-
-            case R.id.menu_gamestock:
-                promptCloseGame();
-                return true;
-
-            case R.id.menu_options:
-                Intent intent = new Intent();
-                intent.setClass(this, SettingsActivity.class);
-                startActivity(intent);
-                return true;
-
-            case R.id.menu_about:
-                showAboutDialog();
-                return true;
-
-            case R.id.menu_newgame:
-                libQspProxy.restartGame();
-                setActiveTab(TAB_MAIN_DESC_AND_ACTIONS);
-                return true;
-
-            case R.id.menu_loadgame:
-            case R.id.menu_savegame:
-                return true;
-
-            default:
-                return false;
-        }
-    }
-
-    private void showAboutDialog() {
-        View messageView = getLayoutInflater().inflate(R.layout.dialog_about, null, false);
-
-        new AlertDialog.Builder(this)
-                .setIcon(R.drawable.icon)
-                .setTitle(R.string.appName)
-                .setView(messageView)
-                .create()
-                .show();
+        if (i == R.id.menu_maindesc) {
+            setActiveTab(TAB_MAIN_DESC_AND_ACTIONS);
+            return true;
+        } else if (i == R.id.menu_inventory) {
+            setActiveTab(TAB_OBJECTS);
+            return true;
+        } else if (i == R.id.menu_varsdesc) {
+            setActiveTab(TAB_VARS_DESC);
+            return true;
+        } else if (i == R.id.menu_userinput) {
+            libQspProxy.onInputAreaClicked();
+            return true;
+        } else if (i == R.id.menu_gamestock) {
+            promptCloseGame();
+            return true;
+        } else if (i == R.id.menu_options) {
+            Intent intent = new Intent();
+            intent.setClass(this , SettingsActivity.class);
+            startActivity(intent);
+            return true;
+        } else if (i == R.id.menu_newgame) {
+            libQspProxy.restartGame();
+            setActiveTab(TAB_MAIN_DESC_AND_ACTIONS);
+            return true;
+        } else return i == R.id.menu_loadgame || i == R.id.menu_savegame;
     }
 
     private void selectNextTab() {

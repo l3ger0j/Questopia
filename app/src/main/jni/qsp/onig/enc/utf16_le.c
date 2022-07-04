@@ -27,7 +27,7 @@
  * SUCH DAMAGE.
  */
 
-#include "../regenc.h"
+#include "qsp/onig/headers/regenc.h"
 
 static const int EncLen_UTF16[] = {
   2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,

@@ -15,12 +15,12 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#include "variables.h"
-#include "coding.h"
-#include "errors.h"
-#include "locations.h"
-#include "mathops.h"
-#include "text.h"
+#include <qsp/headers/variables.h>
+#include <qsp/headers/coding.h>
+#include <qsp/headers/errors.h>
+#include <qsp/headers/locations.h>
+#include <qsp/headers/mathops.h>
+#include <qsp/headers/text.h>
 
 QSPVar qspVars[QSP_VARSCOUNT];
 
