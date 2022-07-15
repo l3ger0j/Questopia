@@ -117,6 +117,7 @@
     <string name="zoom_image">Увеличить изображение</string>
     <string name="image">Изображение</string>
     <string name="summaryURL">Текущее URL: -URL-</string>
+    <string name="plugin">Подключите расширение, чтобы загрузить список игр</string>
 </resources>
 
 

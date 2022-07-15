@@ -5,9 +5,9 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 
-import com.qsp.player.view.fragments.AllStockFragment;
-import com.qsp.player.view.fragments.LocalStockFragment;
-import com.qsp.player.view.fragments.RemoteStockFragment;
+import com.qsp.player.view.fragments.FragmentAll;
+import com.qsp.player.view.fragments.FragmentLocal;
+import com.qsp.player.view.fragments.FragmentRemote;
 
 public class StockFragmentAdapter extends FragmentStateAdapter {
     public StockFragmentAdapter(@NonNull FragmentActivity fragmentActivity) {
@@ -19,11 +19,11 @@ public class StockFragmentAdapter extends FragmentStateAdapter {
     public Fragment createFragment(int position) {
         switch (position) {
             case 1:
-                return new RemoteStockFragment();
+                return new FragmentRemote();
             case 2:
-                return new AllStockFragment();
+                return new FragmentAll();
             default:
-                return new LocalStockFragment();
+                return new FragmentLocal();
         }
     }
 

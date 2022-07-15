@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel;
 
 import com.qsp.player.view.activities.SettingsActivity;
 
-public class SettingsActivityViewModel extends ViewModel {
+public class SettingsActivityVM extends ViewModel {
 
     public ObservableField<SettingsActivity> settingsActivityObservableField =
             new ObservableField<>();

@@ -1,7 +1,6 @@
 package com.qsp.player.view.activities;
 
 import static com.qsp.player.utils.ColorUtil.getHexColor;
-import static com.qsp.player.utils.LanguageUtil.setLocale;
 import static com.qsp.player.utils.ViewUtil.getFontStyle;
 
 import android.app.AlertDialog;
@@ -21,7 +20,7 @@ import androidx.preference.PreferenceManager;
 import com.qsp.player.R;
 import com.qsp.player.utils.ViewUtil;
 import com.qsp.player.view.adapters.SettingsAdapter;
-import com.qsp.player.viewModel.viewModels.SettingsActivityViewModel;
+import com.qsp.player.viewModel.viewModels.SettingsActivityVM;
 
 import java.util.Objects;
 
@@ -43,12 +42,11 @@ public class SettingsActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        SettingsActivityViewModel settingsActivityViewModel = new ViewModelProvider(this)
-                .get(SettingsActivityViewModel.class);
-        settingsActivityViewModel.settingsActivityObservableField.set(this);
+        SettingsActivityVM settingsActivityVM = new ViewModelProvider(this)
+                .get(SettingsActivityVM.class);
+        settingsActivityVM.settingsActivityObservableField.set(this);
 
         loadSettings();
-        loadLocale();
         formationAboutDesc();
 
         getSupportFragmentManager().beginTransaction()
@@ -59,10 +57,6 @@ public class SettingsActivity extends AppCompatActivity {
     private void loadSettings() {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         settingsAdapter = SettingsAdapter.from(preferences);
-    }
-
-    private void loadLocale() {
-        setLocale(this, settingsAdapter.language);
     }
 
     private void formationAboutDesc() {

@@ -9,7 +9,7 @@ import com.qsp.player.view.activities.GameStockActivity;
 
 import java.util.ArrayList;
 
-public class AllStockFragmentViewModel extends ViewModel {
+public class FragmentAllVM extends ViewModel {
     private final MutableLiveData<ArrayList<GameData>> gameDataList;
 
     public ObservableField<GameStockActivity> activityObservableField =
@@ -23,7 +23,7 @@ public class AllStockFragmentViewModel extends ViewModel {
         gameDataList.postValue(gameDataArrayList);
     }
 
-    public AllStockFragmentViewModel () {
+    public FragmentAllVM() {
         gameDataList = new MutableLiveData<>();
     }
 }

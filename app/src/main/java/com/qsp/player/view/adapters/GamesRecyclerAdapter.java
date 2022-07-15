@@ -89,7 +89,7 @@ public class GamesRecyclerAdapter extends RecyclerView.Adapter<GamesRecyclerAdap
         }
 
         // gameSize
-        if (!gameData.fileSize.isEmpty()) {
+        if (gameData.fileSize != null) {
             holder.gameSize.setText(context.getString(R.string.fileSize).replace("-SIZE-",
                     Integer.toString(gameData.getFileSize() / 1024)));
         }

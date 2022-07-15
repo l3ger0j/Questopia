@@ -7,7 +7,7 @@ import com.qsp.player.dto.stock.GameData;
 
 import java.util.List;
 
-public class StockViewModel extends ViewModel {
+public class GameStockActivityVM extends ViewModel {
 
     private final MutableLiveData<List<GameData>> data = new MutableLiveData<>();
 
@@ -15,6 +15,6 @@ public class StockViewModel extends ViewModel {
         return data;
     }
 
-    public StockViewModel () {
+    public GameStockActivityVM() {
     }
 }

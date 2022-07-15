@@ -18,13 +18,9 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -54,23 +50,17 @@ import com.qsp.player.utils.ViewUtil;
 import com.qsp.player.view.adapters.SettingsAdapter;
 import com.qsp.player.view.adapters.StockFragmentAdapter;
 import com.qsp.player.viewModel.repository.LocalGameRepository;
-import com.qsp.player.viewModel.repository.RemoteGameRepository;
-import com.qsp.player.viewModel.viewModels.AllStockFragmentViewModel;
-import com.qsp.player.viewModel.viewModels.LocalStockFragmentViewModel;
-import com.qsp.player.viewModel.viewModels.RemoteStockFragmentViewModel;
-import com.qsp.player.viewModel.viewModels.StockViewModel;
+import com.qsp.player.viewModel.viewModels.FragmentAllVM;
+import com.qsp.player.viewModel.viewModels.FragmentLocalVM;
+import com.qsp.player.viewModel.viewModels.FragmentRemoteVM;
+import com.qsp.player.viewModel.viewModels.GameStockActivityVM;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStreamWriter;
-import java.lang.ref.WeakReference;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -97,18 +87,15 @@ public class GameStockActivity extends AppCompatActivity {
     private boolean showProgressDialog;
     private String currentLanguage = Locale.getDefault().getLanguage();
     private ProgressDialog progressDialog;
-    private ConnectivityManager connectivityManager;
     private Collection<GameData> remoteGameData;
     private File gamesDir;
     private GameData gameData;
-    private DownloadGameAsyncTask downloadTask;
-    private LoadGameListAsyncTask loadGameListTask;
     private InstallType lastInstallType = InstallType.ZIP_ARCHIVE;
 
-    private StockViewModel stockViewModel;
-    private AllStockFragmentViewModel allStockViewModel;
-    private LocalStockFragmentViewModel localStockViewModel;
-    private RemoteStockFragmentViewModel remoteStockViewModel;
+    private GameStockActivityVM gameStockActivityVM;
+    private FragmentAllVM allStockViewModel;
+    private FragmentLocalVM localStockViewModel;
+    private FragmentRemoteVM remoteStockViewModel;
     private final StockFragmentAdapter stockFragmentAdapter =
             new StockFragmentAdapter(this);
     private ViewPager2 stockPager;
@@ -120,16 +107,25 @@ public class GameStockActivity extends AppCompatActivity {
     public String getGameIdByPosition(int position, String tag) {
         switch (tag) {
             case "f0":
-                localStockViewModel.getGameData().observe(this ,
-                        gameDataArrayList -> gameData = gameDataArrayList.get(position));
+                localStockViewModel.getGameData().observe(this, gameDataArrayList -> {
+                    if (!gameDataArrayList.isEmpty() && gameDataArrayList.size() > position) {
+                        gameData = gameDataArrayList.get(position);
+                    }
+                });
                 break;
             case "f1":
-                remoteStockViewModel.getGameData().observe(this ,
-                        gameDataArrayList -> gameData = gameDataArrayList.get(position));
+                remoteStockViewModel.getGameData().observe(this , gameDataArrayList -> {
+                    if (!gameDataArrayList.isEmpty() && gameDataArrayList.size() > position) {
+                        gameData = gameDataArrayList.get(position);
+                    }
+                });
                 break;
             case "f2":
-                allStockViewModel.getGameData().observe(this ,
-                        gameDataArrayList -> gameData = gameDataArrayList.get(position));
+                allStockViewModel.getGameData().observe(this , gameDataArrayList -> {
+                    if (!gameDataArrayList.isEmpty() && gameDataArrayList.size() > position) {
+                        gameData = gameDataArrayList.get(position);
+                    }
+                });
                 break;
         }
         return gameData.id;
@@ -172,26 +168,24 @@ public class GameStockActivity extends AppCompatActivity {
 
         activityStockBinding = ActivityStockBinding.inflate(getLayoutInflater());
 
-        connectivityManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
-
         allStockViewModel =
-                new ViewModelProvider(this).get(AllStockFragmentViewModel.class);
+                new ViewModelProvider(this).get(FragmentAllVM.class);
         allStockViewModel.activityObservableField.set(this);
 
         localStockViewModel =
-                new ViewModelProvider(this).get(LocalStockFragmentViewModel.class);
+                new ViewModelProvider(this).get(FragmentLocalVM.class);
         localStockViewModel.activityObservableField.set(this);
 
         remoteStockViewModel =
-                new ViewModelProvider(this).get(RemoteStockFragmentViewModel.class);
+                new ViewModelProvider(this).get(FragmentRemoteVM.class);
         remoteStockViewModel.activityObservableField.set(this);
 
-        stockViewModel =
-                new ViewModelProvider(this).get(StockViewModel.class);
-        stockViewModel.getData().observe(GameStockActivity.this , gameData -> {
+        gameStockActivityVM =
+                new ViewModelProvider(this).get(GameStockActivityVM.class);
+        gameStockActivityVM.getData().observe(GameStockActivity.this , gameData -> {
             if (gameData != null) {
                 setRemoteGames(gameData);
-                updateProgressDialog(false, "", "", null);
+                updateProgressDialog(false, "", "");
             } else {
                 ViewUtil.showErrorDialog(GameStockActivity.this,
                         getString(R.string.loadGameListNetworkError));
@@ -231,21 +225,6 @@ public class GameStockActivity extends AppCompatActivity {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
                 tabPosition = tab.getPosition();
-                boolean tabHasRemoteGames = tabPosition == TAB_REMOTE ||
-                        tabPosition == TAB_ALL;
-                boolean gamesNotBeingLoaded = loadGameListTask == null ||
-                        loadGameListTask.getStatus() == AsyncTask.Status.FINISHED;
-                if (tabHasRemoteGames && gamesNotBeingLoaded) {
-                    if (isNetworkConnected()) {
-                        LoadGameListAsyncTask task = new LoadGameListAsyncTask(
-                                GameStockActivity.this);
-                        loadGameListTask = task;
-                        task.execute();
-                    } else {
-                        ViewUtil.showErrorDialog(GameStockActivity.this,
-                                getString(R.string.loadGameListNetworkError));
-                    }
-                }
                 setRecyclerAdapter();
             }
 
@@ -303,10 +282,6 @@ public class GameStockActivity extends AppCompatActivity {
                 allStockViewModel.setGameDataArrayList(gameData);
                 break;
         }
-    }
-
-    private String getUrl () {
-        return settingsAdapter.url;
     }
 
     public void onItemClick(int position, String tag) {
@@ -377,9 +352,6 @@ public class GameStockActivity extends AppCompatActivity {
         if (gameData.isInstalled()) {
             alertBuilder.setNeutralButton(getString(R.string.play), (dialog, which) -> playGame(gameData));
         }
-        if (gameData.hasRemoteUrl()) {
-            alertBuilder.setPositiveButton(gameData.isInstalled() ? getString(R.string.update) : getString(R.string.download), (dialog, which) -> downloadGame(gameData));
-        }
         alertBuilder.create().show();
     }
 
@@ -413,26 +385,8 @@ public class GameStockActivity extends AppCompatActivity {
         }
     }
 
-    private void downloadGame(GameData gameData) {
-        if (!isNetworkConnected()) {
-            ViewUtil.showErrorDialog(this, getString(R.string.downloadNetworkError));
-            return;
-        }
-        DownloadGameAsyncTask task = new DownloadGameAsyncTask(this, gameData);
-        task.execute();
-        downloadTask = task;
-    }
-
-    private boolean isNetworkConnected() {
-        NetworkInfo info = connectivityManager.getActiveNetworkInfo();
-        return info != null && info.isConnected();
-    }
-
     @Override
     protected void onDestroy() {
-        if (downloadTask != null) {
-            downloadTask.cancel(true);
-        }
         super.onDestroy();
         logger.info("GameStockActivity destroyed");
     }
@@ -544,22 +498,20 @@ public class GameStockActivity extends AppCompatActivity {
         installGame(file, lastInstallType, gameData);
     }
 
-    private boolean installGame(DocumentFile gameFile, InstallType type, GameData gameData) {
+    private void installGame(DocumentFile gameFile, InstallType type, GameData gameData) {
         if (!isWritableDirectory(gamesDir)) {
             logger.error("Games directory is not writable");
-            return false;
+            return;
         }
         GameInstaller installer = installers.get(type);
         if (installer == null) {
             logger.error(String.format("Installer not found by install type '%s'", type));
-            return false;
+            return;
         }
         try {
             doInstallGame(installer, gameFile, gameData);
-            return true;
         } catch (InstallException ex) {
             logger.error(ex.getMessage());
-            return false;
         }
     }
 
@@ -569,7 +521,7 @@ public class GameStockActivity extends AppCompatActivity {
             logger.error("GameData directory is not writable");
             return;
         }
-        updateProgressDialog(true, gameData.title, getString(R.string.installing), null);
+        updateProgressDialog(true, gameData.title, getString(R.string.installing));
 
         boolean installed = installer.install(gameData.title, gameFile, gameDir);
         if (installed) {
@@ -577,7 +529,7 @@ public class GameStockActivity extends AppCompatActivity {
             refreshGames();
         }
 
-        updateProgressDialog(false, "", "", null);
+        updateProgressDialog(false, "", "");
     }
 
     @NonNull
@@ -669,10 +621,9 @@ public class GameStockActivity extends AppCompatActivity {
         return super.onKeyDown(keyCode, event);
     }
 
-    private void updateProgressDialog(boolean show,
-                                      String title,
-                                      String message,
-                                      final Runnable onCancel) {
+    private void updateProgressDialog(boolean show ,
+                                      String title ,
+                                      String message) {
         showProgressDialog = show;
         if (title.isEmpty()) {
             if (progressDialog != null && progressDialog.isShowing()) {
@@ -690,14 +641,6 @@ public class GameStockActivity extends AppCompatActivity {
                 progressDialog.setCancelable(false);
                 progressDialog.setIndeterminate(true);
                 progressDialog.setCanceledOnTouchOutside(false);
-                if (onCancel != null) {
-                    progressDialog.setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.cancel), (dialog, which) -> {
-                        if (which == DialogInterface.BUTTON_NEGATIVE) {
-                            dialog.dismiss();
-                            onCancel.run();
-                        }
-                    });
-                }
                 if (!progressDialog.isShowing()) {
                     progressDialog.show();
                 }
@@ -752,208 +695,5 @@ public class GameStockActivity extends AppCompatActivity {
 
         return result.replaceAll("[:\"?*|<> ]", "_")
                 .replace("__", "_");
-    }
-
-    private static class LoadGameListAsyncTask extends AsyncTask<Void, Void, List<GameData>> {
-        private final WeakReference<GameStockActivity> activity;
-        private final RemoteGameRepository remoteGameRepository = new RemoteGameRepository();
-
-        private LoadGameListAsyncTask(GameStockActivity activity) {
-            this.activity = new WeakReference<>(activity);
-            remoteGameRepository.setStockURL(activity.getUrl());
-        }
-
-        @Override
-        protected void onPreExecute() {
-            GameStockActivity activity = this.activity.get();
-            if (activity != null) {
-                activity.updateProgressDialog(true, "", activity.getString(R.string.gameListLoading), null);
-            }
-        }
-
-        @Override
-        protected List<GameData> doInBackground(Void... params) {
-            return remoteGameRepository.getGames();
-        }
-
-        @Override
-        protected void onPostExecute(List<GameData> result) {
-            GameStockActivity activity = this.activity.get();
-            if (activity == null) {
-                return;
-            }
-            activity.updateProgressDialog(false, "", "", null);
-
-            if (result == null) {
-                String message = activity.getString(R.string.loadGameListError);
-                ViewUtil.showErrorDialog(activity, message);
-                return;
-            }
-            activity.setRemoteGames(result);
-        }
-    }
-
-    private static class DownloadGameAsyncTask extends AsyncTask<Void,
-            DownloadGameAsyncTask.DownloadPhase,
-            DownloadGameAsyncTask.DownloadResult> {
-        private final WeakReference<GameStockActivity> activity;
-        private final GameData gameData;
-
-        private volatile boolean cancelled = false;
-
-        private DownloadGameAsyncTask(GameStockActivity activity, GameData gameData) {
-            this.activity = new WeakReference<>(activity);
-            this.gameData = gameData;
-        }
-
-        @Override
-        protected void onPreExecute() {
-            GameStockActivity activity = this.activity.get();
-            if (activity != null) {
-                activity.updateProgressDialog(true, gameData.title, activity.getString(R.string.downloading), () -> cancelled = true);
-                activity.progressDialog.setIndeterminate(false);
-                activity.progressDialog.setMax(Integer.parseInt(gameData.fileSize));
-            }
-        }
-
-        @Override
-        protected DownloadResult doInBackground(Void... params) {
-            GameStockActivity activity = this.activity.get();
-            if (activity == null) {
-                return DownloadResult.DOWNLOAD_FAILED;
-            }
-
-            File cacheDir = activity.getCacheDir();
-            if (!isWritableDirectory(cacheDir)) {
-                logger.error("Cache directory is not writable");
-                return DownloadResult.DOWNLOAD_FAILED;
-            }
-
-            String archiveFilename = String.valueOf(SystemClock.elapsedRealtime()).concat("_game");
-            File archiveFile = createFile(cacheDir, archiveFilename);
-            if (archiveFile == null) {
-                logger.error("Failed to create an archive file: " + archiveFilename);
-                return DownloadResult.DOWNLOAD_FAILED;
-            }
-
-            boolean downloaded = download(archiveFile);
-            boolean installed = false;
-
-            if (downloaded) {
-                publishProgress(DownloadPhase.INSTALL);
-                InstallType installType = installTypeFromExtension(gameData.fileExt);
-                installed = activity.installGame(DocumentFile.fromFile(archiveFile), installType, gameData);
-            }
-            if (archiveFile.exists()) {
-                if (archiveFile.delete()) {
-                    logger.info("Archive was delete");
-                } else {
-                    logger.error("Archive was no delete");
-                }
-            }
-            if (!downloaded) {
-                return cancelled ? DownloadResult.CANCELLED : DownloadResult.DOWNLOAD_FAILED;
-            }
-            if (!installed) {
-                return DownloadResult.INSTALL_FAILED;
-            }
-
-            return DownloadResult.OK;
-        }
-
-        private boolean download(File zipFile) {
-            GameStockActivity activity = this.activity.get();
-            if (activity == null) {
-                return false;
-            }
-            try {
-                URL url = new URL(gameData.fileUrl);
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setRequestMethod("GET");
-                conn.connect();
-
-                try (InputStream in = conn.getInputStream()) {
-                    try (FileOutputStream out = new FileOutputStream(zipFile)) {
-                        byte[] b = new byte[8192];
-                        int totalBytesRead = 0;
-                        int bytesRead;
-                        while ((bytesRead = in.read(b)) > 0 ||
-                                activity.progressDialog.getProgress() < activity.progressDialog.getMax()) {
-                            if (cancelled) {
-                                logger.info("GameData download was cancelled");
-                                return false;
-                            }
-                            activity.progressDialog.incrementProgressBy(bytesRead);
-                            out.write(b, 0, bytesRead);
-                            totalBytesRead += bytesRead;
-                        }
-                        return totalBytesRead == gameData.getFileSize();
-                    }
-                }
-            } catch (IOException ex) {
-                logger.error("Failed to download a ZIP file", ex);
-                return false;
-            }
-        }
-
-        private InstallType installTypeFromExtension(String ext) {
-            switch (ext) {
-                case "zip":
-                    return InstallType.ZIP_ARCHIVE;
-                case "rar":
-                    return InstallType.RAR_ARCHIVE;
-                case "aqsp":
-                    return InstallType.AQSP_ARCHIVE;
-                default:
-                    throw new IllegalArgumentException("Unsupported file type: " + ext);
-            }
-        }
-
-        @Override
-        protected void onProgressUpdate(DownloadPhase... values) {
-            super.onProgressUpdate(values);
-            GameStockActivity activity = this.activity.get();
-            if (activity == null) {
-                return;
-            }
-            activity.updateProgressDialog(true, gameData.title, activity.getString(R.string.installing), null);
-        }
-
-        @Override
-        protected void onPostExecute(DownloadResult result) {
-            GameStockActivity activity = this.activity.get();
-            if (activity == null) {
-                return;
-            }
-            activity.updateProgressDialog(false, "", "", null);
-
-            String message;
-            switch (result) {
-                case OK:
-                    activity.refreshGames();
-                    activity.showGameInfo(gameData.id);
-                    break;
-                case DOWNLOAD_FAILED:
-                    message = activity.getString(R.string.downloadError).replace("-GAMENAME-", gameData.title);
-                    ViewUtil.showErrorDialog(activity, message);
-                    break;
-                case INSTALL_FAILED:
-                    message = activity.getString(R.string.installError).replace("-GAMENAME-", gameData.title);
-                    ViewUtil.showErrorDialog(activity, message);
-                    break;
-            }
-        }
-
-        private enum DownloadPhase {
-            DOWNLOAD,
-            INSTALL
-        }
-
-        private enum DownloadResult {
-            OK,
-            CANCELLED,
-            DOWNLOAD_FAILED,
-            INSTALL_FAILED
-        }
     }
 }

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageButton
+        android:id="@+id/imageButton"
+        android:layout_width="75dp"
+        android:layout_height="71dp"
+        android:minWidth="48dp"
+        android:minHeight="48dp"
+        android:scaleType="fitXY"
+        android:src="@drawable/add"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="ContentDescription" />
+
+    <TextView
+        android:layout_width="350dp"
+        android:layout_height="63dp"
+        android:layout_marginBottom="8dp"
+        android:text="@string/plugin"
+        android:textAlignment="center"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/imageButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>

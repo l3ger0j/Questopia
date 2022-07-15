@@ -9,13 +9,13 @@ import com.qsp.player.view.activities.GameStockActivity;
 
 import java.util.ArrayList;
 
-public class RemoteStockFragmentViewModel extends ViewModel {
+public class FragmentLocalVM extends ViewModel {
     private final MutableLiveData<ArrayList<GameData>> gameDataList;
 
     public ObservableField<GameStockActivity> activityObservableField =
             new ObservableField<>();
 
-    public RemoteStockFragmentViewModel() {
+    public FragmentLocalVM() {
         gameDataList = new MutableLiveData<>();
     }
 

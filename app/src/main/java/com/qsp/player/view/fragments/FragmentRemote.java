@@ -10,13 +10,13 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.qsp.player.databinding.FragmentStockAllBinding;
-import com.qsp.player.viewModel.viewModels.AllStockFragmentViewModel;
+import com.qsp.player.databinding.FragmentRemoteBinding;
+import com.qsp.player.viewModel.viewModels.FragmentRemoteVM;
 
-public class AllStockFragment extends Fragment {
-    private AllStockFragmentViewModel allViewModel;
+public class FragmentRemote extends Fragment {
+    private FragmentRemoteVM remoteViewModel;
 
-    public AllStockFragment() {
+    public FragmentRemote() {
     }
 
     @Nullable
@@ -24,16 +24,16 @@ public class AllStockFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater ,
                              @Nullable ViewGroup container ,
                              @Nullable Bundle savedInstanceState) {
-        com.qsp.player.databinding.FragmentStockAllBinding fragmentStockAllBinding =
-                FragmentStockAllBinding.inflate(getLayoutInflater());
+        com.qsp.player.databinding.FragmentRemoteBinding fragmentStockRemoteBinding =
+                FragmentRemoteBinding.inflate(getLayoutInflater());
+        remoteViewModel = new ViewModelProvider(requireActivity())
+                .get(FragmentRemoteVM.class);
 
-        allViewModel = new ViewModelProvider(requireActivity())
-                .get(AllStockFragmentViewModel.class);
-
-        return fragmentStockAllBinding.getRoot();
+        return fragmentStockRemoteBinding.getRoot();
     }
 
     @Override
     public void onViewCreated(@NonNull View view , @Nullable Bundle savedInstanceState) {
+
     }
 }

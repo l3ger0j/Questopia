@@ -12,20 +12,20 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.qsp.player.databinding.FragmentStockLocalBinding;
+import com.qsp.player.databinding.FragmentLocalBinding;
 import com.qsp.player.dto.stock.GameData;
 import com.qsp.player.view.adapters.GamesRecyclerAdapter;
 import com.qsp.player.view.adapters.RecyclerItemClickListener;
-import com.qsp.player.viewModel.viewModels.LocalStockFragmentViewModel;
+import com.qsp.player.viewModel.viewModels.FragmentLocalVM;
 
 import java.util.ArrayList;
 import java.util.Objects;
 
-public class LocalStockFragment extends Fragment {
-    private LocalStockFragmentViewModel localViewModel;
+public class FragmentLocal extends Fragment {
+    private FragmentLocalVM localViewModel;
     private RecyclerView mRecyclerView;
 
-    public LocalStockFragment() {
+    public FragmentLocal() {
     }
 
     @Nullable
@@ -33,11 +33,11 @@ public class LocalStockFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater ,
                              @Nullable ViewGroup container ,
                              @Nullable Bundle savedInstanceState) {
-        com.qsp.player.databinding.FragmentStockLocalBinding fragmentStockLocalBinding =
-                FragmentStockLocalBinding.inflate(getLayoutInflater());
+        com.qsp.player.databinding.FragmentLocalBinding fragmentStockLocalBinding =
+                FragmentLocalBinding.inflate(getLayoutInflater());
         mRecyclerView = fragmentStockLocalBinding.gamesLocal;
         localViewModel = new ViewModelProvider(requireActivity())
-                .get(LocalStockFragmentViewModel.class);
+                .get(FragmentLocalVM.class);
         localViewModel.getGameData().observe(getViewLifecycleOwner(), gameData);
         return fragmentStockLocalBinding.getRoot();
     }
