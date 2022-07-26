@@ -15,13 +15,11 @@ import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.preference.PreferenceManager;
 import android.text.format.DateFormat;
 import android.util.TypedValue;
 import android.view.GestureDetector;
@@ -57,9 +55,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.core.view.GestureDetectorCompat;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.qsp.player.QuestPlayerApplication;
 import com.qsp.player.R;
+import com.qsp.player.databinding.ActivityGameBinding;
 import com.qsp.player.model.libQSP.InterfaceConfiguration;
 import com.qsp.player.model.libQSP.LibQspProxy;
 import com.qsp.player.model.libQSP.QspListItem;
@@ -71,6 +71,7 @@ import com.qsp.player.model.service.GameContentResolver;
 import com.qsp.player.model.service.HtmlProcessor;
 import com.qsp.player.utils.ViewUtil;
 import com.qsp.player.view.adapters.SettingsAdapter;
+import com.qsp.player.viewModel.viewModels.GameActivityVM;
 
 import org.jetbrains.annotations.Contract;
 import org.slf4j.Logger;
@@ -156,16 +157,25 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
 
     // endregion Локация-счётчик
 
+    private GameActivityVM gameActivityVM;
+    private ActivityGameBinding activityGameBinding;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_game);
+
+        activityGameBinding = ActivityGameBinding.inflate(getLayoutInflater());
+
+        gameActivityVM = new ViewModelProvider(this).get(GameActivityVM.class);
+        settingsAdapter = gameActivityVM.loadSettings(this);
+
+        setContentView(activityGameBinding.getRoot());
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
         initServices();
         initControls();
-        loadSettings();
-        loadLocale();
+        settingsAdapter = gameActivityVM.loadSettings(this);
+        currentLanguage = gameActivityVM.loadLocale(this, settingsAdapter);
         initGame();
         setActiveTab(TAB_MAIN_DESC_AND_ACTIONS);
 
@@ -173,8 +183,8 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
     }
 
     private void initControls() {
-        layoutTop = findViewById(R.id.layout_top);
-        separatorView = findViewById(R.id.separator);
+        layoutTop = activityGameBinding.layoutTop;
+        separatorView = activityGameBinding.separator;
 
         initActionBar();
         initMainDescView();
@@ -184,12 +194,12 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
     }
 
     private void initActionBar() {
-        setSupportActionBar(findViewById(R.id.toolbar));
+        setSupportActionBar(activityGameBinding.toolbar);
         actionBar = getSupportActionBar();
     }
 
     private void initMainDescView() {
-        mainDescView = findViewById(R.id.main_desc);
+        mainDescView = activityGameBinding.mainDesc;
         mainDescView.setWebViewClient(new QspWebViewClient());
         mainDescView.setOnTouchListener(this::handleTouchEvent);
         WebSettings webViewSettings = mainDescView.getSettings();
@@ -201,7 +211,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
     }
 
     private void initActionsView() {
-        actionsView = findViewById(R.id.actions);
+        actionsView = activityGameBinding.actions;
         actionsView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         actionsView.setOnTouchListener(this::handleTouchEvent);
         actionsView.setOnItemClickListener((parent, view, position, id) -> libQspProxy.onActionClicked(position));
@@ -218,14 +228,14 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
     }
 
     private void initObjectsView() {
-        objectsView = findViewById(R.id.objects);
+        objectsView = activityGameBinding.objects;
         objectsView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         objectsView.setOnItemClickListener((parent, view, position, id) -> libQspProxy.onObjectSelected(position));
         objectsView.setOnTouchListener(this::handleTouchEvent);
     }
 
     private void initVarsDescView() {
-        varsDescView = findViewById(R.id.vars_desc);
+        varsDescView = activityGameBinding.varsDesc;
         varsDescView.setWebViewClient(new QspWebViewClient());
         varsDescView.setOnTouchListener(this::handleTouchEvent);
     }
@@ -261,11 +271,6 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
         libQspProxy.runGame(gameId, gameTitle, gameDir, gameFile);
     }
 
-    private void loadLocale() {
-        setLocale(this, settingsAdapter.language);
-        currentLanguage = settingsAdapter.language;
-    }
-
     private void setActiveTab(int tab) {
         switch (tab) {
             case TAB_MAIN_DESC_AND_ACTIONS:
@@ -295,19 +300,18 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
     }
 
     private void toggleMainDescAndActions(boolean show) {
-        findViewById(R.id.main_desc).setVisibility(show ? View.VISIBLE : View.GONE);
-
         boolean shouldShowActions = show && showActions;
-        findViewById(R.id.separator).setVisibility(shouldShowActions ? View.VISIBLE : View.GONE);
-        findViewById(R.id.actions).setVisibility(shouldShowActions ? View.VISIBLE : View.GONE);
+        activityGameBinding.mainDesc.setVisibility(show ? View.VISIBLE : View.GONE);
+        activityGameBinding.separator.setVisibility(shouldShowActions ? View.VISIBLE : View.GONE);
+        activityGameBinding.actions.setVisibility(shouldShowActions ? View.VISIBLE : View.GONE);
     }
 
     private void toggleObjects(boolean show) {
-        findViewById(R.id.objects).setVisibility(show ? View.VISIBLE : View.GONE);
+        activityGameBinding.objects.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
     private void toggleVarsDesc(boolean show) {
-        findViewById(R.id.vars_desc).setVisibility(show ? View.VISIBLE : View.GONE);
+        activityGameBinding.varsDesc.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
     private void setTitle(String title) {
@@ -316,7 +320,6 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
 
     private void updateTabIcons() {
         if (mainMenu == null) return;
-
         mainMenu.findItem(R.id.menu_inventory).setIcon(activeTab == TAB_OBJECTS ? R.drawable.tab_object : R.drawable.tab_object_alt);
         mainMenu.findItem(R.id.menu_maindesc).setIcon(activeTab == TAB_MAIN_DESC_AND_ACTIONS ? R.drawable.tab_main : R.drawable.tab_main_alt);
         mainMenu.findItem(R.id.menu_varsdesc).setIcon(activeTab == TAB_VARS_DESC ? R.drawable.tab_vars : R.drawable.tab_vars_alt);
@@ -343,7 +346,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
     public void onResume() {
         super.onResume();
 
-        loadSettings();
+        settingsAdapter = gameActivityVM.loadSettings(this);
         updateLocale();
         applySettings();
 
@@ -355,11 +358,6 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
 
             counterHandler.postDelayed(counterTask, counterInterval);
         }
-    }
-
-    private void loadSettings() {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        settingsAdapter = SettingsAdapter.from(preferences);
     }
 
     private void updateLocale() {
