@@ -1,13 +1,11 @@
 package com.qsp.player.view.activities;
 
-import static com.qsp.player.utils.Base64Util.decodeBase64;
 import static com.qsp.player.utils.ColorUtil.convertRgbaToBgra;
 import static com.qsp.player.utils.ColorUtil.getHexColor;
 import static com.qsp.player.utils.FileUtil.findFileOrDirectory;
 import static com.qsp.player.utils.FileUtil.getOrCreateDirectory;
 import static com.qsp.player.utils.FileUtil.getOrCreateFile;
 import static com.qsp.player.utils.LanguageUtil.setLocale;
-import static com.qsp.player.utils.PathUtil.getExtension;
 import static com.qsp.player.utils.ThreadUtil.isMainThread;
 import static com.qsp.player.utils.ViewUtil.getFontStyle;
 
@@ -32,12 +30,7 @@ import android.view.MotionEvent;
 import android.view.SubMenu;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.MimeTypeMap;
-import android.webkit.WebResourceRequest;
-import android.webkit.WebResourceResponse;
-import android.webkit.WebSettings;
 import android.webkit.WebView;
-import android.webkit.WebViewClient;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
@@ -49,12 +42,12 @@ import android.widget.TextView;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.core.view.GestureDetectorCompat;
+import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.qsp.player.QuestPlayerApplication;
@@ -78,8 +71,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -164,10 +155,13 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        activityGameBinding = ActivityGameBinding.inflate(getLayoutInflater());
+        activityGameBinding = DataBindingUtil.setContentView(this, R.layout.activity_game);
 
         gameActivityVM = new ViewModelProvider(this).get(GameActivityVM.class);
+        activityGameBinding.setGameViewModel(gameActivityVM);
         settingsAdapter = gameActivityVM.loadSettings(this);
+        gameActivityVM.setLibQspProxy(libQspProxy);
+        gameActivityVM.setGameContentResolver(gameContentResolver);
 
         setContentView(activityGameBinding.getRoot());
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
@@ -200,10 +194,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
 
     private void initMainDescView() {
         mainDescView = activityGameBinding.mainDesc;
-        mainDescView.setWebViewClient(new QspWebViewClient());
         mainDescView.setOnTouchListener(this::handleTouchEvent);
-        WebSettings webViewSettings = mainDescView.getSettings();
-        webViewSettings.setAllowFileAccess(true);
     }
 
     private boolean handleTouchEvent(View v, MotionEvent event) {
@@ -236,7 +227,6 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
 
     private void initVarsDescView() {
         varsDescView = activityGameBinding.varsDesc;
-        varsDescView.setWebViewClient(new QspWebViewClient());
         varsDescView.setOnTouchListener(this::handleTouchEvent);
     }
 
@@ -925,37 +915,6 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
     private enum SlotAction {
         LOAD,
         SAVE
-    }
-
-    private class QspWebViewClient extends WebViewClient {
-        @Override
-        public boolean shouldOverrideUrlLoading(WebView view,
-                                                @NonNull final String href) {
-            if (href.toLowerCase().startsWith("exec:")) {
-                String code = decodeBase64(href.substring(5));
-                libQspProxy.execute(code);
-            }
-            return true;
-        }
-
-        @Nullable
-        @Override
-        public WebResourceResponse shouldInterceptRequest(WebView view , WebResourceRequest request) {
-            Uri uri = request.getUrl();
-            if (uri.getScheme().startsWith("file")) {
-                try {
-                    File file = gameContentResolver.getFile(uri.toString().substring(8));
-                    String extension = getExtension(file.getName());
-                    String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
-                    InputStream in = GameActivity.this.getContentResolver().openInputStream(Uri.fromFile(file));
-                    return new WebResourceResponse(mimeType, null, in);
-                } catch (FileNotFoundException ex) {
-                    logger.error("File not found", ex);
-                    return null;
-                }
-            }
-            return super.shouldInterceptRequest(view , request);
-        }
     }
 
     private class QspItemAdapter extends ArrayAdapter<QspListItem> {

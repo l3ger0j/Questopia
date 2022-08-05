@@ -1,78 +1,89 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/layout_top"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:background="?attr/colorPrimary"
-        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-        app:titleTextAppearance="@style/TextAppearance.AppCompat.Small" />
+    <data>
+        <variable
+            name="gameViewModel"
+            type="com.qsp.player.viewModel.viewModels.GameActivityVM"
+            />
+    </data>
 
-    <WebView
-        android:id="@+id/main_desc"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:background="@color/web_background"
-        android:text=""
-        android:textColor="@color/web_text"
-        android:textSize="16sp"
-        app:layout_constraintBottom_toTopOf="@id/separator"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/toolbar"
-        app:layout_constraintVertical_weight="0.67" />
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_top"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
 
-    <View
-        android:id="@+id/separator"
-        android:layout_width="0dp"
-        android:layout_height="4dp"
-        android:background="@color/materialcolorpicker__grey"
-        app:layout_constraintBottom_toTopOf="@id/actions"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/main_desc" />
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:background="?attr/colorPrimary"
+            android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+            app:titleTextAppearance="@style/TextAppearance.AppCompat.Small" />
 
-    <ListView
-        android:id="@+id/actions"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/separator"
-        app:layout_constraintVertical_weight="0.33" />
+        <WebView
+            android:id="@+id/main_desc"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="@color/web_background"
+            android:text=""
+            android:textColor="@color/web_text"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toTopOf="@id/separator"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/toolbar"
+            app:layout_constraintVertical_weight="0.67"
+            app:setWebViewClient="@{gameViewModel.webViewClient}" />
 
-    <WebView
-        android:id="@+id/vars_desc"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:background="@color/web_background"
-        android:text=""
-        android:textColor="@color/web_text"
-        android:textSize="16sp"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/toolbar" />
+        <View
+            android:id="@+id/separator"
+            android:layout_width="0dp"
+            android:layout_height="4dp"
+            android:background="@color/materialcolorpicker__grey"
+            app:layout_constraintBottom_toTopOf="@id/actions"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/main_desc" />
 
-    <ListView
-        android:id="@+id/objects"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/toolbar" />
+        <ListView
+            android:id="@+id/actions"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/separator"
+            app:layout_constraintVertical_weight="0.33" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <WebView
+            android:id="@+id/vars_desc"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="@color/web_background"
+            android:text=""
+            android:textColor="@color/web_text"
+            android:textSize="16sp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/toolbar"
+            app:setWebViewClient="@{gameViewModel.webViewClient}" />
+
+        <ListView
+            android:id="@+id/objects"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/toolbar" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
