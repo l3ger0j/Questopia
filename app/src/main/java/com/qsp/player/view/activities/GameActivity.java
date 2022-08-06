@@ -79,11 +79,13 @@ import java.util.concurrent.CountDownLatch;
 
 @SuppressLint("ClickableViewAccessibility")
 public class GameActivity extends AppCompatActivity implements GameInterface, GestureDetector.OnGestureListener {
-    private static final int MAX_SAVE_SLOTS = 5;
 
+    private static final int MAX_SAVE_SLOTS = 5;
     private static final int TAB_MAIN_DESC_AND_ACTIONS = 0;
     private static final int TAB_OBJECTS = 1;
     private static final int TAB_VARS_DESC = 2;
+    private static final int LOAD = 0;
+    private static final int SAVE = 1;
 
     private static final String PAGE_HEAD_TEMPLATE = "<head>\n"
             + "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1\">\n"
@@ -148,8 +150,10 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
 
     // endregion Локация-счётчик
 
+    private int slotAction = 0;
     private GameActivityVM gameActivityVM;
     private ActivityGameBinding activityGameBinding;
+    private ActivityResultLauncher<Intent> resultLauncher;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -165,6 +169,34 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
 
         setContentView(activityGameBinding.getRoot());
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
+
+        resultLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    Uri uri;
+                    Intent data = result.getData();
+                    if (result.getResultCode() == RESULT_OK) {
+                        switch (slotAction) {
+                            case LOAD:
+                                if (data != null) {
+                                    uri = data.getData();
+                                    doWithCounterDisabled(() -> libQspProxy.loadGameState(uri));
+                                } else {
+                                    break;
+                                }
+                                break;
+                            case SAVE:
+                                if (data != null) {
+                                    uri = data.getData();
+                                    libQspProxy.saveGameState(uri);
+                                } else {
+                                    break;
+                                }
+                                break;
+                        }
+                    }
+                }
+        );
 
         initServices();
         initControls();
@@ -505,20 +537,20 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
 
         if (gameRunning) {
             MenuItem loadItem = menu.findItem(R.id.menu_loadgame);
-            addSaveSlotsSubMenu(loadItem, SlotAction.LOAD);
+            addSaveSlotsSubMenu(loadItem, LOAD);
 
             MenuItem saveItem = menu.findItem(R.id.menu_savegame);
-            addSaveSlotsSubMenu(saveItem, SlotAction.SAVE);
+            addSaveSlotsSubMenu(saveItem, SAVE);
         }
 
         return true;
     }
 
-    private void addSaveSlotsSubMenu(MenuItem parent, final SlotAction action) {
+    private void addSaveSlotsSubMenu(MenuItem parent, int action) {
         int id = parent.getItemId();
         mainMenu.removeItem(id);
 
-        int order = action == SlotAction.LOAD ? 2 : 3;
+        int order = action == LOAD ? 2 : 3;
         SubMenu subMenu = mainMenu.addSubMenu(R.id.menugroup_running, id, order, parent.getTitle());
         subMenu.setHeaderTitle(getString(R.string.selectSlot));
 
@@ -560,60 +592,35 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
             case LOAD:
                 item = subMenu.add(getString(R.string.loadFrom));
                 item.setOnMenuItemClickListener(item12 -> {
-                    startReadOrWriteSave(1);
+                    startReadOrWriteSave(LOAD);
                     return true;
                 });
                 break;
             case SAVE:
                 item = subMenu.add(getString(R.string.saveTo));
                 item.setOnMenuItemClickListener(item1 -> {
-                    startReadOrWriteSave(2);
+                    startReadOrWriteSave(SAVE);
                     return true;
                 });
                 break;
         }
     }
 
-    private void startReadOrWriteSave (int requestCode) {
-        ActivityResultLauncher<Intent> resultLauncher = registerForActivityResult(
-                new ActivityResultContracts.StartActivityForResult(),
-                result -> {
-                    Uri uri;
-                    Intent data = result.getData();
-                    if (result.getResultCode() == RESULT_OK) {
-                        switch (requestCode) {
-                            case 1:
-                                if (data != null) {
-                                    uri = data.getData();
-                                    doWithCounterDisabled(() -> libQspProxy.loadGameState(uri));
-                                } else {
-                                    break;
-                                }
-                                break;
-                            case 2:
-                                if (data != null) {
-                                    uri = data.getData();
-                                    libQspProxy.saveGameState(uri);
-                                } else {
-                                    break;
-                                }
-                                break;
-                        }
-                    }
-                }
-        );
+    private void startReadOrWriteSave (int slotAction) {
         Intent mIntent;
-        switch (requestCode) {
-            case 1:
+        switch (slotAction) {
+            case LOAD:
                 mIntent = new Intent(Intent.ACTION_GET_CONTENT);
                 mIntent.putExtra(Intent.ACTION_GET_CONTENT, true);
                 mIntent.setType("application/octet-stream");
+                this.slotAction = slotAction;
                 resultLauncher.launch(mIntent);
                 break;
-            case 2:
+            case SAVE:
                 mIntent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
                 mIntent.putExtra(Intent.EXTRA_TITLE, libQspProxy.getGameState().gameFile + ".sav");
                 mIntent.setType("application/octet-stream");
+                this.slotAction = slotAction;
                 resultLauncher.launch(mIntent);
                 break;
         }
@@ -911,11 +918,6 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
     }
 
     // endregion GestureDetector.OnGestureListener
-
-    private enum SlotAction {
-        LOAD,
-        SAVE
-    }
 
     private class QspItemAdapter extends ArrayAdapter<QspListItem> {
         private final int resource;

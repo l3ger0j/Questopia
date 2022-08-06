@@ -7,6 +7,7 @@
             android:defaultValue="http://qsp.su/gamestock/gamestock2.php"
             android:key="url"
             android:selectAllOnFocus="true"
+            android:enabled="false"
             android:singleLine="true"
             android:inputType="textUri"
             android:title="@string/stockUrl" />

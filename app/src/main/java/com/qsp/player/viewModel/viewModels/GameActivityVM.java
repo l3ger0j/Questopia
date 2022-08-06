@@ -95,4 +95,6 @@ public class GameActivityVM extends AndroidViewModel {
         setLocale(context, settingsAdapter.language);
         return settingsAdapter.language;
     }
+
+
 }

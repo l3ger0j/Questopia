@@ -15,7 +15,7 @@
             android:contentDescription="@string/varsDescContentDesc"
             android:icon="@drawable/tab_vars"
             android:title="@string/varsDesc"
-            app:showAsAction="always" />
+            app:showAsAction="ifRoom" />
         <item
             android:id="@+id/menu_inventory"
             android:contentDescription="@string/inventoryContentDesc"
@@ -27,7 +27,7 @@
             android:contentDescription="@string/userInputContentDesc"
             android:icon="@drawable/tab_input"
             android:title="@string/userInput"
-            app:showAsAction="always" />
+            app:showAsAction="ifRoom" />
         <item
             android:id="@+id/menu_newgame"
             android:orderInCategory="1"
