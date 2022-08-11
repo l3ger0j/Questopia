@@ -61,13 +61,13 @@ public class FragmentLocal extends Fragment {
                     @Override
                     public void onItemClick(View view , int position) {
                         Objects.requireNonNull(localViewModel.activityObservableField
-                                .get()).onItemClick(position, getTag());
+                                .get()).onItemClick(position);
                     }
 
                     @Override
                     public void onLongItemClick(View view , int position) {
                         Objects.requireNonNull(localViewModel.activityObservableField
-                                .get()).onLongItemClick(position, getTag());
+                                .get()).onLongItemClick(position);
                     }
                 }));
     }

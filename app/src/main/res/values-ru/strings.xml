@@ -64,21 +64,14 @@
     <string name="lang">Язык</string>
     <string name="langSummary">Выберите язык интерфейса</string>
     <string name="actsHeight">Высота списка действий</string>
-    <string name="stockUrl">URL на API магазина</string>
     <string name="actsHeightSummary">Соотношение высоты списка действий к высоте экрана</string>
     <string name="closeToApply">Закройте настройки для применения изменений</string>
 
     <string name="error">Ошибка</string>
     <string name="gamesDirError">Невозможно создать или открыть папку с играми.</string>
-    <string name="loadGameListNetworkError">Список игр не может быть загружен. Проверьте ваше соединение с интернетом.</string>
-    <string name="loadGameListError">Список игр не может быть загружен.</string>
-    <string name="downloadNetworkError">Невозможно скачать игру. Проверьте ваше соединение с интернетом.</string>
-    <string name="downloadError">Невозможно скачать игру -GAMENAME-.</string>
     <string name="installError">Невозможно установить игру -GAMENAME-.</string>
     <string name="noGameFilesError">Файлы игры не найдены после установки.</string>
     <string name="tabLocal">Загружено</string>
-    <string name="tabRemote">Сайт</string>
-    <string name="tabAll">Все</string>
     <string name="inventory">Инвентарь</string>
     <string name="inventoryContentDesc">Перейти к инвентарю</string>
     <string name="mainDesc">Описание</string>
@@ -112,8 +105,7 @@
     <string name="promptCloseGame">Уверены, что хотите закрыть игру?</string>
     <string name="zoom_image">Увеличить изображение</string>
     <string name="image">Изображение</string>
-    <string name="summaryURL">Текущее URL: -URL-</string>
-    <string name="plugin">Подключите расширение, чтобы загрузить список игр</string>
+    <string name="plugin">Подключить расширение, чтобы загрузить список игр</string>
 </resources>
 
 

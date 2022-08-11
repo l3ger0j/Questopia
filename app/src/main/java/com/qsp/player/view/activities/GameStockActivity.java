@@ -33,10 +33,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.preference.PreferenceManager;
-import androidx.viewpager2.widget.ViewPager2;
 
-import com.google.android.material.tabs.TabLayout;
-import com.google.android.material.tabs.TabLayoutMediator;
 import com.qsp.player.R;
 import com.qsp.player.databinding.ActivityStockBinding;
 import com.qsp.player.dto.stock.GameData;
@@ -48,12 +45,9 @@ import com.qsp.player.model.install.InstallException;
 import com.qsp.player.model.install.InstallType;
 import com.qsp.player.utils.ViewUtil;
 import com.qsp.player.view.adapters.SettingsAdapter;
-import com.qsp.player.view.adapters.StockFragmentAdapter;
+import com.qsp.player.view.fragments.FragmentLocal;
 import com.qsp.player.viewModel.repository.LocalGameRepository;
-import com.qsp.player.viewModel.viewModels.FragmentAllVM;
 import com.qsp.player.viewModel.viewModels.FragmentLocalVM;
-import com.qsp.player.viewModel.viewModels.FragmentRemoteVM;
-import com.qsp.player.viewModel.viewModels.GameStockActivityVM;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,16 +60,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
 public class GameStockActivity extends AppCompatActivity {
     private static final int REQUEST_CODE_INSTALL_GAME = 1;
-
-    private static final int TAB_LOCAL = 0;
-    private static final int TAB_REMOTE = 1;
-    private static final int TAB_ALL = 2;
 
     private static final Logger logger = LoggerFactory.getLogger(GameStockActivity.class);
 
@@ -87,47 +76,20 @@ public class GameStockActivity extends AppCompatActivity {
     private boolean showProgressDialog;
     private String currentLanguage = Locale.getDefault().getLanguage();
     private ProgressDialog progressDialog;
-    private Collection<GameData> remoteGameData;
     private File gamesDir;
     private GameData gameData;
     private InstallType lastInstallType = InstallType.ZIP_ARCHIVE;
 
-    private GameStockActivityVM gameStockActivityVM;
-    private FragmentAllVM allStockViewModel;
     private FragmentLocalVM localStockViewModel;
-    private FragmentRemoteVM remoteStockViewModel;
-    private final StockFragmentAdapter stockFragmentAdapter =
-            new StockFragmentAdapter(this);
-    private ViewPager2 stockPager;
-
-    private int tabPosition;
 
     private ActivityStockBinding activityStockBinding;
 
-    public String getGameIdByPosition(int position, String tag) {
-        switch (tag) {
-            case "f0":
-                localStockViewModel.getGameData().observe(this, gameDataArrayList -> {
-                    if (!gameDataArrayList.isEmpty() && gameDataArrayList.size() > position) {
-                        gameData = gameDataArrayList.get(position);
-                    }
-                });
-                break;
-            case "f1":
-                remoteStockViewModel.getGameData().observe(this , gameDataArrayList -> {
-                    if (!gameDataArrayList.isEmpty() && gameDataArrayList.size() > position) {
-                        gameData = gameDataArrayList.get(position);
-                    }
-                });
-                break;
-            case "f2":
-                allStockViewModel.getGameData().observe(this , gameDataArrayList -> {
-                    if (!gameDataArrayList.isEmpty() && gameDataArrayList.size() > position) {
-                        gameData = gameDataArrayList.get(position);
-                    }
-                });
-                break;
-        }
+    public String getGameIdByPosition(int position) {
+        localStockViewModel.getGameData().observe(this, gameDataArrayList -> {
+            if (!gameDataArrayList.isEmpty() && gameDataArrayList.size() > position) {
+                gameData = gameDataArrayList.get(position);
+            }
+        });
         return gameData.id;
     }
 
@@ -150,11 +112,6 @@ public class GameStockActivity extends AppCompatActivity {
         return gameData;
     }
 
-    private void setRemoteGames(List<GameData> gameData) {
-        remoteGameData = gameData;
-        refreshGames();
-    }
-
     public GameStockActivity() {
         installers.put(InstallType.ZIP_ARCHIVE, new ArchiveGameInstaller(this, ArchiveType.ZIP));
         installers.put(InstallType.RAR_ARCHIVE, new ArchiveGameInstaller(this, ArchiveType.RAR));
@@ -168,34 +125,20 @@ public class GameStockActivity extends AppCompatActivity {
 
         activityStockBinding = ActivityStockBinding.inflate(getLayoutInflater());
 
-        allStockViewModel =
-                new ViewModelProvider(this).get(FragmentAllVM.class);
-        allStockViewModel.activityObservableField.set(this);
-
         localStockViewModel =
                 new ViewModelProvider(this).get(FragmentLocalVM.class);
         localStockViewModel.activityObservableField.set(this);
 
-        remoteStockViewModel =
-                new ViewModelProvider(this).get(FragmentRemoteVM.class);
-        remoteStockViewModel.activityObservableField.set(this);
+        // GameStockActivityVM gameStockActivityVM = new ViewModelProvider(this).get(GameStockActivityVM.class);
 
-        gameStockActivityVM =
-                new ViewModelProvider(this).get(GameStockActivityVM.class);
-        gameStockActivityVM.getData().observe(GameStockActivity.this , gameData -> {
-            if (gameData != null) {
-                setRemoteGames(gameData);
-                updateProgressDialog(false, "", "");
-            } else {
-                ViewUtil.showErrorDialog(GameStockActivity.this,
-                        getString(R.string.loadGameListNetworkError));
-            }
-        });
+        if (savedInstanceState == null) {
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.fragment_container, FragmentLocal.class, null)
+                    .commit();
+        }
 
         loadSettings();
         loadLocale();
-        initViewPager();
-        initTabLayout();
 
         logger.info("GameStockActivity created");
 
@@ -213,84 +156,26 @@ public class GameStockActivity extends AppCompatActivity {
         currentLanguage = settingsAdapter.language;
     }
 
-    private void initViewPager() {
-        stockPager = activityStockBinding.stockViewPager;
-        stockPager.setAdapter(stockFragmentAdapter);
-    }
-
-    private void initTabLayout() {
-        TabLayout tabLayout = activityStockBinding.stockTabLayout;
-
-        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-            @Override
-            public void onTabSelected(TabLayout.Tab tab) {
-                tabPosition = tab.getPosition();
-                setRecyclerAdapter();
-            }
-
-            @Override
-            public void onTabUnselected(TabLayout.Tab tab) {
-
-            }
-
-            @Override
-            public void onTabReselected(TabLayout.Tab tab) {
-
-            }
-        });
-
-        new TabLayoutMediator(
-                tabLayout ,
-                stockPager ,
-                (tab , position) -> {
-                    switch (position) {
-                        case TAB_LOCAL:
-                            tab.setText(R.string.tabLocal);
-                            break;
-                        case TAB_REMOTE:
-                            tab.setText(R.string.tabRemote);
-                            break;
-                        case TAB_ALL:
-                            tab.setText(R.string.tabAll);
-                    }
-                }
-        ).attach();
-    }
-
     private void setRecyclerAdapter () {
         ArrayList<GameData> gameData = getSortedGames();
         ArrayList<GameData> localGameData = new ArrayList<>();
-        ArrayList<GameData> remoteGameData = new ArrayList<>();
 
         for (GameData data : gameData) {
             if (data.isInstalled()) {
                 localGameData.add(data);
             }
-            if (data.hasRemoteUrl()) {
-                remoteGameData.add(data);
-            }
         }
 
-        switch (tabPosition) {
-            case 0:
-                localStockViewModel.setGameDataArrayList(localGameData);
-                break;
-            case 1:
-                remoteStockViewModel.setGameDataArrayList(remoteGameData);
-                break;
-            case 2:
-                allStockViewModel.setGameDataArrayList(gameData);
-                break;
-        }
+        localStockViewModel.setGameDataArrayList(localGameData);
     }
 
-    public void onItemClick(int position, String tag) {
-        String gameId = getGameIdByPosition(position, tag);
+    public void onItemClick(int position) {
+        String gameId = getGameIdByPosition(position);
         showGameInfo(gameId);
     }
 
-    public void onLongItemClick(int position, String tag) {
-        String gameId = getGameIdByPosition(position, tag);
+    public void onLongItemClick(int position) {
+        String gameId = getGameIdByPosition(position);
         GameData game = gamesMap.get(gameId);
         if (game != null) {
             if (game.isInstalled()) {
@@ -409,18 +294,10 @@ public class GameStockActivity extends AppCompatActivity {
 
         setLocale(this, settingsAdapter.language);
         setTitle(getString(R.string.gameStock));
-        refreshTabLayout();
+        refreshGames();
         invalidateOptionsMenu();
 
         currentLanguage = settingsAdapter.language;
-    }
-
-    private void refreshTabLayout() {
-        TabLayout tabLayout = activityStockBinding.stockTabLayout;
-        Objects.requireNonNull(tabLayout.getTabAt(2)).setText(getString(R.string.tabAll));
-        Objects.requireNonNull(tabLayout.getTabAt(1)).setText(getString(R.string.tabRemote));
-        Objects.requireNonNull(tabLayout.getTabAt(0)).setText(getString(R.string.tabLocal));
-        refreshGames();
     }
 
     private void refreshGamesDirectory() {
@@ -443,11 +320,6 @@ public class GameStockActivity extends AppCompatActivity {
 
     private void refreshGames() {
         gamesMap.clear();
-        if (remoteGameData != null) {
-            for (GameData gameData : remoteGameData) {
-                gamesMap.put(gameData.id, gameData);
-            }
-        }
         for (GameData localGameData : localGameRepository.getGames()) {
             GameData remoteGameData = gamesMap.get(localGameData.id);
             if (remoteGameData != null) {

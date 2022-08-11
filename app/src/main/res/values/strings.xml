@@ -61,7 +61,6 @@
     <string name="linkColor">Link Color</string>
     <string name="sound">Sound</string>
     <string name="soundSummary">Play music and sounds</string>
-    <string name="stockUrl">Stock API URL</string>
     <string name="lang">Language</string>
     <string name="langSummary">Choose display language</string>
     <string name="actsHeight">Actions List Height</string>
@@ -70,15 +69,9 @@
 
     <string name="error">Error</string>
     <string name="gamesDirError">Unable to create or open games directory.</string>
-    <string name="loadGameListNetworkError">The game list could not be loaded. Check your internet connection.</string>
-    <string name="loadGameListError">The game list could not be loaded.</string>
-    <string name="downloadNetworkError">The game could not be loaded. Check your internet connection.</string>
-    <string name="downloadError">Could not download game -GAMENAME-.</string>
     <string name="installError">Could not install game -GAMENAME-.</string>
     <string name="noGameFilesError">Game files not found after installation.</string>
-    <string name="tabAll">All</string>
     <string name="tabLocal">Local</string>
-    <string name="tabRemote">Remote</string>
     <string name="inventory">Inventory</string>
     <string name="inventoryContentDesc">Go to inventory</string>
     <string name="mainDesc">Description</string>
@@ -102,7 +95,6 @@
     <string name="pub_data">Published: -PUB_DATA-</string>
     <string name="mod_data">Modified: -MOD_DATA-</string>
     <string name="deleteGameQuery">Delete game -GAMENAME-?</string>
-    <string name="summaryURL">Current URL: -URL-</string>
     <string name="close">Close</string>
     <string name="selectGameFile">Select a game file to run</string>
     <string name="cancel">Cancel</string>

@@ -12,7 +12,6 @@ import android.webkit.WebView;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.preference.EditTextPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
@@ -50,7 +49,7 @@ public class SettingsActivity extends AppCompatActivity {
         formationAboutDesc();
 
         getSupportFragmentManager().beginTransaction()
-                .replace(android.R.id.content, new SettingsFragment(mDesc, settingsAdapter.url))
+                .replace(android.R.id.content, new SettingsFragment(mDesc))
                 .commit();
     }
 
@@ -73,11 +72,9 @@ public class SettingsActivity extends AppCompatActivity {
             implements SharedPreferences.OnSharedPreferenceChangeListener {
 
         private final String desc;
-        private final String url;
 
-        SettingsFragment (String desc, String url) {
+        SettingsFragment (String desc) {
             this.desc = desc;
-            this.url = url;
         }
 
         @Override
@@ -103,15 +100,6 @@ public class SettingsActivity extends AppCompatActivity {
                             .show();
                     return true;
                 });
-            }
-
-            StringBuilder urlSummary = new StringBuilder();
-            if (!url.isEmpty()) {
-                urlSummary.append(getString(R.string.summaryURL).replace("-URL-", url));
-            }
-            EditTextPreference urlPref = findPreference("url");
-            if (urlPref != null) {
-                urlPref.setSummary(urlSummary);
             }
         }
 

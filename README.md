@@ -9,3 +9,12 @@ The differences between this fork and the parent fork are the same, except:
 2. Added the ability to "disable" the separator
 3. Added a separate ProgressDialog for downloading game and for loading list games
 4. Added the "fork" item in "About Quest Player Android"
+
+
+## Future plans
+
+- [] Improved RecyclerView + ActionMode + FAB (this will improve navigation in the application) + Multiple styles;
+- [] Saving the state when turning the smartphone (i don't even know how to do it, so this is the most difficult point);
+- [] To implement the ability to connect a plugin to download a list of games (also quite a difficult point, because I have no experience using, for example, AIDL);
+- [] Implement downloading icons and text descriptions for games installed locally (for which me will need to implement the previous paragraph, lol);
+- [] Move the entire native part to the plugin (to make it easier to update it).
