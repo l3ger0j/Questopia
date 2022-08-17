@@ -8,7 +8,7 @@
         android:icon="@drawable/icon"
         android:label="@string/appName"
         android:largeHeap="true"
-        android:theme="@style/Theme.AppCompat"
+        android:theme="@style/Theme.QSP.Translucent"
         tools:targetApi="m">
 
         <activity
@@ -26,7 +26,7 @@
             android:name=".view.activities.GameActivity"
             android:alwaysRetainTaskState="true"
             android:screenOrientation="fullSensor"
-            android:theme="@style/Theme.AppCompat.NoActionBar" />
+            android:theme="@style/Theme.QSP.Translucent.NoActionBar" />
 
         <activity
             android:name=".view.activities.ImageBoxActivity"

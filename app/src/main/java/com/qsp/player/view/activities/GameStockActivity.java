@@ -2,16 +2,12 @@ package com.qsp.player.view.activities;
 
 import static android.content.Intent.ACTION_OPEN_DOCUMENT;
 import static android.content.Intent.ACTION_OPEN_DOCUMENT_TREE;
-import static com.qsp.player.utils.FileUtil.GAME_INFO_FILENAME;
-import static com.qsp.player.utils.FileUtil.createFile;
 import static com.qsp.player.utils.FileUtil.deleteDirectory;
-import static com.qsp.player.utils.FileUtil.findFileOrDirectory;
 import static com.qsp.player.utils.FileUtil.getOrCreateDirectory;
 import static com.qsp.player.utils.FileUtil.isWritableDirectory;
-import static com.qsp.player.utils.FileUtil.isWritableFile;
 import static com.qsp.player.utils.LanguageUtil.setLocale;
 import static com.qsp.player.utils.PathUtil.removeExtension;
-import static com.qsp.player.utils.XmlUtil.objectToXml;
+import static com.qsp.player.viewModel.viewModels.GameStockActivityVM.normalizeGameFolderName;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -25,15 +21,20 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.webkit.MimeTypeMap;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.preference.PreferenceManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.qsp.player.R;
 import com.qsp.player.databinding.ActivityStockBinding;
 import com.qsp.player.dto.stock.GameData;
@@ -48,13 +49,12 @@ import com.qsp.player.view.adapters.SettingsAdapter;
 import com.qsp.player.view.fragments.FragmentLocal;
 import com.qsp.player.viewModel.repository.LocalGameRepository;
 import com.qsp.player.viewModel.viewModels.FragmentLocalVM;
+import com.qsp.player.viewModel.viewModels.GameStockActivityVM;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -64,8 +64,6 @@ import java.util.Locale;
 import java.util.Objects;
 
 public class GameStockActivity extends AppCompatActivity {
-    private static final int REQUEST_CODE_INSTALL_GAME = 1;
-
     private static final Logger logger = LoggerFactory.getLogger(GameStockActivity.class);
 
     private final HashMap<String, GameData> gamesMap = new HashMap<>();
@@ -80,9 +78,19 @@ public class GameStockActivity extends AppCompatActivity {
     private GameData gameData;
     private InstallType lastInstallType = InstallType.ZIP_ARCHIVE;
 
+    private GameStockActivityVM gameStockActivityVM;
     private FragmentLocalVM localStockViewModel;
 
     private ActivityStockBinding activityStockBinding;
+    private ActivityResultLauncher<Intent> resultLauncher;
+
+    private boolean isFABOpen;
+
+    private FloatingActionButton mFAB;
+    private ExtendedFloatingActionButton fab1;
+    private ExtendedFloatingActionButton fab2;
+    private ExtendedFloatingActionButton fab3;
+    private RecyclerView mRecyclerView;
 
     public String getGameIdByPosition(int position) {
         localStockViewModel.getGameData().observe(this, gameDataArrayList -> {
@@ -112,6 +120,19 @@ public class GameStockActivity extends AppCompatActivity {
         return gameData;
     }
 
+    private void setRecyclerAdapter () {
+        ArrayList<GameData> gameData = getSortedGames();
+        ArrayList<GameData> localGameData = new ArrayList<>();
+
+        for (GameData data : gameData) {
+            if (data.isInstalled()) {
+                localGameData.add(data);
+            }
+        }
+
+        localStockViewModel.setGameDataArrayList(localGameData);
+    }
+
     public GameStockActivity() {
         installers.put(InstallType.ZIP_ARCHIVE, new ArchiveGameInstaller(this, ArchiveType.ZIP));
         installers.put(InstallType.RAR_ARCHIVE, new ArchiveGameInstaller(this, ArchiveType.RAR));
@@ -125,17 +146,73 @@ public class GameStockActivity extends AppCompatActivity {
 
         activityStockBinding = ActivityStockBinding.inflate(getLayoutInflater());
 
+        mFAB = activityStockBinding.floatingActionButton;
+        fab1 = activityStockBinding.floatingActionButton1;
+        fab2 = activityStockBinding.floatingActionButton2;
+        fab3 = activityStockBinding.floatingActionButton3;
+
+        mFAB.setOnClickListener(onClickListener);
+        fab1.setOnClickListener(onClickListener);
+        fab2.setOnClickListener(onClickListener);
+        fab3.setOnClickListener(onClickListener);
+
         localStockViewModel =
                 new ViewModelProvider(this).get(FragmentLocalVM.class);
         localStockViewModel.activityObservableField.set(this);
+        mRecyclerView = localStockViewModel.recyclerViewObservableField.get();
+        if (mRecyclerView != null) {
+            mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+                @Override
+                public void onScrollStateChanged(@NonNull RecyclerView recyclerView , int newState) {
+                    if (newState == RecyclerView.SCROLL_STATE_IDLE)
+                    {
+                        mFAB.show();
+                    }
 
-        // GameStockActivityVM gameStockActivityVM = new ViewModelProvider(this).get(GameStockActivityVM.class);
+                    super.onScrollStateChanged(recyclerView, newState);
+                }
+
+                @Override
+                public void onScrolled(@NonNull RecyclerView recyclerView , int dx , int dy) {
+                    if (dy > 0 ||dy<0 && mFAB.isShown())
+                    {
+                        mFAB.hide();
+                    }
+                }
+            });
+        }
+
+        gameStockActivityVM = new ViewModelProvider(this).get(GameStockActivityVM.class);
 
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.fragment_container, FragmentLocal.class, null)
                     .commit();
         }
+
+        resultLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    Uri uri;
+                    DocumentFile file;
+                    if (result.getResultCode() == RESULT_OK) {
+                        if ((uri = Objects.requireNonNull(result.getData()).getData()) == null) {
+                            logger.error("GameData archive or directory is not selected");
+                        }
+                        if (lastInstallType == InstallType.FOLDER) {
+                            file = DocumentFile.fromTreeUri(this, Objects.requireNonNull(uri));
+                        } else {
+                            file = DocumentFile.fromSingleUri(this, Objects.requireNonNull(uri));
+                        }
+                        assert file != null;
+                        String gameName = removeExtension(Objects.requireNonNull(file.getName()));
+                        GameData gameData = new GameData();
+                        gameData.id = gameName;
+                        gameData.title = gameName;
+                        installGame(file, lastInstallType, gameData);
+                    }
+                }
+        );
 
         loadSettings();
         loadLocale();
@@ -144,6 +221,66 @@ public class GameStockActivity extends AppCompatActivity {
 
         setContentView(activityStockBinding.getRoot());
     }
+
+    private void showFABMenu(){
+        isFABOpen = true;
+        fab1.show();
+        fab2.show();
+        fab3.show();
+    }
+
+    private void closeFABMenu(){
+        isFABOpen = false;
+        fab1.hide();
+        fab2.hide();
+        fab3.hide();
+    }
+
+    View.OnClickListener onClickListener = new View.OnClickListener() {
+        String action;
+        String extension = null;
+
+        @Override
+        public void onClick(View view) {
+            int id = view.getId();
+            if (id == R.id.floatingActionButton) {
+                if (!isFABOpen) {
+                    showFABMenu();
+                } else {
+                    closeFABMenu();
+                }
+            } else if (id == R.id.floatingActionButton1) {
+                action = ACTION_OPEN_DOCUMENT;
+                extension = "zip";
+                Intent intent = new Intent(action);
+                intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                if (extension != null) {
+                    intent.setType(MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension));
+                }
+                lastInstallType = InstallType.ZIP_ARCHIVE;
+                resultLauncher.launch(intent);
+            } else if (id == R.id.floatingActionButton2) {
+                action = ACTION_OPEN_DOCUMENT;
+                extension = "rar";
+                Intent intent2 = new Intent(action);
+                intent2.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                if (extension != null) {
+                    intent2.setType(MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension));
+                }
+                lastInstallType = InstallType.RAR_ARCHIVE;
+                resultLauncher.launch(intent2);
+            } else if (id == R.id.floatingActionButton3) {
+                action = ACTION_OPEN_DOCUMENT_TREE;
+                Intent intent3 = new Intent(action);
+                intent3.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                if (extension != null) {
+                    intent3.setType(MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension));
+                }
+                lastInstallType = InstallType.FOLDER;
+                resultLauncher.launch(intent3);
+            }
+        }
+    };
 
     private void loadSettings() {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -154,19 +291,6 @@ public class GameStockActivity extends AppCompatActivity {
         setLocale(this, settingsAdapter.language);
         setTitle(R.string.gameStock);
         currentLanguage = settingsAdapter.language;
-    }
-
-    private void setRecyclerAdapter () {
-        ArrayList<GameData> gameData = getSortedGames();
-        ArrayList<GameData> localGameData = new ArrayList<>();
-
-        for (GameData data : gameData) {
-            if (data.isInstalled()) {
-                localGameData.add(data);
-            }
-        }
-
-        localStockViewModel.setGameDataArrayList(localGameData);
     }
 
     public void onItemClick(int position) {
@@ -342,34 +466,6 @@ public class GameStockActivity extends AppCompatActivity {
         super.onPause();
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        if (requestCode != REQUEST_CODE_INSTALL_GAME) {
-            super.onActivityResult(requestCode, resultCode, data);
-            return;
-        }
-        if (resultCode != RESULT_OK) {
-            return;
-        }
-        Uri uri;
-        if (data == null || (uri = data.getData()) == null) {
-            logger.error("GameData archive or directory is not selected");
-            return;
-        }
-        DocumentFile file;
-        if (lastInstallType == InstallType.FOLDER) {
-            file = DocumentFile.fromTreeUri(this, uri);
-        } else {
-            file = DocumentFile.fromSingleUri(this, uri);
-        }
-        assert file != null;
-        String gameName = removeExtension(Objects.requireNonNull(file.getName()));
-        GameData gameData = new GameData();
-        gameData.id = gameName;
-        gameData.title = gameName;
-        installGame(file, lastInstallType, gameData);
-    }
-
     private void installGame(DocumentFile gameFile, InstallType type, GameData gameData) {
         if (!isWritableDirectory(gamesDir)) {
             logger.error("Games directory is not writable");
@@ -397,7 +493,7 @@ public class GameStockActivity extends AppCompatActivity {
 
         boolean installed = installer.install(gameData.title, gameFile, gameDir);
         if (installed) {
-            writeGameInfo(gameData , gameDir);
+            gameStockActivityVM.writeGameInfo(gameData , gameDir, logger);
             refreshGames();
         }
 
@@ -408,23 +504,6 @@ public class GameStockActivity extends AppCompatActivity {
     private File getOrCreateGameDirectory(String gameName) {
         String folderName = normalizeGameFolderName(gameName);
         return getOrCreateDirectory(gamesDir, folderName);
-    }
-
-    private void writeGameInfo(GameData gameData , File gameDir) {
-        File infoFile = findFileOrDirectory(gameDir, GAME_INFO_FILENAME);
-        if (infoFile == null) {
-            infoFile = createFile(gameDir, GAME_INFO_FILENAME);
-        }
-        if (!isWritableFile(infoFile)) {
-            logger.error("GameData info file is not writable");
-            return;
-        }
-        try (FileOutputStream out = new FileOutputStream(infoFile);
-             OutputStreamWriter writer = new OutputStreamWriter(out)) {
-            writer.write(objectToXml(gameData));
-        } catch (Exception ex) {
-            logger.error("Failed to write to a gameData info file", ex);
-        }
     }
 
     @Override
@@ -440,47 +519,11 @@ public class GameStockActivity extends AppCompatActivity {
         if (itemId == R.id.menu_options) {
             showSettings();
             return true;
-        } else if (itemId == R.id.menu_installfromzip) {
-            showInstallGameDialog(InstallType.ZIP_ARCHIVE);
-            return true;
-        } else if (itemId == R.id.menu_installfromrar) {
-            showInstallGameDialog(InstallType.RAR_ARCHIVE);
-            return true;
-        } else if (itemId == R.id.menu_installfromfolder) {
-            showInstallGameDialog(InstallType.FOLDER);
-            return true;
         } else if (itemId == R.id.menu_deletegame) {
             showDeleteGameDialog();
             return true;
         }
         return false;
-    }
-
-    private void showInstallGameDialog(InstallType installType) {
-        String action;
-        String extension = null;
-        switch (installType) {
-            case ZIP_ARCHIVE:
-                action = ACTION_OPEN_DOCUMENT;
-                extension = "zip";
-                break;
-            case RAR_ARCHIVE:
-                action = ACTION_OPEN_DOCUMENT;
-                extension = "rar";
-                break;
-            case FOLDER:
-                action = ACTION_OPEN_DOCUMENT_TREE;
-                break;
-            default:
-                throw new IllegalArgumentException("Unsupported install type: " + installType);
-        }
-        lastInstallType = installType;
-        Intent intent = new Intent(action);
-        intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        if (extension != null) {
-            intent.setType(MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension));
-        }
-        startActivityForResult(intent, REQUEST_CODE_INSTALL_GAME);
     }
 
     private void showSettings() {
@@ -559,13 +602,5 @@ public class GameStockActivity extends AppCompatActivity {
                 })
                 .create()
                 .show();
-    }
-
-    @NonNull
-    private static String normalizeGameFolderName(String name) {
-        String result = name.endsWith("...") ? name.substring(0, name.length() - 3) : name;
-
-        return result.replaceAll("[:\"?*|<> ]", "_")
-                .replace("__", "_");
     }
 }

@@ -39,6 +39,7 @@ public class FragmentLocal extends Fragment {
         localViewModel = new ViewModelProvider(requireActivity())
                 .get(FragmentLocalVM.class);
         localViewModel.getGameData().observe(getViewLifecycleOwner(), gameData);
+        localViewModel.recyclerViewObservableField.set(mRecyclerView);
         return fragmentStockLocalBinding.getRoot();
     }
 

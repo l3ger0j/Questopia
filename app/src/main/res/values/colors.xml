@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <drawable name="translucent_background">#C0000000</drawable>
     <color name="title_background">#202020</color>
     <color name="title_text">#ffffffff</color>
     <color name="title_separator">#40ffffff</color>
