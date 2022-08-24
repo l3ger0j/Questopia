@@ -48,6 +48,8 @@
     <string name="loadFrom">From File…</string>
     <string name="saveTo">To File…</string>
     <string name="description">Description</string>
+    <string name="search">Search</string>
+    <string name="selectAll">Select all</string>
 
     <!-- Settings -->
     <string name="generalSettings">General</string>

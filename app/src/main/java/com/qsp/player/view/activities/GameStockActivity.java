@@ -17,6 +17,7 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import androidx.appcompat.view.ActionMode;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -81,6 +82,7 @@ public class GameStockActivity extends AppCompatActivity {
     private GameStockActivityVM gameStockActivityVM;
     private FragmentLocalVM localStockViewModel;
 
+    private ActionMode actionMode;
     private ActivityStockBinding activityStockBinding;
     private ActivityResultLauncher<Intent> resultLauncher;
 
@@ -520,6 +522,10 @@ public class GameStockActivity extends AppCompatActivity {
             showSettings();
             return true;
         } else if (itemId == R.id.menu_deletegame) {
+            /*
+             *mFAB.hide();
+             *actionMode = startSupportActionMode(callback);
+             */
             showDeleteGameDialog();
             return true;
         }
@@ -565,6 +571,30 @@ public class GameStockActivity extends AppCompatActivity {
             }
         }
     }
+
+    private final ActionMode.Callback callback = new ActionMode.Callback() {
+        @Override
+        public boolean onCreateActionMode(ActionMode mode , Menu menu) {
+            mode.getMenuInflater().inflate(R.menu.menu_delete, menu);
+            return true;
+        }
+
+        @Override
+        public boolean onPrepareActionMode(ActionMode mode , Menu menu) {
+            return false;
+        }
+
+        @Override
+        public boolean onActionItemClicked(ActionMode mode , MenuItem item) {
+            return false;
+        }
+
+        @Override
+        public void onDestroyActionMode(ActionMode mode) {
+            mode = null;
+            mFAB.show();
+        }
+    };
 
     private void showDeleteGameDialog() {
         ArrayList<GameData> deletableGameData = new ArrayList<>();

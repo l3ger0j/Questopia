@@ -48,6 +48,8 @@
     <string name="loadFrom">Из файла…</string>
     <string name="saveTo">В файл…</string>
     <string name="description">Описание</string>
+    <string name="search">Поиск</string>
+    <string name="selectAll">Выбрать всё</string>
 
     <!-- Настройки -->
     <string name="generalSettings">Главное</string>

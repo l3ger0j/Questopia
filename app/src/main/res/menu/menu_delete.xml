@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/select_all"
+        android:title="@string/selectAll"
+        android:icon="@drawable/select_all"/>
+    <item
+        android:id="@+id/app_bar_search"
+        android:title="@string/search"
+        app:actionViewClass="android.widget.SearchView" />
+    <item
+        android:id="@+id/delete_game"
+        android:title="@string/deleteGame"
+        android:icon="@drawable/delete"/>
+</menu>
