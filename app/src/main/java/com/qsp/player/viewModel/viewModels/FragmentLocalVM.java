@@ -3,7 +3,6 @@ package com.qsp.player.viewModel.viewModels;
 import androidx.databinding.ObservableField;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.qsp.player.dto.stock.GameData;
 import com.qsp.player.view.activities.GameStockActivity;
@@ -14,9 +13,6 @@ public class FragmentLocalVM extends ViewModel {
     private final MutableLiveData<ArrayList<GameData>> gameDataList;
 
     public ObservableField<GameStockActivity> activityObservableField =
-            new ObservableField<>();
-
-    public ObservableField<RecyclerView> recyclerViewObservableField =
             new ObservableField<>();
 
     public FragmentLocalVM() {

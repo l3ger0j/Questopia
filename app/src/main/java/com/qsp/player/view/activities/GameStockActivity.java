@@ -14,21 +14,23 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import androidx.appcompat.view.ActionMode;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.webkit.MimeTypeMap;
+import android.widget.SearchView;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.view.ActionMode;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.preference.PreferenceManager;
@@ -122,6 +124,10 @@ public class GameStockActivity extends AppCompatActivity {
         return gameData;
     }
 
+    public void setRecyclerView(RecyclerView mRecyclerView) {
+        this.mRecyclerView = mRecyclerView;
+    }
+
     private void setRecyclerAdapter () {
         ArrayList<GameData> gameData = getSortedGames();
         ArrayList<GameData> localGameData = new ArrayList<>();
@@ -161,7 +167,6 @@ public class GameStockActivity extends AppCompatActivity {
         localStockViewModel =
                 new ViewModelProvider(this).get(FragmentLocalVM.class);
         localStockViewModel.activityObservableField.set(this);
-        mRecyclerView = localStockViewModel.recyclerViewObservableField.get();
         if (mRecyclerView != null) {
             mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
                 @Override
@@ -295,22 +300,39 @@ public class GameStockActivity extends AppCompatActivity {
         currentLanguage = settingsAdapter.language;
     }
 
+    private boolean isLongClickActMode = false;
+    private boolean isSelectAll=false;
+    private RecyclerView.ViewHolder mViewHolder;
+    private int lastSelectedPosition = -1;
+    private ArrayList<GameData> selectList = new ArrayList<>();
+
     public void onItemClick(int position) {
-        String gameId = getGameIdByPosition(position);
-        showGameInfo(gameId);
+        if (isLongClickActMode) {
+            GameData gameData = getSortedGames().get(mViewHolder.getAdapterPosition());
+            mViewHolder.itemView.setBackgroundColor(Color.LTGRAY);
+            selectList.add(gameData);
+        } else {
+            String gameId = getGameIdByPosition(position);
+            showGameInfo(gameId);
+        }
     }
 
     public void onLongItemClick(int position) {
-        String gameId = getGameIdByPosition(position);
-        GameData game = gamesMap.get(gameId);
-        if (game != null) {
-            if (game.isInstalled()) {
-                playGame(game);
-            } else {
-                showGameInfo(gameId);
-            }
+        if (actionMode != null) {
+            isLongClickActMode = true;
+            mViewHolder = mRecyclerView.findViewHolderForAdapterPosition(position);
         } else {
-            logger.error("Game not found: " + gameId);
+            String gameId = getGameIdByPosition(position);
+            GameData game = gamesMap.get(gameId);
+            if (game != null) {
+                if (game.isInstalled()) {
+                    playGame(game);
+                } else {
+                    showGameInfo(gameId);
+                }
+            } else {
+                logger.error("Game not found: " + gameId);
+            }
         }
     }
 
@@ -522,11 +544,8 @@ public class GameStockActivity extends AppCompatActivity {
             showSettings();
             return true;
         } else if (itemId == R.id.menu_deletegame) {
-            /*
-             *mFAB.hide();
-             *actionMode = startSupportActionMode(callback);
-             */
-            showDeleteGameDialog();
+            mFAB.hide();
+            actionMode = startSupportActionMode(callback);
             return true;
         }
         return false;
@@ -586,15 +605,62 @@ public class GameStockActivity extends AppCompatActivity {
 
         @Override
         public boolean onActionItemClicked(ActionMode mode , MenuItem item) {
+            int itemId = item.getItemId();
+            if (itemId == R.id.app_bar_search) {
+                SearchView searchView = (SearchView) item.getActionView();
+                searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                    @Override
+                    public boolean onQueryTextSubmit(String s) {
+                        return false;
+                    }
+
+                    @Override
+                    public boolean onQueryTextChange(String s) {
+                        filter(s);
+                        return false;
+                    }
+                });
+            } else if (itemId == R.id.delete_game) {
+                for(GameData data : selectList)
+                {
+                    getSortedGames().remove(data);
+                }
+            } else if (itemId == R.id.select_all) {
+                if (selectList.size() == getSortedGames().size()) {
+                    isSelectAll=false;
+                    selectList.clear();
+                } else {
+                    isSelectAll=true;
+                    selectList.clear();
+                    selectList.addAll(getSortedGames());
+                }
+                localStockViewModel.setGameDataArrayList(selectList);
+            }
             return false;
         }
 
         @Override
         public void onDestroyActionMode(ActionMode mode) {
-            mode = null;
+            actionMode = null;
             mFAB.show();
         }
     };
+
+    private void filter(String text){
+        ArrayList<GameData> gameData = getSortedGames();
+        ArrayList<GameData> filteredList = new ArrayList<>();
+
+        for (GameData item : gameData) {
+            if (item.title.toLowerCase().contains(text.toLowerCase())) {
+                filteredList.add(item);
+            }
+        }
+        if (filteredList.isEmpty()) {
+            logger.error("No Data Found");
+        } else {
+            localStockViewModel.setGameDataArrayList(filteredList);
+        }
+    }
 
     private void showDeleteGameDialog() {
         ArrayList<GameData> deletableGameData = new ArrayList<>();
