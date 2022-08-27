@@ -11,7 +11,6 @@ import static com.qsp.player.viewModel.viewModels.GameStockActivityVM.normalizeG
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -89,12 +88,15 @@ public class GameStockActivity extends AppCompatActivity {
     private ActivityResultLauncher<Intent> resultLauncher;
 
     private boolean isFABOpen;
+    private boolean isStartActionMode = false;
 
     private FloatingActionButton mFAB;
     private ExtendedFloatingActionButton fab1;
     private ExtendedFloatingActionButton fab2;
     private ExtendedFloatingActionButton fab3;
     private RecyclerView mRecyclerView;
+    private final ArrayList<GameData> tempList = getSortedGames();
+    private final ArrayList<GameData> selectList = new ArrayList<>();
 
     public String getGameIdByPosition(int position) {
         localStockViewModel.getGameData().observe(this, gameDataArrayList -> {
@@ -300,17 +302,24 @@ public class GameStockActivity extends AppCompatActivity {
         currentLanguage = settingsAdapter.language;
     }
 
-    private boolean isLongClickActMode = false;
-    private boolean isSelectAll=false;
-    private RecyclerView.ViewHolder mViewHolder;
-    private int lastSelectedPosition = -1;
-    private ArrayList<GameData> selectList = new ArrayList<>();
-
     public void onItemClick(int position) {
-        if (isLongClickActMode) {
-            GameData gameData = getSortedGames().get(mViewHolder.getAdapterPosition());
-            mViewHolder.itemView.setBackgroundColor(Color.LTGRAY);
-            selectList.add(gameData);
+        if (isStartActionMode) {
+            for (GameData gameData : gamesMap.values()) {
+                if (!gameData.isInstalled()) continue;
+                tempList.add(gameData);
+            }
+
+            RecyclerView.ViewHolder mViewHolder =
+                    mRecyclerView.findViewHolderForAdapterPosition(position);
+            GameData gameData = tempList.get(mViewHolder.getAdapterPosition());
+
+            if (selectList.isEmpty() || !selectList.contains(gameData)) {
+                selectList.add(gameData);
+                mViewHolder.itemView.setBackgroundColor(Color.LTGRAY);
+            } else {
+                selectList.remove(gameData);
+                mViewHolder.itemView.setBackgroundColor(Color.TRANSPARENT);
+            }
         } else {
             String gameId = getGameIdByPosition(position);
             showGameInfo(gameId);
@@ -318,21 +327,16 @@ public class GameStockActivity extends AppCompatActivity {
     }
 
     public void onLongItemClick(int position) {
-        if (actionMode != null) {
-            isLongClickActMode = true;
-            mViewHolder = mRecyclerView.findViewHolderForAdapterPosition(position);
-        } else {
-            String gameId = getGameIdByPosition(position);
-            GameData game = gamesMap.get(gameId);
-            if (game != null) {
-                if (game.isInstalled()) {
-                    playGame(game);
-                } else {
-                    showGameInfo(gameId);
-                }
+        String gameId = getGameIdByPosition(position);
+        GameData game = gamesMap.get(gameId);
+        if (game != null) {
+            if (game.isInstalled()) {
+                playGame(game);
             } else {
-                logger.error("Game not found: " + gameId);
+                showGameInfo(gameId);
             }
+        } else {
+            logger.error("Game not found: " + gameId);
         }
     }
 
@@ -551,6 +555,72 @@ public class GameStockActivity extends AppCompatActivity {
         return false;
     }
 
+    private final ActionMode.Callback callback = new ActionMode.Callback() {
+        @Override
+        public boolean onCreateActionMode(ActionMode mode , Menu menu) {
+            mode.getMenuInflater().inflate(R.menu.menu_delete, menu);
+            return true;
+        }
+
+        @Override
+        public boolean onPrepareActionMode(ActionMode mode , Menu menu) {
+            isStartActionMode = true;
+            return true;
+        }
+
+        @Override
+        public boolean onActionItemClicked(ActionMode mode , MenuItem item) {
+            int itemId = item.getItemId();
+            if (itemId == R.id.app_bar_search) {
+                SearchView searchView = (SearchView) item.getActionView();
+                searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                    @Override
+                    public boolean onQueryTextSubmit(String s) {
+                        return false;
+                    }
+
+                    @Override
+                    public boolean onQueryTextChange(String s) {
+                        filter(s);
+                        return false;
+                    }
+                });
+            } else if (itemId == R.id.delete_game) {
+                for(GameData data : selectList)
+                {
+                    tempList.remove(data);
+                    deleteDirectory(data.gameDir);
+                    refreshGames();
+                }
+                actionMode.finish();
+            } else if (itemId == R.id.select_all) {
+                if(selectList.size() == tempList.size()) {
+                    selectList.clear();
+                    for (int childCount = mRecyclerView.getChildCount(), i = 0; i < childCount; ++i) {
+                        final RecyclerView.ViewHolder holder = mRecyclerView.getChildViewHolder(mRecyclerView.getChildAt(i));
+                        holder.itemView.setBackgroundColor(Color.TRANSPARENT);
+                    }
+                } else {
+                    selectList.clear();
+                    selectList.addAll(tempList);
+                    for (int childCount = mRecyclerView.getChildCount(), i = 0; i < childCount; ++i) {
+                        final RecyclerView.ViewHolder holder = mRecyclerView.getChildViewHolder(mRecyclerView.getChildAt(i));
+                        holder.itemView.setBackgroundColor(Color.LTGRAY);
+                    }
+                }
+            }
+            return true;
+        }
+
+        @Override
+        public void onDestroyActionMode(ActionMode mode) {
+            actionMode = null;
+            isStartActionMode = false;
+            selectList.clear();
+            mFAB.show();
+        }
+    };
+
     private void showSettings() {
         Intent intent = new Intent(this, SettingsActivity.class);
         startActivity(intent);
@@ -591,61 +661,6 @@ public class GameStockActivity extends AppCompatActivity {
         }
     }
 
-    private final ActionMode.Callback callback = new ActionMode.Callback() {
-        @Override
-        public boolean onCreateActionMode(ActionMode mode , Menu menu) {
-            mode.getMenuInflater().inflate(R.menu.menu_delete, menu);
-            return true;
-        }
-
-        @Override
-        public boolean onPrepareActionMode(ActionMode mode , Menu menu) {
-            return false;
-        }
-
-        @Override
-        public boolean onActionItemClicked(ActionMode mode , MenuItem item) {
-            int itemId = item.getItemId();
-            if (itemId == R.id.app_bar_search) {
-                SearchView searchView = (SearchView) item.getActionView();
-                searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-                    @Override
-                    public boolean onQueryTextSubmit(String s) {
-                        return false;
-                    }
-
-                    @Override
-                    public boolean onQueryTextChange(String s) {
-                        filter(s);
-                        return false;
-                    }
-                });
-            } else if (itemId == R.id.delete_game) {
-                for(GameData data : selectList)
-                {
-                    getSortedGames().remove(data);
-                }
-            } else if (itemId == R.id.select_all) {
-                if (selectList.size() == getSortedGames().size()) {
-                    isSelectAll=false;
-                    selectList.clear();
-                } else {
-                    isSelectAll=true;
-                    selectList.clear();
-                    selectList.addAll(getSortedGames());
-                }
-                localStockViewModel.setGameDataArrayList(selectList);
-            }
-            return false;
-        }
-
-        @Override
-        public void onDestroyActionMode(ActionMode mode) {
-            actionMode = null;
-            mFAB.show();
-        }
-    };
-
     private void filter(String text){
         ArrayList<GameData> gameData = getSortedGames();
         ArrayList<GameData> filteredList = new ArrayList<>();
@@ -660,43 +675,5 @@ public class GameStockActivity extends AppCompatActivity {
         } else {
             localStockViewModel.setGameDataArrayList(filteredList);
         }
-    }
-
-    private void showDeleteGameDialog() {
-        ArrayList<GameData> deletableGameData = new ArrayList<>();
-        ArrayList<String> items = new ArrayList<>();
-
-        for (GameData gameData : gamesMap.values()) {
-            if (!gameData.isInstalled()) continue;
-            deletableGameData.add(gameData);
-            items.add(gameData.title);
-        }
-
-        new AlertDialog.Builder(this)
-                .setTitle(getString(R.string.deleteGameCmd))
-                .setItems(items.toArray(new String[0]), (dialog, which) -> {
-                    GameData gameData = deletableGameData.get(which);
-                    showConfirmDeleteDialog(gameData);
-                })
-                .setNegativeButton(android.R.string.cancel, (dialog, whichButton) -> {
-                })
-                .create()
-                .show();
-    }
-
-    private void showConfirmDeleteDialog(final GameData gameData) {
-        new AlertDialog.Builder(this)
-                .setMessage(getString(R.string.deleteGameQuery).replace("-GAMENAME-", "\"" + gameData.title + "\""))
-                .setPositiveButton(android.R.string.yes, (dialog, which) -> {
-                    if (which == DialogInterface.BUTTON_POSITIVE) {
-                        deleteDirectory(gameData.gameDir);
-                        ViewUtil.showToast(this, getString(R.string.gameDeleted));
-                        refreshGames();
-                    }
-                })
-                .setNegativeButton(android.R.string.no, (dialog, whichButton) -> {
-                })
-                .create()
-                .show();
     }
 }
