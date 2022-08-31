@@ -11,6 +11,7 @@ import static com.qsp.player.viewModel.viewModels.GameStockActivityVM.normalizeG
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -88,7 +89,7 @@ public class GameStockActivity extends AppCompatActivity {
     private ActivityResultLauncher<Intent> resultLauncher;
 
     private boolean isFABOpen;
-    private boolean isStartActionMode = false;
+    private boolean isEnable = false;
 
     private FloatingActionButton mFAB;
     private ExtendedFloatingActionButton fab1;
@@ -267,7 +268,11 @@ public class GameStockActivity extends AppCompatActivity {
                     intent.setType(MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension));
                 }
                 lastInstallType = InstallType.ZIP_ARCHIVE;
-                resultLauncher.launch(intent);
+                try {
+                    resultLauncher.launch(intent);
+                } catch (ActivityNotFoundException e) {
+                    logger.error(e.toString());
+                }
             } else if (id == R.id.floatingActionButton2) {
                 action = ACTION_OPEN_DOCUMENT;
                 extension = "rar";
@@ -277,16 +282,22 @@ public class GameStockActivity extends AppCompatActivity {
                     intent2.setType(MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension));
                 }
                 lastInstallType = InstallType.RAR_ARCHIVE;
-                resultLauncher.launch(intent2);
+                try {
+                    resultLauncher.launch(intent2);
+                } catch (ActivityNotFoundException e) {
+                    logger.error(e.toString());
+                }
             } else if (id == R.id.floatingActionButton3) {
                 action = ACTION_OPEN_DOCUMENT_TREE;
                 Intent intent3 = new Intent(action);
                 intent3.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                if (extension != null) {
-                    intent3.setType(MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension));
-                }
+                intent3.setFlags(Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
                 lastInstallType = InstallType.FOLDER;
-                resultLauncher.launch(intent3);
+                try {
+                    resultLauncher.launch(intent3);
+                } catch (ActivityNotFoundException e) {
+                    logger.error(e.toString());
+                }
             }
         }
     };
@@ -303,7 +314,7 @@ public class GameStockActivity extends AppCompatActivity {
     }
 
     public void onItemClick(int position) {
-        if (isStartActionMode) {
+        if (isEnable) {
             for (GameData gameData : gamesMap.values()) {
                 if (!gameData.isInstalled()) continue;
                 tempList.add(gameData);
@@ -311,7 +322,8 @@ public class GameStockActivity extends AppCompatActivity {
 
             RecyclerView.ViewHolder mViewHolder =
                     mRecyclerView.findViewHolderForAdapterPosition(position);
-            GameData gameData = tempList.get(mViewHolder.getAdapterPosition());
+            GameData gameData = tempList.get(Objects.requireNonNull(mViewHolder)
+                    .getAdapterPosition());
 
             if (selectList.isEmpty() || !selectList.contains(gameData)) {
                 selectList.add(gameData);
@@ -326,17 +338,68 @@ public class GameStockActivity extends AppCompatActivity {
         }
     }
 
-    public void onLongItemClick(int position) {
-        String gameId = getGameIdByPosition(position);
-        GameData game = gamesMap.get(gameId);
-        if (game != null) {
-            if (game.isInstalled()) {
-                playGame(game);
-            } else {
-                showGameInfo(gameId);
-            }
-        } else {
-            logger.error("Game not found: " + gameId);
+    public void onLongItemClick() {
+        if (!isEnable) {
+            ActionMode.Callback callback = new ActionMode.Callback() {
+                @Override
+                public boolean onCreateActionMode(ActionMode mode , Menu menu) {
+                    mode.getMenuInflater().inflate(R.menu.menu_delete, menu);
+                    return true;
+                }
+
+                @Override
+                public boolean onPrepareActionMode(ActionMode mode , Menu menu) {
+                    isEnable = true;
+                    return true;
+                }
+
+                @Override
+                public boolean onActionItemClicked(ActionMode mode , MenuItem item) {
+                    int itemId = item.getItemId();
+                    if (itemId == R.id.delete_game) {
+                        for(GameData data : selectList)
+                        {
+                            tempList.remove(data);
+                            deleteDirectory(data.gameDir);
+                            refreshGames();
+                        }
+                        actionMode.finish();
+                    } else if (itemId == R.id.select_all) {
+                        if(selectList.size() == tempList.size()) {
+                            selectList.clear();
+                            for (int childCount = mRecyclerView.getChildCount(), i = 0; i < childCount; ++i) {
+                                final RecyclerView.ViewHolder holder = mRecyclerView.getChildViewHolder(mRecyclerView.getChildAt(i));
+                                holder.itemView.setBackgroundColor(Color.TRANSPARENT);
+                            }
+                        } else {
+                            selectList.clear();
+                            selectList.addAll(tempList);
+                            for (int childCount = mRecyclerView.getChildCount(), i = 0; i < childCount; ++i) {
+                                final RecyclerView.ViewHolder holder = mRecyclerView.getChildViewHolder(mRecyclerView.getChildAt(i));
+                                holder.itemView.setBackgroundColor(Color.LTGRAY);
+                            }
+                        }
+                    }
+                    return true;
+                }
+
+                @Override
+                public void onDestroyActionMode(ActionMode mode) {
+                    for (int childCount = mRecyclerView.getChildCount(), i = 0; i < childCount; ++i) {
+                        final RecyclerView.ViewHolder holder = mRecyclerView.getChildViewHolder(mRecyclerView.getChildAt(i));
+                        holder.itemView.setBackgroundColor(Color.TRANSPARENT);
+                    }
+
+                    actionMode = null;
+                    isEnable = false;
+
+                    tempList.clear();
+                    selectList.clear();
+                    mFAB.show();
+                }
+            };
+            mFAB.hide();
+            actionMode = startSupportActionMode(callback);
         }
     }
 
@@ -547,79 +610,23 @@ public class GameStockActivity extends AppCompatActivity {
         if (itemId == R.id.menu_options) {
             showSettings();
             return true;
-        } else if (itemId == R.id.menu_deletegame) {
-            mFAB.hide();
-            actionMode = startSupportActionMode(callback);
-            return true;
+        } else if (itemId == R.id.app_bar_search) {
+            SearchView searchView = (SearchView) item.getActionView();
+            searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                @Override
+                public boolean onQueryTextSubmit(String s) {
+                    return false;
+                }
+
+                @Override
+                public boolean onQueryTextChange(String s) {
+                    filter(s);
+                    return false;
+                }
+            });
         }
         return false;
     }
-
-    private final ActionMode.Callback callback = new ActionMode.Callback() {
-        @Override
-        public boolean onCreateActionMode(ActionMode mode , Menu menu) {
-            mode.getMenuInflater().inflate(R.menu.menu_delete, menu);
-            return true;
-        }
-
-        @Override
-        public boolean onPrepareActionMode(ActionMode mode , Menu menu) {
-            isStartActionMode = true;
-            return true;
-        }
-
-        @Override
-        public boolean onActionItemClicked(ActionMode mode , MenuItem item) {
-            int itemId = item.getItemId();
-            if (itemId == R.id.app_bar_search) {
-                SearchView searchView = (SearchView) item.getActionView();
-                searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-                    @Override
-                    public boolean onQueryTextSubmit(String s) {
-                        return false;
-                    }
-
-                    @Override
-                    public boolean onQueryTextChange(String s) {
-                        filter(s);
-                        return false;
-                    }
-                });
-            } else if (itemId == R.id.delete_game) {
-                for(GameData data : selectList)
-                {
-                    tempList.remove(data);
-                    deleteDirectory(data.gameDir);
-                    refreshGames();
-                }
-                actionMode.finish();
-            } else if (itemId == R.id.select_all) {
-                if(selectList.size() == tempList.size()) {
-                    selectList.clear();
-                    for (int childCount = mRecyclerView.getChildCount(), i = 0; i < childCount; ++i) {
-                        final RecyclerView.ViewHolder holder = mRecyclerView.getChildViewHolder(mRecyclerView.getChildAt(i));
-                        holder.itemView.setBackgroundColor(Color.TRANSPARENT);
-                    }
-                } else {
-                    selectList.clear();
-                    selectList.addAll(tempList);
-                    for (int childCount = mRecyclerView.getChildCount(), i = 0; i < childCount; ++i) {
-                        final RecyclerView.ViewHolder holder = mRecyclerView.getChildViewHolder(mRecyclerView.getChildAt(i));
-                        holder.itemView.setBackgroundColor(Color.LTGRAY);
-                    }
-                }
-            }
-            return true;
-        }
-
-        @Override
-        public void onDestroyActionMode(ActionMode mode) {
-            actionMode = null;
-            isStartActionMode = false;
-            selectList.clear();
-            mFAB.show();
-        }
-    };
 
     private void showSettings() {
         Intent intent = new Intent(this, SettingsActivity.class);

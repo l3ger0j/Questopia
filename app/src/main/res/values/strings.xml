@@ -5,7 +5,7 @@
     <string name="appDescription">
 <![CDATA[
 <h2><center>About Quest Player<img src=\"file:///android_res/drawable/landscape.jpg\" width=\"100%\"></center></h2>
-<h4>Quest Player is an open-source Android port of <b>Quest Soft Player</b> (<a href=\"http://qsp.su/?option=com_content&view=article&id=64\">Russian site</a>), a menu-based platform for creating interactive fiction. The most recent version can be downloaded from <a href=\"https://github.com/seedhartha/QuestPlayer\">GitHub</a>.</h4>
+<h4>Quest Player is an open-source Android port of <b>Quest Soft Player</b> (<a href=\"http://qsp.su/?option=com_content&view=article&id=64\">Russian site</a>), a menu-based platform for creating interactive fiction. The most recent version can be downloaded from <a href=\"https://github.com/l3ger0j/QuestPlayerAndroid\">GitHub</a>.</h4>
 ]]>
     </string>
     <string name="appCredits">

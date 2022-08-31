@@ -69,7 +69,7 @@ public class FragmentLocal extends Fragment {
                     @Override
                     public void onLongItemClick(View view , int position) {
                         Objects.requireNonNull(localViewModel.activityObservableField
-                                .get()).onLongItemClick(position);
+                                .get()).onLongItemClick();
                     }
                 }));
     }
