@@ -72,7 +72,8 @@ public class GameActivityVM extends AndroidViewModel {
             Uri uri = request.getUrl();
             if (uri.getScheme().startsWith("file")) {
                 try {
-                    File file = gameContentResolver.getFile(uri.toString().substring(8));
+                    String relPath = Uri.decode(uri.toString().substring(8));
+                    File file = gameContentResolver.getFile(relPath);
                     String extension = getExtension(file.getName());
                     String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
                     InputStream in = getApplication().getContentResolver().openInputStream(Uri.fromFile(file));

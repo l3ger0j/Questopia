@@ -15,20 +15,20 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#include "qsp/headers/game.h"
-#include "qsp/headers/actions.h"
-#include "qsp/headers/callbacks.h"
-#include "qsp/headers/codetools.h"
-#include "qsp/headers/coding.h"
-#include "qsp/headers/common.h"
-#include "qsp/headers/errors.h"
-#include "qsp/headers/locations.h"
-#include "qsp/headers/objects.h"
-#include "qsp/headers/playlist.h"
-#include "qsp/headers/statements.h"
-#include "qsp/headers/text.h"
-#include "qsp/headers/time.h"
-#include "qsp/headers/variables.h"
+#include "game.h"
+#include "actions.h"
+#include "callbacks.h"
+#include "codetools.h"
+#include "coding.h"
+#include "common.h"
+#include "errors.h"
+#include "locations.h"
+#include "objects.h"
+#include "playlist.h"
+#include "statements.h"
+#include "text.h"
+#include "time.h"
+#include "variables.h"
 
 QSP_CHAR *qspQstPath = 0;
 int qspQstPathLen = 0;
@@ -662,9 +662,8 @@ QSP_BOOL qspStatementOpenQst(QSPVariant *args, int count, QSP_CHAR **jumpTo, int
 		if (qspCurIncLocsCount != oldCurIncLocsCount)
 			qspCurIncFiles[qspCurIncFilesCount++] = qspGetNewText(QSP_STR(args[0]), -1);
 		break;
-	default:
-			return QSP_FALSE;
 	}
+	return QSP_FALSE;
 }
 
 QSP_BOOL qspStatementOpenGame(QSPVariant *args, int count, QSP_CHAR **jumpTo, int extArg)

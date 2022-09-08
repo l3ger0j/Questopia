@@ -15,10 +15,10 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#include <qsp/headers/playlist.h>
-#include <qsp/headers/callbacks.h>
-#include <qsp/headers/game.h>
-#include <qsp/headers/text.h>
+#include "playlist.h"
+#include "callbacks.h"
+#include "game.h"
+#include "text.h"
 
 QSP_CHAR *qspPLFiles[QSP_MAXPLFILES];
 int qspPLFilesCount = 0;

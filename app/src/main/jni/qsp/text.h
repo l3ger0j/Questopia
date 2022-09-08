@@ -50,7 +50,7 @@
 	int qspStrLen(QSP_CHAR *);
 	QSP_CHAR *qspStrStr(QSP_CHAR *, QSP_CHAR *);
 	QSP_CHAR *qspStrPBrk(QSP_CHAR *, QSP_CHAR *);
-	QSP_CHAR *qspInStrRChars(QSP_CHAR *, QSP_CHAR *, const QSP_CHAR *);
+	QSP_CHAR *qspInStrRChars(QSP_CHAR *, QSP_CHAR *, QSP_CHAR *);
 	QSP_CHAR *qspJoinStrs(QSP_CHAR **, int, QSP_CHAR *);
 	int qspSplitStr(QSP_CHAR *, QSP_CHAR *, QSP_CHAR ***);
 	void qspCopyStrs(QSP_CHAR ***, QSP_CHAR **, int, int);

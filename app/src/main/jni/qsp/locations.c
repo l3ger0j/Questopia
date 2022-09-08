@@ -15,13 +15,13 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#include <qsp/headers/locations.h>
-#include <qsp/headers/common.h>
-#include <qsp/headers/errors.h>
-#include <qsp/headers/game.h>
-#include <qsp/headers/statements.h>
-#include <qsp/headers/text.h>
-#include <qsp/headers/variables.h>
+#include "locations.h"
+#include "common.h"
+#include "errors.h"
+#include "game.h"
+#include "statements.h"
+#include "text.h"
+#include "variables.h"
 
 QSPLocation *qspLocs = 0;
 QSPLocName *qspLocsNames = 0;

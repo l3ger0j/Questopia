@@ -27,7 +27,7 @@
  * SUCH DAMAGE.
  */
 
-#include "qsp/onig/headers/regint.h"
+#include "regint.h"
 #include <stdio.h> /* for vsnprintf() */
 
 #ifdef HAVE_STDARG_PROTOTYPES

@@ -1,10 +1,6 @@
 LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
-# Use older NDK platform to support pre-API21 devices.
-# For details check http://stackoverflow.com/a/27446105
-# This isn't very clean (properly we should build and ship
-# both PIE and non-PIE builds), but does the trick for now.
 APP_PLATFORM := 21
 
 LOCAL_DISABLE_FATAL_LINKER_WARNINGS := true

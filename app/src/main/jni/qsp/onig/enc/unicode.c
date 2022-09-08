@@ -27,7 +27,7 @@
  * SUCH DAMAGE.
  */
 
-#include "qsp/onig/headers/regint.h"
+#include "../regint.h"
 
 #define ONIGENC_IS_UNICODE_ISO_8859_1_CTYPE(code,ctype) \
   ((EncUNICODE_ISO_8859_1_CtypeTable[code] & CTYPE_TO_BIT(ctype)) != 0)
@@ -10787,7 +10787,7 @@ onigenc_utf16_32_get_ctype_code_range(OnigCtype ctype, OnigCodePoint* sb_out,
   return onigenc_unicode_ctype_code_range(ctype, ranges);
 }
 
-#include "qsp/onig/headers/st.h"
+#include "../st.h"
 
 #define PROPERTY_NAME_MAX_SIZE    20
 

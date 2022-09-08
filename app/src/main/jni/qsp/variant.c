@@ -15,9 +15,9 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#include "qsp/headers/variant.h"
-#include "qsp/headers/coding.h"
-#include "qsp/headers/text.h"
+#include "variant.h"
+#include "coding.h"
+#include "text.h"
 
 void qspFreeVariants(QSPVariant *args, int count)
 {

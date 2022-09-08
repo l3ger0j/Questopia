@@ -27,8 +27,8 @@
  * SUCH DAMAGE.
  */
 
-#include "qsp/onig/headers/regparse.h"
-#include "qsp/onig/headers/st.h"
+#include "regparse.h"
+#include "st.h"
 
 #define WARN_BUFSIZE    256
 

@@ -12,19 +12,19 @@ public final class PathUtil {
     }
 
     @Nullable
-    public static String getExtension(String path) {
+    public static String getExtension(@NonNull String path) {
         int idx = path.lastIndexOf('.');
         return idx == -1 ? null : path.substring(idx + 1);
     }
 
     @NonNull
-    public static String removeExtension(String path) {
+    public static String removeExtension(@NonNull String path) {
         int idx = path.lastIndexOf('.');
         return idx != -1 ? path.substring(0, idx) : path;
     }
 
     @NonNull
-    public static String removeTrailingSlash(String path) {
+    public static String removeTrailingSlash(@NonNull String path) {
         int idx = path.lastIndexOf('/');
         return idx == -1 ? path : path.substring(0, idx);
     }

@@ -15,19 +15,19 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#include <qsp/headers/statements.h>
-#include <qsp/headers/actions.h>
-#include <qsp/headers/callbacks.h>
-#include <qsp/headers/common.h>
-#include <qsp/headers/errors.h>
-#include <qsp/headers/game.h>
-#include <qsp/headers/locations.h>
-#include <qsp/headers/mathops.h>
-#include <qsp/headers/menu.h>
-#include <qsp/headers/objects.h>
-#include <qsp/headers/playlist.h>
-#include <qsp/headers/text.h>
-#include <qsp/headers/variables.h>
+#include "statements.h"
+#include "actions.h"
+#include "callbacks.h"
+#include "common.h"
+#include "errors.h"
+#include "game.h"
+#include "locations.h"
+#include "mathops.h"
+#include "menu.h"
+#include "objects.h"
+#include "playlist.h"
+#include "text.h"
+#include "variables.h"
 
 QSPStatement qspStats[qspStatLast_Statement];
 QSPStatName qspStatsNames[QSP_STATSLEVELS][QSP_MAXSTATSNAMES];
@@ -894,9 +894,8 @@ static QSP_BOOL qspStatementAddText(QSPVariant *args, int count, QSP_CHAR **jump
 		if (count) qspCurDescLen = qspAddText(&qspCurDesc, QSP_STR(args[0]), qspCurDescLen, -1, QSP_FALSE);
 		qspIsMainDescChanged = QSP_TRUE;
 		break;
-	default:
-			return QSP_FALSE;
 	}
+	return QSP_FALSE;
 }
 
 static QSP_BOOL qspStatementClear(QSPVariant *args, int count, QSP_CHAR **jumpTo, int extArg)
@@ -935,9 +934,8 @@ static QSP_BOOL qspStatementClear(QSPVariant *args, int count, QSP_CHAR **jumpTo
 		qspClearIncludes(QSP_FALSE);
 		if (qspCurLoc >= qspLocsCount) qspCurLoc = -1;
 		break;
-	default:
-			return QSP_FALSE;
 	}
+	return QSP_FALSE;
 }
 
 static QSP_BOOL qspStatementExit(QSPVariant *args, int count, QSP_CHAR **jumpTo, int extArg)
@@ -1006,9 +1004,8 @@ static QSP_BOOL qspStatementShowWin(QSPVariant *args, int count, QSP_CHAR **jump
 	case 3:
 		qspCallShowWindow(QSP_WIN_INPUT, qspCurIsShowInput = val);
 		break;
-	default:
-			return QSP_FALSE;
 	}
+	return QSP_FALSE;
 }
 
 static QSP_BOOL qspStatementRefInt(QSPVariant *args, int count, QSP_CHAR **jumpTo, int extArg)

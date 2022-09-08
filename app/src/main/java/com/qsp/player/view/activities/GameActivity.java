@@ -126,7 +126,6 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
 
     // region Сервисы
 
-    private GameContentResolver gameContentResolver;
     private HtmlProcessor htmlProcessor;
     private LibQspProxy libQspProxy;
     private AudioPlayer audioPlayer;
@@ -164,8 +163,6 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
         gameActivityVM = new ViewModelProvider(this).get(GameActivityVM.class);
         activityGameBinding.setGameViewModel(gameActivityVM);
         settingsAdapter = gameActivityVM.loadSettings(this);
-        gameActivityVM.setLibQspProxy(libQspProxy);
-        gameActivityVM.setGameContentResolver(gameContentResolver);
 
         setContentView(activityGameBinding.getRoot());
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
@@ -267,7 +264,8 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
 
         QuestPlayerApplication application = (QuestPlayerApplication) getApplication();
 
-        gameContentResolver = application.getGameContentResolver();
+        GameContentResolver gameContentResolver = application.getGameContentResolver();
+        gameActivityVM.setGameContentResolver(gameContentResolver);
         htmlProcessor = application.getHtmlProcessor();
 
         audioPlayer = application.getAudioPlayer();
@@ -276,6 +274,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
         libQspProxy = application.getLibQspProxy();
         libQspProxy.setGameInterface(this);
         libQspProxy.start();
+        gameActivityVM.setLibQspProxy(libQspProxy);
     }
 
     private void initGame() {

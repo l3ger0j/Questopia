@@ -15,12 +15,12 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#include <qsp/headers/objects.h>
-#include <qsp/headers/errors.h>
-#include <qsp/headers/game.h>
-#include <qsp/headers/locations.h>
-#include <qsp/headers/text.h>
-#include <qsp/headers/variables.h>
+#include "objects.h"
+#include "errors.h"
+#include "game.h"
+#include "locations.h"
+#include "text.h"
+#include "variables.h"
 
 QSPObj qspCurObjects[QSP_MAXOBJECTS];
 int qspCurObjectsCount = 0;
@@ -164,9 +164,8 @@ QSP_BOOL qspStatementDelObj(QSPVariant *args, int count, QSP_CHAR **jumpTo, int 
 		else
 			qspClearObjectsWithNotify();
 		break;
-	default:
-		return QSP_FALSE;
 	}
+	return QSP_FALSE;
 }
 
 QSP_BOOL qspStatementUnSelect(QSPVariant *args, int count, QSP_CHAR **jumpTo, int extArg)
