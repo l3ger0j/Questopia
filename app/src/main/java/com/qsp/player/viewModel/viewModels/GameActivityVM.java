@@ -59,9 +59,13 @@ public class GameActivityVM extends AndroidViewModel {
         @Override
         public boolean shouldOverrideUrlLoading(WebView view,
                                                 @NonNull final String href) {
+            String uriDecode = Uri.decode(href);
             if (href.toLowerCase().startsWith("exec:")) {
-                String code = decodeBase64(href.substring(5));
-                libQspProxy.execute(code);
+                try {
+                    libQspProxy.execute(decodeBase64(uriDecode.substring(5)));
+                } catch (IllegalArgumentException exception) {
+                    libQspProxy.execute(uriDecode.substring(5));
+                }
             }
             return true;
         }

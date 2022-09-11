@@ -64,6 +64,7 @@
     <string name="sound">Sound</string>
     <string name="soundSummary">Play music and sounds</string>
     <string name="lang">Language</string>
+    <string name="gestures">Gestures</string>
     <string name="langSummary">Choose display language</string>
     <string name="actsHeight">Actions List Height</string>
     <string name="actsHeightSummary">Actions List Height To Screen Height Ratio</string>
@@ -107,5 +108,6 @@
     <string name="promptCloseGame">Are you sure you want to close the game?</string>
     <string name="zoom_image">Zoom image</string>
     <string name="image">Image</string>
+    <string name="gesturesSum">Enable/disable gestures to switch between game submenus</string>
     <string name="plugin">Connect the extension to download the list of games</string>
 </resources>

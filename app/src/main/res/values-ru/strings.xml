@@ -64,6 +64,7 @@
     <string name="sound">Звук</string>
     <string name="soundSummary">Проигрывать звуки и музыку</string>
     <string name="lang">Язык</string>
+    <string name="gestures">Жесты</string>
     <string name="langSummary">Выберите язык интерфейса</string>
     <string name="actsHeight">Высота списка действий</string>
     <string name="actsHeightSummary">Соотношение высоты списка действий к высоте экрана</string>
@@ -108,6 +109,7 @@
     <string name="zoom_image">Увеличить изображение</string>
     <string name="image">Изображение</string>
     <string name="plugin">Подключить расширение, чтобы загрузить список игр</string>
+    <string name="gesturesSum">Включение/выключение жестов для переключения между игровыми подменю</string>
 </resources>
 
 

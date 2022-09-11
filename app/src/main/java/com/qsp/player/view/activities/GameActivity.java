@@ -163,6 +163,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
         gameActivityVM = new ViewModelProvider(this).get(GameActivityVM.class);
         activityGameBinding.setGameViewModel(gameActivityVM);
         settingsAdapter = gameActivityVM.loadSettings(this);
+        gameActivityVM.setLogger(logger);
 
         setContentView(activityGameBinding.getRoot());
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
@@ -227,7 +228,11 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
     }
 
     private boolean handleTouchEvent(View v, MotionEvent event) {
-        return gestureDetector.onTouchEvent(event);
+        if (settingsAdapter.useGestures) {
+            return gestureDetector.onTouchEvent(event);
+        } else {
+            return false;
+        }
     }
 
     private void initActionsView() {

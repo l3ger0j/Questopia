@@ -27,6 +27,11 @@
             android:key="separator"
             android:summary="@string/separatorSummary"
             android:title="@string/separator" />
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="gestures"
+            android:summary="@string/gesturesSum"
+            android:title="@string/gestures" />
         <Preference
             android:defaultValue="false"
             android:enabled="false"
