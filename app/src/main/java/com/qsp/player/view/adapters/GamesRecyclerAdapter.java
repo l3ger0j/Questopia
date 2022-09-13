@@ -78,7 +78,7 @@ public class GamesRecyclerAdapter extends RecyclerView.Adapter<GamesRecyclerAdap
         if (gameData.icon.isEmpty()) {
             Drawable drawable = ResourcesCompat.getDrawable(
                     context.getResources(),
-                    R.drawable.broken_image_24, null
+                    R.drawable.broken_image , null
             );
             holder.gameIcon.setImageDrawable(drawable);
         } else {

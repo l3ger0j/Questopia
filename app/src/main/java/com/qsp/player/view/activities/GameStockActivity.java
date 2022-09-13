@@ -3,14 +3,10 @@ package com.qsp.player.view.activities;
 import static android.content.Intent.ACTION_OPEN_DOCUMENT;
 import static android.content.Intent.ACTION_OPEN_DOCUMENT_TREE;
 import static com.qsp.player.utils.FileUtil.deleteDirectory;
-import static com.qsp.player.utils.FileUtil.getOrCreateDirectory;
-import static com.qsp.player.utils.FileUtil.isWritableDirectory;
 import static com.qsp.player.utils.LanguageUtil.setLocale;
 import static com.qsp.player.utils.PathUtil.removeExtension;
-import static com.qsp.player.viewModel.viewModels.GameStockActivityVM.normalizeGameFolderName;
 
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -24,7 +20,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.webkit.MimeTypeMap;
-import android.widget.SearchView;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -41,16 +36,9 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.qsp.player.R;
 import com.qsp.player.databinding.ActivityStockBinding;
 import com.qsp.player.dto.stock.GameData;
-import com.qsp.player.model.install.ArchiveGameInstaller;
-import com.qsp.player.model.install.ArchiveType;
-import com.qsp.player.model.install.FolderGameInstaller;
-import com.qsp.player.model.install.GameInstaller;
-import com.qsp.player.model.install.InstallException;
 import com.qsp.player.model.install.InstallType;
-import com.qsp.player.utils.ViewUtil;
 import com.qsp.player.view.adapters.SettingsAdapter;
 import com.qsp.player.view.fragments.FragmentLocal;
-import com.qsp.player.viewModel.repository.LocalGameRepository;
 import com.qsp.player.viewModel.viewModels.FragmentLocalVM;
 import com.qsp.player.viewModel.viewModels.GameStockActivityVM;
 
@@ -69,15 +57,10 @@ import java.util.Objects;
 public class GameStockActivity extends AppCompatActivity {
     private static final Logger logger = LoggerFactory.getLogger(GameStockActivity.class);
 
-    private final HashMap<String, GameData> gamesMap = new HashMap<>();
-    private final LocalGameRepository localGameRepository = new LocalGameRepository();
-    private final HashMap<InstallType, GameInstaller> installers = new HashMap<>();
+    private HashMap<String, GameData> gamesMap = new HashMap<>();
 
     private SettingsAdapter settingsAdapter;
-    private boolean showProgressDialog;
     private String currentLanguage = Locale.getDefault().getLanguage();
-    private ProgressDialog progressDialog;
-    private File gamesDir;
     private GameData gameData;
     private InstallType lastInstallType = InstallType.ZIP_ARCHIVE;
 
@@ -131,7 +114,7 @@ public class GameStockActivity extends AppCompatActivity {
         this.mRecyclerView = mRecyclerView;
     }
 
-    private void setRecyclerAdapter () {
+    public void setRecyclerAdapter () {
         ArrayList<GameData> gameData = getSortedGames();
         ArrayList<GameData> localGameData = new ArrayList<>();
 
@@ -142,13 +125,6 @@ public class GameStockActivity extends AppCompatActivity {
         }
 
         localStockViewModel.setGameDataArrayList(localGameData);
-    }
-
-    public GameStockActivity() {
-        installers.put(InstallType.ZIP_ARCHIVE, new ArchiveGameInstaller(this, ArchiveType.ZIP));
-        installers.put(InstallType.RAR_ARCHIVE, new ArchiveGameInstaller(this, ArchiveType.RAR));
-        installers.put(InstallType.AQSP_ARCHIVE, new ArchiveGameInstaller(this, ArchiveType.ZIP));
-        installers.put(InstallType.FOLDER, new FolderGameInstaller(this));
     }
 
     @Override
@@ -193,6 +169,9 @@ public class GameStockActivity extends AppCompatActivity {
         }
 
         gameStockActivityVM = new ViewModelProvider(this).get(GameStockActivityVM.class);
+        gameStockActivityVM.activityObservableField.set(this);
+        gamesMap = gameStockActivityVM.getGamesMap();
+        gameStockActivityVM.setLogger(logger);
 
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
@@ -219,7 +198,7 @@ public class GameStockActivity extends AppCompatActivity {
                         GameData gameData = new GameData();
                         gameData.id = gameName;
                         gameData.title = gameName;
-                        installGame(file, lastInstallType, gameData);
+                        gameStockActivityVM.installGame(file, lastInstallType, gameData);
                     }
                 }
         );
@@ -350,6 +329,7 @@ public class GameStockActivity extends AppCompatActivity {
                 @Override
                 public boolean onPrepareActionMode(ActionMode mode , Menu menu) {
                     isEnable = true;
+                    closeFABMenu();
                     return true;
                 }
 
@@ -360,8 +340,12 @@ public class GameStockActivity extends AppCompatActivity {
                         for(GameData data : selectList)
                         {
                             tempList.remove(data);
-                            deleteDirectory(data.gameDir);
-                            refreshGames();
+                            try {
+                                deleteDirectory(data.gameDir);
+                            } catch (NullPointerException e) {
+                                logger.error(e.toString());
+                            }
+                            gameStockActivityVM.refreshGames();
                         }
                         actionMode.finish();
                     } else if (itemId == R.id.select_all) {
@@ -404,7 +388,7 @@ public class GameStockActivity extends AppCompatActivity {
     }
 
     private void showGameInfo(String gameId) {
-        final GameData gameData = gamesMap.get(gameId);
+        final GameData gameData = gameStockActivityVM.getGamesMap().get(gameId);
         if (gameData == null) {
             logger.error("GameData not found: " + gameId);
             return;
@@ -497,11 +481,7 @@ public class GameStockActivity extends AppCompatActivity {
 
         loadSettings();
         updateLocale();
-        refreshGamesDirectory();
-
-        if (showProgressDialog && progressDialog != null) {
-            progressDialog.show();
-        }
+        gameStockActivityVM.refreshGamesDirectory();
     }
 
     private void updateLocale() {
@@ -509,92 +489,10 @@ public class GameStockActivity extends AppCompatActivity {
 
         setLocale(this, settingsAdapter.language);
         setTitle(getString(R.string.gameStock));
-        refreshGames();
+        gameStockActivityVM.refreshGames();
         invalidateOptionsMenu();
 
         currentLanguage = settingsAdapter.language;
-    }
-
-    private void refreshGamesDirectory() {
-        File extFilesDir = getExternalFilesDir(null);
-        if (extFilesDir == null) {
-            logger.error("External files directory not found");
-            return;
-        }
-        File dir = getOrCreateDirectory(extFilesDir, "games");
-        if (!isWritableDirectory(dir)) {
-            logger.error("Games directory is not writable");
-            String message = getString(R.string.gamesDirError);
-            ViewUtil.showErrorDialog(this, message);
-            return;
-        }
-        gamesDir = dir;
-        localGameRepository.setGamesDirectory(gamesDir);
-        refreshGames();
-    }
-
-    private void refreshGames() {
-        gamesMap.clear();
-        for (GameData localGameData : localGameRepository.getGames()) {
-            GameData remoteGameData = gamesMap.get(localGameData.id);
-            if (remoteGameData != null) {
-                GameData aggregateGameData = new GameData(remoteGameData);
-                aggregateGameData.gameDir = localGameData.gameDir;
-                aggregateGameData.gameFiles = localGameData.gameFiles;
-                gamesMap.put(localGameData.id, aggregateGameData);
-            } else {
-                gamesMap.put(localGameData.id, localGameData);
-            }
-        }
-        setRecyclerAdapter();
-    }
-
-    @Override
-    public void onPause() {
-        if (progressDialog != null) {
-            progressDialog.hide();
-        }
-        super.onPause();
-    }
-
-    private void installGame(DocumentFile gameFile, InstallType type, GameData gameData) {
-        if (!isWritableDirectory(gamesDir)) {
-            logger.error("Games directory is not writable");
-            return;
-        }
-        GameInstaller installer = installers.get(type);
-        if (installer == null) {
-            logger.error(String.format("Installer not found by install type '%s'", type));
-            return;
-        }
-        try {
-            doInstallGame(installer, gameFile, gameData);
-        } catch (InstallException ex) {
-            logger.error(ex.getMessage());
-        }
-    }
-
-    private void doInstallGame(GameInstaller installer, DocumentFile gameFile, GameData gameData) {
-        File gameDir = getOrCreateGameDirectory(gameData.title);
-        if (!isWritableDirectory(gameDir)) {
-            logger.error("GameData directory is not writable");
-            return;
-        }
-        updateProgressDialog(true, gameData.title, getString(R.string.installing));
-
-        boolean installed = installer.install(gameData.title, gameFile, gameDir);
-        if (installed) {
-            gameStockActivityVM.writeGameInfo(gameData , gameDir, logger);
-            refreshGames();
-        }
-
-        updateProgressDialog(false, "", "");
-    }
-
-    @NonNull
-    private File getOrCreateGameDirectory(String gameName) {
-        String folderName = normalizeGameFolderName(gameName);
-        return getOrCreateDirectory(gamesDir, folderName);
     }
 
     @Override
@@ -610,17 +508,17 @@ public class GameStockActivity extends AppCompatActivity {
         if (itemId == R.id.menu_options) {
             showSettings();
             return true;
-        } else if (itemId == R.id.app_bar_search) {
-            SearchView searchView = (SearchView) item.getActionView();
-            searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+        } else if (itemId == R.id.action_search) {
+            androidx.appcompat.widget.SearchView searchView = (androidx.appcompat.widget.SearchView) item.getActionView();
+            searchView.setOnQueryTextListener(new androidx.appcompat.widget.SearchView.OnQueryTextListener() {
                 @Override
-                public boolean onQueryTextSubmit(String s) {
+                public boolean onQueryTextSubmit(String query) {
                     return false;
                 }
 
                 @Override
-                public boolean onQueryTextChange(String s) {
-                    filter(s);
+                public boolean onQueryTextChange(String newText) {
+                    filter(newText);
                     return false;
                 }
             });
@@ -636,36 +534,6 @@ public class GameStockActivity extends AppCompatActivity {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         return super.onKeyDown(keyCode, event);
-    }
-
-    private void updateProgressDialog(boolean show ,
-                                      String title ,
-                                      String message) {
-        showProgressDialog = show;
-        if (title.isEmpty()) {
-            if (progressDialog != null && progressDialog.isShowing()) {
-                progressDialog.dismiss();
-                progressDialog = null;
-            }
-        } else {
-            if (show) {
-                if (progressDialog == null) {
-                    progressDialog = new ProgressDialog(this);
-                    progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-                }
-                progressDialog.setTitle(title);
-                progressDialog.setMessage(message);
-                progressDialog.setCancelable(false);
-                progressDialog.setIndeterminate(true);
-                progressDialog.setCanceledOnTouchOutside(false);
-                if (!progressDialog.isShowing()) {
-                    progressDialog.show();
-                }
-            } else if (progressDialog != null && progressDialog.isShowing()) {
-                progressDialog.dismiss();
-                progressDialog = null;
-            }
-        }
     }
 
     private void filter(String text){

@@ -6,6 +6,14 @@ import androidx.annotation.Nullable;
 public final class PathUtil {
 
     @NonNull
+    public static String normalizeFolderName(@NonNull String name) {
+        String result = name.endsWith("...") ? name.substring(0, name.length() - 3) : name;
+
+        return result.replaceAll("[:\"?*|<> ]", "_")
+                .replace("__", "_");
+    }
+
+    @NonNull
     public static String getFilename(String path) {
         int idx = path.lastIndexOf('/');
         return idx == -1 ? path : path.substring(idx + 1);

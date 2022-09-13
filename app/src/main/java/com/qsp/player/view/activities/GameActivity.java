@@ -2,6 +2,7 @@ package com.qsp.player.view.activities;
 
 import static com.qsp.player.utils.ColorUtil.convertRgbaToBgra;
 import static com.qsp.player.utils.ColorUtil.getHexColor;
+import static com.qsp.player.utils.FileUtil.createFile;
 import static com.qsp.player.utils.FileUtil.findFileOrDirectory;
 import static com.qsp.player.utils.FileUtil.getOrCreateDirectory;
 import static com.qsp.player.utils.FileUtil.getOrCreateFile;
@@ -76,6 +77,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ThreadLocalRandom;
 
 @SuppressLint("ClickableViewAccessibility")
 public class GameActivity extends AppCompatActivity implements GameInterface, GestureDetector.OnGestureListener {
@@ -153,6 +155,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
     private GameActivityVM gameActivityVM;
     private ActivityGameBinding activityGameBinding;
     private ActivityResultLauncher<Intent> resultLauncher;
+    private String tinySaveName;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -203,7 +206,33 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
         initGame();
         setActiveTab(TAB_MAIN_DESC_AND_ACTIONS);
 
+        if (savedInstanceState == null) {
+            int randomNum = ThreadLocalRandom.current().nextInt(0, 50 + 1);
+            tinySaveName = libQspProxy.getGameState().gameTitle + randomNum + ".sav";
+        } else {
+            tinySaveName = savedInstanceState.getString("fileName");
+        }
+
         logger.info("GameActivity created");
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        logger.debug(tinySaveName);
+        File file1 = createFile(getCacheDir(), tinySaveName);
+        libQspProxy.saveGameState(Uri.fromFile(file1));
+        outState.putString("fileName", tinySaveName);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        File file = findFileOrDirectory(getCacheDir(), tinySaveName);
+        logger.debug(tinySaveName + " " + file);
+        if (file != null) {
+            doWithCounterDisabled(() -> libQspProxy.loadGameState(Uri.fromFile(file)));
+        }
     }
 
     private void initControls() {
