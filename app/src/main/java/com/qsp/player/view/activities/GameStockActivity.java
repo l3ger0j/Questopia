@@ -14,6 +14,7 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -42,9 +43,6 @@ import com.qsp.player.view.fragments.FragmentLocal;
 import com.qsp.player.viewModel.viewModels.FragmentLocalVM;
 import com.qsp.player.viewModel.viewModels.GameStockActivityVM;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -55,7 +53,7 @@ import java.util.Locale;
 import java.util.Objects;
 
 public class GameStockActivity extends AppCompatActivity {
-    private static final Logger logger = LoggerFactory.getLogger(GameStockActivity.class);
+    private final String TAG = this.getClass().getSimpleName();
 
     private HashMap<String, GameData> gamesMap = new HashMap<>();
 
@@ -171,7 +169,6 @@ public class GameStockActivity extends AppCompatActivity {
         gameStockActivityVM = new ViewModelProvider(this).get(GameStockActivityVM.class);
         gameStockActivityVM.activityObservableField.set(this);
         gamesMap = gameStockActivityVM.getGamesMap();
-        gameStockActivityVM.setLogger(logger);
 
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
@@ -186,7 +183,7 @@ public class GameStockActivity extends AppCompatActivity {
                     DocumentFile file;
                     if (result.getResultCode() == RESULT_OK) {
                         if ((uri = Objects.requireNonNull(result.getData()).getData()) == null) {
-                            logger.error("GameData archive or directory is not selected");
+                            Log.e(TAG, "GameData archive or directory is not selected");
                         }
                         if (lastInstallType == InstallType.FOLDER) {
                             file = DocumentFile.fromTreeUri(this, Objects.requireNonNull(uri));
@@ -206,7 +203,7 @@ public class GameStockActivity extends AppCompatActivity {
         loadSettings();
         loadLocale();
 
-        logger.info("GameStockActivity created");
+        Log.i(TAG,"GameStockActivity created");
 
         setContentView(activityStockBinding.getRoot());
     }
@@ -250,7 +247,7 @@ public class GameStockActivity extends AppCompatActivity {
                 try {
                     resultLauncher.launch(intent);
                 } catch (ActivityNotFoundException e) {
-                    logger.error(e.toString());
+                    Log.e(TAG,e.toString());
                 }
             } else if (id == R.id.floatingActionButton2) {
                 action = ACTION_OPEN_DOCUMENT;
@@ -264,7 +261,7 @@ public class GameStockActivity extends AppCompatActivity {
                 try {
                     resultLauncher.launch(intent2);
                 } catch (ActivityNotFoundException e) {
-                    logger.error(e.toString());
+                    Log.e(TAG,e.toString());
                 }
             } else if (id == R.id.floatingActionButton3) {
                 action = ACTION_OPEN_DOCUMENT_TREE;
@@ -275,7 +272,7 @@ public class GameStockActivity extends AppCompatActivity {
                 try {
                     resultLauncher.launch(intent3);
                 } catch (ActivityNotFoundException e) {
-                    logger.error(e.toString());
+                    Log.e(TAG,e.toString());
                 }
             }
         }
@@ -343,7 +340,7 @@ public class GameStockActivity extends AppCompatActivity {
                             try {
                                 deleteDirectory(data.gameDir);
                             } catch (NullPointerException e) {
-                                logger.error(e.toString());
+                                Log.e(TAG,e.toString());
                             }
                             gameStockActivityVM.refreshGames();
                         }
@@ -390,7 +387,7 @@ public class GameStockActivity extends AppCompatActivity {
     private void showGameInfo(String gameId) {
         final GameData gameData = gameStockActivityVM.getGamesMap().get(gameId);
         if (gameData == null) {
-            logger.error("GameData not found: " + gameId);
+            Log.e(TAG,"GameData not found: " + gameId);
             return;
         }
         StringBuilder message = new StringBuilder();
@@ -447,7 +444,7 @@ public class GameStockActivity extends AppCompatActivity {
 
         int gameFileCount = gameData.gameFiles.size();
         if (gameFileCount == 0) {
-            logger.warn("GameData has no gameData files");
+            Log.w(TAG, "GameData has no gameData files");
             return;
         }
         if (gameFileCount == 1) {
@@ -472,7 +469,7 @@ public class GameStockActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        logger.info("GameStockActivity destroyed");
+        Log.i(TAG , "GameStockActivity destroyed");
     }
 
     @Override
@@ -546,7 +543,7 @@ public class GameStockActivity extends AppCompatActivity {
             }
         }
         if (filteredList.isEmpty()) {
-            logger.error("No Data Found");
+            Log.e(TAG,"No Data Found");
         } else {
             localStockViewModel.setGameDataArrayList(filteredList);
         }

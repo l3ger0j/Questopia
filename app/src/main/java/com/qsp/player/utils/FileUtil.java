@@ -1,10 +1,9 @@
 package com.qsp.player.utils;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -15,10 +14,9 @@ import java.io.InputStreamReader;
 import java.util.Objects;
 
 public final class FileUtil {
+    private static final String TAG = FileUtil.class.getSimpleName();
 
     public static final String GAME_INFO_FILENAME = "gamestockInfo";
-
-    private static final Logger logger = LoggerFactory.getLogger(FileUtil.class);
 
     public static boolean isWritableFile(File file) {
         return file != null && file.exists() && file.canWrite();
@@ -41,10 +39,10 @@ public final class FileUtil {
         if (!file.exists()) {
             try {
                 if (file.createNewFile()) {
-                   logger.info("File created");
+                    Log.i(TAG, "File created");
                 }
             } catch (IOException ex) {
-                logger.error("Error creating a file: " + name, ex);
+                Log.e(TAG , "Error creating a file: " + name, ex);
                 return null;
             }
         }
@@ -64,9 +62,9 @@ public final class FileUtil {
     public static File createDirectory(File parentDir, String name) {
         File dir = new File(parentDir, name);
         if (dir.mkdir()) {
-            logger.info("Directory created");
+            Log.i(TAG,"Directory created");
         } else {
-            logger.error("Directory not created");
+            Log.i(TAG,"Directory not created");
         }
         return dir;
     }
@@ -104,7 +102,7 @@ public final class FileUtil {
                 }
             }
         } catch (IOException ex) {
-            logger.error("Error reading a file", ex);
+            Log.e(TAG,"Error reading a file", ex);
             return null;
         }
         return result.toString();
@@ -116,16 +114,16 @@ public final class FileUtil {
                 deleteDirectory(file);
             } else {
                 if (file.delete()) {
-                    logger.info("File delete");
+                    Log.i(TAG,"File delete");
                 } else {
-                    logger.error("File not delete");
+                    Log.e(TAG,"File not delete");
                 }
             }
         }
         if (dir.delete()) {
-            logger.info("Directory delete");
+            Log.i(TAG,"Directory delete");
         } else {
-            logger.error("Directory not delete");
+            Log.e(TAG,"Directory not delete");
         }
     }
 
@@ -163,7 +161,7 @@ public final class FileUtil {
                 return out.toByteArray();
             }
         } catch (IOException ex) {
-            logger.error("Error reading file: " + path, ex);
+            Log.e(TAG,"Error reading file: " + path, ex);
             return null;
         }
     }

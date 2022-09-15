@@ -1,9 +1,7 @@
 package com.qsp.player.model.service;
 
 import android.graphics.drawable.Drawable;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import android.util.Log;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -13,7 +11,8 @@ import java.util.HashMap;
 import static com.qsp.player.utils.StringUtil.isNullOrEmpty;
 
 public class ImageProvider {
-    private static final Logger logger = LoggerFactory.getLogger(ImageProvider.class);
+    private final String TAG = this.getClass().getSimpleName();
+
     private static final HashMap<String, Drawable> cache = new HashMap<>();
 
     /**
@@ -30,13 +29,13 @@ public class ImageProvider {
 
         File file = new File(normPath);
         if (!file.exists()) {
-            logger.error("Image file not found: " + normPath);
+            Log.e(TAG,"Image file not found: " + normPath);
             return null;
         }
         try (FileInputStream in = new FileInputStream(file)) {
             drawable = Drawable.createFromStream(in, normPath);
         } catch (IOException ex) {
-            logger.error("Error reading the image file", ex);
+            Log.e(TAG,"Error reading the image file", ex);
         }
         if (drawable != null) {
             cache.put(file.getAbsolutePath(), drawable);

@@ -12,8 +12,8 @@ android {
         applicationId "com.qsp.player"
         minSdkVersion 21
         targetSdkVersion 32
-        versionCode 142
-        versionName "2.4.2"
+        versionCode 143
+        versionName "2.4.3"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -58,8 +58,9 @@ dependencies {
     implementation 'androidx.documentfile:documentfile:1.0.1'
     implementation 'androidx.preference:preference:1.2.0'
 
+    implementation 'com.github.omicronapps:7-Zip-JBinding-4Android:Release-16.02-2.02'
+
     implementation 'com.github.junrar:junrar:7.5.0'
-    implementation 'com.gitlab.mvysny.slf4j:slf4j-handroid:1.7.30'
     implementation 'com.jaredrummler:colorpicker:1.1.0'
     implementation 'org.apache.commons:commons-compress:1.21'
     implementation 'org.jsoup:jsoup:1.15.2'

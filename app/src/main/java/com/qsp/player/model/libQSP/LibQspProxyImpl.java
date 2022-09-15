@@ -5,6 +5,7 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
+import android.util.Log;
 
 import com.qsp.player.R;
 import com.qsp.player.dto.libQSP.ActionData;
@@ -17,9 +18,6 @@ import com.qsp.player.model.service.HtmlProcessor;
 import com.qsp.player.model.service.ImageProvider;
 import com.qsp.player.utils.StreamUtil;
 import com.qsp.player.view.activities.GameInterface;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -40,7 +38,7 @@ import static com.qsp.player.utils.ThreadUtil.isSameThread;
 import static com.qsp.player.utils.ThreadUtil.throwIfNotMainThread;
 
 public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
-    private static final Logger logger = LoggerFactory.getLogger(LibQspProxyImpl.class);
+    private final String TAG = this.getClass().getSimpleName();
 
     private final ReentrantLock libQspLock = new ReentrantLock();
     private final GameState gameState = new GameState();
@@ -76,11 +74,11 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
         throwIfNotMainThread();
 
         if (libQspThread == null) {
-            logger.warn("libqsp thread has not been started");
+            Log.w(TAG,"libqsp thread has not been started");
             return;
         }
         if (!libQspThreadInited) {
-            logger.warn("libqsp thread has been started, but not initialized");
+            Log.w(TAG,"libqsp thread has been started, but not initialized");
             return;
         }
         Handler handler = libQspHandler;
@@ -104,7 +102,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
                 gameData = out.toByteArray();
             }
         } catch (IOException ex) {
-            logger.error("Failed to load the game world", ex);
+            Log.e(TAG,"Failed to load the game world", ex);
             return false;
         }
         String fileName = gameState.gameFile.getAbsolutePath();
@@ -130,7 +128,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
                 errorData.errorNum,
                 desc);
 
-        logger.error(message);
+        Log.e(TAG,message);
 
         GameInterface inter = gameInterface;
         if (inter != null) {
@@ -221,7 +219,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
 
                     nativeMethods.QSPDeInit();
                 } catch (Throwable t) {
-                    logger.error("libqsp thread has stopped exceptionally", t);
+                    Log.e(TAG,"libqsp thread has stopped exceptionally", t);
                 }
             }
         };
@@ -240,7 +238,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
             }
             libQspThreadInited = false;
         } else {
-            logger.warn("libqsp thread has been started, but not initialized");
+            Log.w(TAG,"libqsp thread has been started, but not initialized");
         }
         libQspThread = null;
     }
@@ -297,7 +295,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
                 gameData = out.toByteArray();
             }
         } catch (IOException ex) {
-            logger.error("Failed to load game state", ex);
+            Log.e(TAG,"Failed to load game state", ex);
             return;
         }
 
@@ -318,7 +316,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
         try (OutputStream out = context.getContentResolver().openOutputStream(uri, "w")) {
             out.write(gameData);
         } catch (IOException ex) {
-            logger.error("Failed to save the game state", ex);
+            Log.e(TAG,"Failed to save the game state", ex);
         }
     }
 
@@ -482,7 +480,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
         File savesDir = getOrCreateDirectory(gameState.gameDir, "saves");
         File saveFile = findFileOrDirectory(savesDir, filename);
         if (saveFile == null) {
-            logger.error("Save file not found: " + filename);
+            Log.e(TAG,"Save file not found: " + filename);
             return;
         }
         GameInterface inter = gameInterface;
@@ -546,7 +544,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
         try {
             Thread.sleep(msecs);
         } catch (InterruptedException ex) {
-            logger.error("Wait failed", ex);
+            Log.e(TAG,"Wait failed", ex);
         }
     }
 
@@ -568,7 +566,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
     public void ChangeQuestPath(String path) {
         File dir = new File(path);
         if (!dir.exists()) {
-            logger.error("GameData directory not found: " + path);
+            Log.e(TAG,"GameData directory not found: " + path);
             return;
         }
         if (!gameState.gameDir.equals(dir)) {

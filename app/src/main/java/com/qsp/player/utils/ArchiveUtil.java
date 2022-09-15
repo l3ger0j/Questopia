@@ -7,6 +7,8 @@ import static com.qsp.player.utils.PathUtil.getFilename;
 import static com.qsp.player.utils.PathUtil.removeTrailingSlash;
 
 import android.content.Context;
+import android.net.Uri;
+import android.util.Log;
 
 import androidx.documentfile.provider.DocumentFile;
 
@@ -15,21 +17,19 @@ import com.github.junrar.rarfile.FileHeader;
 
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 
 public final class ArchiveUtil {
-    private static final Logger logger = LoggerFactory.getLogger(ArchiveUtil.class);
+    private static final String TAG = ArchiveUtil.class.getSimpleName();
 
     /**
      * Распаковывает ZIP-архив <code>zipFile</code> в папку <code>gameDir</code>.
      */
-    public static boolean unzip(Context context, DocumentFile zipFile, File gameDir) {
-        try (InputStream in = context.getContentResolver().openInputStream(zipFile.getUri())) {
+    public static boolean unzip(Context context, File zipFile, File gameDir) {
+        try (InputStream in = context.getContentResolver().openInputStream(Uri.fromFile(zipFile))) {
             try (ZipArchiveInputStream zipIn = new ZipArchiveInputStream(in, "cp866")) {
                 ZipArchiveEntry entry;
                 while ((entry = zipIn.getNextZipEntry()) != null) {
@@ -42,7 +42,7 @@ public final class ArchiveUtil {
                 return true;
             }
         } catch (Exception ex) {
-            logger.error("Failed to extract a ZIP archive", ex);
+            Log.e(TAG,"Failed to extract a ZIP archive", ex);
             return false;
         }
     }
@@ -65,7 +65,7 @@ public final class ArchiveUtil {
                 return true;
             }
         } catch (Exception ex) {
-            logger.error("Failed to extract a RAR archive", ex);
+            Log.e(TAG,"Failed to extract a RAR archive", ex);
             return false;
         }
     }

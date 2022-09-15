@@ -6,16 +6,14 @@ import static com.qsp.player.utils.ThreadUtil.throwIfNotMainThread;
 import android.media.MediaPlayer;
 import android.os.Handler;
 import android.os.Looper;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import android.util.Log;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class AudioPlayer {
-    private static final Logger logger = LoggerFactory.getLogger(AudioPlayer.class);
+    private final String TAG = this.getClass().getSimpleName();
 
     private final ConcurrentHashMap<String, Sound> sounds = new ConcurrentHashMap<>();
 
@@ -35,7 +33,7 @@ public class AudioPlayer {
                 audioThreadInited = true;
                 Looper.loop();
             } catch (Throwable t) {
-                logger.error("Audio thread has stopped exceptionally", t);
+                Log.e(TAG,"Audio thread has stopped exceptionally", t);
             }
         });
         audioThread.start();
@@ -54,7 +52,7 @@ public class AudioPlayer {
             }
             audioThreadInited = false;
         } else {
-            logger.warn("Audio thread has been started, but not initialized");
+            Log.w(TAG,"Audio thread has been started, but not initialized");
         }
         audioThread = null;
     }
@@ -78,11 +76,11 @@ public class AudioPlayer {
 
     private void runOnAudioThread(final Runnable runnable) {
         if (audioThread == null) {
-            logger.warn("Audio thread has not been started");
+            Log.w(TAG,"Audio thread has not been started");
             return;
         }
         if (!audioThreadInited) {
-            logger.warn("Audio thread has not been initialized");
+            Log.w(TAG,"Audio thread has not been initialized");
             return;
         }
         Handler handler = audioHandler;
@@ -105,7 +103,7 @@ public class AudioPlayer {
         final String normPath = sound.path.replace("\\", "/");
         File file = new File(normPath);
         if (!file.exists()) {
-            logger.error("Sound file not found: " + normPath);
+            Log.e(TAG,"Sound file not found: " + normPath);
             return;
         }
 
@@ -114,7 +112,7 @@ public class AudioPlayer {
             player.setDataSource(file.getAbsolutePath());
             player.prepare();
         } catch (IOException ex) {
-            logger.error("Failed to initialize media player", ex);
+            Log.e(TAG,"Failed to initialize media player", ex);
             return;
         }
         player.setOnCompletionListener(mp -> sounds.remove(sound.path));

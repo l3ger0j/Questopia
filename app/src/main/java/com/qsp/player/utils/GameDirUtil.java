@@ -1,13 +1,12 @@
 package com.qsp.player.utils;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import android.util.Log;
 
 import java.io.File;
 import java.util.Objects;
 
 public final class GameDirUtil {
-    private static final Logger logger = LoggerFactory.getLogger(GameDirUtil.class);
+    private static final String TAG = GameDirUtil.class.getSimpleName();
 
     /**
      * Если в папке есть только одна папка, и больше ничего, рекурсивно разворачивает папку до тех
@@ -26,14 +25,14 @@ public final class GameDirUtil {
         if (it == dir) {
             return;
         }
-        logger.info("Normalizing game directory '{}'", dir.getAbsolutePath());
+        Log.i(TAG,"Normalizing game directory: " + dir.getAbsolutePath());
         for (File file : Objects.requireNonNull(it.listFiles())) {
             File dest = new File(dir.getAbsolutePath(), file.getName());
-            logger.debug("Moving game file '{}' to '{}'", file.getAbsolutePath(), dest.getAbsolutePath());
+            Log.d(TAG,"Moving game file"+ file.getAbsolutePath() + " to " + dest.getAbsolutePath());
             if (file.renameTo(dest)) {
-                logger.info("Renaming file success");
+                Log.i(TAG,"Renaming file success");
             } else {
-                logger.error("Renaming file error");
+                Log.e(TAG,"Renaming file error");
             }
         }
     }

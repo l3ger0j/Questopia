@@ -2,12 +2,11 @@ package com.qsp.player.model.service;
 
 import android.graphics.drawable.Drawable;
 import android.util.Base64;
+import android.util.Log;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
 import java.util.regex.Matcher;
@@ -21,9 +20,9 @@ import static com.qsp.player.utils.StringUtil.isNullOrEmpty;
 import androidx.annotation.NonNull;
 
 public class HtmlProcessor {
+    private final String TAG = this.getClass().getSimpleName();
     private static final int IMAGE_WIDTH_THRESHOLD = 400;
 
-    private static final Logger logger = LoggerFactory.getLogger(HtmlProcessor.class);
     private static final Pattern execPattern = Pattern.compile("href=\"exec:([\\s\\S]*?)\"", Pattern.CASE_INSENSITIVE);
 
     private final GameContentResolver gameContentResolver;
@@ -137,7 +136,7 @@ public class HtmlProcessor {
             result.append(html, fromIdx, idx);
             int endIdx = html.indexOf('>', idx + 1);
             if (endIdx == -1) {
-                logger.warn("Invalid HTML: element at {} is not closed", idx);
+                Log.w(TAG,"Invalid HTML: element at " + idx + " is not closed");
                 result.append(html.substring(idx));
                 break;
             }

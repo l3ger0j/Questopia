@@ -5,14 +5,12 @@ import static com.qsp.player.utils.FileUtil.readFileAsString;
 import static com.qsp.player.utils.XmlUtil.xmlToObject;
 
 import android.os.Build;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.qsp.player.dto.stock.GameData;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -23,7 +21,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class LocalGameRepository {
-    private static final Logger logger = LoggerFactory.getLogger(LocalGameRepository.class);
+    private final String TAG = this.getClass().getSimpleName();
 
     private File gamesDir;
 
@@ -33,7 +31,7 @@ public class LocalGameRepository {
 
     public List<GameData> getGames() {
         if (gamesDir == null) {
-            logger.error("Games directory is not specified");
+            Log.e(TAG,"Games directory is not specified");
             return Collections.emptyList();
         }
 
@@ -114,7 +112,7 @@ public class LocalGameRepository {
     private String getGameInfo(GameFolder game) {
         File[] gameInfoFiles = game.dir.listFiles((dir, name) -> name.equalsIgnoreCase(GAME_INFO_FILENAME));
         if (gameInfoFiles == null || gameInfoFiles.length == 0) {
-            logger.warn("GameData info file not found in " + game.dir.getName());
+            Log.w(TAG, "GameData info file not found in " + game.dir.getName());
             return null;
         }
 
@@ -126,7 +124,7 @@ public class LocalGameRepository {
         try {
             return xmlToObject(xml, GameData.class);
         } catch (Exception ex) {
-            logger.error("Failed to parse game info file", ex);
+            Log.e(TAG,"Failed to parse game info file", ex);
             return null;
         }
     }

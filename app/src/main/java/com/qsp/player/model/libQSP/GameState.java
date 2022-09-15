@@ -30,22 +30,4 @@ public class GameState {
         objects = new ArrayList<>();
         menuItems = new ArrayList<>();
     }
-
-    public StringBuffer debug() {
-        StringBuffer buffer = new StringBuffer();
-        buffer.append(gameRunning)
-                .append("; ")
-                .append(gameId)
-                .append("; ")
-                .append(gameTitle)
-                .append("; ")
-                .append(gameDir.toString())
-                .append("; ")
-                .append(gameFile.toString())
-                .append("; ")
-                .append(mainDesc)
-                .append("; ")
-                .append(varsDesc);
-        return buffer;
-    }
 }

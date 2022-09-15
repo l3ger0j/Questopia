@@ -20,6 +20,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.format.DateFormat;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.GestureDetector;
 import android.view.KeyEvent;
@@ -68,8 +69,6 @@ import com.qsp.player.view.adapters.SettingsAdapter;
 import com.qsp.player.viewModel.viewModels.GameActivityVM;
 
 import org.jetbrains.annotations.Contract;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -81,6 +80,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 @SuppressLint("ClickableViewAccessibility")
 public class GameActivity extends AppCompatActivity implements GameInterface, GestureDetector.OnGestureListener {
+    private final String TAG = this.getClass().getSimpleName();
 
     private static final int MAX_SAVE_SLOTS = 5;
     private static final int TAB_MAIN_DESC_AND_ACTIONS = 0;
@@ -105,8 +105,6 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
             + "</style></head>";
 
     private static final String PAGE_BODY_TEMPLATE = "<body>REPLACETEXT</body>";
-
-    private static final Logger logger = LoggerFactory.getLogger(GameActivity.class);
 
     private SettingsAdapter settingsAdapter;
     private String currentLanguage = Locale.getDefault().getLanguage();
@@ -166,7 +164,6 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
         gameActivityVM = new ViewModelProvider(this).get(GameActivityVM.class);
         activityGameBinding.setGameViewModel(gameActivityVM);
         settingsAdapter = gameActivityVM.loadSettings(this);
-        gameActivityVM.setLogger(logger);
 
         setContentView(activityGameBinding.getRoot());
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
@@ -213,13 +210,13 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
             tinySaveName = savedInstanceState.getString("fileName");
         }
 
-        logger.info("GameActivity created");
+        Log.i(TAG, "GameActivity created");
     }
 
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        logger.debug(tinySaveName);
+        Log.d(TAG, tinySaveName);
         File file1 = createFile(getCacheDir(), tinySaveName);
         libQspProxy.saveGameState(Uri.fromFile(file1));
         outState.putString("fileName", tinySaveName);
@@ -229,7 +226,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
     protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         File file = findFileOrDirectory(getCacheDir(), tinySaveName);
-        logger.debug(tinySaveName + " " + file);
+        Log.d(TAG,tinySaveName + " " + file);
         if (file != null) {
             doWithCounterDisabled(() -> libQspProxy.loadGameState(Uri.fromFile(file)));
         }
@@ -387,7 +384,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
         libQspProxy.setGameInterface(null);
         counterHandler.removeCallbacks(counterTask);
         super.onDestroy();
-        logger.info("GameActivity destroyed");
+        Log.i(TAG,"GameActivity destroyed");
     }
 
     @Override
@@ -798,7 +795,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
         try {
             latch.await();
         } catch (InterruptedException ex) {
-            logger.error("Wait failed", ex);
+            Log.e(TAG,"Wait failed", ex);
         }
     }
 
@@ -832,7 +829,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
         try {
             return inputQueue.take();
         } catch (InterruptedException ex) {
-            logger.error("Wait for input failed", ex);
+            Log.e(TAG,"Wait for input failed", ex);
             return null;
         }
     }
@@ -857,7 +854,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
         try {
             return resultQueue.take();
         } catch (InterruptedException ex) {
-            logger.error("Wait failed", ex);
+            Log.e(TAG,"Wait failed", ex);
             return -1;
         }
     }
@@ -875,7 +872,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
                 runOnUiThread(this::refreshActionsVisibility);
             }
         } else {
-            logger.debug("Unsupported window type: " + type);
+            Log.d(TAG, "Unsupported window type: " + type);
         }
     }
 
@@ -944,7 +941,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
                 return true;
             }
         } catch (Exception ex) {
-            logger.error("Error handling fling event", ex);
+            Log.e(TAG,"Error handling fling event", ex);
         }
 
         return false;

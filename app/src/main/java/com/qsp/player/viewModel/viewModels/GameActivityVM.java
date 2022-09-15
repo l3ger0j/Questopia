@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.webkit.MimeTypeMap;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
@@ -23,17 +24,15 @@ import com.qsp.player.model.libQSP.LibQspProxy;
 import com.qsp.player.model.service.GameContentResolver;
 import com.qsp.player.view.adapters.SettingsAdapter;
 
-import org.slf4j.Logger;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 
 public class GameActivityVM extends AndroidViewModel {
+    private final String TAG = this.getClass().getCanonicalName();
 
     private GameContentResolver gameContentResolver;
     private LibQspProxy libQspProxy;
-    private Logger logger;
 
     public GameActivityVM(@NonNull Application application) {
         super(application);
@@ -45,10 +44,6 @@ public class GameActivityVM extends AndroidViewModel {
 
     public void setGameContentResolver(GameContentResolver gameContentResolver) {
         this.gameContentResolver = gameContentResolver;
-    }
-
-    public void setLogger(Logger logger) {
-        this.logger = logger;
     }
 
     public WebViewClient getWebViewClient() {
@@ -83,7 +78,7 @@ public class GameActivityVM extends AndroidViewModel {
                     InputStream in = getApplication().getContentResolver().openInputStream(Uri.fromFile(file));
                     return new WebResourceResponse(mimeType, null, in);
                 } catch (FileNotFoundException ex) {
-                    logger.error("File not found", ex);
+                    Log.e(TAG,"File not found" , ex);
                     return null;
                 }
             }

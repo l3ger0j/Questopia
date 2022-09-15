@@ -10,6 +10,7 @@ import static com.qsp.player.utils.PathUtil.normalizeFolderName;
 import static com.qsp.player.utils.XmlUtil.objectToXml;
 
 import android.app.Application;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.databinding.ObservableField;
@@ -28,8 +29,6 @@ import com.qsp.player.utils.ViewUtil;
 import com.qsp.player.view.activities.GameStockActivity;
 import com.qsp.player.viewModel.repository.LocalGameRepository;
 
-import org.slf4j.Logger;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
@@ -40,26 +39,18 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.function.BooleanSupplier;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 public class GameStockActivityVM extends AndroidViewModel {
+    private final String TAG = this.getClass().getSimpleName();
+
     private final LocalGameRepository localGameRepository = new LocalGameRepository();
     private final HashMap<InstallType, GameInstaller> installers = new HashMap<>();
     private final HashMap<String, GameData> gamesMap = new HashMap<>();
 
     private File gamesDir;
-    private Logger logger;
 
     public ObservableField<GameStockActivity> activityObservableField = new
             ObservableField<>();
-
-    // region Getter/Setter
-    public void setLogger(Logger logger) {
-        this.logger = logger;
-    }
 
     public void setGamesDir(File gamesDir) {
         this.gamesDir = gamesDir;
@@ -88,25 +79,25 @@ public class GameStockActivityVM extends AndroidViewModel {
 
     public void installGame(DocumentFile gameFile, InstallType type, GameData gameData) {
         if (!isWritableDirectory(gamesDir)) {
-            logger.error("Games directory is not writable");
+            Log.e(TAG, "Games directory is not writable");
             return;
         }
         GameInstaller installer = installers.get(type);
         if (installer == null) {
-            logger.error(String.format("Installer not found by install type '%s'", type));
+            Log.e(TAG, String.format("Installer not found by install type '%s'", type));
             return;
         }
         try {
             doInstallGame(installer, gameFile, gameData);
         } catch (InstallException ex) {
-            logger.error(ex.getMessage());
+            Log.e(TAG, ex.getMessage());
         }
     }
 
-    public void doInstallGame(GameInstaller installer, DocumentFile gameFile, GameData gameData) {
+    private void doInstallGame(GameInstaller installer, DocumentFile gameFile, GameData gameData) {
         File gameDir = getOrCreateGameDirectory(gameData.title);
         if (!isWritableDirectory(gameDir)) {
-            logger.error("GameData directory is not writable");
+            Log.e(TAG, "Games directory is not writable");
             return;
         }
 
@@ -119,29 +110,29 @@ public class GameStockActivityVM extends AndroidViewModel {
         try {
             installed = futureTask.get();
         } catch (ExecutionException | InterruptedException | OutOfMemoryError e) {
-            logger.error(e.toString());
+            Log.e(TAG, e.toString());
         }
 
         if (installed) {
-            writeGameInfo(gameData , gameDir, logger);
+            writeGameInfo(gameData , gameDir);
             refreshGames();
         }
     }
 
-    public void writeGameInfo(GameData gameData , File gameDir, Logger logger) {
+    public void writeGameInfo(GameData gameData , File gameDir) {
         File infoFile = findFileOrDirectory(gameDir, GAME_INFO_FILENAME);
         if (infoFile == null) {
             infoFile = createFile(gameDir, GAME_INFO_FILENAME);
         }
         if (!isWritableFile(infoFile)) {
-            logger.error("Game data info file is not writable");
+            Log.e(TAG, "Game data info file is not writable");
             return;
         }
         try (FileOutputStream out = new FileOutputStream(infoFile);
              OutputStreamWriter writer = new OutputStreamWriter(out)) {
             writer.write(objectToXml(gameData));
         } catch (Exception ex) {
-            logger.error("Failed to write to a gameData info file", ex);
+            Log.e(TAG,"Failed to write to a gameData info file", ex);
         }
     }
     // endregion Game install
@@ -150,12 +141,12 @@ public class GameStockActivityVM extends AndroidViewModel {
     public void refreshGamesDirectory() {
         File extFilesDir = getApplication().getExternalFilesDir(null);
         if (extFilesDir == null) {
-            logger.error("External files directory not found");
+            Log.e(TAG,"External files directory not found");
             return;
         }
         File dir = getOrCreateDirectory(extFilesDir, "games");
         if (!isWritableDirectory(dir)) {
-            logger.error("Games directory is not writable");
+            Log.e(TAG,"Games directory is not writable");
             String message = getApplication().getString(R.string.gamesDirError);
             ViewUtil.showErrorDialog(getApplication(), message);
             return;
