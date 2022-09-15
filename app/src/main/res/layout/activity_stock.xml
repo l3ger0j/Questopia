@@ -54,6 +54,7 @@
             android:layout_marginBottom="32dp"
             android:clickable="true"
             android:focusable="true"
+            android:enabled="false"
             android:text="@string/installFromRAR"
             android:textAlignment="center"
             android:visibility="gone"

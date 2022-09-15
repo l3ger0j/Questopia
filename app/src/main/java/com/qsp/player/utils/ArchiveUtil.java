@@ -28,8 +28,8 @@ public final class ArchiveUtil {
     /**
      * Распаковывает ZIP-архив <code>zipFile</code> в папку <code>gameDir</code>.
      */
-    public static boolean unzip(Context context, File zipFile, File gameDir) {
-        try (InputStream in = context.getContentResolver().openInputStream(Uri.fromFile(zipFile))) {
+    public static boolean unzip(Context context, DocumentFile zipFile, File gameDir) {
+        try (InputStream in = context.getContentResolver().openInputStream(zipFile.getUri())) {
             try (ZipArchiveInputStream zipIn = new ZipArchiveInputStream(in, "cp866")) {
                 ZipArchiveEntry entry;
                 while ((entry = zipIn.getNextZipEntry()) != null) {
