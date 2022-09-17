@@ -6,32 +6,34 @@ import android.graphics.Color;
 import androidx.annotation.NonNull;
 
 public class SettingsAdapter {
-    public boolean soundEnabled;
-    public String language;
-    public float actionsHeightRatio;
-    public boolean isSeparator;
-    public boolean useGestures;
     public int typeface;
     public int fontSize;
-    public boolean useGameFont;
     public int backColor;
     public int textColor;
     public int linkColor;
+    public float actionsHeightRatio;
+    public boolean soundEnabled;
+    public boolean useSeparator;
+    public boolean useGestures;
+    public boolean useGameFont;
+    public boolean useAutoscroll;
+    public String language;
 
     @NonNull
     public static SettingsAdapter from(@NonNull SharedPreferences preferences) {
         SettingsAdapter settingsAdapter = new SettingsAdapter();
-        settingsAdapter.soundEnabled = preferences.getBoolean("sound", true);
-        settingsAdapter.language = preferences.getString("lang", "ru");
-        settingsAdapter.actionsHeightRatio = parseActionsHeightRatio(preferences.getString("actsHeight", "1/3"));
-        settingsAdapter.isSeparator = preferences.getBoolean("separator", false);
-        settingsAdapter.useGestures = preferences.getBoolean("gestures", false);
         settingsAdapter.typeface = Integer.parseInt(preferences.getString("typeface", "0"));
         settingsAdapter.fontSize = Integer.parseInt(preferences.getString("fontSize", "16"));
-        settingsAdapter.useGameFont = preferences.getBoolean("useGameFont", false);
         settingsAdapter.backColor = preferences.getInt("backColor", Color.parseColor("#e0e0e0"));
         settingsAdapter.textColor = preferences.getInt("textColor", Color.parseColor("#000000"));
         settingsAdapter.linkColor = preferences.getInt("linkColor", Color.parseColor("#0000ff"));
+        settingsAdapter.actionsHeightRatio = parseActionsHeightRatio(preferences.getString("actsHeight", "1/3"));
+        settingsAdapter.useAutoscroll = preferences.getBoolean("autoscroll", true);
+        settingsAdapter.useSeparator = preferences.getBoolean("separator", false);
+        settingsAdapter.useGameFont = preferences.getBoolean("gameFont", false);
+        settingsAdapter.useGestures = preferences.getBoolean("gestures", false);
+        settingsAdapter.soundEnabled = preferences.getBoolean("sound", true);
+        settingsAdapter.language = preferences.getString("lang", "ru");
         return settingsAdapter;
     }
 

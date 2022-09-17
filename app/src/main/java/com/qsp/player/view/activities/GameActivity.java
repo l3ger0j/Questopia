@@ -155,6 +155,15 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
     private ActivityResultLauncher<Intent> resultLauncher;
     private String tinySaveName;
 
+    private final Runnable onScroll = new Runnable() {
+        @Override
+        public void run() {
+            if (mainDescView.getContentHeight() * mainDescView.getScale() >= mainDescView.getScrollY() ){
+                mainDescView.scrollBy(0, (int)mainDescView.getHeight());
+            }
+        }
+    };
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -251,6 +260,9 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
     private void initMainDescView() {
         mainDescView = activityGameBinding.mainDesc;
         mainDescView.setOnTouchListener(this::handleTouchEvent);
+        if (settingsAdapter.useAutoscroll) {
+            mainDescView.post(onScroll);
+        }
     }
 
     private boolean handleTouchEvent(View v, MotionEvent event) {
@@ -426,7 +438,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
     private void applySettings() {
         applyActionsHeightRatio();
 
-        if (settingsAdapter.isSeparator) {
+        if (settingsAdapter.useSeparator) {
             separatorView.setBackgroundColor(getBackgroundColor());
         } else {
             separatorView.setBackgroundColor(getResources().getColor(R.color.materialcolorpicker__grey));
@@ -490,6 +502,9 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
 
     private void refreshMainDesc() {
         String mainDesc = getHtml(libQspProxy.getGameState().mainDesc);
+        if (settingsAdapter.useAutoscroll) {
+            mainDescView.postDelayed(onScroll, 300);
+        }
 
         mainDescView.loadDataWithBaseURL(
                 "file:///",

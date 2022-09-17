@@ -1,13 +1,9 @@
 package com.qsp.player.view.activities;
 
-import static android.content.Intent.ACTION_OPEN_DOCUMENT;
-import static android.content.Intent.ACTION_OPEN_DOCUMENT_TREE;
 import static com.qsp.player.utils.FileUtil.deleteDirectory;
 import static com.qsp.player.utils.LanguageUtil.setLocale;
-import static com.qsp.player.utils.PathUtil.removeExtension;
 
 import android.app.AlertDialog;
-import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -19,8 +15,6 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.webkit.MimeTypeMap;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -32,12 +26,10 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.qsp.player.R;
 import com.qsp.player.databinding.ActivityStockBinding;
 import com.qsp.player.dto.stock.GameData;
-import com.qsp.player.model.install.InstallType;
 import com.qsp.player.view.adapters.SettingsAdapter;
 import com.qsp.player.view.fragments.FragmentLocal;
 import com.qsp.player.viewModel.viewModels.FragmentLocalVM;
@@ -60,22 +52,17 @@ public class GameStockActivity extends AppCompatActivity {
     private SettingsAdapter settingsAdapter;
     private String currentLanguage = Locale.getDefault().getLanguage();
     private GameData gameData;
-    private InstallType lastInstallType = InstallType.ZIP_ARCHIVE;
 
     private GameStockActivityVM gameStockActivityVM;
     private FragmentLocalVM localStockViewModel;
 
     private ActionMode actionMode;
     private ActivityStockBinding activityStockBinding;
-    private ActivityResultLauncher<Intent> resultLauncher;
+    public ActivityResultLauncher<Intent> resultInstallLauncher, resultGetImageLauncher;
 
-    private boolean isFABOpen;
     private boolean isEnable = false;
 
     private FloatingActionButton mFAB;
-    private ExtendedFloatingActionButton fab1;
-    private ExtendedFloatingActionButton fab2;
-    private ExtendedFloatingActionButton fab3;
     private RecyclerView mRecyclerView;
     private final ArrayList<GameData> tempList = getSortedGames();
     private final ArrayList<GameData> selectList = new ArrayList<>();
@@ -130,17 +117,7 @@ public class GameStockActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         activityStockBinding = ActivityStockBinding.inflate(getLayoutInflater());
-
         mFAB = activityStockBinding.floatingActionButton;
-        fab1 = activityStockBinding.floatingActionButton1;
-        fab2 = activityStockBinding.floatingActionButton2;
-        fab3 = activityStockBinding.floatingActionButton3;
-
-        mFAB.setOnClickListener(onClickListener);
-        fab1.setOnClickListener(onClickListener);
-        fab2.setOnClickListener(onClickListener);
-        fab3.setOnClickListener(onClickListener);
-
         localStockViewModel =
                 new ViewModelProvider(this).get(FragmentLocalVM.class);
         localStockViewModel.activityObservableField.set(this);
@@ -152,7 +129,6 @@ public class GameStockActivity extends AppCompatActivity {
                     {
                         mFAB.show();
                     }
-
                     super.onScrollStateChanged(recyclerView, newState);
                 }
 
@@ -167,6 +143,7 @@ public class GameStockActivity extends AppCompatActivity {
         }
 
         gameStockActivityVM = new ViewModelProvider(this).get(GameStockActivityVM.class);
+        activityStockBinding.setStockVM(gameStockActivityVM);
         gameStockActivityVM.activityObservableField.set(this);
         gamesMap = gameStockActivityVM.getGamesMap();
 
@@ -176,26 +153,40 @@ public class GameStockActivity extends AppCompatActivity {
                     .commit();
         }
 
-        resultLauncher = registerForActivityResult(
+        resultInstallLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
                     Uri uri;
                     DocumentFile file;
                     if (result.getResultCode() == RESULT_OK) {
                         if ((uri = Objects.requireNonNull(result.getData()).getData()) == null) {
-                            Log.e(TAG, "GameData archive or directory is not selected");
+                            Log.e(TAG, "Archive or file is not selected");
                         }
-                        if (lastInstallType == InstallType.FOLDER) {
-                            file = DocumentFile.fromTreeUri(this, Objects.requireNonNull(uri));
-                        } else {
+                        try {
                             file = DocumentFile.fromSingleUri(this, Objects.requireNonNull(uri));
+                        } catch (Exception e) {
+                            Log.e(TAG, "Error: ", e);
+                            file = DocumentFile.fromTreeUri(this, Objects.requireNonNull(uri));
                         }
                         assert file != null;
-                        String gameName = removeExtension(Objects.requireNonNull(file.getName()));
-                        GameData gameData = new GameData();
-                        gameData.id = gameName;
-                        gameData.title = gameName;
-                        gameStockActivityVM.installGame(file, lastInstallType, gameData);
+                        gameStockActivityVM.setTempInstallFile(file);
+                    }
+                }
+        );
+
+        resultGetImageLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    Uri uri;
+                    DocumentFile file;
+                    if (result.getResultCode() == RESULT_OK) {
+                        if ((uri = Objects.requireNonNull(result.getData()).getData()) == null) {
+                            Log.e(TAG, "Archive or file is not selected");
+                        }
+                        assert uri != null;
+                        file = DocumentFile.fromSingleUri(this, uri);
+                        assert file != null;
+                        gameStockActivityVM.setTempImageFile(file);
                     }
                 }
         );
@@ -207,76 +198,6 @@ public class GameStockActivity extends AppCompatActivity {
 
         setContentView(activityStockBinding.getRoot());
     }
-
-    private void showFABMenu(){
-        isFABOpen = true;
-        fab1.show();
-        fab2.show();
-        fab3.show();
-    }
-
-    private void closeFABMenu(){
-        isFABOpen = false;
-        fab1.hide();
-        fab2.hide();
-        fab3.hide();
-    }
-
-    View.OnClickListener onClickListener = new View.OnClickListener() {
-        String action;
-        String extension = null;
-
-        @Override
-        public void onClick(View view) {
-            int id = view.getId();
-            if (id == R.id.floatingActionButton) {
-                if (!isFABOpen) {
-                    showFABMenu();
-                } else {
-                    closeFABMenu();
-                }
-            } else if (id == R.id.floatingActionButton1) {
-                action = ACTION_OPEN_DOCUMENT;
-                extension = "zip";
-                Intent intent = new Intent(action);
-                intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                if (extension != null) {
-                    intent.setType(MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension));
-                }
-                lastInstallType = InstallType.ZIP_ARCHIVE;
-                try {
-                    resultLauncher.launch(intent);
-                } catch (ActivityNotFoundException e) {
-                    Log.e(TAG,e.toString());
-                }
-            } else if (id == R.id.floatingActionButton2) {
-                action = ACTION_OPEN_DOCUMENT;
-                extension = "rar";
-                Intent intent2 = new Intent(action);
-                intent2.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                if (extension != null) {
-                    intent2.setType(MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension));
-                }
-                lastInstallType = InstallType.RAR_ARCHIVE;
-                try {
-                    resultLauncher.launch(intent2);
-                } catch (ActivityNotFoundException e) {
-                    Log.e(TAG,e.toString());
-                }
-            } else if (id == R.id.floatingActionButton3) {
-                action = ACTION_OPEN_DOCUMENT_TREE;
-                Intent intent3 = new Intent(action);
-                intent3.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                intent3.setFlags(Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
-                lastInstallType = InstallType.FOLDER;
-                try {
-                    resultLauncher.launch(intent3);
-                } catch (ActivityNotFoundException e) {
-                    Log.e(TAG,e.toString());
-                }
-            }
-        }
-    };
 
     private void loadSettings() {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -326,7 +247,6 @@ public class GameStockActivity extends AppCompatActivity {
                 @Override
                 public boolean onPrepareActionMode(ActionMode mode , Menu menu) {
                     isEnable = true;
-                    closeFABMenu();
                     return true;
                 }
 

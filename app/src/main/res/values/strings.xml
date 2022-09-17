@@ -104,7 +104,7 @@
     <string name="update">Update</string>
     <string name="experimental">(experimental)</string>
     <string name="separator">Separator</string>
-    <string name="separatorSummary">On or off separator line in game</string>
+    <string name="separatorSummary">On/off separator line in game</string>
     <string name="promptCloseGame">Are you sure you want to close the game?</string>
     <string name="zoom_image">Zoom image</string>
     <string name="image">Image</string>

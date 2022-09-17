@@ -28,6 +28,10 @@
             android:summary="@string/separatorSummary"
             android:title="@string/separator" />
         <SwitchPreference
+            android:defaultValue="true"
+            android:key="autoscroll"
+            android:title="Autoscroll" />
+        <SwitchPreference
             android:defaultValue="false"
             android:key="gestures"
             android:summary="@string/gesturesSum"
@@ -56,7 +60,7 @@
             android:title="@string/fontSize" />
         <CheckBoxPreference
             android:defaultValue="false"
-            android:key="useGameFont"
+            android:key="gameFont"
             android:title="@string/useGameFont" />
         <com.jaredrummler.android.colorpicker.ColorPreferenceCompat
             android:defaultValue="@color/def_back_color"
