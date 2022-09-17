@@ -26,7 +26,7 @@
             <com.google.android.material.textfield.TextInputEditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Game name" />
+                android:hint="@string/gameName" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -43,7 +43,7 @@
             <com.google.android.material.textfield.TextInputEditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Author" />
+                android:hint="@string/gameAuthor" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -60,7 +60,7 @@
             <com.google.android.material.textfield.TextInputEditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Version" />
+                android:hint="@string/gameVersion" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <LinearLayout
@@ -80,7 +80,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Select archive or file"
+                android:text="@string/selectFileOrArchive"
                 android:textAlignment="center"
                 android:textStyle="bold" />
 
@@ -90,7 +90,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Select" />
+                android:text="@string/buttonSelect" />
         </LinearLayout>
 
         <LinearLayout
@@ -116,7 +116,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Select icon"
+                android:text="@string/selectIcon"
                 android:textAlignment="textEnd"
                 android:textAllCaps="false"
                 android:textStyle="bold" />
@@ -127,7 +127,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Select" />
+                android:text="@string/buttonSelect" />
         </LinearLayout>
 
         <Button
@@ -137,7 +137,7 @@
             android:layout_marginTop="16dp"
             android:layout_marginBottom="16dp"
             android:onClick="@{() -> stockVM.formingInstallIntent()}"
-            android:text="Apply"
+            android:text="@string/add"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.498"

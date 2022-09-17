@@ -356,7 +356,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
         if (inter == null) return;
 
         runOnQspThread(() -> {
-            String input = inter.showInputBox(context.getString(R.string.userInput));
+            String input = inter.showInputBox(context.getString(R.string.userInputTitle));
             nativeMethods.QSPSetInputStrText(input);
 
             if (!nativeMethods.QSPExecUserInput(true)) {

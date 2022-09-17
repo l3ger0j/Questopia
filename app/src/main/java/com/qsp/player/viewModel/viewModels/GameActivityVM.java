@@ -4,12 +4,17 @@ import static com.qsp.player.utils.Base64Util.decodeBase64;
 import static com.qsp.player.utils.LanguageUtil.setLocale;
 import static com.qsp.player.utils.PathUtil.getExtension;
 
+import android.app.AlertDialog;
 import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.View;
 import android.webkit.MimeTypeMap;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
@@ -18,15 +23,21 @@ import android.webkit.WebViewClient;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.databinding.ObservableField;
 import androidx.lifecycle.AndroidViewModel;
 
+import com.qsp.player.QuestPlayerApplication;
+import com.qsp.player.databinding.DialogImageBinding;
 import com.qsp.player.model.libQSP.LibQspProxy;
 import com.qsp.player.model.service.GameContentResolver;
+import com.qsp.player.model.service.ImageProvider;
+import com.qsp.player.view.activities.GameActivity;
 import com.qsp.player.view.adapters.SettingsAdapter;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.Objects;
 
 public class GameActivityVM extends AndroidViewModel {
     private final String TAG = this.getClass().getCanonicalName();
@@ -34,10 +45,14 @@ public class GameActivityVM extends AndroidViewModel {
     private GameContentResolver gameContentResolver;
     private LibQspProxy libQspProxy;
 
-    public GameActivityVM(@NonNull Application application) {
-        super(application);
-    }
+    public ObservableField<GameActivity> gameActivityObservableField =
+            new ObservableField<>();
 
+    private DialogImageBinding imageBinding;
+
+    private String pathToImage;
+
+    // region Getter/Setter
     public void setLibQspProxy(LibQspProxy libQspProxy) {
         this.libQspProxy = libQspProxy;
     }
@@ -49,6 +64,55 @@ public class GameActivityVM extends AndroidViewModel {
     public WebViewClient getWebViewClient() {
         return new QspWebViewClient();
     }
+    // endregion Getter/Setter
+
+    public GameActivityVM(@NonNull Application application) {
+        super(application);
+    }
+
+    // region Dialog
+    private AlertDialog dialog;
+
+    public void showPictureDialog (String pathToImage) {
+        this.pathToImage = pathToImage;
+        dialog = createAlertDialog(createView());
+        dialog.show();
+    }
+
+    public Drawable getImage () {
+        QuestPlayerApplication application = getApplication();
+        ImageProvider imageProvider = application.getImageProvider();
+        return resize(imageProvider.get(pathToImage));
+    }
+
+    private Drawable resize(Drawable image) {
+        Bitmap b = ((BitmapDrawable)image).getBitmap();
+        Bitmap bitmapResized = Bitmap.createScaledBitmap(b,
+                Objects.requireNonNull(
+                        gameActivityObservableField.get())
+                        .getWindow().getDecorView().getWidth() ,
+                Objects.requireNonNull(
+                        gameActivityObservableField.get())
+                        .getWindow().getDecorView().getHeight(), false);
+        return new BitmapDrawable(getApplication().getResources(), bitmapResized);
+    }
+
+    @NonNull
+    private View createView () {
+        imageBinding =
+                DialogImageBinding.inflate(Objects.requireNonNull(gameActivityObservableField.get())
+                        .getLayoutInflater());
+        imageBinding.setGameVM(this);
+        return imageBinding.getRoot();
+    }
+
+    private AlertDialog createAlertDialog (View view) {
+        AlertDialog.Builder dialogBuilder =
+                new AlertDialog.Builder(gameActivityObservableField.get());
+        dialogBuilder.setView(view);
+        return dialogBuilder.create();
+    }
+    // endregion Dialog
 
     public class QspWebViewClient extends WebViewClient {
         @Override

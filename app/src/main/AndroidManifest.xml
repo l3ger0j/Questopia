@@ -29,13 +29,8 @@
             android:theme="@style/Theme.QSP.Translucent.NoActionBar" />
 
         <activity
-            android:name=".view.activities.ImageBoxActivity"
-            android:screenOrientation="fullSensor"
-            android:theme="@style/Theme.QSP.Translucent" />
-
-        <activity
             android:name=".view.activities.SettingsActivity"
-            android:label="@string/settings"
+            android:label="@string/settingsTitle"
             android:screenOrientation="fullSensor" />
 
         <provider

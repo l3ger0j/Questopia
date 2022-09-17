@@ -25,7 +25,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
-        requireActivity().setTitle(R.string.settings);
+        requireActivity().setTitle(R.string.settingsTitle);
         addPreferencesFromResource(R.xml.settings);
 
         Preference button = findPreference("showAbout");
@@ -66,7 +66,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (key.equals("lang") || key.equals("url")) {
-            ViewUtil.showToast(getContext(), getString(R.string.closeToApply));
+            ViewUtil.showSnackBar(getView(), getString(R.string.closeToApply));
         }
     }
 }

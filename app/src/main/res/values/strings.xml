@@ -31,64 +31,21 @@
     </string>
 
     <!-- Menu -->
-    <string name="gameStock">Game Stock</string>
-    <string name="settings">Settings</string>
-    <string name="aboutApp">About Quest Player</string>
-    <string name="restartGame">Restart Game</string>
-    <string name="load">Load</string>
-    <string name="save">Save</string>
-    <string name="deleteGame">Delete Game</string>
     <string name="installGame">Install Game</string>
-    <string name="installFromZIP">From ZIP Archive</string>
-    <string name="installFromRAR">From RAR Archive</string>
-    <string name="installFromFolder">From Folder</string>
     <string name="selectSlot">Select a slot</string>
     <string name="slotPresent" formatted="false">Slot %d - %s</string>
     <string name="slotEmpty">Slot %d [Empty]</string>
     <string name="loadFrom">From File…</string>
     <string name="saveTo">To File…</string>
-    <string name="description">Description</string>
     <string name="search">Search</string>
-    <string name="selectAll">Select all</string>
 
     <!-- Settings -->
-    <string name="generalSettings">General</string>
-    <string name="textSettings">Text</string>
-    <string name="fontSize">Font Size</string>
-    <string name="fontStyle">Font Style</string>
-    <string name="useGameFont">Use Game Font</string>
-    <string name="useGameFontSummary">Use font settings from the game</string>
-    <string name="textColor">Text Color</string>
-    <string name="backColor">Background Color</string>
-    <string name="linkColor">Link Color</string>
-    <string name="sound">Sound</string>
-    <string name="soundSummary">Play music and sounds</string>
-    <string name="lang">Language</string>
-    <string name="gestures">Gestures</string>
-    <string name="langSummary">Choose display language</string>
-    <string name="actsHeight">Actions List Height</string>
-    <string name="actsHeightSummary">Actions List Height To Screen Height Ratio</string>
-    <string name="closeToApply">Close settings to apply changes</string>
-
     <string name="error">Error</string>
     <string name="gamesDirError">Unable to create or open games directory.</string>
     <string name="installError">Could not install game -GAMENAME-.</string>
     <string name="noGameFilesError">Game files not found after installation.</string>
     <string name="tabLocal">Local</string>
-    <string name="inventory">Inventory</string>
-    <string name="inventoryContentDesc">Go to inventory</string>
-    <string name="mainDesc">Description</string>
-    <string name="mainDescContentDesc">Go to main description</string>
-    <string name="varsDesc">Add. description</string>
-    <string name="varsDescContentDesc">Go to additional description</string>
-    <string name="userInput">User input</string>
-    <string name="userInputContentDesc">User input</string>
     <string name="play">Play</string>
-    <string name="download">Download</string>
-    <string name="downloading">Downloading…</string>
-    <string name="installing">Installing…</string>
-    <string name="gameListLoading">Loading a list of games</string>
-    <string name="deleteGameCmd">Delete game</string>
     <string name="gameDeleted">The game has been deleted.</string>
     <string name="author">Author: -AUTHOR-</string>
     <string name="ported_by">Ported by: -PORTED_BY-</string>
@@ -103,11 +60,69 @@
     <string name="cancel">Cancel</string>
     <string name="update">Update</string>
     <string name="experimental">(experimental)</string>
-    <string name="separator">Separator</string>
-    <string name="separatorSummary">On/off separator line in game</string>
     <string name="promptCloseGame">Are you sure you want to close the game?</string>
-    <string name="zoom_image">Zoom image</string>
-    <string name="image">Image</string>
-    <string name="gesturesSum">Enable/disable gestures to switch between game submenus</string>
-    <string name="plugin">Connect the extension to download the list of games</string>
+
+    <!-- Use in dialog/toast -->
+    <!-- DialogAbout -->
+        <string name="description">Description</string>
+    <!-- DialogInstall -->
+        <string name="gameName">Game name</string>
+        <string name="gameAuthor">Author</string>
+        <string name="gameVersion">Version</string>
+        <string name="selectFileOrArchive">Select archive or file</string>
+        <string name="selectIcon">Select icon</string>
+        <string name="buttonSelect">Select</string>
+        <string name="add">Add</string>
+    <!-- Use in activity/fragment -->
+    <!-- SettingsFragment -->
+        <string name="closeToApply">Close settings to apply changes</string>
+    <!-- FragmentImageBox -->
+        <string name="image">Image</string>
+        <string name="imageZoom">Zoom image</string>
+    <!-- Use in menu -->
+    <!-- Menu game -->
+        <!-- Group running -->
+        <string name="mainDescTitle">Description</string>
+        <string name="mainDescContDesc">Go to main description</string>
+        <string name="varsDescTitle">Add. description</string>
+        <string name="varsDescContDesc">Go to additional description</string>
+        <string name="inventoryTitle">Inventory</string>
+        <string name="inventoryContDesc">Go to inventory</string>
+        <string name="userInputTitle">User input</string>
+        <string name="userInputContDesc">User input</string>
+        <string name="restartGameTitle">Restart game</string>
+        <string name="loadTitle">Load</string>
+        <string name="saveTitle">Save</string>
+        <!-- Group default -->
+        <string name="gameStockTitle">Game Stock</string>
+        <string name="settingsTitle">Settings</string>
+    <!-- Menu delete -->
+        <string name="selectAllTitle">Select all</string>
+        <string name="deleteGameTitle">Delete game</string>
+    <!-- Menu settings -->
+        <!-- General section -->
+        <string name="generalCatTitle">General</string>
+        <string name="langTitle">Language</string>
+        <string name="langSum">Choose display language</string>
+        <string name="soundTitle">Sound</string>
+        <string name="soundSum">Play music and sounds</string>
+        <string name="actsHeightTitle">Actions List Height</string>
+        <string name="actsHeightSum">Actions List Height To Screen Height Ratio</string>
+        <string name="separatorTitle">Separator</string>
+        <string name="separatorSum">On/off separator line in game</string>
+        <string name="autoscrollTitle">Autoscroll</string>
+        <string name="autoscrollSum">Enable/disable autoscroll</string>
+        <string name="gesturesTitle">Gestures</string>
+        <string name="gesturesSum">Enable/disable gestures to switch between game submenus</string>
+        <string name="pluginTitle">Extension menu</string>
+        <string name="aboutTitle">About Quest Player</string>
+        <!-- Text section -->
+        <string name="textCatTitle">Text</string>
+        <string name="fontStyleTitle">Font Style</string>
+        <string name="fontSizeTitle">Font Size</string>
+        <string name="useGameFontTitle">Use Game Font</string>
+        <string name="useGameFontSum">Use font settings from the game</string>
+        <string name="textColorTitle">Text Color</string>
+        <string name="backColorTitle">Background Color</string>
+        <string name="linkColorTitle">Link Color</string>
 </resources>

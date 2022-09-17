@@ -6,50 +6,49 @@
     <group android:id="@+id/menugroup_running">
         <item
             android:id="@+id/menu_maindesc"
-            android:contentDescription="@string/mainDescContentDesc"
+            android:contentDescription="@string/mainDescContDesc"
             android:icon="@drawable/tab_main"
-            android:title="@string/mainDesc"
+            android:title="@string/mainDescTitle"
             app:showAsAction="always" />
         <item
             android:id="@+id/menu_varsdesc"
-            android:contentDescription="@string/varsDescContentDesc"
+            android:contentDescription="@string/varsDescContDesc"
             android:icon="@drawable/tab_vars"
-            android:title="@string/varsDesc"
+            android:title="@string/varsDescTitle"
             app:showAsAction="ifRoom" />
         <item
             android:id="@+id/menu_inventory"
-            android:contentDescription="@string/inventoryContentDesc"
+            android:contentDescription="@string/inventoryContDesc"
             android:icon="@drawable/tab_object"
-            android:title="@string/inventory"
+            android:title="@string/inventoryTitle"
             app:showAsAction="always" />
         <item
             android:id="@+id/menu_userinput"
-            android:contentDescription="@string/userInputContentDesc"
+            android:contentDescription="@string/userInputContDesc"
             android:icon="@drawable/tab_input"
-            android:title="@string/userInput"
+            android:title="@string/userInputTitle"
             app:showAsAction="ifRoom" />
         <item
             android:id="@+id/menu_newgame"
             android:orderInCategory="1"
-            android:title="@string/restartGame" />
+            android:title="@string/restartGameTitle" />
         <item
             android:id="@+id/menu_loadgame"
             android:orderInCategory="2"
-            android:title="@string/load" />
+            android:title="@string/loadTitle" />
         <item
             android:id="@+id/menu_savegame"
             android:orderInCategory="3"
-            android:title="@string/save" />
-
+            android:title="@string/saveTitle" />
     </group>
 
     <item
         android:id="@+id/menu_gamestock"
         android:orderInCategory="4"
-        android:title="@string/gameStock" />
+        android:title="@string/gameStockTitle" />
     <item
         android:id="@+id/menu_options"
         android:orderInCategory="5"
-        android:title="@string/settings" />
+        android:title="@string/settingsTitle" />
 
 </menu>

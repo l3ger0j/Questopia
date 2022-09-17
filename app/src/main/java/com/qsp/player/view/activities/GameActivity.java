@@ -159,7 +159,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
         @Override
         public void run() {
             if (mainDescView.getContentHeight() * mainDescView.getScale() >= mainDescView.getScrollY() ){
-                mainDescView.scrollBy(0, (int)mainDescView.getHeight());
+                mainDescView.scrollBy(0, mainDescView.getHeight());
             }
         }
     };
@@ -172,6 +172,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
 
         gameActivityVM = new ViewModelProvider(this).get(GameActivityVM.class);
         activityGameBinding.setGameViewModel(gameActivityVM);
+        gameActivityVM.gameActivityObservableField.set(this);
         settingsAdapter = gameActivityVM.loadSettings(this);
 
         setContentView(activityGameBinding.getRoot());
@@ -207,7 +208,6 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
 
         initServices();
         initControls();
-        settingsAdapter = gameActivityVM.loadSettings(this);
         currentLanguage = gameActivityVM.loadLocale(this, settingsAdapter);
         initGame();
         setActiveTab(TAB_MAIN_DESC_AND_ACTIONS);
@@ -341,21 +341,21 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
                 toggleMainDescAndActions(true);
                 toggleObjects(false);
                 toggleVarsDesc(false);
-                setTitle(getString(R.string.mainDesc));
+                setTitle(getString(R.string.mainDescTitle));
                 break;
 
             case TAB_OBJECTS:
                 toggleMainDescAndActions(false);
                 toggleObjects(true);
                 toggleVarsDesc(false);
-                setTitle(getString(R.string.inventory));
+                setTitle(getString(R.string.inventoryTitle));
                 break;
 
             case TAB_VARS_DESC:
                 toggleMainDescAndActions(false);
                 toggleObjects(false);
                 toggleVarsDesc(true);
-                setTitle(getString(R.string.varsDesc));
+                setTitle(getString(R.string.varsDescTitle));
                 break;
         }
 
@@ -778,12 +778,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
 
     @Override
     public void showPicture(final String path) {
-        runOnUiThread(() -> {
-            Intent intent = new Intent(this, ImageBoxActivity.class);
-            intent.putExtra("gameDirUri", libQspProxy.getGameState().gameDir.getAbsolutePath());
-            intent.putExtra("imagePath", path);
-            startActivity(intent);
-        });
+        runOnUiThread(() -> gameActivityVM.showPictureDialog(path));
     }
 
     @Override

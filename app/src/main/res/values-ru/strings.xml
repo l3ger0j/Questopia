@@ -31,64 +31,21 @@
     </string>
 
     <!-- Меню -->
-    <string name="gameStock">Полка игр</string>
-    <string name="settings">Настройки</string>
-    <string name="aboutApp">О программе</string>
-    <string name="restartGame">Начать заново</string>
-    <string name="load">Загрузить</string>
-    <string name="save">Сохранить</string>
-    <string name="deleteGame">Удалить игру</string>
     <string name="installGame">Установить игру</string>
-    <string name="installFromZIP">Из ZIP-архива</string>
-    <string name="installFromRAR">Из RAR-архива</string>
-    <string name="installFromFolder">Из папки</string>
     <string name="selectSlot">Выберите слот</string>
     <string name="slotPresent" formatted="false">Слот %d - %s</string>
     <string name="slotEmpty">Слот %d [Пусто]</string>
     <string name="loadFrom">Из файла…</string>
     <string name="saveTo">В файл…</string>
-    <string name="description">Описание</string>
     <string name="search">Поиск</string>
-    <string name="selectAll">Выбрать всё</string>
 
     <!-- Настройки -->
-    <string name="generalSettings">Главное</string>
-    <string name="textSettings">Текст</string>
-    <string name="fontSize">Размер шрифта</string>
-    <string name="fontStyle">Стиль шрифта</string>
-    <string name="useGameFont">Исп. шрифт игры</string>
-    <string name="useGameFontSummary">Использовать настройки шрифта из игры</string>
-    <string name="textColor">Цвет текста</string>
-    <string name="backColor">Цвет фона</string>
-    <string name="linkColor">Цвет ссылок</string>
-    <string name="sound">Звук</string>
-    <string name="soundSummary">Проигрывать звуки и музыку</string>
-    <string name="lang">Язык</string>
-    <string name="gestures">Жесты</string>
-    <string name="langSummary">Выберите язык интерфейса</string>
-    <string name="actsHeight">Высота списка действий</string>
-    <string name="actsHeightSummary">Соотношение высоты списка действий к высоте экрана</string>
-    <string name="closeToApply">Закройте настройки для применения изменений</string>
-
     <string name="error">Ошибка</string>
     <string name="gamesDirError">Невозможно создать или открыть папку с играми.</string>
     <string name="installError">Невозможно установить игру -GAMENAME-.</string>
     <string name="noGameFilesError">Файлы игры не найдены после установки.</string>
     <string name="tabLocal">Загружено</string>
-    <string name="inventory">Инвентарь</string>
-    <string name="inventoryContentDesc">Перейти к инвентарю</string>
-    <string name="mainDesc">Описание</string>
-    <string name="mainDescContentDesc">Перейти к основному описанию</string>
-    <string name="varsDesc">Доп. описание</string>
-    <string name="varsDescContentDesc">Перейти к дополнительному описанию</string>
-    <string name="userInput">Пользовательский ввод</string>
-    <string name="userInputContentDesc">Пользовательский ввод</string>
     <string name="play">Играть</string>
-    <string name="download">Скачать</string>
-    <string name="downloading">Скачивается…</string>
-    <string name="installing">Устанавливается…</string>
-    <string name="gameListLoading">Загрузка списка игр</string>
-    <string name="deleteGameCmd">Удалить игру</string>
     <string name="gameDeleted">Игра удалена.</string>
     <string name="deleteGameQuery">Удалить игру -GAMENAME-?</string>
     <string name="author">Автор: -AUTHOR-</string>
@@ -103,13 +60,71 @@
     <string name="cancel">Отмена</string>
     <string name="update">Обновить</string>
     <string name="experimental">(экспериментально)</string>
-    <string name="separator">Разделитель</string>
-    <string name="separatorSummary">Включить/выключить разделитель в игре</string>
     <string name="promptCloseGame">Уверены, что хотите закрыть игру?</string>
-    <string name="zoom_image">Увеличить изображение</string>
-    <string name="image">Изображение</string>
-    <string name="plugin">Подключить расширение, чтобы загрузить список игр</string>
-    <string name="gesturesSum">Включение/выключение жестов для переключения между игровыми подменю</string>
+
+    <!-- Use in dialog/toast -->
+    <!-- DialogAbout -->
+        <string name="description">Описание</string>
+    <!-- DialogInstall -->
+        <string name="gameName">Название игры</string>
+        <string name="gameAuthor">Автор</string>
+        <string name="gameVersion">Версия</string>
+        <string name="selectFileOrArchive">Выберите архив или файл</string>
+        <string name="selectIcon">Выберите иконку</string>
+        <string name="buttonSelect">Выбрать</string>
+        <string name="add">Добавить</string>
+    <!-- Use in activity/fragment -->
+    <!-- SettingsFragment -->
+        <string name="closeToApply">Закройте настройки для применения изменений</string>
+    <!-- FragmentImageBox -->
+        <string name="image">Изображение</string>
+        <string name="imageZoom">Увеличить изображение</string>
+    <!-- Use in menu -->
+    <!-- Menu game -->
+        <!-- Group running -->
+        <string name="mainDescTitle">Описание</string>
+        <string name="mainDescContDesc">Перейти к основному описанию</string>
+        <string name="varsDescTitle">Доп. описание</string>
+        <string name="varsDescContDesc">Перейти к дополнительному описанию</string>
+        <string name="inventoryTitle">Инвентарь</string>
+        <string name="inventoryContDesc">Перейти к инвентарю</string>
+        <string name="userInputTitle">Пользовательский ввод</string>
+        <string name="userInputContDesc">Пользовательский ввод</string>
+        <string name="restartGameTitle">Начать заново</string>
+        <string name="loadTitle">Загрузить</string>
+        <string name="saveTitle">Сохранить</string>
+        <!-- Group default -->
+        <string name="gameStockTitle">Полка игр</string>
+        <string name="settingsTitle">Настройки</string>
+    <!-- Menu delete -->
+        <string name="selectAllTitle">Выбрать всё</string>
+        <string name="deleteGameTitle">Удалить игру</string>
+    <!-- Menu settings -->
+        <!-- General section -->
+        <string name="generalCatTitle">Главное</string>
+        <string name="langTitle">Язык</string>
+        <string name="langSum">Выберите язык интерфейса</string>
+        <string name="soundTitle">Звук</string>
+        <string name="soundSum">Проигрывать звуки и музыку</string>
+        <string name="actsHeightTitle">Высота списка действий</string>
+        <string name="actsHeightSum">Соотношение высоты списка действий к высоте экрана</string>
+        <string name="separatorTitle">Разделитель</string>
+        <string name="separatorSum">Включить/выключить разделитель в игре</string>
+        <string name="autoscrollTitle">Автопролистывание</string>
+        <string name="autoscrollSum">Включить/выключить автопролистывание</string>
+        <string name="gesturesTitle">Жесты</string>
+        <string name="gesturesSum">Включение/выключение жестов для переключения между игровыми подменю</string>
+        <string name="pluginTitle">Меню плагинов</string>
+        <string name="aboutTitle">О программе</string>
+        <!-- Text section -->
+        <string name="textCatTitle">Текст</string>
+        <string name="fontStyleTitle">Стиль шрифта</string>
+        <string name="fontSizeTitle">Размер шрифта</string>
+        <string name="useGameFontTitle">Исп. шрифт игры</string>
+        <string name="useGameFontSum">Использовать настройки шрифта из игры</string>
+        <string name="textColorTitle">Цвет текста</string>
+        <string name="backColorTitle">Цвет фона</string>
+        <string name="linkColorTitle">Цвет ссылок</string>
 </resources>
 
 

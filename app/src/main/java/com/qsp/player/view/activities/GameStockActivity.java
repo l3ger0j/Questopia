@@ -206,7 +206,7 @@ public class GameStockActivity extends AppCompatActivity {
 
     private void loadLocale() {
         setLocale(this, settingsAdapter.language);
-        setTitle(R.string.gameStock);
+        setTitle(R.string.gameStockTitle);
         currentLanguage = settingsAdapter.language;
     }
 
@@ -405,7 +405,7 @@ public class GameStockActivity extends AppCompatActivity {
         if (currentLanguage.equals(settingsAdapter.language)) return;
 
         setLocale(this, settingsAdapter.language);
-        setTitle(getString(R.string.gameStock));
+        setTitle(getString(R.string.gameStockTitle));
         gameStockActivityVM.refreshGames();
         invalidateOptionsMenu();
 

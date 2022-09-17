@@ -5,10 +5,13 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.util.DisplayMetrics;
+import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
+import com.google.android.material.snackbar.BaseTransientBottomBar;
+import com.google.android.material.snackbar.Snackbar;
 import com.qsp.player.R;
 
 import org.jetbrains.annotations.Contract;
@@ -17,8 +20,8 @@ import java.util.Locale;
 
 public final class ViewUtil {
 
-    public static void showToast(Context context, String text) {
-        Toast.makeText(context, text, Toast.LENGTH_SHORT).show();
+    public static void showSnackBar(View view, String text) {
+        Snackbar.make(view, text, Snackbar.LENGTH_SHORT).show();
     }
 
     public static void showErrorDialog(Context context, String message) {
