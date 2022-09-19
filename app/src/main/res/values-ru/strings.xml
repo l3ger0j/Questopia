@@ -69,7 +69,7 @@
         <string name="gameName">Название игры</string>
         <string name="gameAuthor">Автор</string>
         <string name="gameVersion">Версия</string>
-        <string name="selectFileOrArchive">Выберите архив или файл</string>
+        <string name="selectFileOrArchive">Выберите архив</string>
         <string name="selectIcon">Выберите иконку</string>
         <string name="buttonSelect">Выбрать</string>
         <string name="add">Добавить</string>

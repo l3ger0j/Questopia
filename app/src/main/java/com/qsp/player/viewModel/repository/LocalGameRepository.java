@@ -23,19 +23,13 @@ import java.util.Objects;
 public class LocalGameRepository {
     private final String TAG = this.getClass().getSimpleName();
 
-    private File gamesDir;
-
-    public void setGamesDirectory(File dir) {
-        gamesDir = dir;
-    }
-
-    public List<GameData> getGames() {
+    public List<GameData> getGames(File gamesDir) {
         if (gamesDir == null) {
             Log.e(TAG,"Games directory is not specified");
             return Collections.emptyList();
         }
 
-        ArrayList<File> gameDirs = getGameDirectories();
+        ArrayList<File> gameDirs = getGameDirectories(gamesDir);
         if (gameDirs.isEmpty()) {
             return Collections.emptyList();
         }
@@ -62,7 +56,7 @@ public class LocalGameRepository {
     }
 
     @NonNull
-    private ArrayList<File> getGameDirectories() {
+    private ArrayList<File> getGameDirectories(File gamesDir) {
         ArrayList<File> dirs = new ArrayList<>();
         for (File f : Objects.requireNonNull(gamesDir.listFiles())) {
             if (f.isDirectory()) {

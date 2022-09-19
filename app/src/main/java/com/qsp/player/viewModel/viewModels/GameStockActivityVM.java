@@ -1,6 +1,7 @@
 package com.qsp.player.viewModel.viewModels;
 
 import static android.content.Intent.ACTION_OPEN_DOCUMENT;
+import static android.content.Intent.EXTRA_MIME_TYPES;
 import static com.qsp.player.utils.FileUtil.GAME_INFO_FILENAME;
 import static com.qsp.player.utils.FileUtil.createFile;
 import static com.qsp.player.utils.FileUtil.findFileOrDirectory;
@@ -77,7 +78,6 @@ public class GameStockActivityVM extends AndroidViewModel {
 
     public void setGamesDir(File gamesDir) {
         this.gamesDir = gamesDir;
-        localGameRepository.setGamesDirectory(gamesDir);
     }
 
     public HashMap<String, GameData> getGamesMap() {
@@ -133,7 +133,9 @@ public class GameStockActivityVM extends AndroidViewModel {
             action = ACTION_OPEN_DOCUMENT;
             intentInstall = new Intent(action);
             intentInstall.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            intentInstall.setType("application/*");
+            intentInstall.setType("*/*");
+            String[] mimeTypes = {"application/zip", "application/rar"};
+            intentInstall.putExtra(EXTRA_MIME_TYPES, mimeTypes);
             try {
                 Objects.requireNonNull(activityObservableField.get())
                         .resultInstallLauncher.launch(intentInstall);
@@ -144,7 +146,9 @@ public class GameStockActivityVM extends AndroidViewModel {
             action = ACTION_OPEN_DOCUMENT;
             intentGetImage = new Intent(action);
             intentGetImage.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            intentGetImage.setType("image/png");
+            intentGetImage.setType("*/*");
+            String[] mimeTypes = {"image/png", "image/jpeg"};
+            intentGetImage.putExtra(EXTRA_MIME_TYPES, mimeTypes);
             try {
                 Objects.requireNonNull(activityObservableField.get())
                         .resultGetImageLauncher.launch(intentGetImage);
@@ -255,7 +259,7 @@ public class GameStockActivityVM extends AndroidViewModel {
 
     public void refreshGames() {
         gamesMap.clear();
-        for (GameData localGameData : localGameRepository.getGames()) {
+        for (GameData localGameData : localGameRepository.getGames(gamesDir)) {
             GameData remoteGameData = gamesMap.get(localGameData.id);
             if (remoteGameData != null) {
                 GameData aggregateGameData = new GameData(remoteGameData);
