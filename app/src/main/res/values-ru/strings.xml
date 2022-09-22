@@ -108,6 +108,8 @@
         <string name="soundSum">Проигрывать звуки и музыку</string>
         <string name="actsHeightTitle">Высота списка действий</string>
         <string name="actsHeightSum">Соотношение высоты списка действий к высоте экрана</string>
+        <string name="rotateTitle">Поворот</string>
+        <string name="rotateSum">Включить/выключить поворот экрана (alpha)</string>
         <string name="separatorTitle">Разделитель</string>
         <string name="separatorSum">Включить/выключить разделитель в игре</string>
         <string name="autoscrollTitle">Автопролистывание</string>

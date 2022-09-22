@@ -14,6 +14,7 @@ import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.graphics.Typeface;
 import android.media.AudioManager;
 import android.net.Uri;
@@ -177,6 +178,12 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
 
         setContentView(activityGameBinding.getRoot());
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
+
+        if (settingsAdapter.useRotate) {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
+        } else {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        }
 
         resultLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
@@ -417,7 +424,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
         if (libQspProxy.getGameState().gameRunning) {
             applyGameState();
 
-            audioPlayer.setSoundEnabled(settingsAdapter.soundEnabled);
+            audioPlayer.setSoundEnabled(settingsAdapter.isSoundEnabled);
             audioPlayer.resume();
 
             counterHandler.postDelayed(counterTask, counterInterval);

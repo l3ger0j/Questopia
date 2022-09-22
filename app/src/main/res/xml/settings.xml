@@ -24,6 +24,11 @@
             android:title="@string/actsHeightTitle" />
         <SwitchPreference
             android:defaultValue="false"
+            android:key="rotate"
+            android:summary="@string/rotateSum"
+            android:title="@string/rotateTitle" />
+        <SwitchPreference
+            android:defaultValue="false"
             android:key="separator"
             android:summary="@string/separatorSum"
             android:title="@string/separatorTitle" />
@@ -32,6 +37,7 @@
             android:key="autoscroll"
             android:summary="@string/autoscrollSum"
             android:title="@string/autoscrollTitle" />
+
         <SwitchPreference
             android:defaultValue="false"
             android:key="gestures"

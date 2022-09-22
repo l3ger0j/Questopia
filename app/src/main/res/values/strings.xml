@@ -108,6 +108,8 @@
         <string name="soundSum">Play music and sounds</string>
         <string name="actsHeightTitle">Actions List Height</string>
         <string name="actsHeightSum">Actions List Height To Screen Height Ratio</string>
+        <string name="rotateTitle">Rotate</string>
+        <string name="rotateSum">Enable/disable rotate (alpha)</string>
         <string name="separatorTitle">Separator</string>
         <string name="separatorSum">On/off separator line in game</string>
         <string name="autoscrollTitle">Autoscroll</string>
