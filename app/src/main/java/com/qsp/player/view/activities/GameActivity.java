@@ -23,13 +23,11 @@ import android.os.Handler;
 import android.text.format.DateFormat;
 import android.util.Log;
 import android.util.TypedValue;
-import android.view.GestureDetector;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.SubMenu;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,7 +47,6 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
-import androidx.core.view.GestureDetectorCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -80,7 +77,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ThreadLocalRandom;
 
 @SuppressLint("ClickableViewAccessibility")
-public class GameActivity extends AppCompatActivity implements GameInterface, GestureDetector.OnGestureListener {
+public class GameActivity extends AppCompatActivity implements GameInterface {
     private final String TAG = this.getClass().getSimpleName();
 
     private static final int MAX_SAVE_SLOTS = 5;
@@ -130,7 +127,6 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
     private HtmlProcessor htmlProcessor;
     private LibQspProxy libQspProxy;
     private AudioPlayer audioPlayer;
-    private GestureDetectorCompat gestureDetector;
 
     // endregion Сервисы
 
@@ -266,24 +262,14 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
 
     private void initMainDescView() {
         mainDescView = activityGameBinding.mainDesc;
-        mainDescView.setOnTouchListener(this::handleTouchEvent);
         if (settingsAdapter.useAutoscroll) {
             mainDescView.post(onScroll);
-        }
-    }
-
-    private boolean handleTouchEvent(View v, MotionEvent event) {
-        if (settingsAdapter.useGestures) {
-            return gestureDetector.onTouchEvent(event);
-        } else {
-            return false;
         }
     }
 
     private void initActionsView() {
         actionsView = activityGameBinding.actions;
         actionsView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-        actionsView.setOnTouchListener(this::handleTouchEvent);
         actionsView.setOnItemClickListener((parent, view, position, id) -> libQspProxy.onActionClicked(position));
         actionsView.setOnItemSelectedListener(new OnItemSelectedListener() {
             @Override
@@ -301,17 +287,13 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
         objectsView = activityGameBinding.objects;
         objectsView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         objectsView.setOnItemClickListener((parent, view, position, id) -> libQspProxy.onObjectSelected(position));
-        objectsView.setOnTouchListener(this::handleTouchEvent);
     }
 
     private void initVarsDescView() {
         varsDescView = activityGameBinding.varsDesc;
-        varsDescView.setOnTouchListener(this::handleTouchEvent);
     }
 
     private void initServices() {
-        gestureDetector = new GestureDetectorCompat(this, this);
-
         QuestPlayerApplication application = (QuestPlayerApplication) getApplication();
 
         GameContentResolver gameContentResolver = application.getGameContentResolver();
@@ -713,48 +695,6 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
             return true;
         } else return i == R.id.menu_loadgame || i == R.id.menu_savegame;
     }
-
-    private void selectNextTab() {
-        int tab;
-        switch (activeTab) {
-            case TAB_VARS_DESC:
-                tab = TAB_MAIN_DESC_AND_ACTIONS;
-                break;
-            case TAB_OBJECTS:
-                tab = TAB_VARS_DESC;
-                break;
-            case TAB_MAIN_DESC_AND_ACTIONS:
-            default:
-                tab = TAB_OBJECTS;
-                break;
-        }
-        setActiveTab(tab);
-    }
-
-    private void selectPreviousTab() {
-        int tab;
-        switch (activeTab) {
-            case TAB_VARS_DESC:
-                tab = TAB_OBJECTS;
-                break;
-            case TAB_OBJECTS:
-                tab = TAB_MAIN_DESC_AND_ACTIONS;
-                break;
-            case TAB_MAIN_DESC_AND_ACTIONS:
-            default:
-                tab = TAB_VARS_DESC;
-                break;
-        }
-        setActiveTab(tab);
-    }
-
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        if (gestureDetector.onTouchEvent(event)) return true;
-
-        return super.onTouchEvent(event);
-    }
-
     // region GameInterface
 
     @Override
@@ -913,58 +853,6 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ge
     }
 
     // endregion GameInterface
-
-    // region GestureDetector.OnGestureListener
-
-    @Override
-    public boolean onDown(MotionEvent e) {
-        return false;
-    }
-
-    @Override
-    public void onShowPress(MotionEvent e) {
-    }
-
-    @Override
-    public boolean onSingleTapUp(MotionEvent e) {
-        return false;
-    }
-
-    @Override
-    public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-        return false;
-    }
-
-    @Override
-    public void onLongPress(MotionEvent e) {
-    }
-
-    @Override
-    public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-        try {
-            float diffX = e2.getX() - e1.getX();
-            float diffY = e2.getY() - e1.getY();
-            float absDiffX = Math.abs(diffX);
-            float absDiffY = Math.abs(diffY);
-
-            int screenW = layoutTop.getMeasuredWidth();
-
-            if (absDiffX > 0.33f * screenW && absDiffX > 2.0f * absDiffY) {
-                if (diffX > 0.0f) {
-                    selectNextTab();
-                } else {
-                    selectPreviousTab();
-                }
-                return true;
-            }
-        } catch (Exception ex) {
-            Log.e(TAG,"Error handling fling event", ex);
-        }
-
-        return false;
-    }
-
-    // endregion GestureDetector.OnGestureListener
 
     private class QspItemAdapter extends ArrayAdapter<QspListItem> {
         private final int resource;

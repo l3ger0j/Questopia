@@ -49,7 +49,7 @@ public class GameStockActivity extends AppCompatActivity {
 
     private HashMap<String, GameData> gamesMap = new HashMap<>();
 
-    private SettingsAdapter settingsAdapter;
+    public SettingsAdapter settingsAdapter;
     private String currentLanguage = Locale.getDefault().getLanguage();
     private GameData gameData;
 

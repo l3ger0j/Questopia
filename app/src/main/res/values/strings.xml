@@ -104,6 +104,7 @@
         <string name="generalCatTitle">General</string>
         <string name="langTitle">Language</string>
         <string name="langSum">Choose display language</string>
+        <string name="sizeBlockTitle">Size block</string>
         <string name="soundTitle">Sound</string>
         <string name="soundSum">Play music and sounds</string>
         <string name="actsHeightTitle">Actions List Height</string>
@@ -114,8 +115,6 @@
         <string name="separatorSum">On/off separator line in game</string>
         <string name="autoscrollTitle">Autoscroll</string>
         <string name="autoscrollSum">Enable/disable autoscroll</string>
-        <string name="gesturesTitle">Gestures</string>
-        <string name="gesturesSum">Enable/disable gestures to switch between game submenus</string>
         <string name="pluginTitle">Extension menu</string>
         <string name="aboutTitle">About Quest Player</string>
         <!-- Text section -->

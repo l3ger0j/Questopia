@@ -1,7 +1,5 @@
 package com.qsp.player.dto.stock;
 
-import static com.qsp.player.utils.StringUtil.isNotEmpty;
-
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.Root;
 
@@ -70,10 +68,6 @@ public class GameData {
 
     public int getFileSize() {
         return (fileSize != null) ? Integer.parseInt(fileSize) : 0;
-    }
-
-    public boolean hasRemoteUrl() {
-        return isNotEmpty(fileUrl);
     }
 
     public boolean isInstalled() {

@@ -260,7 +260,6 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
             gameState.gameFile = file;
 
             gameContentResolver.setGameDir(dir);
-            imageProvider.invalidateCache();
 
             if (!loadGameWorld()) return;
 
@@ -572,7 +571,6 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
         if (!gameState.gameDir.equals(dir)) {
             gameState.gameDir = dir;
             gameContentResolver.setGameDir(dir);
-            imageProvider.invalidateCache();
         }
     }
 

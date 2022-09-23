@@ -8,9 +8,6 @@ import android.app.AlertDialog;
 import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -26,11 +23,9 @@ import androidx.annotation.Nullable;
 import androidx.databinding.ObservableField;
 import androidx.lifecycle.AndroidViewModel;
 
-import com.qsp.player.QuestPlayerApplication;
 import com.qsp.player.databinding.DialogImageBinding;
 import com.qsp.player.model.libQSP.LibQspProxy;
 import com.qsp.player.model.service.GameContentResolver;
-import com.qsp.player.model.service.ImageProvider;
 import com.qsp.player.view.activities.GameActivity;
 import com.qsp.player.view.adapters.SettingsAdapter;
 
@@ -50,7 +45,7 @@ public class GameActivityVM extends AndroidViewModel {
 
     private DialogImageBinding imageBinding;
 
-    private String pathToImage;
+    public String pathToImage;
 
     // region Getter/Setter
     public void setLibQspProxy(LibQspProxy libQspProxy) {
@@ -79,30 +74,13 @@ public class GameActivityVM extends AndroidViewModel {
         dialog.show();
     }
 
-    public Drawable getImage () {
-        QuestPlayerApplication application = getApplication();
-        ImageProvider imageProvider = application.getImageProvider();
-        return resize(imageProvider.get(pathToImage));
-    }
-
-    private Drawable resize(Drawable image) {
-        Bitmap b = ((BitmapDrawable)image).getBitmap();
-        Bitmap bitmapResized = Bitmap.createScaledBitmap(b,
-                Objects.requireNonNull(
-                        gameActivityObservableField.get())
-                        .getWindow().getDecorView().getWidth() ,
-                Objects.requireNonNull(
-                        gameActivityObservableField.get())
-                        .getWindow().getDecorView().getHeight(), false);
-        return new BitmapDrawable(getApplication().getResources(), bitmapResized);
-    }
-
     @NonNull
     private View createView () {
         imageBinding =
                 DialogImageBinding.inflate(Objects.requireNonNull(gameActivityObservableField.get())
                         .getLayoutInflater());
         imageBinding.setGameVM(this);
+        imageBinding.imagebox.setOnClickListener(v -> dialog.cancel());
         return imageBinding.getRoot();
     }
 

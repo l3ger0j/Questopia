@@ -11,11 +11,11 @@ public class SettingsAdapter {
     public int backColor;
     public int textColor;
     public int linkColor;
+    public int sizeBlock;
     public float actionsHeightRatio;
     public boolean isSoundEnabled;
     public boolean useRotate;
     public boolean useSeparator;
-    public boolean useGestures;
     public boolean useGameFont;
     public boolean useAutoscroll;
     public String language;
@@ -28,12 +28,12 @@ public class SettingsAdapter {
         settingsAdapter.backColor = preferences.getInt("backColor", Color.parseColor("#e0e0e0"));
         settingsAdapter.textColor = preferences.getInt("textColor", Color.parseColor("#000000"));
         settingsAdapter.linkColor = preferences.getInt("linkColor", Color.parseColor("#0000ff"));
+        settingsAdapter.sizeBlock = Integer.parseInt(preferences.getString("size", "1000"));
         settingsAdapter.actionsHeightRatio = parseActionsHeightRatio(preferences.getString("actsHeight", "1/3"));
         settingsAdapter.useRotate = preferences.getBoolean("rotate", false);
         settingsAdapter.useAutoscroll = preferences.getBoolean("autoscroll", true);
         settingsAdapter.useSeparator = preferences.getBoolean("separator", false);
         settingsAdapter.useGameFont = preferences.getBoolean("gameFont", false);
-        settingsAdapter.useGestures = preferences.getBoolean("gestures", false);
         settingsAdapter.isSoundEnabled = preferences.getBoolean("sound", true);
         settingsAdapter.language = preferences.getString("lang", "ru");
         return settingsAdapter;

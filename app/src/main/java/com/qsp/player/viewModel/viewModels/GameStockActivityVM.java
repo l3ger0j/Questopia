@@ -29,7 +29,7 @@ import com.qsp.player.R;
 import com.qsp.player.databinding.DialogInstallBinding;
 import com.qsp.player.dto.stock.GameData;
 import com.qsp.player.model.install.InstallException;
-import com.qsp.player.model.install.InstallGame;
+import com.qsp.player.model.install.Installer;
 import com.qsp.player.utils.ViewUtil;
 import com.qsp.player.view.activities.GameStockActivity;
 import com.qsp.player.viewModel.repository.LocalGameRepository;
@@ -40,11 +40,6 @@ import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.util.HashMap;
 import java.util.Objects;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.FutureTask;
 
 public class GameStockActivityVM extends AndroidViewModel {
     private final String TAG = this.getClass().getSimpleName();
@@ -117,6 +112,10 @@ public class GameStockActivityVM extends AndroidViewModel {
                     null
                     : Objects.requireNonNull(
                             installBinding.installET2.getEditText()).getText().toString());
+            int size = Objects.requireNonNull(activityObservableField.get()).settingsAdapter.sizeBlock;
+            Log.d(TAG, String.valueOf(tempInstallFile.length()));
+            int temp = (int) (tempInstallFile.length() / size);
+            gameData.fileSize = String.valueOf(temp);
             gameData.icon = (tempImageFile == null ? null : tempImageFile.getUri().toString());
             installGame(tempInstallFile, gameData);
             dialog.dismiss();
@@ -200,22 +199,9 @@ public class GameStockActivityVM extends AndroidViewModel {
             Log.e(TAG, "Games directory is not writable");
             return;
         }
-
-        InstallGame installGame = new InstallGame(getApplication());
-
-        Callable<Boolean> task = () -> installGame.gameInstall(gameData.title, gameFile, gameDir);
-        FutureTask<Boolean> futureTask = new FutureTask<>(task);
-        ExecutorService service = Executors.newCachedThreadPool();
-        service.submit(futureTask);
-        boolean installed = false;
-
-        try {
-            installed = futureTask.get();
-        } catch (ExecutionException | InterruptedException | OutOfMemoryError e) {
-            Log.e(TAG, e.toString());
-        }
-
-        if (installed) {
+        Installer installer = new Installer(getApplication());
+        if (installer.gameInstall(gameData.title, gameFile, gameDir)) {
+            isShowDialog.set(false);
             writeGameInfo(gameData , gameDir);
             refreshGames();
         }

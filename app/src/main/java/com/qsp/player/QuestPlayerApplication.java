@@ -20,10 +20,6 @@ public class QuestPlayerApplication extends Application {
         return gameContentResolver;
     }
 
-    public ImageProvider getImageProvider() {
-        return imageProvider;
-    }
-
     public HtmlProcessor getHtmlProcessor() {
         return htmlProcessor;
     }

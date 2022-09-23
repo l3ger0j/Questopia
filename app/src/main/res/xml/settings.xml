@@ -10,6 +10,12 @@
             android:key="lang"
             android:summary="@string/langSum"
             android:title="@string/langTitle" />
+        <ListPreference
+            android:defaultValue="KB"
+            android:entries="@array/sizeName"
+            android:entryValues="@array/sizeValue"
+            android:key="size"
+            android:title="Block size"/>
         <CheckBoxPreference
             android:defaultValue="true"
             android:key="sound"
@@ -37,12 +43,6 @@
             android:key="autoscroll"
             android:summary="@string/autoscrollSum"
             android:title="@string/autoscrollTitle" />
-
-        <SwitchPreference
-            android:defaultValue="false"
-            android:key="gestures"
-            android:summary="@string/gesturesSum"
-            android:title="@string/gesturesTitle" />
         <Preference
             android:defaultValue="false"
             android:enabled="false"

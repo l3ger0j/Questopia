@@ -2,7 +2,6 @@ package com.qsp.player.model.service;
 
 import static com.qsp.player.utils.StringUtil.isNotEmpty;
 import static com.qsp.player.utils.ThreadUtil.throwIfNotMainThread;
-// FIXME: 24.05.2022
 import android.media.MediaPlayer;
 import android.os.Handler;
 import android.os.Looper;

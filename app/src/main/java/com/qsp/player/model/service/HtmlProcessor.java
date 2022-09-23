@@ -1,8 +1,14 @@
 package com.qsp.player.model.service;
 
+import static com.qsp.player.utils.Base64Util.encodeBase64;
+import static com.qsp.player.utils.StringUtil.isNotEmpty;
+import static com.qsp.player.utils.StringUtil.isNullOrEmpty;
+
 import android.graphics.drawable.Drawable;
 import android.util.Base64;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -11,13 +17,6 @@ import org.jsoup.nodes.Element;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-// FIXME: 24.05.2022
-import static com.qsp.player.utils.Base64Util.encodeBase64;
-import static com.qsp.player.utils.StringUtil.isNotEmpty;
-import static com.qsp.player.utils.StringUtil.isNullOrEmpty;
-
-import androidx.annotation.NonNull;
 
 public class HtmlProcessor {
     private final String TAG = this.getClass().getSimpleName();

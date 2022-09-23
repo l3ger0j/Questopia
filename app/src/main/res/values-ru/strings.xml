@@ -104,6 +104,7 @@
         <string name="generalCatTitle">Главное</string>
         <string name="langTitle">Язык</string>
         <string name="langSum">Выберите язык интерфейса</string>
+        <string name="sizeBlockTitle">Размер блока</string>
         <string name="soundTitle">Звук</string>
         <string name="soundSum">Проигрывать звуки и музыку</string>
         <string name="actsHeightTitle">Высота списка действий</string>
@@ -114,8 +115,6 @@
         <string name="separatorSum">Включить/выключить разделитель в игре</string>
         <string name="autoscrollTitle">Автопролистывание</string>
         <string name="autoscrollSum">Включить/выключить автопролистывание</string>
-        <string name="gesturesTitle">Жесты</string>
-        <string name="gesturesSum">Включение/выключение жестов для переключения между игровыми подменю</string>
         <string name="pluginTitle">Меню плагинов</string>
         <string name="aboutTitle">О программе</string>
         <!-- Text section -->

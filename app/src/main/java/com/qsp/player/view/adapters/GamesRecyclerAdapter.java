@@ -91,9 +91,8 @@ public class GamesRecyclerAdapter extends RecyclerView.Adapter<GamesRecyclerAdap
         // gameSize
         if (gameData.fileSize != null) {
             holder.gameSize.setText(context.getString(R.string.fileSize).replace("-SIZE-",
-                    Integer.toString(gameData.getFileSize() / 1024)));
+                    Integer.toString(gameData.getFileSize())));
         }
-
 
         // gameTitle
         if (holder.gameTitle != null) {
@@ -122,7 +121,6 @@ public class GamesRecyclerAdapter extends RecyclerView.Adapter<GamesRecyclerAdap
         ViewHolder(View view){
             super(view);
             gameSize = view.findViewById(R.id.game_size);
-            gameRate = view.findViewById(R.id.game_rate);
             gameIcon = view.findViewById(R.id.game_icon);
             gameTitle = view.findViewById(R.id.game_title);
             gameAuthor = view.findViewById(R.id.game_author);
