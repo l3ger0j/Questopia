@@ -11,7 +11,6 @@ public class SettingsAdapter {
     public int backColor;
     public int textColor;
     public int linkColor;
-    public int sizeBlock;
     public float actionsHeightRatio;
     public boolean isSoundEnabled;
     public boolean useRotate;
@@ -28,7 +27,6 @@ public class SettingsAdapter {
         settingsAdapter.backColor = preferences.getInt("backColor", Color.parseColor("#e0e0e0"));
         settingsAdapter.textColor = preferences.getInt("textColor", Color.parseColor("#000000"));
         settingsAdapter.linkColor = preferences.getInt("linkColor", Color.parseColor("#0000ff"));
-        settingsAdapter.sizeBlock = Integer.parseInt(preferences.getString("size", "1000"));
         settingsAdapter.actionsHeightRatio = parseActionsHeightRatio(preferences.getString("actsHeight", "1/3"));
         settingsAdapter.useRotate = preferences.getBoolean("rotate", false);
         settingsAdapter.useAutoscroll = preferences.getBoolean("autoscroll", true);

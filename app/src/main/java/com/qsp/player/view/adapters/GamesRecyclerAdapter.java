@@ -116,7 +116,7 @@ public class GamesRecyclerAdapter extends RecyclerView.Adapter<GamesRecyclerAdap
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         ShapeableImageView gameIcon;
-        TextView gameTitle, gameAuthor, gameSize, gameRate;
+        TextView gameTitle, gameAuthor, gameSize;
 
         ViewHolder(View view){
             super(view);

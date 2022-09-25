@@ -112,10 +112,7 @@ public class GameStockActivityVM extends AndroidViewModel {
                     null
                     : Objects.requireNonNull(
                             installBinding.installET2.getEditText()).getText().toString());
-            int size = Objects.requireNonNull(activityObservableField.get()).settingsAdapter.sizeBlock;
-            Log.d(TAG, String.valueOf(tempInstallFile.length()));
-            int temp = (int) (tempInstallFile.length() / size);
-            gameData.fileSize = String.valueOf(temp);
+            gameData.fileSize = String.valueOf(tempInstallFile.length() / 1000);
             gameData.icon = (tempImageFile == null ? null : tempImageFile.getUri().toString());
             installGame(tempInstallFile, gameData);
             dialog.dismiss();

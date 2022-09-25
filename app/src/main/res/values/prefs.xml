@@ -29,14 +29,6 @@
         <item>en</item>
         <item>ru</item>
     </string-array>
-    <string-array name="sizeName">
-        <item>1000 byte = 1 KB, 1000 KB = 1 MB</item>
-        <item>1024 byte = 1 KiB, 1024 KiB = 1 MiB</item>
-    </string-array>
-    <string-array name="sizeValue">
-        <item>1000</item>
-        <item>1024</item>
-    </string-array>
     <string-array name="actsHeight">
         <item>1/5</item>
         <item>1/4</item>

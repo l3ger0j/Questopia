@@ -10,12 +10,6 @@
             android:key="lang"
             android:summary="@string/langSum"
             android:title="@string/langTitle" />
-        <ListPreference
-            android:defaultValue="KB"
-            android:entries="@array/sizeName"
-            android:entryValues="@array/sizeValue"
-            android:key="size"
-            android:title="Block size"/>
         <CheckBoxPreference
             android:defaultValue="true"
             android:key="sound"
