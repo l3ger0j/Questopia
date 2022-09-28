@@ -8,6 +8,7 @@ import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.lifecycle.MutableLiveData;
 
 import net.sf.sevenzipjbinding.ExtractAskMode;
 import net.sf.sevenzipjbinding.ExtractOperationResult;
@@ -33,6 +34,7 @@ import java.util.Objects;
 import java.util.Set;
 
 public class ArchiveUtil {
+    public static final MutableLiveData<Long> progress = new MutableLiveData<>();
     private static final String TAG = ArchiveUtil.class.getSimpleName();
 
     public static void assertNonUiThread() {
@@ -65,7 +67,6 @@ public class ArchiveUtil {
                 if (lastSeparator > -1) fileName = fileName.substring(lastSeparator + 1);
                 fileNames.put(index, fileName);
             }
-
             int[] indexes = getPrimitiveLongArrayFromInt(fileNames.keySet());
             Log.d(TAG, fileNames.toString());
             inArchive.extract(indexes, false,
@@ -102,7 +103,6 @@ public class ArchiveUtil {
         private void openUri() throws IOException {
             if (stream != null) stream.close();
             if (pfdInput != null) pfdInput.close();
-
             pfdInput = contentResolver.openFileDescriptor(uri, "r");
             if (pfdInput != null)
                 stream = new FileInputStream(pfdInput.getFileDescriptor());
@@ -115,9 +115,7 @@ public class ArchiveUtil {
             else if (seekOrigin == ISeekableStream.SEEK_SET) seekDelta = offset - position;
             else if (seekOrigin == ISeekableStream.SEEK_END)
                 seekDelta = streamSize + offset - position;
-
             if (position + seekDelta > streamSize) position = streamSize;
-
             if (seekDelta != 0) {
                 try {
                     if (seekDelta < 0) {
@@ -253,6 +251,7 @@ public class ArchiveUtil {
 
         @Override
         public void setCompleted(long complete) {
+            progress.postValue(complete);
             Log.v(TAG, String.format("Extract archive, work completed: %s", complete));
         }
     }

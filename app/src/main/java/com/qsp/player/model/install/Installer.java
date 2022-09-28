@@ -5,83 +5,74 @@ import static com.qsp.player.utils.FileUtil.createFile;
 import static com.qsp.player.utils.FileUtil.getOrCreateDirectory;
 import static com.qsp.player.utils.GameDirUtil.doesDirectoryContainGameFiles;
 import static com.qsp.player.utils.GameDirUtil.normalizeGameDirectory;
-import static com.qsp.player.utils.ViewUtil.showErrorDialog;
 
 import android.content.Context;
-import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.documentfile.provider.DocumentFile;
+import androidx.lifecycle.MutableLiveData;
 
-import com.qsp.player.R;
 import com.qsp.player.utils.StreamUtil;
-import com.qsp.player.utils.ViewUtil;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.FutureTask;
+
+import java9.util.concurrent.CompletableFuture;
 
 public class Installer {
-    private final String TAG = this.getClass().getSimpleName();
+    private final MutableLiveData<Boolean> isDone = new MutableLiveData<>();
     private final Context context;
 
     public Installer(Context context) {
         this.context = context;
     }
 
-    public boolean gameInstall (String gameName, DocumentFile srcFile, File destDir) {
+    public MutableLiveData<Boolean> gameInstall (@NonNull DocumentFile srcFile, File destDir) {
         if (srcFile.isDirectory()) {
-            return installDirectory(srcFile, destDir);
+            installDirectory(srcFile, destDir);
         } else {
-            return installArchive(gameName, srcFile, destDir);
+            installArchive(srcFile, destDir);
         }
+        return isDone;
     }
 
-    protected boolean postInstall(File gameDir) {
+    protected void postInstall(File gameDir) {
         normalizeGameDirectory(gameDir);
-
         boolean containsGameFiles = doesDirectoryContainGameFiles(gameDir);
         if (!containsGameFiles) {
-            ViewUtil.showErrorDialog(context, context.getString(R.string.noGameFilesError));
-            return false;
+            isDone.postValue(false);
+            throw new InstallException("NFE");
         }
-
-        return true;
+        isDone.postValue(true);
     }
 
-    private boolean installArchive (String gameName, DocumentFile srcFile, File destDir) {
-        boolean extracted = false;
-        ExecutorService service = Executors.newCachedThreadPool();
-        Callable<Boolean> newTask = () -> extractArchiveEntries(context, srcFile.getUri(), destDir);
-        FutureTask<Boolean> futureTask = new FutureTask<>(newTask);
-        service.submit(futureTask);
-
-        try {
-            extracted = futureTask.get();
-        } catch (ExecutionException | InterruptedException | OutOfMemoryError e) {
-            Log.e(TAG, e.toString());
-        }
-
-        if (!extracted) {
-            String message = context.getString(R.string.installError).replace("-GAMENAME-", gameName);
-            showErrorDialog(context, message);
-            return false;
-        }
-        return postInstall(destDir);
+    private void installArchive (DocumentFile srcFile, File destDir) {
+        CompletableFuture<Boolean> completableFuture =
+                CompletableFuture
+                        .supplyAsync(() -> extractArchiveEntries(
+                                context, srcFile.getUri(), destDir))
+                        .thenApply(aBoolean -> {
+                            if (!aBoolean) {
+                                isDone.postValue(false);
+                                throw new InstallException("NIG");
+                            } else {
+                                isDone.postValue(true);
+                                postInstall(destDir);
+                                return true;
+                            }
+                        });
+        completableFuture.isDone();
     }
 
     // TODO Deprecated! Rewrite to get .qsp file
-    private boolean installDirectory(DocumentFile srcFile , File destDir) {
+    private void installDirectory(DocumentFile srcFile , File destDir) {
         for (DocumentFile file : srcFile.listFiles()) {
             copyFileOrDirectory(file, destDir);
         }
-        return postInstall(destDir);
+        postInstall(destDir);
     }
 
     private void copyFileOrDirectory(DocumentFile srcFile, File destDir) {
@@ -104,7 +95,7 @@ public class Installer {
              OutputStream out = new FileOutputStream(destFile)) {
             StreamUtil.copy(in, out);
         } catch (IOException ex) {
-            throw new InstallException("Error copying game files");
+            throw new InstallException("CGF");
         }
     }
 }

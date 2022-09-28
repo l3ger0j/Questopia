@@ -2,21 +2,14 @@ package com.qsp.player.utils;
 
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.res.Configuration;
-import android.content.res.Resources;
-import android.util.DisplayMetrics;
 import android.view.View;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
-import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
 import com.qsp.player.R;
 
 import org.jetbrains.annotations.Contract;
-
-import java.util.Locale;
 
 public final class ViewUtil {
 

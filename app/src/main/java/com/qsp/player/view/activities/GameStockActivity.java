@@ -2,6 +2,7 @@ package com.qsp.player.view.activities;
 
 import static com.qsp.player.utils.FileUtil.deleteDirectory;
 import static com.qsp.player.utils.LanguageUtil.setLocale;
+import static com.qsp.player.utils.ViewUtil.showErrorDialog;
 
 import android.app.AlertDialog;
 import android.content.Intent;
@@ -210,6 +211,10 @@ public class GameStockActivity extends AppCompatActivity {
         currentLanguage = settingsAdapter.language;
     }
 
+    public void onShowErrorDialog (String errorMessage) {
+        showErrorDialog(this, errorMessage);
+    }
+
     public void onItemClick(int position) {
         if (isEnable) {
             for (GameData gameData : gamesMap.values()) {
@@ -395,7 +400,6 @@ public class GameStockActivity extends AppCompatActivity {
     @Override
     public void onResume() {
         super.onResume();
-
         loadSettings();
         updateLocale();
         gameStockActivityVM.refreshGamesDirectory();

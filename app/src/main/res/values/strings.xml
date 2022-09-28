@@ -126,4 +126,5 @@
         <string name="textColorTitle">Text Color</string>
         <string name="backColorTitle">Background Color</string>
         <string name="linkColorTitle">Link Color</string>
+        <string name="extendedName">QuestPlayerAndroid -VERSION-</string>
 </resources>

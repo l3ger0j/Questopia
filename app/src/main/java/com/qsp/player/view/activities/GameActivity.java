@@ -880,7 +880,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
                 if (textView != null) {
                     textView.setTypeface(getTypeface());
                     textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, getFontSize());
-                    //textView.setBackgroundColor(getBackgroundColor());
+                    textView.setBackgroundColor(getBackgroundColor());
                     textView.setTextColor(getTextColor());
                     textView.setLinkTextColor(getLinkColor());
                     textView.setText(item.text);
