@@ -28,6 +28,7 @@ import com.qsp.player.model.libQSP.LibQspProxy;
 import com.qsp.player.model.service.GameContentResolver;
 import com.qsp.player.view.activities.GameActivity;
 import com.qsp.player.view.adapters.SettingsAdapter;
+import com.qsp.player.view.fragments.ImageDialogFragment;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -42,10 +43,6 @@ public class GameActivityVM extends AndroidViewModel {
 
     public ObservableField<GameActivity> gameActivityObservableField =
             new ObservableField<>();
-
-    private DialogImageBinding imageBinding;
-
-    public String pathToImage;
 
     // region Getter/Setter
     public void setLibQspProxy(LibQspProxy libQspProxy) {
@@ -66,29 +63,8 @@ public class GameActivityVM extends AndroidViewModel {
     }
 
     // region Dialog
-    private AlertDialog dialog;
-
     public void showPictureDialog (String pathToImage) {
-        this.pathToImage = pathToImage;
-        dialog = createAlertDialog(createView());
-        dialog.show();
-    }
-
-    @NonNull
-    private View createView () {
-        imageBinding =
-                DialogImageBinding.inflate(Objects.requireNonNull(gameActivityObservableField.get())
-                        .getLayoutInflater());
-        imageBinding.setGameVM(this);
-        imageBinding.imagebox.setOnClickListener(v -> dialog.cancel());
-        return imageBinding.getRoot();
-    }
-
-    private AlertDialog createAlertDialog (View view) {
-        AlertDialog.Builder dialogBuilder =
-                new AlertDialog.Builder(gameActivityObservableField.get());
-        dialogBuilder.setView(view);
-        return dialogBuilder.create();
+        Objects.requireNonNull(gameActivityObservableField.get()).onShowDialog(pathToImage);
     }
     // endregion Dialog
 

@@ -4,6 +4,7 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.documentfile.provider.DocumentFile;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -73,7 +74,6 @@ public final class FileUtil {
     public static File findFileOrDirectory(File parentDir, final String name) {
         File[] files = parentDir.listFiles((dir, filename) -> filename.equalsIgnoreCase(name));
         if (files == null || files.length == 0) return null;
-
         return files[0];
     }
 

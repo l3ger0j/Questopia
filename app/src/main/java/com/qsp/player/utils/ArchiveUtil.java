@@ -1,9 +1,10 @@
 package com.qsp.player.utils;
 
+import static com.qsp.player.utils.ThreadUtil.assertNonUiThread;
+
 import android.content.ContentResolver;
 import android.content.Context;
 import android.net.Uri;
-import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
@@ -36,12 +37,6 @@ import java.util.Set;
 public class ArchiveUtil {
     public static final MutableLiveData<Long> progress = new MutableLiveData<>();
     private static final String TAG = ArchiveUtil.class.getSimpleName();
-
-    public static void assertNonUiThread() {
-        if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
-            throw new IllegalStateException("This should not be run on the UI thread");
-        }
-    }
 
     public static int[] getPrimitiveLongArrayFromInt(Set<Integer> input) {
         int[] ret = new int[input.size()];

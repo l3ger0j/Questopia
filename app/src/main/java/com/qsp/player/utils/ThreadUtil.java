@@ -12,6 +12,15 @@ public final class ThreadUtil {
     }
 
     /**
+     * Throw <code>IllegalStateException</code>, if the method is called in the main thread
+     */
+    public static void assertNonUiThread() {
+        if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
+            throw new IllegalStateException("This should not be run on the UI thread");
+        }
+    }
+
+    /**
      * @return <code>true</code> если текущий поток - основной, иначе <code>false</code>
      */
     public static boolean isMainThread() {

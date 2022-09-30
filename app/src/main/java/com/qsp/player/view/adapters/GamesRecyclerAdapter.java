@@ -3,18 +3,17 @@ package com.qsp.player.view.adapters;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.res.ResourcesCompat;
+import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.AsyncListDiffer;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.imageview.ShapeableImageView;
 import com.qsp.player.R;
+import com.qsp.player.databinding.ListItemGameBinding;
 import com.qsp.player.dto.stock.GameData;
 import com.squareup.picasso.Picasso;
 
@@ -22,7 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GamesRecyclerAdapter extends RecyclerView.Adapter<GamesRecyclerAdapter.ViewHolder>{
-    private final LayoutInflater inflater;
     private final Context context;
     private final AsyncListDiffer<GameData> differ =
             new AsyncListDiffer<>(this , DIFF_CALLBACK);
@@ -59,19 +57,21 @@ public class GamesRecyclerAdapter extends RecyclerView.Adapter<GamesRecyclerAdap
 
     public GamesRecyclerAdapter(Context context) {
         this.context = context;
-        this.inflater = LayoutInflater.from(context);
     }
 
     @NonNull
     @Override
     public GamesRecyclerAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent,
                                                               int viewType) {
-        View view = inflater.inflate(R.layout.list_item_game, parent, false);
-        return new ViewHolder(view);
+        LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+        ListItemGameBinding listItemGameBinding =
+                DataBindingUtil.inflate(inflater, R.layout.list_item_game, parent, false);
+        return new ViewHolder(listItemGameBinding);
     }
 
     @Override
     public void onBindViewHolder(@NonNull GamesRecyclerAdapter.ViewHolder holder, int position) {
+        holder.listItemGameBinding(differ.getCurrentList().get(position));
         GameData gameData = differ.getCurrentList().get(position);
 
         // gameIcon
@@ -80,50 +80,43 @@ public class GamesRecyclerAdapter extends RecyclerView.Adapter<GamesRecyclerAdap
                     context.getResources(),
                     R.drawable.broken_image , null
             );
-            holder.gameIcon.setImageDrawable(drawable);
+            holder.listItemGameBinding.gameIcon.setImageDrawable(drawable);
         } else {
             Picasso.get()
                     .load(gameData.icon)
                     .fit()
-                    .into(holder.gameIcon);
+                    .into(holder.listItemGameBinding.gameIcon);
         }
 
         // gameSize
         if (gameData.fileSize != null) {
-            holder.gameSize.setText(context.getString(R.string.fileSize).replace("-SIZE-",
-                    Integer.toString(gameData.getFileSize())));
-        }
-
-        // gameTitle
-        if (holder.gameTitle != null) {
-            holder.gameTitle.setText(gameData.title);
-            if (gameData.isInstalled()) {
-                holder.gameTitle.setTextColor(0xFFE0E0E0);
-            } else {
-                holder.gameTitle.setTextColor(0xFFFFD700);
-            }
+            holder.listItemGameBinding.gameSize
+                    .setText(context.getString(R.string.fileSize)
+                            .replace("-SIZE-", Integer.toString(gameData.getFileSize())));
         }
 
         // gameAuthor
         if (gameData.author.length() > 0) {
             String text = context.getString(R.string.author)
                     .replace("-AUTHOR-", gameData.author);
-            holder.gameAuthor.setText(text);
+            holder.listItemGameBinding.gameAuthor.setText(text);
         } else {
-            holder.gameAuthor.setText("");
+
+            holder.listItemGameBinding.gameAuthor.setText("");
         }
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        ShapeableImageView gameIcon;
-        TextView gameTitle, gameAuthor, gameSize;
+        ListItemGameBinding listItemGameBinding;
 
-        ViewHolder(View view){
-            super(view);
-            gameSize = view.findViewById(R.id.game_size);
-            gameIcon = view.findViewById(R.id.game_icon);
-            gameTitle = view.findViewById(R.id.game_title);
-            gameAuthor = view.findViewById(R.id.game_author);
+        ViewHolder(ListItemGameBinding listItemGameBinding){
+            super(listItemGameBinding.getRoot());
+            this.listItemGameBinding = listItemGameBinding;
+        }
+
+        public void listItemGameBinding(GameData gameData) {
+            listItemGameBinding.setGameData(gameData);
+            listItemGameBinding.executePendingBindings();
         }
     }
 }

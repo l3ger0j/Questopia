@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-
     <data>
         <variable
             name="stockVM"
@@ -109,7 +108,8 @@
                 android:id="@+id/imageView"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:layout_weight="1" />
+                android:layout_weight="1"
+                android:contentDescription="@string/add" />
 
             <TextView
                 android:id="@+id/imageTV"
@@ -146,8 +146,8 @@
             android:id="@+id/button"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:onClick="@{() -> stockVM.openGameDirectory()}"
-            android:text="Open game directory"
+            android:onClick="@{() -> stockVM.setGameDir()}"
+            android:text="Set game directory"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/installBT" />

@@ -3,6 +3,10 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory android:title="@string/generalCatTitle">
+        <Preference
+            android:title="Set game directory"
+            android:key="setGameDir"
+            />
         <ListPreference
             android:defaultValue="ru"
             android:entries="@array/langName"

@@ -64,6 +64,7 @@ import com.qsp.player.model.service.GameContentResolver;
 import com.qsp.player.model.service.HtmlProcessor;
 import com.qsp.player.utils.ViewUtil;
 import com.qsp.player.view.adapters.SettingsAdapter;
+import com.qsp.player.view.fragments.ImageDialogFragment;
 import com.qsp.player.viewModel.viewModels.GameActivityVM;
 
 import org.jetbrains.annotations.Contract;
@@ -155,12 +156,21 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
     private final Runnable onScroll = new Runnable() {
         @Override
         public void run() {
-            if (mainDescView.getContentHeight() * mainDescView.getScale() >= mainDescView.getScrollY() ){
+            if (mainDescView.getContentHeight()
+                    * getResources().getDisplayMetrics().density
+                    >= mainDescView.getScrollY() ){
                 mainDescView.scrollBy(0, mainDescView.getHeight());
             }
         }
     };
 
+    public void onShowDialog (String pathToImg) {
+        ImageDialogFragment imageDialogFragment = new ImageDialogFragment();
+        imageDialogFragment.pathToImage.set(pathToImg);
+        imageDialogFragment.show(getSupportFragmentManager(), "");
+    }
+
+    @SuppressLint("SourceLockedOrientationActivity")
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

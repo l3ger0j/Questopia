@@ -2,8 +2,8 @@ package com.qsp.player.viewModel.viewModels;
 
 import static android.content.Context.NOTIFICATION_SERVICE;
 import static android.content.Intent.ACTION_OPEN_DOCUMENT;
+import static android.content.Intent.ACTION_OPEN_DOCUMENT_TREE;
 import static android.content.Intent.EXTRA_MIME_TYPES;
-import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static com.qsp.player.utils.ArchiveUtil.progress;
 import static com.qsp.player.utils.FileUtil.GAME_INFO_FILENAME;
 import static com.qsp.player.utils.FileUtil.createFile;
@@ -24,14 +24,12 @@ import android.app.PendingIntent;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Build;
 import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
-import androidx.core.content.FileProvider;
 import androidx.databinding.ObservableBoolean;
 import androidx.databinding.ObservableField;
 import androidx.documentfile.provider.DocumentFile;
@@ -71,6 +69,8 @@ public class GameStockActivityVM extends AndroidViewModel {
     private NotificationCompat.Builder builder;
     private NotificationManager notificationManager;
 
+    private AlertDialog dialog;
+
     // region Getter/Setter
     public void setTempInstallFile(@NonNull DocumentFile tempInstallFile) {
         this.tempInstallFile = tempInstallFile;
@@ -100,8 +100,6 @@ public class GameStockActivityVM extends AndroidViewModel {
     }
 
     // region Dialog
-    private AlertDialog dialog;
-
     public void showDialogInstall() {
        dialog = createAlertDialog(formingView());
        dialog.show();
@@ -151,7 +149,7 @@ public class GameStockActivityVM extends AndroidViewModel {
                 Objects.requireNonNull(activityObservableField.get())
                         .resultInstallLauncher.launch(intentInstall);
             } catch (ActivityNotFoundException e) {
-                Log.e(TAG,e.toString());
+                Log.e(TAG , e.toString());
             }
         } else if (id == R.id.button3) {
             action = ACTION_OPEN_DOCUMENT;
@@ -169,14 +167,16 @@ public class GameStockActivityVM extends AndroidViewModel {
         }
     }
 
-    public void openGameDirectory () {
-        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        Uri data = FileProvider.getUriForFile(getApplication(), "com.qsp.player.provider", gamesDir);
-        Log.d(TAG, data.toString());
-        intent.setData(data);
-        intent.setFlags(FLAG_ACTIVITY_NEW_TASK);
-        Objects.requireNonNull(activityObservableField.get())
-                .startActivity(Intent.createChooser(intent, "Open folder"));
+    public void setGameDir () {
+        Intent intent3 = new Intent(ACTION_OPEN_DOCUMENT_TREE);
+        intent3.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        intent3.setFlags(Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+        try {
+            Objects.requireNonNull(activityObservableField.get())
+                    .resultInstallLauncher.launch(intent3);
+        } catch (ActivityNotFoundException e) {
+            Log.e(TAG , e.toString());
+        }
     }
 
     @NonNull
