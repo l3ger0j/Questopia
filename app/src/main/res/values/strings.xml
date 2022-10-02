@@ -1,7 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Application -->
-    <string name="appName">Quest Player</string>
+    <!-- Use in dialog/toast -->
+    <!-- Dialog About -->
+        <string name="description">Description</string>
+    <!-- Dialog Close -->
+        <string name="promptCloseGame">Are you sure you want to close the game?</string>
+    <!-- Dialog Select -->
+        <string name="selectGameFile">Select a game file to run</string>
+    <!-- Dialog Error -->
+        <string name="error">Error</string>
+        <string name="gamesDirError">Unable to create or open games directory.</string>
+        <string name="installError">Could not install game -GAMENAME-.</string>
+        <string name="noGameFilesError">Game files not found after installation.</string>
+    <!-- Dialog Install -->
+        <string name="gameName">Game name</string>
+        <string name="gameAuthor">Author</string>
+        <string name="gameVersion">Version</string>
+        <string name="selectFileOrArchive">Select archive</string>
+        <string name="selectIcon">Select icon</string>
+        <string name="buttonSelect">Select</string>
+        <string name="add">Add</string>
+    <!-- Dialog GameInfo -->
+        <string name="author">Author: -AUTHOR-</string>
+        <string name="ported_by">Ported by: -PORTED_BY-</string>
+        <string name="version">Version: -VERSION-</string>
+        <string name="fileSize">Size: -SIZE- KB</string>
+        <string name="fileType">File Type: -TYPE-</string>
+        <string name="experimental">(experimental)</string>
+        <string name="mod_data">Modified: -MOD_DATA-</string>
+        <string name="pub_data">Published: -PUB_DATA-</string>
+        <string name="close">Close</string>
+        <string name="play">Play</string>
+    <!-- Dialog Credits -->
     <string name="appDescription">
 <![CDATA[
 <h2><center>About Quest Player<img src=\"file:///android_res/drawable/landscape.jpg\" width=\"100%\"></center></h2>
@@ -29,56 +59,13 @@
 </ul>
 ]]>
     </string>
-
-    <!-- Menu -->
-    <string name="installGame">Install Game</string>
-    <string name="selectSlot">Select a slot</string>
-    <string name="slotPresent" formatted="false">Slot %d - %s</string>
-    <string name="slotEmpty">Slot %d [Empty]</string>
-    <string name="loadFrom">From File…</string>
-    <string name="saveTo">To File…</string>
-    <string name="search">Search</string>
-
-    <!-- Settings -->
-    <string name="error">Error</string>
-    <string name="gamesDirError">Unable to create or open games directory.</string>
-    <string name="installError">Could not install game -GAMENAME-.</string>
-    <string name="noGameFilesError">Game files not found after installation.</string>
-    <string name="tabLocal">Local</string>
-    <string name="play">Play</string>
-    <string name="gameDeleted">The game has been deleted.</string>
-    <string name="author">Author: -AUTHOR-</string>
-    <string name="ported_by">Ported by: -PORTED_BY-</string>
-    <string name="version">Version: -VERSION-</string>
-    <string name="fileSize">Size: -SIZE- KB</string>
-    <string name="fileType">File Type: -TYPE-</string>
-    <string name="pub_data">Published: -PUB_DATA-</string>
-    <string name="mod_data">Modified: -MOD_DATA-</string>
-    <string name="deleteGameQuery">Delete game -GAMENAME-?</string>
-    <string name="close">Close</string>
-    <string name="selectGameFile">Select a game file to run</string>
-    <string name="cancel">Cancel</string>
-    <string name="update">Update</string>
-    <string name="experimental">(experimental)</string>
-    <string name="promptCloseGame">Are you sure you want to close the game?</string>
-
-    <!-- Use in dialog/toast -->
-    <!-- DialogAbout -->
-        <string name="description">Description</string>
-    <!-- DialogInstall -->
-        <string name="gameName">Game name</string>
-        <string name="gameAuthor">Author</string>
-        <string name="gameVersion">Version</string>
-        <string name="selectFileOrArchive">Select archive</string>
-        <string name="selectIcon">Select icon</string>
-        <string name="buttonSelect">Select</string>
-        <string name="add">Add</string>
     <!-- Use in activity/fragment -->
+    <!-- QuestPlayerAndroid -->
+        <string name="appName">Quest Player</string>
     <!-- SettingsFragment -->
         <string name="closeToApply">Close settings to apply changes</string>
     <!-- FragmentImageBox -->
         <string name="image">Image</string>
-        <string name="imageZoom">Zoom image</string>
     <!-- Use in menu -->
     <!-- Menu game -->
         <!-- Group running -->
@@ -95,6 +82,7 @@
         <string name="saveTitle">Save</string>
         <!-- Group default -->
         <string name="gameStockTitle">Game Stock</string>
+        <string name="search">Search</string>
         <string name="settingsTitle">Settings</string>
     <!-- Menu delete -->
         <string name="selectAllTitle">Select all</string>
@@ -104,19 +92,18 @@
         <string name="generalCatTitle">General</string>
         <string name="langTitle">Language</string>
         <string name="langSum">Choose display language</string>
-        <string name="sizeBlockTitle">Size block</string>
         <string name="soundTitle">Sound</string>
         <string name="soundSum">Play music and sounds</string>
         <string name="actsHeightTitle">Actions List Height</string>
         <string name="actsHeightSum">Actions List Height To Screen Height Ratio</string>
+        <!-- Switch section -->
+        <string name="switchCatTitle">Switches</string>
         <string name="rotateTitle">Rotate</string>
         <string name="rotateSum">Enable/disable rotate (alpha)</string>
         <string name="separatorTitle">Separator</string>
         <string name="separatorSum">On/off separator line in game</string>
         <string name="autoscrollTitle">Autoscroll</string>
         <string name="autoscrollSum">Enable/disable autoscroll</string>
-        <string name="pluginTitle">Extension menu</string>
-        <string name="aboutTitle">About Quest Player</string>
         <!-- Text section -->
         <string name="textCatTitle">Text</string>
         <string name="fontStyleTitle">Font Style</string>
@@ -127,4 +114,14 @@
         <string name="backColorTitle">Background Color</string>
         <string name="linkColorTitle">Link Color</string>
         <string name="extendedName">QuestPlayerAndroid -VERSION-</string>
+        <!-- Extra section -->
+        <string name="extraCatTitle">Extra</string>
+        <string name="pluginTitle">Extension menu</string>
+        <string name="aboutTitle">About Quest Player</string>
+    <!-- Menu save and load -->
+        <string name="selectSlot">Select a slot</string>
+        <string name="slotPresent" formatted="false">Slot %d - %s</string>
+        <string name="slotEmpty">Slot %d [Empty]</string>
+        <string name="loadFrom">From File…</string>
+        <string name="saveTo">To File…</string>
 </resources>

@@ -4,14 +4,12 @@ import static com.qsp.player.utils.Base64Util.decodeBase64;
 import static com.qsp.player.utils.LanguageUtil.setLocale;
 import static com.qsp.player.utils.PathUtil.getExtension;
 
-import android.app.AlertDialog;
 import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.util.Log;
-import android.view.View;
 import android.webkit.MimeTypeMap;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
@@ -23,12 +21,10 @@ import androidx.annotation.Nullable;
 import androidx.databinding.ObservableField;
 import androidx.lifecycle.AndroidViewModel;
 
-import com.qsp.player.databinding.DialogImageBinding;
 import com.qsp.player.model.libQSP.LibQspProxy;
 import com.qsp.player.model.service.GameContentResolver;
 import com.qsp.player.view.activities.GameActivity;
 import com.qsp.player.view.adapters.SettingsAdapter;
-import com.qsp.player.view.fragments.ImageDialogFragment;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -113,6 +109,5 @@ public class GameActivityVM extends AndroidViewModel {
         setLocale(context, settingsAdapter.language);
         return settingsAdapter.language;
     }
-
 
 }

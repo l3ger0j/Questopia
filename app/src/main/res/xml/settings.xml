@@ -3,10 +3,6 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory android:title="@string/generalCatTitle">
-        <Preference
-            android:title="Set game directory"
-            android:key="setGameDir"
-            />
         <ListPreference
             android:defaultValue="ru"
             android:entries="@array/langName"
@@ -26,28 +22,6 @@
             android:key="actsHeight"
             android:summary="@string/actsHeightSum"
             android:title="@string/actsHeightTitle" />
-        <SwitchPreference
-            android:defaultValue="false"
-            android:key="rotate"
-            android:summary="@string/rotateSum"
-            android:title="@string/rotateTitle" />
-        <SwitchPreference
-            android:defaultValue="false"
-            android:key="separator"
-            android:summary="@string/separatorSum"
-            android:title="@string/separatorTitle" />
-        <SwitchPreference
-            android:defaultValue="true"
-            android:key="autoscroll"
-            android:summary="@string/autoscrollSum"
-            android:title="@string/autoscrollTitle" />
-        <Preference
-            android:defaultValue="false"
-            android:enabled="false"
-            android:title="@string/pluginTitle" />
-        <Preference
-            android:title="@string/aboutTitle"
-            android:key="showAbout" />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/textCatTitle">
@@ -80,6 +54,34 @@
             android:defaultValue="@color/def_link_color"
             android:key="linkColor"
             android:title="@string/linkColorTitle" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/switchCatTitle">
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="rotate"
+            android:summary="@string/rotateSum"
+            android:title="@string/rotateTitle" />
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="separator"
+            android:summary="@string/separatorSum"
+            android:title="@string/separatorTitle" />
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="autoscroll"
+            android:summary="@string/autoscrollSum"
+            android:title="@string/autoscrollTitle" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/extraCatTitle">
+        <Preference
+            android:defaultValue="false"
+            android:enabled="false"
+            android:title="@string/pluginTitle" />
+        <Preference
+            android:title="@string/aboutTitle"
+            android:key="showAbout" />
     </PreferenceCategory>
 
 </androidx.preference.PreferenceScreen>

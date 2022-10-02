@@ -58,7 +58,7 @@ public class GameStockActivity extends AppCompatActivity {
     private FragmentLocalVM localStockViewModel;
 
     private ActionMode actionMode;
-    private ActivityStockBinding activityStockBinding;
+    protected ActivityStockBinding activityStockBinding;
     public ActivityResultLauncher<Intent> resultInstallLauncher, resultGetImageLauncher;
 
     private boolean isEnable = false;
@@ -163,12 +163,7 @@ public class GameStockActivity extends AppCompatActivity {
                         if ((uri = Objects.requireNonNull(result.getData()).getData()) == null) {
                             Log.e(TAG, "Archive or file is not selected");
                         }
-                        try {
-                            file = DocumentFile.fromSingleUri(this, Objects.requireNonNull(uri));
-                        } catch (Exception e) {
-                            Log.e(TAG, "Error: ", e);
-                            file = DocumentFile.fromTreeUri(this, Objects.requireNonNull(uri));
-                        }
+                        file = DocumentFile.fromSingleUri(this, Objects.requireNonNull(uri));
                         assert file != null;
                         gameStockActivityVM.setTempInstallFile(file);
                     }

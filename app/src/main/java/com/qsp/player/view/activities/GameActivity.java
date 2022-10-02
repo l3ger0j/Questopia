@@ -1,6 +1,6 @@
 package com.qsp.player.view.activities;
 
-import static com.qsp.player.utils.ColorUtil.convertRgbaToBgra;
+import static com.qsp.player.utils.ColorUtil.convertRGBAToBGRA;
 import static com.qsp.player.utils.ColorUtil.getHexColor;
 import static com.qsp.player.utils.FileUtil.createFile;
 import static com.qsp.player.utils.FileUtil.findFileOrDirectory;
@@ -36,7 +36,6 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -153,6 +152,8 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
     private ActivityResultLauncher<Intent> resultLauncher;
     private String tinySaveName;
 
+
+    // region Scroll
     private final Runnable onScroll = new Runnable() {
         @Override
         public void run() {
@@ -163,6 +164,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
             }
         }
     };
+    // endregion Scroll
 
     public void onShowDialog (String pathToImg) {
         ImageDialogFragment imageDialogFragment = new ImageDialogFragment();
@@ -225,11 +227,13 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
         initGame();
         setActiveTab(TAB_MAIN_DESC_AND_ACTIONS);
 
-        if (savedInstanceState == null) {
-            int randomNum = ThreadLocalRandom.current().nextInt(0, 50 + 1);
-            tinySaveName = libQspProxy.getGameState().gameTitle + randomNum + ".sav";
-        } else {
-            tinySaveName = savedInstanceState.getString("fileName");
+        if (settingsAdapter.useRotate) {
+            if (savedInstanceState == null) {
+                int randomNum = ThreadLocalRandom.current().nextInt(0, 50 + 1);
+                tinySaveName = libQspProxy.getGameState().gameTitle + randomNum + ".sav";
+            } else {
+                tinySaveName = savedInstanceState.getString("fileName");
+            }
         }
 
         Log.i(TAG, "GameActivity created");
@@ -238,19 +242,23 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        Log.d(TAG, tinySaveName);
-        File file1 = createFile(getCacheDir(), tinySaveName);
-        libQspProxy.saveGameState(Uri.fromFile(file1));
-        outState.putString("fileName", tinySaveName);
+        if (settingsAdapter.useRotate) {
+            Log.d(TAG, tinySaveName);
+            File file1 = createFile(getCacheDir(), tinySaveName);
+            libQspProxy.saveGameState(Uri.fromFile(file1));
+            outState.putString("fileName", tinySaveName);
+        }
     }
 
     @Override
     protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        File file = findFileOrDirectory(getCacheDir(), tinySaveName);
-        Log.d(TAG,tinySaveName + " " + file);
-        if (file != null) {
-            doWithCounterDisabled(() -> libQspProxy.loadGameState(Uri.fromFile(file)));
+        if (settingsAdapter.useRotate) {
+            File file = findFileOrDirectory(getCacheDir(), tinySaveName);
+            Log.d(TAG,tinySaveName + " " + file);
+            if (file != null) {
+                doWithCounterDisabled(() -> libQspProxy.loadGameState(Uri.fromFile(file)));
+            }
         }
     }
 
@@ -394,6 +402,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
         libQspProxy.stop();
         libQspProxy.setGameInterface(null);
         counterHandler.removeCallbacks(counterTask);
+        tinySaveName = null;
         super.onDestroy();
         Log.i(TAG,"GameActivity destroyed");
     }
@@ -455,7 +464,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
 
     private int getBackgroundColor() {
         InterfaceConfiguration config = libQspProxy.getGameState().interfaceConfig;
-        return config.backColor != 0 ? convertRgbaToBgra(config.backColor) : settingsAdapter.backColor;
+        return config.backColor != 0 ? convertRGBAToBGRA(config.backColor) : settingsAdapter.backColor;
     }
 
     private void applyActionsHeightRatio() {
@@ -479,12 +488,12 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
 
     private int getTextColor() {
         InterfaceConfiguration config = libQspProxy.getGameState().interfaceConfig;
-        return config.fontColor != 0 ? convertRgbaToBgra(config.fontColor) : settingsAdapter.textColor;
+        return config.fontColor != 0 ? convertRGBAToBGRA(config.fontColor) : settingsAdapter.textColor;
     }
 
     private int getLinkColor() {
         InterfaceConfiguration config = libQspProxy.getGameState().interfaceConfig;
-        return config.linkColor != 0 ? convertRgbaToBgra(config.linkColor) : settingsAdapter.linkColor;
+        return config.linkColor != 0 ? convertRGBAToBGRA(config.linkColor) : settingsAdapter.linkColor;
     }
 
     private int getFontSize() {
@@ -882,19 +891,15 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
             }
             QspListItem item = items.get(position);
             if (item != null) {
-                ImageView iconView = convertView.findViewById(R.id.item_icon);
                 TextView textView = convertView.findViewById(R.id.item_text);
-                if (iconView != null) {
-                    iconView.setImageDrawable(item.icon);
-                }
-                if (textView != null) {
-                    textView.setTypeface(getTypeface());
-                    textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, getFontSize());
-                    textView.setBackgroundColor(getBackgroundColor());
-                    textView.setTextColor(getTextColor());
-                    textView.setLinkTextColor(getLinkColor());
-                    textView.setText(item.text);
-                }
+                textView.setCompoundDrawablesWithIntrinsicBounds(item.icon,
+                        null, null, null);
+                textView.setTypeface(getTypeface());
+                textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, getFontSize());
+                textView.setBackgroundColor(getBackgroundColor());
+                textView.setTextColor(getTextColor());
+                textView.setLinkTextColor(getLinkColor());
+                textView.setText(item.text);
             }
 
             return convertView;

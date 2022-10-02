@@ -2,7 +2,6 @@ package com.qsp.player.viewModel.viewModels;
 
 import static android.content.Context.NOTIFICATION_SERVICE;
 import static android.content.Intent.ACTION_OPEN_DOCUMENT;
-import static android.content.Intent.ACTION_OPEN_DOCUMENT_TREE;
 import static android.content.Intent.EXTRA_MIME_TYPES;
 import static com.qsp.player.utils.ArchiveUtil.progress;
 import static com.qsp.player.utils.FileUtil.GAME_INFO_FILENAME;
@@ -164,18 +163,6 @@ public class GameStockActivityVM extends AndroidViewModel {
             } catch (ActivityNotFoundException e) {
                 Log.e(TAG , e.toString());
             }
-        }
-    }
-
-    public void setGameDir () {
-        Intent intent3 = new Intent(ACTION_OPEN_DOCUMENT_TREE);
-        intent3.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        intent3.setFlags(Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
-        try {
-            Objects.requireNonNull(activityObservableField.get())
-                    .resultInstallLauncher.launch(intent3);
-        } catch (ActivityNotFoundException e) {
-            Log.e(TAG , e.toString());
         }
     }
 

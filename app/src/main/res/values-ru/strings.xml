@@ -1,7 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Приложение -->
-    <string name="appName">Quest Player</string>
+    <!-- Use in dialog/toast -->
+    <!-- Dialog About -->
+        <string name="description">Описание</string>
+    <!-- Dialog Close -->
+        <string name="promptCloseGame">Уверены, что хотите закрыть игру?</string>
+    <!-- Dialog Select -->
+        <string name="selectGameFile">Выберите файл игры для запуска</string>
+    <!-- Dialog Error -->
+        <string name="error">Ошибка</string>
+        <string name="gamesDirError">Невозможно создать или открыть папку с играми.</string>
+        <string name="installError">Невозможно установить игру -GAMENAME-.</string>
+        <string name="noGameFilesError">Файлы игры не найдены после установки.</string>
+    <!-- Dialog Install -->
+        <string name="gameName">Название игры</string>
+        <string name="gameAuthor">Автор</string>
+        <string name="gameVersion">Версия</string>
+        <string name="selectFileOrArchive">Выберите архив</string>
+        <string name="selectIcon">Выберите иконку</string>
+        <string name="buttonSelect">Выбрать</string>
+        <string name="add">Добавить</string>
+    <!-- Dialog GameInfo -->
+        <string name="author">Автор: -AUTHOR-</string>
+        <string name="ported_by">Портировал: -PORTED_BY-</string>
+        <string name="version">Версия: -VERSION-</string>
+        <string name="fileSize">Размер: -SIZE- КБ</string>
+        <string name="fileType">Тип файла: -TYPE-</string>
+        <string name="experimental">(экспериментально)</string>
+        <string name="mod_data">Изменено: -MOD_DATA-</string>
+        <string name="pub_data">Опубликовано: -PUB_DATA-</string>
+        <string name="close">Закрыть</string>
+        <string name="play">Играть</string>
+    <!-- Dialog Credits -->
     <string name="appDescription">
 <![CDATA[
 <h2><center>О Quest Player<img src=\"file:///android_res/drawable/landscape.jpg\" width=\"100%\"></center></h2>
@@ -29,56 +59,13 @@
 </ul>
 ]]>
     </string>
-
-    <!-- Меню -->
-    <string name="installGame">Установить игру</string>
-    <string name="selectSlot">Выберите слот</string>
-    <string name="slotPresent" formatted="false">Слот %d - %s</string>
-    <string name="slotEmpty">Слот %d [Пусто]</string>
-    <string name="loadFrom">Из файла…</string>
-    <string name="saveTo">В файл…</string>
-    <string name="search">Поиск</string>
-
-    <!-- Настройки -->
-    <string name="error">Ошибка</string>
-    <string name="gamesDirError">Невозможно создать или открыть папку с играми.</string>
-    <string name="installError">Невозможно установить игру -GAMENAME-.</string>
-    <string name="noGameFilesError">Файлы игры не найдены после установки.</string>
-    <string name="tabLocal">Загружено</string>
-    <string name="play">Играть</string>
-    <string name="gameDeleted">Игра удалена.</string>
-    <string name="deleteGameQuery">Удалить игру -GAMENAME-?</string>
-    <string name="author">Автор: -AUTHOR-</string>
-    <string name="ported_by">Портировал: -PORTED_BY-</string>
-    <string name="version">Версия: -VERSION-</string>
-    <string name="fileSize">Размер: -SIZE- КБ</string>
-    <string name="fileType">Тип файла: -TYPE-</string>
-    <string name="pub_data">Опубликовано: -PUB_DATA-</string>
-    <string name="mod_data">Изменено: -MOD_DATA-</string>
-    <string name="close">Закрыть</string>
-    <string name="selectGameFile">Выберите файл игры для запуска</string>
-    <string name="cancel">Отмена</string>
-    <string name="update">Обновить</string>
-    <string name="experimental">(экспериментально)</string>
-    <string name="promptCloseGame">Уверены, что хотите закрыть игру?</string>
-
-    <!-- Use in dialog/toast -->
-    <!-- DialogAbout -->
-        <string name="description">Описание</string>
-    <!-- DialogInstall -->
-        <string name="gameName">Название игры</string>
-        <string name="gameAuthor">Автор</string>
-        <string name="gameVersion">Версия</string>
-        <string name="selectFileOrArchive">Выберите архив</string>
-        <string name="selectIcon">Выберите иконку</string>
-        <string name="buttonSelect">Выбрать</string>
-        <string name="add">Добавить</string>
     <!-- Use in activity/fragment -->
+    <!-- QuestPlayerAndroid -->
+        <string name="appName">Quest Player</string>
     <!-- SettingsFragment -->
         <string name="closeToApply">Закройте настройки для применения изменений</string>
     <!-- FragmentImageBox -->
         <string name="image">Изображение</string>
-        <string name="imageZoom">Увеличить изображение</string>
     <!-- Use in menu -->
     <!-- Menu game -->
         <!-- Group running -->
@@ -95,6 +82,7 @@
         <string name="saveTitle">Сохранить</string>
         <!-- Group default -->
         <string name="gameStockTitle">Полка игр</string>
+        <string name="search">Поиск</string>
         <string name="settingsTitle">Настройки</string>
     <!-- Menu delete -->
         <string name="selectAllTitle">Выбрать всё</string>
@@ -104,19 +92,18 @@
         <string name="generalCatTitle">Главное</string>
         <string name="langTitle">Язык</string>
         <string name="langSum">Выберите язык интерфейса</string>
-        <string name="sizeBlockTitle">Размер блока</string>
         <string name="soundTitle">Звук</string>
         <string name="soundSum">Проигрывать звуки и музыку</string>
         <string name="actsHeightTitle">Высота списка действий</string>
         <string name="actsHeightSum">Соотношение высоты списка действий к высоте экрана</string>
+        <!-- Switch section -->
+        <string name="switchCatTitle">Переключатели</string>
         <string name="rotateTitle">Поворот</string>
         <string name="rotateSum">Включить/выключить поворот экрана (alpha)</string>
         <string name="separatorTitle">Разделитель</string>
         <string name="separatorSum">Включить/выключить разделитель в игре</string>
         <string name="autoscrollTitle">Автопролистывание</string>
         <string name="autoscrollSum">Включить/выключить автопролистывание</string>
-        <string name="pluginTitle">Меню плагинов</string>
-        <string name="aboutTitle">О программе</string>
         <!-- Text section -->
         <string name="textCatTitle">Текст</string>
         <string name="fontStyleTitle">Стиль шрифта</string>
@@ -127,6 +114,16 @@
         <string name="backColorTitle">Цвет фона</string>
         <string name="linkColorTitle">Цвет ссылок</string>
         <string name="extendedName">QuestPlayerAndroid -VERSION-</string>
+        <!-- Extra section -->
+        <string name="extraCatTitle">Экстра</string>
+        <string name="pluginTitle">Меню плагинов</string>
+        <string name="aboutTitle">О программе</string>
+    <!-- Menu save and load -->
+        <string name="selectSlot">Выберите слот</string>
+        <string name="slotPresent" formatted="false">Слот %d - %s</string>
+        <string name="slotEmpty">Слот %d [Пусто]</string>
+        <string name="loadFrom">Из файла…</string>
+        <string name="saveTo">В файл…</string>
 </resources>
 
 

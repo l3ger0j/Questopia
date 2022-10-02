@@ -13,10 +13,8 @@ public final class LanguageUtil {
         Locale locale = new Locale(lang);
         Resources res = context.getResources();
         DisplayMetrics dm = res.getDisplayMetrics();
-
         Configuration conf = res.getConfiguration();
         conf.locale = locale;
-
         res.updateConfiguration(conf, dm);
     }
 }

@@ -9,9 +9,9 @@ public final class GameDirUtil {
     private static final String TAG = GameDirUtil.class.getSimpleName();
 
     /**
-     * Если в папке есть только одна папка, и больше ничего, рекурсивно разворачивает папку до тех
-     * пор, пока или ничего не останется, или останется папка, в которой будет что-то другое, кроме
-     * одной вложенной папки.
+     * If there is only one folder in the folder and nothing else,
+     * recursively expands the folder until either there is nothing left,
+     * or there will be a folder in which there will be something other than one subfolder.
      */
     public static void normalizeGameDirectory(File dir) {
         File it = dir;
