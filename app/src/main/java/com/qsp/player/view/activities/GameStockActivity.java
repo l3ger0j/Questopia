@@ -4,9 +4,11 @@ import static com.qsp.player.utils.FileUtil.deleteDirectory;
 import static com.qsp.player.utils.LanguageUtil.setLocale;
 import static com.qsp.player.utils.ViewUtil.showErrorDialog;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
@@ -22,6 +24,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.view.ActionMode;
+import androidx.core.app.ActivityCompat;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.preference.PreferenceManager;
@@ -154,6 +157,10 @@ public class GameStockActivity extends AppCompatActivity {
                     .commit();
         }
 
+        ActivityCompat.requestPermissions(this,
+                new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                1);
+
         resultInstallLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
@@ -193,6 +200,19 @@ public class GameStockActivity extends AppCompatActivity {
         Log.i(TAG,"GameStockActivity created");
 
         setContentView(activityStockBinding.getRoot());
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode , @NonNull String[] permissions , @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode , permissions , grantResults);
+        if (requestCode == 1) {
+            if (grantResults.length > 0
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+            } else {
+                showErrorDialog(this , "Permission denied to read your External storage");
+            }
+        }
     }
 
     private void loadSettings() {

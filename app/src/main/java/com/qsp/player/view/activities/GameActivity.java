@@ -76,7 +76,6 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ThreadLocalRandom;
 
-@SuppressLint("ClickableViewAccessibility")
 public class GameActivity extends AppCompatActivity implements GameInterface {
     private final String TAG = this.getClass().getSimpleName();
 
