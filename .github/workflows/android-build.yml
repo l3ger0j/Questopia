@@ -1,8 +1,12 @@
-name: Android CI
+name: Android build CI
 
 on:
-  push:
-    branches: [ master ]
+  workflow_dispatch:
+    inputs:
+      Name:
+        description: Create a chaos?
+        required: true
+        default: yes
   pull_request:
     branches: [ master ]
 

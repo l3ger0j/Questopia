@@ -2,6 +2,7 @@ package com.qsp.player.model.service;
 
 import static com.qsp.player.utils.StringUtil.isNullOrEmpty;
 
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -29,7 +30,7 @@ public class ImageProvider {
                 .into(new Target() {
                     @Override
                     public void onBitmapLoaded(Bitmap bitmap , Picasso.LoadedFrom from) {
-                        tempDrawable = new BitmapDrawable(bitmap);
+                        tempDrawable = new BitmapDrawable(Resources.getSystem(), bitmap);
                     }
 
                     @Override
@@ -39,7 +40,6 @@ public class ImageProvider {
 
                     @Override
                     public void onPrepareLoad(Drawable placeHolderDrawable) {
-
                     }
                 });
         return tempDrawable;

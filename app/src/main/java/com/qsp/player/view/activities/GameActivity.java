@@ -755,7 +755,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
 
         runOnUiThread(() -> {
             InterfaceConfiguration config = libQspProxy.getGameState().interfaceConfig;
-            String processedMsg = config.useHtml ? htmlProcessor.removeHtmlTags(message) : message;
+            String processedMsg = config.useHtml ? htmlProcessor.removeHTMLTags(message) : message;
             if (processedMsg == null) {
                 processedMsg = "";
             }
@@ -785,7 +785,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
             final View view = getLayoutInflater().inflate(R.layout.dialog_input, null);
 
             InterfaceConfiguration config = libQspProxy.getGameState().interfaceConfig;
-            String message = config.useHtml ? htmlProcessor.removeHtmlTags(prompt) : prompt;
+            String message = config.useHtml ? htmlProcessor.removeHTMLTags(prompt) : prompt;
             if (message == null) {
                 message = "";
             }

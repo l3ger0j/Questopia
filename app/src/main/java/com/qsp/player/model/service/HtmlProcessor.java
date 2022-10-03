@@ -47,8 +47,8 @@ public class HtmlProcessor {
         document.outputSettings().prettyPrint(false);
 
         Element body = document.body();
-        processHtmlImages(body);
-        processHtmlVideos(body);
+        processHTMLImages(body);
+        processHTMLVideos(body);
 
         return document.toString();
     }
@@ -83,7 +83,7 @@ public class HtmlProcessor {
                 .replace("\r", "");
     }
 
-    private void processHtmlImages(Element documentBody) {
+    private void processHTMLImages(Element documentBody) {
         for (Element img : documentBody.select("img")) {
             boolean resize = shouldImageBeResized(img);
             if (resize) {
@@ -102,7 +102,7 @@ public class HtmlProcessor {
         return drawable.getIntrinsicWidth() > IMAGE_WIDTH_THRESHOLD;
     }
 
-    private void processHtmlVideos(Element documentBody) {
+    private void processHTMLVideos(Element documentBody) {
         documentBody.select("video")
                 .attr("style", "max-width:100%;")
                 .attr("muted", "true");
@@ -119,7 +119,7 @@ public class HtmlProcessor {
     /**
      * Удалить HTML-теги из строки <code>html</code> и вернуть результирующую строку.
      */
-    public String removeHtmlTags(String html) {
+    public String removeHTMLTags(String html) {
         if (isNullOrEmpty(html)) return "";
 
         StringBuilder result = new StringBuilder();

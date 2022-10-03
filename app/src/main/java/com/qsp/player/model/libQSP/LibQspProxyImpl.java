@@ -184,7 +184,8 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
             ActionData actionData = (ActionData) nativeMethods.QSPGetActionData(i);
             QspListItem action = new QspListItem();
             action.icon = imageProvider.get(actionData.image);
-            action.text = gameState.interfaceConfig.useHtml ? htmlProcessor.removeHtmlTags(actionData.name) : actionData.name;
+            action.text = gameState.interfaceConfig.useHtml ?
+                    htmlProcessor.removeHTMLTags(actionData.name) : actionData.name;
             actions.add(action);
         }
         return actions;
@@ -197,7 +198,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
             ObjectData objectResult = (ObjectData) nativeMethods.QSPGetObjectData(i);
             QspListItem object = new QspListItem();
             object.icon = imageProvider.get(objectResult.image);
-            object.text = gameState.interfaceConfig.useHtml ? htmlProcessor.removeHtmlTags(objectResult.name) : objectResult.name;
+            object.text = gameState.interfaceConfig.useHtml ? htmlProcessor.removeHTMLTags(objectResult.name) : objectResult.name;
             objects.add(object);
         }
         return objects;
