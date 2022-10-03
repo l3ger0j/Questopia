@@ -1,6 +1,6 @@
 ## QuestPlayAndroid (fork **[QuestPlayer](https://github.com/seedhartha/QuestPlayer)**)
 
-![master](https://github.com/l3ger0j/QuestPlayerAndroid/workflows/android/badge.svg)
+![android](https://github.com/l3ger0j/QuestPlayerAndroid/actions/workflows/android.yml/badge.svg)
 
 Android application for launching text format games [QSP](https://github.com/seedhartha/qsp).
 
