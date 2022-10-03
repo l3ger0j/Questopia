@@ -31,11 +31,11 @@ jobs:
     - name: Upload APK
       uses: actions/upload-artifact@v3.1.0
       with:
-          name: app-release.apk
+          name: app-release-unsing.apk
           path: app/build/outputs/apk/release/app-release-unsigned.apk
 
     - name: Upload AAB Bundle
       uses: actions/upload-artifact@v3.1.0
       with:
-        name: app-release.aab
+        name: app-release-unsing.aab
         path: app/build/outputs/bundle/release/app-release.aab

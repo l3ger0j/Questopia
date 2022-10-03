@@ -1,5 +1,7 @@
 ## QuestPlayAndroid (fork **[QuestPlayer](https://github.com/seedhartha/QuestPlayer)**)
 
+![master](https://github.com/{your_github_acc_name}/{repository_name}/workflows/android/badge.svg)
+
 Android application for launching text format games [QSP](https://github.com/seedhartha/qsp).
 
 **This fork was made WhoYouAndM3. The original project (hereinafter **[QuestPlayer](https://github.com/seedhartha/QuestPlayer)**) with an no license does not bear any responsibility for this fork **[QuestPlayAndroid](https://github.com/l3ger0j/QuestPlayer.git)**.**
