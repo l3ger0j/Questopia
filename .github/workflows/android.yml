@@ -30,13 +30,11 @@ jobs:
         ./gradlew bundleRelease
 
     - name: Upload APK
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v3.1.0
       with:
           name: app-release.apk
-          path: app/build/outputs/apk/release/app-release-unsigned.apk
 
     - name: Upload AAB Bundle
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v3.1.0
       with:
         name: app-release.aab
-        path: app/build/outputs/bundle/release/app-release.aab
