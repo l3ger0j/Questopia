@@ -7,6 +7,9 @@
         <string name="promptCloseGame">Are you sure you want to close the game?</string>
     <!-- Dialog Select -->
         <string name="selectGameFile">Select a game file to run</string>
+    <!-- Dialog Edit -->
+        <string name="selectPathFile">Select the patch file in the format .qsp</string>
+        <string name="editButton">Edit</string>
     <!-- Dialog Error -->
         <string name="error">Error</string>
         <string name="gamesDirError">Unable to create or open games directory.</string>

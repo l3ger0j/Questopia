@@ -7,6 +7,9 @@
         <string name="promptCloseGame">Уверены, что хотите закрыть игру?</string>
     <!-- Dialog Select -->
         <string name="selectGameFile">Выберите файл игры для запуска</string>
+    <!-- Dialog Edit -->
+        <string name="selectPathFile">Выберите патч-файл в формате .qsp</string>
+        <string name="editButton">Изменить</string>
     <!-- Dialog Error -->
         <string name="error">Ошибка</string>
         <string name="gamesDirError">Невозможно создать или открыть папку с играми.</string>

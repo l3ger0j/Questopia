@@ -79,12 +79,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="@string/selectFileOrArchive"
+                android:text="@string/selectPathFile"
                 android:textAlignment="center"
                 android:textStyle="bold" />
 
             <Button
-                android:id="@+id/button2"
+                android:id="@+id/buttonSelectPath"
                 android:onClick="@{stockVM::sendIntent}"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -131,12 +131,12 @@
         </LinearLayout>
 
         <Button
-            android:id="@+id/installBT"
+            android:id="@+id/editBT"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:onClick="@{() -> stockVM.formingInstallIntent()}"
-            android:text="@string/add"
+            android:onClick="@{() -> stockVM.formingEditIntent()}"
+            android:text="@string/editButton"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.498"
             app:layout_constraintStart_toStartOf="parent"

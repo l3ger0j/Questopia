@@ -25,6 +25,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -35,6 +36,7 @@ import androidx.documentfile.provider.DocumentFile;
 import androidx.lifecycle.AndroidViewModel;
 
 import com.qsp.player.R;
+import com.qsp.player.databinding.DialogEditBinding;
 import com.qsp.player.databinding.DialogInstallBinding;
 import com.qsp.player.dto.stock.GameData;
 import com.qsp.player.model.install.InstallException;
@@ -57,9 +59,11 @@ public class GameStockActivityVM extends AndroidViewModel {
     private final HashMap<String, GameData> gamesMap = new HashMap<>();
 
     private File gamesDir;
-    private DocumentFile tempInstallFile, tempImageFile;
+    private DocumentFile tempInstallFile, tempImageFile, tempPathFile;
 
     private DialogInstallBinding installBinding;
+    private GameData tempGameData;
+    private DialogEditBinding editBinding;
 
     public ObservableField<GameStockActivity> activityObservableField = new
             ObservableField<>();
@@ -71,6 +75,11 @@ public class GameStockActivityVM extends AndroidViewModel {
     private AlertDialog dialog;
 
     // region Getter/Setter
+    public void setTempPathFile(DocumentFile tempPathFile) {
+        this.tempPathFile = tempPathFile;
+        editBinding.fileTV.setText(tempPathFile.getName());
+    }
+
     public void setTempInstallFile(@NonNull DocumentFile tempInstallFile) {
         this.tempInstallFile = tempInstallFile;
         installBinding.fileTV.setText(tempInstallFile.getName());
@@ -100,7 +109,7 @@ public class GameStockActivityVM extends AndroidViewModel {
 
     // region Dialog
     public void showDialogInstall() {
-       dialog = createAlertDialog(formingView());
+       dialog = createAlertDialog(formingInstallView());
        dialog.show();
        isShowDialog.set(true);
     }
@@ -110,15 +119,15 @@ public class GameStockActivityVM extends AndroidViewModel {
         try {
             gameData.id = removeExtension(Objects.requireNonNull(tempInstallFile.getName()));
             gameData.title = (Objects.requireNonNull(
-                    installBinding.installET0.getEditText()).getText().toString().isEmpty()?
+                    installBinding.ET0.getEditText()).getText().toString().isEmpty()?
                     removeExtension(Objects.requireNonNull(tempInstallFile.getName()))
                     : Objects.requireNonNull(
-                            installBinding.installET0.getEditText()).getText().toString());
+                            installBinding.ET0.getEditText()).getText().toString());
             gameData.author = (Objects.requireNonNull(
-                    installBinding.installET1.getEditText()).getText().toString().isEmpty()?
+                    installBinding.ET1.getEditText()).getText().toString().isEmpty()?
                     null
                     : Objects.requireNonNull(
-                            installBinding.installET1.getEditText()).getText().toString());
+                            installBinding.ET1.getEditText()).getText().toString());
             gameData.version = (Objects.requireNonNull(
                     installBinding.installET2.getEditText()).getText().toString().isEmpty()?
                     null
@@ -133,9 +142,47 @@ public class GameStockActivityVM extends AndroidViewModel {
         }
     }
 
+    public void showDialogEdit (GameData gameData) {
+        tempGameData = gameData;
+        dialog = createAlertDialog(formingEditView());
+        dialog.show();
+        isShowDialog.set(true);
+    }
+
+    public void formingEditIntent() {
+        try {
+            tempGameData.title = (Objects.requireNonNull(
+                    editBinding.ET0.getEditText()).getText().toString().isEmpty()?
+                    removeExtension(Objects.requireNonNull(tempGameData.title))
+                    : Objects.requireNonNull(
+                    editBinding.ET0.getEditText()).getText().toString());
+            tempGameData.author = (Objects.requireNonNull(
+                    editBinding.ET1.getEditText()).getText().toString().isEmpty()?
+                    null
+                    : Objects.requireNonNull(
+                    editBinding.ET1.getEditText()).getText().toString());
+            tempGameData.version = (Objects.requireNonNull(
+                    editBinding.installET2.getEditText()).getText().toString().isEmpty()?
+                    null
+                    : Objects.requireNonNull(
+                    editBinding.installET2.getEditText()).getText().toString());
+            tempGameData.icon = (tempImageFile == null ? null : tempImageFile.getUri().toString());
+            writeGameInfo(tempGameData, tempGameData.gameDir);
+            if (tempPathFile != null) {
+                Installer installer = new Installer(activityObservableField.get());
+                installer.copyFileOrDirectory(tempPathFile, tempGameData.gameDir);
+            }
+            refreshGamesDirectory();
+            isShowDialog.set(false);
+            dialog.dismiss();
+        } catch (NullPointerException ex) {
+            Log.e(TAG, "Error: ", ex);
+        }
+    }
+
     public void sendIntent(View view) {
         String action;
-        Intent intentInstall, intentGetImage;
+        Intent intentInstall, intentGetImage, intentSetPath;
         int id = view.getId();
         if (id == R.id.button2) {
             action = ACTION_OPEN_DOCUMENT;
@@ -163,16 +210,33 @@ public class GameStockActivityVM extends AndroidViewModel {
             } catch (ActivityNotFoundException e) {
                 Log.e(TAG , e.toString());
             }
+        } else if (id == R.id.buttonSelectPath) {
+            action = ACTION_OPEN_DOCUMENT;
+            intentSetPath = new Intent(action);
+            intentSetPath.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            intentSetPath.setType("application/octet-stream");
+            try {
+                Objects.requireNonNull(activityObservableField.get())
+                        .resultSetPath.launch(intentSetPath);
+            } catch (ActivityNotFoundException e) {
+                Log.e(TAG , e.toString());
+            }
         }
     }
 
     @NonNull
-    private View formingView() {
+    private View formingInstallView() {
         installBinding =
-                DialogInstallBinding.inflate(Objects.requireNonNull(activityObservableField.get())
-                        .getLayoutInflater());
+                DialogInstallBinding.inflate(LayoutInflater.from(activityObservableField.get()));
         installBinding.setStockVM(this);
         return installBinding.getRoot();
+    }
+
+    private View formingEditView() {
+        editBinding =
+                DialogEditBinding.inflate(LayoutInflater.from(activityObservableField.get()));
+        editBinding.setStockVM(this);
+        return editBinding.getRoot();
     }
 
     private AlertDialog createAlertDialog (View view) {
@@ -203,11 +267,11 @@ public class GameStockActivityVM extends AndroidViewModel {
                 String message = getApplication()
                         .getString(R.string.installError)
                         .replace("-GAMENAME-", gameData.title);
-                Objects.requireNonNull(activityObservableField.get()).onShowErrorDialog(message);
+                Objects.requireNonNull(activityObservableField.get()).showErrorDialog(message);
             } else if (ex.getMessage().equals("NFE")) {
                 String message = getApplication()
                         .getString(R.string.noGameFilesError);
-                Objects.requireNonNull(activityObservableField.get()).onShowErrorDialog(message);
+                Objects.requireNonNull(activityObservableField.get()).showErrorDialog(message);
             }
         }
     }

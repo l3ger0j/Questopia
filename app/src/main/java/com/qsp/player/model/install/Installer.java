@@ -75,7 +75,7 @@ public class Installer {
         postInstall(destDir);
     }
 
-    private void copyFileOrDirectory(DocumentFile srcFile, File destDir) {
+    public void copyFileOrDirectory(DocumentFile srcFile, File destDir) {
         if (srcFile.isDirectory()) {
             File subDestDir = getOrCreateDirectory(destDir, srcFile.getName());
             for (DocumentFile subSrcFile : srcFile.listFiles()) {

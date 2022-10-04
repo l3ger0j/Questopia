@@ -2,7 +2,6 @@ package com.qsp.player.view.activities;
 
 import static com.qsp.player.utils.FileUtil.deleteDirectory;
 import static com.qsp.player.utils.LanguageUtil.setLocale;
-import static com.qsp.player.utils.ViewUtil.showErrorDialog;
 
 import android.Manifest;
 import android.app.AlertDialog;
@@ -34,6 +33,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.qsp.player.R;
 import com.qsp.player.databinding.ActivityStockBinding;
 import com.qsp.player.dto.stock.GameData;
+import com.qsp.player.utils.ViewUtil;
 import com.qsp.player.view.adapters.SettingsAdapter;
 import com.qsp.player.view.fragments.FragmentLocal;
 import com.qsp.player.viewModel.viewModels.FragmentLocalVM;
@@ -47,6 +47,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class GameStockActivity extends AppCompatActivity {
     private final String TAG = this.getClass().getSimpleName();
@@ -62,7 +63,8 @@ public class GameStockActivity extends AppCompatActivity {
 
     private ActionMode actionMode;
     protected ActivityStockBinding activityStockBinding;
-    public ActivityResultLauncher<Intent> resultInstallLauncher, resultGetImageLauncher;
+    public ActivityResultLauncher<Intent>
+            resultInstallLauncher, resultGetImageLauncher, resultSetPath;
 
     private boolean isEnable = false;
 
@@ -161,6 +163,22 @@ public class GameStockActivity extends AppCompatActivity {
                 new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
                 1);
 
+        resultSetPath = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    Uri uri;
+                    DocumentFile file;
+                    if (result.getResultCode() == RESULT_OK) {
+                        if ((uri = Objects.requireNonNull(result.getData()).getData()) == null) {
+                            Log.e(TAG, "Archive or file is not selected");
+                        }
+                        file = DocumentFile.fromSingleUri(this, Objects.requireNonNull(uri));
+                        assert file != null;
+                        gameStockActivityVM.setTempPathFile(file);
+                    }
+                }
+        );
+
         resultInstallLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
@@ -210,7 +228,7 @@ public class GameStockActivity extends AppCompatActivity {
                     && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
             } else {
-                showErrorDialog(this , "Permission denied to read your External storage");
+                ViewUtil.showErrorDialog(this , "Permission denied to read your External storage");
             }
         }
     }
@@ -226,8 +244,8 @@ public class GameStockActivity extends AppCompatActivity {
         currentLanguage = settingsAdapter.language;
     }
 
-    public void onShowErrorDialog (String errorMessage) {
-        showErrorDialog(this, errorMessage);
+    public void showErrorDialog(String errorMessage) {
+        ViewUtil.showErrorDialog(this, errorMessage);
     }
 
     public void onItemClick(int position) {
@@ -274,13 +292,12 @@ public class GameStockActivity extends AppCompatActivity {
                 public boolean onActionItemClicked(ActionMode mode , MenuItem item) {
                     int itemId = item.getItemId();
                     if (itemId == R.id.delete_game) {
-                        for(GameData data : selectList)
-                        {
+                        for (GameData data : selectList) {
                             tempList.remove(data);
                             try {
                                 deleteDirectory(data.gameDir);
                             } catch (NullPointerException e) {
-                                Log.e(TAG,e.toString());
+                                Log.e(TAG , e.toString());
                             }
                             gameStockActivityVM.refreshGames();
                         }
@@ -310,10 +327,8 @@ public class GameStockActivity extends AppCompatActivity {
                         final RecyclerView.ViewHolder holder = mRecyclerView.getChildViewHolder(mRecyclerView.getChildAt(i));
                         holder.itemView.setBackgroundColor(Color.TRANSPARENT);
                     }
-
                     actionMode = null;
                     isEnable = false;
-
                     tempList.clear();
                     selectList.clear();
                     mFAB.show();
@@ -369,6 +384,11 @@ public class GameStockActivity extends AppCompatActivity {
                 .setTitle(gameData.title)
                 .setIcon(R.drawable.icon)
                 .setNegativeButton(getString(R.string.close), (dialog, which) -> dialog.cancel());
+
+        alertBuilder.setPositiveButton(getString(R.string.editButton), (dialog, which) -> {
+            dialog.cancel();
+            gameStockActivityVM.showDialogEdit(gameData);
+        });
 
         if (gameData.isInstalled()) {
             alertBuilder.setNeutralButton(getString(R.string.play), (dialog, which) -> playGame(gameData));

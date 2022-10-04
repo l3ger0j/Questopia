@@ -52,7 +52,6 @@ public class ArchiveUtil {
                                               File targetFolder) {
         assertNonUiThread();
         Map<Integer, String> fileNames = new HashMap<>();
-
         try (DocumentFileRandomInStream stream = new DocumentFileRandomInStream(context, uri);
              IInArchive inArchive = SevenZip.openInArchive(null, stream)) {
             int itemCount = inArchive.getNumberOfItems();
