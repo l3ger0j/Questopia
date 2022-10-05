@@ -1,8 +1,8 @@
 package com.qsp.player.utils;
 
-import android.util.Base64;
-
 import static android.util.Base64.DEFAULT;
+
+import android.util.Base64;
 
 import androidx.annotation.NonNull;
 

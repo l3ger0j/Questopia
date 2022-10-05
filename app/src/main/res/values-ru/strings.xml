@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Use in dialog/toast -->
+    <!-- Dialog LoadGamePopup -->
+        <string name="loadGamePopup">Файл сохранения не был найден в gameDir. Хотите ли вы вручную указать путь к файлу сохранения?</string>
     <!-- Dialog About -->
         <string name="description">Описание</string>
     <!-- Dialog Close -->

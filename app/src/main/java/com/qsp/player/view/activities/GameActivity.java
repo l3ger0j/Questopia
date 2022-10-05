@@ -835,6 +835,16 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
     }
 
     @Override
+    public void showLoadGamePopup() {
+        runOnUiThread(() -> new AlertDialog.Builder(this)
+                .setMessage(R.string.loadGamePopup)
+                .setPositiveButton(android.R.string.yes, (dialog, which) -> startReadOrWriteSave(LOAD))
+                .setNegativeButton(android.R.string.no, (dialog, which) -> { })
+                .setCancelable(false)
+                .create().show());
+    }
+
+    @Override
     public void showSaveGamePopup(String filename) {
         runOnUiThread(() -> mainMenu.performIdentifierAction(R.id.menu_savegame, 0));
     }

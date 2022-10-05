@@ -11,6 +11,7 @@ public interface GameInterface {
     void showMessage(String message);
     String showInputBox(String prompt);
     int showMenu();
+    void showLoadGamePopup();
     void showSaveGamePopup(String filename);
     void showWindow(WindowType type, boolean show);
 

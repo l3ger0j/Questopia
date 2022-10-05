@@ -1,5 +1,13 @@
 package com.qsp.player.model.libQSP;
 
+import static com.qsp.player.utils.FileUtil.findFileOrDirectory;
+import static com.qsp.player.utils.FileUtil.getFileContents;
+import static com.qsp.player.utils.FileUtil.getOrCreateDirectory;
+import static com.qsp.player.utils.StringUtil.getStringOrEmpty;
+import static com.qsp.player.utils.StringUtil.isNotEmpty;
+import static com.qsp.player.utils.ThreadUtil.isSameThread;
+import static com.qsp.player.utils.ThreadUtil.throwIfNotMainThread;
+
 import android.content.Context;
 import android.net.Uri;
 import android.os.Handler;
@@ -29,14 +37,6 @@ import java.util.ArrayList;
 import java.util.Locale;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static com.qsp.player.utils.FileUtil.findFileOrDirectory;
-import static com.qsp.player.utils.FileUtil.getFileContents;
-import static com.qsp.player.utils.FileUtil.getOrCreateDirectory;
-import static com.qsp.player.utils.StringUtil.getStringOrEmpty;
-import static com.qsp.player.utils.StringUtil.isNotEmpty;
-import static com.qsp.player.utils.ThreadUtil.isSameThread;
-import static com.qsp.player.utils.ThreadUtil.throwIfNotMainThread;
-
 public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
     private final String TAG = this.getClass().getSimpleName();
 
@@ -46,7 +46,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
 
     private Thread libQspThread;
     private volatile Handler libQspHandler;
-    private volatile boolean libQspThreadInited;
+    private volatile boolean libQspThreadInit;
     private volatile long gameStartTime;
     private volatile long lastMsCountCallTime;
     private GameInterface gameInterface;
@@ -77,7 +77,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
             Log.w(TAG,"libqsp thread has not been started");
             return;
         }
-        if (!libQspThreadInited) {
+        if (!libQspThreadInit) {
             Log.w(TAG,"libqsp thread has been started, but not initialized");
             return;
         }
@@ -214,7 +214,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
                     nativeMethods.QSPInit();
                     Looper.prepare();
                     libQspHandler = new Handler();
-                    libQspThreadInited = true;
+                    libQspThreadInit = true;
 
                     Looper.loop();
 
@@ -232,12 +232,12 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
 
         if (libQspThread == null) return;
 
-        if (libQspThreadInited) {
+        if (libQspThreadInit) {
             Handler handler = libQspHandler;
             if (handler != null) {
                 handler.getLooper().quitSafely();
             }
-            libQspThreadInited = false;
+            libQspThreadInit = false;
         } else {
             Log.w(TAG,"libqsp thread has been started, but not initialized");
         }
@@ -477,13 +477,14 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
 
     @Override
     public void OpenGame(String filename) {
+        GameInterface inter = gameInterface;
         File savesDir = getOrCreateDirectory(gameState.gameDir, "saves");
         File saveFile = findFileOrDirectory(savesDir, filename);
-        if (saveFile == null) {
+        if (saveFile == null && inter != null) {
             Log.e(TAG,"Save file not found: " + filename);
+            inter.showLoadGamePopup();
             return;
         }
-        GameInterface inter = gameInterface;
         if (inter != null) {
             inter.doWithCounterDisabled(() -> loadGameState(Uri.fromFile(saveFile)));
         }
