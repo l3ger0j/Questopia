@@ -91,7 +91,7 @@ public class GameActivityVM extends AndroidViewModel {
                     String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
                     InputStream in = getApplication().getContentResolver().openInputStream(Uri.fromFile(file));
                     return new WebResourceResponse(mimeType, null, in);
-                } catch (FileNotFoundException ex) {
+                } catch (FileNotFoundException | NullPointerException ex) {
                     Log.e(TAG,"File not found" , ex);
                     return null;
                 }
