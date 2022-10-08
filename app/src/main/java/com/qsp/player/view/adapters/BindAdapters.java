@@ -1,6 +1,7 @@
 package com.qsp.player.view.adapters;
 
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -11,6 +12,7 @@ import androidx.core.content.res.ResourcesCompat;
 import androidx.databinding.BindingAdapter;
 
 import com.qsp.player.R;
+import com.qsp.player.model.service.ImageProvider;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
@@ -35,6 +37,7 @@ public class BindAdapters {
         } else {
             Picasso.get()
                     .load(new File(imageUrl))
+                    .error(new ImageProvider().getOld(imageUrl))
                     .into(view);
         }
     }

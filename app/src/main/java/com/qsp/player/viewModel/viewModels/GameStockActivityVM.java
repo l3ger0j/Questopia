@@ -1,9 +1,7 @@
 package com.qsp.player.viewModel.viewModels;
 
-import static android.content.Context.NOTIFICATION_SERVICE;
 import static android.content.Intent.ACTION_OPEN_DOCUMENT;
 import static android.content.Intent.EXTRA_MIME_TYPES;
-import static com.qsp.player.utils.ArchiveUtil.progress;
 import static com.qsp.player.utils.FileUtil.GAME_INFO_FILENAME;
 import static com.qsp.player.utils.FileUtil.createFile;
 import static com.qsp.player.utils.FileUtil.findFileOrDirectory;
@@ -16,20 +14,13 @@ import static com.qsp.player.utils.XmlUtil.objectToXml;
 
 import android.app.AlertDialog;
 import android.app.Application;
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.ActivityNotFoundException;
-import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 
 import androidx.annotation.NonNull;
-import androidx.core.app.NotificationCompat;
 import androidx.databinding.ObservableBoolean;
 import androidx.databinding.ObservableField;
 import androidx.documentfile.provider.DocumentFile;
@@ -68,10 +59,6 @@ public class GameStockActivityVM extends AndroidViewModel {
     public ObservableField<GameStockActivity> activityObservableField = new
             ObservableField<>();
     public ObservableBoolean isShowDialog = new ObservableBoolean();
-
-    private NotificationCompat.Builder builder;
-    private NotificationManager notificationManager;
-
     private AlertDialog dialog;
 
     // region Getter/Setter
@@ -282,20 +269,11 @@ public class GameStockActivityVM extends AndroidViewModel {
             Log.e(TAG, "Games directory is not writable");
             return;
         }
-        notificationBuilder(gameFile);
         Installer installer = new Installer(activityObservableField.get());
-        progress.observeForever(aLong -> {
-            builder.setProgress((int) gameFile.length() , Math.toIntExact(aLong), false)
-                    .setContentText(aLong + " of " + gameFile.length());
-            notificationManager.notify(1, builder.build());
-        });
         installer.gameInstall(gameFile, gameDir).observeForever(aBoolean -> {
             if (aBoolean) {
                 writeGameInfo(gameData , gameDir);
                 refreshGames();
-                builder.setProgress(0, (int) gameFile.length(), false)
-                        .setContentText("Completed");
-                notificationManager.notify(1, builder.build());
             }
         });
         isShowDialog.set(false);
@@ -318,45 +296,6 @@ public class GameStockActivityVM extends AndroidViewModel {
         }
     }
     // endregion Game install
-
-    private void notificationBuilder (DocumentFile gameFile) {
-        Intent resultIntent = new Intent(getApplication(), GameStockActivity.class);
-        PendingIntent resultPendingIntent;
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-            resultPendingIntent = PendingIntent.getActivity(getApplication(), 0, resultIntent, PendingIntent.FLAG_IMMUTABLE);
-        } else {
-            resultPendingIntent = PendingIntent.getActivity(getApplication(), 0, resultIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            int importance = NotificationManager.IMPORTANCE_DEFAULT;
-            NotificationChannel channel = new NotificationChannel("qsp" , "QSP Channel" , importance);
-            channel.setDescription("Reminders");
-            notificationManager =
-                    (NotificationManager) getApplication().getSystemService(Context.NOTIFICATION_SERVICE);
-            notificationManager.createNotificationChannel(channel);
-            builder =
-                    new NotificationCompat.Builder(getApplication(), "myChannelId")
-                            .setSmallIcon(R.drawable.download)
-                            .setContentTitle("Install")
-                            .setProgress((int) gameFile.length(), 0, true)
-                            .setContentIntent(resultPendingIntent);
-            notificationManager =
-                    (NotificationManager) getApplication().getSystemService(Context.NOTIFICATION_SERVICE);
-            notificationManager.notify(1, builder.build());
-        } else {
-            builder =
-                    new NotificationCompat.Builder(Objects.requireNonNull(activityObservableField.get()))
-                            .setSmallIcon(R.drawable.download)
-                            .setContentTitle("Install")
-                            .setProgress((int) gameFile.length(), 0, true)
-                            .setContentIntent(resultPendingIntent);
-            Notification notification = builder.build();
-            notificationManager =
-                    (NotificationManager) getApplication().getSystemService(NOTIFICATION_SERVICE);
-            notificationManager.notify(1, notification);
-        }
-    }
 
     // region Refresh
     public void refreshGamesDirectory() {

@@ -5,8 +5,8 @@ import android.util.Log;
 import java.io.File;
 import java.util.Objects;
 
-public final class GameDirUtil {
-    private static final String TAG = GameDirUtil.class.getSimpleName();
+public final class DirUtil {
+    private static final String TAG = DirUtil.class.getSimpleName();
 
     /**
      * If there is only one folder in the folder and nothing else,

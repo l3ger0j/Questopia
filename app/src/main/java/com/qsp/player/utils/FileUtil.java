@@ -15,8 +15,7 @@ import java.util.Objects;
 
 public final class FileUtil {
     private static final String TAG = FileUtil.class.getSimpleName();
-
-    public static final String GAME_INFO_FILENAME = "gamestockInfo";
+    public static final String GAME_INFO_FILENAME = "gameStockInfo";
 
     public static boolean isWritableFile(File file) {
         return file != null && file.exists() && file.canWrite();

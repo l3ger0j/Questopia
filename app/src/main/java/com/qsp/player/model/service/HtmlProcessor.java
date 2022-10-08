@@ -96,8 +96,12 @@ public class HtmlProcessor {
         String relPath = img.attr("src");
         String absPath = gameContentResolver.getAbsolutePath(relPath);
 
-        Drawable drawable = imageProvider.get(absPath);
-        if (drawable == null) return false;
+        Drawable drawable;
+        drawable = imageProvider.get(absPath);
+        if (drawable == null) {
+            drawable = imageProvider.getOld(absPath);
+            if (drawable == null) return false;
+        }
 
         return drawable.getIntrinsicWidth() > IMAGE_WIDTH_THRESHOLD;
     }

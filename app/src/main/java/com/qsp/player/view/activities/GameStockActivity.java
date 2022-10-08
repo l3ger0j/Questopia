@@ -47,7 +47,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class GameStockActivity extends AppCompatActivity {
     private final String TAG = this.getClass().getSimpleName();
