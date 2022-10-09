@@ -4,6 +4,7 @@ import static com.qsp.player.utils.Base64Util.encodeBase64;
 import static com.qsp.player.utils.StringUtil.isNotEmpty;
 import static com.qsp.player.utils.StringUtil.isNullOrEmpty;
 
+import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.util.Base64;
 import android.util.Log;
@@ -20,8 +21,6 @@ import java.util.regex.Pattern;
 
 public class HtmlProcessor {
     private final String TAG = this.getClass().getSimpleName();
-    private static final int IMAGE_WIDTH_THRESHOLD = 400;
-
     private static final Pattern execPattern = Pattern.compile("href=\"exec:([\\s\\S]*?)\"", Pattern.CASE_INSENSITIVE);
 
     private final GameContentResolver gameContentResolver;
@@ -103,7 +102,8 @@ public class HtmlProcessor {
             if (drawable == null) return false;
         }
 
-        return drawable.getIntrinsicWidth() > IMAGE_WIDTH_THRESHOLD;
+        return drawable.getIntrinsicWidth() > Resources.getSystem()
+                .getDisplayMetrics().widthPixels;
     }
 
     private void processHTMLVideos(Element documentBody) {
