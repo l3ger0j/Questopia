@@ -39,6 +39,8 @@ import com.qsp.player.view.fragments.FragmentLocal;
 import com.qsp.player.viewModel.viewModels.FragmentLocalVM;
 import com.qsp.player.viewModel.viewModels.GameStockActivityVM;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -47,6 +49,16 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Objects;
+
+import io.appwrite.Client;
+import io.appwrite.exceptions.AppwriteException;
+import io.appwrite.extensions.JsonExtensionsKt;
+import io.appwrite.models.Session;
+import io.appwrite.services.Account;
+import kotlin.Result;
+import kotlin.coroutines.Continuation;
+import kotlin.coroutines.CoroutineContext;
+import kotlin.coroutines.EmptyCoroutineContext;
 
 public class GameStockActivity extends AppCompatActivity {
     private final String TAG = this.getClass().getSimpleName();
@@ -120,6 +132,12 @@ public class GameStockActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        try {
+            startAnalytic();
+        } catch (Exception ex) {
+            Log.e(TAG, "Error: ", ex);
+        }
 
         activityStockBinding = ActivityStockBinding.inflate(getLayoutInflater());
         mFAB = activityStockBinding.floatingActionButton;
@@ -217,6 +235,42 @@ public class GameStockActivity extends AppCompatActivity {
         Log.i(TAG,"GameStockActivity created");
 
         setContentView(activityStockBinding.getRoot());
+    }
+
+    private void startAnalytic () {
+        Client client = new Client(getApplicationContext())
+                .setEndpoint("ENDPOINT-IP")
+                .setProject("PROJECT-ID");
+
+        Account account = new Account(client);
+
+        try {
+            account.createAnonymousSession(new Continuation<Session>() {
+                @NotNull
+                @Override
+                public CoroutineContext getContext() {
+                    return EmptyCoroutineContext.INSTANCE;
+                }
+
+                @Override
+                public void resumeWith(@NotNull Object o) {
+                    try {
+                        if (o instanceof Result.Failure) {
+                            Result.Failure failure = (Result.Failure) o;
+                            throw failure.exception;
+                        } else {
+                            Session session = (Session) o;
+                            Log.d("RESPONSE", JsonExtensionsKt.toJson(session));
+                        }
+                    } catch (Throwable th) {
+                        Log.e("ERROR", th.toString());
+                    }
+                }
+            });
+        } catch (AppwriteException e) {
+            e.printStackTrace();
+        }
+
     }
 
     @Override

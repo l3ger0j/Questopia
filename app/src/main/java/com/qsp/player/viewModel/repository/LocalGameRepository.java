@@ -2,7 +2,6 @@ package com.qsp.player.viewModel.repository;
 
 import static com.qsp.player.utils.FileUtil.GAME_INFO_FILENAME;
 import static com.qsp.player.utils.FileUtil.createFile;
-import static com.qsp.player.utils.FileUtil.findFileOrDirectory;
 import static com.qsp.player.utils.FileUtil.readFileAsString;
 import static com.qsp.player.utils.PathUtil.removeExtension;
 import static com.qsp.player.utils.XmlUtil.objectToXml;
@@ -18,7 +17,6 @@ import com.qsp.player.dto.stock.GameData;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
