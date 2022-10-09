@@ -97,10 +97,7 @@ public class HtmlProcessor {
 
         Drawable drawable;
         drawable = imageProvider.get(absPath);
-        if (drawable == null) {
-            drawable = imageProvider.getOld(absPath);
-            if (drawable == null) return false;
-        }
+        if (drawable == null) return false;
 
         return drawable.getIntrinsicWidth() > Resources.getSystem()
                 .getDisplayMetrics().widthPixels;
