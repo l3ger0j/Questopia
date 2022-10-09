@@ -109,7 +109,7 @@ public class GameStockActivityVM extends AndroidViewModel {
        isShowDialog.set(true);
     }
 
-    public void formingInstallIntent() {
+    public void createInstallIntent() {
         GameData gameData = new GameData();
         try {
             gameData.id = removeExtension(Objects.requireNonNull(tempInstallFile.getName()));
@@ -144,24 +144,25 @@ public class GameStockActivityVM extends AndroidViewModel {
         isShowDialog.set(true);
     }
 
-    public void formingEditIntent() {
+    public void createEditIntent() {
         try {
             tempGameData.title = (Objects.requireNonNull(
                     editBinding.ET0.getEditText()).getText().toString().isEmpty()?
-                    removeExtension(Objects.requireNonNull(tempGameData.title))
+                    removeExtension(tempGameData.title)
                     : Objects.requireNonNull(
                     editBinding.ET0.getEditText()).getText().toString());
             tempGameData.author = (Objects.requireNonNull(
                     editBinding.ET1.getEditText()).getText().toString().isEmpty()?
-                    null
+                    removeExtension(tempGameData.author)
                     : Objects.requireNonNull(
                     editBinding.ET1.getEditText()).getText().toString());
             tempGameData.version = (Objects.requireNonNull(
                     editBinding.installET2.getEditText()).getText().toString().isEmpty()?
-                    null
+                    removeExtension(tempGameData.version)
                     : Objects.requireNonNull(
                     editBinding.installET2.getEditText()).getText().toString());
-            tempGameData.icon = (tempImageFile == null ? null : tempImageFile.getUri().toString());
+            tempGameData.icon = (tempImageFile == null ? tempGameData.icon
+                    : tempImageFile.getUri().toString());
             writeGameInfo(tempGameData, tempGameData.gameDir);
             if (tempPathFile != null) {
                 Installer installer = new Installer(activityObservableField.get());
