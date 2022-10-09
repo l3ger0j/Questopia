@@ -270,7 +270,6 @@ public class GameStockActivity extends AppCompatActivity {
         } catch (AppwriteException e) {
             e.printStackTrace();
         }
-
     }
 
     @Override
