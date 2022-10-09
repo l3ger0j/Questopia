@@ -1,10 +1,7 @@
 package com.qsp.player.viewModel.repository;
 
 import static com.qsp.player.utils.FileUtil.GAME_INFO_FILENAME;
-import static com.qsp.player.utils.FileUtil.createFile;
 import static com.qsp.player.utils.FileUtil.readFileAsString;
-import static com.qsp.player.utils.PathUtil.removeExtension;
-import static com.qsp.player.utils.XmlUtil.objectToXml;
 import static com.qsp.player.utils.XmlUtil.xmlToObject;
 
 import android.os.Build;
@@ -16,8 +13,6 @@ import androidx.annotation.Nullable;
 import com.qsp.player.dto.stock.GameData;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -109,22 +104,12 @@ public class LocalGameRepository {
 
     @Nullable
     private String getGameInfo(GameFolder game) {
-        File[] gameInfoFiles = game.dir.listFiles(
-                (dir, name) -> name.equalsIgnoreCase(GAME_INFO_FILENAME));
+        File[] gameInfoFiles = game.dir.listFiles((dir, name) -> name.equalsIgnoreCase(GAME_INFO_FILENAME));
         if (gameInfoFiles == null || gameInfoFiles.length == 0) {
-            File infoFile = createFile(game.dir, GAME_INFO_FILENAME);
-            GameData gameData = new GameData();
-            gameData.id = removeExtension(game.dir.getName());
-            gameData.title = removeExtension(game.dir.getName());
-            try (FileOutputStream out = new FileOutputStream(infoFile);
-                 OutputStreamWriter writer = new OutputStreamWriter(out)) {
-                writer.write(objectToXml(gameData));
-            } catch (Exception ex) {
-                Log.e(TAG,"Failed to write to a gameData info file", ex);
-            }
+            Log.w(TAG, "GameData info file not found in " + game.dir.getName());
+            return null;
         }
-
-        return readFileAsString(gameInfoFiles != null ? gameInfoFiles[0] : null);
+        return readFileAsString(gameInfoFiles[0]);
     }
 
     @Nullable

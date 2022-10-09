@@ -12,7 +12,6 @@ import static com.qsp.player.utils.PathUtil.normalizeFolderName;
 import static com.qsp.player.utils.PathUtil.removeExtension;
 import static com.qsp.player.utils.XmlUtil.objectToXml;
 
-import android.app.AlertDialog;
 import android.app.Application;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
@@ -26,6 +25,7 @@ import androidx.databinding.ObservableField;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.lifecycle.AndroidViewModel;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.qsp.player.R;
 import com.qsp.player.databinding.DialogEditBinding;
 import com.qsp.player.databinding.DialogInstallBinding;
@@ -46,6 +46,10 @@ import java.util.Objects;
 public class GameStockActivityVM extends AndroidViewModel {
     private final String TAG = this.getClass().getSimpleName();
 
+    public ObservableField<GameStockActivity> activityObservableField = new
+            ObservableField<>();
+    public ObservableBoolean isShowDialog = new ObservableBoolean();
+
     private final LocalGameRepository localGameRepository = new LocalGameRepository();
     private final HashMap<String, GameData> gamesMap = new HashMap<>();
 
@@ -55,11 +59,7 @@ public class GameStockActivityVM extends AndroidViewModel {
     private DialogInstallBinding installBinding;
     private GameData tempGameData;
     private DialogEditBinding editBinding;
-
-    public ObservableField<GameStockActivity> activityObservableField = new
-            ObservableField<>();
-    public ObservableBoolean isShowDialog = new ObservableBoolean();
-    private AlertDialog dialog;
+    private androidx.appcompat.app.AlertDialog dialog;
 
     // region Getter/Setter
     public void setTempPathFile(DocumentFile tempPathFile) {
@@ -74,11 +74,19 @@ public class GameStockActivityVM extends AndroidViewModel {
 
     public void setTempImageFile(@NonNull DocumentFile tempImageFile) {
         this.tempImageFile = tempImageFile;
-        installBinding.imageTV.setText(tempImageFile.getName());
-        Picasso.get()
-                .load(tempImageFile.getUri())
-                .fit()
-                .into(installBinding.imageView);
+        if (installBinding != null) {
+            installBinding.imageTV.setText(tempImageFile.getName());
+            Picasso.get()
+                    .load(tempImageFile.getUri())
+                    .fit()
+                    .into(installBinding.imageView);
+        } else {
+            editBinding.imageTV.setText(tempImageFile.getName());
+            Picasso.get()
+                    .load(tempImageFile.getUri())
+                    .fit()
+                    .into(editBinding.imageView);
+        }
     }
 
     public void setGamesDir(File gamesDir) {
@@ -226,8 +234,8 @@ public class GameStockActivityVM extends AndroidViewModel {
         return editBinding.getRoot();
     }
 
-    private AlertDialog createAlertDialog (View view) {
-        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(activityObservableField.get());
+    private androidx.appcompat.app.AlertDialog createAlertDialog (View view) {
+        MaterialAlertDialogBuilder dialogBuilder = new MaterialAlertDialogBuilder(Objects.requireNonNull(activityObservableField.get()));
         dialogBuilder.setOnCancelListener(dialogInterface -> isShowDialog.set(false));
         dialogBuilder.setView(view);
         return dialogBuilder.create();
