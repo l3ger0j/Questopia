@@ -12,6 +12,7 @@
 #   public *;
 #}
 
+-keep class com.qsp.player.dto.libQSP.** { *; }
 -keep class net.sf.sevenzipjbinding.** { *; }
 -keep class com.qsp.player.model.libQSP.** { *; }
 
