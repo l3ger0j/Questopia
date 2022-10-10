@@ -6,6 +6,7 @@ import static com.qsp.player.utils.PathUtil.getExtension;
 
 import android.app.Application;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.preference.PreferenceManager;
@@ -70,11 +71,20 @@ public class GameActivityVM extends AndroidViewModel {
                                                 @NonNull final String href) {
             String uriDecode = Uri.decode(href);
             if (href.toLowerCase().startsWith("exec:")) {
+                Log.d(TAG, decodeBase64(uriDecode));
                 try {
                     libQspProxy.execute(decodeBase64(uriDecode.substring(5)));
                 } catch (IllegalArgumentException exception) {
                     libQspProxy.execute(uriDecode.substring(5));
                 }
+            } else if (href.toLowerCase().startsWith("https:")) {
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(uriDecode));
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                getApplication().startActivity(intent);
+            } else if (href.toLowerCase().startsWith("http:")) {
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(uriDecode));
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                getApplication().startActivity(intent);
             }
             return true;
         }
