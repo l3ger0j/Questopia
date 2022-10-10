@@ -9,7 +9,6 @@ import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
-import androidx.lifecycle.MutableLiveData;
 
 import net.sf.sevenzipjbinding.ExtractAskMode;
 import net.sf.sevenzipjbinding.ExtractOperationResult;
@@ -35,7 +34,6 @@ import java.util.Objects;
 import java.util.Set;
 
 public class ArchiveUtil {
-    public static final MutableLiveData<Long> progress = new MutableLiveData<>();
     private static final String TAG = ArchiveUtil.class.getSimpleName();
 
     @NonNull
@@ -246,7 +244,6 @@ public class ArchiveUtil {
 
         @Override
         public void setCompleted(long complete) {
-            progress.postValue(complete);
             Log.v(TAG, String.format("Extract archive, work completed: %s", complete));
         }
     }

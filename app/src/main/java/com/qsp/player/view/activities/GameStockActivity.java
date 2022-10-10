@@ -202,6 +202,9 @@ public class GameStockActivity extends AppCompatActivity {
                         if ((uri = Objects.requireNonNull(result.getData()).getData()) == null) {
                             Log.e(TAG, "Archive or file is not selected");
                         }
+                        getContentResolver().takePersistableUriPermission(uri,
+                                Intent.FLAG_GRANT_READ_URI_PERMISSION
+                                | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
                         assert uri != null;
                         file = DocumentFile.fromSingleUri(this, uri);
                         assert file != null;
