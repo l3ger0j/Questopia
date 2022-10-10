@@ -1,10 +1,10 @@
 package com.qsp.player.model.install;
 
 import static com.qsp.player.utils.ArchiveUtil.extractArchiveEntries;
-import static com.qsp.player.utils.FileUtil.createFile;
-import static com.qsp.player.utils.FileUtil.getOrCreateDirectory;
 import static com.qsp.player.utils.DirUtil.doesDirectoryContainGameFiles;
 import static com.qsp.player.utils.DirUtil.normalizeGameDirectory;
+import static com.qsp.player.utils.FileUtil.createFile;
+import static com.qsp.player.utils.FileUtil.getOrCreateDirectory;
 
 import android.content.Context;
 

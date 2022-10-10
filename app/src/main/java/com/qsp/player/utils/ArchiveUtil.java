@@ -38,6 +38,7 @@ public class ArchiveUtil {
     public static final MutableLiveData<Long> progress = new MutableLiveData<>();
     private static final String TAG = ArchiveUtil.class.getSimpleName();
 
+    @NonNull
     public static int[] getPrimitiveLongArrayFromInt(Set<Integer> input) {
         int[] ret = new int[input.size()];
         Iterator<Integer> iterator = input.iterator();

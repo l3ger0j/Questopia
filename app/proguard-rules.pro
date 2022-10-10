@@ -12,6 +12,9 @@
 #   public *;
 #}
 
+-keep class net.sf.sevenzipjbinding.** { *; }
+-keep class com.qsp.player.model.libQSP.** { *; }
+
 # Uncomment this to preserve the line number information for
 # debugging stack traces.
 #-keepattributes SourceFile,LineNumberTable
