@@ -1,9 +1,11 @@
 package com.qsp.player.view.adapters;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 
 import androidx.annotation.NonNull;
+import androidx.preference.PreferenceManager;
 
 public class SettingsAdapter {
     public int typeface;
@@ -19,8 +21,22 @@ public class SettingsAdapter {
     public boolean useAutoscroll;
     public String language;
 
+    private static SettingsAdapter INSTANCE;
+
+    public static SettingsAdapter newInstance() {
+        if (INSTANCE == null) {
+            INSTANCE = new SettingsAdapter();
+        }
+        return INSTANCE;
+    }
+
+    public SettingsAdapter loadSettings(Context context) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        return from(preferences);
+    }
+
     @NonNull
-    public static SettingsAdapter from(@NonNull SharedPreferences preferences) {
+    private static SettingsAdapter from(@NonNull SharedPreferences preferences) {
         SettingsAdapter settingsAdapter = new SettingsAdapter();
         settingsAdapter.typeface = Integer.parseInt(preferences.getString("typeface", "0"));
         settingsAdapter.fontSize = Integer.parseInt(preferences.getString("fontSize", "16"));

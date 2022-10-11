@@ -4,11 +4,9 @@ import static com.qsp.player.utils.ColorUtil.getHexColor;
 import static com.qsp.player.utils.ViewUtil.getFontStyle;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 
 import androidx.databinding.ObservableField;
 import androidx.lifecycle.ViewModel;
-import androidx.preference.PreferenceManager;
 
 import com.qsp.player.R;
 import com.qsp.player.view.activities.SettingsActivity;
@@ -27,11 +25,6 @@ public class SettingsActivityVM extends ViewModel {
 
     public ObservableField<SettingsActivity> settingsActivityObservableField =
             new ObservableField<>();
-
-    public SettingsAdapter loadSettings(Context context) {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        return SettingsAdapter.from(preferences);
-    }
 
     public String formationAboutDesc(SettingsAdapter settingsAdapter, Context context) {
         return ABOUT_TEMPLATE

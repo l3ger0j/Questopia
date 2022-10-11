@@ -6,7 +6,6 @@ import static com.qsp.player.utils.LanguageUtil.setLocale;
 import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.Uri;
@@ -26,7 +25,6 @@ import androidx.appcompat.view.ActionMode;
 import androidx.core.app.ActivityCompat;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -235,8 +233,7 @@ public class GameStockActivity extends AppCompatActivity {
     }
 
     private void loadSettings() {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        settingsAdapter = SettingsAdapter.from(preferences);
+        settingsAdapter = SettingsAdapter.newInstance().loadSettings(this);
     }
 
     private void loadLocale() {

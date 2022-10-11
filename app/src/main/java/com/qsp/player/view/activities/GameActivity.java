@@ -181,7 +181,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
         gameActivityVM = new ViewModelProvider(this).get(GameActivityVM.class);
         activityGameBinding.setGameViewModel(gameActivityVM);
         gameActivityVM.gameActivityObservableField.set(this);
-        settingsAdapter = gameActivityVM.loadSettings(this);
+        settingsAdapter = SettingsAdapter.newInstance().loadSettings(this);
 
         setContentView(activityGameBinding.getRoot());
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
@@ -417,7 +417,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
     public void onResume() {
         super.onResume();
 
-        settingsAdapter = gameActivityVM.loadSettings(this);
+        settingsAdapter = SettingsAdapter.newInstance().loadSettings(this);
         updateLocale();
         applySettings();
 

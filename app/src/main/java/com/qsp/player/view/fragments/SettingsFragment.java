@@ -17,16 +17,19 @@ import java.util.Objects;
 public class SettingsFragment extends PreferenceFragmentCompat
         implements SharedPreferences.OnSharedPreferenceChangeListener {
 
-    private final String desc;
-
-    public SettingsFragment(String desc) {
-        this.desc = desc;
+    public static SettingsFragment newInstance(String desc) {
+        Bundle args = new Bundle();
+        args.putString("desc", desc);
+        SettingsFragment fragment = new SettingsFragment();
+        fragment.setArguments(args);
+        return fragment;
     }
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         requireActivity().setTitle(R.string.settingsTitle);
         addPreferencesFromResource(R.xml.settings);
+        String desc = requireArguments().getString("desc");
 
         Preference button = findPreference("showAbout");
         if (button != null) {

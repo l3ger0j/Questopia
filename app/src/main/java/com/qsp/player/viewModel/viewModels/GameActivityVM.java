@@ -7,9 +7,7 @@ import static com.qsp.player.utils.PathUtil.getExtension;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.Uri;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
 import android.webkit.WebResourceRequest;
@@ -108,11 +106,6 @@ public class GameActivityVM extends AndroidViewModel {
             }
             return super.shouldInterceptRequest(view , request);
         }
-    }
-
-    public SettingsAdapter loadSettings(Context context) {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        return SettingsAdapter.from(preferences);
     }
 
     public String loadLocale(Context context, SettingsAdapter settingsAdapter) {
