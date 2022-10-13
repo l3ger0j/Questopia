@@ -410,16 +410,6 @@ void QSPSelectMenuItem(int index)
 /* ------------------------------------------------------------ */
 /* Управление игрой */
 
-/* Загрузка новой игры из файла */
-QSP_BOOL QSPLoadGameWorld(const QSP_CHAR *fileName)
-{
-	if (qspIsExitOnError && qspErrorNum) return QSP_FALSE;
-	qspResetError();
-	if (qspIsDisableCodeExec) return QSP_FALSE;
-	qspOpenQuest((QSP_CHAR *)fileName, QSP_FALSE);
-	if (qspErrorNum) return QSP_FALSE;
-	return QSP_TRUE;
-}
 /* Загрузка новой игры из памяти */
 QSP_BOOL QSPLoadGameWorldFromData(const char *data, int dataSize, const QSP_CHAR *fileName)
 {
@@ -433,17 +423,6 @@ QSP_BOOL QSPLoadGameWorldFromData(const char *data, int dataSize, const QSP_CHAR
 	qspOpenQuestFromData(ptr, dataSize + 3, (QSP_CHAR *)fileName, QSP_FALSE);
 	free(ptr);
 	if (qspErrorNum) return QSP_FALSE;
-	return QSP_TRUE;
-}
-/* Сохранение состояния в файл */
-QSP_BOOL QSPSaveGame(const QSP_CHAR *fileName, QSP_BOOL isRefresh)
-{
-	if (qspIsExitOnError && qspErrorNum) return QSP_FALSE;
-	qspPrepareExecution();
-	if (qspIsDisableCodeExec) return QSP_FALSE;
-	qspSaveGameStatus((QSP_CHAR *)fileName);
-	if (qspErrorNum) return QSP_FALSE;
-	if (isRefresh) qspCallRefreshInt(QSP_FALSE);
 	return QSP_TRUE;
 }
 /* Сохранение состояния в память */
@@ -471,17 +450,6 @@ QSP_BOOL QSPSaveGameAsData(void **buf, int *realSize, QSP_BOOL isRefresh)
 
 	memcpy(*buf, data, size);
 	free(data);
-	if (isRefresh) qspCallRefreshInt(QSP_FALSE);
-	return QSP_TRUE;
-}
-/* Загрузка состояния из файла */
-QSP_BOOL QSPOpenSavedGame(const QSP_CHAR *fileName, QSP_BOOL isRefresh)
-{
-	if (qspIsExitOnError && qspErrorNum) return QSP_FALSE;
-	qspPrepareExecution();
-	if (qspIsDisableCodeExec) return QSP_FALSE;
-	qspOpenGameStatus((QSP_CHAR *)fileName);
-	if (qspErrorNum) return QSP_FALSE;
 	if (isRefresh) qspCallRefreshInt(QSP_FALSE);
 	return QSP_TRUE;
 }

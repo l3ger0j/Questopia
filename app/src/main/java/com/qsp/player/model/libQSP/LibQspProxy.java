@@ -17,10 +17,15 @@ public interface LibQspProxy {
      */
     void stop();
 
+    void enableDebugMode (boolean isDebug);
+
     void runGame(String id, String title, File dir, File file);
     void restartGame();
     void loadGameState(Uri uri);
     void saveGameState(Uri uri);
+
+    byte[] getSaveGameState();
+    void loadGameStateAsArray(byte[] saveData);
 
     void onActionSelected(int index);
     void onActionClicked(int index);

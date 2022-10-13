@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Locale;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -244,6 +245,10 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
         libQspThread = null;
     }
 
+    public void enableDebugMode (boolean isDebug) {
+        runOnQspThread(() -> nativeMethods.QSPEnableDebugMode(isDebug));
+    }
+
     @Override
     public void runGame(final String id, final String title, final File dir, final File file) {
         runOnQspThread(() -> doRunGame(id, title, dir, file));
@@ -293,6 +298,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
             try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
                 StreamUtil.copy(in, out);
                 gameData = out.toByteArray();
+                Log.d(TAG, Arrays.toString(gameData));
             }
         } catch (IOException ex) {
             Log.e(TAG,"Failed to load game state", ex);
@@ -302,6 +308,28 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
         if (!nativeMethods.QSPOpenSavedGameFromData(gameData, gameData.length, true)) {
             showLastQspError();
         }
+    }
+
+    private static byte[] tempByteArray;
+    public void loadGameStateAsArray(byte[] saveData) {
+        if (!isSameThread(libQspHandler.getLooper().getThread())) {
+            runOnQspThread(() -> loadGameStateAsArray(saveData));
+            return;
+        }
+        if (saveData == null) {
+            if (!nativeMethods.QSPOpenSavedGameFromData(tempByteArray, tempByteArray.length, false)) {
+                showLastQspError();
+            }
+        } else {
+            if (!nativeMethods.QSPOpenSavedGameFromData(saveData, saveData.length, false)) {
+                showLastQspError();
+            }
+        }
+    }
+
+    public byte[] getSaveGameState() {
+        runOnQspThread(() -> tempByteArray = nativeMethods.QSPSaveGameAsData(false));
+        return tempByteArray;
     }
 
     @Override

@@ -39,8 +39,7 @@ void Java_com_qsp_player_model_libQSP_NativeMethods_QSPEnableDebugMode(JNIEnv *e
     QSPEnableDebugMode((QSP_BOOL) isDebug);
 }
 
-jobject
-Java_com_qsp_player_model_libQSP_NativeMethods_QSPGetCurStateData(JNIEnv *env,
+jobject Java_com_qsp_player_model_libQSP_NativeMethods_QSPGetCurStateData(JNIEnv *env,
                                                                   jobject this) {
     //!!!STUB
     //QSPGetCurStateData(jstring *loc, (int *)actIndex, (int *)line);
@@ -58,8 +57,7 @@ jstring Java_com_qsp_player_model_libQSP_NativeMethods_QSPGetVersion(JNIEnv *env
 
 
 ///* Количество полных обновлений локаций */
-jint
-Java_com_qsp_player_model_libQSP_NativeMethods_QSPGetFullRefreshCount(JNIEnv *env,
+jint Java_com_qsp_player_model_libQSP_NativeMethods_QSPGetFullRefreshCount(JNIEnv *env,
                                                                       jobject this) {
     return QSPGetFullRefreshCount();
 }
@@ -100,8 +98,7 @@ jstring Java_com_qsp_player_model_libQSP_NativeMethods_QSPGetMainDesc(JNIEnv *en
 }
 
 ///* Возможность изменения текста основного описания */
-jboolean
-Java_com_qsp_player_model_libQSP_NativeMethods_QSPIsMainDescChanged(JNIEnv *env,
+jboolean Java_com_qsp_player_model_libQSP_NativeMethods_QSPIsMainDescChanged(JNIEnv *env,
                                                                     jobject this) {
     return QSPIsMainDescChanged();
 }
@@ -121,8 +118,7 @@ jstring Java_com_qsp_player_model_libQSP_NativeMethods_QSPGetVarsDesc(JNIEnv *en
 
 ///* Возможность изменения текста дополнительного описания */
 //QSP_BOOL QSPIsVarsDescChanged()
-jboolean
-Java_com_qsp_player_model_libQSP_NativeMethods_QSPIsVarsDescChanged(JNIEnv *env,
+jboolean Java_com_qsp_player_model_libQSP_NativeMethods_QSPIsVarsDescChanged(JNIEnv *env,
                                                                     jobject this) {
     return QSPIsVarsDescChanged();
 }
@@ -212,16 +208,14 @@ jobject Java_com_qsp_player_model_libQSP_NativeMethods_QSPGetActionData(JNIEnv *
 }
 
 ///* Выполнение кода выбранного действия */
-jboolean
-Java_com_qsp_player_model_libQSP_NativeMethods_QSPExecuteSelActionCode(JNIEnv *env,
+jboolean Java_com_qsp_player_model_libQSP_NativeMethods_QSPExecuteSelActionCode(JNIEnv *env,
                                                                        jobject this,
                                                                        jboolean isRefresh) {
     return QSPExecuteSelActionCode((QSP_BOOL) isRefresh);
 }
 
 ///* Установить индекс выбранного действия */
-jboolean
-Java_com_qsp_player_model_libQSP_NativeMethods_QSPSetSelActionIndex(JNIEnv *env,
+jboolean Java_com_qsp_player_model_libQSP_NativeMethods_QSPSetSelActionIndex(JNIEnv *env,
                                                                     jobject this,
                                                                     jint ind, jboolean isRefresh) {
     return QSPSetSelActionIndex(ind, (QSP_BOOL) isRefresh);
@@ -234,8 +228,7 @@ jint Java_com_qsp_player_model_libQSP_NativeMethods_QSPGetSelActionIndex(JNIEnv 
 }
 
 ///* Возможность изменения списка действий */
-jboolean
-Java_com_qsp_player_model_libQSP_NativeMethods_QSPIsActionsChanged(JNIEnv *env,
+jboolean Java_com_qsp_player_model_libQSP_NativeMethods_QSPIsActionsChanged(JNIEnv *env,
                                                                    jobject this) {
     return QSPIsActionsChanged();
 }
@@ -285,8 +278,7 @@ jobject Java_com_qsp_player_model_libQSP_NativeMethods_QSPGetObjectData(JNIEnv *
 }
 
 ///* Установить индекс выбранного объекта */
-jboolean
-Java_com_qsp_player_model_libQSP_NativeMethods_QSPSetSelObjectIndex(JNIEnv *env,
+jboolean Java_com_qsp_player_model_libQSP_NativeMethods_QSPSetSelObjectIndex(JNIEnv *env,
                                                                     jobject this,
                                                                     jint ind,
                                                                     jboolean isRefresh) {
@@ -300,16 +292,14 @@ jint Java_com_qsp_player_model_libQSP_NativeMethods_QSPGetSelObjectIndex(JNIEnv 
 }
 
 ///* Возможность изменения списка объектов */
-jboolean
-Java_com_qsp_player_model_libQSP_NativeMethods_QSPIsObjectsChanged(JNIEnv *env,
+jboolean Java_com_qsp_player_model_libQSP_NativeMethods_QSPIsObjectsChanged(JNIEnv *env,
                                                                    jobject this) {
     return QSPIsObjectsChanged();
 }
 
 ///* ------------------------------------------------------------ */
 ///* Показ / скрытие окон */
-void
-Java_com_qsp_player_model_libQSP_NativeMethods_QSPShowWindow(JNIEnv *env,
+void Java_com_qsp_player_model_libQSP_NativeMethods_QSPShowWindow(JNIEnv *env,
                                                              jobject this,
                                                              jint type,
                                                              jboolean isShow) {
@@ -321,8 +311,7 @@ Java_com_qsp_player_model_libQSP_NativeMethods_QSPShowWindow(JNIEnv *env,
 //
 ///* Получить количество элементов массива */
 //QSP_BOOL QSPGetVarValuesCount(const QSP_CHAR *name, int *count)
-jobject
-Java_com_qsp_player_model_libQSP_NativeMethods_QSPGetVarValuesCount(JNIEnv *env,
+jobject Java_com_qsp_player_model_libQSP_NativeMethods_QSPGetVarValuesCount(JNIEnv *env,
                                                                     jobject this,
                                                                     jstring name) {
     //!!!STUB
@@ -399,8 +388,7 @@ jint Java_com_qsp_player_model_libQSP_NativeMethods_QSPGetMaxVarsCount(JNIEnv *e
 
 ///* Получить имя переменной с указанным индексом */
 //QSP_BOOL QSPGetVarNameByIndex(int index, QSP_CHAR **name)
-jobject
-Java_com_qsp_player_model_libQSP_NativeMethods_QSPGetVarNameByIndex(JNIEnv *env,
+jobject Java_com_qsp_player_model_libQSP_NativeMethods_QSPGetVarNameByIndex(JNIEnv *env,
                                                                     jobject this,
                                                                     jint index) {
     //!!!STUB
@@ -416,8 +404,7 @@ Java_com_qsp_player_model_libQSP_NativeMethods_QSPGetVarNameByIndex(JNIEnv *env,
 ///* Выполнение кода */
 //
 ///* Выполнение строки кода */
-jboolean
-Java_com_qsp_player_model_libQSP_NativeMethods_QSPExecString(JNIEnv *env,
+jboolean Java_com_qsp_player_model_libQSP_NativeMethods_QSPExecString(JNIEnv *env,
                                                              jobject this,
                                                              jstring s,
                                                              jboolean isRefresh) {
@@ -433,8 +420,7 @@ Java_com_qsp_player_model_libQSP_NativeMethods_QSPExecString(JNIEnv *env,
 }
 
 ///* Выполнение кода указанной локации */
-jboolean
-Java_com_qsp_player_model_libQSP_NativeMethods_QSPExecLocationCode(JNIEnv *env,
+jboolean Java_com_qsp_player_model_libQSP_NativeMethods_QSPExecLocationCode(JNIEnv *env,
                                                                    jobject this,
                                                                    jstring name,
                                                                    jboolean isRefresh) {
@@ -467,8 +453,7 @@ jboolean Java_com_qsp_player_model_libQSP_NativeMethods_QSPExecUserInput(JNIEnv 
 ///* Ошибки */
 //
 ///* Получить информацию о последней ошибке */
-jobject
-Java_com_qsp_player_model_libQSP_NativeMethods_QSPGetLastErrorData(JNIEnv *env,
+jobject Java_com_qsp_player_model_libQSP_NativeMethods_QSPGetLastErrorData(JNIEnv *env,
                                                                    jobject this) {
     jclass clazz = (*env)->FindClass(env, "com/qsp/player/dto/libQSP/ErrorData");
     if (clazz == 0)
@@ -515,23 +500,8 @@ jstring Java_com_qsp_player_model_libQSP_NativeMethods_QSPGetErrorDesc(JNIEnv *e
 ///* ------------------------------------------------------------ */
 ///* Управление игрой */
 //
-///* Загрузка новой игры из файла */
-jboolean Java_com_qsp_player_model_libQSP_NativeMethods_QSPLoadGameWorld(JNIEnv *env,
-                                                                         jobject this,
-                                                                        jstring fileName) {
-    const char *str = (*env)->GetStringUTFChars(env, fileName, NULL);
-    if (str == NULL)
-        return JNI_FALSE;
-
-    jboolean result = QSPLoadGameWorld(str);
-
-    (*env)->ReleaseStringUTFChars(env, fileName, str);
-    return result;
-}
-
 ///* Загрузка новой игры из памяти */
-jboolean
-Java_com_qsp_player_model_libQSP_NativeMethods_QSPLoadGameWorldFromData(JNIEnv *env,
+jboolean Java_com_qsp_player_model_libQSP_NativeMethods_QSPLoadGameWorldFromData(JNIEnv *env,
                                                                         jobject this,
                                                                         jbyteArray data,
                                                                         jint dataSize,
@@ -565,24 +535,8 @@ Java_com_qsp_player_model_libQSP_NativeMethods_QSPLoadGameWorldFromData(JNIEnv *
     return result;
 }
 
-///* Сохранение состояния в файл */
-jboolean Java_com_qsp_player_model_libQSP_NativeMethods_QSPSaveGame(JNIEnv *env,
-                                                                    jobject this,
-                                                                    jstring fileName,
-                                                                    jboolean isRefresh) {
-    const char *str = (*env)->GetStringUTFChars(env, fileName, NULL);
-    if (str == NULL)
-        return JNI_FALSE;
-
-    jboolean result = QSPSaveGame(str, (QSP_BOOL) isRefresh);
-
-    (*env)->ReleaseStringUTFChars(env, fileName, str);
-    return result;
-}
-
 ///* Сохранение состояния в память */
-jbyteArray
-Java_com_qsp_player_model_libQSP_NativeMethods_QSPSaveGameAsData(JNIEnv *env,
+jbyteArray Java_com_qsp_player_model_libQSP_NativeMethods_QSPSaveGameAsData(JNIEnv *env,
                                                                  jobject this,
                                                                  jboolean isRefresh) {
     void *buffer = NULL;
@@ -600,24 +554,8 @@ Java_com_qsp_player_model_libQSP_NativeMethods_QSPSaveGameAsData(JNIEnv *env,
     return result;
 }
 
-///* Загрузка состояния из файла */
-jboolean Java_com_qsp_player_model_libQSP_NativeMethods_QSPOpenSavedGame(JNIEnv *env,
-                                                                         jobject this,
-                                                                         jstring fileName,
-                                                                         jboolean isRefresh) {
-    const char *str = (*env)->GetStringUTFChars(env, fileName, NULL);
-    if (str == NULL)
-        return JNI_FALSE;
-
-    jboolean result = QSPOpenSavedGame(str, (QSP_BOOL) isRefresh);
-
-    (*env)->ReleaseStringUTFChars(env, fileName, str);
-    return result;
-}
-
 ///* Загрузка состояния из памяти */
-jboolean
-Java_com_qsp_player_model_libQSP_NativeMethods_QSPOpenSavedGameFromData(JNIEnv *env,
+jboolean Java_com_qsp_player_model_libQSP_NativeMethods_QSPOpenSavedGameFromData(JNIEnv *env,
                                                                         jobject this,
                                                                         jbyteArray data,
                                                                         jint dataSize,

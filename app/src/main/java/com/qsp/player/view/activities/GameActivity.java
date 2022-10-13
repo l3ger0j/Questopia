@@ -2,7 +2,6 @@ package com.qsp.player.view.activities;
 
 import static com.qsp.player.utils.ColorUtil.convertRGBAToBGRA;
 import static com.qsp.player.utils.ColorUtil.getHexColor;
-import static com.qsp.player.utils.FileUtil.createFile;
 import static com.qsp.player.utils.FileUtil.findFileOrDirectory;
 import static com.qsp.player.utils.FileUtil.getOrCreateDirectory;
 import static com.qsp.player.utils.FileUtil.getOrCreateFile;
@@ -74,7 +73,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class GameActivity extends AppCompatActivity implements GameInterface {
     private final String TAG = this.getClass().getSimpleName();
@@ -149,8 +147,6 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
     private GameActivityVM gameActivityVM;
     private ActivityGameBinding activityGameBinding;
     private ActivityResultLauncher<Intent> resultLauncher;
-    private String tinySaveName;
-
 
     // region Scroll
     private final Runnable onScroll = new Runnable() {
@@ -223,17 +219,12 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
         initServices();
         initControls();
         currentLanguage = gameActivityVM.loadLocale(this, settingsAdapter);
-        initGame();
-        setActiveTab(TAB_MAIN_DESC_AND_ACTIONS);
-
-        if (settingsAdapter.useRotate) {
-            if (savedInstanceState == null) {
-                int randomNum = ThreadLocalRandom.current().nextInt(0, 50 + 1);
-                tinySaveName = libQspProxy.getGameState().gameTitle + randomNum + ".sav";
-            } else {
-                tinySaveName = savedInstanceState.getString("fileName");
-            }
+        if (gameActivityVM.getTempByteArray() != null) {
+            libQspProxy.loadGameStateAsArray(gameActivityVM.getTempByteArray());
+        } else {
+            initGame();
         }
+        setActiveTab(TAB_MAIN_DESC_AND_ACTIONS);
 
         Log.i(TAG, "GameActivity created");
     }
@@ -242,22 +233,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         if (settingsAdapter.useRotate) {
-            Log.d(TAG, tinySaveName);
-            File file1 = createFile(getCacheDir(), tinySaveName);
-            libQspProxy.saveGameState(Uri.fromFile(file1));
-            outState.putString("fileName", tinySaveName);
-        }
-    }
-
-    @Override
-    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        if (settingsAdapter.useRotate) {
-            File file = findFileOrDirectory(getCacheDir(), tinySaveName);
-            Log.d(TAG,tinySaveName + " " + file);
-            if (file != null) {
-                doWithCounterDisabled(() -> libQspProxy.loadGameState(Uri.fromFile(file)));
-            }
+            gameActivityVM.setTempByteArray(libQspProxy.getSaveGameState());
         }
     }
 
@@ -401,7 +377,6 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
         libQspProxy.stop();
         libQspProxy.setGameInterface(null);
         counterHandler.removeCallbacks(counterTask);
-        tinySaveName = null;
         super.onDestroy();
         Log.i(TAG,"GameActivity destroyed");
     }
@@ -422,6 +397,8 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
         applySettings();
 
         if (libQspProxy.getGameState().gameRunning) {
+            gameActivityVM.setTempByteArray(libQspProxy.getSaveGameState());
+
             applyGameState();
 
             audioPlayer.setSoundEnabled(settingsAdapter.isSoundEnabled);
@@ -554,7 +531,10 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
     private void promptCloseGame() {
         new AlertDialog.Builder(this)
                 .setMessage(R.string.promptCloseGame)
-                .setPositiveButton(android.R.string.yes, (dialog, which) -> finish())
+                .setPositiveButton(android.R.string.yes, (dialog, which) -> {
+                    gameActivityVM.setTempByteArray(null);
+                    finish();
+                })
                 .setNegativeButton(android.R.string.no, (dialog, which) -> { })
                 .setCancelable(false)
                 .create()
