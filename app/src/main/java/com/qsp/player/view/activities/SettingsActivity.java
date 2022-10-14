@@ -3,13 +3,11 @@ package com.qsp.player.view.activities;
 import static com.qsp.player.utils.LanguageUtil.setLocale;
 
 import android.os.Bundle;
-import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.qsp.player.BuildConfig;
 import com.qsp.player.R;
 import com.qsp.player.view.adapters.SettingsAdapter;
 import com.qsp.player.view.fragments.SettingsFragment;
@@ -25,10 +23,6 @@ public class SettingsActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
-
-        TextView textView = findViewById(R.id.settingsTV);
-        textView.setText(getString(R.string.extendedName)
-                .replace("-VERSION-", BuildConfig.VERSION_NAME));
 
         SettingsActivityVM settingsActivityVM = new ViewModelProvider(this)
                 .get(SettingsActivityVM.class);

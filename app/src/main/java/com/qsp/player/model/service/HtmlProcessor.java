@@ -23,12 +23,17 @@ public class HtmlProcessor {
     private final String TAG = this.getClass().getSimpleName();
     private static final Pattern execPattern = Pattern.compile("href=\"exec:([\\s\\S]*?)\"", Pattern.CASE_INSENSITIVE);
 
+    private boolean useOld;
     private final GameContentResolver gameContentResolver;
     private final ImageProvider imageProvider;
 
     public HtmlProcessor(GameContentResolver gameContentResolver, ImageProvider imageProvider) {
         this.gameContentResolver = gameContentResolver;
         this.imageProvider = imageProvider;
+    }
+
+    public void setUseOld(boolean useOld) {
+        this.useOld = useOld;
     }
 
     /**
@@ -84,8 +89,7 @@ public class HtmlProcessor {
 
     private void processHTMLImages(Element documentBody) {
         for (Element img : documentBody.select("img")) {
-            boolean resize = shouldImageBeResized(img);
-            if (resize) {
+            if (shouldImageBeResized(img)) {
                 img.attr("style", "max-width:100%;");
             }
         }
@@ -99,8 +103,12 @@ public class HtmlProcessor {
         drawable = imageProvider.get(absPath);
         if (drawable == null) return false;
 
-        return drawable.getIntrinsicWidth() > Resources.getSystem()
-                .getDisplayMetrics().widthPixels;
+        if (useOld) {
+            return drawable.getIntrinsicWidth() > 400;
+        } else {
+            return drawable.getIntrinsicWidth() >= Resources.getSystem()
+                    .getDisplayMetrics().widthPixels;
+        }
     }
 
     private void processHTMLVideos(Element documentBody) {

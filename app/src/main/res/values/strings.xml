@@ -105,6 +105,8 @@
         <string name="switchCatTitle">Switches</string>
         <string name="rotateTitle">Rotate</string>
         <string name="rotateSum">Enable/disable rotate (alpha)</string>
+        <string name="useOldTitle">Old value for resizing the image</string>
+        <string name="useOldSum">Use the old value to resize the image</string>
         <string name="separatorTitle">Separator</string>
         <string name="separatorSum">On/off separator line in game</string>
         <string name="autoscrollTitle">Autoscroll</string>

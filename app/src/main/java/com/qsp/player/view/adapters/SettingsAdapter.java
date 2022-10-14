@@ -16,6 +16,7 @@ public class SettingsAdapter {
     public float actionsHeightRatio;
     public boolean isSoundEnabled;
     public boolean useRotate;
+    public boolean useOldValue;
     public boolean useSeparator;
     public boolean useGameFont;
     public boolean useAutoscroll;
@@ -45,6 +46,7 @@ public class SettingsAdapter {
         settingsAdapter.linkColor = preferences.getInt("linkColor", Color.parseColor("#0000ff"));
         settingsAdapter.actionsHeightRatio = parseActionsHeightRatio(preferences.getString("actsHeight", "1/3"));
         settingsAdapter.useRotate = preferences.getBoolean("rotate", false);
+        settingsAdapter.useOldValue = preferences.getBoolean("oldValue", true);
         settingsAdapter.useAutoscroll = preferences.getBoolean("autoscroll", true);
         settingsAdapter.useSeparator = preferences.getBoolean("separator", false);
         settingsAdapter.useGameFont = preferences.getBoolean("gameFont", false);

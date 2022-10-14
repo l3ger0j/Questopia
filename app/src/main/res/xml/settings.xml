@@ -64,6 +64,11 @@
             android:summary="@string/rotateSum"
             android:title="@string/rotateTitle" />
         <SwitchPreference
+            android:defaultValue="true"
+            android:key="oldValue"
+            android:summary="@string/useOldSum"
+            android:title="@string/useOldTitle" />
+        <SwitchPreference
             android:defaultValue="false"
             android:key="separator"
             android:summary="@string/separatorSum"
@@ -83,6 +88,8 @@
         <Preference
             android:title="@string/aboutTitle"
             android:key="showAbout" />
+        <Preference
+            android:key="showVersion" />
     </PreferenceCategory>
 
 </androidx.preference.PreferenceScreen>

@@ -279,6 +279,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
         GameContentResolver gameContentResolver = application.getGameContentResolver();
         gameActivityVM.setGameContentResolver(gameContentResolver);
         htmlProcessor = application.getHtmlProcessor();
+        htmlProcessor.setUseOld(settingsAdapter.useOldValue);
 
         audioPlayer = application.getAudioPlayer();
         audioPlayer.start();
@@ -385,6 +386,8 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
 
         if (libQspProxy.getGameState().gameRunning) {
             applyGameState();
+
+            htmlProcessor.setUseOld(settingsAdapter.useOldValue);
 
             audioPlayer.setSoundEnabled(settingsAdapter.isSoundEnabled);
             audioPlayer.resume();

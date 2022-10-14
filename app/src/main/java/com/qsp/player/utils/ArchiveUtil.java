@@ -33,7 +33,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-public class ArchiveUtil {
+public final class ArchiveUtil {
     private static final String TAG = ArchiveUtil.class.getSimpleName();
 
     @NonNull
