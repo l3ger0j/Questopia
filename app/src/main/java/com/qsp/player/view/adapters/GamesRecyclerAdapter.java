@@ -72,7 +72,7 @@ public class GamesRecyclerAdapter extends RecyclerView.Adapter<GamesRecyclerAdap
     @Override
     public void onBindViewHolder(@NonNull GamesRecyclerAdapter.ViewHolder holder, int position) {
         holder.listItemGameBinding(differ.getCurrentList().get(position));
-        GameData gameData = differ.getCurrentList().get(position);
+        GameData gameData = getItem(position);
 
         // gameIcon
         if (gameData.icon.isEmpty()) {

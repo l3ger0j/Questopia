@@ -219,22 +219,9 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
         initServices();
         initControls();
         currentLanguage = gameActivityVM.loadLocale(this, settingsAdapter);
-        if (gameActivityVM.getTempByteArray() != null) {
-            libQspProxy.loadGameStateAsArray(gameActivityVM.getTempByteArray());
-        } else {
-            initGame();
-        }
-        setActiveTab(TAB_MAIN_DESC_AND_ACTIONS);
+        initGame();
 
         Log.i(TAG, "GameActivity created");
-    }
-
-    @Override
-    protected void onSaveInstanceState(@NonNull Bundle outState) {
-        super.onSaveInstanceState(outState);
-        if (settingsAdapter.useRotate) {
-            gameActivityVM.setTempByteArray(libQspProxy.getSaveGameState());
-        }
     }
 
     private void initControls() {
@@ -397,8 +384,6 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
         applySettings();
 
         if (libQspProxy.getGameState().gameRunning) {
-            gameActivityVM.setTempByteArray(libQspProxy.getSaveGameState());
-
             applyGameState();
 
             audioPlayer.setSoundEnabled(settingsAdapter.isSoundEnabled);
@@ -531,10 +516,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
     private void promptCloseGame() {
         new AlertDialog.Builder(this)
                 .setMessage(R.string.promptCloseGame)
-                .setPositiveButton(android.R.string.yes, (dialog, which) -> {
-                    gameActivityVM.setTempByteArray(null);
-                    finish();
-                })
+                .setPositiveButton(android.R.string.yes, (dialog, which) -> finish())
                 .setNegativeButton(android.R.string.no, (dialog, which) -> { })
                 .setCancelable(false)
                 .create()

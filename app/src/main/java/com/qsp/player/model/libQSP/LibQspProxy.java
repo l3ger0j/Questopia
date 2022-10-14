@@ -24,9 +24,6 @@ public interface LibQspProxy {
     void loadGameState(Uri uri);
     void saveGameState(Uri uri);
 
-    byte[] getSaveGameState();
-    void loadGameStateAsArray(byte[] saveData);
-
     void onActionSelected(int index);
     void onActionClicked(int index);
     void onObjectSelected(int index);

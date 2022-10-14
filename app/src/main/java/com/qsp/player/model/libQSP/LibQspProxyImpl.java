@@ -310,28 +310,6 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
         }
     }
 
-    private static byte[] tempByteArray;
-    public void loadGameStateAsArray(byte[] saveData) {
-        if (!isSameThread(libQspHandler.getLooper().getThread())) {
-            runOnQspThread(() -> loadGameStateAsArray(saveData));
-            return;
-        }
-        if (saveData == null) {
-            if (!nativeMethods.QSPOpenSavedGameFromData(tempByteArray, tempByteArray.length, false)) {
-                showLastQspError();
-            }
-        } else {
-            if (!nativeMethods.QSPOpenSavedGameFromData(saveData, saveData.length, false)) {
-                showLastQspError();
-            }
-        }
-    }
-
-    public byte[] getSaveGameState() {
-        runOnQspThread(() -> tempByteArray = nativeMethods.QSPSaveGameAsData(false));
-        return tempByteArray;
-    }
-
     @Override
     public void saveGameState(final Uri uri) {
         if (!isSameThread(libQspHandler.getLooper().getThread())) {

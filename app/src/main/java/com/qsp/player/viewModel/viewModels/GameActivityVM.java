@@ -39,17 +39,7 @@ public class GameActivityVM extends AndroidViewModel {
     public ObservableField<GameActivity> gameActivityObservableField =
             new ObservableField<>();
 
-    private byte[] tempByteArray;
-
     // region Getter/Setter
-    public byte[] getTempByteArray() {
-        return tempByteArray;
-    }
-
-    public void setTempByteArray(byte[] tempByteArray) {
-        this.tempByteArray = tempByteArray;
-    }
-
     public void setLibQspProxy(LibQspProxy libQspProxy) {
         this.libQspProxy = libQspProxy;
     }
