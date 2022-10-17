@@ -19,6 +19,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.concurrent.Executors;
 
 import java9.util.concurrent.CompletableFuture;
 
@@ -53,8 +54,9 @@ public class Installer {
         CompletableFuture<Boolean> completableFuture =
                 CompletableFuture
                         .supplyAsync(() -> extractArchiveEntries(
-                                context, srcFile.getUri(), destDir))
-                        .thenApply(aBoolean -> {
+                                context, srcFile.getUri(), destDir),
+                                Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()))
+                        .thenApplyAsync(aBoolean -> {
                             if (!aBoolean) {
                                 isDone.postValue(false);
                                 throw new InstallException("NIG");
@@ -63,7 +65,7 @@ public class Installer {
                                 postInstall(destDir);
                                 return true;
                             }
-                        });
+                        }, Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()));
         completableFuture.isDone();
     }
 

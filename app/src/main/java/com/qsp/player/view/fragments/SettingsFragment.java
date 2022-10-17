@@ -36,6 +36,18 @@ public class SettingsFragment extends PreferenceFragmentCompat
         addPreferencesFromResource(R.xml.settings);
         String desc = requireArguments().getString("desc");
 
+        Preference backColor = findPreference("backColor");
+        Objects.requireNonNull(backColor).setSummary(getString(R.string.textBackLinkColorSum)
+                .replace("-VALUE-", "#e0e0e0"));
+
+        Preference textColor = findPreference("textColor");
+        Objects.requireNonNull(textColor).setSummary(getString(R.string.textBackLinkColorSum)
+                .replace("-VALUE-", "#000000"));
+
+        Preference linkColor = findPreference("linkColor");
+        Objects.requireNonNull(linkColor).setSummary(getString(R.string.textBackLinkColorSum)
+                .replace("-VALUE-", "#0000ff"));
+
         Preference version = findPreference("showVersion");
         if (version != null) {
             version.setTitle(getString(R.string.extendedName)
@@ -44,7 +56,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
                 countClick--;
                 if (countClick == 0) {
                     countClick = 3;
-                    Toast.makeText(getContext(), "Eternity smells of oil", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), ":)", Toast.LENGTH_SHORT).show();
                 }
                 return true;
             });

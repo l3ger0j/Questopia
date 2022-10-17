@@ -120,6 +120,7 @@
         <string name="textColorTitle">Цвет текста</string>
         <string name="backColorTitle">Цвет фона</string>
         <string name="linkColorTitle">Цвет ссылок</string>
+        <string name="textBackLinkColorSum">Значение по умолчанию -VALUE-</string>
         <string name="extendedName">QuestPlayerAndroid -VERSION-</string>
         <!-- Extra section -->
         <string name="extraCatTitle">Экстра</string>

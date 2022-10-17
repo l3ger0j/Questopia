@@ -183,6 +183,7 @@ public class GameStockActivityVM extends AndroidViewModel {
         if (id == R.id.button2) {
             action = ACTION_OPEN_DOCUMENT;
             intentInstall = new Intent(action);
+            intentInstall.addCategory(Intent.CATEGORY_OPENABLE);
             intentInstall.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             intentInstall.setType("*/*");
             String[] mimeTypes = {"application/zip", "application/rar"};
@@ -196,6 +197,7 @@ public class GameStockActivityVM extends AndroidViewModel {
         } else if (id == R.id.button3) {
             action = ACTION_OPEN_DOCUMENT;
             intentGetImage = new Intent(action);
+            intentGetImage.addCategory(Intent.CATEGORY_OPENABLE);
             intentGetImage.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             intentGetImage.setType("*/*");
             String[] mimeTypes = {"image/png", "image/jpeg"};

@@ -428,7 +428,8 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
 
     private int getBackgroundColor() {
         InterfaceConfiguration config = libQspProxy.getGameState().interfaceConfig;
-        return config.backColor != 0 ? convertRGBAToBGRA(config.backColor) : settingsAdapter.backColor;
+        return settingsAdapter.backColor != 0 ?
+                settingsAdapter.backColor : convertRGBAToBGRA(config.backColor);
     }
 
     private void applyActionsHeightRatio() {
