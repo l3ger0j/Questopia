@@ -3,8 +3,8 @@ package com.qsp.player.view.fragments;
 import android.app.AlertDialog;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.view.View;
 import android.webkit.WebView;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -56,7 +56,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
                 countClick--;
                 if (countClick == 0) {
                     countClick = 3;
-                    Toast.makeText(getContext(), ":)", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "I challenge you to all out life", Toast.LENGTH_SHORT).show();
                 }
                 return true;
             });
@@ -65,17 +65,24 @@ public class SettingsFragment extends PreferenceFragmentCompat
         Preference button = findPreference("showAbout");
         if (button != null) {
             button.setOnPreferenceClickListener(preference -> {
-                View messageView = getLayoutInflater()
-                        .inflate(R.layout.dialog_about, null, false);
+                LinearLayout linearLayout = new LinearLayout(getContext());
+                linearLayout.setOrientation(LinearLayout.VERTICAL);
+                LinearLayout.LayoutParams linLayoutParam =
+                        new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+                                LinearLayout.LayoutParams.MATCH_PARENT);
+                linearLayout.setLayoutParams(linLayoutParam);
 
-                WebView descView = messageView.findViewById(R.id.about_descrip);
-                descView.loadDataWithBaseURL("", desc,
+                LinearLayout.LayoutParams lpView =
+                        new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
+                                LinearLayout.LayoutParams.WRAP_CONTENT);
+                WebView webView = new WebView(getContext());
+                webView.loadDataWithBaseURL("", desc,
                         "text/html", "utf-8", "");
+                webView.setLayoutParams(lpView);
+                linearLayout.addView(webView);
 
                 new AlertDialog.Builder(getContext())
-                        .setPositiveButton(android.R.string.ok, (dialog, whichButton) -> {
-                        })
-                        .setView(messageView)
+                        .setView(linearLayout)
                         .create()
                         .show();
                 return true;
@@ -99,7 +106,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        if (key.equals("lang") || key.equals("url")) {
+        if (key.equals("lang")) {
             ViewUtil.showSnackBar(getView(), getString(R.string.closeToApply));
         }
     }

@@ -190,7 +190,8 @@ public class GameStockActivityVM extends AndroidViewModel {
             intentInstall.putExtra(EXTRA_MIME_TYPES, mimeTypes);
             try {
                 Objects.requireNonNull(activityObservableField.get())
-                        .resultInstallLauncher.launch(intentInstall);
+                        .resultInstallLauncher.launch(
+                                Intent.createChooser(intentInstall, "Select an archive"));
             } catch (ActivityNotFoundException e) {
                 Log.e(TAG , e.toString());
             }
@@ -204,7 +205,8 @@ public class GameStockActivityVM extends AndroidViewModel {
             intentGetImage.putExtra(EXTRA_MIME_TYPES, mimeTypes);
             try {
                 Objects.requireNonNull(activityObservableField.get())
-                        .resultGetImageLauncher.launch(intentGetImage);
+                        .resultGetImageLauncher.launch(
+                                Intent.createChooser(intentGetImage, "Select an image"));
             } catch (ActivityNotFoundException e) {
                 Log.e(TAG , e.toString());
             }

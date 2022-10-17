@@ -10,6 +10,7 @@ import android.util.Base64;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.databinding.ObservableBoolean;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -21,19 +22,16 @@ import java.util.regex.Pattern;
 
 public class HtmlProcessor {
     private final String TAG = this.getClass().getSimpleName();
+    private static final int IMAGE_WIDTH_THRESHOLD = 400;
     private static final Pattern execPattern = Pattern.compile("href=\"exec:([\\s\\S]*?)\"", Pattern.CASE_INSENSITIVE);
-
-    private boolean useOld;
     private final GameContentResolver gameContentResolver;
     private final ImageProvider imageProvider;
+
+    public ObservableBoolean useOldValue = new ObservableBoolean();
 
     public HtmlProcessor(GameContentResolver gameContentResolver, ImageProvider imageProvider) {
         this.gameContentResolver = gameContentResolver;
         this.imageProvider = imageProvider;
-    }
-
-    public void setUseOld(boolean useOld) {
-        this.useOld = useOld;
     }
 
     /**
@@ -103,8 +101,8 @@ public class HtmlProcessor {
         drawable = imageProvider.get(absPath);
         if (drawable == null) return false;
 
-        if (useOld) {
-            return drawable.getIntrinsicWidth() > 400;
+        if (useOldValue.get()) {
+            return drawable.getIntrinsicWidth() > IMAGE_WIDTH_THRESHOLD;
         } else {
             return drawable.getIntrinsicWidth() >= Resources.getSystem()
                     .getDisplayMetrics().widthPixels;

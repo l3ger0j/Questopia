@@ -3,8 +3,6 @@
     <!-- Use in dialog/toast -->
     <!-- Dialog LoadGamePopup -->
         <string name="loadGamePopup">Файл сохранения не был найден в gameDir. Хотите ли вы вручную указать путь к файлу сохранения?</string>
-    <!-- Dialog About -->
-        <string name="description">Описание</string>
     <!-- Dialog Close -->
         <string name="promptCloseGame">Уверены, что хотите закрыть игру?</string>
     <!-- Dialog Select -->
@@ -40,7 +38,7 @@
     <string name="appDescription">
 <![CDATA[
 <h2><center>О Quest Player<img src=\"file:///android_res/drawable/landscape.jpg\" width=\"100%\"></center></h2>
-<h4>Quest Player это проект с открытым исходным кодом, является Android-версией <b>Quest Soft Player</b> (<a href=\"http://qsp.su/?option=com_content&view=article&id=64\">русскоязычный сайт</a>), платформы для создания интерактивной литературы с интерфейсом, основанным на меню выбора действий. Вы можете скачать актуальную версию приложения на <a href=\"https://github.com/l3ger0j/QuestPlayerAndroid\">GitHub</a>.</h4>
+<h4 style="margin-left:5px;">Quest Player это проект с открытым исходным кодом, является Android-версией <b>Quest Soft Player</b> (<a href=\"http://qsp.su/?option=com_content&view=article&id=64\">русскоязычный сайт</a>), платформы для создания интерактивной литературы с интерфейсом, основанным на меню выбора действий. Вы можете скачать актуальную версию приложения на <a href=\"https://github.com/l3ger0j/QuestPlayerAndroid\">GitHub</a>.</h4>
 ]]>
     </string>
     <string name="appCredits">

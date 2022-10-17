@@ -12,8 +12,8 @@ android {
         applicationId "com.qsp.player"
         minSdkVersion 21
         targetSdkVersion 32
-        versionCode 11002
-        versionName "2.10.2"
+        versionCode 11003
+        versionName "2.10.3"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
