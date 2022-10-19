@@ -61,9 +61,9 @@ import com.qsp.player.model.service.AudioPlayer;
 import com.qsp.player.model.service.GameContentResolver;
 import com.qsp.player.model.service.HtmlProcessor;
 import com.qsp.player.utils.ViewUtil;
-import com.qsp.player.view.adapters.SettingsAdapter;
-import com.qsp.player.view.fragments.ImageDialogFragment;
-import com.qsp.player.viewModel.viewModels.GameActivityVM;
+import com.qsp.player.view.adapters.Settings;
+import com.qsp.player.view.fragments.ImageDialog;
+import com.qsp.player.viewModel.viewModels.ActivityGame;
 
 import org.jetbrains.annotations.Contract;
 
@@ -74,7 +74,7 @@ import java.util.Locale;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CountDownLatch;
 
-public class GameActivity extends AppCompatActivity implements GameInterface {
+public class Game extends AppCompatActivity implements GameInterface {
     private final String TAG = this.getClass().getSimpleName();
 
     private static final int MAX_SAVE_SLOTS = 5;
@@ -101,7 +101,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
 
     private static final String PAGE_BODY_TEMPLATE = "<body>REPLACETEXT</body>";
 
-    private SettingsAdapter settingsAdapter;
+    private Settings settings;
     private String currentLanguage = Locale.getDefault().getLanguage();
     private int activeTab;
     private String pageTemplate = "";
@@ -144,7 +144,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
     // endregion Локация-счётчик
 
     private int slotAction = 0;
-    private GameActivityVM gameActivityVM;
+    private ActivityGame activityGame;
     private ActivityGameBinding activityGameBinding;
     private ActivityResultLauncher<Intent> resultLauncher;
 
@@ -161,12 +161,6 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
     };
     // endregion Scroll
 
-    public void onShowDialog (String pathToImg) {
-        ImageDialogFragment imageDialogFragment = new ImageDialogFragment();
-        imageDialogFragment.pathToImage.set(pathToImg);
-        imageDialogFragment.show(getSupportFragmentManager(), "");
-    }
-
     @SuppressLint("SourceLockedOrientationActivity")
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -174,15 +168,15 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
 
         activityGameBinding = DataBindingUtil.setContentView(this, R.layout.activity_game);
 
-        gameActivityVM = new ViewModelProvider(this).get(GameActivityVM.class);
-        activityGameBinding.setGameViewModel(gameActivityVM);
-        gameActivityVM.gameActivityObservableField.set(this);
-        settingsAdapter = SettingsAdapter.newInstance().loadSettings(this);
+        activityGame = new ViewModelProvider(this).get(ActivityGame.class);
+        activityGameBinding.setGameViewModel(activityGame);
+        activityGame.gameActivityObservableField.set(this);
+        settings = Settings.newInstance().loadSettings(this);
 
         setContentView(activityGameBinding.getRoot());
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
-        if (settingsAdapter.useRotate) {
+        if (settings.useRotate) {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
         } else {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
@@ -218,10 +212,10 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
 
         initServices();
         initControls();
-        currentLanguage = gameActivityVM.loadLocale(this, settingsAdapter);
+        currentLanguage = activityGame.loadLocale(this, settings);
         initGame();
 
-        Log.i(TAG, "GameActivity created");
+        Log.i(TAG, "Game created");
     }
 
     private void initControls() {
@@ -242,7 +236,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
 
     private void initMainDescView() {
         mainDescView = activityGameBinding.mainDesc;
-        if (settingsAdapter.useAutoscroll) {
+        if (settings.useAutoscroll) {
             mainDescView.post(onScroll);
         }
     }
@@ -277,7 +271,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
         QuestPlayerApplication application = (QuestPlayerApplication) getApplication();
 
         GameContentResolver gameContentResolver = application.getGameContentResolver();
-        gameActivityVM.setGameContentResolver(gameContentResolver);
+        activityGame.setGameContentResolver(gameContentResolver);
         htmlProcessor = application.getHtmlProcessor();
 
         audioPlayer = application.getAudioPlayer();
@@ -286,7 +280,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
         libQspProxy = application.getLibQspProxy();
         libQspProxy.setGameInterface(this);
         libQspProxy.start();
-        gameActivityVM.setLibQspProxy(libQspProxy);
+        activityGame.setLibQspProxy(libQspProxy);
     }
 
     private void initGame() {
@@ -365,7 +359,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
         libQspProxy.setGameInterface(null);
         counterHandler.removeCallbacks(counterTask);
         super.onDestroy();
-        Log.i(TAG,"GameActivity destroyed");
+        Log.i(TAG,"Game destroyed");
     }
 
     @Override
@@ -379,14 +373,14 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
     public void onResume() {
         super.onResume();
 
-        settingsAdapter = SettingsAdapter.newInstance().loadSettings(this);
+        settings = Settings.newInstance().loadSettings(this);
         updateLocale();
         applySettings();
 
         if (libQspProxy.getGameState().gameRunning) {
             applyGameState();
 
-            audioPlayer.setSoundEnabled(settingsAdapter.isSoundEnabled);
+            audioPlayer.setSoundEnabled(settings.isSoundEnabled);
             audioPlayer.resume();
 
             counterHandler.postDelayed(counterTask, counterInterval);
@@ -394,26 +388,26 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
     }
 
     private void updateLocale() {
-        if (currentLanguage.equals(settingsAdapter.language)) return;
+        if (currentLanguage.equals(settings.language)) return;
 
-        setLocale(this, settingsAdapter.language);
+        setLocale(this, settings.language);
         setTitle(R.string.appName);
         invalidateOptionsMenu();
         setActiveTab(activeTab);
 
-        currentLanguage = settingsAdapter.language;
+        currentLanguage = settings.language;
     }
 
     private void applySettings() {
         applyActionsHeightRatio();
 
-        if (settingsAdapter.useSeparator) {
+        if (settings.useSeparator) {
             separatorView.setBackgroundColor(getBackgroundColor());
         } else {
             separatorView.setBackgroundColor(getResources().getColor(R.color.materialcolorpicker__grey));
         }
 
-        htmlProcessor.useOldValue.set(settingsAdapter.useOldValue);
+        htmlProcessor.useOldValue.set(settings.useOldValue);
 
         int backColor = getBackgroundColor();
         layoutTop.setBackgroundColor(backColor);
@@ -427,15 +421,15 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
 
     private int getBackgroundColor() {
         InterfaceConfiguration config = libQspProxy.getGameState().interfaceConfig;
-        return settingsAdapter.backColor != 0 ?
-                settingsAdapter.backColor : convertRGBAToBGRA(config.backColor);
+        return settings.backColor != 0 ?
+                settings.backColor : convertRGBAToBGRA(config.backColor);
     }
 
     private void applyActionsHeightRatio() {
         ConstraintSet constraintSet = new ConstraintSet();
         constraintSet.clone(layoutTop);
-        constraintSet.setVerticalWeight(R.id.main_desc, 1.0f - settingsAdapter.actionsHeightRatio);
-        constraintSet.setVerticalWeight(R.id.actions, settingsAdapter.actionsHeightRatio);
+        constraintSet.setVerticalWeight(R.id.main_desc, 1.0f - settings.actionsHeightRatio);
+        constraintSet.setVerticalWeight(R.id.actions, settings.actionsHeightRatio);
         constraintSet.applyTo(layoutTop);
     }
 
@@ -444,7 +438,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
                 .replace("QSPTEXTCOLOR", getHexColor(getTextColor()))
                 .replace("QSPBACKCOLOR", getHexColor(getBackgroundColor()))
                 .replace("QSPLINKCOLOR", getHexColor(getLinkColor()))
-                .replace("QSPFONTSTYLE", getFontStyle(settingsAdapter.typeface))
+                .replace("QSPFONTSTYLE", getFontStyle(settings.typeface))
                 .replace("QSPFONTSIZE", Integer.toString(getFontSize()));
 
         pageTemplate = pageHeadTemplate + PAGE_BODY_TEMPLATE;
@@ -452,17 +446,17 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
 
     private int getTextColor() {
         InterfaceConfiguration config = libQspProxy.getGameState().interfaceConfig;
-        return config.fontColor != 0 ? convertRGBAToBGRA(config.fontColor) : settingsAdapter.textColor;
+        return config.fontColor != 0 ? convertRGBAToBGRA(config.fontColor) : settings.textColor;
     }
 
     private int getLinkColor() {
         InterfaceConfiguration config = libQspProxy.getGameState().interfaceConfig;
-        return config.linkColor != 0 ? convertRGBAToBGRA(config.linkColor) : settingsAdapter.linkColor;
+        return config.linkColor != 0 ? convertRGBAToBGRA(config.linkColor) : settings.linkColor;
     }
 
     private int getFontSize() {
         InterfaceConfiguration config = libQspProxy.getGameState().interfaceConfig;
-        return settingsAdapter.useGameFont && config.fontSize != 0 ? config.fontSize : settingsAdapter.fontSize;
+        return settings.useGameFont && config.fontSize != 0 ? config.fontSize : settings.fontSize;
     }
 
     private void applyGameState() {
@@ -474,7 +468,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
 
     private void refreshMainDesc() {
         String mainDesc = getHtml(libQspProxy.getGameState().mainDesc);
-        if (settingsAdapter.useAutoscroll) {
+        if (settings.useAutoscroll) {
             mainDescView.postDelayed(onScroll, 300);
         }
 
@@ -669,7 +663,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
             return true;
         } else if (i == R.id.menu_options) {
             Intent intent = new Intent();
-            intent.setClass(this , SettingsActivity.class);
+            intent.setClass(this , com.qsp.player.view.activities.Settings.class);
             startActivity(intent);
             return true;
         } else if (i == R.id.menu_newgame) {
@@ -707,8 +701,12 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
     }
 
     @Override
-    public void showPicture(final String path) {
-        runOnUiThread(() -> gameActivityVM.showPictureDialog(path));
+    public void showPicture(final String pathToImg) {
+        runOnUiThread(() -> {
+            ImageDialog imageDialogFragment = new ImageDialog();
+            imageDialogFragment.pathToImage.set(pathToImg);
+            imageDialogFragment.show(getSupportFragmentManager(), "");
+        });
     }
 
     @Override
@@ -880,7 +878,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
         }
 
         private Typeface getTypeface() {
-            switch (settingsAdapter.typeface) {
+            switch (settings.typeface) {
                 case 1:
                     return Typeface.SANS_SERIF;
                 case 2:

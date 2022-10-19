@@ -17,15 +17,15 @@ import com.qsp.player.utils.ViewUtil;
 
 import java.util.Objects;
 
-public class SettingsFragment extends PreferenceFragmentCompat
+public class Settings extends PreferenceFragmentCompat
         implements SharedPreferences.OnSharedPreferenceChangeListener {
     private int countClick = 3;
 
     @NonNull
-    public static SettingsFragment newInstance(String desc) {
+    public static Settings newInstance(String desc) {
         Bundle args = new Bundle();
         args.putString("desc", desc);
-        SettingsFragment fragment = new SettingsFragment();
+        Settings fragment = new Settings();
         fragment.setArguments(args);
         return fragment;
     }
@@ -48,16 +48,14 @@ public class SettingsFragment extends PreferenceFragmentCompat
         Objects.requireNonNull(linkColor).setSummary(getString(R.string.textBackLinkColorSum)
                 .replace("-VALUE-", "#0000ff"));
 
-        Preference version = findPreference("showVersion");
-        if (version != null) {
-            version.setTitle(getString(R.string.extendedName)
-                    .replace("-VERSION-", BuildConfig.VERSION_NAME));
-            version.setOnPreferenceClickListener(preference -> {
-                countClick--;
-                if (countClick == 0) {
-                    countClick = 3;
-                    Toast.makeText(getContext(), "I challenge you to all out life", Toast.LENGTH_SHORT).show();
-                }
+        Preference click = findPreference("showExtensionMenu");
+        if (click != null) {
+            click.setOnPreferenceClickListener(preference -> {
+                Plugin plugin = new Plugin();
+                requireActivity().getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.settings_container, plugin, "findThisFragment")
+                        .addToBackStack(null)
+                        .commit();
                 return true;
             });
         }
@@ -85,6 +83,20 @@ public class SettingsFragment extends PreferenceFragmentCompat
                         .setView(linearLayout)
                         .create()
                         .show();
+                return true;
+            });
+        }
+
+        Preference version = findPreference("showVersion");
+        if (version != null) {
+            version.setTitle(getString(R.string.extendedName)
+                    .replace("-VERSION-", BuildConfig.VERSION_NAME));
+            version.setOnPreferenceClickListener(preference -> {
+                countClick--;
+                if (countClick == 0) {
+                    countClick = 3;
+                    Toast.makeText(getContext(), "O_o", Toast.LENGTH_SHORT).show();
+                }
                 return true;
             });
         }

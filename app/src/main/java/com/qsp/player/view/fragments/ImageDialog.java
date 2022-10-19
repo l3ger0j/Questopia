@@ -12,7 +12,7 @@ import androidx.fragment.app.DialogFragment;
 
 import com.qsp.player.databinding.DialogImageBinding;
 
-public class ImageDialogFragment extends DialogFragment {
+public class ImageDialog extends DialogFragment {
     public ObservableField<String> pathToImage = new ObservableField<>();
     private DialogImageBinding imageBinding;
 

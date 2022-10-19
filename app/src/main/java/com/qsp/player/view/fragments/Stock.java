@@ -12,20 +12,20 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.qsp.player.databinding.FragmentLocalBinding;
+import com.qsp.player.databinding.FragmentStockBinding;
 import com.qsp.player.dto.stock.GameData;
-import com.qsp.player.view.adapters.GamesRecyclerAdapter;
+import com.qsp.player.view.adapters.GamesRecycler;
 import com.qsp.player.view.adapters.RecyclerItemClickListener;
-import com.qsp.player.viewModel.viewModels.FragmentLocalVM;
+import com.qsp.player.viewModel.viewModels.FragmentStock;
 
 import java.util.ArrayList;
 import java.util.Objects;
 
-public class GameStockFragment extends Fragment {
-    private FragmentLocalVM localViewModel;
+public class Stock extends Fragment {
+    private FragmentStock localViewModel;
     private RecyclerView mRecyclerView;
 
-    public GameStockFragment() {
+    public Stock() {
     }
 
     @Nullable
@@ -33,22 +33,22 @@ public class GameStockFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater ,
                              @Nullable ViewGroup container ,
                              @Nullable Bundle savedInstanceState) {
-        com.qsp.player.databinding.FragmentLocalBinding fragmentStockLocalBinding =
-                FragmentLocalBinding.inflate(getLayoutInflater());
-        mRecyclerView = fragmentStockLocalBinding.gamesLocal;
+        com.qsp.player.databinding.FragmentStockBinding fragmentStockBinding =
+                FragmentStockBinding.inflate(getLayoutInflater());
+        mRecyclerView = fragmentStockBinding.gamesLocal;
         localViewModel = new ViewModelProvider(requireActivity())
-                .get(FragmentLocalVM.class);
+                .get(FragmentStock.class);
         localViewModel.getGameData().observe(getViewLifecycleOwner(), gameData);
         Objects.requireNonNull(localViewModel.activityObservableField.get())
                 .setRecyclerView(mRecyclerView);
-        return fragmentStockLocalBinding.getRoot();
+        return fragmentStockBinding.getRoot();
     }
 
     Observer<ArrayList<GameData>> gameData = new Observer<ArrayList<GameData>>() {
         @Override
         public void onChanged(ArrayList<GameData> gameData) {
-            GamesRecyclerAdapter adapter =
-                    new GamesRecyclerAdapter(requireActivity());
+            GamesRecycler adapter =
+                    new GamesRecycler(requireActivity());
             adapter.submitList(gameData);
             mRecyclerView.setAdapter(adapter);
         }

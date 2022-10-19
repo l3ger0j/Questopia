@@ -9,10 +9,9 @@ import androidx.databinding.ObservableField;
 import androidx.lifecycle.ViewModel;
 
 import com.qsp.player.R;
-import com.qsp.player.view.activities.SettingsActivity;
-import com.qsp.player.view.adapters.SettingsAdapter;
+import com.qsp.player.view.adapters.Settings;
 
-public class SettingsActivityVM extends ViewModel {
+public class ActivitySettings extends ViewModel {
     private static final String ABOUT_TEMPLATE = "<html><head>\n" +
             "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1\">\n" +
             "<style type=\"text/css\">\n" +
@@ -23,16 +22,16 @@ public class SettingsActivityVM extends ViewModel {
             "</style></head><body>REPLACETEXT</body></html>";
 
 
-    public ObservableField<SettingsActivity> settingsActivityObservableField =
+    public ObservableField<com.qsp.player.view.activities.Settings> settingsActivityObservableField =
             new ObservableField<>();
 
-    public String formationAboutDesc(SettingsAdapter settingsAdapter, Context context) {
+    public String formationAboutDesc(Settings settings , Context context) {
         return ABOUT_TEMPLATE
-                .replace("QSPFONTSTYLE", getFontStyle(settingsAdapter.typeface))
-                .replace("QSPFONTSIZE", Integer.toString(settingsAdapter.fontSize))
-                .replace("QSPTEXTCOLOR", getHexColor(settingsAdapter.textColor))
-                .replace("QSPBACKCOLOR", getHexColor(settingsAdapter.backColor))
-                .replace("QSPLINKCOLOR", getHexColor(settingsAdapter.linkColor))
+                .replace("QSPFONTSTYLE", getFontStyle(settings.typeface))
+                .replace("QSPFONTSIZE", Integer.toString(settings.fontSize))
+                .replace("QSPTEXTCOLOR", getHexColor(settings.textColor))
+                .replace("QSPBACKCOLOR", getHexColor(settings.backColor))
+                .replace("QSPLINKCOLOR", getHexColor(settings.linkColor))
                 .replace("REPLACETEXT", context.getString(R.string.appDescription)
                         + context.getString(R.string.appCredits));
     }

@@ -33,8 +33,8 @@ import com.qsp.player.dto.stock.GameData;
 import com.qsp.player.model.install.InstallException;
 import com.qsp.player.model.install.Installer;
 import com.qsp.player.utils.ViewUtil;
-import com.qsp.player.view.activities.GameStockActivity;
-import com.qsp.player.viewModel.repository.LocalGameRepository;
+import com.qsp.player.view.activities.Stock;
+import com.qsp.player.viewModel.repository.LocalGame;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
@@ -43,14 +43,14 @@ import java.io.OutputStreamWriter;
 import java.util.HashMap;
 import java.util.Objects;
 
-public class GameStockActivityVM extends AndroidViewModel {
+public class ActivityStock extends AndroidViewModel {
     private final String TAG = this.getClass().getSimpleName();
 
-    public ObservableField<GameStockActivity> activityObservableField = new
+    public ObservableField<Stock> activityObservableField = new
             ObservableField<>();
     public ObservableBoolean isShowDialog = new ObservableBoolean();
 
-    private final LocalGameRepository localGameRepository = new LocalGameRepository();
+    private final LocalGame localGame = new LocalGame();
     private final HashMap<String, GameData> gamesMap = new HashMap<>();
 
     private File gamesDir;
@@ -98,7 +98,7 @@ public class GameStockActivityVM extends AndroidViewModel {
     }
     // endregion Getter/Setter
 
-    public GameStockActivityVM(@NonNull Application application) {
+    public ActivityStock(@NonNull Application application) {
         super(application);
     }
 
@@ -330,7 +330,7 @@ public class GameStockActivityVM extends AndroidViewModel {
 
     public void refreshGames() {
         gamesMap.clear();
-        for (GameData localGameData : localGameRepository.getGames(gamesDir)) {
+        for (GameData localGameData : localGame.getGames(gamesDir)) {
             GameData remoteGameData = gamesMap.get(localGameData.id);
             if (remoteGameData != null) {
                 GameData aggregateGameData = new GameData(remoteGameData);

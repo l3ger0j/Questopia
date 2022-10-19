@@ -14,9 +14,8 @@
         tools:targetApi="m">
 
         <activity
-            android:name=".view.activities.GameStockActivity"
-            android:exported="true"
-            android:screenOrientation="fullSensor">
+            android:name=".view.activities.Stock"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -24,15 +23,13 @@
         </activity>
 
         <activity
-            android:name=".view.activities.GameActivity"
+            android:name=".view.activities.Game"
             android:alwaysRetainTaskState="true"
-            android:screenOrientation="fullSensor"
             android:theme="@style/Theme.QSP.Translucent.NoActionBar" />
 
         <activity
-            android:name=".view.activities.SettingsActivity"
-            android:label="@string/settingsTitle"
-            android:screenOrientation="fullSensor" />
+            android:name=".view.activities.Settings"
+            android:label="@string/settingsTitle" />
 
         <provider
             android:name="androidx.core.content.FileProvider"
@@ -41,8 +38,7 @@
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths">
-            </meta-data>
+                android:resource="@xml/file_paths" />
         </provider>
     </application>
 </manifest>

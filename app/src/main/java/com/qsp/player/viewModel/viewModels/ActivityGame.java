@@ -22,21 +22,20 @@ import androidx.lifecycle.AndroidViewModel;
 
 import com.qsp.player.model.libQSP.LibQspProxy;
 import com.qsp.player.model.service.GameContentResolver;
-import com.qsp.player.view.activities.GameActivity;
-import com.qsp.player.view.adapters.SettingsAdapter;
+import com.qsp.player.view.activities.Game;
+import com.qsp.player.view.adapters.Settings;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.util.Objects;
 
-public class GameActivityVM extends AndroidViewModel {
+public class ActivityGame extends AndroidViewModel {
     private final String TAG = this.getClass().getCanonicalName();
 
     private GameContentResolver gameContentResolver;
     private LibQspProxy libQspProxy;
 
-    public ObservableField<GameActivity> gameActivityObservableField =
+    public ObservableField<Game> gameActivityObservableField =
             new ObservableField<>();
 
     // region Getter/Setter
@@ -53,15 +52,9 @@ public class GameActivityVM extends AndroidViewModel {
     }
     // endregion Getter/Setter
 
-    public GameActivityVM(@NonNull Application application) {
+    public ActivityGame(@NonNull Application application) {
         super(application);
     }
-
-    // region Dialog
-    public void showPictureDialog (String pathToImage) {
-        Objects.requireNonNull(gameActivityObservableField.get()).onShowDialog(pathToImage);
-    }
-    // endregion Dialog
 
     public class QspWebViewClient extends WebViewClient {
         @Override
@@ -108,9 +101,9 @@ public class GameActivityVM extends AndroidViewModel {
         }
     }
 
-    public String loadLocale(Context context, SettingsAdapter settingsAdapter) {
-        setLocale(context, settingsAdapter.language);
-        return settingsAdapter.language;
+    public String loadLocale(Context context, Settings settings) {
+        setLocale(context, settings.language);
+        return settings.language;
     }
 
 }

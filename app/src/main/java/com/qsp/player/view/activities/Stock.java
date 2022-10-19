@@ -32,10 +32,9 @@ import com.qsp.player.R;
 import com.qsp.player.databinding.ActivityStockBinding;
 import com.qsp.player.dto.stock.GameData;
 import com.qsp.player.utils.ViewUtil;
-import com.qsp.player.view.adapters.SettingsAdapter;
-import com.qsp.player.view.fragments.GameStockFragment;
-import com.qsp.player.viewModel.viewModels.FragmentLocalVM;
-import com.qsp.player.viewModel.viewModels.GameStockActivityVM;
+import com.qsp.player.view.adapters.Settings;
+import com.qsp.player.viewModel.viewModels.ActivityStock;
+import com.qsp.player.viewModel.viewModels.FragmentStock;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -46,17 +45,17 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Objects;
 
-public class GameStockActivity extends AppCompatActivity {
+public class Stock extends AppCompatActivity {
     private final String TAG = this.getClass().getSimpleName();
 
     private HashMap<String, GameData> gamesMap = new HashMap<>();
 
-    public SettingsAdapter settingsAdapter;
+    public Settings settings;
     private String currentLanguage = Locale.getDefault().getLanguage();
     private GameData gameData;
 
-    private GameStockActivityVM gameStockActivityVM;
-    private FragmentLocalVM localStockViewModel;
+    private ActivityStock activityStock;
+    private FragmentStock localStockViewModel;
 
     private ActionMode actionMode;
     protected ActivityStockBinding activityStockBinding;
@@ -121,7 +120,7 @@ public class GameStockActivity extends AppCompatActivity {
         activityStockBinding = ActivityStockBinding.inflate(getLayoutInflater());
         mFAB = activityStockBinding.floatingActionButton;
         localStockViewModel =
-                new ViewModelProvider(this).get(FragmentLocalVM.class);
+                new ViewModelProvider(this).get(FragmentStock.class);
         localStockViewModel.activityObservableField.set(this);
         if (mRecyclerView != null) {
             mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -144,14 +143,14 @@ public class GameStockActivity extends AppCompatActivity {
             });
         }
 
-        gameStockActivityVM = new ViewModelProvider(this).get(GameStockActivityVM.class);
-        activityStockBinding.setStockVM(gameStockActivityVM);
-        gameStockActivityVM.activityObservableField.set(this);
-        gamesMap = gameStockActivityVM.getGamesMap();
+        activityStock = new ViewModelProvider(this).get(ActivityStock.class);
+        activityStockBinding.setStockVM(activityStock);
+        activityStock.activityObservableField.set(this);
+        gamesMap = activityStock.getGamesMap();
 
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.fragment_container, GameStockFragment.class, null)
+                    .add(R.id.fragment_container, com.qsp.player.view.fragments.Stock.class, null)
                     .commit();
         }
 
@@ -170,7 +169,7 @@ public class GameStockActivity extends AppCompatActivity {
                         }
                         file = DocumentFile.fromSingleUri(this, Objects.requireNonNull(uri));
                         assert file != null;
-                        gameStockActivityVM.setTempPathFile(file);
+                        activityStock.setTempPathFile(file);
                     }
                 }
         );
@@ -186,7 +185,7 @@ public class GameStockActivity extends AppCompatActivity {
                         }
                         file = DocumentFile.fromSingleUri(this, Objects.requireNonNull(uri));
                         assert file != null;
-                        gameStockActivityVM.setTempInstallFile(file);
+                        activityStock.setTempInstallFile(file);
                     }
                 }
         );
@@ -206,7 +205,7 @@ public class GameStockActivity extends AppCompatActivity {
                         assert uri != null;
                         file = DocumentFile.fromSingleUri(this, uri);
                         assert file != null;
-                        gameStockActivityVM.setTempImageFile(file);
+                        activityStock.setTempImageFile(file);
                     }
                 }
         );
@@ -214,7 +213,7 @@ public class GameStockActivity extends AppCompatActivity {
         loadSettings();
         loadLocale();
 
-        Log.i(TAG,"GameStockActivity created");
+        Log.i(TAG,"Stock created");
 
         setContentView(activityStockBinding.getRoot());
     }
@@ -233,13 +232,13 @@ public class GameStockActivity extends AppCompatActivity {
     }
 
     private void loadSettings() {
-        settingsAdapter = SettingsAdapter.newInstance().loadSettings(this);
+        settings = Settings.newInstance().loadSettings(this);
     }
 
     private void loadLocale() {
-        setLocale(this, settingsAdapter.language);
+        setLocale(this, settings.language);
         setTitle(R.string.gameStockTitle);
-        currentLanguage = settingsAdapter.language;
+        currentLanguage = settings.language;
     }
 
     public void showErrorDialog(String errorMessage) {
@@ -297,7 +296,7 @@ public class GameStockActivity extends AppCompatActivity {
                             } catch (NullPointerException e) {
                                 Log.e(TAG , e.toString());
                             }
-                            gameStockActivityVM.refreshGames();
+                            activityStock.refreshGames();
                         }
                         actionMode.finish();
                     } else if (itemId == R.id.select_all) {
@@ -338,7 +337,7 @@ public class GameStockActivity extends AppCompatActivity {
     }
 
     private void showGameInfo(String gameId) {
-        final GameData gameData = gameStockActivityVM.getGamesMap().get(gameId);
+        final GameData gameData = activityStock.getGamesMap().get(gameId);
         if (gameData == null) {
             Log.e(TAG,"GameData not found: " + gameId);
             return;
@@ -385,7 +384,7 @@ public class GameStockActivity extends AppCompatActivity {
 
         alertBuilder.setPositiveButton(getString(R.string.editButton), (dialog, which) -> {
             dialog.cancel();
-            gameStockActivityVM.showDialogEdit(gameData);
+            activityStock.showDialogEdit(gameData);
         });
 
         if (gameData.isInstalled()) {
@@ -395,7 +394,7 @@ public class GameStockActivity extends AppCompatActivity {
     }
 
     private void playGame(final GameData gameData) {
-        Intent intent = new Intent(this, GameActivity.class);
+        Intent intent = new Intent(this, Game.class);
         intent.putExtra("gameId", gameData.id);
         intent.putExtra("gameTitle", gameData.title);
         intent.putExtra("gameDirUri", gameData.gameDir.getAbsolutePath());
@@ -413,7 +412,7 @@ public class GameStockActivity extends AppCompatActivity {
             for (File file : gameData.gameFiles) {
                 names.add(file.getName());
             }
-            new AlertDialog.Builder(GameStockActivity.this)
+            new AlertDialog.Builder(Stock.this)
                     .setTitle(getString(R.string.selectGameFile))
                     .setCancelable(false)
                     .setItems(names.toArray(new String[0]), (dialog, which) -> {
@@ -427,7 +426,7 @@ public class GameStockActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Log.i(TAG , "GameStockActivity destroyed");
+        Log.i(TAG , "Stock destroyed");
     }
 
     @Override
@@ -435,18 +434,18 @@ public class GameStockActivity extends AppCompatActivity {
         super.onResume();
         loadSettings();
         updateLocale();
-        gameStockActivityVM.refreshGamesDirectory();
+        activityStock.refreshGamesDirectory();
     }
 
     private void updateLocale() {
-        if (currentLanguage.equals(settingsAdapter.language)) return;
+        if (currentLanguage.equals(settings.language)) return;
 
-        setLocale(this, settingsAdapter.language);
+        setLocale(this, settings.language);
         setTitle(getString(R.string.gameStockTitle));
-        gameStockActivityVM.refreshGames();
+        activityStock.refreshGames();
         invalidateOptionsMenu();
 
-        currentLanguage = settingsAdapter.language;
+        currentLanguage = settings.language;
     }
 
     @Override
@@ -481,7 +480,7 @@ public class GameStockActivity extends AppCompatActivity {
     }
 
     private void showSettings() {
-        Intent intent = new Intent(this, SettingsActivity.class);
+        Intent intent = new Intent(this, com.qsp.player.view.activities.Settings.class);
         startActivity(intent);
     }
 

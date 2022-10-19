@@ -82,9 +82,8 @@
 
     <PreferenceCategory android:title="@string/extraCatTitle">
         <Preference
-            android:defaultValue="false"
-            android:enabled="false"
-            android:title="@string/pluginTitle" />
+            android:title="@string/pluginTitle"
+            android:key="showExtensionMenu"/>
         <Preference
             android:title="@string/aboutTitle"
             android:key="showAbout" />

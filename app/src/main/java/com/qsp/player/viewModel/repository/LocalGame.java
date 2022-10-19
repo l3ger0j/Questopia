@@ -20,7 +20,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
-public class LocalGameRepository {
+public class LocalGame {
     private final String TAG = this.getClass().getSimpleName();
 
     public List<GameData> getGames(File gamesDir) {
@@ -63,7 +63,6 @@ public class LocalGameRepository {
                 dirs.add(f);
             }
         }
-
         return dirs;
     }
 

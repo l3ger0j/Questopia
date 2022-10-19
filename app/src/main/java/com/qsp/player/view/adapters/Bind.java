@@ -15,7 +15,7 @@ import com.squareup.picasso.Picasso;
 
 import java.io.File;
 
-public class BindAdapters {
+public class Bind {
 
     @BindingAdapter({"setWebViewClient"})
     public static void setWebViewClient(@NonNull WebView view, WebViewClient client) {

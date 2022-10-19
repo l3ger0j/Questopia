@@ -7,14 +7,14 @@
         <import type="android.view.View"/>
         <variable
             name="stockVM"
-            type="com.qsp.player.viewModel.viewModels.GameStockActivityVM" />
+            type="com.qsp.player.viewModel.viewModels.ActivityStock" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <androidx.fragment.app.FragmentContainerView
+        <FrameLayout
             android:id="@+id/fragment_container"
             android:layout_width="match_parent"
             android:layout_height="match_parent"

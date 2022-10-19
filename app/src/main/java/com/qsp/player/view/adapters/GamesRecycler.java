@@ -20,7 +20,7 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GamesRecyclerAdapter extends RecyclerView.Adapter<GamesRecyclerAdapter.ViewHolder>{
+public class GamesRecycler extends RecyclerView.Adapter<GamesRecycler.ViewHolder>{
     private final Context context;
     private final AsyncListDiffer<GameData> differ =
             new AsyncListDiffer<>(this , DIFF_CALLBACK);
@@ -55,14 +55,14 @@ public class GamesRecyclerAdapter extends RecyclerView.Adapter<GamesRecyclerAdap
         differ.submitList(gameData);
     }
 
-    public GamesRecyclerAdapter(Context context) {
+    public GamesRecycler(Context context) {
         this.context = context;
     }
 
     @NonNull
     @Override
-    public GamesRecyclerAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent,
-                                                              int viewType) {
+    public GamesRecycler.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent,
+                                                       int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         ListItemGameBinding listItemGameBinding =
                 DataBindingUtil.inflate(inflater, R.layout.list_item_game, parent, false);
@@ -70,7 +70,7 @@ public class GamesRecyclerAdapter extends RecyclerView.Adapter<GamesRecyclerAdap
     }
 
     @Override
-    public void onBindViewHolder(@NonNull GamesRecyclerAdapter.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull GamesRecycler.ViewHolder holder, int position) {
         holder.listItemGameBinding(differ.getCurrentList().get(position));
         GameData gameData = getItem(position);
 
