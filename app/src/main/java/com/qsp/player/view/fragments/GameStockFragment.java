@@ -21,11 +21,11 @@ import com.qsp.player.viewModel.viewModels.FragmentLocalVM;
 import java.util.ArrayList;
 import java.util.Objects;
 
-public class FragmentLocal extends Fragment {
+public class GameStockFragment extends Fragment {
     private FragmentLocalVM localViewModel;
     private RecyclerView mRecyclerView;
 
-    public FragmentLocal() {
+    public GameStockFragment() {
     }
 
     @Nullable

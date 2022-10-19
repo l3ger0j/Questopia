@@ -33,7 +33,7 @@ import com.qsp.player.databinding.ActivityStockBinding;
 import com.qsp.player.dto.stock.GameData;
 import com.qsp.player.utils.ViewUtil;
 import com.qsp.player.view.adapters.SettingsAdapter;
-import com.qsp.player.view.fragments.FragmentLocal;
+import com.qsp.player.view.fragments.GameStockFragment;
 import com.qsp.player.viewModel.viewModels.FragmentLocalVM;
 import com.qsp.player.viewModel.viewModels.GameStockActivityVM;
 
@@ -151,7 +151,7 @@ public class GameStockActivity extends AppCompatActivity {
 
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.fragment_container, FragmentLocal.class, null)
+                    .add(R.id.fragment_container, GameStockFragment.class, null)
                     .commit();
         }
 
