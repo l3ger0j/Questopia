@@ -9,7 +9,8 @@ import androidx.databinding.ObservableField;
 import androidx.lifecycle.ViewModel;
 
 import com.qsp.player.R;
-import com.qsp.player.view.adapters.Settings;
+import com.qsp.player.view.settings.SettingsActivity;
+import com.qsp.player.view.settings.SettingsController;
 
 public class ActivitySettings extends ViewModel {
     private static final String ABOUT_TEMPLATE = "<html><head>\n" +
@@ -22,16 +23,16 @@ public class ActivitySettings extends ViewModel {
             "</style></head><body>REPLACETEXT</body></html>";
 
 
-    public ObservableField<com.qsp.player.view.activities.Settings> settingsActivityObservableField =
+    public ObservableField<SettingsActivity> settingsActivityObservableField =
             new ObservableField<>();
 
-    public String formationAboutDesc(Settings settings , Context context) {
+    public String formationAboutDesc(SettingsController settingsController , Context context) {
         return ABOUT_TEMPLATE
-                .replace("QSPFONTSTYLE", getFontStyle(settings.typeface))
-                .replace("QSPFONTSIZE", Integer.toString(settings.fontSize))
-                .replace("QSPTEXTCOLOR", getHexColor(settings.textColor))
-                .replace("QSPBACKCOLOR", getHexColor(settings.backColor))
-                .replace("QSPLINKCOLOR", getHexColor(settings.linkColor))
+                .replace("QSPFONTSTYLE", getFontStyle(settingsController.typeface))
+                .replace("QSPFONTSIZE", Integer.toString(settingsController.fontSize))
+                .replace("QSPTEXTCOLOR", getHexColor(settingsController.textColor))
+                .replace("QSPBACKCOLOR", getHexColor(settingsController.backColor))
+                .replace("QSPLINKCOLOR", getHexColor(settingsController.linkColor))
                 .replace("REPLACETEXT", context.getString(R.string.appDescription)
                         + context.getString(R.string.appCredits));
     }

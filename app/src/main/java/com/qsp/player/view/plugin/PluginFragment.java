@@ -1,4 +1,4 @@
-package com.qsp.player.view.fragments;
+package com.qsp.player.view.plugin;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -12,21 +12,19 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.qsp.player.R;
 import com.qsp.player.databinding.FragmentPluginBinding;
 import com.qsp.player.dto.PluginList;
-import com.qsp.player.view.adapters.PluginRecycler;
 import com.qsp.player.view.adapters.RecyclerItemClickListener;
 import com.qsp.player.viewModel.viewModels.FragmentPlugin;
 
 import java.util.ArrayList;
 
-public class Plugin extends Fragment {
+public class PluginFragment extends Fragment {
     private FragmentPlugin pluginViewModel;
-    private FloatingActionButton floatingActionButton;
     private RecyclerView recyclerView;
 
-    public Plugin () {
+    public PluginFragment() {
     }
 
     @Nullable
@@ -37,12 +35,10 @@ public class Plugin extends Fragment {
         requireActivity().setTitle("Plugins");
         com.qsp.player.databinding.FragmentPluginBinding fragmentPluginBinding =
                 FragmentPluginBinding.inflate(getLayoutInflater());
-        floatingActionButton = fragmentPluginBinding.pluginFAB;
         recyclerView = fragmentPluginBinding.pluginRecyclerView;
         pluginViewModel = new ViewModelProvider(requireActivity())
                 .get(FragmentPlugin.class);
         pluginViewModel.getGameData().observe(getViewLifecycleOwner(), pluginList);
-
         return fragmentPluginBinding.getRoot();
     }
 
@@ -64,13 +60,17 @@ public class Plugin extends Fragment {
                 new RecyclerItemClickListener.OnItemClickListener() {
                     @Override
                     public void onItemClick(View view , int position) {
-
                     }
 
                     @Override
                     public void onLongItemClick(View view , int position) {
-
                     }
                 }));
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        requireActivity().setTitle(R.string.settingsTitle);
     }
 }

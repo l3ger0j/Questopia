@@ -61,8 +61,13 @@ public class Installer {
                                 isDone.postValue(false);
                                 throw new InstallException("NIG");
                             } else {
-                                isDone.postValue(true);
-                                postInstall(destDir);
+                                normalizeGameDirectory(destDir);
+                                if (!doesDirectoryContainGameFiles(destDir)) {
+                                    isDone.postValue(false);
+                                    throw new InstallException("NFE");
+                                } else {
+                                    isDone.postValue(true);
+                                }
                                 return true;
                             }
                         }, Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()));

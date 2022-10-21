@@ -33,7 +33,7 @@ import com.qsp.player.dto.stock.GameData;
 import com.qsp.player.model.install.InstallException;
 import com.qsp.player.model.install.Installer;
 import com.qsp.player.utils.ViewUtil;
-import com.qsp.player.view.activities.Stock;
+import com.qsp.player.view.stock.StockActivity;
 import com.qsp.player.viewModel.repository.LocalGame;
 import com.squareup.picasso.Picasso;
 
@@ -46,7 +46,7 @@ import java.util.Objects;
 public class ActivityStock extends AndroidViewModel {
     private final String TAG = this.getClass().getSimpleName();
 
-    public ObservableField<Stock> activityObservableField = new
+    public ObservableField<StockActivity> activityObservableField = new
             ObservableField<>();
     public ObservableBoolean isShowDialog = new ObservableBoolean();
 

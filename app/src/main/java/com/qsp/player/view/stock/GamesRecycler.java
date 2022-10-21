@@ -1,8 +1,9 @@
-package com.qsp.player.view.adapters;
+package com.qsp.player.view.stock;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
@@ -101,7 +102,6 @@ public class GamesRecycler extends RecyclerView.Adapter<GamesRecycler.ViewHolder
                     .replace("-AUTHOR-", gameData.author);
             holder.listItemGameBinding.gameAuthor.setText(text);
         } else {
-
             holder.listItemGameBinding.gameAuthor.setText("");
         }
     }

@@ -1,4 +1,4 @@
-package com.qsp.player.view.fragments;
+package com.qsp.player.view.game;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;

@@ -1,5 +1,6 @@
-package com.qsp.player.view.activities;
+package com.qsp.player.view.stock;
 
+import static com.qsp.player.utils.DirUtil.doesDirectoryContainGameFiles;
 import static com.qsp.player.utils.FileUtil.deleteDirectory;
 import static com.qsp.player.utils.LanguageUtil.setLocale;
 
@@ -32,7 +33,9 @@ import com.qsp.player.R;
 import com.qsp.player.databinding.ActivityStockBinding;
 import com.qsp.player.dto.stock.GameData;
 import com.qsp.player.utils.ViewUtil;
-import com.qsp.player.view.adapters.Settings;
+import com.qsp.player.view.game.GameActivity;
+import com.qsp.player.view.settings.SettingsActivity;
+import com.qsp.player.view.settings.SettingsController;
 import com.qsp.player.viewModel.viewModels.ActivityStock;
 import com.qsp.player.viewModel.viewModels.FragmentStock;
 
@@ -45,12 +48,12 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Objects;
 
-public class Stock extends AppCompatActivity {
+public class StockActivity extends AppCompatActivity {
     private final String TAG = this.getClass().getSimpleName();
 
     private HashMap<String, GameData> gamesMap = new HashMap<>();
 
-    public Settings settings;
+    public SettingsController settingsController;
     private String currentLanguage = Locale.getDefault().getLanguage();
     private GameData gameData;
 
@@ -150,7 +153,7 @@ public class Stock extends AppCompatActivity {
 
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.fragment_container, com.qsp.player.view.fragments.Stock.class, null)
+                    .add(R.id.fragment_container, StockFragment.class, null)
                     .commit();
         }
 
@@ -213,7 +216,7 @@ public class Stock extends AppCompatActivity {
         loadSettings();
         loadLocale();
 
-        Log.i(TAG,"Stock created");
+        Log.i(TAG,"StockFragment created");
 
         setContentView(activityStockBinding.getRoot());
     }
@@ -232,13 +235,13 @@ public class Stock extends AppCompatActivity {
     }
 
     private void loadSettings() {
-        settings = Settings.newInstance().loadSettings(this);
+        settingsController = SettingsController.newInstance().loadSettings(this);
     }
 
     private void loadLocale() {
-        setLocale(this, settings.language);
+        setLocale(this, settingsController.language);
         setTitle(R.string.gameStockTitle);
-        currentLanguage = settings.language;
+        currentLanguage = settingsController.language;
     }
 
     public void showErrorDialog(String errorMessage) {
@@ -382,19 +385,18 @@ public class Stock extends AppCompatActivity {
                 .setIcon(R.drawable.icon)
                 .setNegativeButton(getString(R.string.close), (dialog, which) -> dialog.cancel());
 
-        alertBuilder.setPositiveButton(getString(R.string.editButton), (dialog, which) -> {
-            dialog.cancel();
-            activityStock.showDialogEdit(gameData);
-        });
-
-        if (gameData.isInstalled()) {
+        if (gameData.isInstalled() && doesDirectoryContainGameFiles(gameData.gameDir)) {
             alertBuilder.setNeutralButton(getString(R.string.play), (dialog, which) -> playGame(gameData));
+            alertBuilder.setPositiveButton(getString(R.string.editButton), (dialog, which) -> {
+                dialog.cancel();
+                activityStock.showDialogEdit(gameData);
+            });
         }
         alertBuilder.create().show();
     }
 
     private void playGame(final GameData gameData) {
-        Intent intent = new Intent(this, Game.class);
+        Intent intent = new Intent(this, GameActivity.class);
         intent.putExtra("gameId", gameData.id);
         intent.putExtra("gameTitle", gameData.title);
         intent.putExtra("gameDirUri", gameData.gameDir.getAbsolutePath());
@@ -412,7 +414,7 @@ public class Stock extends AppCompatActivity {
             for (File file : gameData.gameFiles) {
                 names.add(file.getName());
             }
-            new AlertDialog.Builder(Stock.this)
+            new AlertDialog.Builder(StockActivity.this)
                     .setTitle(getString(R.string.selectGameFile))
                     .setCancelable(false)
                     .setItems(names.toArray(new String[0]), (dialog, which) -> {
@@ -426,7 +428,7 @@ public class Stock extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Log.i(TAG , "Stock destroyed");
+        Log.i(TAG , "StockFragment destroyed");
     }
 
     @Override
@@ -438,14 +440,12 @@ public class Stock extends AppCompatActivity {
     }
 
     private void updateLocale() {
-        if (currentLanguage.equals(settings.language)) return;
-
-        setLocale(this, settings.language);
+        if (currentLanguage.equals(settingsController.language)) return;
+        setLocale(this, settingsController.language);
         setTitle(getString(R.string.gameStockTitle));
         activityStock.refreshGames();
         invalidateOptionsMenu();
-
-        currentLanguage = settings.language;
+        currentLanguage = settingsController.language;
     }
 
     @Override
@@ -480,7 +480,7 @@ public class Stock extends AppCompatActivity {
     }
 
     private void showSettings() {
-        Intent intent = new Intent(this, com.qsp.player.view.activities.Settings.class);
+        Intent intent = new Intent(this, SettingsActivity.class);
         startActivity(intent);
     }
 

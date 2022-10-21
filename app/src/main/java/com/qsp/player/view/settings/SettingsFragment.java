@@ -1,4 +1,4 @@
-package com.qsp.player.view.fragments;
+package com.qsp.player.view.settings;
 
 import android.app.AlertDialog;
 import android.content.SharedPreferences;
@@ -14,18 +14,19 @@ import androidx.preference.PreferenceFragmentCompat;
 import com.qsp.player.BuildConfig;
 import com.qsp.player.R;
 import com.qsp.player.utils.ViewUtil;
+import com.qsp.player.view.plugin.PluginFragment;
 
 import java.util.Objects;
 
-public class Settings extends PreferenceFragmentCompat
+public class SettingsFragment extends PreferenceFragmentCompat
         implements SharedPreferences.OnSharedPreferenceChangeListener {
     private int countClick = 3;
 
     @NonNull
-    public static Settings newInstance(String desc) {
+    public static SettingsFragment newInstance(String desc) {
         Bundle args = new Bundle();
         args.putString("desc", desc);
-        Settings fragment = new Settings();
+        SettingsFragment fragment = new SettingsFragment();
         fragment.setArguments(args);
         return fragment;
     }
@@ -51,9 +52,9 @@ public class Settings extends PreferenceFragmentCompat
         Preference click = findPreference("showExtensionMenu");
         if (click != null) {
             click.setOnPreferenceClickListener(preference -> {
-                Plugin plugin = new Plugin();
+                PluginFragment pluginFragment = new PluginFragment();
                 requireActivity().getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.settings_container, plugin, "findThisFragment")
+                        .replace(R.id.settings_container, pluginFragment , "findThisFragment")
                         .addToBackStack(null)
                         .commit();
                 return true;

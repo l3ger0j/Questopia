@@ -1,4 +1,4 @@
-package com.qsp.player.view.activities;
+package com.qsp.player.view.game;
 
 import static com.qsp.player.utils.ColorUtil.convertRGBAToBGRA;
 import static com.qsp.player.utils.ColorUtil.getHexColor;
@@ -61,8 +61,8 @@ import com.qsp.player.model.service.AudioPlayer;
 import com.qsp.player.model.service.GameContentResolver;
 import com.qsp.player.model.service.HtmlProcessor;
 import com.qsp.player.utils.ViewUtil;
-import com.qsp.player.view.adapters.Settings;
-import com.qsp.player.view.fragments.ImageDialog;
+import com.qsp.player.view.settings.SettingsActivity;
+import com.qsp.player.view.settings.SettingsController;
 import com.qsp.player.viewModel.viewModels.ActivityGame;
 
 import org.jetbrains.annotations.Contract;
@@ -74,7 +74,7 @@ import java.util.Locale;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CountDownLatch;
 
-public class Game extends AppCompatActivity implements GameInterface {
+public class GameActivity extends AppCompatActivity implements GameInterface {
     private final String TAG = this.getClass().getSimpleName();
 
     private static final int MAX_SAVE_SLOTS = 5;
@@ -101,7 +101,7 @@ public class Game extends AppCompatActivity implements GameInterface {
 
     private static final String PAGE_BODY_TEMPLATE = "<body>REPLACETEXT</body>";
 
-    private Settings settings;
+    private SettingsController settingsController;
     private String currentLanguage = Locale.getDefault().getLanguage();
     private int activeTab;
     private String pageTemplate = "";
@@ -171,12 +171,12 @@ public class Game extends AppCompatActivity implements GameInterface {
         activityGame = new ViewModelProvider(this).get(ActivityGame.class);
         activityGameBinding.setGameViewModel(activityGame);
         activityGame.gameActivityObservableField.set(this);
-        settings = Settings.newInstance().loadSettings(this);
+        settingsController = SettingsController.newInstance().loadSettings(this);
 
         setContentView(activityGameBinding.getRoot());
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
-        if (settings.useRotate) {
+        if (settingsController.useRotate) {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
         } else {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
@@ -212,7 +212,7 @@ public class Game extends AppCompatActivity implements GameInterface {
 
         initServices();
         initControls();
-        currentLanguage = activityGame.loadLocale(this, settings);
+        currentLanguage = activityGame.loadLocale(this, settingsController);
         initGame();
 
         Log.i(TAG, "Game created");
@@ -236,7 +236,7 @@ public class Game extends AppCompatActivity implements GameInterface {
 
     private void initMainDescView() {
         mainDescView = activityGameBinding.mainDesc;
-        if (settings.useAutoscroll) {
+        if (settingsController.useAutoscroll) {
             mainDescView.post(onScroll);
         }
     }
@@ -373,14 +373,14 @@ public class Game extends AppCompatActivity implements GameInterface {
     public void onResume() {
         super.onResume();
 
-        settings = Settings.newInstance().loadSettings(this);
+        settingsController = SettingsController.newInstance().loadSettings(this);
         updateLocale();
         applySettings();
 
         if (libQspProxy.getGameState().gameRunning) {
             applyGameState();
 
-            audioPlayer.setSoundEnabled(settings.isSoundEnabled);
+            audioPlayer.setSoundEnabled(settingsController.isSoundEnabled);
             audioPlayer.resume();
 
             counterHandler.postDelayed(counterTask, counterInterval);
@@ -388,26 +388,26 @@ public class Game extends AppCompatActivity implements GameInterface {
     }
 
     private void updateLocale() {
-        if (currentLanguage.equals(settings.language)) return;
+        if (currentLanguage.equals(settingsController.language)) return;
 
-        setLocale(this, settings.language);
+        setLocale(this, settingsController.language);
         setTitle(R.string.appName);
         invalidateOptionsMenu();
         setActiveTab(activeTab);
 
-        currentLanguage = settings.language;
+        currentLanguage = settingsController.language;
     }
 
     private void applySettings() {
         applyActionsHeightRatio();
 
-        if (settings.useSeparator) {
+        if (settingsController.useSeparator) {
             separatorView.setBackgroundColor(getBackgroundColor());
         } else {
             separatorView.setBackgroundColor(getResources().getColor(R.color.materialcolorpicker__grey));
         }
 
-        htmlProcessor.useOldValue.set(settings.useOldValue);
+        htmlProcessor.useOldValue.set(settingsController.useOldValue);
 
         int backColor = getBackgroundColor();
         layoutTop.setBackgroundColor(backColor);
@@ -421,15 +421,15 @@ public class Game extends AppCompatActivity implements GameInterface {
 
     private int getBackgroundColor() {
         InterfaceConfiguration config = libQspProxy.getGameState().interfaceConfig;
-        return settings.backColor != 0 ?
-                settings.backColor : convertRGBAToBGRA(config.backColor);
+        return settingsController.backColor != 0 ?
+                settingsController.backColor : convertRGBAToBGRA(config.backColor);
     }
 
     private void applyActionsHeightRatio() {
         ConstraintSet constraintSet = new ConstraintSet();
         constraintSet.clone(layoutTop);
-        constraintSet.setVerticalWeight(R.id.main_desc, 1.0f - settings.actionsHeightRatio);
-        constraintSet.setVerticalWeight(R.id.actions, settings.actionsHeightRatio);
+        constraintSet.setVerticalWeight(R.id.main_desc, 1.0f - settingsController.actionsHeightRatio);
+        constraintSet.setVerticalWeight(R.id.actions, settingsController.actionsHeightRatio);
         constraintSet.applyTo(layoutTop);
     }
 
@@ -438,7 +438,7 @@ public class Game extends AppCompatActivity implements GameInterface {
                 .replace("QSPTEXTCOLOR", getHexColor(getTextColor()))
                 .replace("QSPBACKCOLOR", getHexColor(getBackgroundColor()))
                 .replace("QSPLINKCOLOR", getHexColor(getLinkColor()))
-                .replace("QSPFONTSTYLE", getFontStyle(settings.typeface))
+                .replace("QSPFONTSTYLE", getFontStyle(settingsController.typeface))
                 .replace("QSPFONTSIZE", Integer.toString(getFontSize()));
 
         pageTemplate = pageHeadTemplate + PAGE_BODY_TEMPLATE;
@@ -446,17 +446,17 @@ public class Game extends AppCompatActivity implements GameInterface {
 
     private int getTextColor() {
         InterfaceConfiguration config = libQspProxy.getGameState().interfaceConfig;
-        return config.fontColor != 0 ? convertRGBAToBGRA(config.fontColor) : settings.textColor;
+        return config.fontColor != 0 ? convertRGBAToBGRA(config.fontColor) : settingsController.textColor;
     }
 
     private int getLinkColor() {
         InterfaceConfiguration config = libQspProxy.getGameState().interfaceConfig;
-        return config.linkColor != 0 ? convertRGBAToBGRA(config.linkColor) : settings.linkColor;
+        return config.linkColor != 0 ? convertRGBAToBGRA(config.linkColor) : settingsController.linkColor;
     }
 
     private int getFontSize() {
         InterfaceConfiguration config = libQspProxy.getGameState().interfaceConfig;
-        return settings.useGameFont && config.fontSize != 0 ? config.fontSize : settings.fontSize;
+        return settingsController.useGameFont && config.fontSize != 0 ? config.fontSize : settingsController.fontSize;
     }
 
     private void applyGameState() {
@@ -468,7 +468,7 @@ public class Game extends AppCompatActivity implements GameInterface {
 
     private void refreshMainDesc() {
         String mainDesc = getHtml(libQspProxy.getGameState().mainDesc);
-        if (settings.useAutoscroll) {
+        if (settingsController.useAutoscroll) {
             mainDescView.postDelayed(onScroll, 300);
         }
 
@@ -663,7 +663,7 @@ public class Game extends AppCompatActivity implements GameInterface {
             return true;
         } else if (i == R.id.menu_options) {
             Intent intent = new Intent();
-            intent.setClass(this , com.qsp.player.view.activities.Settings.class);
+            intent.setClass(this , SettingsActivity.class);
             startActivity(intent);
             return true;
         } else if (i == R.id.menu_newgame) {
@@ -878,7 +878,7 @@ public class Game extends AppCompatActivity implements GameInterface {
         }
 
         private Typeface getTypeface() {
-            switch (settings.typeface) {
+            switch (settingsController.typeface) {
                 case 1:
                     return Typeface.SANS_SERIF;
                 case 2:

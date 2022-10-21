@@ -1,4 +1,4 @@
-package com.qsp.player.view.fragments;
+package com.qsp.player.view.stock;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -14,18 +14,17 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.qsp.player.databinding.FragmentStockBinding;
 import com.qsp.player.dto.stock.GameData;
-import com.qsp.player.view.adapters.GamesRecycler;
 import com.qsp.player.view.adapters.RecyclerItemClickListener;
 import com.qsp.player.viewModel.viewModels.FragmentStock;
 
 import java.util.ArrayList;
 import java.util.Objects;
 
-public class Stock extends Fragment {
+public class StockFragment extends Fragment {
     private FragmentStock localViewModel;
     private RecyclerView mRecyclerView;
 
-    public Stock() {
+    public StockFragment() {
     }
 
     @Nullable

@@ -1,4 +1,4 @@
-package com.qsp.player.view.adapters;
+package com.qsp.player.view.plugin;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;

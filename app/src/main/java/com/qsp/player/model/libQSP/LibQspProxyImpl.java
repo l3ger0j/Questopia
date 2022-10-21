@@ -25,7 +25,7 @@ import com.qsp.player.model.service.GameContentResolver;
 import com.qsp.player.model.service.HtmlProcessor;
 import com.qsp.player.model.service.ImageProvider;
 import com.qsp.player.utils.StreamUtil;
-import com.qsp.player.view.activities.GameInterface;
+import com.qsp.player.view.game.GameInterface;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;

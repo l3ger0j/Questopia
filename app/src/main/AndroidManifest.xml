@@ -14,7 +14,7 @@
         tools:targetApi="m">
 
         <activity
-            android:name=".view.activities.Stock"
+            android:name=".view.stock.StockActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -23,12 +23,12 @@
         </activity>
 
         <activity
-            android:name=".view.activities.Game"
+            android:name=".view.game.GameActivity"
             android:alwaysRetainTaskState="true"
             android:theme="@style/Theme.QSP.Translucent.NoActionBar" />
 
         <activity
-            android:name=".view.activities.Settings"
+            android:name=".view.settings.SettingsActivity"
             android:label="@string/settingsTitle" />
 
         <provider

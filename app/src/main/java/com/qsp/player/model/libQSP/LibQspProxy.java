@@ -2,7 +2,7 @@ package com.qsp.player.model.libQSP;
 
 import android.net.Uri;
 
-import com.qsp.player.view.activities.GameInterface;
+import com.qsp.player.view.game.GameInterface;
 
 import java.io.File;
 

@@ -1,4 +1,4 @@
-package com.qsp.player.view.activities;
+package com.qsp.player.view.game;
 
 import com.qsp.player.model.libQSP.RefreshInterfaceRequest;
 import com.qsp.player.model.libQSP.WindowType;

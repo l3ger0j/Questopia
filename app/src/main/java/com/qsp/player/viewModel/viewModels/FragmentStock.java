@@ -5,14 +5,14 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.qsp.player.dto.stock.GameData;
-import com.qsp.player.view.activities.Stock;
+import com.qsp.player.view.stock.StockActivity;
 
 import java.util.ArrayList;
 
 public class FragmentStock extends ViewModel {
     private final MutableLiveData<ArrayList<GameData>> gameDataList;
 
-    public ObservableField<Stock> activityObservableField =
+    public ObservableField<StockActivity> activityObservableField =
             new ObservableField<>();
 
     public FragmentStock() {

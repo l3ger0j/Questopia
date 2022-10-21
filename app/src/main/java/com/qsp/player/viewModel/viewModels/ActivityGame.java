@@ -22,8 +22,8 @@ import androidx.lifecycle.AndroidViewModel;
 
 import com.qsp.player.model.libQSP.LibQspProxy;
 import com.qsp.player.model.service.GameContentResolver;
-import com.qsp.player.view.activities.Game;
-import com.qsp.player.view.adapters.Settings;
+import com.qsp.player.view.game.GameActivity;
+import com.qsp.player.view.settings.SettingsController;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -35,7 +35,7 @@ public class ActivityGame extends AndroidViewModel {
     private GameContentResolver gameContentResolver;
     private LibQspProxy libQspProxy;
 
-    public ObservableField<Game> gameActivityObservableField =
+    public ObservableField<GameActivity> gameActivityObservableField =
             new ObservableField<>();
 
     // region Getter/Setter
@@ -101,9 +101,9 @@ public class ActivityGame extends AndroidViewModel {
         }
     }
 
-    public String loadLocale(Context context, Settings settings) {
-        setLocale(context, settings.language);
-        return settings.language;
+    public String loadLocale(Context context, SettingsController settingsController) {
+        setLocale(context, settingsController.language);
+        return settingsController.language;
     }
 
 }
