@@ -200,7 +200,7 @@ public final class ArchiveUtil {
             createDirectory(Objects.requireNonNull(file.getParentFile()));
             try {
                 stream = new SequentialOutStream(context.getContentResolver()
-                        .openOutputStream(Uri.fromFile(file) , "rwt"));
+                        .openOutputStream(Uri.parse(Uri.decode(String.valueOf(Uri.fromFile(file)))) , "rwt"));
             } catch (FileNotFoundException e) {
                 Log.e(TAG, "Error: ", e);
             }

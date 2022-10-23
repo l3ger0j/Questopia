@@ -15,11 +15,13 @@ import static com.qsp.player.utils.XmlUtil.objectToXml;
 import android.app.Application;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.os.Build;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 
 import androidx.annotation.NonNull;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.databinding.ObservableBoolean;
 import androidx.databinding.ObservableField;
 import androidx.documentfile.provider.DocumentFile;
@@ -32,6 +34,7 @@ import com.qsp.player.databinding.DialogInstallBinding;
 import com.qsp.player.dto.stock.GameData;
 import com.qsp.player.model.install.InstallException;
 import com.qsp.player.model.install.Installer;
+import com.qsp.player.model.notify.NotifyBuilder;
 import com.qsp.player.utils.ViewUtil;
 import com.qsp.player.view.stock.StockActivity;
 import com.qsp.player.viewModel.repository.LocalGame;
@@ -285,11 +288,24 @@ public class ActivityStock extends AndroidViewModel {
         Installer installer = new Installer(activityObservableField.get());
         installer.gameInstall(gameFile, gameDir).observeForever(aBoolean -> {
             if (aBoolean) {
+                notifyGameWasInstall();
                 writeGameInfo(gameData , gameDir);
                 refreshGames();
             }
         });
         isShowDialog.set(false);
+    }
+
+    private void notifyGameWasInstall () {
+        NotifyBuilder builder =
+                new NotifyBuilder(activityObservableField.get(), "com.qsp.player");
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            builder.createChannel();
+        }
+        builder.setTitleNotify("Game install");
+        builder.setTextNotify("The game has been successfully installed!");
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(getApplication());
+        notificationManager.notify(1, builder.build());
     }
 
     public void writeGameInfo(GameData gameData , File gameDir) {

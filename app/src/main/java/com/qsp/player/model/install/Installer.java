@@ -1,6 +1,5 @@
 package com.qsp.player.model.install;
 
-import static com.qsp.player.utils.ArchiveUtil.extractArchiveEntries;
 import static com.qsp.player.utils.DirUtil.doesDirectoryContainGameFiles;
 import static com.qsp.player.utils.DirUtil.normalizeGameDirectory;
 import static com.qsp.player.utils.FileUtil.createFile;
@@ -11,6 +10,10 @@ import android.content.Context;
 import androidx.annotation.NonNull;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.lifecycle.MutableLiveData;
+import androidx.work.Data;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkInfo;
+import androidx.work.WorkManager;
 
 import com.qsp.player.utils.StreamUtil;
 
@@ -19,9 +22,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.concurrent.Executors;
-
-import java9.util.concurrent.CompletableFuture;
 
 public class Installer {
     private final MutableLiveData<Boolean> isDone = new MutableLiveData<>();
@@ -51,27 +51,33 @@ public class Installer {
     }
 
     private void installArchive (DocumentFile srcFile, File destDir) {
-        CompletableFuture<Boolean> completableFuture =
-                CompletableFuture
-                        .supplyAsync(() -> extractArchiveEntries(
-                                context, srcFile.getUri(), destDir),
-                                Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()))
-                        .thenApplyAsync(aBoolean -> {
-                            if (!aBoolean) {
-                                isDone.postValue(false);
-                                throw new InstallException("NIG");
-                            } else {
-                                normalizeGameDirectory(destDir);
-                                if (!doesDirectoryContainGameFiles(destDir)) {
-                                    isDone.postValue(false);
-                                    throw new InstallException("NFE");
-                                } else {
-                                    isDone.postValue(true);
-                                }
-                                return true;
-                            }
-                        }, Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()));
-        completableFuture.isDone();
+        Data inputData = new Data.Builder()
+                .putString("srcFile", srcFile.getUri().toString())
+                .putString("destDir", destDir.getAbsolutePath())
+                .build();
+
+        OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(InstallerWork.class)
+                .setInputData(inputData)
+                .build();
+
+        WorkManager.getInstance().enqueue(workRequest);
+
+        WorkManager.getInstance().getWorkInfoByIdLiveData(workRequest.getId()).observeForever(workInfo -> {
+            if (workInfo.getState().isFinished()) {
+                if (workInfo.getState().equals(WorkInfo.State.SUCCEEDED)) {
+                    isDone.postValue(true);
+                } else if (workInfo.getState().equals(WorkInfo.State.FAILED)) {
+                    isDone.postValue(false);
+                    if (!workInfo.getOutputData().equals(Data.EMPTY)) {
+                        if (workInfo.getOutputData().getString("errorOne") != null) {
+                            throw new InstallException("NIG");
+                        } else if (workInfo.getOutputData().getString("errorTwo") != null) {
+                            throw new InstallException("NFE");
+                        }
+                    }
+                }
+            }
+        });
     }
 
     // TODO Deprecated! Rewrite to get .qsp file
