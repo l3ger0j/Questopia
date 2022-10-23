@@ -81,6 +81,7 @@ public class Installer {
     }
 
     // TODO Deprecated! Rewrite to get .qsp file
+    @Deprecated
     private void installDirectory(DocumentFile srcFile , File destDir) {
         for (DocumentFile file : srcFile.listFiles()) {
             copyFileOrDirectory(file, destDir);
