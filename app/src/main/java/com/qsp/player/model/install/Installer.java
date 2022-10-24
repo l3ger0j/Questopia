@@ -60,9 +60,10 @@ public class Installer {
                 .setInputData(inputData)
                 .build();
 
-        WorkManager.getInstance().enqueue(workRequest);
+        WorkManager.getInstance(context).enqueue(workRequest);
 
-        WorkManager.getInstance().getWorkInfoByIdLiveData(workRequest.getId()).observeForever(workInfo -> {
+        WorkManager.getInstance(context)
+                .getWorkInfoByIdLiveData(workRequest.getId()).observeForever(workInfo -> {
             if (workInfo.getState().isFinished()) {
                 if (workInfo.getState().equals(WorkInfo.State.SUCCEEDED)) {
                     isDone.postValue(true);

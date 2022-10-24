@@ -124,7 +124,7 @@
         <string name="extraCatTitle">Extra</string>
         <string name="pluginTitle">Extension menu</string>
         <string name="aboutTitle">About Quest Player</string>
-        <!-- Menu save and load -->
+    <!-- Menu save and load -->
         <string name="selectSlot">Select a slot</string>
         <string name="slotPresent" formatted="false">Slot %d - %s</string>
         <string name="slotEmpty">Slot %d [Empty]</string>
