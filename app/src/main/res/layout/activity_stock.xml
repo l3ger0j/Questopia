@@ -7,7 +7,7 @@
         <import type="android.view.View"/>
         <variable
             name="stockVM"
-            type="com.qsp.player.viewModel.viewModels.ActivityStock" />
+            type="org.qp.android.viewModel.viewModels.ActivityStock" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

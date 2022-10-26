@@ -5,8 +5,8 @@
         <import type="android.text.TextUtils"/>
 
         <variable
-            name="pluginList"
-            type="com.qsp.player.dto.PluginList" />
+            name="pluginInfo"
+            type="org.qp.android.dto.plugin.PluginInfo" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -36,7 +36,7 @@
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
             android:padding="5dp"
-            android:text="@{pluginList.title}"
+            android:text="@{pluginInfo.title}"
             android:textAlignment="center"
             android:textSize="16sp"
             android:textStyle="bold"

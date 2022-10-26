@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.QSP.Translucent" parent="Theme.MaterialComponents.Bridge">
+    <style name="Theme.QP.Translucent" parent="Theme.MaterialComponents.Bridge">
         <item name="android:windowNoTitle">true</item>
         <item name="android:colorForeground">#fff</item>
     </style>
-    <style name="Theme.QSP.Translucent.NoActionBar" parent="Theme.MaterialComponents.NoActionBar.Bridge">
+    <style name="Theme.QP.Translucent.NoActionBar" parent="Theme.MaterialComponents.NoActionBar.Bridge">
         <item name="android:windowNoTitle">true</item>
         <item name="android:colorForeground">#fff</item>
     </style>

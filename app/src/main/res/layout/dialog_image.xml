@@ -5,7 +5,7 @@
         <import type="android.view.View"/>
         <variable
             name="dialogFragment"
-            type="com.qsp.player.view.game.ImageDialog" />
+            type="org.qp.android.view.game.ImageDialog" />
     </data>
 
     <FrameLayout

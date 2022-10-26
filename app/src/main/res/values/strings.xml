@@ -130,4 +130,6 @@
         <string name="slotEmpty">Slot %d [Empty]</string>
         <string name="loadFrom">From File…</string>
         <string name="saveTo">To File…</string>
+    <!-- Menu plugins -->
+        <string name="pluginMenuTitle">Plugins</string>
 </resources>

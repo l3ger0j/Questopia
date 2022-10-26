@@ -6,7 +6,7 @@
 
         <variable
             name="gameData"
-            type="com.qsp.player.dto.stock.GameData" />
+            type="org.qp.android.dto.stock.GameData" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"

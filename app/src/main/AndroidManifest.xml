@@ -4,13 +4,17 @@
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
 
+    <queries>
+
+    </queries>
+
     <application
         android:name=".QuestPlayerApplication"
         android:hardwareAccelerated="true"
         android:icon="@drawable/icon"
         android:label="@string/appName"
         android:largeHeap="true"
-        android:theme="@style/Theme.QSP.Translucent"
+        android:theme="@style/Theme.QP.Translucent"
         tools:targetApi="m">
 
         <activity
@@ -25,7 +29,7 @@
         <activity
             android:name=".view.game.GameActivity"
             android:alwaysRetainTaskState="true"
-            android:theme="@style/Theme.QSP.Translucent.NoActionBar" />
+            android:theme="@style/Theme.QP.Translucent.NoActionBar" />
 
         <activity
             android:name=".view.settings.SettingsActivity"
