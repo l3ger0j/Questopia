@@ -9,7 +9,7 @@ android {
     compileSdkVersion 32
 
     defaultConfig {
-        applicationId "com.qsp.player"
+        applicationId "org.qp.android"
         minSdkVersion 21
         targetSdkVersion 32
         versionCode 20000
