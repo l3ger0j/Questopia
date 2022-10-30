@@ -1,6 +1,6 @@
-package com.qsp.player;
+package org.qp.android.model.plugin;
 
-interface QuestPlugin {
+interface IQuestPlugin {
 
     int id();
     int version();

@@ -125,31 +125,6 @@ public final class FileUtil {
         }
     }
 
-    public static File getParentDirectory(File parentDir, String path) {
-        int idx = path.indexOf('/');
-        if (idx == -1) return parentDir;
-
-        String dirName = path.substring(0, idx);
-        File dir = findFileOrDirectory(parentDir, dirName);
-        if (dir == null) {
-            dir =  createDirectory(parentDir, dirName);
-        }
-
-        return getParentDirectory(dir, path.substring(idx + 1));
-    }
-
-    public static void createDirectories(File parentDir, String dirPath) {
-        int idx = dirPath.indexOf('/');
-        String dirName = idx == -1 ? dirPath : dirPath.substring(0, idx);
-        File dir = findFileOrDirectory(parentDir, dirName);
-        if (dir == null) {
-            dir = createDirectory(parentDir, dirName);
-        }
-        if (idx != -1) {
-            createDirectories(dir, dirPath.substring(idx + 1));
-        }
-    }
-
     @Nullable
     public static byte[] getFileContents(String path) {
         File file = new File(path);

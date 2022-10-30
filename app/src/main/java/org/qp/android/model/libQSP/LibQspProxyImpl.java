@@ -34,7 +34,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Locale;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -298,7 +297,6 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
             try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
                 StreamUtil.copy(in, out);
                 gameData = out.toByteArray();
-                Log.d(TAG, Arrays.toString(gameData));
             }
         } catch (IOException ex) {
             Log.e(TAG,"Failed to load game state", ex);
@@ -360,12 +358,22 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
     public void onInputAreaClicked() {
         final GameInterface inter = gameInterface;
         if (inter == null) return;
-
         runOnQspThread(() -> {
             String input = inter.showInputBox(context.getString(R.string.userInputTitle));
             nativeMethods.QSPSetInputStrText(input);
-
             if (!nativeMethods.QSPExecUserInput(true)) {
+                showLastQspError();
+            }
+        });
+    }
+
+    @Override
+    public void onUseExecutorString() {
+        final GameInterface inter = gameInterface;
+        if (inter == null) return;
+        runOnQspThread(() -> {
+            String input = inter.showInputBox("Write ur code");
+            if (!nativeMethods.QSPExecString(input, true)) {
                 showLastQspError();
             }
         });
@@ -383,7 +391,6 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
     @Override
     public void executeCounter() {
         if (libQspLock.isLocked()) return;
-
         runOnQspThread(() -> {
             if (!nativeMethods.QSPExecCounter(true)) {
                 showLastQspError();

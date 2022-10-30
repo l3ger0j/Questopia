@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<androidx.preference.PreferenceScreen
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <PreferenceCategory android:title="@string/generalCatTitle">
         <ListPreference
@@ -78,6 +78,11 @@
             android:key="autoscroll"
             android:summary="@string/autoscrollSum"
             android:title="@string/autoscrollTitle" />
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="execString"
+            android:summary="@string/execStringSum"
+            app:title="@string/execStringTitle"/>
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/extraCatTitle">

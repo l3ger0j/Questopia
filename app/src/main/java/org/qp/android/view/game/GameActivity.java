@@ -655,7 +655,11 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
             setActiveTab(TAB_VARS_DESC);
             return true;
         } else if (i == R.id.menu_userinput) {
-            libQspProxy.onInputAreaClicked();
+            if (settingsController.useExecString) {
+                libQspProxy.onUseExecutorString();
+            } else {
+                libQspProxy.onInputAreaClicked();
+            }
             return true;
         } else if (i == R.id.menu_gamestock) {
             promptCloseGame();

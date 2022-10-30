@@ -109,6 +109,8 @@
         <string name="separatorSum">Включить/выключить разделитель в игре</string>
         <string name="autoscrollTitle">Автопролистывание</string>
         <string name="autoscrollSum">Включить/выключить автопролистывание</string>
+        <string name="execStringTitle">Исполнитель строк</string>
+        <string name="execStringSum">Включить/выключить исполнитель строк</string>
         <!-- Text section -->
         <string name="textCatTitle">Текст</string>
         <string name="fontStyleTitle">Стиль шрифта</string>

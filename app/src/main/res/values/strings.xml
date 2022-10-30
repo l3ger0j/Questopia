@@ -109,6 +109,8 @@
         <string name="separatorSum">On/off separator line in game</string>
         <string name="autoscrollTitle">Autoscroll</string>
         <string name="autoscrollSum">Enable/disable autoscroll</string>
+        <string name="execStringTitle">String executor</string>
+        <string name="execStringSum">Enable/disable execution string</string>
         <!-- Text section -->
         <string name="textCatTitle">Text</string>
         <string name="fontStyleTitle">Font Style</string>

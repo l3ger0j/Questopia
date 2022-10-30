@@ -12,8 +12,8 @@ android {
         applicationId "org.qp.android"
         minSdkVersion 21
         targetSdkVersion 32
-        versionCode 20000
-        versionName "3.0.0"
+        versionCode 20100
+        versionName "3.1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -57,7 +57,7 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.documentfile:documentfile:1.0.1'
     implementation 'androidx.preference:preference:1.2.0'
-    implementation 'androidx.fragment:fragment:1.5.3'
+    implementation 'androidx.fragment:fragment:1.5.4'
 
     implementation 'androidx.work:work-runtime:2.7.1'
     implementation 'com.github.omicronapps:7-Zip-JBinding-4Android:Release-16.02-2.02'

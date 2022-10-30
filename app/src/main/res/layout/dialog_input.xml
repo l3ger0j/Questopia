@@ -5,12 +5,12 @@
 
     <EditText
         android:id="@+id/inputbox_edit"
-        android:labelFor="@id/inputbox_edit"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:autofillHints="Write command"
         android:gravity="fill_horizontal"
-        android:inputType="textNoSuggestions"
+        android:inputType="textMultiLine|textNoSuggestions"
+        android:labelFor="@id/inputbox_edit"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
 </LinearLayout>

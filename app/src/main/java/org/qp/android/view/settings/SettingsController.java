@@ -20,6 +20,7 @@ public class SettingsController {
     public boolean useSeparator;
     public boolean useGameFont;
     public boolean useAutoscroll;
+    public boolean useExecString;
     public String language;
 
     private static SettingsController INSTANCE;
@@ -48,6 +49,7 @@ public class SettingsController {
         settingsController.useRotate = preferences.getBoolean("rotate", false);
         settingsController.useOldValue = preferences.getBoolean("oldValue", true);
         settingsController.useAutoscroll = preferences.getBoolean("autoscroll", true);
+        settingsController.useExecString = preferences.getBoolean("execString", false);
         settingsController.useSeparator = preferences.getBoolean("separator", false);
         settingsController.useGameFont = preferences.getBoolean("gameFont", false);
         settingsController.isSoundEnabled = preferences.getBoolean("sound", true);

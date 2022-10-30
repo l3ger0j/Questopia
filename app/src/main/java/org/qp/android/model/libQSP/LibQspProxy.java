@@ -28,6 +28,7 @@ public interface LibQspProxy {
     void onActionClicked(int index);
     void onObjectSelected(int index);
     void onInputAreaClicked();
+    void onUseExecutorString();
 
     /**
      * Запускает выполнение указанной строки кода в библиотеке.

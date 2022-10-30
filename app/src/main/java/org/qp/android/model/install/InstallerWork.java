@@ -15,7 +15,6 @@ import androidx.work.WorkerParameters;
 
 import java.io.File;
 import java.util.Objects;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -41,7 +40,7 @@ public class InstallerWork extends Worker {
                 .build();
 
         ExecutorService service = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-        FutureTask<Boolean> task = new FutureTask<>((Callable<Boolean>) () ->
+        FutureTask<Boolean> task = new FutureTask<>(() ->
                 extractArchiveEntries(getApplicationContext() , Objects.requireNonNull(srcFile).getUri() , destDir));
         service.submit(task);
         try {

@@ -228,7 +228,7 @@ public class StockActivity extends AppCompatActivity {
         if (requestCode == 1) {
             if (grantResults.length > 0
                     && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
+                Log.d(TAG, "Success");
             } else {
                 ViewUtil.showErrorDialog(this , "Permission denied to read your External storage");
             }
@@ -383,7 +383,7 @@ public class StockActivity extends AppCompatActivity {
         AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this)
                 .setMessage(message)
                 .setTitle(gameData.title)
-                .setIcon(R.mipmap.ic_launcher)
+                .setIcon(R.mipmap.ic_launcher_round)
                 .setNegativeButton(getString(R.string.close), (dialog, which) -> dialog.cancel());
 
         if (gameData.isInstalled() && doesDirectoryContainGameFiles(gameData.gameDir)) {

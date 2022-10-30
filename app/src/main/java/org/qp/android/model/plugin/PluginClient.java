@@ -8,17 +8,15 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.IBinder;
 
-import com.qsp.player.QuestPlugin;
-
 import java.util.List;
 
 public class PluginClient {
-    private QuestPlugin servicePlugin;
+    private IQuestPlugin servicePlugin;
 
     ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name , IBinder service) {
-            servicePlugin = QuestPlugin.Stub.asInterface(service);
+            servicePlugin = IQuestPlugin.Stub.asInterface(service);
         }
 
         @Override
