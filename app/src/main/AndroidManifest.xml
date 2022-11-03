@@ -17,13 +17,16 @@
         android:theme="@style/Theme.QP.Translucent"
         tools:targetApi="m">
 
-        <activity
-            android:name=".view.stock.StockActivity"
+        <activity android:name=".view.splash.SquashActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".view.stock.StockActivity">
         </activity>
 
         <activity
