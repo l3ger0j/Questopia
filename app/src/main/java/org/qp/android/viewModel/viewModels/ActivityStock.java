@@ -3,6 +3,7 @@ package org.qp.android.viewModel.viewModels;
 import static android.content.Intent.ACTION_OPEN_DOCUMENT;
 import static android.content.Intent.EXTRA_MIME_TYPES;
 import static org.qp.android.utils.FileUtil.GAME_INFO_FILENAME;
+import static org.qp.android.utils.FileUtil.copyFile;
 import static org.qp.android.utils.FileUtil.createFile;
 import static org.qp.android.utils.FileUtil.findFileOrDirectory;
 import static org.qp.android.utils.FileUtil.getOrCreateDirectory;
@@ -169,8 +170,7 @@ public class ActivityStock extends AndroidViewModel {
                     : tempImageFile.getUri().toString());
             writeGameInfo(tempGameData, tempGameData.gameDir);
             if (tempPathFile != null) {
-                Installer installer = new Installer(activityObservableField.get());
-                installer.copyFileOrDirectory(tempPathFile, tempGameData.gameDir);
+                copyFile(activityObservableField.get(), tempPathFile, tempGameData.gameDir);
             }
             refreshGamesDirectory();
             isShowDialog.set(false);

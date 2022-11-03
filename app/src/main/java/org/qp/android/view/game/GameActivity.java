@@ -105,7 +105,6 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
     private int activeTab;
     private String pageTemplate = "";
     private boolean showActions = true;
-    // region Контролы
 
     private ActionBar actionBar;
     private Menu mainMenu;
@@ -116,17 +115,9 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
     private ListView actionsView;
     private ListView objectsView;
 
-    // endregion Контролы
-
-    // region Сервисы
-
     private HtmlProcessor htmlProcessor;
     private LibQspProxy libQspProxy;
     private AudioPlayer audioPlayer;
-
-    // endregion Сервисы
-
-    // region Локация-счётчик
 
     private final Handler counterHandler = new Handler();
 
@@ -140,14 +131,11 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
         }
     };
 
-    // endregion Локация-счётчик
-
     private int slotAction = 0;
     private ActivityGame activityGame;
     private ActivityGameBinding activityGameBinding;
     private ActivityResultLauncher<Intent> resultLauncher;
 
-    // region Scroll
     private final Runnable onScroll = new Runnable() {
         @Override
         public void run() {
@@ -158,7 +146,6 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
             }
         }
     };
-    // endregion Scroll
 
     @SuppressLint("SourceLockedOrientationActivity")
     @Override

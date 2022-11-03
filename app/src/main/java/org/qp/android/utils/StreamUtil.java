@@ -8,7 +8,7 @@ public final class StreamUtil {
     private static final int BUFFER_SIZE = 8192;
 
     /**
-     * Копирует данные из потока <code>from</code> в поток <code>to</code>.
+     * Copies data from the <code>from</code> stream to the <code>to</code> stream.
      */
     public static void copy(InputStream from, OutputStream to) throws IOException {
         byte[] buffer = new byte[BUFFER_SIZE];

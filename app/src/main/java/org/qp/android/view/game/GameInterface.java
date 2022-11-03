@@ -18,12 +18,12 @@ public interface GameInterface {
     // region Локация-счётчик
 
     /**
-     * Установить интервал обработки локации-счётчика в <code>millis</code> миллисекунд.
+     * Set the counter location processing interval to <code>millis</code> milliseconds.
      */
     void setCounterInterval(int millis);
 
     /**
-     * Выполнить <code>runnable</code> без обработки локации-счётчика.
+     * Execute <code>runnable</code> without processing the location counter.
      */
     void doWithCounterDisabled(Runnable runnable);
 

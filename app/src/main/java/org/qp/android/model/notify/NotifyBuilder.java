@@ -40,7 +40,7 @@ public class NotifyBuilder {
         NotificationChannel notificationChannel =
                 new NotificationChannel(CHANNEL_ID,
                         "Installation status",
-                        NotificationManager.IMPORTANCE_DEFAULT );
+                        NotificationManager.IMPORTANCE_DEFAULT);
         notificationChannel.setDescription("Channel for displaying information about the current installation status of the game");
         notificationChannel.enableLights(true);
         notificationChannel.setLightColor(Color.GREEN);

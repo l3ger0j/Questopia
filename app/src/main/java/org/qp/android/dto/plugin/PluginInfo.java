@@ -11,7 +11,6 @@ public class PluginInfo {
     public String fileSize;
 
     public PluginInfo() {
-
     }
 
     public int getFileSize() {

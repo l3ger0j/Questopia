@@ -1,10 +1,5 @@
 package org.qp.android.model.install;
 
-import static org.qp.android.utils.DirUtil.doesDirectoryContainGameFiles;
-import static org.qp.android.utils.DirUtil.normalizeGameDirectory;
-import static org.qp.android.utils.FileUtil.createFile;
-import static org.qp.android.utils.FileUtil.getOrCreateDirectory;
-
 import android.content.Context;
 
 import androidx.annotation.NonNull;
@@ -15,13 +10,7 @@ import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
 
-import org.qp.android.utils.StreamUtil;
-
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 
 public class Installer {
     private final MutableLiveData<Boolean> isDone = new MutableLiveData<>();
@@ -32,22 +21,8 @@ public class Installer {
     }
 
     public MutableLiveData<Boolean> gameInstall (@NonNull DocumentFile srcFile, File destDir) {
-        if (srcFile.isDirectory()) {
-            installDirectory(srcFile, destDir);
-        } else {
-            installArchive(srcFile, destDir);
-        }
+        installArchive(srcFile, destDir);
         return isDone;
-    }
-
-    protected void postInstall(File gameDir) {
-        normalizeGameDirectory(gameDir);
-        boolean containsGameFiles = doesDirectoryContainGameFiles(gameDir);
-        if (!containsGameFiles) {
-            isDone.postValue(false);
-            throw new InstallException("NFE");
-        }
-        isDone.postValue(true);
     }
 
     private void installArchive (DocumentFile srcFile, File destDir) {
@@ -79,37 +54,5 @@ public class Installer {
                 }
             }
         });
-    }
-
-    @Deprecated
-    private void installDirectory(DocumentFile srcFile , File destDir) {
-        for (DocumentFile file : srcFile.listFiles()) {
-            copyFileOrDirectory(file, destDir);
-        }
-        postInstall(destDir);
-    }
-
-    public void copyFileOrDirectory(DocumentFile srcFile, File destDir) {
-        if (srcFile.isDirectory()) {
-            File subDestDir = getOrCreateDirectory(destDir, srcFile.getName());
-            for (DocumentFile subSrcFile : srcFile.listFiles()) {
-                copyFileOrDirectory(subSrcFile, subDestDir);
-            }
-        } else {
-            copyFile(srcFile, destDir);
-        }
-    }
-
-    private void copyFile(DocumentFile srcFile, File destDir) {
-        File destFile = createFile(destDir, srcFile.getName());
-        if (destFile == null) {
-            return;
-        }
-        try (InputStream in = context.getContentResolver().openInputStream(srcFile.getUri());
-             OutputStream out = new FileOutputStream(destFile)) {
-            StreamUtil.copy(in, out);
-        } catch (IOException ex) {
-            throw new InstallException("CGF");
-        }
     }
 }

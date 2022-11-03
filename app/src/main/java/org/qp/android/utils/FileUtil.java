@@ -1,16 +1,23 @@
 package org.qp.android.utils;
 
+import android.content.Context;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.documentfile.provider.DocumentFile;
+
+import org.qp.android.model.install.InstallException;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.util.Objects;
 
 public final class FileUtil {
@@ -136,6 +143,26 @@ public final class FileUtil {
         } catch (IOException ex) {
             Log.e(TAG,"Error reading file: " + path, ex);
             return null;
+        }
+    }
+
+    public static void copyDirectory(DocumentFile srcFile, File destDir) {
+        File subDestDir = getOrCreateDirectory(destDir, srcFile.getName());
+        for (DocumentFile subSrcFile : srcFile.listFiles()) {
+            copyDirectory(subSrcFile, subDestDir);
+        }
+    }
+
+    public static void copyFile(Context context, DocumentFile srcFile, File destDir) {
+        File destFile = createFile(destDir, srcFile.getName());
+        if (destFile == null) {
+            return;
+        }
+        try (InputStream in = context.getContentResolver().openInputStream(srcFile.getUri());
+             OutputStream out = new FileOutputStream(destFile)) {
+            StreamUtil.copy(in, out);
+        } catch (IOException ex) {
+            throw new InstallException("CGF");
         }
     }
 }

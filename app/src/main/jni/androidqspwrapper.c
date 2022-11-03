@@ -351,7 +351,7 @@ jobject Java_org_qp_android_model_libQSP_NativeMethods_QSPGetVarValues(JNIEnv *e
         return NULL;
     jobject obj = (*env)->AllocObject(env, clazz);
 
-    jfieldID successFid = (*env)->GetFieldID(env, clazz, "success", "Z");
+    jfieldID successFid = (*env)->GetFieldID(env, clazz, "isSuccess", "Z");
     if (successFid == 0)
         return NULL;
     if (result == QSP_TRUE) {

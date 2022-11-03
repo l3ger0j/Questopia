@@ -5,7 +5,7 @@ import android.os.Looper;
 public final class ThreadUtil {
 
     /**
-     * @return <code>true</code> если текущий поток - <code>thread</code>, иначе <code>false</code>
+     * @return <code>true</code> if the current thread is <code>thread</code>, otherwise <code>false</code>
      */
     public static boolean isSameThread(Thread thread) {
         return Thread.currentThread().equals(thread);
@@ -21,14 +21,14 @@ public final class ThreadUtil {
     }
 
     /**
-     * @return <code>true</code> если текущий поток - основной, иначе <code>false</code>
+     * @return <code>true</code> if the current thread is the main one, otherwise <code>false</code>
      */
     public static boolean isMainThread() {
         return Thread.currentThread().equals(Looper.getMainLooper().getThread());
     }
 
     /**
-     * Вбрасывает <code>RuntimeException</code>, если метод вызывается не из основного потока.
+     * Throws a <code>RuntimeException</code> if the method is not called from the main thread.
      */
     public static void throwIfNotMainThread() {
         if (!isMainThread()) {

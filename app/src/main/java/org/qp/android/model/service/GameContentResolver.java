@@ -20,9 +20,9 @@ public class GameContentResolver {
     }
 
     /**
-     * Приводит к нормальной форме путь до игрового ресурса (мелодии, изображения).
+     * Leads to the normal form of the path to the game resource (melodies, images).
      *
-     * @implNote Удаляет "./" из начала пути, заменяет все вхождения "\" на "/".
+     * @implNote Removes "./" from the beginning of the path, replaces all occurrences of "\" with "/".
      */
     public static String normalizeContentPath(String path) {
         if (path == null) return null;

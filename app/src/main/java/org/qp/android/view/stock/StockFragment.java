@@ -24,10 +24,6 @@ public class StockFragment extends Fragment {
     private FragmentStock localViewModel;
     private RecyclerView mRecyclerView;
 
-
-    public StockFragment() {
-    }
-
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater ,

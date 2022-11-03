@@ -64,7 +64,7 @@
     </string>
     <!-- Use in activity/fragment -->
     <!-- QuestPlayerAndroid -->
-        <string name="appName">QPlayer Android</string>
+        <string name="appName">QPlayer</string>
     <!-- SettingsFragment -->
         <string name="closeToApply">Закройте настройки для применения изменений</string>
     <!-- FragmentImageBox -->

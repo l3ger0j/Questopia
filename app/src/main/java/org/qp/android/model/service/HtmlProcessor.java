@@ -35,8 +35,8 @@ public class HtmlProcessor {
     }
 
     /**
-     * Привести HTML-код <code>html</code>, полученный из библиотеки к
-     * HTML-коду, приемлемому для отображения в {@linkplain android.webkit.WebView}.
+     * Bring the HTML code <code>html</code> obtained from the library to
+     * HTML code acceptable for display in {@linkplain android.webkit.WebView}.
      */
     public String convertQspHtmlToWebViewHtml(String html) {
         if (isNullOrEmpty(html)) return "";
@@ -116,15 +116,15 @@ public class HtmlProcessor {
     }
 
     /**
-     * Привести строку <code>str</code>, полученную из библиотеки, к HTML-коду,
-     * приемлемому для отображения в {@linkplain android.webkit.WebView}.
+     * Convert the string <code>str</code> obtained from the library to HTML code,
+     * acceptable for display in {@linkplain android.webkit.WebView}.
      */
     public String convertQspStringToWebViewHtml(String str) {
         return isNotEmpty(str) ? htmlizeLineBreaks(str) : "";
     }
 
     /**
-     * Удалить HTML-теги из строки <code>html</code> и вернуть результирующую строку.
+     * Remove HTML tags from the <code>html</code> string and return the resulting string.
      */
     public String removeHTMLTags(String html) {
         if (isNullOrEmpty(html)) return "";

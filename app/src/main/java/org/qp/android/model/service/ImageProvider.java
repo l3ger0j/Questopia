@@ -18,9 +18,9 @@ public class ImageProvider {
     private Drawable tempDrawable;
 
     /**
-     * Загружает изображение из файла по абсолютному пути.
+     * Loads an image from a file using an absolute path.
      *
-     * @return загруженное изображение, или <code>null</code> если изображение не было найдено
+     * @return uploaded image, or <code>null</code> if the image was not found
      */
     public Drawable get(String path) {
         if (isNullOrEmpty(path)) return null;

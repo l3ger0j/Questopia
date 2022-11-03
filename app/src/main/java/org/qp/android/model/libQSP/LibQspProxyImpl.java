@@ -146,7 +146,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
         boolean changed = false;
 
         GetVarValuesResponse htmlResult = (GetVarValuesResponse) nativeMethods.QSPGetVarValues("USEHTML", 0);
-        if (htmlResult.success) {
+        if (htmlResult.isSuccess) {
             boolean useHtml = htmlResult.intValue != 0;
             if (config.useHtml != useHtml) {
                 config.useHtml = useHtml;
@@ -154,22 +154,22 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
             }
         }
         GetVarValuesResponse fSizeResult = (GetVarValuesResponse) nativeMethods.QSPGetVarValues("FSIZE", 0);
-        if (fSizeResult.success && config.fontSize != fSizeResult.intValue) {
+        if (fSizeResult.isSuccess && config.fontSize != fSizeResult.intValue) {
             config.fontSize = fSizeResult.intValue;
             changed = true;
         }
         GetVarValuesResponse bColorResult = (GetVarValuesResponse) nativeMethods.QSPGetVarValues("BCOLOR", 0);
-        if (bColorResult.success && config.backColor != bColorResult.intValue) {
+        if (bColorResult.isSuccess && config.backColor != bColorResult.intValue) {
             config.backColor = bColorResult.intValue;
             changed = true;
         }
         GetVarValuesResponse fColorResult = (GetVarValuesResponse) nativeMethods.QSPGetVarValues("FCOLOR", 0);
-        if (fColorResult.success && config.fontColor != fColorResult.intValue) {
+        if (fColorResult.isSuccess && config.fontColor != fColorResult.intValue) {
             config.fontColor = fColorResult.intValue;
             changed = true;
         }
         GetVarValuesResponse lColorResult = (GetVarValuesResponse) nativeMethods.QSPGetVarValues("LCOLOR", 0);
-        if (lColorResult.success && config.linkColor != lColorResult.intValue) {
+        if (lColorResult.isSuccess && config.linkColor != lColorResult.intValue) {
             config.linkColor = lColorResult.intValue;
             changed = true;
         }

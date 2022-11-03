@@ -18,7 +18,7 @@ public class AudioPlayer {
 
     private Thread audioThread;
     private volatile Handler audioHandler;
-    private volatile boolean audioThreadInited;
+    private volatile boolean isAudioThreadInit;
     private boolean soundEnabled;
     private boolean paused;
 
@@ -29,7 +29,7 @@ public class AudioPlayer {
             try {
                 Looper.prepare();
                 audioHandler = new Handler();
-                audioThreadInited = true;
+                isAudioThreadInit = true;
                 Looper.loop();
             } catch (Throwable t) {
                 Log.e(TAG,"Audio thread has stopped exceptionally", t);
@@ -44,12 +44,12 @@ public class AudioPlayer {
 
         if (audioThread == null) return;
 
-        if (audioThreadInited) {
+        if (isAudioThreadInit) {
             Handler handler = audioHandler;
             if (handler != null) {
                 handler.getLooper().quitSafely();
             }
-            audioThreadInited = false;
+            isAudioThreadInit = false;
         } else {
             Log.w(TAG,"Audio thread has been started, but not initialized");
         }
@@ -78,7 +78,7 @@ public class AudioPlayer {
             Log.w(TAG,"Audio thread has not been started");
             return;
         }
-        if (!audioThreadInited) {
+        if (!isAudioThreadInit) {
             Log.w(TAG,"Audio thread has not been initialized");
             return;
         }
