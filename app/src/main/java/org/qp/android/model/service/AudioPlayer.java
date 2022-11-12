@@ -24,7 +24,6 @@ public class AudioPlayer {
 
     public void start() {
         throwIfNotMainThread();
-
         audioThread = new Thread(() -> {
             try {
                 Looper.prepare();

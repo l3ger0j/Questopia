@@ -7,6 +7,11 @@ import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.IBinder;
+import android.os.RemoteException;
+import android.util.Log;
+
+import org.qp.android.IQuestPlugin;
+import org.qp.android.dto.plugin.PluginInfo;
 
 import java.util.List;
 
@@ -26,11 +31,27 @@ public class PluginClient {
     };
 
     public void connectPlugin (Context context, String pluginName) {
-        Intent intent = new Intent("org.qp.plugin"+pluginName);
+        Intent intent = new Intent("org.qp.plugin."+pluginName);
+        Log.d (getClass().getSimpleName(), intent.toString());
         Intent updatedIntent = createExplicitIntent(context, intent);
         if (updatedIntent != null) {
             context.bindService(updatedIntent, serviceConnection, Context.BIND_AUTO_CREATE);
         }
+    }
+
+    public PluginInfo getPluginInfo () {
+        PluginInfo pluginInfo = new PluginInfo();
+        try {
+            pluginInfo.id = servicePlugin.id();
+            pluginInfo.version = servicePlugin.version();
+            pluginInfo.title = servicePlugin.title();
+            pluginInfo.author = servicePlugin.author();
+            pluginInfo.image = servicePlugin.pathToImage();
+            pluginInfo.fileSize = servicePlugin.fileSize();
+        } catch (RemoteException e) {
+            Log.e(getClass().getSimpleName(), "Error: ", e);
+        }
+        return pluginInfo;
     }
 
     private Intent createExplicitIntent(Context context, Intent intent) {

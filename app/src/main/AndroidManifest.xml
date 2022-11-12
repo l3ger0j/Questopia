@@ -4,10 +4,6 @@
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
 
-    <queries>
-
-    </queries>
-
     <application
         android:name=".QuestPlayerApplication"
         android:hardwareAccelerated="true"

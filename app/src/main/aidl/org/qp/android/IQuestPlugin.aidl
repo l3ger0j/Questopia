@@ -1,4 +1,4 @@
-package org.qp.android.model.plugin;
+package org.qp.android;
 
 interface IQuestPlugin {
 
@@ -9,4 +9,5 @@ interface IQuestPlugin {
     String pathToImage();
     String fileSize();
 
+    void showQSPFile (String pathToQSPFile);
 }

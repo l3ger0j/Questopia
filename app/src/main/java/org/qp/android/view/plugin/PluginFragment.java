@@ -38,6 +38,8 @@ public class PluginFragment extends Fragment {
         recyclerView = fragmentPluginBinding.pluginRecyclerView;
         pluginViewModel = new ViewModelProvider(requireActivity())
                 .get(FragmentPlugin.class);
+        fragmentPluginBinding.setPluginViewModel(pluginViewModel);
+        pluginViewModel.fragmentObservableField.set(this);
         pluginViewModel.getGameData().observe(getViewLifecycleOwner(), pluginList);
         return fragmentPluginBinding.getRoot();
     }
