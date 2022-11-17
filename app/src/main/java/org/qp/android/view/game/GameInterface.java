@@ -15,8 +15,6 @@ public interface GameInterface {
     void showSaveGamePopup(String filename);
     void showWindow(WindowType type, boolean show);
 
-    // region Локация-счётчик
-
     /**
      * Set the counter location processing interval to <code>millis</code> milliseconds.
      */
@@ -26,6 +24,4 @@ public interface GameInterface {
      * Execute <code>runnable</code> without processing the location counter.
      */
     void doWithCounterDisabled(Runnable runnable);
-
-    // endregion Локация-счётчик
 }

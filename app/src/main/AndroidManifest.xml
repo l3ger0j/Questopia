@@ -4,6 +4,12 @@
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
 
+    <queries>
+        <intent>
+            <action android:name="org.qp.intent.action.PICK_PLUGIN" />
+        </intent>
+    </queries>
+
     <application
         android:name=".QuestPlayerApplication"
         android:hardwareAccelerated="true"
@@ -22,8 +28,7 @@
         </activity>
 
         <activity
-            android:name=".view.stock.StockActivity">
-        </activity>
+            android:name=".view.stock.StockActivity" />
 
         <activity
             android:name=".view.game.GameActivity"

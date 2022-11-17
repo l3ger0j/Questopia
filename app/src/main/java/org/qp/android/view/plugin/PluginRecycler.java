@@ -75,7 +75,7 @@ public class PluginRecycler extends RecyclerView.Adapter<PluginRecycler.ViewHold
         PluginInfo pluginInfo = getItem(position);
 
         // gameIcon
-        if (pluginInfo.image.isEmpty()) {
+        if (pluginInfo.image != null && pluginInfo.image.isEmpty()) {
             Drawable drawable = ResourcesCompat.getDrawable(
                     context.getResources(),
                     R.drawable.broken_image , null
@@ -96,7 +96,7 @@ public class PluginRecycler extends RecyclerView.Adapter<PluginRecycler.ViewHold
         }
 
         // gameAuthor
-        if (pluginInfo.author.length() > 0) {
+        if (pluginInfo.author != null && pluginInfo.author.length() > 0) {
             String text = context.getString(R.string.author)
                     .replace("-AUTHOR-", pluginInfo.author);
             holder.listItemPluginBinding.pluginAuthor.setText(text);
