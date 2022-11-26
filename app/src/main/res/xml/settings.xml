@@ -58,12 +58,6 @@
 
     <PreferenceCategory android:title="@string/switchCatTitle">
         <SwitchPreference
-            android:defaultValue="false"
-            android:key="rotate"
-            android:enabled="false"
-            android:summary="@string/rotateSum"
-            android:title="@string/rotateTitle" />
-        <SwitchPreference
             android:defaultValue="true"
             android:key="oldValue"
             android:summary="@string/useOldSum"

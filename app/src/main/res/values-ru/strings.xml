@@ -101,8 +101,6 @@
         <string name="actsHeightSum">Соотношение высоты списка действий к высоте экрана</string>
         <!-- Switch section -->
         <string name="switchCatTitle">Переключатели</string>
-        <string name="rotateTitle">Поворот</string>
-        <string name="rotateSum">Включить/выключить поворот экрана (alpha)</string>
         <string name="useOldTitle">Старое значение для изменения размера изображения</string>
         <string name="useOldSum">Использовать старое значение для изменения размера изображения</string>
         <string name="separatorTitle">Разделитель</string>

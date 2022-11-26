@@ -19,6 +19,9 @@ public interface LibQspProxy {
 
     void enableDebugMode (boolean isDebug);
 
+    String getVersionQSP();
+    String getCompiledDateTime();
+
     void runGame(String id, String title, File dir, File file);
     void restartGame();
     void loadGameState(Uri uri);

@@ -55,6 +55,14 @@ jstring Java_org_qp_android_model_libQSP_NativeMethods_QSPGetVersion(JNIEnv *env
     return result;
 }
 
+jstring Java_org_qp_android_model_libQSP_NativeMethods_QSPGetCompiledDateTime(JNIEnv *env,
+                                                                              jobject this) {
+    char *sz = qspW2C(QSPGetCompiledDateTime());
+    jstring result = (*env)->NewStringUTF(env, sz);
+    if (sz != NULL)
+        free(sz);
+    return result;
+}
 
 ///* Количество полных обновлений локаций */
 jint Java_org_qp_android_model_libQSP_NativeMethods_QSPGetFullRefreshCount(JNIEnv *env,

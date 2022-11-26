@@ -248,6 +248,20 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
         runOnQspThread(() -> nativeMethods.QSPEnableDebugMode(isDebug));
     }
 
+    public String getVersionQSP () {
+        if (!isSameThread(libQspHandler.getLooper().getThread())) {
+            runOnQspThread(this::getVersionQSP);
+        }
+        return nativeMethods.QSPGetVersion();
+    }
+
+    public String getCompiledDateTime () {
+        if (!isSameThread(libQspHandler.getLooper().getThread())) {
+            runOnQspThread(this::getCompiledDateTime);
+        }
+        return nativeMethods.QSPGetCompiledDateTime();
+    }
+
     @Override
     public void runGame(final String id, final String title, final File dir, final File file) {
         runOnQspThread(() -> doRunGame(id, title, dir, file));

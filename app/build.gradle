@@ -12,8 +12,8 @@ android {
         applicationId "org.qp.android"
         minSdkVersion 21
         targetSdkVersion 32
-        versionCode 20202
-        versionName "3.2.2"
+        versionCode 20203
+        versionName "3.2.3"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -36,8 +36,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
 
     buildFeatures {
@@ -45,7 +45,7 @@ android {
         dataBinding dataBind
     }
 
-    ndkVersion = '24.0.8215888'
+    ndkVersion = '25.1.8937393'
     lint {
         abortOnError false
     }

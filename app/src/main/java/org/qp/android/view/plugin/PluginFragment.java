@@ -42,7 +42,6 @@ public class PluginFragment extends Fragment {
     private static final String KEY_SERVICENAME = "servicename";
     private static final String KEY_ACTIONS = "actions";
     private static final String KEY_CATEGORIES = "categories";
-    private static final String BUNDLE_EXTRAS_CATEGORY = "category";
     private ArrayList<HashMap<String, String>> services;
     private ArrayList<String> categories;
 
@@ -96,18 +95,8 @@ public class PluginFragment extends Fragment {
                 new RecyclerItemClickListener.OnItemClickListener() {
                     @Override
                     public void onItemClick(View view , int position) {
+                        // TODO implement opening or linking a plugin by clicking
                         ViewUtil.showSnackBar(getView(), "Click!");
-                        // String category = categories.get(position);
-                        /*
-                        *if (category.length() > 0) {
-                        *   Intent intent = new Intent();
-                            intent.setClassName(
-                                    "org.qp.android.view.plugin",
-                                    "org.qp.android.view.plugin.PluginFragment");
-                            intent.putExtra(BUNDLE_EXTRAS_CATEGORY, category);
-                            startActivity(intent);
-                        }
-                         */
                     }
 
                     @Override
@@ -127,14 +116,14 @@ public class PluginFragment extends Fragment {
         Log.d(TAG, "fillPluginList: " + list);
         for (int i = 0; i < list.size(); ++i) {
             ResolveInfo info = list.get(i);
-            ServiceInfo sinfo = info.serviceInfo;
+            ServiceInfo serviceInfo = info.serviceInfo;
             IntentFilter filter = info.filter;
-            Log.d(TAG, "fillPluginList: i: " + i + "; sinfo: " + sinfo + ";filter: " + filter);
-            if (sinfo != null) {
+            Log.d(TAG, "fillPluginList: i: " + i + "; serviceInfo: " + serviceInfo + ";filter: " + filter);
+            if (serviceInfo != null) {
                 HashMap<String, String> item = new HashMap<>();
-                item.put(KEY_PKG, sinfo.packageName);
-                namePlugin = sinfo.packageName;
-                item.put(KEY_SERVICENAME, sinfo.name);
+                item.put(KEY_PKG, serviceInfo.packageName);
+                namePlugin = serviceInfo.packageName;
+                item.put(KEY_SERVICENAME, serviceInfo.name);
                 String firstCategory = null;
                 if (filter != null) {
                     StringBuilder actions = new StringBuilder();

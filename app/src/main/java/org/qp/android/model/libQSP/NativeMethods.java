@@ -22,6 +22,7 @@ public class NativeMethods {
     public native void QSPEnableDebugMode(boolean isDebug);
     public native Object QSPGetCurStateData();//!!!STUB
     public native String QSPGetVersion();
+    public native String QSPGetCompiledDateTime();
     public native int QSPGetFullRefreshCount();
     public native String QSPGetQstFullPath();
     public native String QSPGetCurLoc();

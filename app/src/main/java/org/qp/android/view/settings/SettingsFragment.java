@@ -12,7 +12,9 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 
 import org.qp.android.BuildConfig;
+import org.qp.android.QuestPlayerApplication;
 import org.qp.android.R;
+import org.qp.android.model.libQSP.LibQspProxy;
 import org.qp.android.utils.ViewUtil;
 import org.qp.android.view.plugin.PluginFragment;
 
@@ -96,7 +98,15 @@ public class SettingsFragment extends PreferenceFragmentCompat
                 countClick--;
                 if (countClick == 0) {
                     countClick = 3;
-                    Toast.makeText(getContext(), "O_o", Toast.LENGTH_SHORT).show();
+                    QuestPlayerApplication application = (QuestPlayerApplication) requireActivity().getApplication();
+                    LibQspProxy libQspProxy = application.getLibQspProxy();
+                    try {
+                        Toast.makeText(getContext(), libQspProxy.getCompiledDateTime()
+                                +"\n"+libQspProxy.getVersionQSP(), Toast.LENGTH_SHORT).show();
+                    } catch (NullPointerException ex) {
+                        Toast.makeText(getContext(),
+                                "Follow the white rabbit", Toast.LENGTH_SHORT).show();
+                    }
                 }
                 return true;
             });

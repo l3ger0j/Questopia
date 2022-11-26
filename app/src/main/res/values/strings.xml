@@ -101,8 +101,6 @@
         <string name="actsHeightSum">Actions List Height To Screen Height Ratio</string>
         <!-- Switch section -->
         <string name="switchCatTitle">Switches</string>
-        <string name="rotateTitle">Rotate</string>
-        <string name="rotateSum">Enable/disable rotate (alpha)</string>
         <string name="useOldTitle">Old value for resizing the image</string>
         <string name="useOldSum">Use the old value to resize the image</string>
         <string name="separatorTitle">Separator</string>
