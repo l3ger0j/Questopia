@@ -15,7 +15,6 @@ public class SettingsController {
     public int linkColor;
     public float actionsHeightRatio;
     public boolean isSoundEnabled;
-    public boolean useRotate;
     public boolean useOldValue;
     public boolean useSeparator;
     public boolean useGameFont;
@@ -46,7 +45,6 @@ public class SettingsController {
         settingsController.textColor = preferences.getInt("textColor", Color.parseColor("#000000"));
         settingsController.linkColor = preferences.getInt("linkColor", Color.parseColor("#0000ff"));
         settingsController.actionsHeightRatio = parseActionsHeightRatio(preferences.getString("actsHeight", "1/3"));
-        settingsController.useRotate = preferences.getBoolean("rotate", false);
         settingsController.useOldValue = preferences.getBoolean("oldValue", true);
         settingsController.useAutoscroll = preferences.getBoolean("autoscroll", true);
         settingsController.useExecString = preferences.getBoolean("execString", false);

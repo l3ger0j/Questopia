@@ -37,8 +37,8 @@
     <!-- Dialog Credits -->
     <string name="appDescription">
 <![CDATA[
-<h2><center>About Quest Player<img src=\"file:///android_res/drawable/landscape.jpg\" width=\"100%\"></center></h2>
-<h4 style="margin-left:5px;">Quest Player is an open-source Android port of <b>Quest Soft Player</b> (<a href=\"http://qsp.su/?option=com_content&view=article&id=64\">Russian site</a>), a menu-based platform for creating interactive fiction. The most recent version can be downloaded from <a href=\"https://github.com/l3ger0j/QuestPlayerAndroid\">GitHub</a>.</h4>
+<h2><center>About Quest Player Android<img src=\"file:///android_res/drawable/landscape.jpg\" width=\"100%\"></center></h2>
+<h4 style="margin-left:5px;">Quest Player Android is an open-source fork Android port of <b>Quest Soft Player</b> (<a href=\"http://qsp.su/?option=com_content&view=article&id=64\">Russian site</a>), a menu-based platform for creating interactive fiction. The most recent version can be downloaded from <a href=\"https://github.com/l3ger0j/QuestPlayerAndroid\">GitHub</a>.</h4>
 ]]>
     </string>
     <string name="appCredits">
@@ -79,7 +79,7 @@
         <string name="inventoryTitle">Inventory</string>
         <string name="inventoryContDesc">Go to inventory</string>
         <string name="userInputTitle">User input</string>
-        <string name="userInputContDesc">User input</string>
+        <string name="userInputContDesc">Show user input</string>
         <string name="restartGameTitle">Restart game</string>
         <string name="loadTitle">Load</string>
         <string name="saveTitle">Save</string>

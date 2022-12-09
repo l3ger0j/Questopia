@@ -40,7 +40,7 @@ public class StockFragment extends Fragment {
         return fragmentStockBinding.getRoot();
     }
 
-    Observer<ArrayList<GameData>> gameData = new Observer<ArrayList<GameData>>() {
+    Observer<ArrayList<GameData>> gameData = new Observer<>() {
         @Override
         public void onChanged(ArrayList<GameData> gameData) {
             GamesRecycler adapter =

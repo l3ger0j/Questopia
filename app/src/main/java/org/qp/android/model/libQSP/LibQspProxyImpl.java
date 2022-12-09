@@ -386,7 +386,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
         final GameInterface inter = gameInterface;
         if (inter == null) return;
         runOnQspThread(() -> {
-            String input = inter.showInputBox("Write ur code");
+            String input = inter.showInputBox(context.getString(R.string.execStringTitle));
             if (!nativeMethods.QSPExecString(input, true)) {
                 showLastQspError();
             }

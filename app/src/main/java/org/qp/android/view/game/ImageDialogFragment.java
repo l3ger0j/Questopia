@@ -12,7 +12,7 @@ import androidx.fragment.app.DialogFragment;
 
 import org.qp.android.databinding.DialogImageBinding;
 
-public class ImageDialog extends DialogFragment {
+public class ImageDialogFragment extends DialogFragment {
     public ObservableField<String> pathToImage = new ObservableField<>();
     private DialogImageBinding imageBinding;
 
@@ -23,7 +23,16 @@ public class ImageDialog extends DialogFragment {
                              @Nullable Bundle savedInstanceState) {
         imageBinding = DialogImageBinding.inflate(getLayoutInflater());
         imageBinding.setDialogFragment(this);
+        if (savedInstanceState != null && savedInstanceState.containsKey("pathToImage")) {
+            pathToImage.set(savedInstanceState.getString("pathToImage"));
+        }
         return imageBinding.getRoot();
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString("pathToImage", pathToImage.get());
     }
 
     @Override

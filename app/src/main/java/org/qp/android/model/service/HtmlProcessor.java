@@ -70,7 +70,6 @@ public class HtmlProcessor {
             matcher.appendReplacement(sb, "href=\"exec:" + encodedExec + "\"");
         }
         matcher.appendTail(sb);
-
         return sb.toString();
     }
 
@@ -104,7 +103,7 @@ public class HtmlProcessor {
         if (useOldValue.get()) {
             return drawable.getIntrinsicWidth() > IMAGE_WIDTH_THRESHOLD;
         } else {
-            return drawable.getIntrinsicWidth() >= Resources.getSystem()
+            return drawable.getIntrinsicWidth() > Resources.getSystem()
                     .getDisplayMetrics().widthPixels;
         }
     }

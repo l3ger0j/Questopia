@@ -25,6 +25,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.view.ActionMode;
 import androidx.core.app.ActivityCompat;
 import androidx.documentfile.provider.DocumentFile;
+import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -217,7 +218,7 @@ public class StockActivity extends AppCompatActivity {
         loadSettings();
         loadLocale();
 
-        Log.i(TAG,"StockFragment created");
+        Log.i(TAG,"Stock Activity created");
 
         setContentView(activityStockBinding.getRoot());
     }
@@ -247,6 +248,14 @@ public class StockActivity extends AppCompatActivity {
 
     public void showErrorDialog(String errorMessage) {
         ViewUtil.showErrorDialog(this, errorMessage);
+    }
+
+    public void showDialogFragment (DialogFragment dialogFragment) {
+        dialogFragment.show(getSupportFragmentManager(), "");
+    }
+
+    public void onDestroyDialogFragment () {
+        activityStock.isShowDialog.set(false);
     }
 
     public void onItemClick(int position) {

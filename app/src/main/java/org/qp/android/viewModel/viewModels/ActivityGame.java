@@ -19,10 +19,15 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.databinding.ObservableField;
 import androidx.lifecycle.AndroidViewModel;
+import androidx.lifecycle.MutableLiveData;
 
+import org.qp.android.QuestPlayerApplication;
 import org.qp.android.model.libQSP.LibQspProxy;
+import org.qp.android.model.service.AudioPlayer;
 import org.qp.android.model.service.GameContentResolver;
+import org.qp.android.model.service.HtmlProcessor;
 import org.qp.android.view.game.GameActivity;
+import org.qp.android.view.game.GameInterface;
 import org.qp.android.view.settings.SettingsController;
 
 import java.io.File;
@@ -32,19 +37,28 @@ import java.io.InputStream;
 public class ActivityGame extends AndroidViewModel {
     private final String TAG = this.getClass().getCanonicalName();
 
-    private GameContentResolver gameContentResolver;
+    private final QuestPlayerApplication questPlayerApplication;
+    private final GameContentResolver gameContentResolver;
+    private final HtmlProcessor htmlProcessor;
     private LibQspProxy libQspProxy;
+    private AudioPlayer audioPlayer;
 
     public ObservableField<GameActivity> gameActivityObservableField =
             new ObservableField<>();
 
+    public MutableLiveData<String> outputTextObserver = new MutableLiveData<>();
+
     // region Getter/Setter
-    public void setLibQspProxy(LibQspProxy libQspProxy) {
-        this.libQspProxy = libQspProxy;
+    public HtmlProcessor getHtmlProcessor() {
+        return htmlProcessor;
     }
 
-    public void setGameContentResolver(GameContentResolver gameContentResolver) {
-        this.gameContentResolver = gameContentResolver;
+    public AudioPlayer getAudioPlayer() {
+        return audioPlayer;
+    }
+
+    public LibQspProxy getLibQspProxy() {
+        return libQspProxy;
     }
 
     public WebViewClient getWebViewClient() {
@@ -54,6 +68,33 @@ public class ActivityGame extends AndroidViewModel {
 
     public ActivityGame(@NonNull Application application) {
         super(application);
+        questPlayerApplication = getApplication();
+        gameContentResolver = questPlayerApplication.getGameContentResolver();
+        htmlProcessor = questPlayerApplication.getHtmlProcessor();
+    }
+
+    public AudioPlayer startAudio () {
+        audioPlayer = questPlayerApplication.getAudioPlayer();
+        audioPlayer.start();
+        return audioPlayer;
+    }
+
+    public void stopAudio () {
+        audioPlayer.stop();
+        audioPlayer = null;
+    }
+
+    public LibQspProxy startLibQsp (GameInterface gameInterface) {
+        libQspProxy = questPlayerApplication.getLibQspProxy();
+        libQspProxy.setGameInterface(gameInterface);
+        libQspProxy.start();
+        return libQspProxy;
+    }
+
+    public void stopLibQsp () {
+        libQspProxy.stop();
+        libQspProxy.setGameInterface(null);
+        libQspProxy = null;
     }
 
     public class QspWebViewClient extends WebViewClient {
@@ -61,18 +102,15 @@ public class ActivityGame extends AndroidViewModel {
         public boolean shouldOverrideUrlLoading(WebView view,
                                                 @NonNull final String href) {
             String uriDecode = Uri.decode(href);
+            Log.d(TAG, decodeBase64(uriDecode));
             if (href.toLowerCase().startsWith("exec:")) {
-                Log.d(TAG, decodeBase64(uriDecode));
                 try {
                     libQspProxy.execute(decodeBase64(uriDecode.substring(5)));
                 } catch (IllegalArgumentException exception) {
                     libQspProxy.execute(uriDecode.substring(5));
                 }
-            } else if (href.toLowerCase().startsWith("https:")) {
-                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(uriDecode));
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                getApplication().startActivity(intent);
-            } else if (href.toLowerCase().startsWith("http:")) {
+            } else if (href.toLowerCase().startsWith("https:") ||
+                    href.toLowerCase().startsWith("http:")) {
                 Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(uriDecode));
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 getApplication().startActivity(intent);

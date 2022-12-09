@@ -9,11 +9,9 @@ import static org.qp.android.utils.LanguageUtil.setLocale;
 import static org.qp.android.utils.ThreadUtil.isMainThread;
 import static org.qp.android.utils.ViewUtil.getFontStyle;
 
-import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.graphics.Typeface;
 import android.media.AudioManager;
 import android.net.Uri;
@@ -30,11 +28,11 @@ import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
-import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -46,10 +44,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.databinding.DataBindingUtil;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
 
 import org.jetbrains.annotations.Contract;
-import org.qp.android.QuestPlayerApplication;
 import org.qp.android.R;
 import org.qp.android.databinding.ActivityGameBinding;
 import org.qp.android.model.libQSP.InterfaceConfiguration;
@@ -59,7 +57,6 @@ import org.qp.android.model.libQSP.QspMenuItem;
 import org.qp.android.model.libQSP.RefreshInterfaceRequest;
 import org.qp.android.model.libQSP.WindowType;
 import org.qp.android.model.service.AudioPlayer;
-import org.qp.android.model.service.GameContentResolver;
 import org.qp.android.model.service.HtmlProcessor;
 import org.qp.android.utils.ViewUtil;
 import org.qp.android.view.settings.SettingsActivity;
@@ -70,6 +67,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CountDownLatch;
 
@@ -147,13 +145,13 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
         }
     };
 
-    @SuppressLint("SourceLockedOrientationActivity")
+    private String tempIdGame;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         activityGameBinding = DataBindingUtil.setContentView(this, R.layout.activity_game);
-
         activityGame = new ViewModelProvider(this).get(ActivityGame.class);
         activityGameBinding.setGameViewModel(activityGame);
         activityGame.gameActivityObservableField.set(this);
@@ -161,12 +159,6 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
 
         setContentView(activityGameBinding.getRoot());
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
-
-        if (settingsController.useRotate) {
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
-        } else {
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        }
 
         resultLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
@@ -196,15 +188,37 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
                 }
         );
 
-        initServices();
-        initControls();
-        currentLanguage = activityGame.loadLocale(this, settingsController);
-        initGame();
+        tempIdGame = getIntent().getStringExtra("gameId");
+        if (savedInstanceState != null && savedInstanceState.containsKey("tempGameId")) {
+            String gameId = savedInstanceState.getString("tempGameId");
+            if (!gameId.equals(tempIdGame)) {
+                initServices();
+                initControls();
+                currentLanguage = activityGame.loadLocale(this, settingsController);
+                initGame();
+            } else {
+                restartServices();
+                initControls();
+                currentLanguage = activityGame.loadLocale(this, settingsController);
+            }
+        } else {
+            initServices();
+            initControls();
+            currentLanguage = activityGame.loadLocale(this, settingsController);
+            initGame();
+        }
 
         Log.i(TAG, "Game created");
     }
 
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString("tempGameId", tempIdGame);
+    }
+
     private void initControls() {
+        htmlProcessor.useOldValue.set(settingsController.useOldValue);
         layoutTop = activityGameBinding.layoutTop;
         separatorView = activityGameBinding.separator;
 
@@ -222,8 +236,12 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
 
     private void initMainDescView() {
         mainDescView = activityGameBinding.mainDesc;
+        WebSettings webViewSettings = mainDescView.getSettings();
+        webViewSettings.setAllowFileAccess(true);
+        webViewSettings.setDomStorageEnabled(true);
+        mainDescView.setWebViewClient(activityGame.getWebViewClient());
         if (settingsController.useAutoscroll) {
-            mainDescView.post(onScroll);
+            mainDescView.postDelayed(onScroll, 300);
         }
     }
 
@@ -254,19 +272,16 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
     }
 
     private void initServices() {
-        QuestPlayerApplication application = (QuestPlayerApplication) getApplication();
+        htmlProcessor = activityGame.getHtmlProcessor();
+        audioPlayer = activityGame.startAudio();
+        libQspProxy = activityGame.startLibQsp(this);
+    }
 
-        GameContentResolver gameContentResolver = application.getGameContentResolver();
-        activityGame.setGameContentResolver(gameContentResolver);
-        htmlProcessor = application.getHtmlProcessor();
-
-        audioPlayer = application.getAudioPlayer();
-        audioPlayer.start();
-
-        libQspProxy = application.getLibQspProxy();
+    private void restartServices() {
+        htmlProcessor = activityGame.getHtmlProcessor();
+        audioPlayer = activityGame.getAudioPlayer();
+        libQspProxy = activityGame.getLibQspProxy();
         libQspProxy.setGameInterface(this);
-        libQspProxy.start();
-        activityGame.setLibQspProxy(libQspProxy);
     }
 
     private void initGame() {
@@ -340,10 +355,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
 
     @Override
     protected void onDestroy() {
-        audioPlayer.stop();
-        libQspProxy.stop();
         libQspProxy.setGameInterface(null);
-        counterHandler.removeCallbacks(counterTask);
         super.onDestroy();
         Log.i(TAG,"Game destroyed");
     }
@@ -394,6 +406,10 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
         }
 
         htmlProcessor.useOldValue.set(settingsController.useOldValue);
+
+        if (settingsController.useOldValue) {
+            applyGameState();
+        }
 
         int backColor = getBackgroundColor();
         layoutTop.setBackgroundColor(backColor);
@@ -454,6 +470,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
 
     private void refreshMainDesc() {
         String mainDesc = getHtml(libQspProxy.getGameState().mainDesc);
+
         if (settingsController.useAutoscroll) {
             mainDescView.postDelayed(onScroll, 300);
         }
@@ -463,12 +480,11 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
                 pageTemplate.replace("REPLACETEXT", mainDesc),
                 "text/html",
                 "UTF-8",
-                "");
+                null);
     }
 
     private String getHtml(String str) {
         InterfaceConfiguration config = libQspProxy.getGameState().interfaceConfig;
-
         return config.useHtml ?
                 htmlProcessor.convertQspHtmlToWebViewHtml(str) :
                 htmlProcessor.convertQspStringToWebViewHtml(str);
@@ -476,13 +492,12 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
 
     private void refreshVarsDesc() {
         String varsDesc = getHtml(libQspProxy.getGameState().varsDesc);
-
         varsDescView.loadDataWithBaseURL(
                 "file:///",
                 pageTemplate.replace("REPLACETEXT", varsDesc),
                 "text/html",
                 "UTF-8",
-                "");
+                null);
     }
 
     private void refreshActions() {
@@ -499,7 +514,12 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
     private void promptCloseGame() {
         new AlertDialog.Builder(this)
                 .setMessage(R.string.promptCloseGame)
-                .setPositiveButton(android.R.string.yes, (dialog, which) -> finish())
+                .setPositiveButton(android.R.string.yes, (dialog, which) -> {
+                    activityGame.stopAudio();
+                    activityGame.stopLibQsp();
+                    counterHandler.removeCallbacks(counterTask);
+                    finish();
+                })
                 .setNegativeButton(android.R.string.no, (dialog, which) -> { })
                 .setCancelable(false)
                 .create()
@@ -693,7 +713,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
     @Override
     public void showPicture(final String pathToImg) {
         runOnUiThread(() -> {
-            ImageDialog imageDialogFragment = new ImageDialog();
+            ImageDialogFragment imageDialogFragment = new ImageDialogFragment();
             imageDialogFragment.pathToImage.set(pathToImg);
             imageDialogFragment.show(getSupportFragmentManager(), "");
         });
@@ -735,30 +755,36 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
         final ArrayBlockingQueue<String> inputQueue = new ArrayBlockingQueue<>(1);
 
         runOnUiThread(() -> {
-            final View view = getLayoutInflater().inflate(R.layout.dialog_input, null);
-
             InterfaceConfiguration config = libQspProxy.getGameState().interfaceConfig;
             String message = config.useHtml ? htmlProcessor.removeHTMLTags(prompt) : prompt;
             if (message == null) {
                 message = "";
             }
-            new AlertDialog.Builder(this)
-                    .setView(view)
-                    .setMessage(message)
-                    .setPositiveButton(android.R.string.ok, (dialog, which) -> {
-                        EditText editView = view.findViewById(R.id.inputbox_edit);
-                        inputQueue.add(editView.getText().toString());
-                    })
-                    .setCancelable(false)
-                    .create()
-                    .show();
+
+            if (activityGame.outputTextObserver.hasObservers()) {
+                activityGame.outputTextObserver = new MutableLiveData<>();
+            }
+
+            InputDialogFragment inputDialogFragment = new InputDialogFragment();
+            inputDialogFragment.setMessage(message);
+            inputDialogFragment.setCancelable(false);
+            inputDialogFragment.show(getSupportFragmentManager(), "");
+            activityGame.outputTextObserver.observeForever(inputQueue::add);
         });
 
         try {
             return inputQueue.take();
         } catch (InterruptedException ex) {
             Log.e(TAG,"Wait for input failed", ex);
-            return null;
+            return "";
+        }
+    }
+
+    public void onClickOk (String outputText) {
+        if (Objects.equals(outputText , "")) {
+            activityGame.outputTextObserver.setValue("");
+        } else {
+            activityGame.outputTextObserver.setValue(outputText);
         }
     }
 

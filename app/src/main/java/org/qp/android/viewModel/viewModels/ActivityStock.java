@@ -15,6 +15,7 @@ import static org.qp.android.utils.XmlUtil.objectToXml;
 
 import android.app.Application;
 import android.content.ActivityNotFoundException;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
 import android.util.Log;
@@ -28,7 +29,6 @@ import androidx.databinding.ObservableField;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.lifecycle.AndroidViewModel;
 
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.squareup.picasso.Picasso;
 
 import org.qp.android.R;
@@ -39,6 +39,7 @@ import org.qp.android.model.install.InstallException;
 import org.qp.android.model.install.Installer;
 import org.qp.android.model.notify.NotifyBuilder;
 import org.qp.android.utils.ViewUtil;
+import org.qp.android.view.stock.InstallDialogFragment;
 import org.qp.android.view.stock.StockActivity;
 import org.qp.android.viewModel.repository.LocalGame;
 
@@ -64,7 +65,6 @@ public class ActivityStock extends AndroidViewModel {
     private DialogInstallBinding installBinding;
     private GameData tempGameData;
     private DialogEditBinding editBinding;
-    private androidx.appcompat.app.AlertDialog dialog;
 
     // region Getter/Setter
     public void setTempPathFile(DocumentFile tempPathFile) {
@@ -108,9 +108,22 @@ public class ActivityStock extends AndroidViewModel {
     }
 
     // region Dialog
+    private final InstallDialogFragment dialogFragment = new InstallDialogFragment();
+
     public void showDialogInstall() {
-       dialog = createAlertDialog(formingInstallView());
-       dialog.show();
+       dialogFragment.setInstallBinding(formingInstallView());
+       dialogFragment.onCancel(new DialogInterface() {
+            @Override
+            public void cancel() {
+                isShowDialog.set(false);
+            }
+
+            @Override
+            public void dismiss() {
+            }
+        });
+       Objects.requireNonNull(activityObservableField.get())
+               .showDialogFragment(dialogFragment);
        isShowDialog.set(true);
     }
 
@@ -136,7 +149,7 @@ public class ActivityStock extends AndroidViewModel {
             gameData.fileSize = String.valueOf(tempInstallFile.length() / 1000);
             gameData.icon = (tempImageFile == null ? null : tempImageFile.getUri().toString());
             installGame(tempInstallFile, gameData);
-            dialog.dismiss();
+            dialogFragment.dismiss();
         } catch (NullPointerException ex) {
             Log.e(TAG, "Error: ", ex);
         }
@@ -144,8 +157,19 @@ public class ActivityStock extends AndroidViewModel {
 
     public void showDialogEdit (GameData gameData) {
         tempGameData = gameData;
-        dialog = createAlertDialog(formingEditView());
-        dialog.show();
+        dialogFragment.setEditBinding(formingEditView());
+        dialogFragment.onCancel(new DialogInterface() {
+            @Override
+            public void cancel() {
+                isShowDialog.set(false);
+            }
+
+            @Override
+            public void dismiss() {
+            }
+        });
+        Objects.requireNonNull(activityObservableField.get())
+                .showDialogFragment(dialogFragment);
         isShowDialog.set(true);
     }
 
@@ -174,7 +198,7 @@ public class ActivityStock extends AndroidViewModel {
             }
             refreshGamesDirectory();
             isShowDialog.set(false);
-            dialog.dismiss();
+            dialogFragment.dismiss();
         } catch (NullPointerException ex) {
             Log.e(TAG, "Error: ", ex);
         }
@@ -229,25 +253,19 @@ public class ActivityStock extends AndroidViewModel {
     }
 
     @NonNull
-    private View formingInstallView() {
+    private DialogInstallBinding formingInstallView() {
         installBinding =
                 DialogInstallBinding.inflate(LayoutInflater.from(activityObservableField.get()));
         installBinding.setStockVM(this);
-        return installBinding.getRoot();
+        return installBinding;
     }
 
-    private View formingEditView() {
+    @NonNull
+    private DialogEditBinding formingEditView() {
         editBinding =
                 DialogEditBinding.inflate(LayoutInflater.from(activityObservableField.get()));
         editBinding.setStockVM(this);
-        return editBinding.getRoot();
-    }
-
-    private androidx.appcompat.app.AlertDialog createAlertDialog (View view) {
-        MaterialAlertDialogBuilder dialogBuilder = new MaterialAlertDialogBuilder(Objects.requireNonNull(activityObservableField.get()));
-        dialogBuilder.setOnCancelListener(dialogInterface -> isShowDialog.set(false));
-        dialogBuilder.setView(view);
-        return dialogBuilder.create();
+        return editBinding;
     }
     // endregion Dialog
 

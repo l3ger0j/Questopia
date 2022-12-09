@@ -5,7 +5,7 @@
         <import type="android.view.View"/>
         <variable
             name="dialogFragment"
-            type="org.qp.android.view.game.ImageDialog" />
+            type="org.qp.android.view.game.ImageDialogFragment" />
     </data>
 
     <FrameLayout
@@ -21,6 +21,7 @@
             android:minWidth="1000dp"
             android:minHeight="450dp"
             android:scaleType="fitCenter"
+            android:onClick="@{() -> dialogFragment.dismiss()}"
             app:imageUrl="@{dialogFragment.pathToImage}" />
     </FrameLayout>
 </layout>
