@@ -102,16 +102,21 @@ public class ActivityGame extends AndroidViewModel {
         public boolean shouldOverrideUrlLoading(WebView view,
                                                 @NonNull final String href) {
             String uriDecode = Uri.decode(href);
-            Log.d(TAG, decodeBase64(uriDecode));
             if (href.toLowerCase().startsWith("exec:")) {
                 try {
                     libQspProxy.execute(decodeBase64(uriDecode.substring(5)));
                 } catch (IllegalArgumentException exception) {
                     libQspProxy.execute(uriDecode.substring(5));
                 }
-            } else if (href.toLowerCase().startsWith("https:") ||
-                    href.toLowerCase().startsWith("http:")) {
+            } else if (href.toLowerCase().startsWith("https:")
+                    || href.toLowerCase().startsWith("http:")) {
                 Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(uriDecode));
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                getApplication().startActivity(intent);
+            } else if (href.toLowerCase().startsWith("file:")) {
+                String tempLink = href.replace("file:/", "https:");
+                Log.d(TAG, tempLink);
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(tempLink));
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 getApplication().startActivity(intent);
             }
