@@ -242,26 +242,6 @@ QSP_BOOL QSPIsObjectsChanged()
 	return qspIsObjectsChanged;
 }
 /* ------------------------------------------------------------ */
-/* Показ / скрытие окон */
-void QSPShowWindow(int type, QSP_BOOL isShow)
-{
-	switch (type)
-	{
-	case QSP_WIN_ACTS:
-		qspCurIsShowActs = isShow;
-		break;
-	case QSP_WIN_OBJS:
-		qspCurIsShowObjs = isShow;
-		break;
-	case QSP_WIN_VARS:
-		qspCurIsShowVars = isShow;
-		break;
-	case QSP_WIN_INPUT:
-		qspCurIsShowInput = isShow;
-		break;
-	}
-}
-/* ------------------------------------------------------------ */
 /* Переменные */
 
 /* Получить количество элементов массива */

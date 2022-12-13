@@ -52,8 +52,6 @@ public class NativeMethods {
     public native boolean QSPSetSelObjectIndex(int ind, boolean isRefresh);
     public native int QSPGetSelObjectIndex();
     public native boolean QSPIsObjectsChanged();
-    /* Windows */
-    public native void QSPShowWindow(int type, boolean isShow);
     /* Code execution */
     public native boolean QSPExecString(String s, boolean isRefresh);
     public native boolean QSPExecLocationCode(String name, boolean isRefresh);

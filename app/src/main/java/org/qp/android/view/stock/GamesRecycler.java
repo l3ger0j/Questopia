@@ -40,17 +40,17 @@ public class GamesRecycler extends RecyclerView.Adapter<GamesRecycler.ViewHolder
     }
 
     private static final DiffUtil.ItemCallback<GameData> DIFF_CALLBACK =
-            new DiffUtil.ItemCallback<GameData>() {
-        @Override
-        public boolean areItemsTheSame(@NonNull GameData oldItem , @NonNull GameData newItem) {
-            return oldItem.id.equals(newItem.id);
-        }
+            new DiffUtil.ItemCallback<>() {
+                @Override
+                public boolean areItemsTheSame(@NonNull GameData oldItem , @NonNull GameData newItem) {
+                    return oldItem.id.equals(newItem.id);
+                }
 
-        @Override
-        public boolean areContentsTheSame(@NonNull GameData oldItem , @NonNull GameData newItem) {
-            return oldItem.equals(newItem);
-        }
-    };
+                @Override
+                public boolean areContentsTheSame(@NonNull GameData oldItem , @NonNull GameData newItem) {
+                    return oldItem.equals(newItem);
+                }
+            };
 
     public void submitList(ArrayList<GameData> gameData){
         differ.submitList(gameData);

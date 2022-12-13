@@ -44,7 +44,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.databinding.DataBindingUtil;
-import androidx.databinding.Observable;
 import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
@@ -516,9 +515,10 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
     }
 
     private void promptCloseGame() {
-        CloseGameDialogFragment closeGameDialogFragment = new CloseGameDialogFragment();
-        closeGameDialogFragment.setCancelable(false);
-        closeGameDialogFragment.show(getSupportFragmentManager(), "closeGameDialogFragment");
+        GameDialogFragments dialogFragment = new GameDialogFragments();
+        dialogFragment.setDialogType(GameDialogType.CLOSE_DIALOG);
+        dialogFragment.setCancelable(false);
+        dialogFragment.show(getSupportFragmentManager(), "closeGameDialogFragment");
     }
 
     @Override
@@ -708,9 +708,10 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
     @Override
     public void showPicture(final String pathToImg) {
         runOnUiThread(() -> {
-            ImageDialogFragment imageDialogFragment = new ImageDialogFragment();
-            imageDialogFragment.pathToImage.set(pathToImg);
-            imageDialogFragment.show(getSupportFragmentManager(), "");
+            GameDialogFragments dialogFragment = new GameDialogFragments();
+            dialogFragment.setDialogType(GameDialogType.IMAGE_DIALOG);
+            dialogFragment.pathToImage.set(pathToImg);
+            dialogFragment.show(getSupportFragmentManager(), "");
         });
     }
 
@@ -728,17 +729,18 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
                 processedMsg = "";
             }
 
-            ShowMessageDialogFragment showMessageDialogFragment = new ShowMessageDialogFragment();
-            showMessageDialogFragment.setProcessedMsg(processedMsg);
-            showMessageDialogFragment.setCancelable(false);
-            showMessageDialogFragment.show(getSupportFragmentManager(), "showMessageDialogFragment");
-            activityGame.isClickOk.addOnPropertyChangedCallback(
-                    new Observable.OnPropertyChangedCallback() {
-                @Override
-                public void onPropertyChanged(Observable sender , int propertyId) {
-                    if (sender != null && sender.toString().equals("true")) {
-                        latch.countDown();
-                    }
+            if (activityGame.outputBooleanObserver.hasObservers()) {
+                activityGame.outputBooleanObserver = new MutableLiveData<>();
+            }
+
+            GameDialogFragments dialogFragment = new GameDialogFragments();
+            dialogFragment.setDialogType(GameDialogType.MESSAGE_DIALOG);
+            dialogFragment.setProcessedMsg(processedMsg);
+            dialogFragment.setCancelable(false);
+            dialogFragment.show(getSupportFragmentManager(), "showMessageDialogFragment");
+            activityGame.outputBooleanObserver.observeForever(aBoolean -> {
+                if (aBoolean) {
+                    latch.countDown();
                 }
             });
         });
@@ -768,10 +770,11 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
                 activityGame.outputTextObserver = new MutableLiveData<>();
             }
 
-            InputDialogFragment inputDialogFragment = new InputDialogFragment();
-            inputDialogFragment.setMessage(message);
-            inputDialogFragment.setCancelable(false);
-            inputDialogFragment.show(getSupportFragmentManager(), "inputDialogFragment");
+            GameDialogFragments dialogFragment = new GameDialogFragments();
+            dialogFragment.setDialogType(GameDialogType.INPUT_DIALOG);
+            dialogFragment.setMessage(message);
+            dialogFragment.setCancelable(false);
+            dialogFragment.show(getSupportFragmentManager(), "inputDialogFragment");
             activityGame.outputTextObserver.observeForever(inputQueue::add);
         });
 
@@ -800,9 +803,10 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
                 activityGame.outputIntObserver = new MutableLiveData<>();
             }
 
-            ShowMenuDialogFragment showMenuDialogFragment = new ShowMenuDialogFragment();
-            showMenuDialogFragment.setItems(items);
-            showMenuDialogFragment.show(getSupportFragmentManager(), "showMenuDialogFragment");
+            GameDialogFragments dialogFragment = new GameDialogFragments();
+            dialogFragment.setDialogType(GameDialogType.MENU_DIALOG);
+            dialogFragment.setItems(items);
+            dialogFragment.show(getSupportFragmentManager(), "showMenuDialogFragment");
             activityGame.outputIntObserver.observeForever(resultQueue::add);
         });
 
@@ -817,9 +821,10 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
     @Override
     public void showLoadGamePopup() {
         runOnUiThread(() -> {
-            LoadGameDialogFragment loadGameDialogFragment = new LoadGameDialogFragment();
-            loadGameDialogFragment.setCancelable(true);
-            loadGameDialogFragment.show(getSupportFragmentManager(), "loadGameDialogFragment");
+            GameDialogFragments dialogFragment = new GameDialogFragments();
+            dialogFragment.setDialogType(GameDialogType.LOAD_DIALOG);
+            dialogFragment.setCancelable(true);
+            dialogFragment.show(getSupportFragmentManager(), "loadGameDialogFragment");
         });
     }
 
@@ -879,7 +884,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
         } else if (Objects.equals(dialog.getTag() , "loadGameDialogFragment")) {
             startReadOrWriteSave(LOAD);
         } else if (Objects.equals(dialog.getTag(), "showMessageDialogFragment")) {
-            activityGame.isClickOk.set(true);
+            activityGame.outputBooleanObserver.setValue(true);
         }
     }
 

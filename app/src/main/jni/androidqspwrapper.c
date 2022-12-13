@@ -306,15 +306,6 @@ jboolean Java_org_qp_android_model_libQSP_NativeMethods_QSPIsObjectsChanged(JNIE
 }
 
 ///* ------------------------------------------------------------ */
-///* Показ / скрытие окон */
-void Java_org_qp_android_model_libQSP_NativeMethods_QSPShowWindow(JNIEnv *env,
-                                                             jobject this,
-                                                             jint type,
-                                                             jboolean isShow) {
-    QSPShowWindow(type, (QSP_BOOL) isShow);
-}
-
-///* ------------------------------------------------------------ */
 ///* Переменные */
 //
 ///* Получить количество элементов массива */
