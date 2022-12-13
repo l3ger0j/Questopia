@@ -9,7 +9,6 @@ import static org.qp.android.utils.LanguageUtil.setLocale;
 import static org.qp.android.utils.ThreadUtil.isMainThread;
 import static org.qp.android.utils.ViewUtil.getFontStyle;
 
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Typeface;
@@ -33,6 +32,7 @@ import android.webkit.WebView;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -44,6 +44,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.databinding.DataBindingUtil;
+import androidx.databinding.Observable;
+import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -58,6 +60,7 @@ import org.qp.android.model.libQSP.RefreshInterfaceRequest;
 import org.qp.android.model.libQSP.WindowType;
 import org.qp.android.model.service.AudioPlayer;
 import org.qp.android.model.service.HtmlProcessor;
+import org.qp.android.utils.PatternDialogFragment;
 import org.qp.android.utils.ViewUtil;
 import org.qp.android.view.settings.SettingsActivity;
 import org.qp.android.view.settings.SettingsController;
@@ -71,7 +74,8 @@ import java.util.Objects;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CountDownLatch;
 
-public class GameActivity extends AppCompatActivity implements GameInterface {
+public class GameActivity extends AppCompatActivity implements GameInterface,
+        PatternDialogFragment.PatternDialogListener {
     private final String TAG = this.getClass().getSimpleName();
 
     private static final int MAX_SAVE_SLOTS = 5;
@@ -349,8 +353,8 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
     private void updateTabIcons() {
         if (mainMenu == null) return;
         mainMenu.findItem(R.id.menu_inventory).setIcon(activeTab == TAB_OBJECTS ? R.drawable.tab_object : R.drawable.tab_object_alt);
-        mainMenu.findItem(R.id.menu_maindesc).setIcon(activeTab == TAB_MAIN_DESC_AND_ACTIONS ? R.drawable.tab_main : R.drawable.tab_main_alt);
-        mainMenu.findItem(R.id.menu_varsdesc).setIcon(activeTab == TAB_VARS_DESC ? R.drawable.tab_vars : R.drawable.tab_vars_alt);
+        mainMenu.findItem(R.id.menu_mainDesc).setIcon(activeTab == TAB_MAIN_DESC_AND_ACTIONS ? R.drawable.tab_main : R.drawable.tab_main_alt);
+        mainMenu.findItem(R.id.menu_varsDesc).setIcon(activeTab == TAB_VARS_DESC ? R.drawable.tab_vars : R.drawable.tab_vars_alt);
     }
 
     @Override
@@ -512,18 +516,9 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
     }
 
     private void promptCloseGame() {
-        new AlertDialog.Builder(this)
-                .setMessage(R.string.promptCloseGame)
-                .setPositiveButton(android.R.string.yes, (dialog, which) -> {
-                    activityGame.stopAudio();
-                    activityGame.stopLibQsp();
-                    counterHandler.removeCallbacks(counterTask);
-                    finish();
-                })
-                .setNegativeButton(android.R.string.no, (dialog, which) -> { })
-                .setCancelable(false)
-                .create()
-                .show();
+        CloseGameDialogFragment closeGameDialogFragment = new CloseGameDialogFragment();
+        closeGameDialogFragment.setCancelable(false);
+        closeGameDialogFragment.show(getSupportFragmentManager(), "closeGameDialogFragment");
     }
 
     @Override
@@ -550,13 +545,13 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         boolean gameRunning = libQspProxy.getGameState().gameRunning;
-        menu.setGroupVisible(R.id.menugroup_running, gameRunning);
+        menu.setGroupVisible(R.id.menuGroup_running , gameRunning);
 
         if (gameRunning) {
-            MenuItem loadItem = menu.findItem(R.id.menu_loadgame);
+            MenuItem loadItem = menu.findItem(R.id.menu_loadGame);
             addSaveSlotsSubMenu(loadItem, LOAD);
 
-            MenuItem saveItem = menu.findItem(R.id.menu_savegame);
+            MenuItem saveItem = menu.findItem(R.id.menu_saveGame);
             addSaveSlotsSubMenu(saveItem, SAVE);
         }
 
@@ -568,7 +563,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
         mainMenu.removeItem(id);
 
         int order = action == LOAD ? 2 : 3;
-        SubMenu subMenu = mainMenu.addSubMenu(R.id.menugroup_running, id, order, parent.getTitle());
+        SubMenu subMenu = mainMenu.addSubMenu(R.id.menuGroup_running , id, order, parent.getTitle());
         subMenu.setHeaderTitle(getString(R.string.selectSlot));
 
         MenuItem item;
@@ -652,23 +647,23 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int i = item.getItemId();
-        if (i == R.id.menu_maindesc) {
+        if (i == R.id.menu_mainDesc) {
             setActiveTab(TAB_MAIN_DESC_AND_ACTIONS);
             return true;
         } else if (i == R.id.menu_inventory) {
             setActiveTab(TAB_OBJECTS);
             return true;
-        } else if (i == R.id.menu_varsdesc) {
+        } else if (i == R.id.menu_varsDesc) {
             setActiveTab(TAB_VARS_DESC);
             return true;
-        } else if (i == R.id.menu_userinput) {
+        } else if (i == R.id.menu_userInput) {
             if (settingsController.useExecString) {
                 libQspProxy.onUseExecutorString();
             } else {
                 libQspProxy.onInputAreaClicked();
             }
             return true;
-        } else if (i == R.id.menu_gamestock) {
+        } else if (i == R.id.menu_gameStock) {
             promptCloseGame();
             return true;
         } else if (i == R.id.menu_options) {
@@ -676,11 +671,11 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
             intent.setClass(this , SettingsActivity.class);
             startActivity(intent);
             return true;
-        } else if (i == R.id.menu_newgame) {
+        } else if (i == R.id.menu_newGame) {
             libQspProxy.restartGame();
             setActiveTab(TAB_MAIN_DESC_AND_ACTIONS);
             return true;
-        } else return i == R.id.menu_loadgame || i == R.id.menu_savegame;
+        } else return i == R.id.menu_loadGame || i == R.id.menu_saveGame;
     }
     // region GameInterface
 
@@ -732,12 +727,20 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
             if (processedMsg == null) {
                 processedMsg = "";
             }
-            new AlertDialog.Builder(this)
-                    .setMessage(processedMsg)
-                    .setPositiveButton(android.R.string.ok, (dialog, which) -> latch.countDown())
-                    .setCancelable(false)
-                    .create()
-                    .show();
+
+            ShowMessageDialogFragment showMessageDialogFragment = new ShowMessageDialogFragment();
+            showMessageDialogFragment.setProcessedMsg(processedMsg);
+            showMessageDialogFragment.setCancelable(false);
+            showMessageDialogFragment.show(getSupportFragmentManager(), "showMessageDialogFragment");
+            activityGame.isClickOk.addOnPropertyChangedCallback(
+                    new Observable.OnPropertyChangedCallback() {
+                @Override
+                public void onPropertyChanged(Observable sender , int propertyId) {
+                    if (sender != null && sender.toString().equals("true")) {
+                        latch.countDown();
+                    }
+                }
+            });
         });
 
         try {
@@ -768,7 +771,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
             InputDialogFragment inputDialogFragment = new InputDialogFragment();
             inputDialogFragment.setMessage(message);
             inputDialogFragment.setCancelable(false);
-            inputDialogFragment.show(getSupportFragmentManager(), "");
+            inputDialogFragment.show(getSupportFragmentManager(), "inputDialogFragment");
             activityGame.outputTextObserver.observeForever(inputQueue::add);
         });
 
@@ -777,14 +780,6 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
         } catch (InterruptedException ex) {
             Log.e(TAG,"Wait for input failed", ex);
             return "";
-        }
-    }
-
-    public void onClickOk (String outputText) {
-        if (Objects.equals(outputText , "")) {
-            activityGame.outputTextObserver.setValue("");
-        } else {
-            activityGame.outputTextObserver.setValue(outputText);
         }
     }
 
@@ -799,11 +794,17 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
         for (QspMenuItem item : libQspProxy.getGameState().menuItems) {
             items.add(item.name);
         }
-        runOnUiThread(() -> new AlertDialog.Builder(this)
-                .setItems(items.toArray(new CharSequence[0]), (dialog, which) -> resultQueue.add(which))
-                .setOnCancelListener(dialog -> resultQueue.add(-1))
-                .create()
-                .show());
+
+        runOnUiThread(() -> {
+            if (activityGame.outputIntObserver.hasObservers()) {
+                activityGame.outputIntObserver = new MutableLiveData<>();
+            }
+
+            ShowMenuDialogFragment showMenuDialogFragment = new ShowMenuDialogFragment();
+            showMenuDialogFragment.setItems(items);
+            showMenuDialogFragment.show(getSupportFragmentManager(), "showMenuDialogFragment");
+            activityGame.outputIntObserver.observeForever(resultQueue::add);
+        });
 
         try {
             return resultQueue.take();
@@ -815,17 +816,16 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
 
     @Override
     public void showLoadGamePopup() {
-        runOnUiThread(() -> new AlertDialog.Builder(this)
-                .setMessage(R.string.loadGamePopup)
-                .setPositiveButton(android.R.string.yes, (dialog, which) -> startReadOrWriteSave(LOAD))
-                .setNegativeButton(android.R.string.no, (dialog, which) -> { })
-                .setCancelable(false)
-                .create().show());
+        runOnUiThread(() -> {
+            LoadGameDialogFragment loadGameDialogFragment = new LoadGameDialogFragment();
+            loadGameDialogFragment.setCancelable(true);
+            loadGameDialogFragment.show(getSupportFragmentManager(), "loadGameDialogFragment");
+        });
     }
 
     @Override
     public void showSaveGamePopup(String filename) {
-        runOnUiThread(() -> mainMenu.performIdentifierAction(R.id.menu_savegame, 0));
+        runOnUiThread(() -> mainMenu.performIdentifierAction(R.id.menu_saveGame , 0));
     }
 
     @Override
@@ -857,6 +857,44 @@ public class GameActivity extends AppCompatActivity implements GameInterface {
         counterHandler.removeCallbacks(counterTask);
         runnable.run();
         counterHandler.postDelayed(counterTask, counterInterval);
+    }
+
+    @Override
+    public void onDialogPositiveClick(@NonNull DialogFragment dialog) {
+        if (Objects.equals(dialog.getTag() , "closeGameDialogFragment")) {
+            activityGame.stopAudio();
+            activityGame.stopLibQsp();
+            counterHandler.removeCallbacks(counterTask);
+            finish();
+        } else if (Objects.equals(dialog.getTag() , "inputDialogFragment")) {
+            if (dialog.requireDialog().getWindow().findViewById(R.id.inputBox_edit) != null) {
+                EditText editText = dialog.requireDialog().getWindow().findViewById(R.id.inputBox_edit);
+                String outputText = editText.getText().toString();
+                if (Objects.equals(outputText , "")) {
+                    activityGame.outputTextObserver.setValue("");
+                } else {
+                    activityGame.outputTextObserver.setValue(outputText);
+                }
+            }
+        } else if (Objects.equals(dialog.getTag() , "loadGameDialogFragment")) {
+            startReadOrWriteSave(LOAD);
+        } else if (Objects.equals(dialog.getTag(), "showMessageDialogFragment")) {
+            activityGame.isClickOk.set(true);
+        }
+    }
+
+    @Override
+    public void onDialogNegativeClick(@NonNull DialogFragment dialog) {
+        if (Objects.equals(dialog.getTag() , "showMenuDialogFragment")) {
+            activityGame.outputIntObserver.setValue(-1);
+        }
+    }
+
+    @Override
+    public void onDialogListClick(DialogFragment dialog , int which) {
+        if (Objects.equals(dialog.getTag() , "showMenuDialogFragment")) {
+            activityGame.outputIntObserver.setValue(which);
+        }
     }
 
     // endregion GameInterface

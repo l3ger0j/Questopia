@@ -3,16 +3,15 @@ package org.qp.android.view.game;
 import android.app.Dialog;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.EditText;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
-import androidx.fragment.app.DialogFragment;
 
 import org.qp.android.R;
+import org.qp.android.utils.PatternDialogFragment;
 
-public class InputDialogFragment extends DialogFragment {
+public class InputDialogFragment extends PatternDialogFragment {
     private String message;
 
     public void setMessage(String message) {
@@ -30,10 +29,8 @@ public class InputDialogFragment extends DialogFragment {
         return new AlertDialog.Builder(requireContext())
                 .setView(view)
                 .setMessage(message)
-                .setPositiveButton(android.R.string.ok, (dialog, which) -> {
-                    EditText editView = view.findViewById(R.id.inputBox_edit);
-                    ((GameActivity) requireActivity()).onClickOk(editView.getText().toString());
-                })
+                .setPositiveButton(android.R.string.ok, (dialog, which) ->
+                        listener.onDialogPositiveClick(this))
                 .create();
     }
 

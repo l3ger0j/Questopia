@@ -1,32 +1,31 @@
 package org.qp.android.view.game;
 
+import android.app.Dialog;
 import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.databinding.ObservableField;
-import androidx.fragment.app.DialogFragment;
 
 import org.qp.android.databinding.DialogImageBinding;
+import org.qp.android.utils.PatternDialogFragment;
 
-public class ImageDialogFragment extends DialogFragment {
+public class ImageDialogFragment extends PatternDialogFragment {
     public ObservableField<String> pathToImage = new ObservableField<>();
     private DialogImageBinding imageBinding;
 
-    @Nullable
+    @NonNull
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater ,
-                             @Nullable ViewGroup container ,
-                             @Nullable Bundle savedInstanceState) {
+    public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
         imageBinding = DialogImageBinding.inflate(getLayoutInflater());
         imageBinding.setDialogFragment(this);
         if (savedInstanceState != null && savedInstanceState.containsKey("pathToImage")) {
             pathToImage.set(savedInstanceState.getString("pathToImage"));
         }
-        return imageBinding.getRoot();
+        return new AlertDialog.Builder(requireContext())
+                .setView(imageBinding.getRoot())
+                .create();
     }
 
     @Override

@@ -17,6 +17,7 @@ import android.webkit.WebViewClient;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.databinding.ObservableBoolean;
 import androidx.databinding.ObservableField;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.MutableLiveData;
@@ -47,6 +48,8 @@ public class ActivityGame extends AndroidViewModel {
             new ObservableField<>();
 
     public MutableLiveData<String> outputTextObserver = new MutableLiveData<>();
+    public MutableLiveData<Integer> outputIntObserver = new MutableLiveData<>();
+    public ObservableBoolean isClickOk = new ObservableBoolean(false);
 
     // region Getter/Setter
     public HtmlProcessor getHtmlProcessor() {
