@@ -34,6 +34,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import org.qp.android.R;
 import org.qp.android.databinding.ActivityStockBinding;
 import org.qp.android.dto.stock.GameData;
+import org.qp.android.utils.PatternDialogFragment;
 import org.qp.android.utils.ViewUtil;
 import org.qp.android.view.game.GameActivity;
 import org.qp.android.view.settings.SettingsActivity;
@@ -50,7 +51,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Objects;
 
-public class StockActivity extends AppCompatActivity {
+public class StockActivity extends AppCompatActivity implements PatternDialogFragment.PatternDialogListener {
     private final String TAG = this.getClass().getSimpleName();
 
     private HashMap<String, GameData> gamesMap = new HashMap<>();
@@ -71,7 +72,7 @@ public class StockActivity extends AppCompatActivity {
 
     private FloatingActionButton mFAB;
     private RecyclerView mRecyclerView;
-    private final ArrayList<GameData> tempList = getSortedGames();
+    private ArrayList<GameData> tempList;
     private final ArrayList<GameData> selectList = new ArrayList<>();
 
     public String getGameIdByPosition(int position) {
@@ -254,10 +255,6 @@ public class StockActivity extends AppCompatActivity {
         dialogFragment.show(getSupportFragmentManager(), "");
     }
 
-    public void onDestroyDialogFragment () {
-        activityStock.isShowDialog.set(false);
-    }
-
     public void onItemClick(int position) {
         if (isEnable) {
             for (GameData gameData : gamesMap.values()) {
@@ -283,6 +280,21 @@ public class StockActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void onDialogPositiveClick(DialogFragment dialog) {
+        activityStock.isShowDialog.set(false);
+    }
+
+    @Override
+    public void onDialogNegativeClick(DialogFragment dialog) {
+
+    }
+
+    @Override
+    public void onDialogListClick(DialogFragment dialog , int which) {
+
+    }
+
     public void onLongItemClick() {
         if (!isEnable) {
             ActionMode.Callback callback = new ActionMode.Callback() {
@@ -294,6 +306,7 @@ public class StockActivity extends AppCompatActivity {
 
                 @Override
                 public boolean onPrepareActionMode(ActionMode mode , Menu menu) {
+                    tempList = getSortedGames();
                     isEnable = true;
                     return true;
                 }

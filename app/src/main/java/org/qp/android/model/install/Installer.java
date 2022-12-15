@@ -7,7 +7,6 @@ import androidx.documentfile.provider.DocumentFile;
 import androidx.lifecycle.MutableLiveData;
 import androidx.work.Data;
 import androidx.work.OneTimeWorkRequest;
-import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
 
 import java.io.File;
@@ -40,17 +39,20 @@ public class Installer {
         WorkManager.getInstance(context)
                 .getWorkInfoByIdLiveData(workRequest.getId()).observeForever(workInfo -> {
             if (workInfo.getState().isFinished()) {
-                if (workInfo.getState().equals(WorkInfo.State.SUCCEEDED)) {
-                    isDone.postValue(true);
-                } else if (workInfo.getState().equals(WorkInfo.State.FAILED)) {
-                    isDone.postValue(false);
-                    if (!workInfo.getOutputData().equals(Data.EMPTY)) {
-                        if (workInfo.getOutputData().getString("errorOne") != null) {
-                            throw new InstallException("NIG");
-                        } else if (workInfo.getOutputData().getString("errorTwo") != null) {
-                            throw new InstallException("NFE");
+                switch (workInfo.getState()) {
+                    case SUCCEEDED:
+                        isDone.postValue(true);
+                        break;
+                    case FAILED:
+                        isDone.postValue(false);
+                        if (!workInfo.getOutputData().equals(Data.EMPTY)) {
+                            if (workInfo.getOutputData().getString("errorOne") != null) {
+                                throw new InstallException("NIG");
+                            } else if (workInfo.getOutputData().getString("errorTwo") != null) {
+                                throw new InstallException("NFE");
+                            }
                         }
-                    }
+                        break;
                 }
             }
         });

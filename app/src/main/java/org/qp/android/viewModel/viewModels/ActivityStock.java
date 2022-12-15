@@ -39,8 +39,9 @@ import org.qp.android.model.install.InstallException;
 import org.qp.android.model.install.Installer;
 import org.qp.android.model.notify.NotifyBuilder;
 import org.qp.android.utils.ViewUtil;
-import org.qp.android.view.stock.InstallDialogFragment;
 import org.qp.android.view.stock.StockActivity;
+import org.qp.android.view.stock.StockDialogFragments;
+import org.qp.android.view.stock.StockDialogType;
 import org.qp.android.viewModel.repository.LocalGame;
 
 import java.io.File;
@@ -108,11 +109,12 @@ public class ActivityStock extends AndroidViewModel {
     }
 
     // region Dialog
-    private final InstallDialogFragment dialogFragment = new InstallDialogFragment();
+    private final StockDialogFragments dialogFragments = new StockDialogFragments();
 
     public void showDialogInstall() {
-       dialogFragment.setInstallBinding(formingInstallView());
-       dialogFragment.onCancel(new DialogInterface() {
+       dialogFragments.setDialogType(StockDialogType.INSTALL_DIALOG);
+       dialogFragments.setInstallBinding(formingInstallView());
+       dialogFragments.onCancel(new DialogInterface() {
             @Override
             public void cancel() {
                 isShowDialog.set(false);
@@ -123,7 +125,7 @@ public class ActivityStock extends AndroidViewModel {
             }
         });
        Objects.requireNonNull(activityObservableField.get())
-               .showDialogFragment(dialogFragment);
+               .showDialogFragment(dialogFragments);
        isShowDialog.set(true);
     }
 
@@ -149,7 +151,7 @@ public class ActivityStock extends AndroidViewModel {
             gameData.fileSize = String.valueOf(tempInstallFile.length() / 1000);
             gameData.icon = (tempImageFile == null ? null : tempImageFile.getUri().toString());
             installGame(tempInstallFile, gameData);
-            dialogFragment.dismiss();
+            dialogFragments.dismiss();
         } catch (NullPointerException ex) {
             Log.e(TAG, "Error: ", ex);
         }
@@ -157,8 +159,9 @@ public class ActivityStock extends AndroidViewModel {
 
     public void showDialogEdit (GameData gameData) {
         tempGameData = gameData;
-        dialogFragment.setEditBinding(formingEditView());
-        dialogFragment.onCancel(new DialogInterface() {
+        dialogFragments.setDialogType(StockDialogType.EDIT_DIALOG);
+        dialogFragments.setEditBinding(formingEditView());
+        dialogFragments.onCancel(new DialogInterface() {
             @Override
             public void cancel() {
                 isShowDialog.set(false);
@@ -169,7 +172,7 @@ public class ActivityStock extends AndroidViewModel {
             }
         });
         Objects.requireNonNull(activityObservableField.get())
-                .showDialogFragment(dialogFragment);
+                .showDialogFragment(dialogFragments);
         isShowDialog.set(true);
     }
 
@@ -198,7 +201,7 @@ public class ActivityStock extends AndroidViewModel {
             }
             refreshGamesDirectory();
             isShowDialog.set(false);
-            dialogFragment.dismiss();
+            dialogFragments.dismiss();
         } catch (NullPointerException ex) {
             Log.e(TAG, "Error: ", ex);
         }

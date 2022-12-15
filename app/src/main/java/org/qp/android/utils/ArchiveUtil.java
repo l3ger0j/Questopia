@@ -9,6 +9,7 @@ import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import net.sf.sevenzipjbinding.ExtractAskMode;
 import net.sf.sevenzipjbinding.ExtractOperationResult;
@@ -125,23 +126,18 @@ public final class ArchiveUtil {
             return position;
         }
 
-        // Taken from Java14's InputStream
-        // as basic skip is limited by the size of its buffer
         private void skipNBytes(long n) throws IOException {
             if (n > 0) {
                 long ns = stream.skip(n);
-                if (ns < n) { // skipped too few bytes
-                    // adjust number to skip
+                if (ns < n) {
                     n -= ns;
-                    // read until requested number skipped or EOS reached
                     while (n > 0 && stream.read() != -1) {
                         n--;
                     }
-                    // if not enough skipped, then EOFE
                     if (n != 0) {
                         throw new EOFException();
                     }
-                } else if (ns != n) { // skipped negative or too many bytes
+                } else if (ns != n) {
                     throw new IOException("Unable to skip exactly");
                 }
             }
@@ -184,6 +180,7 @@ public final class ArchiveUtil {
             this.context = context;
         }
 
+        @Nullable
         @Override
         public ISequentialOutStream getStream(int index, ExtractAskMode extractAskMode)
                 throws SevenZipException {
