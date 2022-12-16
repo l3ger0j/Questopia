@@ -6,6 +6,8 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 
 import com.squareup.picasso.Picasso;
@@ -25,7 +27,10 @@ public class ImageProvider {
     public Drawable get(String path) {
         if (isNullOrEmpty(path)) return null;
         String fixPath = path.replace("\\", "/").trim();
-        Picasso.get()
+
+        Handler handler = new Handler(Looper.getMainLooper());
+        handler.post(() ->
+                Picasso.get()
                 .load(new File(fixPath))
                 .into(new Target() {
                     @Override
@@ -41,7 +46,7 @@ public class ImageProvider {
                     @Override
                     public void onPrepareLoad(Drawable placeHolderDrawable) {
                     }
-                });
+                }));
         return tempDrawable;
     }
 }

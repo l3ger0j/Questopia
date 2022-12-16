@@ -15,6 +15,8 @@ import android.os.Looper;
 import android.os.SystemClock;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import org.qp.android.R;
 import org.qp.android.dto.libQSP.ActionData;
 import org.qp.android.dto.libQSP.ErrorData;
@@ -191,6 +193,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
         return actions;
     }
 
+    @NonNull
     private ArrayList<QspListItem> getObjects() {
         ArrayList<QspListItem> objects = new ArrayList<>();
         int count = nativeMethods.QSPGetObjectsCount();

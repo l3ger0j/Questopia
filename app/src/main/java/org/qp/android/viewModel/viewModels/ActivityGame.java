@@ -127,7 +127,8 @@ public class ActivityGame extends AndroidViewModel {
 
         @Nullable
         @Override
-        public WebResourceResponse shouldInterceptRequest(WebView view , WebResourceRequest request) {
+        public WebResourceResponse shouldInterceptRequest(WebView view ,
+                                                          @NonNull WebResourceRequest request) {
             Uri uri = request.getUrl();
             if (uri.getScheme().startsWith("file")) {
                 try {

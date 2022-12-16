@@ -272,6 +272,10 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
 
     private void initVarsDescView() {
         varsDescView = activityGameBinding.varsDesc;
+        WebSettings webViewSettings = varsDescView.getSettings();
+        webViewSettings.setAllowFileAccess(true);
+        webViewSettings.setDomStorageEnabled(true);
+        varsDescView.setWebViewClient(activityGame.getWebViewClient());
     }
 
     private void initServices() {
@@ -359,6 +363,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
     @Override
     protected void onDestroy() {
         libQspProxy.setGameInterface(null);
+        counterHandler.removeCallbacks(counterTask);
         super.onDestroy();
         Log.i(TAG,"Game destroyed");
     }
@@ -883,22 +888,30 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
             }
         } else if (Objects.equals(dialog.getTag() , "loadGameDialogFragment")) {
             startReadOrWriteSave(LOAD);
-        } else if (Objects.equals(dialog.getTag(), "showMessageDialogFragment")) {
+        } else if (Objects.equals(dialog.getTag() , "showMessageDialogFragment")) {
             activityGame.outputBooleanObserver.setValue(true);
         }
     }
 
     @Override
-    public void onDialogNegativeClick(@NonNull DialogFragment dialog) {
-        if (Objects.equals(dialog.getTag() , "showMenuDialogFragment")) {
-            activityGame.outputIntObserver.setValue(-1);
+    public void onDialogNegativeClick(DialogFragment dialog) {
+        if (dialog == null) {
+            Log.e(TAG, "Dialog is null");
+        } else {
+            if (Objects.equals(dialog.getTag() , "showMenuDialogFragment")) {
+                activityGame.outputIntObserver.setValue(-1);
+            }
         }
     }
 
     @Override
     public void onDialogListClick(DialogFragment dialog , int which) {
-        if (Objects.equals(dialog.getTag() , "showMenuDialogFragment")) {
-            activityGame.outputIntObserver.setValue(which);
+        if (dialog == null) {
+            Log.e(TAG, "Dialog is null");
+        } else {
+            if (Objects.equals(dialog.getTag() , "showMenuDialogFragment")) {
+                activityGame.outputIntObserver.setValue(which);
+            }
         }
     }
 
