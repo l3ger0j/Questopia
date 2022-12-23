@@ -5,13 +5,13 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
+
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import org.qp.android.databinding.DialogEditBinding;
 import org.qp.android.databinding.DialogInstallBinding;
-import org.qp.android.utils.PatternDialogFragment;
 
-public class StockDialogFragments extends PatternDialogFragment {
+public class StockDialogFrags extends StockPatternDialogFrags {
     private DialogInstallBinding installBinding;
     private DialogEditBinding editBinding;
     private StockDialogType dialogType;
@@ -35,8 +35,7 @@ public class StockDialogFragments extends PatternDialogFragment {
             dismissAllowingStateLoss();
             return super.onCreateDialog(savedInstanceState);
         }
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(requireContext());
         switch (dialogType) {
             case INSTALL_DIALOG:
                 builder.setView(installBinding.getRoot());
@@ -57,7 +56,7 @@ public class StockDialogFragments extends PatternDialogFragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        listener.onDialogPositiveClick(this);
+        listener.onDialogDestroy(this);
         if (installBinding != null) {
             installBinding = null;
         }

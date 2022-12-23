@@ -5,6 +5,7 @@ import static org.qp.android.utils.ViewUtil.getFontStyle;
 
 import android.content.Context;
 
+import androidx.annotation.NonNull;
 import androidx.databinding.ObservableField;
 import androidx.lifecycle.ViewModel;
 
@@ -26,7 +27,8 @@ public class ActivitySettings extends ViewModel {
     public ObservableField<SettingsActivity> settingsActivityObservableField =
             new ObservableField<>();
 
-    public String formationAboutDesc(SettingsController settingsController , Context context) {
+    public String formationAboutDesc(@NonNull SettingsController settingsController ,
+                                     @NonNull Context context) {
         return ABOUT_TEMPLATE
                 .replace("QSPFONTSTYLE", getFontStyle(settingsController.typeface))
                 .replace("QSPFONTSIZE", Integer.toString(settingsController.fontSize))

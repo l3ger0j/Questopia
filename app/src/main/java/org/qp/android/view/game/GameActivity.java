@@ -59,7 +59,6 @@ import org.qp.android.model.libQSP.RefreshInterfaceRequest;
 import org.qp.android.model.libQSP.WindowType;
 import org.qp.android.model.service.AudioPlayer;
 import org.qp.android.model.service.HtmlProcessor;
-import org.qp.android.utils.PatternDialogFragment;
 import org.qp.android.utils.ViewUtil;
 import org.qp.android.view.settings.SettingsActivity;
 import org.qp.android.view.settings.SettingsController;
@@ -67,14 +66,13 @@ import org.qp.android.viewModel.viewModels.ActivityGame;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CountDownLatch;
 
 public class GameActivity extends AppCompatActivity implements GameInterface,
-        PatternDialogFragment.PatternDialogListener {
+        GamePatternDialogFrags.GamePatternDialogList {
     private final String TAG = this.getClass().getSimpleName();
 
     private static final int MAX_SAVE_SLOTS = 5;
@@ -520,7 +518,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
     }
 
     private void promptCloseGame() {
-        GameDialogFragments dialogFragment = new GameDialogFragments();
+        GameDialogFrags dialogFragment = new GameDialogFrags();
         dialogFragment.setDialogType(GameDialogType.CLOSE_DIALOG);
         dialogFragment.setCancelable(false);
         dialogFragment.show(getSupportFragmentManager(), "closeGameDialogFragment");
@@ -713,7 +711,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
     @Override
     public void showPicture(final String pathToImg) {
         runOnUiThread(() -> {
-            GameDialogFragments dialogFragment = new GameDialogFragments();
+            GameDialogFrags dialogFragment = new GameDialogFrags();
             dialogFragment.setDialogType(GameDialogType.IMAGE_DIALOG);
             dialogFragment.pathToImage.set(pathToImg);
             dialogFragment.show(getSupportFragmentManager(), "");
@@ -738,7 +736,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
                 activityGame.outputBooleanObserver = new MutableLiveData<>();
             }
 
-            GameDialogFragments dialogFragment = new GameDialogFragments();
+            GameDialogFrags dialogFragment = new GameDialogFrags();
             dialogFragment.setDialogType(GameDialogType.MESSAGE_DIALOG);
             dialogFragment.setProcessedMsg(processedMsg);
             dialogFragment.setCancelable(false);
@@ -775,7 +773,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
                 activityGame.outputTextObserver = new MutableLiveData<>();
             }
 
-            GameDialogFragments dialogFragment = new GameDialogFragments();
+            GameDialogFrags dialogFragment = new GameDialogFrags();
             dialogFragment.setDialogType(GameDialogType.INPUT_DIALOG);
             dialogFragment.setMessage(message);
             dialogFragment.setCancelable(false);
@@ -808,9 +806,10 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
                 activityGame.outputIntObserver = new MutableLiveData<>();
             }
 
-            GameDialogFragments dialogFragment = new GameDialogFragments();
+            GameDialogFrags dialogFragment = new GameDialogFrags();
             dialogFragment.setDialogType(GameDialogType.MENU_DIALOG);
             dialogFragment.setItems(items);
+            dialogFragment.setCancelable(false);
             dialogFragment.show(getSupportFragmentManager(), "showMenuDialogFragment");
             activityGame.outputIntObserver.observeForever(resultQueue::add);
         });
@@ -826,7 +825,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
     @Override
     public void showLoadGamePopup() {
         runOnUiThread(() -> {
-            GameDialogFragments dialogFragment = new GameDialogFragments();
+            GameDialogFrags dialogFragment = new GameDialogFrags();
             dialogFragment.setDialogType(GameDialogType.LOAD_DIALOG);
             dialogFragment.setCancelable(true);
             dialogFragment.show(getSupportFragmentManager(), "loadGameDialogFragment");
@@ -919,9 +918,9 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
 
     private class QspItemAdapter extends ArrayAdapter<QspListItem> {
         private final int resource;
-        private final List<QspListItem> items;
+        private final ArrayList<QspListItem> items;
 
-        QspItemAdapter(Context context, int resource, List<QspListItem> items) {
+        QspItemAdapter(Context context, int resource, ArrayList<QspListItem> items) {
             super(context, resource, items);
             this.resource = resource;
             this.items = items;
@@ -936,8 +935,14 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
             QspListItem item = items.get(position);
             if (item != null) {
                 TextView textView = convertView.findViewById(R.id.item_text);
-                textView.setCompoundDrawablesWithIntrinsicBounds(item.icon,
-                        null, null, null);
+                Log.d(TAG , item.text.toString());
+                if (item.icon != null) {
+                    Log.d(TAG , item.icon.toString());
+                    textView.setCompoundDrawablesWithIntrinsicBounds(item.icon,
+                            null, null, null);
+                } else {
+                    Log.d(TAG, "TRUE");
+                }
                 textView.setTypeface(getTypeface());
                 textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, getFontSize());
                 textView.setBackgroundColor(getBackgroundColor());

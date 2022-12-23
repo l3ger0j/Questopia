@@ -38,9 +38,10 @@ import org.qp.android.dto.stock.GameData;
 import org.qp.android.model.install.InstallException;
 import org.qp.android.model.install.Installer;
 import org.qp.android.model.notify.NotifyBuilder;
+import org.qp.android.utils.ArchiveUtil;
 import org.qp.android.utils.ViewUtil;
 import org.qp.android.view.stock.StockActivity;
-import org.qp.android.view.stock.StockDialogFragments;
+import org.qp.android.view.stock.StockDialogFrags;
 import org.qp.android.view.stock.StockDialogType;
 import org.qp.android.viewModel.repository.LocalGame;
 
@@ -109,7 +110,7 @@ public class ActivityStock extends AndroidViewModel {
     }
 
     // region Dialog
-    private final StockDialogFragments dialogFragments = new StockDialogFragments();
+    private final StockDialogFrags dialogFragments = new StockDialogFrags();
 
     public void showDialogInstall() {
        dialogFragments.setDialogType(StockDialogType.INSTALL_DIALOG);
@@ -307,10 +308,10 @@ public class ActivityStock extends AndroidViewModel {
             Log.e(TAG, "Games directory is not writable");
             return;
         }
+        notificationStateGame(gameData.title);
         Installer installer = new Installer(activityObservableField.get());
         installer.gameInstall(gameFile, gameDir).observeForever(aBoolean -> {
             if (aBoolean) {
-                notifyGameWasInstall();
                 writeGameInfo(gameData , gameDir);
                 refreshGames();
             }
@@ -318,16 +319,33 @@ public class ActivityStock extends AndroidViewModel {
         isShowDialog.set(false);
     }
 
-    private void notifyGameWasInstall () {
+    private void notificationStateGame (String gameName) {
         NotifyBuilder builder =
-                new NotifyBuilder(activityObservableField.get(), "org.qp.android");
+                new NotifyBuilder(activityObservableField.get(),"gameInstallationProgress");
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            builder.createChannel();
+            builder.createDefaultChannel();
+            builder.createProgressChannel();
         }
-        builder.setTitleNotify("Game install");
-        builder.setTextNotify("The game has been successfully installed!");
+        builder.setTitleNotify(getApplication().getString(R.string.titleNotify));
+        builder.setTextNotify(getApplication().getString(R.string.textProgressNotify));
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(getApplication());
-        notificationManager.notify(1, builder.build());
+        notificationManager.notify(1, builder.buildWithProgress());
+        ArchiveUtil.progressInstall.observeForever(aLong -> {
+            notificationManager
+                    .notify(1, builder.updateProgress((int) (aLong * 100 / ArchiveUtil.totalSize)));
+            if (aLong == ArchiveUtil.totalSize) {
+                Log.d(TAG, "this");
+                notificationManager.cancelAll();
+                NotifyBuilder notifyBuilder =
+                        new NotifyBuilder(activityObservableField.get(), "gameInstalled");
+                notifyBuilder.setTitleNotify(getApplication().getString(R.string.titleNotify));
+                String tempMessage = getApplication()
+                        .getString(R.string.textInstallNotify)
+                        .replace("-GAMENAME-", gameName);
+                notifyBuilder.setTextNotify(tempMessage);
+                notificationManager.notify(1, notifyBuilder.buildWithoutProgress());
+            }
+        });
     }
 
     public void writeGameInfo(GameData gameData , File gameDir) {

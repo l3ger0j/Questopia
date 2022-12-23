@@ -29,11 +29,21 @@ public class SettingsActivity extends AppCompatActivity {
 
         getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.settings_container, SettingsFragment
-                        .newInstance(activitySettings.formationAboutDesc(settingsController , this)))
+                .add(R.id.settings_container,
+                        SettingsFragment
+                                .newInstance(activitySettings
+                                        .formationAboutDesc(settingsController , this)),
+                        "settingsFragment")
+                .addToBackStack(null)
                 .commit();
 
         loadLocale();
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        finish();
     }
 
     private void loadLocale() {

@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Use in dialog/toast -->
+    <!-- Use in dialog/toast/notification -->
+    <!-- Install notification -->
+        <string name="titleNotify">Game install</string>
+        <string name="textProgressNotify">Game Installation Progress</string>
+        <string name="textInstallNotify">The game -GAMENAME- has been successfully installed!</string>
     <!-- Dialog LoadGamePopup -->
         <string name="loadGamePopup">The save file was not found in gameDir. Would you like to manually specify the path to the save file?</string>
     <!-- Dialog Close -->

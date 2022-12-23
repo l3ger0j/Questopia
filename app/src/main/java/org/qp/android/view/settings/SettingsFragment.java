@@ -56,7 +56,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
             click.setOnPreferenceClickListener(preference -> {
                 PluginFragment pluginFragment = new PluginFragment();
                 requireActivity().getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.settings_container, pluginFragment , "findThisFragment")
+                        .replace(R.id.settings_container, pluginFragment , "pluginFragment")
                         .addToBackStack(null)
                         .commit();
                 return true;

@@ -4,7 +4,6 @@ import static org.qp.android.utils.DirUtil.doesDirectoryContainGameFiles;
 import static org.qp.android.utils.FileUtil.deleteDirectory;
 import static org.qp.android.utils.LanguageUtil.setLocale;
 
-import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -23,7 +22,6 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.view.ActionMode;
-import androidx.core.app.ActivityCompat;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.ViewModelProvider;
@@ -34,7 +32,6 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import org.qp.android.R;
 import org.qp.android.databinding.ActivityStockBinding;
 import org.qp.android.dto.stock.GameData;
-import org.qp.android.utils.PatternDialogFragment;
 import org.qp.android.utils.ViewUtil;
 import org.qp.android.view.game.GameActivity;
 import org.qp.android.view.settings.SettingsActivity;
@@ -51,7 +48,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Objects;
 
-public class StockActivity extends AppCompatActivity implements PatternDialogFragment.PatternDialogListener {
+public class StockActivity extends AppCompatActivity implements StockPatternDialogFrags.StockPatternDialogList {
     private final String TAG = this.getClass().getSimpleName();
 
     private HashMap<String, GameData> gamesMap = new HashMap<>();
@@ -124,7 +121,7 @@ public class StockActivity extends AppCompatActivity implements PatternDialogFra
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         activityStockBinding = ActivityStockBinding.inflate(getLayoutInflater());
-        mFAB = activityStockBinding.floatingActionButton;
+        mFAB = activityStockBinding.stockFAB;
         localStockViewModel =
                 new ViewModelProvider(this).get(FragmentStock.class);
         localStockViewModel.activityObservableField.set(this);
@@ -155,14 +152,12 @@ public class StockActivity extends AppCompatActivity implements PatternDialogFra
         gamesMap = activityStock.getGamesMap();
 
         if (savedInstanceState == null) {
+            StockFragment stockFragment = new StockFragment();
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.fragment_container, StockFragment.class, null)
+                    .add(activityStockBinding.stockFragContainer.getId(),
+                            stockFragment, "stockFragment")
                     .commit();
         }
-
-        ActivityCompat.requestPermissions(this,
-                new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
-                1);
 
         resultSetPath = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
@@ -225,6 +220,12 @@ public class StockActivity extends AppCompatActivity implements PatternDialogFra
     }
 
     @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
+    }
+
+    @Override
     public void onRequestPermissionsResult(int requestCode , @NonNull String[] permissions , @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode , permissions , grantResults);
         if (requestCode == 1) {
@@ -281,18 +282,8 @@ public class StockActivity extends AppCompatActivity implements PatternDialogFra
     }
 
     @Override
-    public void onDialogPositiveClick(DialogFragment dialog) {
+    public void onDialogDestroy(DialogFragment dialog) {
         activityStock.isShowDialog.set(false);
-    }
-
-    @Override
-    public void onDialogNegativeClick(DialogFragment dialog) {
-
-    }
-
-    @Override
-    public void onDialogListClick(DialogFragment dialog , int which) {
-
     }
 
     public void onLongItemClick() {

@@ -10,6 +10,7 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.lifecycle.MutableLiveData;
 
 import net.sf.sevenzipjbinding.ExtractAskMode;
 import net.sf.sevenzipjbinding.ExtractOperationResult;
@@ -37,8 +38,11 @@ import java.util.Set;
 public final class ArchiveUtil {
     private static final String TAG = ArchiveUtil.class.getSimpleName();
 
+    public static long totalSize;
+    public static MutableLiveData<Long> progressInstall = new MutableLiveData<>();
+
     @NonNull
-    public static int[] getPrimitiveLongArrayFromInt(Set<Integer> input) {
+    public static int[] getPrimitiveLongArrayFromInt(@NonNull Set<Integer> input) {
         int[] ret = new int[input.size()];
         Iterator<Integer> iterator = input.iterator();
         for (int i = 0; i < ret.length; i++) {
@@ -236,11 +240,13 @@ public final class ArchiveUtil {
 
         @Override
         public void setTotal(long total) {
+            totalSize = total;
             Log.v(TAG, String.format("Extract archive, work planned: %s", total));
         }
 
         @Override
         public void setCompleted(long complete) {
+            progressInstall.postValue(complete);
             Log.v(TAG, String.format("Extract archive, work completed: %s", complete));
         }
     }

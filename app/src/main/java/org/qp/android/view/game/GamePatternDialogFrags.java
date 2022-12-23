@@ -1,29 +1,28 @@
-package org.qp.android.utils;
+package org.qp.android.view.game;
 
 import android.content.Context;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.DialogFragment;
 
-public abstract class PatternDialogFragment extends DialogFragment {
+public abstract class GamePatternDialogFrags extends DialogFragment {
 
-    public interface PatternDialogListener {
+    public interface GamePatternDialogList {
         void onDialogPositiveClick(DialogFragment dialog);
         void onDialogNegativeClick(DialogFragment dialog);
         void onDialogListClick(DialogFragment dialog, int which);
     }
 
-    public PatternDialogListener listener;
+    public GamePatternDialogFrags.GamePatternDialogList listener;
 
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         try {
-            listener = (PatternDialogListener) context;
+            listener = (GamePatternDialogFrags.GamePatternDialogList) context;
         } catch (ClassCastException e) {
             throw new ClassCastException(context
                     + " must implement PatternDialogListener");
         }
     }
-
 }

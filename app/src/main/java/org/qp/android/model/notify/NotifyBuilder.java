@@ -19,6 +19,8 @@ public class NotifyBuilder {
     private String titleNotify;
     private String textNotify;
 
+    private NotificationCompat.Builder progressBuilder;
+
     public void setTitleNotify(String titleNotify) {
         this.titleNotify = titleNotify;
     }
@@ -34,21 +36,56 @@ public class NotifyBuilder {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    public void createChannel () {
+    public void createDefaultChannel () {
         NotificationManager notificationManager =
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         NotificationChannel notificationChannel =
-                new NotificationChannel(CHANNEL_ID,
+                new NotificationChannel("gameInstalled",
                         "Installation status",
                         NotificationManager.IMPORTANCE_DEFAULT);
         notificationChannel.setDescription("Channel for displaying information about the current installation status of the game");
         notificationChannel.enableLights(true);
         notificationChannel.setLightColor(Color.GREEN);
         notificationChannel.enableVibration(false);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            notificationChannel.setAllowBubbles(true);
+        }
         notificationManager.createNotificationChannel(notificationChannel);
     }
 
-    public Notification build() {
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public void createProgressChannel () {
+        NotificationManager notificationManager =
+                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationChannel notificationChannel =
+                new NotificationChannel("gameInstallationProgress",
+                        "Progress install of game",
+                        NotificationManager.IMPORTANCE_LOW);
+        notificationChannel.setDescription("Channel for displaying information about the current installation status of the game");
+        notificationChannel.enableLights(true);
+        notificationChannel.setLightColor(Color.RED);
+        notificationChannel.enableVibration(false);
+        notificationManager.createNotificationChannel(notificationChannel);
+    }
+
+    public Notification buildWithProgress() {
+        progressBuilder = new NotificationCompat.Builder(context, CHANNEL_ID)
+                .setSmallIcon(R.drawable.add)
+                .setContentTitle(titleNotify)
+                .setContentText(textNotify)
+                .setOngoing(true)
+                .setProgress(0, 0, true);
+        return progressBuilder.build();
+    }
+
+    public Notification updateProgress(int progress) {
+        progressBuilder
+                .setContentText(progress +" / "+ 100)
+                .setProgress(100, progress, false);
+        return progressBuilder.build();
+    }
+
+    public Notification buildWithoutProgress() {
        return new NotificationCompat.Builder(context, CHANNEL_ID)
                .setSmallIcon(R.drawable.add)
                .setContentTitle(titleNotify)

@@ -6,16 +6,16 @@ import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.databinding.ObservableField;
+
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import org.qp.android.R;
 import org.qp.android.databinding.DialogImageBinding;
-import org.qp.android.utils.PatternDialogFragment;
 
 import java.util.ArrayList;
 
-public class GameDialogFragments extends PatternDialogFragment {
+public class GameDialogFrags extends GamePatternDialogFrags {
     private ArrayList<String> items;
     private GameDialogType dialogType;
     private DialogImageBinding imageBinding;
@@ -43,7 +43,7 @@ public class GameDialogFragments extends PatternDialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(requireContext());
         if (savedInstanceState != null) {
             if (savedInstanceState.containsKey("selectedDialogType")) {
                 dialogType = GameDialogType.valueOf(savedInstanceState.getString("selectedDialogType"));
