@@ -28,8 +28,7 @@ import androidx.databinding.ObservableBoolean;
 import androidx.databinding.ObservableField;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.lifecycle.AndroidViewModel;
-
-import com.squareup.picasso.Picasso;
+import androidx.lifecycle.MutableLiveData;
 
 import org.qp.android.R;
 import org.qp.android.databinding.DialogEditBinding;
@@ -39,7 +38,6 @@ import org.qp.android.model.install.InstallException;
 import org.qp.android.model.install.Installer;
 import org.qp.android.model.notify.NotifyBuilder;
 import org.qp.android.utils.ArchiveUtil;
-import org.qp.android.utils.ViewUtil;
 import org.qp.android.view.stock.StockActivity;
 import org.qp.android.view.stock.StockDialogFrags;
 import org.qp.android.view.stock.StockDialogType;
@@ -68,6 +66,8 @@ public class ActivityStock extends AndroidViewModel {
     private GameData tempGameData;
     private DialogEditBinding editBinding;
 
+    public MutableLiveData<Integer> outputIntObserver = new MutableLiveData<>();
+
     // region Getter/Setter
     public void setTempPathFile(DocumentFile tempPathFile) {
         this.tempPathFile = tempPathFile;
@@ -76,24 +76,11 @@ public class ActivityStock extends AndroidViewModel {
 
     public void setTempInstallFile(@NonNull DocumentFile tempInstallFile) {
         this.tempInstallFile = tempInstallFile;
-        installBinding.fileTV.setText(tempInstallFile.getName());
+        // installBinding.fileTV.setText(tempInstallFile.getName());
     }
 
     public void setTempImageFile(@NonNull DocumentFile tempImageFile) {
         this.tempImageFile = tempImageFile;
-        if (installBinding != null) {
-            installBinding.imageTV.setText(tempImageFile.getName());
-            Picasso.get()
-                    .load(tempImageFile.getUri())
-                    .fit()
-                    .into(installBinding.imageView);
-        } else {
-            editBinding.imageTV.setText(tempImageFile.getName());
-            Picasso.get()
-                    .load(tempImageFile.getUri())
-                    .fit()
-                    .into(editBinding.imageView);
-        }
     }
 
     public void setGamesDir(File gamesDir) {
@@ -126,7 +113,7 @@ public class ActivityStock extends AndroidViewModel {
             }
         });
        Objects.requireNonNull(activityObservableField.get())
-               .showDialogFragment(dialogFragments);
+               .showInstallDialogFragment(dialogFragments);
        isShowDialog.set(true);
     }
 
@@ -173,7 +160,7 @@ public class ActivityStock extends AndroidViewModel {
             }
         });
         Objects.requireNonNull(activityObservableField.get())
-                .showDialogFragment(dialogFragments);
+                .showEditDialogFragment(dialogFragments);
         isShowDialog.set(true);
     }
 
@@ -208,7 +195,7 @@ public class ActivityStock extends AndroidViewModel {
         }
     }
 
-    public void sendIntent(View view) {
+    public void sendIntent(@NonNull View view) {
         String action;
         Intent intentInstall, intentGetImage, intentSetPath;
         int id = view.getId();
@@ -377,7 +364,8 @@ public class ActivityStock extends AndroidViewModel {
         if (!isWritableDirectory(dir)) {
             Log.e(TAG,"Games directory is not writable");
             String message = getApplication().getString(R.string.gamesDirError);
-            ViewUtil.showErrorDialog(getApplication(), message);
+            Objects.requireNonNull(activityObservableField.get())
+                    .showErrorDialog(message);
             return;
         }
         setGamesDir(dir);

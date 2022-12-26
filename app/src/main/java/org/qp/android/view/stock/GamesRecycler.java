@@ -95,15 +95,6 @@ public class GamesRecycler extends RecyclerView.Adapter<GamesRecycler.ViewHolder
                     .setText(context.getString(R.string.fileSize)
                             .replace("-SIZE-", Integer.toString(gameData.getFileSize())));
         }
-
-        // gameAuthor
-        if (gameData.author.length() > 0) {
-            String text = context.getString(R.string.author)
-                    .replace("-AUTHOR-", gameData.author);
-            holder.listItemGameBinding.gameAuthor.setText(text);
-        } else {
-            holder.listItemGameBinding.gameAuthor.setText("");
-        }
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {

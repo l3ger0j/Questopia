@@ -1,6 +1,7 @@
 package org.qp.android.view.game;
 
 public enum GameDialogType {
+    ERROR_DIALOG,
     CLOSE_DIALOG,
     IMAGE_DIALOG,
     INPUT_DIALOG,

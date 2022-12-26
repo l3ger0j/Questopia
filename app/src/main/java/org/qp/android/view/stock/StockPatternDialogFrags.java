@@ -9,6 +9,9 @@ public abstract class StockPatternDialogFrags extends DialogFragment {
 
     public interface StockPatternDialogList {
         void onDialogDestroy(DialogFragment dialog);
+        void onDialogPositiveClick(DialogFragment dialog);
+        void onDialogNeutralClick(DialogFragment dialog);
+        void onDialogListClick(DialogFragment dialog, int which);
     }
 
     public StockPatternDialogFrags.StockPatternDialogList listener;

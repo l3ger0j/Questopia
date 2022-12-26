@@ -59,7 +59,6 @@ import org.qp.android.model.libQSP.RefreshInterfaceRequest;
 import org.qp.android.model.libQSP.WindowType;
 import org.qp.android.model.service.AudioPlayer;
 import org.qp.android.model.service.HtmlProcessor;
-import org.qp.android.utils.ViewUtil;
 import org.qp.android.view.settings.SettingsActivity;
 import org.qp.android.view.settings.SettingsController;
 import org.qp.android.viewModel.viewModels.ActivityGame;
@@ -705,7 +704,12 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
 
     @Override
     public void showError(final String message) {
-        runOnUiThread(() -> ViewUtil.showErrorDialog(this, message));
+        runOnUiThread(() -> {
+            var dialogFragments = new GameDialogFrags();
+            dialogFragments.setDialogType(GameDialogType.ERROR_DIALOG);
+            dialogFragments.setMessage(message);
+            dialogFragments.show(getSupportFragmentManager(), "errorDialogFragment");
+        });
     }
 
     @Override

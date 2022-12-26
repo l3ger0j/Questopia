@@ -62,6 +62,11 @@ public class GameDialogFrags extends GamePatternDialogFrags {
             }
         }
         switch (dialogType) {
+            case ERROR_DIALOG:
+                builder.setTitle(R.string.error);
+                builder.setMessage(message);
+                builder.setPositiveButton(android.R.string.ok, (dialog, which) -> {});
+                return builder.create();
             case CLOSE_DIALOG:
                 builder.setMessage(requireContext().getString(R.string.promptCloseGame));
                 builder.setPositiveButton(android.R.string.yes, (dialog, which) ->
