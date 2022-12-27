@@ -26,6 +26,8 @@ public class HtmlProcessor {
     private static final Pattern execPattern = Pattern.compile("href=\"exec:([\\s\\S]*?)\"", Pattern.CASE_INSENSITIVE);
     private final GameContentResolver gameContentResolver;
     private final ImageProvider imageProvider;
+    private static final String HTML_PATTERN = "<(\"[^\"]*\"|'[^']*'|[^'\">])*>";
+    private final Pattern pattern = Pattern.compile(HTML_PATTERN);
 
     public ObservableBoolean useOldValue = new ObservableBoolean();
 
@@ -149,5 +151,10 @@ public class HtmlProcessor {
         }
 
         return result.toString();
+    }
+
+    public boolean hasHTMLTags(String text){
+        Matcher matcher = pattern.matcher(text);
+        return matcher.find();
     }
 }

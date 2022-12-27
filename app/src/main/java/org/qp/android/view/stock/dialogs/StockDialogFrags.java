@@ -1,4 +1,4 @@
-package org.qp.android.view.stock;
+package org.qp.android.view.stock.dialogs;
 
 import android.app.Dialog;
 import android.os.Bundle;
@@ -76,7 +76,7 @@ public class StockDialogFrags extends StockPatternDialogFrags {
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(requireContext());
         switch (dialogType) {
             case EDIT_DIALOG:
-                if (installBinding != null) {
+                if (editBinding != null) {
                     builder.setView(editBinding.getRoot());
                     return builder.create();
                 } else {

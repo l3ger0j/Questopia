@@ -36,6 +36,9 @@ import org.qp.android.dto.stock.GameData;
 import org.qp.android.view.game.GameActivity;
 import org.qp.android.view.settings.SettingsActivity;
 import org.qp.android.view.settings.SettingsController;
+import org.qp.android.view.stock.dialogs.StockDialogFrags;
+import org.qp.android.view.stock.dialogs.StockDialogType;
+import org.qp.android.view.stock.dialogs.StockPatternDialogFrags;
 import org.qp.android.viewModel.viewModels.ActivityStock;
 import org.qp.android.viewModel.viewModels.FragmentStock;
 
@@ -62,7 +65,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
     private ActionMode actionMode;
     protected ActivityStockBinding activityStockBinding;
     public ActivityResultLauncher<Intent>
-            resultInstallLauncher, resultGetImageLauncher, resultSetPath;
+            resultInstallLauncher, resultInstallDir, resultGetImageLauncher, resultSetPath;
 
     private boolean isEnable = false;
 
@@ -190,6 +193,22 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
                 }
         );
 
+        resultInstallDir = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    Uri uri;
+                    DocumentFile file;
+                    if (result.getResultCode() == RESULT_OK) {
+                        if ((uri = Objects.requireNonNull(result.getData()).getData()) == null) {
+                            Log.e(TAG, "Archive or file is not selected");
+                        }
+                        file = DocumentFile.fromTreeUri(this, Objects.requireNonNull(uri));
+                        assert file != null;
+                        activityStock.setTempInstallDir(file);
+                    }
+                }
+        );
+
         resultGetImageLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
@@ -289,7 +308,6 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
     @Override
     public void onDialogPositiveClick(DialogFragment dialog) {
         if (Objects.equals(dialog.getTag() , "infoDialogFragment")) {
-            dialog.dismiss();
             activityStock.showDialogEdit(gameData);
         }
     }
@@ -437,11 +455,12 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         intent.putExtra("gameTitle", gameData.title);
         intent.putExtra("gameDirUri", gameData.gameDir.getAbsolutePath());
 
-        int gameFileCount = gameData.gameFiles.size();
+        var gameFileCount = gameData.gameFiles.size();
         if (gameFileCount == 0) {
             Log.w(TAG, "GameData has no gameData files");
             return;
         }
+
         if (gameFileCount == 1) {
             intent.putExtra("gameFileUri", gameData.gameFiles.get(0).getAbsolutePath());
             startActivity(intent);

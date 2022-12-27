@@ -1,4 +1,4 @@
-package org.qp.android.view.stock;
+package org.qp.android.view.stock.dialogs;
 
 import android.content.Context;
 

@@ -1,6 +1,7 @@
 package org.qp.android.viewModel.viewModels;
 
 import static org.qp.android.utils.Base64Util.decodeBase64;
+import static org.qp.android.utils.Base64Util.hasBase64;
 import static org.qp.android.utils.LanguageUtil.setLocale;
 import static org.qp.android.utils.PathUtil.getExtension;
 
@@ -105,10 +106,17 @@ public class ActivityGame extends AndroidViewModel {
                                                 @NonNull final String href) {
             String uriDecode = Uri.decode(href);
             if (href.toLowerCase().startsWith("exec:")) {
-                try {
-                    libQspProxy.execute(decodeBase64(uriDecode.substring(5)));
-                } catch (IllegalArgumentException exception) {
-                    libQspProxy.execute(uriDecode.substring(5));
+                String tempUriDecode = uriDecode.substring(5);
+                Log.d(TAG, String.valueOf(hasBase64(tempUriDecode)));
+                if (hasBase64(tempUriDecode)) {
+                    tempUriDecode = decodeBase64(uriDecode.substring(5));
+                } else {
+                    tempUriDecode = uriDecode.substring(5);
+                }
+                if (htmlProcessor.hasHTMLTags(tempUriDecode)) {
+                    libQspProxy.execute(htmlProcessor.removeHTMLTags(tempUriDecode));
+                } else {
+                    libQspProxy.execute(tempUriDecode);
                 }
             } else if (href.toLowerCase().startsWith("https:")
                     || href.toLowerCase().startsWith("http:")) {

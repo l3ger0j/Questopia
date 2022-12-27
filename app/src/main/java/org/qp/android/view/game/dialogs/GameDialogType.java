@@ -1,4 +1,4 @@
-package org.qp.android.view.game;
+package org.qp.android.view.game.dialogs;
 
 public enum GameDialogType {
     ERROR_DIALOG,

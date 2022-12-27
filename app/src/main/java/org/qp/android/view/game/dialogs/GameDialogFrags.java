@@ -1,4 +1,4 @@
-package org.qp.android.view.game;
+package org.qp.android.view.game.dialogs;
 
 import android.app.Dialog;
 import android.os.Bundle;

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <data>
         <variable
@@ -21,7 +22,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
-                android:layout_marginTop="32dp"
+                android:layout_marginTop="16dp"
                 android:layout_marginEnd="16dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -39,7 +40,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
-                android:layout_marginTop="32dp"
+                android:layout_marginTop="16dp"
                 android:layout_marginEnd="16dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -52,12 +53,12 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/installET2"
+                android:id="@+id/ET2"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
-                android:layout_marginTop="32dp"
+                android:layout_marginTop="16dp"
                 android:layout_marginEnd="16dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -74,12 +75,12 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
-                android:layout_marginTop="32dp"
+                android:layout_marginTop="16dp"
                 android:layout_marginEnd="16dp"
                 android:orientation="horizontal"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/installET2">
+                app:layout_constraintTop_toBottomOf="@+id/ET2">
 
                 <TextView
                     android:id="@+id/fileTV"
@@ -92,10 +93,10 @@
 
                 <Button
                     android:id="@+id/buttonSelectPath"
-                    android:onClick="@{stockVM::sendIntent}"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:onClick="@{stockVM::sendIntent}"
                     android:text="@string/buttonSelect" />
             </LinearLayout>
 
@@ -104,10 +105,11 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
-                android:layout_marginTop="32dp"
+                android:layout_marginTop="16dp"
                 android:layout_marginEnd="16dp"
                 android:orientation="horizontal"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/linearLayout">
 
@@ -129,11 +131,11 @@
                     android:textStyle="bold" />
 
                 <Button
-                    android:id="@+id/button3"
-                    android:onClick="@{stockVM::sendIntent}"
+                    android:id="@+id/buttonSelectIcon"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:onClick="@{stockVM::sendIntent}"
                     android:text="@string/buttonSelect" />
             </LinearLayout>
 
@@ -147,7 +149,7 @@
                 android:onClick="@{() -> stockVM.createEditIntent()}"
                 android:text="@string/editButton"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.498"
+                app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/linearLayout2" />
 

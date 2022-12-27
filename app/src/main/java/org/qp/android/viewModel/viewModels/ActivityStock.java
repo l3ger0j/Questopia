@@ -1,6 +1,7 @@
 package org.qp.android.viewModel.viewModels;
 
 import static android.content.Intent.ACTION_OPEN_DOCUMENT;
+import static android.content.Intent.ACTION_OPEN_DOCUMENT_TREE;
 import static android.content.Intent.EXTRA_MIME_TYPES;
 import static org.qp.android.utils.FileUtil.GAME_INFO_FILENAME;
 import static org.qp.android.utils.FileUtil.copyFile;
@@ -39,8 +40,8 @@ import org.qp.android.model.install.Installer;
 import org.qp.android.model.notify.NotifyBuilder;
 import org.qp.android.utils.ArchiveUtil;
 import org.qp.android.view.stock.StockActivity;
-import org.qp.android.view.stock.StockDialogFrags;
-import org.qp.android.view.stock.StockDialogType;
+import org.qp.android.view.stock.dialogs.StockDialogFrags;
+import org.qp.android.view.stock.dialogs.StockDialogType;
 import org.qp.android.viewModel.repository.LocalGame;
 
 import java.io.File;
@@ -60,7 +61,7 @@ public class ActivityStock extends AndroidViewModel {
     private final HashMap<String, GameData> gamesMap = new HashMap<>();
 
     private File gamesDir;
-    private DocumentFile tempInstallFile, tempImageFile, tempPathFile;
+    private DocumentFile tempInstallFile, tempInstallDir, tempImageFile, tempPathFile;
 
     private DialogInstallBinding installBinding;
     private GameData tempGameData;
@@ -76,7 +77,13 @@ public class ActivityStock extends AndroidViewModel {
 
     public void setTempInstallFile(@NonNull DocumentFile tempInstallFile) {
         this.tempInstallFile = tempInstallFile;
-        // installBinding.fileTV.setText(tempInstallFile.getName());
+        installBinding.fileTV.setText(tempInstallFile.getName());
+    }
+
+    public void setTempInstallDir (@NonNull DocumentFile tempInstallDir) {
+        this.tempInstallDir = tempInstallDir;
+        installBinding.buttonSelectArchive.setEnabled(false);
+        installBinding.folderTV.setText(tempInstallDir.getName());
     }
 
     public void setTempImageFile(@NonNull DocumentFile tempImageFile) {
@@ -97,7 +104,7 @@ public class ActivityStock extends AndroidViewModel {
     }
 
     // region Dialog
-    private final StockDialogFrags dialogFragments = new StockDialogFrags();
+    private StockDialogFrags dialogFragments = new StockDialogFrags();
 
     public void showDialogInstall() {
        dialogFragments.setDialogType(StockDialogType.INSTALL_DIALOG);
@@ -120,10 +127,14 @@ public class ActivityStock extends AndroidViewModel {
     public void createInstallIntent() {
         GameData gameData = new GameData();
         try {
-            gameData.id = removeExtension(Objects.requireNonNull(tempInstallFile.getName()));
+            gameData.id = removeExtension(Objects.requireNonNull(tempInstallFile != null ?
+                    tempInstallFile.getName()
+                    : tempInstallDir.getName()));
             gameData.title = (Objects.requireNonNull(
                     installBinding.ET0.getEditText()).getText().toString().isEmpty()?
-                    removeExtension(Objects.requireNonNull(tempInstallFile.getName()))
+                    removeExtension(Objects.requireNonNull(tempInstallFile != null ?
+                            tempInstallFile.getName() :
+                            tempInstallDir.getName()))
                     : Objects.requireNonNull(
                             installBinding.ET0.getEditText()).getText().toString());
             gameData.author = (Objects.requireNonNull(
@@ -132,13 +143,15 @@ public class ActivityStock extends AndroidViewModel {
                     : Objects.requireNonNull(
                             installBinding.ET1.getEditText()).getText().toString());
             gameData.version = (Objects.requireNonNull(
-                    installBinding.installET2.getEditText()).getText().toString().isEmpty()?
+                    installBinding.ET2.getEditText()).getText().toString().isEmpty()?
                     null
                     : Objects.requireNonNull(
-                            installBinding.installET2.getEditText()).getText().toString());
-            gameData.fileSize = String.valueOf(tempInstallFile.length() / 1000);
+                            installBinding.ET2.getEditText()).getText().toString());
+            gameData.fileSize = String.valueOf(tempInstallFile != null ?
+                    tempInstallFile.length()
+                    : tempInstallDir.length() / 1000);
             gameData.icon = (tempImageFile == null ? null : tempImageFile.getUri().toString());
-            installGame(tempInstallFile, gameData);
+            installGame(tempInstallFile != null ? tempInstallFile : tempInstallDir, gameData);
             dialogFragments.dismiss();
         } catch (NullPointerException ex) {
             Log.e(TAG, "Error: ", ex);
@@ -147,6 +160,7 @@ public class ActivityStock extends AndroidViewModel {
 
     public void showDialogEdit (GameData gameData) {
         tempGameData = gameData;
+        dialogFragments = new StockDialogFrags();
         dialogFragments.setDialogType(StockDialogType.EDIT_DIALOG);
         dialogFragments.setEditBinding(formingEditView());
         dialogFragments.onCancel(new DialogInterface() {
@@ -177,10 +191,10 @@ public class ActivityStock extends AndroidViewModel {
                     : Objects.requireNonNull(
                     editBinding.ET1.getEditText()).getText().toString());
             tempGameData.version = (Objects.requireNonNull(
-                    editBinding.installET2.getEditText()).getText().toString().isEmpty()?
+                    editBinding.ET2.getEditText()).getText().toString().isEmpty()?
                     removeExtension(tempGameData.version)
                     : Objects.requireNonNull(
-                    editBinding.installET2.getEditText()).getText().toString());
+                    editBinding.ET2.getEditText()).getText().toString());
             tempGameData.icon = (tempImageFile == null ? tempGameData.icon
                     : tempImageFile.getUri().toString());
             writeGameInfo(tempGameData, tempGameData.gameDir);
@@ -197,9 +211,9 @@ public class ActivityStock extends AndroidViewModel {
 
     public void sendIntent(@NonNull View view) {
         String action;
-        Intent intentInstall, intentGetImage, intentSetPath;
+        Intent intentInstall, intentInstallDir, intentGetImage, intentSetPath;
         int id = view.getId();
-        if (id == R.id.button2) {
+        if (id == R.id.buttonSelectArchive) {
             action = ACTION_OPEN_DOCUMENT;
             intentInstall = new Intent(action);
             intentInstall.addCategory(Intent.CATEGORY_OPENABLE);
@@ -214,7 +228,17 @@ public class ActivityStock extends AndroidViewModel {
             } catch (ActivityNotFoundException e) {
                 Log.e(TAG , e.toString());
             }
-        } else if (id == R.id.button3) {
+        } else if (id == R.id.buttonSelectFolder) {
+            action = ACTION_OPEN_DOCUMENT_TREE;
+            intentInstallDir = new Intent(action);
+            intentInstallDir.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            try {
+                Objects.requireNonNull(activityObservableField.get())
+                        .resultInstallDir.launch(intentInstallDir);
+            } catch (ActivityNotFoundException e) {
+                Log.e(TAG , e.toString());
+            }
+        } else if (id == R.id.buttonSelectIcon) {
             action = ACTION_OPEN_DOCUMENT;
             intentGetImage = new Intent(action);
             intentGetImage.addCategory(Intent.CATEGORY_OPENABLE);
@@ -295,15 +319,26 @@ public class ActivityStock extends AndroidViewModel {
             Log.e(TAG, "Games directory is not writable");
             return;
         }
-        notificationStateGame(gameData.title);
-        Installer installer = new Installer(activityObservableField.get());
-        installer.gameInstall(gameFile, gameDir).observeForever(aBoolean -> {
-            if (aBoolean) {
-                writeGameInfo(gameData , gameDir);
-                refreshGames();
-            }
-        });
-        isShowDialog.set(false);
+        if (isWritableDirectory(gameDir)) {
+            Installer installer = new Installer(activityObservableField.get());
+            installer.gameInstall(gameFile, gameDir).observeForever(aBoolean -> {
+                if (aBoolean) {
+                    writeGameInfo(gameData , gameDir);
+                    refreshGames();
+                }
+            });
+            isShowDialog.set(false);
+        } else {
+            notificationStateGame(gameData.title);
+            Installer installer = new Installer(activityObservableField.get());
+            installer.gameInstall(gameFile, gameDir).observeForever(aBoolean -> {
+                if (aBoolean) {
+                    writeGameInfo(gameData , gameDir);
+                    refreshGames();
+                }
+            });
+            isShowDialog.set(false);
+        }
     }
 
     private void notificationStateGame (String gameName) {

@@ -1,5 +1,10 @@
 package org.qp.android.model.install;
 
+import static org.qp.android.utils.DirUtil.doesDirectoryContainGameFiles;
+import static org.qp.android.utils.DirUtil.normalizeGameDirectory;
+import static org.qp.android.utils.FileUtil.copyFile;
+import static org.qp.android.utils.FileUtil.getOrCreateDirectory;
+
 import android.content.Context;
 
 import androidx.annotation.NonNull;
@@ -20,7 +25,11 @@ public class Installer {
     }
 
     public MutableLiveData<Boolean> gameInstall (@NonNull DocumentFile srcFile, File destDir) {
-        installArchive(srcFile, destDir);
+        if (srcFile.isDirectory()) {
+            installDirectory(srcFile, destDir);
+        } else {
+            installArchive(srcFile , destDir);
+        }
         return isDone;
     }
 
@@ -56,5 +65,27 @@ public class Installer {
                 }
             }
         });
+    }
+
+    private void installDirectory(DocumentFile srcFile , File destDir) {
+        for (DocumentFile file : srcFile.listFiles()) {
+            copyFileOrDirectory(file, destDir);
+        }
+        normalizeGameDirectory(destDir);
+        if (!doesDirectoryContainGameFiles(destDir)) {
+            throw new InstallException("NFE");
+        }
+        isDone.postValue(true);
+    }
+
+    private void copyFileOrDirectory(DocumentFile srcFile, File destDir) {
+        if (srcFile.isDirectory()) {
+            File subDestDir = getOrCreateDirectory(destDir, srcFile.getName());
+            for (DocumentFile subSrcFile : srcFile.listFiles()) {
+                copyFileOrDirectory(subSrcFile, subDestDir);
+            }
+        } else {
+            copyFile(context, srcFile, destDir);
+        }
     }
 }
