@@ -5,8 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
-import android.content.pm.ServiceInfo;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -24,12 +22,12 @@ import org.qp.android.databinding.FragmentPluginBinding;
 import org.qp.android.dto.plugin.PluginInfo;
 import org.qp.android.utils.ViewUtil;
 import org.qp.android.view.adapters.RecyclerItemClickListener;
+import org.qp.android.view.settings.SettingsActivity;
 import org.qp.android.viewModel.viewModels.FragmentPlugin;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 
 public class PluginFragment extends Fragment {
     private final String TAG = getClass().getSimpleName();
@@ -47,6 +45,7 @@ public class PluginFragment extends Fragment {
 
     private PackageBroadcastReceiver packageBroadcastReceiver;
     private IntentFilter packageFilter;
+    private String namePlugin;
 
     @Nullable
     @Override
@@ -56,7 +55,7 @@ public class PluginFragment extends Fragment {
         requireActivity().setTitle(R.string.pluginMenuTitle);
         packageBroadcastReceiver = new PackageBroadcastReceiver();
         packageFilter = new IntentFilter();
-        org.qp.android.databinding.FragmentPluginBinding fragmentPluginBinding =
+        var fragmentPluginBinding =
                 FragmentPluginBinding.inflate(getLayoutInflater());
         recyclerView = fragmentPluginBinding.pluginRecyclerView;
         pluginViewModel = new ViewModelProvider(requireActivity())
@@ -67,10 +66,9 @@ public class PluginFragment extends Fragment {
         return fragmentPluginBinding.getRoot();
     }
 
-    private String namePlugin;
     public void refreshPluginInfo() {
         fillPluginList();
-        PluginInfo pluginInfo = new PluginInfo();
+        var pluginInfo = new PluginInfo();
         pluginInfo.title = namePlugin;
         ArrayList<PluginInfo> arrayList = new ArrayList<>();
         arrayList.add(pluginInfo);
@@ -81,7 +79,7 @@ public class PluginFragment extends Fragment {
         packageFilter.addCategory(Intent.CATEGORY_DEFAULT);
         packageFilter.addDataScheme("package");
 
-        PluginRecycler adapter =
+        var adapter =
                 new PluginRecycler(requireActivity());
         adapter.submitList(arrayList);
         recyclerView.setAdapter(adapter);
@@ -108,16 +106,16 @@ public class PluginFragment extends Fragment {
     private void fillPluginList() {
         services = new ArrayList<>();
         categories = new ArrayList<>();
-        PackageManager packageManager = requireActivity().getPackageManager();
-        Intent baseIntent = new Intent(ACTION_PICK_PLUGIN);
+        var packageManager = requireActivity().getPackageManager();
+        var baseIntent = new Intent(ACTION_PICK_PLUGIN);
         baseIntent.setFlags(Intent.FLAG_DEBUG_LOG_RESOLUTION);
-        List<ResolveInfo> list = packageManager.queryIntentServices(baseIntent,
+        var list = packageManager.queryIntentServices(baseIntent,
                 PackageManager.GET_RESOLVED_FILTER);
         Log.d(TAG, "fillPluginList: " + list);
         for (int i = 0; i < list.size(); ++i) {
-            ResolveInfo info = list.get(i);
-            ServiceInfo serviceInfo = info.serviceInfo;
-            IntentFilter filter = info.filter;
+            var info = list.get(i);
+            var serviceInfo = info.serviceInfo;
+            var filter = info.filter;
             Log.d(TAG, "fillPluginList: i: " + i + "; serviceInfo: " + serviceInfo + ";filter: " + filter);
             if (serviceInfo != null) {
                 HashMap<String, String> item = new HashMap<>();
@@ -126,17 +124,17 @@ public class PluginFragment extends Fragment {
                 item.put(KEY_SERVICENAME, serviceInfo.name);
                 String firstCategory = null;
                 if (filter != null) {
-                    StringBuilder actions = new StringBuilder();
+                    var actions = new StringBuilder();
                     for (Iterator<String> actionIterator = filter.actionsIterator(); actionIterator.hasNext(); ) {
-                        String action = actionIterator.next();
+                        var action = actionIterator.next();
                         if (actions.length() > 0)
                             actions.append(",");
                         actions.append(action);
                     }
-                    StringBuilder categories = new StringBuilder();
-                    for (Iterator<String> categoryIterator = filter.categoriesIterator();
+                    var categories = new StringBuilder();
+                    for (var categoryIterator = filter.categoriesIterator();
                          categoryIterator.hasNext(); ) {
-                        String category = categoryIterator.next();
+                        var category = categoryIterator.next();
                         if (firstCategory == null)
                             firstCategory = category;
                         if (categories.length() > 0)
@@ -175,6 +173,7 @@ public class PluginFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         requireActivity().setTitle(R.string.settingsTitle);
+        ((SettingsActivity) requireActivity()).onClickShowPlugin(false);
     }
 
     class PackageBroadcastReceiver extends BroadcastReceiver {

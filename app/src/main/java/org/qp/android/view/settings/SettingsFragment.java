@@ -1,6 +1,5 @@
 package org.qp.android.view.settings;
 
-import android.app.AlertDialog;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.webkit.WebView;
@@ -8,8 +7,6 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.preference.Preference;
-import androidx.preference.PreferenceFragmentCompat;
 
 import org.qp.android.BuildConfig;
 import org.qp.android.QuestPlayerApplication;
@@ -20,8 +17,7 @@ import org.qp.android.view.plugin.PluginFragment;
 
 import java.util.Objects;
 
-public class SettingsFragment extends PreferenceFragmentCompat
-        implements SharedPreferences.OnSharedPreferenceChangeListener {
+public class SettingsFragment extends SettingsPatternPrefFrag {
     private int countClick = 3;
 
     @NonNull
@@ -39,22 +35,23 @@ public class SettingsFragment extends PreferenceFragmentCompat
         addPreferencesFromResource(R.xml.settings);
         String desc = requireArguments().getString("desc");
 
-        Preference backColor = findPreference("backColor");
+        var backColor = findPreference("backColor");
         Objects.requireNonNull(backColor).setSummary(getString(R.string.textBackLinkColorSum)
                 .replace("-VALUE-", "#e0e0e0"));
 
-        Preference textColor = findPreference("textColor");
+        var textColor = findPreference("textColor");
         Objects.requireNonNull(textColor).setSummary(getString(R.string.textBackLinkColorSum)
                 .replace("-VALUE-", "#000000"));
 
-        Preference linkColor = findPreference("linkColor");
+        var linkColor = findPreference("linkColor");
         Objects.requireNonNull(linkColor).setSummary(getString(R.string.textBackLinkColorSum)
                 .replace("-VALUE-", "#0000ff"));
 
-        Preference click = findPreference("showExtensionMenu");
+        var click = findPreference("showExtensionMenu");
         if (click != null) {
             click.setOnPreferenceClickListener(preference -> {
-                PluginFragment pluginFragment = new PluginFragment();
+                listener.onClickShowPlugin(true);
+                var pluginFragment = new PluginFragment();
                 requireActivity().getSupportFragmentManager().beginTransaction()
                         .replace(R.id.settings_container, pluginFragment , "pluginFragment")
                         .addToBackStack(null)
@@ -63,7 +60,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
             });
         }
         
-        Preference button = findPreference("showAbout");
+        var button = findPreference("showAbout");
         if (button != null) {
             button.setOnPreferenceClickListener(preference -> {
                 LinearLayout linearLayout = new LinearLayout(getContext());
@@ -81,16 +78,14 @@ public class SettingsFragment extends PreferenceFragmentCompat
                         "text/html", "utf-8", "");
                 webView.setLayoutParams(lpView);
                 linearLayout.addView(webView);
-
-                new AlertDialog.Builder(getContext())
-                        .setView(linearLayout)
-                        .create()
-                        .show();
+                var dialogFrag = new SettingsDialogFrag();
+                dialogFrag.setView(linearLayout);
+                dialogFrag.show(getParentFragmentManager(), "settingsDialogFragment");
                 return true;
             });
         }
 
-        Preference version = findPreference("showVersion");
+        var version = findPreference("showVersion");
         if (version != null) {
             version.setTitle(getString(R.string.extendedName)
                     .replace("-VERSION-", BuildConfig.VERSION_NAME));

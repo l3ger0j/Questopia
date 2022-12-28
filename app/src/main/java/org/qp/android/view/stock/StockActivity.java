@@ -24,7 +24,6 @@ import androidx.appcompat.view.ActionMode;
 import androidx.cardview.widget.CardView;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.DialogFragment;
-import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -33,7 +32,6 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import org.qp.android.R;
 import org.qp.android.databinding.ActivityStockBinding;
 import org.qp.android.dto.stock.GameData;
-import org.qp.android.view.game.GameActivity;
 import org.qp.android.view.settings.SettingsActivity;
 import org.qp.android.view.settings.SettingsController;
 import org.qp.android.view.stock.dialogs.StockDialogFrags;
@@ -42,7 +40,6 @@ import org.qp.android.view.stock.dialogs.StockPatternDialogFrags;
 import org.qp.android.viewModel.viewModels.ActivityStock;
 import org.qp.android.viewModel.viewModels.FragmentStock;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -57,7 +54,6 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
 
     public SettingsController settingsController;
     private String currentLanguage = Locale.getDefault().getLanguage();
-    private GameData gameData;
 
     private ActivityStock activityStock;
     private FragmentStock localStockViewModel;
@@ -77,10 +73,10 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
     public String getGameIdByPosition(int position) {
         localStockViewModel.getGameData().observe(this, gameDataArrayList -> {
             if (!gameDataArrayList.isEmpty() && gameDataArrayList.size() > position) {
-                gameData = gameDataArrayList.get(position);
+                activityStock.setTempGameData(gameDataArrayList.get(position));
             }
         });
-        return gameData.id;
+        return activityStock.getTempGameData().id;
     }
 
     @NonNull
@@ -267,12 +263,16 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         dialogFragments.show(getSupportFragmentManager(), "errorDialogFragment");
     }
 
-    public void showEditDialogFragment (DialogFragment dialogFragment) {
-        dialogFragment.show(getSupportFragmentManager(), "editDialogFragment");
+    public void showEditDialogFragment (DialogFragment editDialog) {
+        editDialog.show(getSupportFragmentManager(), "editDialogFragment");
     }
 
-    public void showInstallDialogFragment (DialogFragment dialogFragment) {
-        dialogFragment.show(getSupportFragmentManager(), "installDialogFragment");
+    public void showInstallDialogFragment (DialogFragment installDialog) {
+        installDialog.show(getSupportFragmentManager(), "installDialogFragment");
+    }
+
+    public void showSelectDialogFragment (DialogFragment selectDialog) {
+        selectDialog.show(getSupportFragmentManager(), "selectDialogFragment");
     }
 
     public void onItemClick(int position) {
@@ -308,14 +308,14 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
     @Override
     public void onDialogPositiveClick(DialogFragment dialog) {
         if (Objects.equals(dialog.getTag() , "infoDialogFragment")) {
-            activityStock.showDialogEdit(gameData);
+            activityStock.showDialogEdit();
         }
     }
 
     @Override
     public void onDialogNeutralClick(DialogFragment dialog) {
         if (Objects.equals(dialog.getTag() , "infoDialogFragment")) {
-            playGame(gameData);
+            activityStock.playGame();
         }
     }
 
@@ -400,7 +400,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
     }
 
     private void showGameInfo(String gameId) {
-        gameData = activityStock.getGamesMap().get(gameId);
+        var gameData = activityStock.getGamesMap().get(gameId);
         if (gameData == null) {
             Log.e(TAG,"GameData not found: " + gameId);
             return;
@@ -449,45 +449,6 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         dialogFrags.show(getSupportFragmentManager(), "infoDialogFragment");
     }
 
-    private void playGame(final GameData gameData) {
-        var intent = new Intent(this, GameActivity.class);
-        intent.putExtra("gameId", gameData.id);
-        intent.putExtra("gameTitle", gameData.title);
-        intent.putExtra("gameDirUri", gameData.gameDir.getAbsolutePath());
-
-        var gameFileCount = gameData.gameFiles.size();
-        if (gameFileCount == 0) {
-            Log.w(TAG, "GameData has no gameData files");
-            return;
-        }
-
-        if (gameFileCount == 1) {
-            intent.putExtra("gameFileUri", gameData.gameFiles.get(0).getAbsolutePath());
-            startActivity(intent);
-        } else {
-            if (activityStock.outputIntObserver.hasObservers()) {
-                activityStock.outputIntObserver = new MutableLiveData<>();
-            }
-
-            ArrayList<String> names = new ArrayList<>();
-            for (File file : gameData.gameFiles) {
-                names.add(file.getName());
-            }
-
-            var dialogFragments = new StockDialogFrags();
-            dialogFragments.setDialogType(StockDialogType.SELECT_DIALOG);
-            dialogFragments.setNames(names);
-            dialogFragments.setCancelable(false);
-            dialogFragments.show(getSupportFragmentManager(), "selectDialogFragment");
-
-            activityStock.outputIntObserver.observeForever(integer -> {
-                intent.putExtra("gameFileUri",
-                        gameData.gameFiles.get(integer).getAbsolutePath());
-                startActivity(intent);
-            });
-        }
-    }
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -502,8 +463,11 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         activityStock.refreshGamesDirectory();
     }
 
-    private void updateLocale() {
-        if (currentLanguage.equals(settingsController.language)) return;
+    public void updateLocale() {
+        if (currentLanguage.equals(settingsController.language)) {
+            setTitle(getString(R.string.gameStockTitle));
+            return;
+        }
         setLocale(this, settingsController.language);
         setTitle(getString(R.string.gameStockTitle));
         activityStock.refreshGames();

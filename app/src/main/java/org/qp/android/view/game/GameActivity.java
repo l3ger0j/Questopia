@@ -672,7 +672,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
             promptCloseGame();
             return true;
         } else if (i == R.id.menu_options) {
-            Intent intent = new Intent();
+            var intent = new Intent();
             intent.setClass(this , SettingsActivity.class);
             startActivity(intent);
             return true;

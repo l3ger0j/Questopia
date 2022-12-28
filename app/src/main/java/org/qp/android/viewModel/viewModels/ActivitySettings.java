@@ -27,6 +27,8 @@ public class ActivitySettings extends ViewModel {
     public ObservableField<SettingsActivity> settingsActivityObservableField =
             new ObservableField<>();
 
+    public boolean isShowPluginFragment = false;
+
     public String formationAboutDesc(@NonNull SettingsController settingsController ,
                                      @NonNull Context context) {
         return ABOUT_TEMPLATE

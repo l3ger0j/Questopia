@@ -37,7 +37,6 @@
 
         <activity
             android:name=".view.settings.SettingsActivity"
-            android:parentActivityName=".view.stock.StockActivity"
             android:label="@string/settingsTitle" />
 
         <provider

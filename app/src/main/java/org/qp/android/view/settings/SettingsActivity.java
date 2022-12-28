@@ -13,23 +13,28 @@ import org.qp.android.viewModel.viewModels.ActivitySettings;
 
 import java.util.Locale;
 
-public class SettingsActivity extends AppCompatActivity {
+public class SettingsActivity extends AppCompatActivity implements
+        SettingsPatternPrefFrag.SettingsPatternFragmentList {
     private String currentLanguage = Locale.getDefault().getLanguage();
     private SettingsController settingsController;
+    private ActivitySettings activitySettings;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
 
-        ActivitySettings activitySettings = new ViewModelProvider(this)
+        activitySettings = new ViewModelProvider(this)
                 .get(ActivitySettings.class);
         activitySettings.settingsActivityObservableField.set(this);
         settingsController = SettingsController.newInstance().loadSettings(this);
 
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+
         getSupportFragmentManager()
                 .beginTransaction()
-                .add(R.id.settings_container,
+                .replace(R.id.settings_container,
                         SettingsFragment
                                 .newInstance(activitySettings
                                         .formationAboutDesc(settingsController , this)),
@@ -41,9 +46,18 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        finish();
+    public void onClickShowPlugin(boolean onShow) {
+        activitySettings.isShowPluginFragment = onShow;
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        if (activitySettings.isShowPluginFragment) {
+            onBackPressed();
+        } else {
+            finish();
+        }
+        return true;
     }
 
     private void loadLocale() {

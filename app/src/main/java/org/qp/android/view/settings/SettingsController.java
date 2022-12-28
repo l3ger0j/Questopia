@@ -32,7 +32,7 @@ public class SettingsController {
     }
 
     public SettingsController loadSettings(Context context) {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        var preferences = PreferenceManager.getDefaultSharedPreferences(context);
         return from(preferences);
     }
 

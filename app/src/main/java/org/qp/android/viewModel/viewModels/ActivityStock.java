@@ -39,6 +39,7 @@ import org.qp.android.model.install.InstallException;
 import org.qp.android.model.install.Installer;
 import org.qp.android.model.notify.NotifyBuilder;
 import org.qp.android.utils.ArchiveUtil;
+import org.qp.android.view.game.GameActivity;
 import org.qp.android.view.stock.StockActivity;
 import org.qp.android.view.stock.dialogs.StockDialogFrags;
 import org.qp.android.view.stock.dialogs.StockDialogType;
@@ -47,6 +48,7 @@ import org.qp.android.viewModel.repository.LocalGame;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
 
@@ -70,6 +72,14 @@ public class ActivityStock extends AndroidViewModel {
     public MutableLiveData<Integer> outputIntObserver = new MutableLiveData<>();
 
     // region Getter/Setter
+    public GameData getTempGameData() {
+        return tempGameData;
+    }
+
+    public void setTempGameData(GameData tempGameData) {
+        this.tempGameData = tempGameData;
+    }
+
     public void setTempPathFile(DocumentFile tempPathFile) {
         this.tempPathFile = tempPathFile;
         editBinding.fileTV.setText(tempPathFile.getName());
@@ -158,8 +168,7 @@ public class ActivityStock extends AndroidViewModel {
         }
     }
 
-    public void showDialogEdit (GameData gameData) {
-        tempGameData = gameData;
+    public void showDialogEdit () {
         dialogFragments = new StockDialogFrags();
         dialogFragments.setDialogType(StockDialogType.EDIT_DIALOG);
         dialogFragments.setEditBinding(formingEditView());
@@ -176,6 +185,47 @@ public class ActivityStock extends AndroidViewModel {
         Objects.requireNonNull(activityObservableField.get())
                 .showEditDialogFragment(dialogFragments);
         isShowDialog.set(true);
+    }
+
+    public void playGame() {
+        var intent = new Intent(activityObservableField.get(),
+                GameActivity.class);
+        intent.putExtra("gameId", tempGameData.id);
+        intent.putExtra("gameTitle", tempGameData.title);
+        intent.putExtra("gameDirUri", tempGameData.gameDir.getAbsolutePath());
+
+        var gameFileCount = tempGameData.gameFiles.size();
+        if (gameFileCount == 0) {
+            Log.w(TAG, "GameData has no gameData files");
+            return;
+        }
+
+        if (gameFileCount == 1) {
+            intent.putExtra("gameFileUri", tempGameData.gameFiles.get(0).getAbsolutePath());
+            Objects.requireNonNull(activityObservableField.get()).startActivity(intent);
+        } else {
+            if (outputIntObserver.hasObservers()) {
+                outputIntObserver = new MutableLiveData<>();
+            }
+
+            ArrayList<String> names = new ArrayList<>();
+            for (File file : tempGameData.gameFiles) {
+                names.add(file.getName());
+            }
+
+            var dialogFragments = new StockDialogFrags();
+            dialogFragments.setDialogType(StockDialogType.SELECT_DIALOG);
+            dialogFragments.setNames(names);
+            dialogFragments.setCancelable(false);
+            Objects.requireNonNull(activityObservableField.get())
+                    .showSelectDialogFragment(dialogFragments);
+
+            outputIntObserver.observeForever(integer -> {
+                intent.putExtra("gameFileUri",
+                        tempGameData.gameFiles.get(integer).getAbsolutePath());
+                Objects.requireNonNull(activityObservableField.get()).startActivity(intent);
+            });
+        }
     }
 
     public void createEditIntent() {
@@ -287,19 +337,19 @@ public class ActivityStock extends AndroidViewModel {
     // region Game install
     @NonNull
     public File getOrCreateGameDirectory(String gameName) {
-        String folderName = normalizeFolderName(gameName);
+        var folderName = normalizeFolderName(gameName);
         return getOrCreateDirectory(gamesDir, folderName);
     }
 
     public void installGame(DocumentFile gameFile, GameData gameData) {
         if (!isWritableDirectory(gamesDir)) {
-            Log.e(TAG, "Games directory is not writable");
+            Objects.requireNonNull(activityObservableField.get())
+                    .showErrorDialog("Games directory is not writable");
             return;
         }
         try {
             doInstallGame(gameFile, gameData);
         } catch (InstallException ex) {
-            Log.e(TAG, ex.getMessage());
             if (Objects.requireNonNull(ex.getMessage()).equals("NIG")) {
                 String message = getApplication()
                         .getString(R.string.installError)
@@ -314,13 +364,14 @@ public class ActivityStock extends AndroidViewModel {
     }
 
     private void doInstallGame(DocumentFile gameFile, GameData gameData) {
-        File gameDir = getOrCreateGameDirectory(gameData.title);
+        var gameDir = getOrCreateGameDirectory(gameData.title);
         if (!isWritableDirectory(gameDir)) {
-            Log.e(TAG, "Games directory is not writable");
+            Objects.requireNonNull(activityObservableField.get())
+                    .showErrorDialog("Games directory is not writable");
             return;
         }
         if (isWritableDirectory(gameDir)) {
-            Installer installer = new Installer(activityObservableField.get());
+            var installer = new Installer(activityObservableField.get());
             installer.gameInstall(gameFile, gameDir).observeForever(aBoolean -> {
                 if (aBoolean) {
                     writeGameInfo(gameData , gameDir);
@@ -330,7 +381,7 @@ public class ActivityStock extends AndroidViewModel {
             isShowDialog.set(false);
         } else {
             notificationStateGame(gameData.title);
-            Installer installer = new Installer(activityObservableField.get());
+            var installer = new Installer(activityObservableField.get());
             installer.gameInstall(gameFile, gameDir).observeForever(aBoolean -> {
                 if (aBoolean) {
                     writeGameInfo(gameData , gameDir);
@@ -342,7 +393,7 @@ public class ActivityStock extends AndroidViewModel {
     }
 
     private void notificationStateGame (String gameName) {
-        NotifyBuilder builder =
+        var builder =
                 new NotifyBuilder(activityObservableField.get(),"gameInstallationProgress");
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             builder.createDefaultChannel();
@@ -350,7 +401,7 @@ public class ActivityStock extends AndroidViewModel {
         }
         builder.setTitleNotify(getApplication().getString(R.string.titleNotify));
         builder.setTextNotify(getApplication().getString(R.string.textProgressNotify));
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(getApplication());
+        var notificationManager = NotificationManagerCompat.from(getApplication());
         notificationManager.notify(1, builder.buildWithProgress());
         ArchiveUtil.progressInstall.observeForever(aLong -> {
             notificationManager
@@ -358,10 +409,10 @@ public class ActivityStock extends AndroidViewModel {
             if (aLong == ArchiveUtil.totalSize) {
                 Log.d(TAG, "this");
                 notificationManager.cancelAll();
-                NotifyBuilder notifyBuilder =
+                var notifyBuilder =
                         new NotifyBuilder(activityObservableField.get(), "gameInstalled");
                 notifyBuilder.setTitleNotify(getApplication().getString(R.string.titleNotify));
-                String tempMessage = getApplication()
+                var tempMessage = getApplication()
                         .getString(R.string.textInstallNotify)
                         .replace("-GAMENAME-", gameName);
                 notifyBuilder.setTextNotify(tempMessage);
@@ -371,34 +422,37 @@ public class ActivityStock extends AndroidViewModel {
     }
 
     public void writeGameInfo(GameData gameData , File gameDir) {
-        File infoFile = findFileOrDirectory(gameDir, GAME_INFO_FILENAME);
+        var infoFile = findFileOrDirectory(gameDir, GAME_INFO_FILENAME);
         if (infoFile == null) {
             infoFile = createFile(gameDir, GAME_INFO_FILENAME);
         }
         if (!isWritableFile(infoFile)) {
-            Log.e(TAG, "Game data info file is not writable");
+            Objects.requireNonNull(activityObservableField.get())
+                    .showErrorDialog("Game data info file is not writable");
             return;
         }
-        try (FileOutputStream out = new FileOutputStream(infoFile);
-             OutputStreamWriter writer = new OutputStreamWriter(out)) {
+        try (var out = new FileOutputStream(infoFile);
+             var writer = new OutputStreamWriter(out)) {
             writer.write(objectToXml(gameData));
         } catch (Exception ex) {
-            Log.e(TAG,"Failed to write to a gameData info file", ex);
+            Objects.requireNonNull(activityObservableField.get())
+                    .showErrorDialog("Failed to write to a gameData info file");
         }
     }
     // endregion Game install
 
     // region Refresh
     public void refreshGamesDirectory() {
-        File extFilesDir = getApplication().getExternalFilesDir(null);
+        var extFilesDir = getApplication().getExternalFilesDir(null);
         if (extFilesDir == null) {
-            Log.e(TAG,"External files directory not found");
+            Objects.requireNonNull(activityObservableField.get())
+                    .showErrorDialog("External files directory not found");
             return;
         }
-        File dir = getOrCreateDirectory(extFilesDir, "games");
+        var dir = getOrCreateDirectory(extFilesDir, "games");
         if (!isWritableDirectory(dir)) {
-            Log.e(TAG,"Games directory is not writable");
-            String message = getApplication().getString(R.string.gamesDirError);
+            var message = "Games directory is not writable" + " " +
+                    getApplication().getString(R.string.gamesDirError);
             Objects.requireNonNull(activityObservableField.get())
                     .showErrorDialog(message);
             return;
@@ -410,9 +464,9 @@ public class ActivityStock extends AndroidViewModel {
     public void refreshGames() {
         gamesMap.clear();
         for (GameData localGameData : localGame.getGames(gamesDir)) {
-            GameData remoteGameData = gamesMap.get(localGameData.id);
+            var remoteGameData = gamesMap.get(localGameData.id);
             if (remoteGameData != null) {
-                GameData aggregateGameData = new GameData(remoteGameData);
+                var aggregateGameData = new GameData(remoteGameData);
                 aggregateGameData.gameDir = localGameData.gameDir;
                 aggregateGameData.gameFiles = localGameData.gameFiles;
                 gamesMap.put(localGameData.id, aggregateGameData);
