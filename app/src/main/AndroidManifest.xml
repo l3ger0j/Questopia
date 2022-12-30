@@ -4,7 +4,8 @@
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
 
-    <queries>
+    <queries
+        android:exported="false">
         <intent>
             <action android:name="org.qp.intent.action.PICK_PLUGIN" />
         </intent>
@@ -17,7 +18,10 @@
         android:label="@string/appName"
         android:largeHeap="true"
         android:theme="@style/Theme.QP.Translucent"
-        tools:targetApi="m">
+        tools:targetApi="s"
+        android:allowBackup="false"
+        android:fullBackupContent="false"
+        android:dataExtractionRules="@xml/data_extraction_rules">
 
         <activity android:name=".view.splash.SquashActivity"
             android:exported="true">

@@ -42,12 +42,19 @@
     <string name="appDescription">
 <![CDATA[
 <h2><center>О Quest Player Android<img src=\"file:///android_res/drawable/landscape.jpg\" width=\"100%\"></center></h2>
-<h4 style="margin-left:5px;">Quest Player Android это проект с открытым исходным кодом, является форком Android-версии оригинальной <b>Quest Soft Player</b> (<a href=\"http://qsp.su/?option=com_content&view=article&id=64\">русскоязычный сайт</a>), платформы для создания интерактивной литературы с интерфейсом, основанным на меню выбора действий. Вы можете скачать актуальную версию приложения на <a href=\"https://github.com/l3ger0j/QuestPlayerAndroid\">GitHub</a>.</h4>
+<h4 style="margin-left:5px;">Quest Player Android это Android-порт с открытым исходным кодом оригинальной <b>Quest Soft Player</b> (<a href=\"http://qsp.su/?option=com_content&view=article&id=64\">русскоязычный сайт</a>), основанный на форке от <a href=\"https://github.com/seedhartha/QuestPlayer\">seedharta</a>. Вы можете скачать актуальную версию приложения на <a href=\"https://github.com/l3ger0j/QuestPlayerAndroid\">GitHub</a> или в <a href=\"https://t.me/QuestPlayer\">Телеграм канале</a>.</h4>
 ]]>
     </string>
     <string name="appCredits">
 <![CDATA[
-<center><h3>Credits</h3></center>
+<center><h3>В ролях</h3></center>
+<ul>
+    <li><b>Разработка:</b></li>
+    <ul style="list-style-type:none">
+        <li>l3ger0j (~v2.1+)</li>
+    </ul>
+</ul>
+<center><h3>Люди, принимавшие участие в разработке оригинального форка от seedharta</h3></center>
 <ul>
     <li><b>Разработка:</b></li>
     <ul style="list-style-type:none">
@@ -55,7 +62,6 @@
         <li>BOOMik (v1.3)</li>
         <li>MrBoboFace (v1.4+)</li>
         <li>seedhartha (v2.1+)</li>
-        <li>l3ger0j (~v2.1+)</li>
     </ul>
     <li><b>Перевод:</b></li>
     <ul style="list-style-type:none">
