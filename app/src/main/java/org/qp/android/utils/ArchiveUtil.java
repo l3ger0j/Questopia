@@ -30,7 +30,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -43,8 +42,8 @@ public final class ArchiveUtil {
 
     @NonNull
     public static int[] getPrimitiveLongArrayFromInt(@NonNull Set<Integer> input) {
-        int[] ret = new int[input.size()];
-        Iterator<Integer> iterator = input.iterator();
+        var ret = new int[input.size()];
+        var iterator = input.iterator();
         for (int i = 0; i < ret.length; i++) {
             ret[i] = iterator.next();
         }
@@ -56,17 +55,16 @@ public final class ArchiveUtil {
                                               File targetFolder) {
         assertNonUiThread();
         Map<Integer, String> fileNames = new HashMap<>();
-        try (DocumentFileRandomInStream stream = new DocumentFileRandomInStream(context, uri);
-             IInArchive inArchive = SevenZip.openInArchive(null, stream)) {
-            int itemCount = inArchive.getNumberOfItems();
-            for (int index = 0; index < itemCount; index++) {
-                String fileName = inArchive.getStringProperty(index, PropID.PATH);
-                int lastSeparator = fileName.lastIndexOf(File.separator);
+        try (var stream = new DocumentFileRandomInStream(context, uri);
+             var inArchive = SevenZip.openInArchive(null, stream)) {
+            var itemCount = inArchive.getNumberOfItems();
+            for (var index = 0; index < itemCount; index++) {
+                var fileName = inArchive.getStringProperty(index, PropID.PATH);
+                var lastSeparator = fileName.lastIndexOf(File.separator);
                 if (lastSeparator > -1) fileName = fileName.substring(lastSeparator + 1);
                 fileNames.put(index, fileName);
             }
-            int[] indexes = getPrimitiveLongArrayFromInt(fileNames.keySet());
-            Log.d(TAG, fileNames.toString());
+            var indexes = getPrimitiveLongArrayFromInt(fileNames.keySet());
             inArchive.extract(indexes, false,
                     new ArchiveExtractCallback(targetFolder, inArchive, context));
             return true;
@@ -150,7 +148,7 @@ public final class ArchiveUtil {
         @Override
         public int read(byte[] bytes) throws SevenZipException {
             try {
-                int result = stream.read(bytes);
+                var result = stream.read(bytes);
                 position += result;
                 if (result != bytes.length)
                     Log.w(TAG, String.format("diff %s expected; %s read", bytes.length, result));
@@ -190,10 +188,10 @@ public final class ArchiveUtil {
                 throws SevenZipException {
             Log.v(TAG, "Extract archive, get stream: " + index + " to: " + extractAskMode);
             this.extractAskMode = extractAskMode;
-            boolean isFolder = (Boolean) inArchive.getProperty(index ,
+            var isFolder = (Boolean) inArchive.getProperty(index ,
                     PropID.IS_FOLDER);
-            String path = (String) inArchive.getProperty(index, PropID.PATH);
-            File file = new File(targetFolder.getAbsolutePath(), path);
+            var path = (String) inArchive.getProperty(index, PropID.PATH);
+            var file = new File(targetFolder.getAbsolutePath(), path);
             if (isFolder) {
                 createDirectory(file);
                 return null;

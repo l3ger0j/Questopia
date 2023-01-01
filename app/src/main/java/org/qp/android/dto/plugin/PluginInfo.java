@@ -21,7 +21,7 @@ public class PluginInfo {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        PluginInfo that = (PluginInfo) o;
+        var that = (PluginInfo) o;
         return Objects.equals(id, that.id)
                 && Objects.equals(version, that.version)
                 && Objects.equals(title, that.title)

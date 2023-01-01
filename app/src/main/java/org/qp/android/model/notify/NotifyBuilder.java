@@ -37,9 +37,9 @@ public class NotifyBuilder {
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     public void createDefaultChannel () {
-        NotificationManager notificationManager =
+        var notificationManager =
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        NotificationChannel notificationChannel =
+        var notificationChannel =
                 new NotificationChannel("gameInstalled",
                         "Installation status",
                         NotificationManager.IMPORTANCE_DEFAULT);
@@ -55,9 +55,9 @@ public class NotifyBuilder {
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     public void createProgressChannel () {
-        NotificationManager notificationManager =
+        var notificationManager =
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        NotificationChannel notificationChannel =
+        var notificationChannel =
                 new NotificationChannel("gameInstallationProgress",
                         "Progress install of game",
                         NotificationManager.IMPORTANCE_LOW);

@@ -4,14 +4,10 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.os.IBinder;
 import android.util.Log;
 
 import org.qp.android.IQuestPlugin;
-
-import java.util.List;
 
 public class PluginClient {
     private IQuestPlugin servicePlugin;
@@ -29,25 +25,25 @@ public class PluginClient {
     };
 
     public void connectPlugin (Context context, String pluginName) {
-        Intent intent = new Intent("org.qp.plugin."+pluginName);
+        var intent = new Intent("org.qp.plugin."+pluginName);
         Log.d (getClass().getSimpleName(), intent.toString());
-        Intent updatedIntent = createExplicitIntent(context, intent);
+        var updatedIntent = createExplicitIntent(context, intent);
         if (updatedIntent != null) {
             context.bindService(updatedIntent, serviceConnection, Context.BIND_AUTO_CREATE);
         }
     }
 
     private Intent createExplicitIntent(Context context, Intent intent) {
-        PackageManager pm = context.getPackageManager();
-        List<ResolveInfo> resolveInfo = pm.queryIntentServices(intent, 0);
+        var pm = context.getPackageManager();
+        var resolveInfo = pm.queryIntentServices(intent, 0);
         if (resolveInfo == null || resolveInfo.size() != 1) {
             return null;
         }
-        ResolveInfo serviceInfo = resolveInfo.get(0);
-        String packageName = serviceInfo.serviceInfo.packageName;
-        String className = serviceInfo.serviceInfo.name;
-        ComponentName component = new ComponentName(packageName, className);
-        Intent explicitIntent = new Intent(intent);
+        var serviceInfo = resolveInfo.get(0);
+        var packageName = serviceInfo.serviceInfo.packageName;
+        var className = serviceInfo.serviceInfo.name;
+        var component = new ComponentName(packageName, className);
+        var explicitIntent = new Intent(intent);
         explicitIntent.setComponent(component);
         return explicitIntent;
     }

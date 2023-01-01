@@ -13,9 +13,9 @@ public class GameState {
     public File gameFile;
     public String mainDesc = "";
     public String varsDesc = "";
-    public ArrayList<QspListItem> actions = new ArrayList<>();
-    public ArrayList<QspListItem> objects = new ArrayList<>();
-    public ArrayList<QspMenuItem> menuItems = new ArrayList<>();
+    public ArrayList<QpListItem> actions = new ArrayList<>();
+    public ArrayList<QpListItem> objects = new ArrayList<>();
+    public ArrayList<QpMenuItem> menuItems = new ArrayList<>();
 
     public void reset() {
         interfaceConfig.reset();

@@ -15,7 +15,7 @@ public class GameContentResolver {
     }
 
     public String getAbsolutePath(String relPath) {
-        File file = getFile(relPath);
+        var file = getFile(relPath);
         return file != null ? file.getAbsolutePath() : null;
     }
 
@@ -26,12 +26,10 @@ public class GameContentResolver {
      */
     public static String normalizeContentPath(String path) {
         if (path == null) return null;
-
-        String result = path;
+        var result = path;
         if (result.startsWith("./")) {
             result = result.substring(2);
         }
-
         return result.replace("\\", "/");
     }
 

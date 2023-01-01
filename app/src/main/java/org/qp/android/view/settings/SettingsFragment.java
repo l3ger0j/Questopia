@@ -22,9 +22,9 @@ public class SettingsFragment extends SettingsPatternPrefFrag {
 
     @NonNull
     public static SettingsFragment newInstance(String desc) {
-        Bundle args = new Bundle();
+        var args = new Bundle();
         args.putString("desc", desc);
-        SettingsFragment fragment = new SettingsFragment();
+        var fragment = new SettingsFragment();
         fragment.setArguments(args);
         return fragment;
     }
@@ -33,7 +33,7 @@ public class SettingsFragment extends SettingsPatternPrefFrag {
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         requireActivity().setTitle(R.string.settingsTitle);
         addPreferencesFromResource(R.xml.settings);
-        String desc = requireArguments().getString("desc");
+        var desc = requireArguments().getString("desc");
 
         var backColor = findPreference("backColor");
         Objects.requireNonNull(backColor).setSummary(getString(R.string.textBackLinkColorSum)
@@ -63,7 +63,7 @@ public class SettingsFragment extends SettingsPatternPrefFrag {
         var button = findPreference("showAbout");
         if (button != null) {
             button.setOnPreferenceClickListener(preference -> {
-                LinearLayout linearLayout = new LinearLayout(getContext());
+                var linearLayout = new LinearLayout(getContext());
                 linearLayout.setOrientation(LinearLayout.VERTICAL);
                 LinearLayout.LayoutParams linLayoutParam =
                         new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
@@ -73,7 +73,7 @@ public class SettingsFragment extends SettingsPatternPrefFrag {
                 LinearLayout.LayoutParams lpView =
                         new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
                                 LinearLayout.LayoutParams.WRAP_CONTENT);
-                WebView webView = new WebView(getContext());
+                var webView = new WebView(getContext());
                 webView.loadDataWithBaseURL("", desc,
                         "text/html", "utf-8", "");
                 webView.setLayoutParams(lpView);

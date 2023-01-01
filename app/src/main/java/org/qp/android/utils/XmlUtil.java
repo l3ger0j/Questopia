@@ -11,7 +11,7 @@ public final class XmlUtil {
 
     @NonNull
     public static String objectToXml(Object o) throws Exception {
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+        try (var baos = new ByteArrayOutputStream()) {
             PERSISTER.write(o, baos);
             return baos.toString();
         }

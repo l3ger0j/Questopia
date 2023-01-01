@@ -8,7 +8,6 @@ import androidx.annotation.NonNull;
 
 import org.jetbrains.annotations.Contract;
 
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public final class Base64Util {
@@ -30,7 +29,7 @@ public final class Base64Util {
     }
 
     public static boolean hasBase64 (String input) {
-        Matcher matcher = pattern.matcher(input);
+        var matcher = pattern.matcher(input);
         return matcher.find();
     }
 }

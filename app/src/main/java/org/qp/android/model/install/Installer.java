@@ -34,12 +34,12 @@ public class Installer {
     }
 
     private void installArchive (DocumentFile srcFile, File destDir) {
-        Data inputData = new Data.Builder()
+        var inputData = new Data.Builder()
                 .putString("srcFile", srcFile.getUri().toString())
                 .putString("destDir", destDir.getAbsolutePath())
                 .build();
 
-        OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(InstallerWork.class)
+        var workRequest = new OneTimeWorkRequest.Builder(InstallerWork.class)
                 .setInputData(inputData)
                 .build();
 

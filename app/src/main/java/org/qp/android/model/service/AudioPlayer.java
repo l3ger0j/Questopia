@@ -40,11 +40,9 @@ public class AudioPlayer {
     public void stop() {
         throwIfNotMainThread();
         pause();
-
         if (audioThread == null) return;
-
         if (isAudioThreadInit) {
-            Handler handler = audioHandler;
+            var handler = audioHandler;
             if (handler != null) {
                 handler.getLooper().quitSafely();
             }
@@ -57,7 +55,7 @@ public class AudioPlayer {
 
     public void playFile(final String path, final int volume) {
         runOnAudioThread(() -> {
-            Sound sound = sounds.get(path);
+            var sound = sounds.get(path);
             if (sound != null) {
                 sound.volume = volume;
             } else {
@@ -81,15 +79,14 @@ public class AudioPlayer {
             Log.w(TAG,"Audio thread has not been initialized");
             return;
         }
-        Handler handler = audioHandler;
+        var handler = audioHandler;
         if (handler != null) {
             handler.post(runnable);
         }
     }
 
     private void doPlay(final Sound sound) {
-        float sysVolume = getSystemVolume(sound.volume);
-
+        var sysVolume = getSystemVolume(sound.volume);
         if (sound.player != null) {
             sound.player.setVolume(sysVolume, sysVolume);
             if (!sound.player.isPlaying()) {
@@ -97,15 +94,13 @@ public class AudioPlayer {
             }
             return;
         }
-
-        final String normPath = sound.path.replace("\\", "/");
-        File file = new File(normPath);
+        final var normPath = sound.path.replace("\\", "/");
+        var file = new File(normPath);
         if (!file.exists()) {
             Log.e(TAG,"Sound file not found: " + normPath);
             return;
         }
-
-        MediaPlayer player = new MediaPlayer();
+        var player = new MediaPlayer();
         try {
             player.setDataSource(file.getAbsolutePath());
             player.prepare();
@@ -116,7 +111,6 @@ public class AudioPlayer {
         player.setOnCompletionListener(mp -> sounds.remove(sound.path));
         player.setVolume(sysVolume, sysVolume);
         player.start();
-
         sound.player = player;
     }
 
@@ -126,7 +120,7 @@ public class AudioPlayer {
 
     public void closeAllFiles() {
         runOnAudioThread(() -> {
-            for (Sound sound : sounds.values()) {
+            for (var sound : sounds.values()) {
                 doClose(sound);
             }
             sounds.clear();
@@ -145,7 +139,7 @@ public class AudioPlayer {
 
     public void closeFile(final String path) {
         runOnAudioThread(() -> {
-            Sound sound = sounds.remove(path);
+            var sound = sounds.remove(path);
             if (sound != null) {
                 doClose(sound);
             }
@@ -154,11 +148,9 @@ public class AudioPlayer {
 
     public void pause() {
         if (paused) return;
-
         paused = true;
-
         runOnAudioThread(() -> {
-            for (Sound sound : sounds.values()) {
+            for (var sound : sounds.values()) {
                 if (sound.player != null && sound.player.isPlaying()) {
                     sound.player.pause();
                 }
@@ -168,13 +160,10 @@ public class AudioPlayer {
 
     public void resume() {
         if (!paused) return;
-
         paused = false;
-
         if (!soundEnabled) return;
-
         runOnAudioThread(() -> {
-            for (Sound sound : sounds.values()) {
+            for (var sound : sounds.values()) {
                 doPlay(sound);
             }
         });

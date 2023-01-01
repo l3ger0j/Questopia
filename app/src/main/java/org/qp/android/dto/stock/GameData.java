@@ -78,7 +78,7 @@ public class GameData {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        GameData that = (GameData) o;
+        var that = (GameData) o;
         return Objects.equals(id, that.id)
                 && Objects.equals(listId, that.listId)
                 && Objects.equals(author, that.author)

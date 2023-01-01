@@ -16,7 +16,7 @@ public class GameList {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        GameList that = (GameList) o;
+        var that = (GameList) o;
         return Objects.equals(gameDataList , that.gameDataList);
     }
 

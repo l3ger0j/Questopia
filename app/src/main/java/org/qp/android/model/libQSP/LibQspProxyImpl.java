@@ -33,9 +33,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Locale;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -83,7 +82,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
             Log.w(TAG,"libqsp thread has been started, but not initialized");
             return;
         }
-        Handler handler = libQspHandler;
+        var handler = libQspHandler;
         if (handler != null) {
             handler.post(() -> {
                 libQspLock.lock();
@@ -98,8 +97,8 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
 
     private boolean loadGameWorld() {
         byte[] gameData;
-        try (FileInputStream in = new FileInputStream(gameState.gameFile)) {
-            try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+        try (var in = new FileInputStream(gameState.gameFile)) {
+            try (var out = new ByteArrayOutputStream()) {
                 StreamUtil.copy(in, out);
                 gameData = out.toByteArray();
             }
@@ -107,7 +106,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
             Log.e(TAG,"Failed to load the game world", ex);
             return false;
         }
-        String fileName = gameState.gameFile.getAbsolutePath();
+        var fileName = gameState.gameFile.getAbsolutePath();
         if (!nativeMethods.QSPLoadGameWorldFromData(gameData, gameData.length, fileName)) {
             showLastQspError();
             return false;
@@ -117,11 +116,11 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
     }
 
     private void showLastQspError() {
-        ErrorData errorData = (ErrorData) nativeMethods.QSPGetLastErrorData();
-        String locName = getStringOrEmpty(errorData.locName);
-        String desc = getStringOrEmpty(nativeMethods.QSPGetErrorDesc(errorData.errorNum));
+        var errorData = (ErrorData) nativeMethods.QSPGetLastErrorData();
+        var locName = getStringOrEmpty(errorData.locName);
+        var desc = getStringOrEmpty(nativeMethods.QSPGetErrorDesc(errorData.errorNum));
 
-        final String message = String.format(
+        final var message = String.format(
                 Locale.getDefault(),
                 "Location: %s\nAction: %d\nLine: %d\nError number: %d\nDescription: %s",
                 locName,
@@ -132,7 +131,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
 
         Log.e(TAG,message);
 
-        GameInterface inter = gameInterface;
+        var inter = gameInterface;
         if (inter != null) {
             gameInterface.showError(message);
         }
@@ -144,10 +143,10 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
      * @return <code>true</code> если конфигурация изменилась, иначе <code>false</code>
      */
     private boolean loadInterfaceConfiguration() {
-        InterfaceConfiguration config = gameState.interfaceConfig;
+        var config = gameState.interfaceConfig;
         boolean changed = false;
 
-        GetVarValuesResponse htmlResult = (GetVarValuesResponse) nativeMethods.QSPGetVarValues("USEHTML", 0);
+        var htmlResult = (GetVarValuesResponse) nativeMethods.QSPGetVarValues("USEHTML", 0);
         if (htmlResult.isSuccess) {
             boolean useHtml = htmlResult.intValue != 0;
             if (config.useHtml != useHtml) {
@@ -155,22 +154,22 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
                 changed = true;
             }
         }
-        GetVarValuesResponse fSizeResult = (GetVarValuesResponse) nativeMethods.QSPGetVarValues("FSIZE", 0);
+        var fSizeResult = (GetVarValuesResponse) nativeMethods.QSPGetVarValues("FSIZE", 0);
         if (fSizeResult.isSuccess && config.fontSize != fSizeResult.intValue) {
             config.fontSize = fSizeResult.intValue;
             changed = true;
         }
-        GetVarValuesResponse bColorResult = (GetVarValuesResponse) nativeMethods.QSPGetVarValues("BCOLOR", 0);
+        var bColorResult = (GetVarValuesResponse) nativeMethods.QSPGetVarValues("BCOLOR", 0);
         if (bColorResult.isSuccess && config.backColor != bColorResult.intValue) {
             config.backColor = bColorResult.intValue;
             changed = true;
         }
-        GetVarValuesResponse fColorResult = (GetVarValuesResponse) nativeMethods.QSPGetVarValues("FCOLOR", 0);
+        var fColorResult = (GetVarValuesResponse) nativeMethods.QSPGetVarValues("FCOLOR", 0);
         if (fColorResult.isSuccess && config.fontColor != fColorResult.intValue) {
             config.fontColor = fColorResult.intValue;
             changed = true;
         }
-        GetVarValuesResponse lColorResult = (GetVarValuesResponse) nativeMethods.QSPGetVarValues("LCOLOR", 0);
+        var lColorResult = (GetVarValuesResponse) nativeMethods.QSPGetVarValues("LCOLOR", 0);
         if (lColorResult.isSuccess && config.linkColor != lColorResult.intValue) {
             config.linkColor = lColorResult.intValue;
             changed = true;
@@ -179,12 +178,12 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
         return changed;
     }
 
-    private ArrayList<QspListItem> getActions() {
-        ArrayList<QspListItem> actions = new ArrayList<>();
-        int count = nativeMethods.QSPGetActionsCount();
+    private ArrayList<QpListItem> getActions() {
+        ArrayList<QpListItem> actions = new ArrayList<>();
+        var count = nativeMethods.QSPGetActionsCount();
         for (int i = 0; i < count; ++i) {
-            ActionData actionData = (ActionData) nativeMethods.QSPGetActionData(i);
-            QspListItem action = new QspListItem();
+            var actionData = (ActionData) nativeMethods.QSPGetActionData(i);
+            var action = new QpListItem();
             action.icon = imageProvider.get(actionData.image);
             action.text = gameState.interfaceConfig.useHtml ?
                     htmlProcessor.removeHTMLTags(actionData.name) : actionData.name;
@@ -194,12 +193,12 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
     }
 
     @NonNull
-    private ArrayList<QspListItem> getObjects() {
-        ArrayList<QspListItem> objects = new ArrayList<>();
-        int count = nativeMethods.QSPGetObjectsCount();
+    private ArrayList<QpListItem> getObjects() {
+        ArrayList<QpListItem> objects = new ArrayList<>();
+        var count = nativeMethods.QSPGetObjectsCount();
         for (int i = 0; i < count; i++) {
-            ObjectData objectResult = (ObjectData) nativeMethods.QSPGetObjectData(i);
-            QspListItem object = new QspListItem();
+            var objectResult = (ObjectData) nativeMethods.QSPGetObjectData(i);
+            var object = new QpListItem();
             object.icon = imageProvider.get(objectResult.image);
             object.text = gameState.interfaceConfig.useHtml ? htmlProcessor.removeHTMLTags(objectResult.name) : objectResult.name;
             objects.add(object);
@@ -218,9 +217,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
                     Looper.prepare();
                     libQspHandler = new Handler();
                     libQspThreadInit = true;
-
                     Looper.loop();
-
                     nativeMethods.QSPDeInit();
                 } catch (Throwable t) {
                     Log.e(TAG,"libqsp thread has stopped exceptionally", t);
@@ -232,11 +229,9 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
 
     public void stop() {
         throwIfNotMainThread();
-
         if (libQspThread == null) return;
-
         if (libQspThreadInit) {
-            Handler handler = libQspHandler;
+            var handler = libQspHandler;
             if (handler != null) {
                 handler.getLooper().quitSafely();
             }
@@ -273,21 +268,16 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
     private void doRunGame(final String id, final String title, final File dir, final File file) {
         gameInterface.doWithCounterDisabled(() -> {
             audioPlayer.closeAllFiles();
-
             gameState.reset();
             gameState.gameRunning = true;
             gameState.gameId = id;
             gameState.gameTitle = title;
             gameState.gameDir = dir;
             gameState.gameFile = file;
-
             gameContentResolver.setGameDir(dir);
-
             if (!loadGameWorld()) return;
-
             gameStartTime = SystemClock.elapsedRealtime();
             lastMsCountCallTime = 0;
-
             if (!nativeMethods.QSPRestartGame(true)) {
                 showLastQspError();
             }
@@ -297,7 +287,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
     @Override
     public void restartGame() {
         runOnQspThread(() -> {
-            GameState state = gameState;
+            var state = gameState;
             doRunGame(state.gameId, state.gameTitle, state.gameDir, state.gameFile);
         });
     }
@@ -309,9 +299,8 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
             return;
         }
         final byte[] gameData;
-
-        try (InputStream in = context.getContentResolver().openInputStream(uri)) {
-            try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+        try (var in = context.getContentResolver().openInputStream(uri)) {
+            try (var out = new ByteArrayOutputStream()) {
                 StreamUtil.copy(in, out);
                 gameData = out.toByteArray();
             }
@@ -319,7 +308,6 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
             Log.e(TAG,"Failed to load game state", ex);
             return;
         }
-
         if (!nativeMethods.QSPOpenSavedGameFromData(gameData, gameData.length, true)) {
             showLastQspError();
         }
@@ -333,8 +321,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
         }
         byte[] gameData = nativeMethods.QSPSaveGameAsData(false);
         if (gameData == null) return;
-
-        try (OutputStream out = context.getContentResolver().openOutputStream(uri, "w")) {
+        try (var out = context.getContentResolver().openOutputStream(uri, "w")) {
             out.write(gameData);
         } catch (IOException ex) {
             Log.e(TAG,"Failed to save the game state", ex);
@@ -373,10 +360,10 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
 
     @Override
     public void onInputAreaClicked() {
-        final GameInterface inter = gameInterface;
+        final var inter = gameInterface;
         if (inter == null) return;
         runOnQspThread(() -> {
-            String input = inter.showInputBox(context.getString(R.string.userInputTitle));
+            var input = inter.showInputBox(context.getString(R.string.userInputTitle));
             nativeMethods.QSPSetInputStrText(input);
             if (!nativeMethods.QSPExecUserInput(true)) {
                 showLastQspError();
@@ -386,10 +373,10 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
 
     @Override
     public void onUseExecutorString() {
-        final GameInterface inter = gameInterface;
+        final var inter = gameInterface;
         if (inter == null) return;
         runOnQspThread(() -> {
-            String input = inter.showInputBox(context.getString(R.string.execStringTitle));
+            var input = inter.showInputBox(context.getString(R.string.execStringTitle));
             if (!nativeMethods.QSPExecString(input, true)) {
                 showLastQspError();
             }
@@ -431,9 +418,9 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
 
     @Override
     public void RefreshInt() {
-        RefreshInterfaceRequest request = new RefreshInterfaceRequest();
+        var request = new RefreshInterfaceRequest();
 
-        boolean configChanged = loadInterfaceConfiguration();
+        var configChanged = loadInterfaceConfiguration();
         if (configChanged) {
             request.interfaceConfigChanged = true;
         }
@@ -454,7 +441,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
             request.varsDescChanged = true;
         }
 
-        GameInterface inter = gameInterface;
+        var inter = gameInterface;
         if (inter != null) {
             inter.refresh(request);
         }
@@ -462,7 +449,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
 
     @Override
     public void ShowPicture(String path) {
-        GameInterface inter = gameInterface;
+        var inter = gameInterface;
         if (inter != null && isNotEmpty(path)) {
             inter.showPicture(path);
         }
@@ -470,7 +457,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
 
     @Override
     public void SetTimer(int msecs) {
-        GameInterface inter = gameInterface;
+        var inter = gameInterface;
         if (inter != null) {
             inter.setCounterInterval(msecs);
         }
@@ -478,7 +465,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
 
     @Override
     public void ShowMessage(String message) {
-        GameInterface inter = gameInterface;
+        var inter = gameInterface;
         if (inter != null) {
             inter.showMessage(message);
         }
@@ -507,9 +494,9 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
 
     @Override
     public void OpenGame(String filename) {
-        GameInterface inter = gameInterface;
-        File savesDir = getOrCreateDirectory(gameState.gameDir, "saves");
-        File saveFile = findFileOrDirectory(savesDir, filename);
+        var inter = gameInterface;
+        var savesDir = getOrCreateDirectory(gameState.gameDir, "saves");
+        var saveFile = findFileOrDirectory(savesDir, filename);
         if (saveFile == null && inter != null) {
             Log.e(TAG,"Save file not found: " + filename);
             inter.showLoadGamePopup();
@@ -522,7 +509,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
 
     @Override
     public void SaveGame(String filename) {
-        GameInterface inter = gameInterface;
+        var inter = gameInterface;
         if (inter != null) {
             inter.showSaveGamePopup(filename);
         }
@@ -530,25 +517,24 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
 
     @Override
     public String InputBox(String prompt) {
-        GameInterface inter = gameInterface;
+        var inter = gameInterface;
         return inter != null ? inter.showInputBox(prompt) : null;
     }
 
     @Override
     public int GetMSCount() {
-        long now = SystemClock.elapsedRealtime();
+        var now = SystemClock.elapsedRealtime();
         if (lastMsCountCallTime == 0) {
             lastMsCountCallTime = gameStartTime;
         }
-        int dt = (int) (now - lastMsCountCallTime);
+        var dt = (int) (now - lastMsCountCallTime);
         lastMsCountCallTime = now;
-
         return dt;
     }
 
     @Override
     public void AddMenuItem(String name, String imgPath) {
-        QspMenuItem item = new QspMenuItem();
+        var item = new QpMenuItem();
         item.imgPath = imgPath;
         item.name = name;
         gameState.menuItems.add(item);
@@ -556,9 +542,8 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
 
     @Override
     public void ShowMenu() {
-        GameInterface inter = gameInterface;
+        var inter = gameInterface;
         if (inter == null) return;
-
         int result = inter.showMenu();
         if (result != -1) {
             nativeMethods.QSPSelectMenuItem(result);
@@ -581,9 +566,9 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
 
     @Override
     public void ShowWindow(int type, boolean isShow) {
-        GameInterface inter = gameInterface;
+        var inter = gameInterface;
         if (inter != null) {
-            WindowType windowType = WindowType.values()[type];
+            var windowType = WindowType.values()[type];
             inter.showWindow(windowType, isShow);
         }
     }
@@ -595,7 +580,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
 
     @Override
     public void ChangeQuestPath(String path) {
-        File dir = new File(path);
+        var dir = new File(path);
         if (!dir.exists()) {
             Log.e(TAG,"GameData directory not found: " + path);
             return;

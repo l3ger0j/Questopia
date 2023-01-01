@@ -1,6 +1,5 @@
 package org.qp.android.view.adapters;
 
-import android.graphics.drawable.Drawable;
 import android.widget.ImageView;
 
 import androidx.core.content.res.ResourcesCompat;
@@ -17,7 +16,7 @@ public class Bind {
     public static void loadImage(ImageView view, String imageUrl) {
         if (imageUrl != null) {
             if (imageUrl.isEmpty()) {
-                Drawable drawable = ResourcesCompat.getDrawable(
+                var drawable = ResourcesCompat.getDrawable(
                         view.getContext().getResources() ,
                         R.drawable.broken_image , null
                 );
@@ -28,7 +27,7 @@ public class Bind {
                         .into(view);
             }
         } else {
-            Drawable drawable = ResourcesCompat.getDrawable(
+            var drawable = ResourcesCompat.getDrawable(
                     view.getContext().getResources() ,
                     R.drawable.broken_image , null
             );

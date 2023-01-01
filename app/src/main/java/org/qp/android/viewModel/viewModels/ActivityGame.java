@@ -33,7 +33,7 @@ import androidx.lifecycle.MutableLiveData;
 import org.qp.android.QuestPlayerApplication;
 import org.qp.android.R;
 import org.qp.android.model.libQSP.LibQspProxy;
-import org.qp.android.model.libQSP.QspListItem;
+import org.qp.android.model.libQSP.QpListItem;
 import org.qp.android.model.service.AudioPlayer;
 import org.qp.android.model.service.GameContentResolver;
 import org.qp.android.model.service.HtmlProcessor;
@@ -49,7 +49,7 @@ public class ActivityGame extends AndroidViewModel {
 
     private final QuestPlayerApplication questPlayerApplication;
     private final GameContentResolver gameContentResolver;
-    private SettingsController settingsController;
+    private final SettingsController settingsController;
     private final HtmlProcessor htmlProcessor;
     private LibQspProxy libQspProxy;
     private AudioPlayer audioPlayer;
@@ -84,7 +84,7 @@ public class ActivityGame extends AndroidViewModel {
 
     public GameItemAdapter getQspItemAdapter (Context context,
                                               int resource,
-                                              ArrayList<QspListItem> items) {
+                                              ArrayList<QpListItem> items) {
         return new GameItemAdapter(context, resource, items);
     }
 
@@ -205,11 +205,11 @@ public class ActivityGame extends AndroidViewModel {
         }
     }
 
-    public class GameItemAdapter extends ArrayAdapter<QspListItem> {
+    public class GameItemAdapter extends ArrayAdapter<QpListItem> {
         private final int resource;
-        private final ArrayList<QspListItem> items;
+        private final ArrayList<QpListItem> items;
 
-        GameItemAdapter(Context context, int resource, ArrayList<QspListItem> items) {
+        GameItemAdapter(Context context, int resource, ArrayList<QpListItem> items) {
             super(context, resource, items);
             this.resource = resource;
             this.items = items;

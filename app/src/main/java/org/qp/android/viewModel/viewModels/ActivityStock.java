@@ -407,7 +407,6 @@ public class ActivityStock extends AndroidViewModel {
             notificationManager
                     .notify(1, builder.updateProgress((int) (aLong * 100 / ArchiveUtil.totalSize)));
             if (aLong == ArchiveUtil.totalSize) {
-                Log.d(TAG, "this");
                 notificationManager.cancelAll();
                 var notifyBuilder =
                         new NotifyBuilder(activityObservableField.get(), "gameInstalled");

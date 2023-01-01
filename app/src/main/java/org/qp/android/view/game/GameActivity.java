@@ -41,7 +41,7 @@ import org.jetbrains.annotations.Contract;
 import org.qp.android.R;
 import org.qp.android.databinding.ActivityGameBinding;
 import org.qp.android.model.libQSP.LibQspProxy;
-import org.qp.android.model.libQSP.QspMenuItem;
+import org.qp.android.model.libQSP.QpMenuItem;
 import org.qp.android.model.libQSP.RefreshInterfaceRequest;
 import org.qp.android.model.libQSP.WindowType;
 import org.qp.android.model.service.AudioPlayer;
@@ -758,7 +758,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
         final ArrayBlockingQueue<Integer> resultQueue = new ArrayBlockingQueue<>(1);
         final ArrayList<String> items = new ArrayList<>();
 
-        for (QspMenuItem item : libQspProxy.getGameState().menuItems) {
+        for (QpMenuItem item : libQspProxy.getGameState().menuItems) {
             items.add(item.name);
         }
 

@@ -26,9 +26,8 @@ public class ImageProvider {
      */
     public Drawable get(String path) {
         if (isNullOrEmpty(path)) return null;
-        String fixPath = path.replace("\\", "/").trim();
-
-        Handler handler = new Handler(Looper.getMainLooper());
+        var fixPath = path.replace("\\", "/").trim();
+        var handler = new Handler(Looper.getMainLooper());
         handler.post(() ->
                 Picasso.get()
                 .load(new File(fixPath))
@@ -37,12 +36,10 @@ public class ImageProvider {
                     public void onBitmapLoaded(Bitmap bitmap , Picasso.LoadedFrom from) {
                         tempDrawable = new BitmapDrawable(Resources.getSystem(), bitmap);
                     }
-
                     @Override
                     public void onBitmapFailed(Exception e , Drawable errorDrawable) {
                         Log.e(TAG, "Error: ", e);
                     }
-
                     @Override
                     public void onPrepareLoad(Drawable placeHolderDrawable) {
                     }

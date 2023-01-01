@@ -16,7 +16,6 @@ import androidx.work.WorkerParameters;
 import java.io.File;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 
@@ -31,16 +30,16 @@ public class InstallerWork extends Worker {
     @NonNull
     @Override
     public Result doWork() {
-        Data outputErrorOne = new Data.Builder()
+        var outputErrorOne = new Data.Builder()
                 .putString("errorOne", "NIG")
                 .build();
 
-        Data outputErrorTwo = new Data.Builder()
+        var outputErrorTwo = new Data.Builder()
                 .putString("errorTwo", "NFE")
                 .build();
 
-        ExecutorService service = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-        FutureTask<Boolean> task = new FutureTask<>(() ->
+        var service = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+        var task = new FutureTask<>(() ->
                 extractArchiveEntries(getApplicationContext() , Objects.requireNonNull(srcFile).getUri() , destDir));
         service.submit(task);
         try {
