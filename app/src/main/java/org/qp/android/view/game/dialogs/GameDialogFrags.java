@@ -43,7 +43,7 @@ public class GameDialogFrags extends GamePatternDialogFrags {
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(requireContext());
+        var builder = new MaterialAlertDialogBuilder(requireContext());
         if (savedInstanceState != null) {
             if (savedInstanceState.containsKey("selectedDialogType")) {
                 dialogType = GameDialogType.valueOf(savedInstanceState.getString("selectedDialogType"));

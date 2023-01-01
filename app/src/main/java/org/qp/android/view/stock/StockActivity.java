@@ -13,7 +13,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -477,14 +476,14 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
+        var inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_stock, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        int itemId = item.getItemId();
+        var itemId = item.getItemId();
         if (itemId == R.id.menu_options) {
             showSettings();
             return true;

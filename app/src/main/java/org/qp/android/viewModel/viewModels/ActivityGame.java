@@ -2,19 +2,27 @@ package org.qp.android.viewModel.viewModels;
 
 import static org.qp.android.utils.Base64Util.decodeBase64;
 import static org.qp.android.utils.Base64Util.hasBase64;
+import static org.qp.android.utils.ColorUtil.convertRGBAToBGRA;
 import static org.qp.android.utils.LanguageUtil.setLocale;
 import static org.qp.android.utils.PathUtil.getExtension;
 
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.util.Log;
+import android.util.TypedValue;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.webkit.MimeTypeMap;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.ArrayAdapter;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -23,7 +31,9 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.MutableLiveData;
 
 import org.qp.android.QuestPlayerApplication;
+import org.qp.android.R;
 import org.qp.android.model.libQSP.LibQspProxy;
+import org.qp.android.model.libQSP.QspListItem;
 import org.qp.android.model.service.AudioPlayer;
 import org.qp.android.model.service.GameContentResolver;
 import org.qp.android.model.service.HtmlProcessor;
@@ -31,15 +41,15 @@ import org.qp.android.view.game.GameActivity;
 import org.qp.android.view.game.GameInterface;
 import org.qp.android.view.settings.SettingsController;
 
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.InputStream;
+import java.util.ArrayList;
 
 public class ActivityGame extends AndroidViewModel {
     private final String TAG = this.getClass().getCanonicalName();
 
     private final QuestPlayerApplication questPlayerApplication;
     private final GameContentResolver gameContentResolver;
+    private SettingsController settingsController;
     private final HtmlProcessor htmlProcessor;
     private LibQspProxy libQspProxy;
     private AudioPlayer audioPlayer;
@@ -64,8 +74,42 @@ public class ActivityGame extends AndroidViewModel {
         return libQspProxy;
     }
 
+    public SettingsController getSettingsController() {
+        return settingsController;
+    }
+
     public WebViewClient getWebViewClient() {
-        return new QspWebViewClient();
+        return new GameWebViewClient();
+    }
+
+    public GameItemAdapter getQspItemAdapter (Context context,
+                                              int resource,
+                                              ArrayList<QspListItem> items) {
+        return new GameItemAdapter(context, resource, items);
+    }
+
+    public int getTextColor() {
+        var config = libQspProxy.getGameState().interfaceConfig;
+        return config.fontColor != 0 ?
+                convertRGBAToBGRA(config.fontColor) : settingsController.textColor;
+    }
+
+    public int getBackgroundColor() {
+        var config = libQspProxy.getGameState().interfaceConfig;
+        return settingsController.backColor != 0 ?
+                settingsController.backColor : convertRGBAToBGRA(config.backColor);
+    }
+
+    public int getLinkColor() {
+        var config = libQspProxy.getGameState().interfaceConfig;
+        return config.linkColor != 0 ?
+                convertRGBAToBGRA(config.linkColor) : settingsController.linkColor;
+    }
+
+    public int getFontSize() {
+        var config = libQspProxy.getGameState().interfaceConfig;
+        return settingsController.useGameFont && config.fontSize != 0 ?
+                config.fontSize : settingsController.fontSize;
     }
     // endregion Getter/Setter
 
@@ -74,6 +118,12 @@ public class ActivityGame extends AndroidViewModel {
         questPlayerApplication = getApplication();
         gameContentResolver = questPlayerApplication.getGameContentResolver();
         htmlProcessor = questPlayerApplication.getHtmlProcessor();
+        settingsController = SettingsController.newInstance().loadSettings(getApplication());
+    }
+
+    public String loadLocale(Context context, SettingsController settingsController) {
+        setLocale(context, settingsController.language);
+        return settingsController.language;
     }
 
     public AudioPlayer startAudio () {
@@ -100,13 +150,13 @@ public class ActivityGame extends AndroidViewModel {
         libQspProxy = null;
     }
 
-    public class QspWebViewClient extends WebViewClient {
+    public class GameWebViewClient extends WebViewClient {
         @Override
         public boolean shouldOverrideUrlLoading(WebView view,
                                                 @NonNull final String href) {
-            String uriDecode = Uri.decode(href);
+            var uriDecode = Uri.decode(href);
             if (href.toLowerCase().startsWith("exec:")) {
-                String tempUriDecode = uriDecode.substring(5);
+                var tempUriDecode = uriDecode.substring(5);
                 Log.d(TAG, String.valueOf(hasBase64(tempUriDecode)));
                 if (hasBase64(tempUriDecode)) {
                     tempUriDecode = decodeBase64(uriDecode.substring(5));
@@ -120,13 +170,13 @@ public class ActivityGame extends AndroidViewModel {
                 }
             } else if (href.toLowerCase().startsWith("https:")
                     || href.toLowerCase().startsWith("http:")) {
-                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(uriDecode));
+                var intent = new Intent(Intent.ACTION_VIEW, Uri.parse(uriDecode));
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 getApplication().startActivity(intent);
             } else if (href.toLowerCase().startsWith("file:")) {
-                String tempLink = href.replace("file:/", "https:");
+                var tempLink = href.replace("file:/", "https:");
                 Log.d(TAG, tempLink);
-                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(tempLink));
+                var intent = new Intent(Intent.ACTION_VIEW, Uri.parse(tempLink));
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 getApplication().startActivity(intent);
             }
@@ -137,14 +187,14 @@ public class ActivityGame extends AndroidViewModel {
         @Override
         public WebResourceResponse shouldInterceptRequest(WebView view ,
                                                           @NonNull WebResourceRequest request) {
-            Uri uri = request.getUrl();
+            var uri = request.getUrl();
             if (uri.getScheme().startsWith("file")) {
                 try {
-                    String relPath = Uri.decode(uri.toString().substring(8));
-                    File file = gameContentResolver.getFile(relPath);
-                    String extension = getExtension(file.getName());
-                    String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
-                    InputStream in = getApplication().getContentResolver().openInputStream(Uri.fromFile(file));
+                    var relPath = Uri.decode(uri.toString().substring(8));
+                    var file = gameContentResolver.getFile(relPath);
+                    var extension = getExtension(file.getName());
+                    var mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+                    var in = getApplication().getContentResolver().openInputStream(Uri.fromFile(file));
                     return new WebResourceResponse(mimeType, null, in);
                 } catch (FileNotFoundException | NullPointerException ex) {
                     Log.e(TAG,"File not found" , ex);
@@ -155,9 +205,49 @@ public class ActivityGame extends AndroidViewModel {
         }
     }
 
-    public String loadLocale(Context context, SettingsController settingsController) {
-        setLocale(context, settingsController.language);
-        return settingsController.language;
-    }
+    public class GameItemAdapter extends ArrayAdapter<QspListItem> {
+        private final int resource;
+        private final ArrayList<QspListItem> items;
 
+        GameItemAdapter(Context context, int resource, ArrayList<QspListItem> items) {
+            super(context, resource, items);
+            this.resource = resource;
+            this.items = items;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            if (convertView == null) {
+                var inflater = LayoutInflater.from(getContext());
+                convertView = inflater.inflate(resource, null);
+            }
+            var item = items.get(position);
+            if (item != null) {
+                TextView textView = convertView.findViewById(R.id.item_text);
+                textView.setCompoundDrawablesWithIntrinsicBounds(item.icon,
+                        null, null, null);
+                textView.setTypeface(getTypeface());
+                textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, getFontSize());
+                textView.setBackgroundColor(getBackgroundColor());
+                textView.setTextColor(getTextColor());
+                textView.setLinkTextColor(getLinkColor());
+                textView.setText(item.text);
+            }
+
+            return convertView;
+        }
+
+        private Typeface getTypeface() {
+            switch (settingsController.typeface) {
+                case 1:
+                    return Typeface.SANS_SERIF;
+                case 2:
+                    return Typeface.SERIF;
+                case 3:
+                    return Typeface.MONOSPACE;
+                default:
+                    return Typeface.DEFAULT;
+            }
+        }
+    }
 }
