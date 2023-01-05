@@ -67,7 +67,7 @@ public class Installer {
         });
     }
 
-    private void installDirectory(DocumentFile srcFile , File destDir) {
+    private void installDirectory(@NonNull DocumentFile srcFile , File destDir) {
         for (DocumentFile file : srcFile.listFiles()) {
             copyFileOrDirectory(file, destDir);
         }
@@ -78,7 +78,7 @@ public class Installer {
         isDone.postValue(true);
     }
 
-    private void copyFileOrDirectory(DocumentFile srcFile, File destDir) {
+    private void copyFileOrDirectory(@NonNull DocumentFile srcFile, File destDir) {
         if (srcFile.isDirectory()) {
             File subDestDir = getOrCreateDirectory(destDir, srcFile.getName());
             for (DocumentFile subSrcFile : srcFile.listFiles()) {

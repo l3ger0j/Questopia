@@ -12,10 +12,10 @@
 #   public *;
 #}
 
--keep class com.qsp.player.dto.libQSP.** { *; }
--keep class net.sf.sevenzipjbinding.** { *; }
--keep class com.qsp.player.model.libQSP.** { *; }
--keep class org.simpleframework.xml.** { *; }
+-keep, allowobfuscation class org.qp.android.dto.libQSP.** { *; }
+-keep, allowobfuscation class net.sf.sevenzipjbinding.** { *; }
+-keep, allowobfuscation class org.qp.android.model.libQSP.** { *; }
+-keep, allowobfuscation class org.simpleframework.xml.** { *; }
 
 # JSR 305 annotations are for embedding nullability information.
 -dontwarn javax.annotation.**

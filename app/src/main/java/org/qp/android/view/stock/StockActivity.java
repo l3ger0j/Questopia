@@ -184,6 +184,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
                         file = DocumentFile.fromSingleUri(this, Objects.requireNonNull(uri));
                         assert file != null;
                         activityStock.setTempInstallFile(file);
+                        activityStock.isSelectArchive.set(true);
                     }
                 }
         );
@@ -200,6 +201,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
                         file = DocumentFile.fromTreeUri(this, Objects.requireNonNull(uri));
                         assert file != null;
                         activityStock.setTempInstallDir(file);
+                        activityStock.isSelectFolder.set(true);
                     }
                 }
         );

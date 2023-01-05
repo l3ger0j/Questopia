@@ -23,7 +23,8 @@
         <string name="gameName">Game name</string>
         <string name="gameAuthor">Author</string>
         <string name="gameVersion">Version</string>
-        <string name="selectFileOrArchive">Select archive</string>
+        <string name="selectArchive">Select archive</string>
+        <string name="selectFolder">Select the folder with the file</string>
         <string name="selectIcon">Select icon</string>
         <string name="buttonSelect">Select</string>
         <string name="add">Add</string>

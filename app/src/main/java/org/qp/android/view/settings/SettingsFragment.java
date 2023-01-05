@@ -100,7 +100,19 @@ public class SettingsFragment extends SettingsPatternPrefFrag {
                                 +"\n"+libQspProxy.getVersionQSP(), Toast.LENGTH_SHORT).show();
                     } catch (NullPointerException ex) {
                         Toast.makeText(getContext(),
-                                "Follow the white rabbit", Toast.LENGTH_SHORT).show();
+                                "▒▒▒▒▒▒▒▒▄▄▄▄▄▄▄▄▒▒▒▒▒▒▒▒\n" +
+                                "▒▒▒▒▒▄█▀▀░░░░░░▀▀█▄▒▒▒▒▒\n" +
+                                "▒▒▒▄█▀▄██▄░░░░░░░░▀█▄▒▒▒\n" +
+                                "▒▒█▀░▀░░▄▀░░░░▄▀▀▀▀░▀█▒▒\n" +
+                                "▒█▀░░░░███░░░░▄█▄░░░░▀█▒\n" +
+                                "▒█░░░░░░▀░░░░░▀█▀░░░░░█▒\n" +
+                                "▒█░░░░░░░░░░░░░░░░░░░░█▒\n" +
+                                "▒█░░██▄░░▀▀▀▀▄▄░░░░░░░█▒\n" +
+                                "▒▀█░█░█░░░▄▄▄▄▄░░░░░░█▀▒\n" +
+                                "▒▒▀█▀░▀▀▀▀░▄▄▄▀░░░░▄█▀▒▒\n" +
+                                "▒▒▒█░░░░░░▀█░░░░░▄█▀▒▒▒▒\n" +
+                                "▒▒▒█▄░░░░░▀█▄▄▄█▀▀▒▒▒▒▒▒\n" +
+                                "▒▒▒▒▀▀▀▀▀▀▀▒▒▒▒▒▒▒▒▒▒▒▒▒\n", Toast.LENGTH_SHORT).show();
                     }
                 }
                 return true;

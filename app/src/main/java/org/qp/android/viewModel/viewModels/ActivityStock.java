@@ -58,6 +58,8 @@ public class ActivityStock extends AndroidViewModel {
     public ObservableField<StockActivity> activityObservableField = new
             ObservableField<>();
     public ObservableBoolean isShowDialog = new ObservableBoolean();
+    public ObservableBoolean isSelectArchive = new ObservableBoolean();
+    public ObservableBoolean isSelectFolder = new ObservableBoolean();
 
     private final LocalGame localGame = new LocalGame();
     private final HashMap<String, GameData> gamesMap = new HashMap<>();
@@ -162,6 +164,8 @@ public class ActivityStock extends AndroidViewModel {
                     : tempInstallDir.length() / 1000);
             gameData.icon = (tempImageFile == null ? null : tempImageFile.getUri().toString());
             installGame(tempInstallFile != null ? tempInstallFile : tempInstallDir, gameData);
+            isSelectArchive.set(false);
+            isSelectFolder.set(false);
             dialogFragments.dismiss();
         } catch (NullPointerException ex) {
             Log.e(TAG, "Error: ", ex);
@@ -370,26 +374,17 @@ public class ActivityStock extends AndroidViewModel {
                     .showErrorDialog("Games directory is not writable");
             return;
         }
-        if (isWritableDirectory(gameDir)) {
-            var installer = new Installer(activityObservableField.get());
-            installer.gameInstall(gameFile, gameDir).observeForever(aBoolean -> {
-                if (aBoolean) {
-                    writeGameInfo(gameData , gameDir);
-                    refreshGames();
-                }
-            });
-            isShowDialog.set(false);
-        } else {
+        if (!gameFile.isDirectory()) {
             notificationStateGame(gameData.title);
-            var installer = new Installer(activityObservableField.get());
-            installer.gameInstall(gameFile, gameDir).observeForever(aBoolean -> {
-                if (aBoolean) {
-                    writeGameInfo(gameData , gameDir);
-                    refreshGames();
-                }
-            });
-            isShowDialog.set(false);
         }
+        var installer = new Installer(activityObservableField.get());
+        installer.gameInstall(gameFile, gameDir).observeForever(aBoolean -> {
+            if (aBoolean) {
+                writeGameInfo(gameData , gameDir);
+                refreshGames();
+            }
+        });
+        isShowDialog.set(false);
     }
 
     private void notificationStateGame (String gameName) {
@@ -401,7 +396,8 @@ public class ActivityStock extends AndroidViewModel {
         }
         builder.setTitleNotify(getApplication().getString(R.string.titleNotify));
         builder.setTextNotify(getApplication().getString(R.string.textProgressNotify));
-        var notificationManager = NotificationManagerCompat.from(getApplication());
+        var notificationManager =
+                NotificationManagerCompat.from(getApplication());
         notificationManager.notify(1, builder.buildWithProgress());
         ArchiveUtil.progressInstall.observeForever(aLong -> {
             notificationManager
