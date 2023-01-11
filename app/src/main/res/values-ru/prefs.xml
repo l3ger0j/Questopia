@@ -24,8 +24,16 @@
         <item>English</item>
         <item>Русский</item>
     </string-array>
+    <string-array name="binPrefName">
+        <item>Б/КБ/МБ/ГБ/ТБ</item>
+        <item>Б/КиБ/МиБ/ГиБ/ТиБ</item>
+    </string-array>
     <string-array name="langValue">
         <item>en</item>
         <item>ru</item>
+    </string-array>
+    <string-array name="binPrefValue">
+        <item>1000</item>
+        <item>1024</item>
     </string-array>
 </resources>

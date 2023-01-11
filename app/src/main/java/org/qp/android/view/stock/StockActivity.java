@@ -249,6 +249,10 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
 
     private void loadSettings() {
         settingsController = SettingsController.newInstance().loadSettings(this);
+        activityStock.setController(settingsController);
+        if (settingsController.binaryPrefixes <= 1000) {
+            activityStock.refreshGames();
+        }
     }
 
     private void loadLocale() {
@@ -419,10 +423,10 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
             message.append('\n');
             message.append(getString(R.string.version).replace("-VERSION-", gameData.version));
         }
-        if (gameData.getFileSize() > 0) {
+        if (gameData.fileSize != null) {
             message.append('\n');
             message.append(getString(R.string.fileSize).replace("-SIZE-",
-                    Integer.toString(gameData.getFileSize() / 1024)));
+                    gameData.getFileSize()));
         }
         if (gameData.fileExt.length() > 0) {
             message.append('\n');

@@ -11,14 +11,12 @@ import android.view.MenuItem;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
 
 import org.qp.android.R;
+import org.qp.android.view.settings.dialogs.SettingsPatternPrefFrag;
 import org.qp.android.viewModel.viewModels.ActivitySettings;
 
-import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -92,8 +90,8 @@ public class SettingsActivity extends AppCompatActivity implements
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        FragmentManager manager = getSupportFragmentManager();
-        List<Fragment> fragments = manager.getFragments();
+        var manager = getSupportFragmentManager();
+        var fragments = manager.getFragments();
         if (fragments.size() == 0) {
             super.onBackPressed();
         }

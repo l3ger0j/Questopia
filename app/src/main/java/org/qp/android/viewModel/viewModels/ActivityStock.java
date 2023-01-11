@@ -40,6 +40,7 @@ import org.qp.android.model.install.Installer;
 import org.qp.android.model.notify.NotifyBuilder;
 import org.qp.android.utils.ArchiveUtil;
 import org.qp.android.view.game.GameActivity;
+import org.qp.android.view.settings.SettingsController;
 import org.qp.android.view.stock.StockActivity;
 import org.qp.android.view.stock.dialogs.StockDialogFrags;
 import org.qp.android.view.stock.dialogs.StockDialogType;
@@ -48,6 +49,7 @@ import org.qp.android.viewModel.repository.LocalGame;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
@@ -70,10 +72,15 @@ public class ActivityStock extends AndroidViewModel {
     private DialogInstallBinding installBinding;
     private GameData tempGameData;
     private DialogEditBinding editBinding;
+    private SettingsController controller;
 
     public MutableLiveData<Integer> outputIntObserver = new MutableLiveData<>();
 
     // region Getter/Setter
+    public void setController(SettingsController controller) {
+        this.controller = controller;
+    }
+
     public GameData getTempGameData() {
         return tempGameData;
     }
@@ -137,7 +144,7 @@ public class ActivityStock extends AndroidViewModel {
     }
 
     public void createInstallIntent() {
-        GameData gameData = new GameData();
+        var gameData = new GameData();
         try {
             gameData.id = removeExtension(Objects.requireNonNull(tempInstallFile != null ?
                     tempInstallFile.getName()
@@ -159,17 +166,35 @@ public class ActivityStock extends AndroidViewModel {
                     null
                     : Objects.requireNonNull(
                             installBinding.ET2.getEditText()).getText().toString());
-            gameData.fileSize = String.valueOf(tempInstallFile != null ?
-                    tempInstallFile.length()
-                    : tempInstallDir.length() / 1000);
+            gameData.fileSize = tempInstallFile != null ?
+                    formatFileSize(tempInstallFile.length(), controller.binaryPrefixes)
+                    : formatFileSize(tempInstallDir.length(), controller.binaryPrefixes);
             gameData.icon = (tempImageFile == null ? null : tempImageFile.getUri().toString());
             installGame(tempInstallFile != null ? tempInstallFile : tempInstallDir, gameData);
             isSelectArchive.set(false);
             isSelectFolder.set(false);
             dialogFragments.dismiss();
         } catch (NullPointerException ex) {
-            Log.e(TAG, "Error: ", ex);
+            Objects.requireNonNull(activityObservableField.get())
+                    .showErrorDialog("Error: "+ex);
         }
+    }
+
+    @NonNull
+    public static String formatFileSize(long size, int numCountInfo) {
+        if (size <= 0) {
+            return "0";
+        }
+        String[] units = new String[0];
+        if (numCountInfo == 1000) {
+            units = new String[]{"B" , "KB" , "MB" , "GB" , "TB"};
+        } else if (numCountInfo == 1024) {
+            units = new String[]{"B" , "KiB" , "MiB" , "GiB" , "TiB"};
+        }
+        int digitGroups = (int) (Math.log10(size) / Math.log10(numCountInfo));
+        return new DecimalFormat("#,##0.#").format(size /
+                Math.pow(numCountInfo , digitGroups))
+                + " " + units[digitGroups];
     }
 
     public void showDialogEdit () {
@@ -259,7 +284,8 @@ public class ActivityStock extends AndroidViewModel {
             isShowDialog.set(false);
             dialogFragments.dismiss();
         } catch (NullPointerException ex) {
-            Log.e(TAG, "Error: ", ex);
+            Objects.requireNonNull(activityObservableField.get())
+                    .showErrorDialog("Error: "+ex);
         }
     }
 

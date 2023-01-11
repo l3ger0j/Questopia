@@ -34,7 +34,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Locale;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -363,7 +362,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
         final var inter = gameInterface;
         if (inter == null) return;
         runOnQspThread(() -> {
-            var input = inter.showInputBox(context.getString(R.string.userInputTitle));
+            var input = inter.showInputDialog(context.getString(R.string.userInputTitle));
             nativeMethods.QSPSetInputStrText(input);
             if (!nativeMethods.QSPExecUserInput(true)) {
                 showLastQspError();
@@ -376,7 +375,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
         final var inter = gameInterface;
         if (inter == null) return;
         runOnQspThread(() -> {
-            var input = inter.showInputBox(context.getString(R.string.execStringTitle));
+            var input = inter.showExecutorDialog(context.getString(R.string.execStringTitle));
             if (!nativeMethods.QSPExecString(input, true)) {
                 showLastQspError();
             }
@@ -518,7 +517,7 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
     @Override
     public String InputBox(String prompt) {
         var inter = gameInterface;
-        return inter != null ? inter.showInputBox(prompt) : null;
+        return inter != null ? inter.showInputDialog(prompt) : null;
     }
 
     @Override

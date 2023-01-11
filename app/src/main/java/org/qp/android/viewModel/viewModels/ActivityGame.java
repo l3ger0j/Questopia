@@ -108,7 +108,7 @@ public class ActivityGame extends AndroidViewModel {
 
     public int getFontSize() {
         var config = libQspProxy.getGameState().interfaceConfig;
-        return settingsController.useGameFont && config.fontSize != 0 ?
+        return settingsController.isUseGameFont && config.fontSize != 0 ?
                 config.fontSize : settingsController.fontSize;
     }
     // endregion Getter/Setter

@@ -9,24 +9,26 @@ import android.util.Base64;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
-import androidx.databinding.ObservableBoolean;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
+import org.qp.android.view.settings.SettingsController;
 
 import java.util.Objects;
 import java.util.regex.Pattern;
 
 public class HtmlProcessor {
     private final String TAG = this.getClass().getSimpleName();
-    private static final int IMAGE_WIDTH_THRESHOLD = 400;
     private static final Pattern execPattern = Pattern.compile("href=\"exec:([\\s\\S]*?)\"", Pattern.CASE_INSENSITIVE);
     private final GameContentResolver gameContentResolver;
     private final ImageProvider imageProvider;
     private static final String HTML_PATTERN = "<(\"[^\"]*\"|'[^']*'|[^'\">])*>";
     private final Pattern pattern = Pattern.compile(HTML_PATTERN);
+    private SettingsController controller;
 
-    public ObservableBoolean useOldValue = new ObservableBoolean();
+    public void setController(SettingsController controller) {
+        this.controller = controller;
+    }
 
     public HtmlProcessor(GameContentResolver gameContentResolver, ImageProvider imageProvider) {
         this.gameContentResolver = gameContentResolver;
@@ -41,7 +43,7 @@ public class HtmlProcessor {
         if (isNullOrEmpty(html)) return "";
         var result = unescapeQuotes(html);
         result = encodeExec(result);
-        result = htmlizeLineBreaks(result);
+        result = lineBreaksInHTML(result);
         var document = Jsoup.parse(result);
         document.outputSettings().prettyPrint(false);
         var body = document.body();
@@ -69,35 +71,59 @@ public class HtmlProcessor {
     }
 
     @NonNull
-    private String normalizePathsInExec(String exec) {
+    private String normalizePathsInExec(@NonNull String exec) {
         return exec.replace("\\", "/");
     }
 
     @NonNull
-    private String htmlizeLineBreaks(String s) {
+    private String lineBreaksInHTML(@NonNull String s) {
         return s.replace("\n", "<br>")
                 .replace("\r", "");
     }
 
-    private void processHTMLImages(Element documentBody) {
+    private void processHTMLImages(@NonNull Element documentBody) {
         for (var img : documentBody.select("img")) {
-            if (shouldImageBeResized(img)) {
-                img.attr("style", "max-width:100%;");
+            if (controller.isUseAutoWidth) {
+                if (shouldChangeWidth(img)) {
+                    img.attr("style", "max-width:100%;");
+                }
+            } else {
+                img.attr("style", "width:"+controller.customWidthImage);
+            }
+            if (controller.isUseAutoHeight) {
+                if (shouldChangeHeight(img)) {
+                    img.attr("style", "max-height:100%;");
+                }
+            } else {
+                img.attr("style", "height:"+controller.customWidthImage);
             }
         }
     }
 
-    private boolean shouldImageBeResized(Element img) {
+    private boolean shouldChangeWidth(Element img) {
         var relPath = img.attr("src");
         var absPath = gameContentResolver.getAbsolutePath(relPath);
         var drawable = imageProvider.get(absPath);
         if (drawable == null) return false;
-        if (useOldValue.get()) {
-            return drawable.getIntrinsicWidth() > IMAGE_WIDTH_THRESHOLD;
-        } else {
-            return drawable.getIntrinsicWidth() > Resources.getSystem()
+        if (drawable.getIntrinsicWidth() == -1) {
+            return drawable.getIntrinsicWidth() < Resources.getSystem()
                     .getDisplayMetrics().widthPixels;
         }
+        return drawable.getIntrinsicWidth() > Resources.getSystem()
+                .getDisplayMetrics().widthPixels;
+    }
+
+    private boolean shouldChangeHeight(Element img) {
+        var relPath = img.attr("src");
+        var absPath = gameContentResolver.getAbsolutePath(relPath);
+        var drawable = imageProvider.get(absPath);
+        if (drawable == null) return false;
+        if (drawable.getIntrinsicWidth() == -1) {
+            return drawable.getIntrinsicHeight() < Resources.getSystem()
+                    .getDisplayMetrics().heightPixels;
+        }
+        return drawable.getIntrinsicHeight() > Resources.getSystem()
+                .getDisplayMetrics().heightPixels;
     }
 
     private void processHTMLVideos(Element documentBody) {
@@ -111,7 +137,7 @@ public class HtmlProcessor {
      * acceptable for display in {@linkplain android.webkit.WebView}.
      */
     public String convertQspStringToWebViewHtml(String str) {
-        return isNotEmpty(str) ? htmlizeLineBreaks(str) : "";
+        return isNotEmpty(str) ? lineBreaksInHTML(str) : "";
     }
 
     /**

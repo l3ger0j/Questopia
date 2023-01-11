@@ -11,9 +11,10 @@ import androidx.annotation.NonNull;
 import org.qp.android.BuildConfig;
 import org.qp.android.QuestPlayerApplication;
 import org.qp.android.R;
-import org.qp.android.model.libQSP.LibQspProxy;
 import org.qp.android.utils.ViewUtil;
 import org.qp.android.view.plugin.PluginFragment;
+import org.qp.android.view.settings.dialogs.SettingsDialogFrag;
+import org.qp.android.view.settings.dialogs.SettingsPatternPrefFrag;
 
 import java.util.Objects;
 
@@ -34,6 +35,17 @@ public class SettingsFragment extends SettingsPatternPrefFrag {
         requireActivity().setTitle(R.string.settingsTitle);
         addPreferencesFromResource(R.xml.settings);
         var desc = requireArguments().getString("desc");
+
+        var controller = SettingsController
+                .newInstance().loadSettings(getContext());
+        if (controller.isUseAutoWidth) {
+            var customWidthImage = findPreference("customWidthImage");
+            Objects.requireNonNull(customWidthImage).setEnabled(false);
+        }
+        if (controller.isUseAutoHeight) {
+            var customWidthImage = findPreference("customHeightImage");
+            Objects.requireNonNull(customWidthImage).setEnabled(false);
+        }
 
         var backColor = findPreference("backColor");
         Objects.requireNonNull(backColor).setSummary(getString(R.string.textBackLinkColorSum)
@@ -65,12 +77,11 @@ public class SettingsFragment extends SettingsPatternPrefFrag {
             button.setOnPreferenceClickListener(preference -> {
                 var linearLayout = new LinearLayout(getContext());
                 linearLayout.setOrientation(LinearLayout.VERTICAL);
-                LinearLayout.LayoutParams linLayoutParam =
+                var linLayoutParam =
                         new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
                                 LinearLayout.LayoutParams.MATCH_PARENT);
                 linearLayout.setLayoutParams(linLayoutParam);
-
-                LinearLayout.LayoutParams lpView =
+                var lpView =
                         new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
                                 LinearLayout.LayoutParams.WRAP_CONTENT);
                 var webView = new WebView(getContext());
@@ -93,8 +104,8 @@ public class SettingsFragment extends SettingsPatternPrefFrag {
                 countClick--;
                 if (countClick == 0) {
                     countClick = 3;
-                    QuestPlayerApplication application = (QuestPlayerApplication) requireActivity().getApplication();
-                    LibQspProxy libQspProxy = application.getLibQspProxy();
+                    var application = (QuestPlayerApplication) requireActivity().getApplication();
+                    var libQspProxy = application.getLibQspProxy();
                     try {
                         Toast.makeText(getContext(), libQspProxy.getCompiledDateTime()
                                 +"\n"+libQspProxy.getVersionQSP(), Toast.LENGTH_SHORT).show();
@@ -138,6 +149,8 @@ public class SettingsFragment extends SettingsPatternPrefFrag {
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (key.equals("lang")) {
             ViewUtil.showSnackBar(getView(), getString(R.string.closeToApply));
+        } else if (key.equals("binPref")) {
+            ViewUtil.showSnackBar(getView(), "The setting will take effect the next time you unpack the game");
         }
     }
 }

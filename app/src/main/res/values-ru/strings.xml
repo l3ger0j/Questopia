@@ -32,7 +32,7 @@
         <string name="author">Автор: -AUTHOR-</string>
         <string name="ported_by">Портировал: -PORTED_BY-</string>
         <string name="version">Версия: -VERSION-</string>
-        <string name="fileSize">Размер: -SIZE- КБ</string>
+        <string name="fileSize">Размер: -SIZE-</string>
         <string name="fileType">Тип файла: -TYPE-</string>
         <string name="experimental">(экспериментально)</string>
         <string name="mod_data">Изменено: -MOD_DATA-</string>

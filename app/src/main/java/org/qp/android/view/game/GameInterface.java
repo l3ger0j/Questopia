@@ -9,7 +9,8 @@ public interface GameInterface {
     void showError(String message);
     void showPicture(String path);
     void showMessage(String message);
-    String showInputBox(String prompt);
+    String showInputDialog(String prompt);
+    String showExecutorDialog(String prompt);
     int showMenu();
     void showLoadGamePopup();
     void showSaveGamePopup(String filename);

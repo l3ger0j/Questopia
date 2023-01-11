@@ -1,4 +1,4 @@
-package org.qp.android.view.settings;
+package org.qp.android.view.settings.dialogs;
 
 import android.app.Dialog;
 import android.os.Bundle;

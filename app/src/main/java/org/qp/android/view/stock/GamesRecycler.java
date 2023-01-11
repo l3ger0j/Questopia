@@ -74,7 +74,6 @@ public class GamesRecycler extends RecyclerView.Adapter<GamesRecycler.ViewHolder
     public void onBindViewHolder(@NonNull GamesRecycler.ViewHolder holder, int position) {
         holder.listItemGameBinding(differ.getCurrentList().get(position));
         GameData gameData = getItem(position);
-
         // gameIcon
         if (gameData.icon.isEmpty()) {
             Drawable drawable = ResourcesCompat.getDrawable(
@@ -88,12 +87,11 @@ public class GamesRecycler extends RecyclerView.Adapter<GamesRecycler.ViewHolder
                     .fit()
                     .into(holder.listItemGameBinding.gameIcon);
         }
-
         // gameSize
         if (gameData.fileSize != null) {
             holder.listItemGameBinding.gameSize
                     .setText(context.getString(R.string.fileSize)
-                            .replace("-SIZE-", Integer.toString(gameData.getFileSize())));
+                            .replace("-SIZE-", gameData.getFileSize()));
         }
     }
 

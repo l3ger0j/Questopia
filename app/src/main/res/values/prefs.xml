@@ -25,9 +25,17 @@
         <item>English</item>
         <item>Русский</item>
     </string-array>
+    <string-array name="binPrefName">
+        <item>B/KB/MB/GB/TB</item>
+        <item>B/KiB/MiB/GiB/TiB</item>
+    </string-array>
     <string-array name="langValue">
         <item>en</item>
         <item>ru</item>
+    </string-array>
+    <string-array name="binPrefValue">
+        <item>1000</item>
+        <item>1024</item>
     </string-array>
     <string-array name="actsHeight">
         <item>1/5</item>

@@ -1,5 +1,6 @@
 package org.qp.android.view.game;
 
+import static android.content.Intent.ACTION_OPEN_DOCUMENT;
 import static org.qp.android.utils.ColorUtil.getHexColor;
 import static org.qp.android.utils.FileUtil.findFileOrDirectory;
 import static org.qp.android.utils.FileUtil.getOrCreateDirectory;
@@ -8,6 +9,7 @@ import static org.qp.android.utils.LanguageUtil.setLocale;
 import static org.qp.android.utils.ThreadUtil.isMainThread;
 import static org.qp.android.utils.ViewUtil.getFontStyle;
 
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.net.Uri;
@@ -22,7 +24,6 @@ import android.view.View;
 import android.webkit.WebView;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
-import android.widget.EditText;
 import android.widget.ListView;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -33,9 +34,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.databinding.DataBindingUtil;
+import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.Fragment;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
+
+import com.google.android.material.textfield.TextInputLayout;
 
 import org.jetbrains.annotations.Contract;
 import org.qp.android.R;
@@ -53,7 +58,12 @@ import org.qp.android.view.settings.SettingsActivity;
 import org.qp.android.view.settings.SettingsController;
 import org.qp.android.viewModel.viewModels.ActivityGame;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Objects;
@@ -122,7 +132,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
     private int slotAction = 0;
     private ActivityGame activityGame;
     private ActivityGameBinding activityGameBinding;
-    private ActivityResultLauncher<Intent> resultLauncher;
+    private ActivityResultLauncher<Intent> resultLauncher, templateLauncher;
 
     private final Runnable onScroll = new Runnable() {
         @Override
@@ -136,6 +146,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
     };
 
     private String tempIdGame;
+    private View mDecorView;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -146,6 +157,13 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
         activityGameBinding.setGameViewModel(activityGame);
         activityGame.gameActivityObservableField.set(this);
         settingsController = activityGame.getSettingsController();
+
+        mDecorView = getWindow().getDecorView();
+        if (settingsController.isUseImmersiveMode) {
+            hideSystemUI();
+        } else {
+            showSystemUI();
+        }
 
         setContentView(activityGameBinding.getRoot());
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
@@ -178,6 +196,48 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
                 }
         );
 
+        templateLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    Uri uri;
+                    DocumentFile file;
+                    if (result.getResultCode() == RESULT_OK) {
+                        if ((uri = Objects.requireNonNull(result.getData()).getData()) == null) {
+                            showError("File is not selected");
+                        }
+                        file = DocumentFile.fromSingleUri(this, Objects.requireNonNull(uri));
+                        assert file != null;
+                        String ret = "";
+                        try {
+                            InputStream inputStream = getContentResolver().openInputStream(file.getUri());
+                            if ( inputStream != null ) {
+                                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+                                String receiveString;
+                                StringBuilder stringBuilder = new StringBuilder();
+
+                                while ( (receiveString = bufferedReader.readLine()) != null ) {
+                                    stringBuilder.append("\n").append(receiveString);
+                                }
+
+                                inputStream.close();
+                                var manager = getSupportFragmentManager();
+                                Fragment fragment = manager.findFragmentByTag("executorDialogFragment");
+                                Bundle bundle = new Bundle();
+                                bundle.putString("template", stringBuilder.toString());
+                                Objects.requireNonNull(fragment).setArguments(bundle);
+                                Log.d(TAG, stringBuilder.toString());
+                            }
+                        }
+                        catch (FileNotFoundException e) {
+                            showError("File not found: " + e);
+                        } catch (IOException e) {
+                            showError("Can not read file: " + e);
+                        }
+                    }
+                }
+        );
+
         tempIdGame = getIntent().getStringExtra("gameId");
         if (savedInstanceState != null && savedInstanceState.containsKey("tempGameId")) {
             var gameId = savedInstanceState.getString("tempGameId");
@@ -201,6 +261,38 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
         Log.i(TAG, "Game created");
     }
 
+    private void hideSystemUI() {
+        mDecorView.setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_IMMERSIVE);
+    }
+
+    private void showSystemUI() {
+        mDecorView.setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus) {
+            mDecorView.setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                            | View.SYSTEM_UI_FLAG_FULLSCREEN
+                            | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+        }
+    }
+
+
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -208,7 +300,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
     }
 
     private void initControls() {
-        htmlProcessor.useOldValue.set(settingsController.useOldValue);
+        htmlProcessor.setController(settingsController);
         layoutTop = activityGameBinding.layoutTop;
         separatorView = activityGameBinding.separator;
 
@@ -230,7 +322,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
         webViewSettings.setAllowFileAccess(true);
         webViewSettings.setDomStorageEnabled(true);
         mainDescView.setWebViewClient(activityGame.getWebViewClient());
-        if (settingsController.useAutoscroll) {
+        if (settingsController.isUseAutoscroll) {
             mainDescView.postDelayed(onScroll, 300);
         }
     }
@@ -383,18 +475,15 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
 
     private void applySettings() {
         applyActionsHeightRatio();
+        applyGameState();
 
-        if (settingsController.useSeparator) {
+        if (settingsController.isUseSeparator) {
             separatorView.setBackgroundColor(activityGame.getBackgroundColor());
         } else {
             separatorView.setBackgroundColor(getResources().getColor(R.color.materialcolorpicker__grey));
         }
 
-        htmlProcessor.useOldValue.set(settingsController.useOldValue);
-
-        if (settingsController.useOldValue) {
-            applyGameState();
-        }
+        htmlProcessor.setController(settingsController);
 
         var backColor =
                 activityGame.getBackgroundColor();
@@ -435,7 +524,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
     private void refreshMainDesc() {
         var mainDesc = getHtml(libQspProxy.getGameState().mainDesc);
 
-        if (settingsController.useAutoscroll) {
+        if (settingsController.isUseAutoscroll) {
             mainDescView.postDelayed(onScroll, 300);
         }
 
@@ -616,7 +705,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
             setActiveTab(TAB_VARS_DESC);
             return true;
         } else if (i == R.id.menu_userInput) {
-            if (settingsController.useExecString) {
+            if (settingsController.isUseExecString) {
                 libQspProxy.onUseExecutorString();
             } else {
                 libQspProxy.onInputAreaClicked();
@@ -717,7 +806,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
     }
 
     @Override
-    public String showInputBox(final String prompt) {
+    public String showInputDialog(final String prompt) {
         if (isMainThread()) {
             throw new RuntimeException("Must not be called on the main thread");
         }
@@ -739,6 +828,40 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
             dialogFragment.setMessage(message);
             dialogFragment.setCancelable(false);
             dialogFragment.show(getSupportFragmentManager(), "inputDialogFragment");
+            activityGame.outputTextObserver.observeForever(inputQueue::add);
+        });
+
+        try {
+            return inputQueue.take();
+        } catch (InterruptedException ex) {
+            Log.e(TAG,"Wait for input failed", ex);
+            return "";
+        }
+    }
+
+    @Override
+    public String showExecutorDialog(final String text) {
+        if (isMainThread()) {
+            throw new RuntimeException("Must not be called on the main thread");
+        }
+        final ArrayBlockingQueue<String> inputQueue = new ArrayBlockingQueue<>(1);
+
+        runOnUiThread(() -> {
+            var config = libQspProxy.getGameState().interfaceConfig;
+            var message = config.useHtml ? htmlProcessor.removeHTMLTags(text) : text;
+            if (message == null) {
+                message = "";
+            }
+
+            if (activityGame.outputTextObserver.hasObservers()) {
+                activityGame.outputTextObserver = new MutableLiveData<>();
+            }
+
+            var dialogFragment = new GameDialogFrags();
+            dialogFragment.setDialogType(GameDialogType.EXECUTOR_DIALOG);
+            dialogFragment.setMessage(message);
+            dialogFragment.setCancelable(false);
+            dialogFragment.show(getSupportFragmentManager(), "executorDialogFragment");
             activityGame.outputTextObserver.observeForever(inputQueue::add);
         });
 
@@ -836,14 +959,18 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
             activityGame.stopLibQsp();
             counterHandler.removeCallbacks(counterTask);
             finish();
-        } else if (Objects.equals(dialog.getTag() , "inputDialogFragment")) {
+        } else if (Objects.equals(dialog.getTag() , "inputDialogFragment") ||
+                Objects.equals(dialog.getTag() , "executorDialogFragment")) {
             if (dialog.requireDialog().getWindow().findViewById(R.id.inputBox_edit) != null) {
-                EditText editText = dialog.requireDialog().getWindow().findViewById(R.id.inputBox_edit);
-                String outputText = editText.getText().toString();
-                if (Objects.equals(outputText , "")) {
-                    activityGame.outputTextObserver.setValue("");
-                } else {
-                    activityGame.outputTextObserver.setValue(outputText);
+                TextInputLayout editText = dialog.requireDialog().getWindow()
+                        .findViewById(R.id.inputBox_edit);
+                if (editText.getEditText() != null) {
+                    var outputText = editText.getEditText().getText().toString();
+                    if (Objects.equals(outputText , "")) {
+                        activityGame.outputTextObserver.setValue("");
+                    } else {
+                        activityGame.outputTextObserver.setValue(outputText);
+                    }
                 }
             }
         } else if (Objects.equals(dialog.getTag() , "loadGameDialogFragment")) {
@@ -860,6 +987,16 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
         } else {
             if (Objects.equals(dialog.getTag() , "showMenuDialogFragment")) {
                 activityGame.outputIntObserver.setValue(-1);
+            } else if (Objects.equals(dialog.getTag() , "executorDialogFragment")) {
+                Intent intentInstall = new Intent(ACTION_OPEN_DOCUMENT);
+                intentInstall.addCategory(Intent.CATEGORY_OPENABLE);
+                intentInstall.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                intentInstall.setType("text/plain");
+                try {
+                    templateLauncher.launch(intentInstall);
+                } catch (ActivityNotFoundException e) {
+                    Log.e(TAG , e.toString());
+                }
             }
         }
     }

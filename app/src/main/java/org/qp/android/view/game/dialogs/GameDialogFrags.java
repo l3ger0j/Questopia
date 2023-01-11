@@ -2,13 +2,15 @@ package org.qp.android.view.game.dialogs;
 
 import android.app.Dialog;
 import android.os.Bundle;
-import android.view.View;
+import android.widget.Button;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.databinding.ObservableField;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.textfield.TextInputLayout;
 
 import org.qp.android.R;
 import org.qp.android.databinding.DialogImageBinding;
@@ -21,6 +23,7 @@ public class GameDialogFrags extends GamePatternDialogFrags {
     private DialogImageBinding imageBinding;
     private String processedMsg;
     private String message;
+    private String template;
 
     public ObservableField<String> pathToImage = new ObservableField<>();
 
@@ -38,6 +41,10 @@ public class GameDialogFrags extends GamePatternDialogFrags {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public void setTemplate(String template) {
+        this.template = template;
     }
 
     @NonNull
@@ -62,6 +69,17 @@ public class GameDialogFrags extends GamePatternDialogFrags {
             }
         }
         switch (dialogType) {
+            case EXECUTOR_DIALOG:
+                final var executorView =
+                        getLayoutInflater().inflate(R.layout.dialog_input, null);
+                TextInputLayout textInputLayout =
+                        executorView.findViewById(R.id.inputBox_edit);
+                textInputLayout.setHelperText(message);
+                builder.setView(executorView);
+                builder.setPositiveButton(android.R.string.ok, (dialog, which) ->
+                        listener.onDialogPositiveClick(this));
+                builder.setNegativeButton("Select File", (dialog , which) -> {});
+                return builder.create();
             case ERROR_DIALOG:
                 builder.setTitle(R.string.error);
                 builder.setMessage(message);
@@ -79,10 +97,11 @@ public class GameDialogFrags extends GamePatternDialogFrags {
                 builder.setView(imageBinding.getRoot());
                 return builder.create();
             case INPUT_DIALOG:
-                final View view =
+                final var inputView =
                         getLayoutInflater().inflate(R.layout.dialog_input, null);
-                builder.setView(view);
-                builder.setMessage(message);
+                TextInputLayout layout = inputView.findViewById(R.id.inputBox_edit);
+                layout.setHelperText(message);
+                builder.setView(inputView);
                 builder.setPositiveButton(android.R.string.ok, (dialog, which) ->
                         listener.onDialogPositiveClick(this));
                 return builder.create();
@@ -104,6 +123,26 @@ public class GameDialogFrags extends GamePatternDialogFrags {
                 return builder.create();
         }
         return super.onCreateDialog(savedInstanceState);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (getArguments() != null) {
+            template = getArguments().getString("template");
+        }
+        final var dialog = (AlertDialog) getDialog();
+        if (dialogType.equals(GameDialogType.EXECUTOR_DIALOG) ||
+                dialogType.equals(GameDialogType.INPUT_DIALOG)) {
+            if (dialog != null) {
+                var textInputLayout = (TextInputLayout) dialog.findViewById(R.id.inputBox_edit);
+                if (textInputLayout != null && textInputLayout.getEditText() != null) {
+                    textInputLayout.getEditText().setText(template);
+                }
+                var negativeButton = (Button) dialog.getButton(Dialog.BUTTON_NEGATIVE);
+                negativeButton.setOnClickListener(v -> listener.onDialogNegativeClick(this));
+            }
+        }
     }
 
     @Override

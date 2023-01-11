@@ -32,7 +32,7 @@
         <string name="author">Author: -AUTHOR-</string>
         <string name="ported_by">Ported by: -PORTED_BY-</string>
         <string name="version">Version: -VERSION-</string>
-        <string name="fileSize">Size: -SIZE- KB</string>
+        <string name="fileSize">Size: -SIZE-</string>
         <string name="fileType">File Type: -TYPE-</string>
         <string name="experimental">(experimental)</string>
         <string name="mod_data">Modified: -MOD_DATA-</string>
