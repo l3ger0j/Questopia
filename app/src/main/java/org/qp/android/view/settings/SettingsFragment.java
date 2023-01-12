@@ -40,11 +40,15 @@ public class SettingsFragment extends SettingsPatternPrefFrag {
                 .newInstance().loadSettings(getContext());
         if (controller.isUseAutoWidth) {
             var customWidthImage = findPreference("customWidthImage");
-            Objects.requireNonNull(customWidthImage).setEnabled(false);
+            if (customWidthImage != null) {
+                customWidthImage.setEnabled(false);
+            }
         }
         if (controller.isUseAutoHeight) {
-            var customWidthImage = findPreference("customHeightImage");
-            Objects.requireNonNull(customWidthImage).setEnabled(false);
+            var customHeightImage = findPreference("customHeightImage");
+            if (customHeightImage != null) {
+                customHeightImage.setEnabled(false);
+            }
         }
 
         var backColor = findPreference("backColor");
