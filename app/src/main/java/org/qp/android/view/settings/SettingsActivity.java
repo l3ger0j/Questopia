@@ -1,7 +1,5 @@
 package org.qp.android.view.settings;
 
-import static org.qp.android.utils.LanguageUtil.setLocale;
-
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -17,12 +15,10 @@ import org.qp.android.R;
 import org.qp.android.view.settings.dialogs.SettingsPatternPrefFrag;
 import org.qp.android.viewModel.viewModels.ActivitySettings;
 
-import java.util.Locale;
 import java.util.Objects;
 
 public class SettingsActivity extends AppCompatActivity implements
         SettingsPatternPrefFrag.SettingsPatternFragmentList {
-    private String currentLanguage = Locale.getDefault().getLanguage();
     private SettingsController settingsController;
     private ActivitySettings activitySettings;
 
@@ -49,8 +45,12 @@ public class SettingsActivity extends AppCompatActivity implements
                         "settingsFragment")
                 .addToBackStack(null)
                 .commit();
+    }
 
-        loadLocale();
+    @Override
+    protected void onResume() {
+        super.onResume();
+        settingsController = SettingsController.newInstance().loadSettings(this);
     }
 
     @Override
@@ -95,24 +95,6 @@ public class SettingsActivity extends AppCompatActivity implements
         if (fragments.size() == 0) {
             super.onBackPressed();
         }
-    }
-
-    private void loadLocale() {
-        setLocale(this, settingsController.language);
-        currentLanguage = settingsController.language;
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        settingsController = SettingsController.newInstance().loadSettings(this);
-        updateLocale();
-    }
-
-    private void updateLocale() {
-        if (currentLanguage.equals(settingsController.language)) return;
-        setLocale(this, settingsController.language);
-        currentLanguage = settingsController.language;
     }
 }
 

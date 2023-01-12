@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
 import androidx.annotation.Nullable;
@@ -26,15 +25,15 @@ public class SquashActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_squash);
 
-        Animation pulse = AnimationUtils.loadAnimation(this, R.anim.pulse);
+        var pulse = AnimationUtils.loadAnimation(this, R.anim.pulse);
         findViewById(R.id.imageView3).startAnimation(pulse);
 
-        Handler handler = new Handler();
-        handler.postDelayed((Runnable) () -> {
+        var handler = new Handler();
+        handler.postDelayed(() -> {
             startActivity(new Intent(this, StockActivity.class));
             overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
             finish();
-        }, 2000);
+        } , 2000);
     }
 
     private void makeFullScreen() {

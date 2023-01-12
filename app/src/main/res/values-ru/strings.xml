@@ -11,6 +11,8 @@
         <string name="promptCloseGame">Уверены, что хотите закрыть игру?</string>
     <!-- Dialog Select -->
         <string name="selectGameFile">Выберите файл игры для запуска</string>
+    <!-- Dialog Executor -->
+        <string name="selectTemplateFile">Выберите файл</string>
     <!-- Dialog Edit -->
         <string name="selectPathFile">Выберите патч-файл в формате .qsp</string>
         <string name="editButton">Изменить</string>
@@ -108,31 +110,41 @@
         <string name="generalCatTitle">Главное</string>
         <string name="langTitle">Язык</string>
         <string name="langSum">Выберите язык интерфейса</string>
+        <string name="binPrefTitle">Двоичные Префиксы</string>
+        <string name="binPrefSum">Выберите двоичные префиксы</string>
         <string name="soundTitle">Звук</string>
         <string name="soundSum">Проигрывать звуки и музыку</string>
-        <string name="actsHeightTitle">Высота списка действий</string>
+        <string name="actsHeightTitle">Высота Списка Действий</string>
         <string name="actsHeightSum">Соотношение высоты списка действий к высоте экрана</string>
+        <!-- Text section -->
+        <string name="textCatTitle">Текст</string>
+        <string name="fontStyleTitle">Стиль Шрифта</string>
+        <string name="fontSizeTitle">Размер Шрифта</string>
+        <string name="useGameFontTitle">Исп. Шрифт Мгры</string>
+        <string name="useGameFontSum">Использовать настройки шрифта из игры</string>
+        <string name="textColorTitle">Цвет Текста</string>
+        <string name="backColorTitle">Цвет Фона</string>
+        <string name="linkColorTitle">Цвет Ссылок</string>
+        <string name="textBackLinkColorSum">Значение по умолчанию -VALUE-</string>
+        <string name="extendedName">QuestPlayerAndroid -VERSION-</string>
+        <!-- Image section -->
+        <string name="imageCatTitle">Картинки</string>
+        <string name="autoWidthTitle">Авто Ширина Изображения</string>
+        <string name="autoWidthSum">Использовать автоматически определяемое значение для ширины изображения</string>
+        <string name="customWidthTitle">Своё Значение Ширины</string>
+        <string name="autoHeightTitle">Авто Высота Изображения</string>
+        <string name="autoHeightSum">Использовать автоматически определяемое значение для высоты изображения</string>
+        <string name="customHeightTitle">Своё Значение Высоты</string>
         <!-- Switch section -->
         <string name="switchCatTitle">Переключатели</string>
-        <string name="useOldTitle">Старое значение для изменения размера изображения</string>
-        <string name="useOldSum">Использовать старое значение для изменения размера изображения</string>
+        <string name="immersiveModeTitle">Режим Погружения</string>
+        <string name="immersiveModeSum">Включение/выключение режима погружения</string>
         <string name="separatorTitle">Разделитель</string>
         <string name="separatorSum">Включить/выключить разделитель в игре</string>
         <string name="autoscrollTitle">Автопролистывание</string>
         <string name="autoscrollSum">Включить/выключить автопролистывание</string>
         <string name="execStringTitle">Исполнитель строк</string>
         <string name="execStringSum">Включить/выключить исполнитель строк</string>
-        <!-- Text section -->
-        <string name="textCatTitle">Текст</string>
-        <string name="fontStyleTitle">Стиль шрифта</string>
-        <string name="fontSizeTitle">Размер шрифта</string>
-        <string name="useGameFontTitle">Исп. шрифт игры</string>
-        <string name="useGameFontSum">Использовать настройки шрифта из игры</string>
-        <string name="textColorTitle">Цвет текста</string>
-        <string name="backColorTitle">Цвет фона</string>
-        <string name="linkColorTitle">Цвет ссылок</string>
-        <string name="textBackLinkColorSum">Значение по умолчанию -VALUE-</string>
-        <string name="extendedName">QuestPlayerAndroid -VERSION-</string>
         <!-- Extra section -->
         <string name="extraCatTitle">Экстра</string>
         <string name="pluginTitle">Меню плагинов</string>

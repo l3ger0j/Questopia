@@ -1,7 +1,6 @@
 package org.qp.android.view.plugin;
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
@@ -40,20 +39,20 @@ public class PluginRecycler extends RecyclerView.Adapter<PluginRecycler.ViewHold
     }
 
     private static final DiffUtil.ItemCallback<PluginInfo> DIFF_CALLBACK =
-            new DiffUtil.ItemCallback<PluginInfo>() {
-        @Override
-        public boolean areItemsTheSame(@NonNull PluginInfo oldItem , @NonNull PluginInfo newItem) {
-            return oldItem.id == newItem.id;
-        }
+            new DiffUtil.ItemCallback<>() {
+                @Override
+                public boolean areItemsTheSame(@NonNull PluginInfo oldItem , @NonNull PluginInfo newItem) {
+                    return oldItem.id == newItem.id;
+                }
 
-        @Override
-        public boolean areContentsTheSame(@NonNull PluginInfo oldItem , @NonNull PluginInfo newItem) {
-            return oldItem.equals(newItem);
-        }
-    };
+                @Override
+                public boolean areContentsTheSame(@NonNull PluginInfo oldItem , @NonNull PluginInfo newItem) {
+                    return oldItem.equals(newItem);
+                }
+            };
 
-    public void submitList(ArrayList<PluginInfo> pluginInfos){
-        differ.submitList(pluginInfos);
+    public void submitList(ArrayList<PluginInfo> pluginInfo){
+        differ.submitList(pluginInfo);
     }
 
     public PluginRecycler(Context context) {
@@ -63,7 +62,7 @@ public class PluginRecycler extends RecyclerView.Adapter<PluginRecycler.ViewHold
     @NonNull
     @Override
     public PluginRecycler.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent , int viewType) {
-        LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+        var inflater = LayoutInflater.from(parent.getContext());
         ListItemPluginBinding listItemPluginBinding =
                 DataBindingUtil.inflate(inflater, R.layout.list_item_plugin, parent, false);
         return new PluginRecycler.ViewHolder(listItemPluginBinding);
@@ -72,11 +71,11 @@ public class PluginRecycler extends RecyclerView.Adapter<PluginRecycler.ViewHold
     @Override
     public void onBindViewHolder(@NonNull PluginRecycler.ViewHolder holder , int position) {
         holder.listItemPluginBinding(differ.getCurrentList().get(position));
-        PluginInfo pluginInfo = getItem(position);
+        var pluginInfo = getItem(position);
 
         // gameIcon
         if (pluginInfo.image != null && pluginInfo.image.isEmpty()) {
-            Drawable drawable = ResourcesCompat.getDrawable(
+            var drawable = ResourcesCompat.getDrawable(
                     context.getResources(),
                     R.drawable.broken_image , null
             );
@@ -97,9 +96,9 @@ public class PluginRecycler extends RecyclerView.Adapter<PluginRecycler.ViewHold
 
         // gameAuthor
         if (pluginInfo.author != null && pluginInfo.author.length() > 0) {
-            String text = context.getString(R.string.author)
-                    .replace("-AUTHOR-", pluginInfo.author);
-            holder.listItemPluginBinding.pluginAuthor.setText(text);
+            holder.listItemPluginBinding.pluginAuthor
+                    .setText(context.getString(R.string.author)
+                            .replace("-AUTHOR-", pluginInfo.author));
         } else {
             holder.listItemPluginBinding.pluginAuthor.setText("");
         }

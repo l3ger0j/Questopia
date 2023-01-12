@@ -11,6 +11,8 @@
         <string name="promptCloseGame">Are you sure you want to close the game?</string>
     <!-- Dialog Select -->
         <string name="selectGameFile">Select a game file to run</string>
+    <!-- Dialog Executor -->
+        <string name="selectTemplateFile">Select File</string>
     <!-- Dialog Edit -->
         <string name="selectPathFile">Select the patch file in the format .qsp</string>
         <string name="editButton">Edit</string>
@@ -108,20 +110,12 @@
         <string name="generalCatTitle">General</string>
         <string name="langTitle">Language</string>
         <string name="langSum">Choose display language</string>
+        <string name="binPrefTitle">Binary prefixes</string>
+        <string name="binPrefSum">Choose binary prefixes</string>
         <string name="soundTitle">Sound</string>
         <string name="soundSum">Play music and sounds</string>
         <string name="actsHeightTitle">Actions List Height</string>
         <string name="actsHeightSum">Actions List Height To Screen Height Ratio</string>
-        <!-- Switch section -->
-        <string name="switchCatTitle">Switches</string>
-        <string name="useOldTitle">Old value for resizing the image</string>
-        <string name="useOldSum">Use the old value to resize the image</string>
-        <string name="separatorTitle">Separator</string>
-        <string name="separatorSum">On/off separator line in game</string>
-        <string name="autoscrollTitle">Autoscroll</string>
-        <string name="autoscrollSum">Enable/disable autoscroll</string>
-        <string name="execStringTitle">String executor</string>
-        <string name="execStringSum">Enable/disable execution string</string>
         <!-- Text section -->
         <string name="textCatTitle">Text</string>
         <string name="fontStyleTitle">Font Style</string>
@@ -133,6 +127,24 @@
         <string name="linkColorTitle">Link Color</string>
         <string name="textBackLinkColorSum">Default value -VALUE-</string>
         <string name="extendedName">QuestPlayerAndroid -VERSION-</string>
+        <!-- Image section -->
+        <string name="imageCatTitle">Images</string>
+        <string name="autoWidthTitle">Auto Width Image</string>
+        <string name="autoWidthSum">Use an auto-detectable value for the width of the image</string>
+        <string name="customWidthTitle">Custom Width Image</string>
+        <string name="autoHeightTitle">Auto Height Image</string>
+        <string name="autoHeightSum">Use an auto-detectable value for the height of the image</string>
+        <string name="customHeightTitle">Custom Height Image</string>
+        <!-- Switch section -->
+        <string name="switchCatTitle">Switches</string>
+        <string name="immersiveModeTitle">Immersive Mode</string>
+        <string name="immersiveModeSum">Enable/disable immersive mode</string>
+        <string name="separatorTitle">Separator</string>
+        <string name="separatorSum">On/off separator line in game</string>
+        <string name="autoscrollTitle">Autoscroll</string>
+        <string name="autoscrollSum">Enable/disable autoscroll</string>
+        <string name="execStringTitle">String executor</string>
+        <string name="execStringSum">Enable/disable execution string</string>
         <!-- Extra section -->
         <string name="extraCatTitle">Extra</string>
         <string name="pluginTitle">Extension menu</string>

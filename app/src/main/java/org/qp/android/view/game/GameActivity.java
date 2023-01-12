@@ -5,7 +5,6 @@ import static org.qp.android.utils.ColorUtil.getHexColor;
 import static org.qp.android.utils.FileUtil.findFileOrDirectory;
 import static org.qp.android.utils.FileUtil.getOrCreateDirectory;
 import static org.qp.android.utils.FileUtil.getOrCreateFile;
-import static org.qp.android.utils.LanguageUtil.setLocale;
 import static org.qp.android.utils.ThreadUtil.isMainThread;
 import static org.qp.android.utils.ViewUtil.getFontStyle;
 
@@ -36,7 +35,6 @@ import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.databinding.DataBindingUtil;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.DialogFragment;
-import androidx.fragment.app.Fragment;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -65,7 +63,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CountDownLatch;
@@ -99,7 +96,6 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
     private static final String PAGE_BODY_TEMPLATE = "<body>REPLACETEXT</body>";
 
     private SettingsController settingsController;
-    private String currentLanguage = Locale.getDefault().getLanguage();
     private int activeTab;
     private String pageTemplate = "";
     private boolean showActions = true;
@@ -207,32 +203,28 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
                         }
                         file = DocumentFile.fromSingleUri(this, Objects.requireNonNull(uri));
                         assert file != null;
-                        String ret = "";
                         try {
                             InputStream inputStream = getContentResolver().openInputStream(file.getUri());
                             if ( inputStream != null ) {
-                                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-                                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+                                var inputStreamReader = new InputStreamReader(inputStream);
+                                var bufferedReader = new BufferedReader(inputStreamReader);
                                 String receiveString;
-                                StringBuilder stringBuilder = new StringBuilder();
-
-                                while ( (receiveString = bufferedReader.readLine()) != null ) {
+                                var stringBuilder = new StringBuilder();
+                                while ((receiveString = bufferedReader.readLine()) != null) {
                                     stringBuilder.append("\n").append(receiveString);
                                 }
-
                                 inputStream.close();
                                 var manager = getSupportFragmentManager();
-                                Fragment fragment = manager.findFragmentByTag("executorDialogFragment");
-                                Bundle bundle = new Bundle();
+                                var fragment = manager.findFragmentByTag("executorDialogFragment");
+                                var bundle = new Bundle();
                                 bundle.putString("template", stringBuilder.toString());
                                 Objects.requireNonNull(fragment).setArguments(bundle);
-                                Log.d(TAG, stringBuilder.toString());
                             }
                         }
                         catch (FileNotFoundException e) {
-                            showError("File not found: " + e);
+                            showError("File not found: "+"\n"+e);
                         } catch (IOException e) {
-                            showError("Can not read file: " + e);
+                            showError("Can not read file: "+"\n"+e);
                         }
                     }
                 }
@@ -244,17 +236,14 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
             if (!gameId.equals(tempIdGame)) {
                 initServices();
                 initControls();
-                currentLanguage = activityGame.loadLocale(this, settingsController);
                 initGame();
             } else {
                 restartServices();
                 initControls();
-                currentLanguage = activityGame.loadLocale(this, settingsController);
             }
         } else {
             initServices();
             initControls();
-            currentLanguage = activityGame.loadLocale(this, settingsController);
             initGame();
         }
 
@@ -291,7 +280,6 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
                             | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
         }
     }
-
 
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
@@ -454,7 +442,6 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
     public void onResume() {
         super.onResume();
         settingsController = SettingsController.newInstance().loadSettings(this);
-        updateLocale();
         applySettings();
         if (libQspProxy.getGameState().gameRunning) {
             applyGameState();
@@ -462,15 +449,6 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
             audioPlayer.resume();
             counterHandler.postDelayed(counterTask, counterInterval);
         }
-    }
-
-    private void updateLocale() {
-        if (currentLanguage.equals(settingsController.language)) return;
-        setLocale(this, settingsController.language);
-        setTitle(R.string.appName);
-        invalidateOptionsMenu();
-        setActiveTab(activeTab);
-        currentLanguage = settingsController.language;
     }
 
     private void applySettings() {
@@ -801,7 +779,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
         try {
             latch.await();
         } catch (InterruptedException ex) {
-            Log.e(TAG,"Wait failed", ex);
+            showError("Wait failed"+"\n"+ex);
         }
     }
 
@@ -834,7 +812,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
         try {
             return inputQueue.take();
         } catch (InterruptedException ex) {
-            Log.e(TAG,"Wait for input failed", ex);
+            showError("Wait for input failed"+"\n"+ex);
             return "";
         }
     }
@@ -868,7 +846,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
         try {
             return inputQueue.take();
         } catch (InterruptedException ex) {
-            Log.e(TAG,"Wait for input failed", ex);
+            showError("Wait for input failed"+ex);
             return "";
         }
     }
@@ -901,7 +879,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
         try {
             return resultQueue.take();
         } catch (InterruptedException ex) {
-            Log.e(TAG,"Wait failed", ex);
+            showError("Wait failed"+"\n"+ex);
             return -1;
         }
     }
@@ -928,8 +906,6 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
             if (activeTab == TAB_MAIN_DESC_AND_ACTIONS) {
                 runOnUiThread(this::refreshActionsVisibility);
             }
-        } else {
-            Log.d(TAG, "Unsupported window type: " + type);
         }
     }
 
@@ -983,7 +959,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
     @Override
     public void onDialogNegativeClick(DialogFragment dialog) {
         if (dialog == null) {
-            Log.e(TAG, "Dialog is null");
+            showError("Dialog is null");
         } else {
             if (Objects.equals(dialog.getTag() , "showMenuDialogFragment")) {
                 activityGame.outputIntObserver.setValue(-1);
@@ -995,7 +971,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
                 try {
                     templateLauncher.launch(intentInstall);
                 } catch (ActivityNotFoundException e) {
-                    Log.e(TAG , e.toString());
+                    showError("Error: "+"\n"+e);
                 }
             }
         }
@@ -1004,7 +980,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
     @Override
     public void onDialogListClick(DialogFragment dialog , int which) {
         if (dialog == null) {
-            Log.e(TAG, "Dialog is null");
+            showError("Dialog is null");
         } else {
             if (Objects.equals(dialog.getTag() , "showMenuDialogFragment")) {
                 activityGame.outputIntObserver.setValue(which);

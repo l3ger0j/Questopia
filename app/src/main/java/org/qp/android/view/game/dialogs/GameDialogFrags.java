@@ -78,7 +78,7 @@ public class GameDialogFrags extends GamePatternDialogFrags {
                 builder.setView(executorView);
                 builder.setPositiveButton(android.R.string.ok, (dialog, which) ->
                         listener.onDialogPositiveClick(this));
-                builder.setNegativeButton("Select File", (dialog , which) -> {});
+                builder.setNegativeButton(requireContext().getString(R.string.selectTemplateFile), (dialog , which) -> {});
                 return builder.create();
             case ERROR_DIALOG:
                 builder.setTitle(R.string.error);

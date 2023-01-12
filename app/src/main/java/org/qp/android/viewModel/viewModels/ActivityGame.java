@@ -3,7 +3,6 @@ package org.qp.android.viewModel.viewModels;
 import static org.qp.android.utils.Base64Util.decodeBase64;
 import static org.qp.android.utils.Base64Util.hasBase64;
 import static org.qp.android.utils.ColorUtil.convertRGBAToBGRA;
-import static org.qp.android.utils.LanguageUtil.setLocale;
 import static org.qp.android.utils.PathUtil.getExtension;
 
 import android.app.Application;
@@ -119,11 +118,6 @@ public class ActivityGame extends AndroidViewModel {
         gameContentResolver = questPlayerApplication.getGameContentResolver();
         htmlProcessor = questPlayerApplication.getHtmlProcessor();
         settingsController = SettingsController.newInstance().loadSettings(getApplication());
-    }
-
-    public String loadLocale(Context context, SettingsController settingsController) {
-        setLocale(context, settingsController.language);
-        return settingsController.language;
     }
 
     public AudioPlayer startAudio () {

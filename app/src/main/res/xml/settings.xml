@@ -8,6 +8,7 @@
             android:entries="@array/langName"
             android:entryValues="@array/langValue"
             android:key="lang"
+            android:enabled="false"
             android:summary="@string/langSum"
             android:title="@string/langTitle" />
         <ListPreference
@@ -15,8 +16,8 @@
             android:entries="@array/binPrefName"
             android:entryValues="@array/binPrefValue"
             android:key="binPref"
-            android:summary="Choose binary prefixes"
-            android:title="Binary prefixes" />
+            android:summary="@string/binPrefSum"
+            android:title="@string/binPrefTitle" />
         <CheckBoxPreference
             android:defaultValue="true"
             android:key="sound"
@@ -63,37 +64,37 @@
             android:title="@string/linkColorTitle" />
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="Images">
+    <PreferenceCategory android:title="@string/imageCatTitle">
         <SwitchPreference
             android:defaultValue="true"
             android:key="autoWidth"
-            android:summary="Use an auto-detectable value for the width of the image"
-            android:title="Auto Width Image" />
+            android:summary="@string/autoWidthSum"
+            android:title="@string/autoWidthTitle" />
         <EditTextPreference
             android:defaultValue="400"
-            android:key="customWidthImage"
+            android:key="customWidth"
             android:selectAllOnFocus="true"
             android:singleLine="true"
-            android:title="Custom Width Image" />
+            android:title="@string/customWidthTitle" />
         <SwitchPreference
             android:defaultValue="true"
             android:key="autoHeight"
-            android:summary="Use an auto-detectable value for the height of the image"
-            android:title="Auto Height Image" />
+            android:summary="@string/autoHeightSum"
+            android:title="@string/autoHeightTitle" />
         <EditTextPreference
             android:defaultValue="400"
-            android:key="customHeightImage"
+            android:key="customHeight"
             android:selectAllOnFocus="true"
             android:singleLine="true"
-            android:title="Custom Height Image" />
+            android:title="@string/customHeightTitle" />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/switchCatTitle">
         <SwitchPreference
             android:defaultValue="true"
             android:key="immersiveMode"
-            android:summary="Enable/disable immersive mode"
-            android:title="Immersive Mode" />
+            android:summary="@string/immersiveModeSum"
+            android:title="@string/immersiveModeTitle" />
         <SwitchPreference
             android:defaultValue="false"
             android:key="separator"

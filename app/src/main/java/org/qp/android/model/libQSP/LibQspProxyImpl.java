@@ -424,20 +424,28 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
             request.interfaceConfigChanged = true;
         }
         if (nativeMethods.QSPIsMainDescChanged()) {
-            gameState.mainDesc = nativeMethods.QSPGetMainDesc();
-            request.mainDescChanged = true;
+            if (!gameState.mainDesc.equals(nativeMethods.QSPGetMainDesc())) {
+                gameState.mainDesc = nativeMethods.QSPGetMainDesc();
+                request.mainDescChanged = true;
+            }
         }
         if (nativeMethods.QSPIsActionsChanged()) {
-            gameState.actions = getActions();
-            request.actionsChanged = true;
+            if (gameState.actions != getActions()) {
+                gameState.actions = getActions();
+                request.actionsChanged = true;
+            }
         }
         if (nativeMethods.QSPIsObjectsChanged()) {
-            gameState.objects = getObjects();
-            request.objectsChanged = true;
+            if (gameState.objects != getObjects()) {
+                gameState.objects = getObjects();
+                request.objectsChanged = true;
+            }
         }
         if (nativeMethods.QSPIsVarsDescChanged()) {
-            gameState.varsDesc = nativeMethods.QSPGetVarsDesc();
-            request.varsDescChanged = true;
+            if (!gameState.varsDesc.equals(nativeMethods.QSPGetVarsDesc())) {
+                gameState.varsDesc = nativeMethods.QSPGetVarsDesc();
+                request.varsDescChanged = true;
+            }
         }
 
         var inter = gameInterface;

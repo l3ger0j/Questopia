@@ -2,7 +2,6 @@ package org.qp.android.view.stock;
 
 import static org.qp.android.utils.DirUtil.doesDirectoryContainGameFiles;
 import static org.qp.android.utils.FileUtil.deleteDirectory;
-import static org.qp.android.utils.LanguageUtil.setLocale;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -43,7 +42,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Objects;
 
 public class StockActivity extends AppCompatActivity implements StockPatternDialogFrags.StockPatternDialogList {
@@ -52,8 +50,6 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
     private HashMap<String, GameData> gamesMap = new HashMap<>();
 
     public SettingsController settingsController;
-    private String currentLanguage = Locale.getDefault().getLanguage();
-
     private ActivityStock activityStock;
     private FragmentStock localStockViewModel;
 
@@ -163,7 +159,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
                     DocumentFile file;
                     if (result.getResultCode() == RESULT_OK) {
                         if ((uri = Objects.requireNonNull(result.getData()).getData()) == null) {
-                            Log.e(TAG, "Archive or file is not selected");
+                            showErrorDialog("Archive or file is not selected");
                         }
                         file = DocumentFile.fromSingleUri(this, Objects.requireNonNull(uri));
                         assert file != null;
@@ -179,7 +175,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
                     DocumentFile file;
                     if (result.getResultCode() == RESULT_OK) {
                         if ((uri = Objects.requireNonNull(result.getData()).getData()) == null) {
-                            Log.e(TAG, "Archive or file is not selected");
+                            showErrorDialog("Archive or file is not selected");
                         }
                         file = DocumentFile.fromSingleUri(this, Objects.requireNonNull(uri));
                         assert file != null;
@@ -196,7 +192,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
                     DocumentFile file;
                     if (result.getResultCode() == RESULT_OK) {
                         if ((uri = Objects.requireNonNull(result.getData()).getData()) == null) {
-                            Log.e(TAG, "Archive or file is not selected");
+                            showErrorDialog("Archive or file is not selected");
                         }
                         file = DocumentFile.fromTreeUri(this, Objects.requireNonNull(uri));
                         assert file != null;
@@ -213,7 +209,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
                     DocumentFile file;
                     if (result.getResultCode() == RESULT_OK) {
                         if ((uri = Objects.requireNonNull(result.getData()).getData()) == null) {
-                            Log.e(TAG, "Archive or file is not selected");
+                            showErrorDialog("Archive or file is not selected");
                         }
                         getContentResolver().takePersistableUriPermission(uri,
                                 Intent.FLAG_GRANT_READ_URI_PERMISSION
@@ -227,7 +223,6 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         );
 
         loadSettings();
-        loadLocale();
 
         Log.i(TAG,"Stock Activity created");
 
@@ -253,12 +248,6 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         if (settingsController.binaryPrefixes <= 1000) {
             activityStock.refreshGames();
         }
-    }
-
-    private void loadLocale() {
-        setLocale(this, settingsController.language);
-        setTitle(R.string.gameStockTitle);
-        currentLanguage = settingsController.language;
     }
 
     public void showErrorDialog(String errorMessage) {
@@ -357,7 +346,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
                             try {
                                 deleteDirectory(data.gameDir);
                             } catch (NullPointerException e) {
-                                Log.e(TAG , e.toString());
+                                showErrorDialog("Error: "+"\n"+e);
                             }
                             activityStock.refreshGames();
                         }
@@ -407,7 +396,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
     private void showGameInfo(String gameId) {
         var gameData = activityStock.getGamesMap().get(gameId);
         if (gameData == null) {
-            Log.e(TAG,"GameData not found: " + gameId);
+            showErrorDialog("GameData not found: " + gameId);
             return;
         }
         StringBuilder message = new StringBuilder();
@@ -464,20 +453,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
     public void onResume() {
         super.onResume();
         loadSettings();
-        updateLocale();
         activityStock.refreshGamesDirectory();
-    }
-
-    public void updateLocale() {
-        if (currentLanguage.equals(settingsController.language)) {
-            setTitle(getString(R.string.gameStockTitle));
-            return;
-        }
-        setLocale(this, settingsController.language);
-        setTitle(getString(R.string.gameStockTitle));
-        activityStock.refreshGames();
-        invalidateOptionsMenu();
-        currentLanguage = settingsController.language;
     }
 
     @Override
@@ -530,7 +506,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
             }
         }
         if (filteredList.isEmpty()) {
-            Log.e(TAG,"No Data Found");
+            showErrorDialog("No Data Found");
         } else {
             localStockViewModel.setGameDataArrayList(filteredList);
         }
