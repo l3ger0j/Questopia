@@ -424,25 +424,45 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
             request.interfaceConfigChanged = true;
         }
         if (nativeMethods.QSPIsMainDescChanged()) {
-            if (!gameState.mainDesc.equals(nativeMethods.QSPGetMainDesc())) {
+            if (gameState.mainDesc != null) {
+                if (!gameState.mainDesc.equals(nativeMethods.QSPGetMainDesc())) {
+                    gameState.mainDesc = nativeMethods.QSPGetMainDesc();
+                    request.mainDescChanged = true;
+                }
+            } else {
                 gameState.mainDesc = nativeMethods.QSPGetMainDesc();
                 request.mainDescChanged = true;
             }
         }
         if (nativeMethods.QSPIsActionsChanged()) {
-            if (gameState.actions != getActions()) {
+            if (gameState.actions != null) {
+                if (gameState.actions != getActions()) {
+                    gameState.actions = getActions();
+                    request.actionsChanged = true;
+                }
+            } else {
                 gameState.actions = getActions();
                 request.actionsChanged = true;
             }
         }
         if (nativeMethods.QSPIsObjectsChanged()) {
-            if (gameState.objects != getObjects()) {
+            if (gameState.objects != null) {
+                if (gameState.objects != getObjects()) {
+                    gameState.objects = getObjects();
+                    request.objectsChanged = true;
+                }
+            } else {
                 gameState.objects = getObjects();
                 request.objectsChanged = true;
             }
         }
         if (nativeMethods.QSPIsVarsDescChanged()) {
-            if (!gameState.varsDesc.equals(nativeMethods.QSPGetVarsDesc())) {
+            if (gameState.varsDesc != null) {
+                if (!gameState.varsDesc.equals(nativeMethods.QSPGetVarsDesc())) {
+                    gameState.varsDesc = nativeMethods.QSPGetVarsDesc();
+                    request.varsDescChanged = true;
+                }
+            } else {
                 gameState.varsDesc = nativeMethods.QSPGetVarsDesc();
                 request.varsDescChanged = true;
             }
