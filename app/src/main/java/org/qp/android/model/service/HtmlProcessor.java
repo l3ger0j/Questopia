@@ -166,6 +166,16 @@ public class HtmlProcessor {
         return result.toString();
     }
 
+    public String getSrcDir(String html) {
+        var document = Jsoup.parse(html);
+        var imageElement = document.select("img").first();
+        String srcValue = null;
+        if (imageElement != null) {
+            srcValue = imageElement.attr("src");
+        }
+        return srcValue;
+    }
+
     public boolean hasHTMLTags(String text){
         var matcher = pattern.matcher(text);
         return matcher.find();

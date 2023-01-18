@@ -14,7 +14,7 @@ void Java_org_qp_android_model_libQSP_NativeMethods_QSPInit(JNIEnv *env,
 
     jclass cls = (*env)->GetObjectClass(env, this);
     jfieldID fid = (*env)->GetFieldID(env, cls, "callbacks",
-                                      "Lorg/qp/android/model/libQSP/LibQspCallbacks;");
+                                      "Lorg/qp/android/model/libQSP/LibQpCallbacks;");
     jobject callbacks = (*env)->GetObjectField(env, this, fid);
     qspCallbacksObj = (*env)->NewGlobalRef(env, callbacks);
 

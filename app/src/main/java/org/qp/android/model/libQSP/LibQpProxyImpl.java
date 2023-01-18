@@ -1,6 +1,7 @@
 package org.qp.android.model.libQSP;
 
 import static org.qp.android.utils.FileUtil.findFileOrDirectory;
+import static org.qp.android.utils.FileUtil.findFileRecursively;
 import static org.qp.android.utils.FileUtil.getFileContents;
 import static org.qp.android.utils.FileUtil.getOrCreateDirectory;
 import static org.qp.android.utils.StringUtil.getStringOrEmpty;
@@ -25,7 +26,6 @@ import org.qp.android.dto.libQSP.ObjectData;
 import org.qp.android.model.service.AudioPlayer;
 import org.qp.android.model.service.GameContentResolver;
 import org.qp.android.model.service.HtmlProcessor;
-import org.qp.android.model.service.ImageProvider;
 import org.qp.android.utils.StreamUtil;
 import org.qp.android.view.game.GameInterface;
 
@@ -37,7 +37,7 @@ import java.util.ArrayList;
 import java.util.Locale;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
+public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
     private final String TAG = this.getClass().getSimpleName();
 
     private final ReentrantLock libQspLock = new ReentrantLock();
@@ -53,19 +53,16 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
 
     private final Context context;
     private final GameContentResolver gameContentResolver;
-    private final ImageProvider imageProvider;
     private final HtmlProcessor htmlProcessor;
     private final AudioPlayer audioPlayer;
 
-    public LibQspProxyImpl(
+    public LibQpProxyImpl(
             Context context,
             GameContentResolver gameContentResolver,
-            ImageProvider imageProvider,
             HtmlProcessor htmlProcessor,
             AudioPlayer audioPlayer) {
         this.context = context;
         this.gameContentResolver = gameContentResolver;
-        this.imageProvider = imageProvider;
         this.htmlProcessor = htmlProcessor;
         this.audioPlayer = audioPlayer;
     }
@@ -177,13 +174,14 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
         return changed;
     }
 
+    @NonNull
     private ArrayList<QpListItem> getActions() {
         ArrayList<QpListItem> actions = new ArrayList<>();
         var count = nativeMethods.QSPGetActionsCount();
         for (int i = 0; i < count; ++i) {
             var actionData = (ActionData) nativeMethods.QSPGetActionData(i);
             var action = new QpListItem();
-            action.icon = imageProvider.get(actionData.image);
+            action.pathToImage = actionData.image;
             action.text = gameState.interfaceConfig.useHtml ?
                     htmlProcessor.removeHTMLTags(actionData.name) : actionData.name;
             actions.add(action);
@@ -198,14 +196,26 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
         for (int i = 0; i < count; i++) {
             var objectResult = (ObjectData) nativeMethods.QSPGetObjectData(i);
             var object = new QpListItem();
-            object.icon = imageProvider.get(objectResult.image);
-            object.text = gameState.interfaceConfig.useHtml ? htmlProcessor.removeHTMLTags(objectResult.name) : objectResult.name;
+            if (objectResult.name.contains("<img")) {
+                if (htmlProcessor.hasHTMLTags(objectResult.name)) {
+                    String tempPath = htmlProcessor.getSrcDir(objectResult.name);
+                    object.pathToImage = String.valueOf(findFileRecursively(gameState.gameDir,
+                            tempPath));
+                } else {
+                    object.pathToImage = String.valueOf(findFileRecursively(gameState.gameDir,
+                            objectResult.name));
+                }
+            } else {
+                object.pathToImage = objectResult.image;
+                object.text = gameState.interfaceConfig.useHtml ?
+                        htmlProcessor.removeHTMLTags(objectResult.name) : objectResult.name;
+            }
             objects.add(object);
         }
         return objects;
     }
 
-    // region LibQspProxy
+    // region LibQpProxy
 
     public void start() {
         libQspThread = new Thread("libqsp") {
@@ -411,9 +421,9 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
         gameInterface = view;
     }
 
-    // endregion LibQspProxy
+    // endregion LibQpProxy
 
-    // region LibQspCallbacks
+    // region LibQpCallbacks
 
     @Override
     public void RefreshInt() {
@@ -618,5 +628,5 @@ public class LibQspProxyImpl implements LibQspProxy, LibQspCallbacks {
         }
     }
 
-    // endregion LibQspCallbacks
+    // endregion LibQpCallbacks
 }

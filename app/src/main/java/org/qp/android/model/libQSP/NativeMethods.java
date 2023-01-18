@@ -6,13 +6,13 @@ import java.util.Objects;
  * Методы данного класса определены в <code>androidqspwrapper.c</code>.
  */
 public class NativeMethods {
-    private final LibQspCallbacks callbacks;
+    private final LibQpCallbacks callbacks;
 
     static {
         System.loadLibrary("ndkqsp");
     }
 
-    public NativeMethods(LibQspCallbacks callbacks) {
+    public NativeMethods(LibQpCallbacks callbacks) {
         this.callbacks = Objects.requireNonNull(callbacks, "callbacks");
     }
 

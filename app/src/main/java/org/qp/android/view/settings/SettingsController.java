@@ -3,6 +3,7 @@ package org.qp.android.view.settings;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.graphics.Typeface;
 
 import androidx.annotation.NonNull;
 import androidx.preference.PreferenceManager;
@@ -39,6 +40,19 @@ public class SettingsController {
     public SettingsController loadSettings(Context context) {
         var preferences = PreferenceManager.getDefaultSharedPreferences(context);
         return from(preferences);
+    }
+
+    public Typeface getTypeface() {
+        switch (typeface) {
+            case 1:
+                return Typeface.SANS_SERIF;
+            case 2:
+                return Typeface.SERIF;
+            case 3:
+                return Typeface.MONOSPACE;
+            default:
+                return Typeface.DEFAULT;
+        }
     }
 
     @NonNull

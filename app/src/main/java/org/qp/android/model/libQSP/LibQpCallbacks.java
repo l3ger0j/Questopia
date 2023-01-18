@@ -3,7 +3,7 @@ package org.qp.android.model.libQSP;
 /**
  * Методы данного интерфейса вызываются из нативного кода. См. <code>android_callbacks.c</code>.
  */
-public interface LibQspCallbacks {
+public interface LibQpCallbacks {
     void RefreshInt();
     void ShowPicture(String path);
     void SetTimer(int msecs);

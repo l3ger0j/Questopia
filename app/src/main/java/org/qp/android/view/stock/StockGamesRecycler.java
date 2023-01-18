@@ -21,7 +21,7 @@ import org.qp.android.dto.stock.GameData;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GamesRecycler extends RecyclerView.Adapter<GamesRecycler.ViewHolder>{
+public class StockGamesRecycler extends RecyclerView.Adapter<StockGamesRecycler.ViewHolder>{
     private final Context context;
     private final AsyncListDiffer<GameData> differ =
             new AsyncListDiffer<>(this , DIFF_CALLBACK);
@@ -56,14 +56,14 @@ public class GamesRecycler extends RecyclerView.Adapter<GamesRecycler.ViewHolder
         differ.submitList(gameData);
     }
 
-    public GamesRecycler(Context context) {
+    public StockGamesRecycler(Context context) {
         this.context = context;
     }
 
     @NonNull
     @Override
-    public GamesRecycler.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent,
-                                                       int viewType) {
+    public StockGamesRecycler.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent,
+                                                            int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         ListItemGameBinding listItemGameBinding =
                 DataBindingUtil.inflate(inflater, R.layout.list_item_game, parent, false);
@@ -71,7 +71,7 @@ public class GamesRecycler extends RecyclerView.Adapter<GamesRecycler.ViewHolder
     }
 
     @Override
-    public void onBindViewHolder(@NonNull GamesRecycler.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull StockGamesRecycler.ViewHolder holder, int position) {
         holder.listItemGameBinding(differ.getCurrentList().get(position));
         GameData gameData = getItem(position);
         // gameIcon

@@ -6,14 +6,14 @@ def viewBind = true
 def dataBind = true
 
 android {
-    compileSdkVersion 32
+    compileSdkVersion 33
 
     defaultConfig {
         applicationId "org.qp.android"
         minSdkVersion 21
-        targetSdkVersion 32
-        versionCode 20902
-        versionName "3.9.2"
+        targetSdkVersion 33
+        versionCode 20903
+        versionName "3.9.3"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -54,7 +54,7 @@ android {
 }
 
 dependencies {
-    implementation 'androidx.appcompat:appcompat:1.5.1'
+    implementation 'androidx.appcompat:appcompat:1.6.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.documentfile:documentfile:1.0.1'
     implementation 'androidx.preference:preference:1.2.0'

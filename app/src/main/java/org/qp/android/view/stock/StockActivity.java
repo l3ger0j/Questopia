@@ -117,6 +117,18 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         mFAB = activityStockBinding.stockFAB;
         localStockViewModel =
                 new ViewModelProvider(this).get(FragmentStock.class);
+        activityStockBinding.imageBanner0.setOnClickListener(v -> {
+            var intent = new Intent(Intent.ACTION_VIEW, Uri
+                    .parse("https://t.me/joinchat/AAAAAFgqAMXq0SA34umFbQ"));
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+        });
+        activityStockBinding.imageBanner1.setOnClickListener(v -> {
+            var intent = new Intent(Intent.ACTION_VIEW, Uri
+                    .parse("https://schoollife.fludilka.su/viewtopic.php?id=828#p63540"));
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+        });
         localStockViewModel.activityObservableField.set(this);
         if (mRecyclerView != null) {
             mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {

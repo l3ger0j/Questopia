@@ -32,7 +32,7 @@ public class ActivitySettings extends ViewModel {
     public String formationAboutDesc(@NonNull SettingsController settingsController ,
                                      @NonNull Context context) {
         return ABOUT_TEMPLATE
-                .replace("QSPFONTSTYLE", getFontStyle(settingsController.typeface))
+                .replace("QSPFONTSTYLE", getFontStyle(settingsController.getTypeface()))
                 .replace("QSPFONTSIZE", Integer.toString(settingsController.fontSize))
                 .replace("QSPTEXTCOLOR", getHexColor(settingsController.textColor))
                 .replace("QSPBACKCOLOR", getHexColor(settingsController.backColor))

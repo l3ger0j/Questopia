@@ -6,7 +6,7 @@ import org.qp.android.view.game.GameInterface;
 
 import java.io.File;
 
-public interface LibQspProxy {
+public interface LibQpProxy {
     /**
      * Запускает поток библиотеки.
      */

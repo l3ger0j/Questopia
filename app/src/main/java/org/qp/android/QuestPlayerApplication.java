@@ -2,8 +2,8 @@ package org.qp.android;
 
 import android.app.Application;
 
-import org.qp.android.model.libQSP.LibQspProxy;
-import org.qp.android.model.libQSP.LibQspProxyImpl;
+import org.qp.android.model.libQSP.LibQpProxy;
+import org.qp.android.model.libQSP.LibQpProxyImpl;
 import org.qp.android.model.service.AudioPlayer;
 import org.qp.android.model.service.GameContentResolver;
 import org.qp.android.model.service.HtmlProcessor;
@@ -14,7 +14,7 @@ public class QuestPlayerApplication extends Application {
     private final ImageProvider imageProvider = new ImageProvider();
     private final HtmlProcessor htmlProcessor = new HtmlProcessor(gameContentResolver, imageProvider);
     private final AudioPlayer audioPlayer = new AudioPlayer();
-    private final LibQspProxyImpl libQspProxy = new LibQspProxyImpl(this, gameContentResolver, imageProvider, htmlProcessor, audioPlayer);
+    private final LibQpProxyImpl libQspProxy = new LibQpProxyImpl(this, gameContentResolver, htmlProcessor, audioPlayer);
 
     public GameContentResolver getGameContentResolver() {
         return gameContentResolver;
@@ -28,7 +28,7 @@ public class QuestPlayerApplication extends Application {
         return audioPlayer;
     }
 
-    public LibQspProxy getLibQspProxy() {
+    public LibQpProxy getLibQspProxy() {
         return libQspProxy;
     }
 }

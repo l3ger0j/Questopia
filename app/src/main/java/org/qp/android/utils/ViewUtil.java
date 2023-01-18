@@ -1,5 +1,6 @@
 package org.qp.android.utils;
 
+import android.graphics.Typeface;
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -16,16 +17,16 @@ public final class ViewUtil {
 
     @NonNull
     @Contract(pure = true)
-    public static String getFontStyle(int typeface) {
-        switch (typeface) {
-            case 2:
-                return "serif";
-            case 3:
-                return "courier";
-            case 0:
-            case 1:
-            default:
-                return "sans-serif";
+    public static String getFontStyle(Typeface typeface) {
+        if (Typeface.SANS_SERIF.equals(typeface)) {
+            return "sans-serif";
+        } else if (Typeface.SERIF.equals(typeface)) {
+            return "serif";
+        } else if (Typeface.MONOSPACE.equals(typeface)) {
+            return "courier";
+        } else if (Typeface.DEFAULT.equals(typeface)) {
+            return "default";
         }
+        return "default";
     }
 }

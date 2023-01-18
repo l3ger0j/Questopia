@@ -33,6 +33,7 @@
             android:background="@color/web_background"
             android:textColor="@color/web_text"
             android:textSize="16sp"
+            app:setWebViewClient="@{gameViewModel.webViewClient}"
             app:layout_constraintBottom_toTopOf="@id/separator"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -49,10 +50,11 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/main_desc" />
 
-        <ListView
+        <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/actions"
             android:layout_width="0dp"
             android:layout_height="0dp"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -67,16 +69,18 @@
             android:textColor="@color/web_text"
             android:textSize="16sp"
             android:visibility="gone"
+            app:setWebViewClient="@{gameViewModel.webViewClient}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/toolbar" />
 
-        <ListView
+        <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/objects"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:visibility="gone"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

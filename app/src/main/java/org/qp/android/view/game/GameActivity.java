@@ -21,9 +21,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebView;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemSelectedListener;
-import android.widget.ListView;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -37,18 +34,20 @@ import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.textfield.TextInputLayout;
 
 import org.jetbrains.annotations.Contract;
 import org.qp.android.R;
 import org.qp.android.databinding.ActivityGameBinding;
-import org.qp.android.model.libQSP.LibQspProxy;
+import org.qp.android.model.libQSP.LibQpProxy;
 import org.qp.android.model.libQSP.QpMenuItem;
 import org.qp.android.model.libQSP.RefreshInterfaceRequest;
 import org.qp.android.model.libQSP.WindowType;
 import org.qp.android.model.service.AudioPlayer;
 import org.qp.android.model.service.HtmlProcessor;
+import org.qp.android.view.adapters.RecyclerItemClickListener;
 import org.qp.android.view.game.dialogs.GameDialogFrags;
 import org.qp.android.view.game.dialogs.GameDialogType;
 import org.qp.android.view.game.dialogs.GamePatternDialogFrags;
@@ -106,11 +105,10 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
     private WebView mainDescView;
     private WebView varsDescView;
     private View separatorView;
-    private ListView actionsView;
-    private ListView objectsView;
+    private RecyclerView actionsView, objectsView;
 
     private HtmlProcessor htmlProcessor;
-    private LibQspProxy libQspProxy;
+    private LibQpProxy libQpProxy;
     private AudioPlayer audioPlayer;
 
     private final Handler counterHandler = new Handler();
@@ -120,7 +118,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
     private final Runnable counterTask = new Runnable() {
         @Override
         public void run() {
-            libQspProxy.executeCounter();
+            libQpProxy.executeCounter();
             counterHandler.postDelayed(this, counterInterval);
         }
     };
@@ -174,7 +172,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
                             case LOAD:
                                 if (data != null) {
                                     uri = data.getData();
-                                    doWithCounterDisabled(() -> libQspProxy.loadGameState(uri));
+                                    doWithCounterDisabled(() -> libQpProxy.loadGameState(uri));
                                 } else {
                                     break;
                                 }
@@ -182,7 +180,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
                             case SAVE:
                                 if (data != null) {
                                     uri = data.getData();
-                                    libQspProxy.saveGameState(uri);
+                                    libQpProxy.saveGameState(uri);
                                 } else {
                                     break;
                                 }
@@ -306,10 +304,6 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
 
     private void initMainDescView() {
         mainDescView = activityGameBinding.mainDesc;
-        var webViewSettings = mainDescView.getSettings();
-        webViewSettings.setAllowFileAccess(true);
-        webViewSettings.setDomStorageEnabled(true);
-        mainDescView.setWebViewClient(activityGame.getWebViewClient());
         if (settingsController.isUseAutoscroll) {
             mainDescView.postDelayed(onScroll, 300);
         }
@@ -317,45 +311,76 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
 
     private void initActionsView() {
         actionsView = activityGameBinding.actions;
-        actionsView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-        actionsView.setOnItemClickListener((parent, view, position, id) -> libQspProxy.onActionClicked(position));
-        actionsView.setOnItemSelectedListener(new OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, final int position, long id) {
-                libQspProxy.onActionSelected(position);
-            }
+        var actions = libQpProxy.getGameState().actions;
+        var recycler = new GameItemRecycler(this);
+        recycler.setTypeface(activityGame.getSettingsController().getTypeface());
+        recycler.setTextSize(activityGame.getFontSize());
+        recycler.setBackgroundColor(activityGame.getBackgroundColor());
+        recycler.setTextColor(activityGame.getTextColor());
+        recycler.setLinkTextColor(activityGame.getLinkColor());
+        recycler.submitList(actions);
+        actionsView.setAdapter(recycler);
+        actionsView.addOnItemTouchListener(new RecyclerItemClickListener(
+                this ,
+                actionsView ,
+                new RecyclerItemClickListener.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(View view , int position) {
+                        libQpProxy.onActionClicked(position);
+                        libQpProxy.onActionSelected(position);
+                    }
 
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-            }
-        });
+                    @Override
+                    public void onLongItemClick(View view , int position) {
+
+                    }
+                }
+        ));
     }
 
     private void initObjectsView() {
         objectsView = activityGameBinding.objects;
-        objectsView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-        objectsView.setOnItemClickListener((parent, view, position, id) -> libQspProxy.onObjectSelected(position));
+        var objects = libQpProxy.getGameState().objects;
+        var recycler = new GameItemRecycler(this);
+        recycler.setTypeface(activityGame.getSettingsController().getTypeface());
+        recycler.setTextSize(activityGame.getFontSize());
+        recycler.setBackgroundColor(activityGame.getBackgroundColor());
+        recycler.setTextColor(activityGame.getTextColor());
+        recycler.setLinkTextColor(activityGame.getLinkColor());
+        recycler.submitList(objects);
+        objectsView.setAdapter(recycler);
+        objectsView.addOnItemTouchListener(new RecyclerItemClickListener(
+                this ,
+                objectsView ,
+                new RecyclerItemClickListener.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(View view , int position) {
+                        libQpProxy.onObjectSelected(position);
+                    }
+
+                    @Override
+                    public void onLongItemClick(View view , int position) {
+
+                    }
+                }
+        ));
     }
 
     private void initVarsDescView() {
         varsDescView = activityGameBinding.varsDesc;
-        var webViewSettings = varsDescView.getSettings();
-        webViewSettings.setAllowFileAccess(true);
-        webViewSettings.setDomStorageEnabled(true);
-        varsDescView.setWebViewClient(activityGame.getWebViewClient());
     }
 
     private void initServices() {
         htmlProcessor = activityGame.getHtmlProcessor();
         audioPlayer = activityGame.startAudio();
-        libQspProxy = activityGame.startLibQsp(this);
+        libQpProxy = activityGame.startLibQsp(this);
     }
 
     private void restartServices() {
         htmlProcessor = activityGame.getHtmlProcessor();
         audioPlayer = activityGame.getAudioPlayer();
-        libQspProxy = activityGame.getLibQspProxy();
-        libQspProxy.setGameInterface(this);
+        libQpProxy = activityGame.getLibQspProxy();
+        libQpProxy.setGameInterface(this);
     }
 
     private void initGame() {
@@ -366,7 +391,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
         var gameDir = new File(gameDirUri);
         var gameFileUri = intent.getStringExtra("gameFileUri");
         var gameFile = new File(gameFileUri);
-        libQspProxy.runGame(gameId, gameTitle, gameDir, gameFile);
+        libQpProxy.runGame(gameId, gameTitle, gameDir, gameFile);
     }
 
     private void setActiveTab(int tab) {
@@ -425,7 +450,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
 
     @Override
     protected void onDestroy() {
-        libQspProxy.setGameInterface(null);
+        libQpProxy.setGameInterface(null);
         counterHandler.removeCallbacks(counterTask);
         super.onDestroy();
         Log.i(TAG,"Game destroyed");
@@ -443,7 +468,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
         super.onResume();
         settingsController = SettingsController.newInstance().loadSettings(this);
         applySettings();
-        if (libQspProxy.getGameState().gameRunning) {
+        if (libQpProxy.getGameState().gameRunning) {
             applyGameState();
             audioPlayer.setSoundEnabled(settingsController.isSoundEnabled);
             audioPlayer.resume();
@@ -487,9 +512,10 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
                 .replace("QSPTEXTCOLOR", getHexColor(activityGame.getTextColor()))
                 .replace("QSPBACKCOLOR", getHexColor(activityGame.getBackgroundColor()))
                 .replace("QSPLINKCOLOR", getHexColor(activityGame.getLinkColor()))
-                .replace("QSPFONTSTYLE", getFontStyle(settingsController.typeface))
+                .replace("QSPFONTSTYLE", getFontStyle(settingsController.getTypeface()))
                 .replace("QSPFONTSIZE", Integer.toString(activityGame.getFontSize()));
         pageTemplate = pageHeadTemplate + PAGE_BODY_TEMPLATE;
+        Log.d(TAG, getHexColor(activityGame.getBackgroundColor()));
     }
 
     private void applyGameState() {
@@ -500,7 +526,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
     }
 
     private void refreshMainDesc() {
-        var mainDesc = getHtml(libQspProxy.getGameState().mainDesc);
+        var mainDesc = getHtml(libQpProxy.getGameState().mainDesc);
 
         if (settingsController.isUseAutoscroll) {
             mainDescView.postDelayed(onScroll, 300);
@@ -515,14 +541,14 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
     }
 
     private String getHtml(String str) {
-        var config = libQspProxy.getGameState().interfaceConfig;
+        var config = libQpProxy.getGameState().interfaceConfig;
         return config.useHtml ?
                 htmlProcessor.convertQspHtmlToWebViewHtml(str) :
                 htmlProcessor.convertQspStringToWebViewHtml(str);
     }
 
     private void refreshVarsDesc() {
-        var varsDesc = getHtml(libQspProxy.getGameState().varsDesc);
+        var varsDesc = getHtml(libQpProxy.getGameState().varsDesc);
         varsDescView.loadDataWithBaseURL(
                 "file:///",
                 pageTemplate.replace("REPLACETEXT", varsDesc),
@@ -532,16 +558,28 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
     }
 
     private void refreshActions() {
-        var actions = libQspProxy.getGameState().actions;
-        actionsView.setAdapter(activityGame
-                .getQspItemAdapter(this, R.layout.list_item_action, actions));
+        var actions = libQpProxy.getGameState().actions;
+        var recycler = new GameItemRecycler(this);
+        recycler.setTypeface(activityGame.getSettingsController().getTypeface());
+        recycler.setTextSize(activityGame.getFontSize());
+        recycler.setBackgroundColor(activityGame.getBackgroundColor());
+        recycler.setTextColor(activityGame.getTextColor());
+        recycler.setLinkTextColor(activityGame.getLinkColor());
+        recycler.submitList(actions);
+        actionsView.setAdapter(recycler);
         refreshActionsVisibility();
     }
 
     private void refreshObjects() {
-        var objects = libQspProxy.getGameState().objects;
-        objectsView.setAdapter(activityGame
-                .getQspItemAdapter(this, R.layout.list_item_object, objects));
+        var objects = libQpProxy.getGameState().objects;
+        var recycler = new GameItemRecycler(this);
+        recycler.setTypeface(activityGame.getSettingsController().getTypeface());
+        recycler.setTextSize(activityGame.getFontSize());
+        recycler.setBackgroundColor(activityGame.getBackgroundColor());
+        recycler.setTextColor(activityGame.getTextColor());
+        recycler.setLinkTextColor(activityGame.getLinkColor());
+        recycler.submitList(objects);
+        objectsView.setAdapter(recycler);
     }
 
     private void promptCloseGame() {
@@ -571,7 +609,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        var gameRunning = libQspProxy.getGameState().gameRunning;
+        var gameRunning = libQpProxy.getGameState().gameRunning;
         menu.setGroupVisible(R.id.menuGroup_running , gameRunning);
         if (gameRunning) {
             var loadItem = menu.findItem(R.id.menu_loadGame);
@@ -591,8 +629,8 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
         subMenu.setHeaderTitle(getString(R.string.selectSlot));
 
         MenuItem item;
-        final var savesDir = getOrCreateDirectory(libQspProxy.getGameState().gameDir, "saves");
-        final var proxy = libQspProxy;
+        final var savesDir = getOrCreateDirectory(libQpProxy.getGameState().gameDir, "saves");
+        final var proxy = libQpProxy;
 
         for (int i = 0; i < MAX_SAVE_SLOTS; ++i) {
             final var filename = getSaveSlotFilename(i);
@@ -656,7 +694,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
                 break;
             case SAVE:
                 mIntent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
-                mIntent.putExtra(Intent.EXTRA_TITLE, libQspProxy.getGameState().gameFile + ".sav");
+                mIntent.putExtra(Intent.EXTRA_TITLE, libQpProxy.getGameState().gameFile + ".sav");
                 mIntent.setType("application/octet-stream");
                 this.slotAction = slotAction;
                 resultLauncher.launch(mIntent);
@@ -684,9 +722,9 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
             return true;
         } else if (i == R.id.menu_userInput) {
             if (settingsController.isUseExecString) {
-                libQspProxy.onUseExecutorString();
+                libQpProxy.onUseExecutorString();
             } else {
-                libQspProxy.onInputAreaClicked();
+                libQpProxy.onInputAreaClicked();
             }
             return true;
         } else if (i == R.id.menu_gameStock) {
@@ -698,7 +736,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
             startActivity(intent);
             return true;
         } else if (i == R.id.menu_newGame) {
-            libQspProxy.restartGame();
+            libQpProxy.restartGame();
             setActiveTab(TAB_MAIN_DESC_AND_ACTIONS);
             return true;
         } else return i == R.id.menu_loadGame || i == R.id.menu_saveGame;
@@ -729,10 +767,10 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
     @Override
     public void showError(final String message) {
         runOnUiThread(() -> {
-            var dialogFragments = new GameDialogFrags();
-            dialogFragments.setDialogType(GameDialogType.ERROR_DIALOG);
-            dialogFragments.setMessage(message);
-            dialogFragments.show(getSupportFragmentManager(), "errorDialogFragment");
+            var dialogFragment = new GameDialogFrags();
+            dialogFragment.setDialogType(GameDialogType.ERROR_DIALOG);
+            dialogFragment.setMessage(message);
+            dialogFragment.show(getSupportFragmentManager(), "errorDialogFragment");
         });
     }
 
@@ -754,7 +792,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
         final var latch = new CountDownLatch(1);
 
         runOnUiThread(() -> {
-            var config = libQspProxy.getGameState().interfaceConfig;
+            var config = libQpProxy.getGameState().interfaceConfig;
             var processedMsg = config.useHtml ? htmlProcessor.removeHTMLTags(message) : message;
             if (processedMsg == null) {
                 processedMsg = "";
@@ -791,7 +829,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
         final ArrayBlockingQueue<String> inputQueue = new ArrayBlockingQueue<>(1);
 
         runOnUiThread(() -> {
-            var config = libQspProxy.getGameState().interfaceConfig;
+            var config = libQpProxy.getGameState().interfaceConfig;
             var message = config.useHtml ? htmlProcessor.removeHTMLTags(prompt) : prompt;
             if (message == null) {
                 message = "";
@@ -825,7 +863,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
         final ArrayBlockingQueue<String> inputQueue = new ArrayBlockingQueue<>(1);
 
         runOnUiThread(() -> {
-            var config = libQspProxy.getGameState().interfaceConfig;
+            var config = libQpProxy.getGameState().interfaceConfig;
             var message = config.useHtml ? htmlProcessor.removeHTMLTags(text) : text;
             if (message == null) {
                 message = "";
@@ -856,10 +894,10 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
         if (isMainThread()) {
             throw new RuntimeException("Must not be called on the main thread");
         }
-        final ArrayBlockingQueue<Integer> resultQueue = new ArrayBlockingQueue<>(1);
-        final ArrayList<String> items = new ArrayList<>();
+        final var resultQueue = new ArrayBlockingQueue<Integer>(1);
+        final var items = new ArrayList<String>();
 
-        for (QpMenuItem item : libQspProxy.getGameState().menuItems) {
+        for (QpMenuItem item : libQpProxy.getGameState().menuItems) {
             items.add(item.name);
         }
 
@@ -910,10 +948,12 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
     }
 
     private void refreshActionsVisibility() {
-        int count = actionsView.getAdapter().getCount();
-        boolean show = showActions && count > 0;
-        separatorView.setVisibility(show ? View.VISIBLE : View.GONE);
-        actionsView.setVisibility(show ? View.VISIBLE : View.GONE);
+        if (actionsView.getAdapter() != null) {
+            int count = actionsView.getAdapter().getItemCount();
+            boolean show = showActions && count > 0;
+            separatorView.setVisibility(show ? View.VISIBLE : View.GONE);
+            actionsView.setVisibility(show ? View.VISIBLE : View.GONE);
+        }
     }
 
     @Override
