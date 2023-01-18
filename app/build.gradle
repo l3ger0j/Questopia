@@ -12,8 +12,8 @@ android {
         applicationId "org.qp.android"
         minSdkVersion 21
         targetSdkVersion 33
-        versionCode 20903
-        versionName "3.9.3"
+        versionCode 201000
+        versionName "3.10.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
