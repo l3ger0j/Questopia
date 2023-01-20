@@ -27,8 +27,10 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
+import androidx.core.os.LocaleListCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.DialogFragment;
@@ -485,6 +487,11 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
         } else {
             separatorView.setBackgroundColor(getResources().getColor(R.color.materialcolorpicker__grey));
         }
+        if (settingsController.language.equals("ru")) {
+            AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("ru"));
+        } else {
+            AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("en"));
+        }
 
         htmlProcessor.setController(settingsController);
 
@@ -841,7 +848,11 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
 
             var dialogFragment = new GameDialogFrags();
             dialogFragment.setDialogType(GameDialogType.INPUT_DIALOG);
-            dialogFragment.setMessage(message);
+            if (message.equals("userInputTitle")) {
+                dialogFragment.setMessage(getString(R.string.userInputTitle));
+            } else {
+                dialogFragment.setMessage(message);
+            }
             dialogFragment.setCancelable(false);
             dialogFragment.show(getSupportFragmentManager(), "inputDialogFragment");
             activityGame.outputTextObserver.observeForever(inputQueue::add);
@@ -875,7 +886,11 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
 
             var dialogFragment = new GameDialogFrags();
             dialogFragment.setDialogType(GameDialogType.EXECUTOR_DIALOG);
-            dialogFragment.setMessage(message);
+            if (message.equals("execStringTitle")) {
+                dialogFragment.setMessage(getString(R.string.execStringTitle));
+            } else {
+                dialogFragment.setMessage(message);
+            }
             dialogFragment.setCancelable(false);
             dialogFragment.show(getSupportFragmentManager(), "executorDialogFragment");
             activityGame.outputTextObserver.observeForever(inputQueue::add);

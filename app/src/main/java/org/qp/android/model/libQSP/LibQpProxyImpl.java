@@ -18,7 +18,6 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
-import org.qp.android.R;
 import org.qp.android.dto.libQSP.ActionData;
 import org.qp.android.dto.libQSP.ErrorData;
 import org.qp.android.dto.libQSP.GetVarValuesResponse;
@@ -372,7 +371,7 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
         final var inter = gameInterface;
         if (inter == null) return;
         runOnQspThread(() -> {
-            var input = inter.showInputDialog(context.getString(R.string.userInputTitle));
+            var input = inter.showInputDialog("userInputTitle");
             nativeMethods.QSPSetInputStrText(input);
             if (!nativeMethods.QSPExecUserInput(true)) {
                 showLastQspError();
@@ -385,7 +384,7 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
         final var inter = gameInterface;
         if (inter == null) return;
         runOnQspThread(() -> {
-            var input = inter.showExecutorDialog(context.getString(R.string.execStringTitle));
+            var input = inter.showExecutorDialog("execStringTitle");
             if (!nativeMethods.QSPExecString(input, true)) {
                 showLastQspError();
             }

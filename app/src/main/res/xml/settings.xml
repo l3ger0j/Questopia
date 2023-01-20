@@ -8,7 +8,6 @@
             android:entries="@array/langName"
             android:entryValues="@array/langValue"
             android:key="lang"
-            android:enabled="false"
             android:summary="@string/langSum"
             android:title="@string/langTitle" />
         <ListPreference

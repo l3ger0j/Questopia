@@ -18,8 +18,10 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.view.ActionMode;
 import androidx.cardview.widget.CardView;
+import androidx.core.os.LocaleListCompat;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.ViewModelProvider;
@@ -259,6 +261,11 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         activityStock.setController(settingsController);
         if (settingsController.binaryPrefixes <= 1000) {
             activityStock.refreshGames();
+        }
+        if (settingsController.language.equals("ru")) {
+            AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("ru"));
+        } else {
+            AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("en"));
         }
     }
 

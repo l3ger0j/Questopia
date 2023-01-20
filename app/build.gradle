@@ -12,8 +12,9 @@ android {
         applicationId "org.qp.android"
         minSdkVersion 21
         targetSdkVersion 33
-        versionCode 201000
-        versionName "3.10.0"
+        versionCode 201001
+        versionName "3.10.1"
+        resConfigs "en", "ru"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
