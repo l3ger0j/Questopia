@@ -59,19 +59,20 @@
 </ul>
 <center><h3>People who participated in the development of the original fork from seedharta</h3></center>
 <ul>
-    <li><b>Разработка:</b></li>
+    <li><b>Coding:</b>
     <ul style="list-style-type:none">
         <li>Nex (~v1.0.201)</li>
         <li>BOOMik (v1.3)</li>
         <li>MrBoboFace (v1.4+)</li>
         <li>seedhartha (v2.1+)</li>
+        <li>l3ger0j (~v2.1+)</li>
     </ul>
-    <li><b>Перевод:</b></li>
+    <li><b>Translations:</b></li>
     <ul style="list-style-type:none">
-        <li>Illume (Китайский упрощенный / Китайский традиционный/Английский~v1.3)</li>
-        <li>Unregistred (Русский)</li>
-    <li><b>Особое спасибо:</b> Kevin Smarts и всему <a href=\"https://tfgamessite.com/\">TFGamesSite сообществу</a></li>
-    <li><i>Изображения Пятого Мира</i> созданы Noah Bradley (Творческие Сообщества; изображения уменьшены и обрезаны)</li>
+        <li>Illume (English~v1.3/Simplified Chinese/Traditional Chinese)</li>
+        <li>Unregistred (Russian)</li>
+    <li><b>Special Thanks:</b> Kevin Smarts and all those in <a href=\"https://tfgamessite.com/\">TFGamesSite Community</a></li>
+    <li><i>The Fifth World</i> painting by Noah Bradley (Creative Commons License; image scaled and cropped)</li>
 </ul>
 ]]>
     </string>
