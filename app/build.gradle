@@ -12,8 +12,8 @@ android {
         applicationId "org.qp.android"
         minSdkVersion 21
         targetSdkVersion 33
-        versionCode 201001
-        versionName "3.10.1"
+        versionCode 201002
+        versionName "3.10.2"
         resConfigs "en", "ru"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -64,6 +64,7 @@ dependencies {
     implementation 'androidx.work:work-runtime:2.7.1'
     implementation 'com.github.omicronapps:7-Zip-JBinding-4Android:Release-16.02-2.02'
     implementation 'com.jaredrummler:colorpicker:1.1.0'
+    implementation 'com.github.zhpanvip:bannerviewpager:3.5.8'
     implementation 'org.jsoup:jsoup:1.15.3'
     implementation 'org.simpleframework:simple-xml:2.7.1'
     implementation 'com.google.android.material:material:1.7.0'

@@ -28,6 +28,9 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.zhpan.bannerview.BannerViewPager;
+import com.zhpan.bannerview.BaseBannerAdapter;
+import com.zhpan.bannerview.BaseViewHolder;
 
 import org.qp.android.R;
 import org.qp.android.databinding.ActivityStockBinding;
@@ -37,8 +40,8 @@ import org.qp.android.view.settings.SettingsController;
 import org.qp.android.view.stock.dialogs.StockDialogFrags;
 import org.qp.android.view.stock.dialogs.StockDialogType;
 import org.qp.android.view.stock.dialogs.StockPatternDialogFrags;
-import org.qp.android.viewModel.viewModels.ActivityStock;
-import org.qp.android.viewModel.viewModels.FragmentStock;
+import org.qp.android.viewModel.ActivityStock;
+import org.qp.android.viewModel.FragmentStock;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -58,7 +61,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
     private ActionMode actionMode;
     protected ActivityStockBinding activityStockBinding;
     public ActivityResultLauncher<Intent>
-            resultInstallLauncher, resultInstallDir, resultGetImageLauncher, resultSetPath;
+            resultInstallLauncher, resultInstallDir, resultGetImageLauncher, resultSetPath, resultSetMod;
 
     private boolean isEnable = false;
 
@@ -119,17 +122,37 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         mFAB = activityStockBinding.stockFAB;
         localStockViewModel =
                 new ViewModelProvider(this).get(FragmentStock.class);
-        activityStockBinding.imageBanner0.setOnClickListener(v -> {
-            var intent = new Intent(Intent.ACTION_VIEW, Uri
-                    .parse("https://t.me/joinchat/AAAAAFgqAMXq0SA34umFbQ"));
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);
-        });
-        activityStockBinding.imageBanner1.setOnClickListener(v -> {
-            var intent = new Intent(Intent.ACTION_VIEW, Uri
-                    .parse("https://schoollife.fludilka.su/viewtopic.php?id=828#p63540"));
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);
+        ArrayList<Integer> list = new ArrayList<>();
+        list.add(R.drawable.banner_1);
+        list.add(R.drawable.banner_0);
+        BannerViewPager<Integer> bannerViewPager;
+        bannerViewPager = activityStockBinding.bannerView;
+        bannerViewPager.registerLifecycleObserver(getLifecycle()).setAdapter(new BaseBannerAdapter<>() {
+            @Override
+            protected void bindData(BaseViewHolder<Integer> holder , Integer data , int position , int pageSize) {
+                holder.setImageResource(R.id.banner_image , data);
+            }
+
+            @Override
+            public int getLayoutId(int viewType) {
+                return R.layout.list_item_banner;
+            }
+        }).create(list);
+        bannerViewPager.setOnPageClickListener((clickedView , position) -> {
+            switch (position) {
+                case 0:
+                    var intentImg0 = new Intent(Intent.ACTION_VIEW, Uri
+                            .parse("https://t.me/joinchat/AAAAAFgqAMXq0SA34umFbQ"));
+                    intentImg0.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intentImg0);
+                    break;
+                case 1:
+                    var intentImg1 = new Intent(Intent.ACTION_VIEW, Uri
+                            .parse("https://schoollife.fludilka.su/viewtopic.php?id=828#p63540"));
+                    intentImg1.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intentImg1);
+                    break;
+            }
         });
         localStockViewModel.activityObservableField.set(this);
         if (mRecyclerView != null) {
@@ -178,6 +201,22 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
                         file = DocumentFile.fromSingleUri(this, Objects.requireNonNull(uri));
                         assert file != null;
                         activityStock.setTempPathFile(file);
+                    }
+                }
+        );
+
+        resultSetMod = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    Uri uri;
+                    DocumentFile file;
+                    if (result.getResultCode() == RESULT_OK) {
+                        if ((uri = Objects.requireNonNull(result.getData()).getData()) == null) {
+                            showErrorDialog("Archive or file is not selected");
+                        }
+                        file = DocumentFile.fromSingleUri(this, Objects.requireNonNull(uri));
+                        assert file != null;
+                        activityStock.setTempModFile(file);
                     }
                 }
         );

@@ -23,7 +23,7 @@ import org.qp.android.dto.plugin.PluginInfo;
 import org.qp.android.utils.ViewUtil;
 import org.qp.android.view.adapters.RecyclerItemClickListener;
 import org.qp.android.view.settings.SettingsActivity;
-import org.qp.android.viewModel.viewModels.FragmentPlugin;
+import org.qp.android.viewModel.FragmentPlugin;
 
 import java.util.ArrayList;
 import java.util.HashMap;

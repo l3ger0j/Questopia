@@ -1,4 +1,4 @@
-package org.qp.android.viewModel.viewModels;
+package org.qp.android.viewModel;
 
 import androidx.databinding.ObservableField;
 import androidx.lifecycle.ViewModel;

@@ -1,4 +1,4 @@
-package org.qp.android.viewModel.viewModels;
+package org.qp.android.viewModel;
 
 import static org.qp.android.utils.ColorUtil.getHexColor;
 import static org.qp.android.utils.ViewUtil.getFontStyle;

@@ -16,6 +16,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.text.DecimalFormat;
 import java.util.Objects;
 
 public final class FileUtil {
@@ -142,6 +143,23 @@ public final class FileUtil {
             Log.e(TAG,"Error reading file: " + path, ex);
             return null;
         }
+    }
+
+    @NonNull
+    public static String formatFileSize(long size, int numCountInfo) {
+        if (size <= 0) {
+            return "0";
+        }
+        String[] units = new String[0];
+        if (numCountInfo == 1000) {
+            units = new String[]{"B" , "KB" , "MB" , "GB" , "TB"};
+        } else if (numCountInfo == 1024) {
+            units = new String[]{"B" , "KiB" , "MiB" , "GiB" , "TiB"};
+        }
+        int digitGroups = (int) (Math.log10(size) / Math.log10(numCountInfo));
+        return new DecimalFormat("#,##0.#").format(size /
+                Math.pow(numCountInfo , digitGroups))
+                + " " + units[digitGroups];
     }
 
     public static void copyFile(Context context, DocumentFile srcFile, File destDir) {

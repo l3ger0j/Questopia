@@ -15,7 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import org.qp.android.databinding.FragmentStockBinding;
 import org.qp.android.dto.stock.GameData;
 import org.qp.android.view.adapters.RecyclerItemClickListener;
-import org.qp.android.viewModel.viewModels.FragmentStock;
+import org.qp.android.viewModel.FragmentStock;
 
 import java.util.ArrayList;
 import java.util.Objects;

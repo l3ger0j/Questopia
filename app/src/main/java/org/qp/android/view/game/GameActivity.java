@@ -55,7 +55,7 @@ import org.qp.android.view.game.dialogs.GameDialogType;
 import org.qp.android.view.game.dialogs.GamePatternDialogFrags;
 import org.qp.android.view.settings.SettingsActivity;
 import org.qp.android.view.settings.SettingsController;
-import org.qp.android.viewModel.viewModels.ActivityGame;
+import org.qp.android.viewModel.ActivityGame;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -522,7 +522,6 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
                 .replace("QSPFONTSTYLE", getFontStyle(settingsController.getTypeface()))
                 .replace("QSPFONTSIZE", Integer.toString(activityGame.getFontSize()));
         pageTemplate = pageHeadTemplate + PAGE_BODY_TEMPLATE;
-        Log.d(TAG, getHexColor(activityGame.getBackgroundColor()));
     }
 
     private void applyGameState() {
