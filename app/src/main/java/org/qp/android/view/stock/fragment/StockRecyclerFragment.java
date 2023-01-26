@@ -1,4 +1,4 @@
-package org.qp.android.view.stock;
+package org.qp.android.view.stock.fragment;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -12,15 +12,16 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
-import org.qp.android.databinding.FragmentStockBinding;
+import org.qp.android.databinding.FragmentStockRecyclerBinding;
 import org.qp.android.dto.stock.GameData;
 import org.qp.android.view.adapters.RecyclerItemClickListener;
+import org.qp.android.view.stock.StockGamesRecycler;
 import org.qp.android.viewModel.FragmentStock;
 
 import java.util.ArrayList;
 import java.util.Objects;
 
-public class StockFragment extends Fragment {
+public class StockRecyclerFragment extends Fragment {
     private FragmentStock localViewModel;
     private RecyclerView mRecyclerView;
 
@@ -29,8 +30,8 @@ public class StockFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater ,
                              @Nullable ViewGroup container ,
                              @Nullable Bundle savedInstanceState) {
-        org.qp.android.databinding.FragmentStockBinding fragmentStockBinding =
-                FragmentStockBinding.inflate(getLayoutInflater());
+        org.qp.android.databinding.FragmentStockRecyclerBinding fragmentStockBinding =
+                FragmentStockRecyclerBinding.inflate(getLayoutInflater());
         mRecyclerView = fragmentStockBinding.gamesLocal;
         localViewModel = new ViewModelProvider(requireActivity())
                 .get(FragmentStock.class);

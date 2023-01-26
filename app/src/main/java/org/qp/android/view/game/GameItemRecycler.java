@@ -2,7 +2,6 @@ package org.qp.android.view.game;
 
 import android.content.Context;
 import android.graphics.Typeface;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
@@ -105,7 +104,6 @@ public class GameItemRecycler extends RecyclerView.Adapter<GameItemRecycler.View
         QpListItem qpListItem = getItem(position);
 
         if (qpListItem.pathToImage != null) {
-            Log.d(getClass().getSimpleName(), qpListItem.pathToImage);
             Picasso.get()
                     .load(new File(qpListItem.pathToImage))
                     .error(R.drawable.broken_image)

@@ -47,8 +47,8 @@ import org.qp.android.utils.ArchiveUtil;
 import org.qp.android.view.game.GameActivity;
 import org.qp.android.view.settings.SettingsController;
 import org.qp.android.view.stock.StockActivity;
-import org.qp.android.view.stock.dialogs.StockDialogFrags;
-import org.qp.android.view.stock.dialogs.StockDialogType;
+import org.qp.android.view.stock.fragment.dialogs.StockDialogFrags;
+import org.qp.android.view.stock.fragment.dialogs.StockDialogType;
 import org.qp.android.viewModel.repository.LocalGame;
 
 import java.io.File;

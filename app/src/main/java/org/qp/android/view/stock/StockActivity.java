@@ -37,11 +37,15 @@ import org.qp.android.databinding.ActivityStockBinding;
 import org.qp.android.dto.stock.GameData;
 import org.qp.android.view.settings.SettingsActivity;
 import org.qp.android.view.settings.SettingsController;
-import org.qp.android.view.stock.dialogs.StockDialogFrags;
-import org.qp.android.view.stock.dialogs.StockDialogType;
-import org.qp.android.view.stock.dialogs.StockPatternDialogFrags;
+import org.qp.android.view.stock.fragment.dialogs.StockDialogFrags;
+import org.qp.android.view.stock.fragment.dialogs.StockDialogType;
+import org.qp.android.view.stock.fragment.dialogs.StockPatternDialogFrags;
+import org.qp.android.view.stock.fragment.StockGameFragment;
+import org.qp.android.view.stock.fragment.StockPatternFragment;
+import org.qp.android.view.stock.fragment.StockRecyclerFragment;
 import org.qp.android.viewModel.ActivityStock;
 import org.qp.android.viewModel.FragmentStock;
+import org.qp.android.viewModel.FragmentStockGame;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -49,7 +53,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Objects;
 
-public class StockActivity extends AppCompatActivity implements StockPatternDialogFrags.StockPatternDialogList {
+public class StockActivity extends AppCompatActivity implements StockPatternDialogFrags.StockPatternDialogList, StockPatternFragment.StockPatternFragmentList {
     private final String TAG = this.getClass().getSimpleName();
 
     private HashMap<String, GameData> gamesMap = new HashMap<>();
@@ -182,10 +186,10 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         gamesMap = activityStock.getGamesMap();
 
         if (savedInstanceState == null) {
-            var stockFragment = new StockFragment();
+            var stockFragment = new StockRecyclerFragment();
             getSupportFragmentManager().beginTransaction()
                     .add(activityStockBinding.stockFragContainer.getId(),
-                            stockFragment, "stockFragment")
+                            stockFragment, "stockRecyclerFragment")
                     .commit();
         }
 
@@ -295,6 +299,36 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         }
     }
 
+    @Override
+    public boolean onSupportNavigateUp() {
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+        }
+        var stockFragment = new StockRecyclerFragment();
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.stockFragContainer, stockFragment, "stockRecyclerFragment")
+                .commit();
+        return true;
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+        }
+        var manager = getSupportFragmentManager();
+        var stockFragment = new StockRecyclerFragment();
+        if (manager.findFragmentByTag("stockRecyclerFragment") != null) {
+            super.onBackPressed();
+        } else {
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.stockFragContainer , stockFragment , "stockRecyclerFragment")
+                    .commit();
+        }
+    }
+
     private void loadSettings() {
         settingsController = SettingsController.newInstance().loadSettings(this);
         activityStock.setController(settingsController);
@@ -348,7 +382,17 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
                 cardView.setCardBackgroundColor(Color.DKGRAY);
             }
         } else {
-            showGameInfo(getGameIdByPosition(position));
+            if (!getSupportFragmentManager().getFragments().isEmpty()) {
+                StockGameFragment fragment = new StockGameFragment();
+                FragmentStockGame fragmentStockGame = new ViewModelProvider(this).get(FragmentStockGame.class);
+                fragmentStockGame.setGameData(activityStock.getGamesMap()
+                        .get(getGameIdByPosition(position)));
+                getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.stockFragContainer, fragment, "StockGameFragment")
+                        .commit();
+            }
+            // showGameInfo(getGameIdByPosition(position));
         }
     }
 
@@ -371,6 +415,15 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         }
     }
 
+    @Override
+    public void onClickEditButton() {
+        activityStock.showDialogEdit();
+    }
+
+    @Override
+    public void onClickPlayButton() {
+        activityStock.playGame();
+    }
 
     @Override
     public void onDialogListClick(DialogFragment dialog, int which) {
@@ -451,6 +504,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         }
     }
 
+    @Deprecated
     private void showGameInfo(String gameId) {
         var gameData = activityStock.getGamesMap().get(gameId);
         if (gameData == null) {
@@ -504,7 +558,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Log.i(TAG , "StockFragment destroyed");
+        Log.i(TAG , "Stock Activity destroyed");
     }
 
     @Override
@@ -563,9 +617,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
                 filteredList.add(item);
             }
         }
-        if (filteredList.isEmpty()) {
-            showErrorDialog("No Data Found");
-        } else {
+        if (!filteredList.isEmpty()) {
             localStockViewModel.setGameDataArrayList(filteredList);
         }
     }

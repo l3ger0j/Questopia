@@ -8,12 +8,12 @@ import java.io.File;
 
 public interface LibQpProxy {
     /**
-     * Запускает поток библиотеки.
+     * Starts the library thread.
      */
     void start();
 
     /**
-     * Останавливает поток библиотеки.
+     * Stops the library thread.
      */
     void stop();
 
@@ -34,12 +34,12 @@ public interface LibQpProxy {
     void onUseExecutorString();
 
     /**
-     * Запускает выполнение указанной строки кода в библиотеке.
+     * Starts execution of the specified line of code in the library.
      */
     void execute(String code);
 
     /**
-     * Запускает обработку локации-счётчика в библиотеке.
+     * Starts processing the location counter in the library.
      */
     void executeCounter();
 

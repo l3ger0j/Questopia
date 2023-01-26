@@ -1,4 +1,4 @@
-package org.qp.android.view.stock.dialogs;
+package org.qp.android.view.stock.fragment.dialogs;
 
 public enum StockDialogType {
     EDIT_DIALOG,
