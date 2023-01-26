@@ -74,7 +74,6 @@ public class StockGamesRecycler extends RecyclerView.Adapter<StockGamesRecycler.
     public void onBindViewHolder(@NonNull StockGamesRecycler.ViewHolder holder, int position) {
         holder.listItemGameBinding(differ.getCurrentList().get(position));
         GameData gameData = getItem(position);
-        // gameIcon
         if (gameData.icon.isEmpty()) {
             Drawable drawable = ResourcesCompat.getDrawable(
                     context.getResources(),
@@ -87,7 +86,6 @@ public class StockGamesRecycler extends RecyclerView.Adapter<StockGamesRecycler.
                     .fit()
                     .into(holder.listItemGameBinding.gameIcon);
         }
-        // gameSize
         if (gameData.fileSize != null) {
             holder.listItemGameBinding.gameSize
                     .setText(context.getString(R.string.fileSize)

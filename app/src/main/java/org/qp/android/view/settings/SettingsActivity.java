@@ -13,7 +13,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import org.qp.android.R;
 import org.qp.android.view.settings.dialogs.SettingsPatternPrefFrag;
-import org.qp.android.viewModel.viewModels.ActivitySettings;
+import org.qp.android.viewModel.ActivitySettings;
 
 import java.util.Objects;
 

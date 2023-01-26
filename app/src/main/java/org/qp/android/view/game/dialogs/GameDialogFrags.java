@@ -73,6 +73,7 @@ public class GameDialogFrags extends GamePatternDialogFrags {
         }
         switch (dialogType) {
             case EXECUTOR_DIALOG:
+            case INPUT_DIALOG:
                 final var executorView =
                         getLayoutInflater().inflate(R.layout.dialog_input, null);
                 TextInputLayout textInputLayout =
@@ -98,15 +99,6 @@ public class GameDialogFrags extends GamePatternDialogFrags {
                 imageBinding = DialogImageBinding.inflate(getLayoutInflater());
                 imageBinding.setDialogFragment(this);
                 builder.setView(imageBinding.getRoot());
-                return builder.create();
-            case INPUT_DIALOG:
-                final var inputView =
-                        getLayoutInflater().inflate(R.layout.dialog_input, null);
-                TextInputLayout layout = inputView.findViewById(R.id.inputBox_edit);
-                layout.setHelperText(message);
-                builder.setView(inputView);
-                builder.setPositiveButton(android.R.string.ok, (dialog, which) ->
-                        listener.onDialogPositiveClick(this));
                 return builder.create();
             case LOAD_DIALOG:
                 builder.setMessage(requireContext().getString(R.string.loadGamePopup));

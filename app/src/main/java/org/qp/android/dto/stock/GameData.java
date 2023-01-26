@@ -67,7 +67,7 @@ public class GameData {
     }
 
     public String getFileSize() {
-        return (fileSize != null) ? fileSize : "0";
+        return (fileSize != null) ? fileSize : "";
     }
 
     public boolean isInstalled() {

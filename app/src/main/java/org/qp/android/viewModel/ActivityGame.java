@@ -1,4 +1,4 @@
-package org.qp.android.viewModel.viewModels;
+package org.qp.android.viewModel;
 
 import static org.qp.android.utils.Base64Util.decodeBase64;
 import static org.qp.android.utils.Base64Util.hasBase64;

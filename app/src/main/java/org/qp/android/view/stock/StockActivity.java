@@ -28,17 +28,24 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.zhpan.bannerview.BannerViewPager;
+import com.zhpan.bannerview.BaseBannerAdapter;
+import com.zhpan.bannerview.BaseViewHolder;
 
 import org.qp.android.R;
 import org.qp.android.databinding.ActivityStockBinding;
 import org.qp.android.dto.stock.GameData;
 import org.qp.android.view.settings.SettingsActivity;
 import org.qp.android.view.settings.SettingsController;
-import org.qp.android.view.stock.dialogs.StockDialogFrags;
-import org.qp.android.view.stock.dialogs.StockDialogType;
-import org.qp.android.view.stock.dialogs.StockPatternDialogFrags;
-import org.qp.android.viewModel.viewModels.ActivityStock;
-import org.qp.android.viewModel.viewModels.FragmentStock;
+import org.qp.android.view.stock.fragment.dialogs.StockDialogFrags;
+import org.qp.android.view.stock.fragment.dialogs.StockDialogType;
+import org.qp.android.view.stock.fragment.dialogs.StockPatternDialogFrags;
+import org.qp.android.view.stock.fragment.StockGameFragment;
+import org.qp.android.view.stock.fragment.StockPatternFragment;
+import org.qp.android.view.stock.fragment.StockRecyclerFragment;
+import org.qp.android.viewModel.ActivityStock;
+import org.qp.android.viewModel.FragmentStock;
+import org.qp.android.viewModel.FragmentStockGame;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -46,7 +53,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Objects;
 
-public class StockActivity extends AppCompatActivity implements StockPatternDialogFrags.StockPatternDialogList {
+public class StockActivity extends AppCompatActivity implements StockPatternDialogFrags.StockPatternDialogList, StockPatternFragment.StockPatternFragmentList {
     private final String TAG = this.getClass().getSimpleName();
 
     private HashMap<String, GameData> gamesMap = new HashMap<>();
@@ -58,7 +65,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
     private ActionMode actionMode;
     protected ActivityStockBinding activityStockBinding;
     public ActivityResultLauncher<Intent>
-            resultInstallLauncher, resultInstallDir, resultGetImageLauncher, resultSetPath;
+            resultInstallLauncher, resultInstallDir, resultGetImageLauncher, resultSetPath, resultSetMod;
 
     private boolean isEnable = false;
 
@@ -119,17 +126,37 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         mFAB = activityStockBinding.stockFAB;
         localStockViewModel =
                 new ViewModelProvider(this).get(FragmentStock.class);
-        activityStockBinding.imageBanner0.setOnClickListener(v -> {
-            var intent = new Intent(Intent.ACTION_VIEW, Uri
-                    .parse("https://t.me/joinchat/AAAAAFgqAMXq0SA34umFbQ"));
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);
-        });
-        activityStockBinding.imageBanner1.setOnClickListener(v -> {
-            var intent = new Intent(Intent.ACTION_VIEW, Uri
-                    .parse("https://schoollife.fludilka.su/viewtopic.php?id=828#p63540"));
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);
+        ArrayList<Integer> list = new ArrayList<>();
+        list.add(R.drawable.banner_1);
+        list.add(R.drawable.banner_0);
+        BannerViewPager<Integer> bannerViewPager;
+        bannerViewPager = activityStockBinding.bannerView;
+        bannerViewPager.registerLifecycleObserver(getLifecycle()).setAdapter(new BaseBannerAdapter<>() {
+            @Override
+            protected void bindData(BaseViewHolder<Integer> holder , Integer data , int position , int pageSize) {
+                holder.setImageResource(R.id.banner_image , data);
+            }
+
+            @Override
+            public int getLayoutId(int viewType) {
+                return R.layout.list_item_banner;
+            }
+        }).create(list);
+        bannerViewPager.setOnPageClickListener((clickedView , position) -> {
+            switch (position) {
+                case 0:
+                    var intentImg0 = new Intent(Intent.ACTION_VIEW, Uri
+                            .parse("https://t.me/joinchat/AAAAAFgqAMXq0SA34umFbQ"));
+                    intentImg0.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intentImg0);
+                    break;
+                case 1:
+                    var intentImg1 = new Intent(Intent.ACTION_VIEW, Uri
+                            .parse("https://schoollife.fludilka.su/viewtopic.php?id=828#p63540"));
+                    intentImg1.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intentImg1);
+                    break;
+            }
         });
         localStockViewModel.activityObservableField.set(this);
         if (mRecyclerView != null) {
@@ -159,10 +186,10 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         gamesMap = activityStock.getGamesMap();
 
         if (savedInstanceState == null) {
-            var stockFragment = new StockFragment();
+            var stockFragment = new StockRecyclerFragment();
             getSupportFragmentManager().beginTransaction()
                     .add(activityStockBinding.stockFragContainer.getId(),
-                            stockFragment, "stockFragment")
+                            stockFragment, "stockRecyclerFragment")
                     .commit();
         }
 
@@ -178,6 +205,22 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
                         file = DocumentFile.fromSingleUri(this, Objects.requireNonNull(uri));
                         assert file != null;
                         activityStock.setTempPathFile(file);
+                    }
+                }
+        );
+
+        resultSetMod = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    Uri uri;
+                    DocumentFile file;
+                    if (result.getResultCode() == RESULT_OK) {
+                        if ((uri = Objects.requireNonNull(result.getData()).getData()) == null) {
+                            showErrorDialog("Archive or file is not selected");
+                        }
+                        file = DocumentFile.fromSingleUri(this, Objects.requireNonNull(uri));
+                        assert file != null;
+                        activityStock.setTempModFile(file);
                     }
                 }
         );
@@ -256,6 +299,36 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         }
     }
 
+    @Override
+    public boolean onSupportNavigateUp() {
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+        }
+        var stockFragment = new StockRecyclerFragment();
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.stockFragContainer, stockFragment, "stockRecyclerFragment")
+                .commit();
+        return true;
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+        }
+        var manager = getSupportFragmentManager();
+        var stockFragment = new StockRecyclerFragment();
+        if (manager.findFragmentByTag("stockRecyclerFragment") != null) {
+            super.onBackPressed();
+        } else {
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.stockFragContainer , stockFragment , "stockRecyclerFragment")
+                    .commit();
+        }
+    }
+
     private void loadSettings() {
         settingsController = SettingsController.newInstance().loadSettings(this);
         activityStock.setController(settingsController);
@@ -309,7 +382,17 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
                 cardView.setCardBackgroundColor(Color.DKGRAY);
             }
         } else {
-            showGameInfo(getGameIdByPosition(position));
+            if (!getSupportFragmentManager().getFragments().isEmpty()) {
+                StockGameFragment fragment = new StockGameFragment();
+                FragmentStockGame fragmentStockGame = new ViewModelProvider(this).get(FragmentStockGame.class);
+                fragmentStockGame.setGameData(activityStock.getGamesMap()
+                        .get(getGameIdByPosition(position)));
+                getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.stockFragContainer, fragment, "StockGameFragment")
+                        .commit();
+            }
+            // showGameInfo(getGameIdByPosition(position));
         }
     }
 
@@ -332,6 +415,15 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         }
     }
 
+    @Override
+    public void onClickEditButton() {
+        activityStock.showDialogEdit();
+    }
+
+    @Override
+    public void onClickPlayButton() {
+        activityStock.playGame();
+    }
 
     @Override
     public void onDialogListClick(DialogFragment dialog, int which) {
@@ -412,6 +504,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         }
     }
 
+    @Deprecated
     private void showGameInfo(String gameId) {
         var gameData = activityStock.getGamesMap().get(gameId);
         if (gameData == null) {
@@ -465,7 +558,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Log.i(TAG , "StockFragment destroyed");
+        Log.i(TAG , "Stock Activity destroyed");
     }
 
     @Override
@@ -524,9 +617,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
                 filteredList.add(item);
             }
         }
-        if (filteredList.isEmpty()) {
-            showErrorDialog("No Data Found");
-        } else {
+        if (!filteredList.isEmpty()) {
             localStockViewModel.setGameDataArrayList(filteredList);
         }
     }

@@ -15,6 +15,7 @@
         <string name="selectTemplateFile">Select File</string>
     <!-- Dialog Edit -->
         <string name="selectPathFile">Select the patch file in the format .qsp</string>
+        <string name="selectModFile">Select the mod file in the format .qsp</string>
         <string name="editButton">Edit</string>
     <!-- Dialog Error -->
         <string name="error">Error</string>

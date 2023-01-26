@@ -7,38 +7,22 @@
         <import type="android.view.View"/>
         <variable
             name="stockVM"
-            type="org.qp.android.viewModel.viewModels.ActivityStock" />
+            type="org.qp.android.viewModel.ActivityStock" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <LinearLayout
-            android:id="@+id/linearLayout3"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
+        <com.zhpan.bannerview.BannerViewPager
+            android:id="@+id/banner_view"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:background="#000000"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent">
-
-            <ImageView
-                android:id="@+id/imageBanner0"
-                android:layout_width="200dp"
-                android:layout_height="100dp"
-                android:adjustViewBounds="true"
-                android:background="#757575"
-                app:srcCompat="@drawable/banner_1" />
-
-            <ImageView
-                android:id="@+id/imageBanner1"
-                android:layout_width="wrap_content"
-                android:layout_height="100dp"
-                android:adjustViewBounds="true"
-                android:background="#757575"
-                app:srcCompat="@drawable/banner_0" />
-        </LinearLayout>
+            app:layout_constraintHorizontal_bias="0.473"
+            app:layout_constraintStart_toStartOf="parent" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/stockFAB"
@@ -48,7 +32,7 @@
             android:layout_marginBottom="32dp"
             android:onClick="@{() -> stockVM.showDialogInstall()}"
             android:visibility="@{stockVM.isShowDialog ? View.GONE : View.VISIBLE}"
-            app:layout_constraintBottom_toTopOf="@+id/linearLayout3"
+            app:layout_constraintBottom_toTopOf="@+id/banner_view"
             app:layout_constraintEnd_toEndOf="parent"
             app:srcCompat="@drawable/add"
             tools:ignore="ContentDescription" />
@@ -57,13 +41,11 @@
             android:id="@+id/stockFragContainer"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            app:layout_constraintBottom_toTopOf="@+id/linearLayout3"
+            app:layout_constraintBottom_toTopOf="@+id/banner_view"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
-        </FrameLayout>
+            app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

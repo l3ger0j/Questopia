@@ -6,7 +6,7 @@
         <import type="android.view.View"/>
         <variable
             name="pluginViewModel"
-            type="org.qp.android.viewModel.viewModels.FragmentPlugin" />
+            type="org.qp.android.viewModel.FragmentPlugin" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
