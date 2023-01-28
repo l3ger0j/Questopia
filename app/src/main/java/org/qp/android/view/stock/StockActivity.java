@@ -37,12 +37,12 @@ import org.qp.android.databinding.ActivityStockBinding;
 import org.qp.android.dto.stock.GameData;
 import org.qp.android.view.settings.SettingsActivity;
 import org.qp.android.view.settings.SettingsController;
-import org.qp.android.view.stock.fragment.dialogs.StockDialogFrags;
-import org.qp.android.view.stock.fragment.dialogs.StockDialogType;
-import org.qp.android.view.stock.fragment.dialogs.StockPatternDialogFrags;
 import org.qp.android.view.stock.fragment.StockGameFragment;
 import org.qp.android.view.stock.fragment.StockPatternFragment;
 import org.qp.android.view.stock.fragment.StockRecyclerFragment;
+import org.qp.android.view.stock.fragment.dialogs.StockDialogFrags;
+import org.qp.android.view.stock.fragment.dialogs.StockDialogType;
+import org.qp.android.view.stock.fragment.dialogs.StockPatternDialogFrags;
 import org.qp.android.viewModel.ActivityStock;
 import org.qp.android.viewModel.FragmentStock;
 import org.qp.android.viewModel.FragmentStockGame;
@@ -129,8 +129,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         ArrayList<Integer> list = new ArrayList<>();
         list.add(R.drawable.banner_1);
         list.add(R.drawable.banner_0);
-        BannerViewPager<Integer> bannerViewPager;
-        bannerViewPager = activityStockBinding.bannerView;
+        BannerViewPager<Integer> bannerViewPager = activityStockBinding.bannerView;
         bannerViewPager.registerLifecycleObserver(getLifecycle()).setAdapter(new BaseBannerAdapter<>() {
             @Override
             protected void bindData(BaseViewHolder<Integer> holder , Integer data , int position , int pageSize) {

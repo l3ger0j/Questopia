@@ -13,8 +13,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import org.qp.android.R;
 import org.qp.android.view.stock.StockActivity;
 
-import java.util.Objects;
-
 public class SquashActivity extends AppCompatActivity {
 
     @Override
@@ -37,11 +35,13 @@ public class SquashActivity extends AppCompatActivity {
     }
 
     private void makeFullScreen() {
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(
                 WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN
         );
-        Objects.requireNonNull(getSupportActionBar()).hide();
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().hide();
+        }
     }
 }

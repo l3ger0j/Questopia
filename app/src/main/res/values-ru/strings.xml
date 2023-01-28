@@ -123,9 +123,15 @@
         <string name="fontSizeTitle">Размер Шрифта</string>
         <string name="useGameFontTitle">Исп. Шрифт Игры</string>
         <string name="useGameFontSum">Использовать настройки шрифта из игры</string>
-        <string name="textColorTitle">Цвет Текста</string>
-        <string name="backColorTitle">Цвет Фона</string>
-        <string name="linkColorTitle">Цвет Ссылок</string>
+        <string name="useGameTextColorTitle">Исп. Цвет Текста из Игры</string>
+        <string name="useGameTextColorSum">Использовать настройки цвета текста из игры</string>
+        <string name="textColorTitle">Свой Цвет Текста</string>
+        <string name="useGameBackgroundColorTitle">Исп. Цвет Фона из Игры</string>
+        <string name="useGameBackgroundColorSum">Использовать настройки цвета фона из игры</string>
+        <string name="backColorTitle">Свой Цвет Фона</string>
+        <string name="useGameLinkColorTitle">Исп. Цвет Ссылок из Игры</string>
+        <string name="useGameLinkColorSum">Использовать настройки цвета ссылки из игры</string>
+        <string name="linkColorTitle">Свой Цвет Ссылок</string>
         <string name="textBackLinkColorSum">Значение по умолчанию -VALUE-</string>
         <string name="extendedName">QuestPlayerAndroid -VERSION-</string>
         <!-- Image section -->

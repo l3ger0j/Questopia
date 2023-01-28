@@ -46,17 +46,32 @@
             android:title="@string/fontSizeTitle" />
         <CheckBoxPreference
             android:defaultValue="false"
-            android:key="gameFont"
+            android:key="useGameFont"
             android:summary="@string/useGameFontSum"
             android:title="@string/useGameFontTitle" />
-        <com.jaredrummler.android.colorpicker.ColorPreferenceCompat
-            android:defaultValue="@color/def_back_color"
-            android:key="backColor"
-            android:title="@string/backColorTitle" />
+        <SwitchPreferenceCompat
+            android:defaultValue="true"
+            android:key="useGameTextColor"
+            android:summary="@string/useGameTextColorSum"
+            android:title="@string/useGameTextColorTitle" />
         <com.jaredrummler.android.colorpicker.ColorPreferenceCompat
             android:defaultValue="@color/def_text_color"
             android:key="textColor"
             android:title="@string/textColorTitle" />
+        <SwitchPreferenceCompat
+            android:defaultValue="true"
+            android:key="useGameBackgroundColor"
+            android:summary="@string/useGameBackgroundColorSum"
+            android:title="@string/useGameBackgroundColorTitle" />
+        <com.jaredrummler.android.colorpicker.ColorPreferenceCompat
+            android:defaultValue="@color/def_back_color"
+            android:key="backColor"
+            android:title="@string/backColorTitle" />
+        <SwitchPreferenceCompat
+            android:defaultValue="true"
+            android:key="useGameLinkColor"
+            android:summary="@string/useGameLinkColorSum"
+            android:title="@string/useGameLinkColorTitle" />
         <com.jaredrummler.android.colorpicker.ColorPreferenceCompat
             android:defaultValue="@color/def_link_color"
             android:key="linkColor"
@@ -64,7 +79,7 @@
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/imageCatTitle">
-        <SwitchPreference
+        <SwitchPreferenceCompat
             android:defaultValue="true"
             android:key="autoWidth"
             android:summary="@string/autoWidthSum"
@@ -75,7 +90,7 @@
             android:selectAllOnFocus="true"
             android:singleLine="true"
             android:title="@string/customWidthTitle" />
-        <SwitchPreference
+        <SwitchPreferenceCompat
             android:defaultValue="true"
             android:key="autoHeight"
             android:summary="@string/autoHeightSum"
@@ -89,22 +104,22 @@
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/switchCatTitle">
-        <SwitchPreference
+        <SwitchPreferenceCompat
             android:defaultValue="true"
             android:key="immersiveMode"
             android:summary="@string/immersiveModeSum"
             android:title="@string/immersiveModeTitle" />
-        <SwitchPreference
+        <SwitchPreferenceCompat
             android:defaultValue="false"
             android:key="separator"
             android:summary="@string/separatorSum"
             android:title="@string/separatorTitle" />
-        <SwitchPreference
+        <SwitchPreferenceCompat
             android:defaultValue="true"
             android:key="autoscroll"
             android:summary="@string/autoscrollSum"
             android:title="@string/autoscrollTitle" />
-        <SwitchPreference
+        <SwitchPreferenceCompat
             android:defaultValue="false"
             android:key="execString"
             android:summary="@string/execStringSum"

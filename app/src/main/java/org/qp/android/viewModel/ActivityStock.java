@@ -214,38 +214,34 @@ public class ActivityStock extends AndroidViewModel {
         intent.putExtra("gameId" , tempGameData.id);
         intent.putExtra("gameTitle" , tempGameData.title);
         intent.putExtra("gameDirUri" , tempGameData.gameDir.getAbsolutePath());
-
         var gameFileCount = tempGameData.gameFiles.size();
-        if (gameFileCount == 0) {
-            Log.w(TAG , "GameData has no gameData files");
-            return;
-        }
-
-        if (gameFileCount == 1) {
-            intent.putExtra("gameFileUri" , tempGameData.gameFiles.get(0).getAbsolutePath());
-            Objects.requireNonNull(activityObservableField.get()).startActivity(intent);
-        } else {
-            if (outputIntObserver.hasObservers()) {
-                outputIntObserver = new MutableLiveData<>();
-            }
-
-            ArrayList<String> names = new ArrayList<>();
-            for (File file : tempGameData.gameFiles) {
-                names.add(file.getName());
-            }
-
-            var dialogFragments = new StockDialogFrags();
-            dialogFragments.setDialogType(StockDialogType.SELECT_DIALOG);
-            dialogFragments.setNames(names);
-            dialogFragments.setCancelable(false);
-            Objects.requireNonNull(activityObservableField.get())
-                    .showSelectDialogFragment(dialogFragments);
-
-            outputIntObserver.observeForever(integer -> {
-                intent.putExtra("gameFileUri" ,
-                        tempGameData.gameFiles.get(integer).getAbsolutePath());
+        switch (gameFileCount) {
+            case 0:
+                Log.w(TAG , "GameData has no game files");
+                break;
+            case 1:
+                intent.putExtra("gameFileUri" , tempGameData.gameFiles.get(0).getAbsolutePath());
                 Objects.requireNonNull(activityObservableField.get()).startActivity(intent);
-            });
+                break;
+            default:
+                if (outputIntObserver.hasObservers()) {
+                    outputIntObserver = new MutableLiveData<>();
+                }
+                var names = new ArrayList<String>();
+                for (var file : tempGameData.gameFiles) {
+                    names.add(file.getName());
+                }
+                var dialogFragments = new StockDialogFrags();
+                dialogFragments.setDialogType(StockDialogType.SELECT_DIALOG);
+                dialogFragments.setNames(names);
+                Objects.requireNonNull(activityObservableField.get())
+                        .showSelectDialogFragment(dialogFragments);
+                outputIntObserver.observeForever(integer -> {
+                    intent.putExtra("gameFileUri" ,
+                            tempGameData.gameFiles.get(integer).getAbsolutePath());
+                    Objects.requireNonNull(activityObservableField.get()).startActivity(intent);
+                });
+                break;
         }
     }
 
