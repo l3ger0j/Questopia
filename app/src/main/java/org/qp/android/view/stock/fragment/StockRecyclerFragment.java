@@ -44,7 +44,7 @@ public class StockRecyclerFragment extends Fragment {
     Observer<ArrayList<GameData>> gameData = new Observer<>() {
         @Override
         public void onChanged(ArrayList<GameData> gameData) {
-            StockGamesRecycler adapter =
+            var adapter =
                     new StockGamesRecycler(requireActivity());
             adapter.submitList(gameData);
             mRecyclerView.setAdapter(adapter);

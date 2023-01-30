@@ -1,4 +1,4 @@
-package org.qp.android.view.game.dialogs;
+package org.qp.android.view.game.fragments.dialogs;
 
 import android.app.Dialog;
 import android.os.Bundle;
@@ -76,8 +76,8 @@ public class GameDialogFrags extends GamePatternDialogFrags {
             case INPUT_DIALOG:
                 final var executorView =
                         getLayoutInflater().inflate(R.layout.dialog_input, null);
-                TextInputLayout textInputLayout =
-                        executorView.findViewById(R.id.inputBox_edit);
+                var textInputLayout =
+                        (TextInputLayout) executorView.findViewById(R.id.inputBox_edit);
                 textInputLayout.setHelperText(message);
                 builder.setView(executorView);
                 builder.setPositiveButton(android.R.string.ok, (dialog, which) ->

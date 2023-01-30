@@ -25,7 +25,7 @@ public class PluginClient {
     };
 
     public void connectPlugin (Context context, String pluginName) {
-        var intent = new Intent("org.qp.plugin."+pluginName);
+        var intent = new Intent(pluginName);
         Log.d (getClass().getSimpleName(), intent.toString());
         var updatedIntent = createExplicitIntent(context, intent);
         if (updatedIntent != null) {

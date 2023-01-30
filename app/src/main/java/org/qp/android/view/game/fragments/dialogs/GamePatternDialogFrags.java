@@ -1,4 +1,4 @@
-package org.qp.android.view.game.dialogs;
+package org.qp.android.view.game.fragments.dialogs;
 
 import android.content.Context;
 

@@ -6,6 +6,7 @@ import static android.content.Intent.EXTRA_MIME_TYPES;
 import static org.qp.android.utils.FileUtil.GAME_INFO_FILENAME;
 import static org.qp.android.utils.FileUtil.copyFile;
 import static org.qp.android.utils.FileUtil.createFile;
+import static org.qp.android.utils.FileUtil.dirSize;
 import static org.qp.android.utils.FileUtil.findFileOrDirectory;
 import static org.qp.android.utils.FileUtil.findFileRecursively;
 import static org.qp.android.utils.FileUtil.formatFileSize;
@@ -175,9 +176,11 @@ public class ActivityStock extends AndroidViewModel {
                     null
                     : Objects.requireNonNull(
                     installBinding.ET2.getEditText()).getText().toString());
-            gameData.fileSize = tempInstallFile != null ?
-                    formatFileSize(tempInstallFile.length() , controller.binaryPrefixes)
-                    : formatFileSize(tempInstallDir.length() , controller.binaryPrefixes);
+            if (tempInstallFile != null) {
+                gameData.fileSize = formatFileSize(tempInstallFile.length() , controller.binaryPrefixes);
+            } else if (tempInstallDir != null) {
+                gameData.fileSize = formatFileSize(dirSize(tempInstallDir) , controller.binaryPrefixes);
+            }
             gameData.icon = (tempImageFile == null ? null : tempImageFile.getUri().toString());
             installGame(tempInstallFile != null ? tempInstallFile : tempInstallDir , gameData);
             isSelectArchive.set(false);
@@ -198,7 +201,6 @@ public class ActivityStock extends AndroidViewModel {
             public void cancel() {
                 isShowDialog.set(false);
             }
-
             @Override
             public void dismiss() {
             }
@@ -247,29 +249,44 @@ public class ActivityStock extends AndroidViewModel {
 
     public void createEditIntent() {
         try {
-            tempGameData.title = (Objects.requireNonNull(
-                    editBinding.ET0.getEditText()).getText().toString().isEmpty() ?
-                    removeExtension(tempGameData.title)
-                    : Objects.requireNonNull(
-                    editBinding.ET0.getEditText()).getText().toString());
-            tempGameData.author = (Objects.requireNonNull(
-                    editBinding.ET1.getEditText()).getText().toString().isEmpty() ?
-                    removeExtension(tempGameData.author)
-                    : Objects.requireNonNull(
-                    editBinding.ET1.getEditText()).getText().toString());
-            tempGameData.version = (Objects.requireNonNull(
-                    editBinding.ET2.getEditText()).getText().toString().isEmpty() ?
-                    removeExtension(tempGameData.version)
-                    : Objects.requireNonNull(
-                    editBinding.ET2.getEditText()).getText().toString());
-            tempGameData.icon = (tempImageFile == null ? tempGameData.icon
-                    : tempImageFile.getUri().toString());
+            var editTextTitle = editBinding.ET0.getEditText();
+            if (editTextTitle != null) {
+                if (editTextTitle.getText().toString().isEmpty()) {
+                    tempGameData.title = removeExtension(tempGameData.title);
+                } else {
+                    tempGameData.title = editTextTitle.getText().toString();
+                }
+            }
+            var editTextAuthor = editBinding.ET1.getEditText();
+            if (editTextAuthor != null) {
+                if (editTextAuthor.getText().toString().isEmpty()) {
+                    tempGameData.author = removeExtension(tempGameData.author);
+                } else {
+                    tempGameData.author = editTextAuthor.getText().toString();
+                }
+            }
+            var editTextVersion = editBinding.ET2.getEditText();
+            if (editTextVersion != null) {
+                if (editTextVersion.toString().isEmpty()) {
+                    tempGameData.version = removeExtension(tempGameData.version);
+                } else {
+                    tempGameData.version = editTextVersion.getText().toString();
+                }
+            }
+            if (tempImageFile != null) {
+                tempGameData.icon = tempImageFile.getUri().toString();
+            }
+            if (tempGameData.fileSize == null || tempGameData.fileSize.isEmpty()) {
+                tempGameData.fileSize = formatFileSize(dirSize(DocumentFile
+                                .fromFile(tempGameData.gameDir)) , controller.binaryPrefixes);
+            }
             writeGameInfo(tempGameData , tempGameData.gameDir);
             if (tempPathFile != null) {
                 copyFile(activityObservableField.get() , tempPathFile , tempGameData.gameDir);
             }
             if (tempModFile != null) {
-                copyFile(activityObservableField.get() , tempModFile , findFileRecursively(tempGameData.gameDir, "mods"));
+                copyFile(activityObservableField.get() , tempModFile ,
+                        findFileRecursively(tempGameData.gameDir, "mods"));
             }
             refreshGamesDirectory();
             isShowDialog.set(false);
@@ -494,7 +511,7 @@ public class ActivityStock extends AndroidViewModel {
 
     public void refreshGames() {
         gamesMap.clear();
-        for (GameData localGameData : localGame.getGames(gamesDir)) {
+        for (var localGameData : localGame.getGames(gamesDir)) {
             var remoteGameData = gamesMap.get(localGameData.id);
             if (remoteGameData != null) {
                 var aggregateGameData = new GameData(remoteGameData);

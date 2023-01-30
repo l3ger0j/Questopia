@@ -5,22 +5,16 @@
         <import type="android.view.View"/>
         <variable
             name="dialogFragment"
-            type="org.qp.android.view.game.dialogs.GameDialogFrags" />
+            type="org.qp.android.view.game.fragments.dialogs.GameDialogFrags" />
     </data>
-
-    <FrameLayout
+    <ImageView
+        android:id="@+id/imageBox"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <ImageView
-            android:id="@+id/imageBox"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:contentDescription="@string/image"
-            android:gravity="center|center_vertical"
-            android:scaleType="fitCenter"
-            android:adjustViewBounds="true"
-            android:onClick="@{() -> dialogFragment.dismiss()}"
-            app:imageUrl="@{dialogFragment.pathToImage}" />
-    </FrameLayout>
+        android:layout_height="match_parent"
+        android:contentDescription="@string/image"
+        android:gravity="center|center_vertical"
+        android:scaleType="fitCenter"
+        android:adjustViewBounds="true"
+        android:onClick="@{() -> dialogFragment.dismiss()}"
+        app:imageUrl="@{dialogFragment.pathToImage}" />
 </layout>

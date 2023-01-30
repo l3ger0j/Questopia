@@ -28,21 +28,19 @@ public class LocalGame {
             Log.e(TAG,"Games directory is not specified");
             return Collections.emptyList();
         }
-
-        ArrayList<File> gameDirs = getGameDirectories(gamesDir);
+        var gameDirs = getGameDirectories(gamesDir);
         if (gameDirs.isEmpty()) {
             return Collections.emptyList();
         }
-
-        ArrayList<GameData> items = new ArrayList<>();
-        for (GameFolder folder : getGameFolders(gameDirs)) {
-            GameData item = null;
-            String info = getGameInfo(folder);
+        var items = new ArrayList<GameData>();
+        for (var folder : getGameFolders(gameDirs)) {
+            var item = (GameData) null;
+            var info = getGameInfo(folder);
             if (info != null) {
                 item = parseGameInfo(info);
             }
             if (item == null) {
-                String name = folder.dir.getName();
+                var name = folder.dir.getName();
                 item = new GameData();
                 item.id = name;
                 item.title = name;
@@ -51,14 +49,13 @@ public class LocalGame {
             item.gameFiles = folder.gameFiles;
             items.add(item);
         }
-
         return items;
     }
 
     @NonNull
-    private ArrayList<File> getGameDirectories(File gamesDir) {
-        ArrayList<File> dirs = new ArrayList<>();
-        for (File f : Objects.requireNonNull(gamesDir.listFiles())) {
+    private ArrayList<File> getGameDirectories(@NonNull File gamesDir) {
+        var dirs = new ArrayList<File>();
+        for (var f : Objects.requireNonNull(gamesDir.listFiles())) {
             if (f.isDirectory()) {
                 dirs.add(f);
             }
@@ -68,31 +65,25 @@ public class LocalGame {
 
     @NonNull
     private List<GameFolder> getGameFolders(List<File> dirs) {
-        ArrayList<GameFolder> folders = new ArrayList<>();
+        var folders = new ArrayList<GameFolder>();
         sortFilesByName(dirs);
-
-        for (File dir : dirs) {
-            ArrayList<File> gameFiles = new ArrayList<>();
-
-            List<File> files = Arrays.asList(Objects.requireNonNull(dir.listFiles()));
+        for (var dir : dirs) {
+            var gameFiles = new ArrayList<File>();
+            var files = Arrays.asList(Objects.requireNonNull(dir.listFiles()));
             sortFilesByName(files);
-
-            for (File file : files) {
-                String lcName = file.getName().toLowerCase();
+            for (var file : files) {
+                var lcName = file.getName().toLowerCase();
                 if (lcName.endsWith(".qsp") || lcName.endsWith(".gam")) {
                     gameFiles.add(file);
                 }
             }
-
             folders.add(new GameFolder(dir, gameFiles));
         }
-
         return folders;
     }
 
-    private void sortFilesByName(List<File> files) {
+    private void sortFilesByName(@NonNull List<File> files) {
         if (files.size() < 2) return;
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             Collections.sort(files, Comparator.comparing(o -> o.getName().toLowerCase()));
         } else {
@@ -102,8 +93,8 @@ public class LocalGame {
     }
 
     @Nullable
-    private String getGameInfo(GameFolder game) {
-        File[] gameInfoFiles = game.dir.listFiles((dir, name) -> name.equalsIgnoreCase(GAME_INFO_FILENAME));
+    private String getGameInfo(@NonNull GameFolder game) {
+        var gameInfoFiles = game.dir.listFiles((dir, name) -> name.equalsIgnoreCase(GAME_INFO_FILENAME));
         if (gameInfoFiles == null || gameInfoFiles.length == 0) {
             Log.w(TAG, "GameData info file not found in " + game.dir.getName());
             return null;

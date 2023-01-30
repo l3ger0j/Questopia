@@ -126,7 +126,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         mFAB = activityStockBinding.stockFAB;
         localStockViewModel =
                 new ViewModelProvider(this).get(FragmentStock.class);
-        ArrayList<Integer> list = new ArrayList<>();
+        var list = new ArrayList<Integer>();
         list.add(R.drawable.banner_1);
         list.add(R.drawable.banner_0);
         BannerViewPager<Integer> bannerViewPager = activityStockBinding.bannerView;
@@ -368,27 +368,26 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
             }
             var mViewHolder =
                     mRecyclerView.findViewHolderForAdapterPosition(position);
-            var gameData = tempList.get(Objects.requireNonNull(mViewHolder)
-                    .getAdapterPosition());
-
+            var gameData =
+                    tempList.get(Objects.requireNonNull(mViewHolder).getAdapterPosition());
             if (selectList.isEmpty() || !selectList.contains(gameData)) {
                 selectList.add(gameData);
-                CardView cardView = mViewHolder.itemView.findViewWithTag("gameCardView");
+                var cardView = (CardView) mViewHolder.itemView.findViewWithTag("gameCardView");
                 cardView.setCardBackgroundColor(Color.LTGRAY);
             } else {
                 selectList.remove(gameData);
-                CardView cardView = mViewHolder.itemView.findViewWithTag("gameCardView");
+                var cardView = (CardView) mViewHolder.itemView.findViewWithTag("gameCardView");
                 cardView.setCardBackgroundColor(Color.DKGRAY);
             }
         } else {
             if (!getSupportFragmentManager().getFragments().isEmpty()) {
-                StockGameFragment fragment = new StockGameFragment();
-                FragmentStockGame fragmentStockGame = new ViewModelProvider(this).get(FragmentStockGame.class);
-                fragmentStockGame.setGameData(activityStock.getGamesMap()
+                new ViewModelProvider(this)
+                        .get(FragmentStockGame.class)
+                        .setGameData(activityStock.getGamesMap()
                         .get(getGameIdByPosition(position)));
                 getSupportFragmentManager()
                         .beginTransaction()
-                        .replace(R.id.stockFragContainer, fragment, "StockGameFragment")
+                        .replace(R.id.stockFragContainer, new StockGameFragment(), "StockGameFragment")
                         .commit();
             }
             // showGameInfo(getGameIdByPosition(position));
@@ -465,17 +464,18 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
                         if(selectList.size() == tempList.size()) {
                             selectList.clear();
                             for (int childCount = mRecyclerView.getChildCount(), i = 0; i < childCount; ++i) {
-                                final RecyclerView.ViewHolder holder =
+                                final var holder =
                                         mRecyclerView.getChildViewHolder(mRecyclerView.getChildAt(i));
-                                CardView cardView = holder.itemView.findViewWithTag("gameCardView");
+                                var cardView = (CardView) holder.itemView.findViewWithTag("gameCardView");
                                 cardView.setCardBackgroundColor(Color.DKGRAY);
                             }
                         } else {
                             selectList.clear();
                             selectList.addAll(tempList);
                             for (int childCount = mRecyclerView.getChildCount(), i = 0; i < childCount; ++i) {
-                                final RecyclerView.ViewHolder holder = mRecyclerView.getChildViewHolder(mRecyclerView.getChildAt(i));
-                                CardView cardView = holder.itemView.findViewWithTag("gameCardView");
+                                final var holder =
+                                        mRecyclerView.getChildViewHolder(mRecyclerView.getChildAt(i));
+                                var cardView = (CardView) holder.itemView.findViewWithTag("gameCardView");
                                 cardView.setCardBackgroundColor(Color.LTGRAY);
                             }
                         }
@@ -486,9 +486,9 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
                 @Override
                 public void onDestroyActionMode(ActionMode mode) {
                     for (int childCount = mRecyclerView.getChildCount(), i = 0; i < childCount; ++i) {
-                        final RecyclerView.ViewHolder holder =
+                        final var holder =
                                 mRecyclerView.getChildViewHolder(mRecyclerView.getChildAt(i));
-                        CardView cardView = holder.itemView.findViewWithTag("gameCardView");
+                        var cardView = (CardView) holder.itemView.findViewWithTag("gameCardView");
                         cardView.setCardBackgroundColor(Color.DKGRAY);
                     }
                     actionMode = null;
@@ -599,7 +599,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
     }
 
     private void showSettings() {
-        Intent intent = new Intent(this, SettingsActivity.class);
+        var intent = new Intent(this, SettingsActivity.class);
         startActivity(intent);
     }
 
@@ -611,7 +611,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
     private void filter(String text){
         var gameData = getSortedGames();
         var filteredList = new ArrayList<GameData>();
-        for (GameData item : gameData) {
+        for (var item : gameData) {
             if (item.title.toLowerCase().contains(text.toLowerCase())) {
                 filteredList.add(item);
             }
