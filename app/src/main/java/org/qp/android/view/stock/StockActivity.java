@@ -27,6 +27,7 @@ import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.anggrayudi.storage.SimpleStorageHelper;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.zhpan.bannerview.BannerViewPager;
 import com.zhpan.bannerview.BaseBannerAdapter;
@@ -55,9 +56,7 @@ import java.util.Objects;
 
 public class StockActivity extends AppCompatActivity implements StockPatternDialogFrags.StockPatternDialogList, StockPatternFragment.StockPatternFragmentList {
     private final String TAG = this.getClass().getSimpleName();
-
     private HashMap<String, GameData> gamesMap = new HashMap<>();
-
     public SettingsController settingsController;
     private ActivityStock activityStock;
     private FragmentStock localStockViewModel;
@@ -66,13 +65,13 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
     protected ActivityStockBinding activityStockBinding;
     public ActivityResultLauncher<Intent>
             resultInstallLauncher, resultInstallDir, resultGetImageLauncher, resultSetPath, resultSetMod;
-
     private boolean isEnable = false;
-
     private FloatingActionButton mFAB;
     private RecyclerView mRecyclerView;
     private ArrayList<GameData> tempList;
     private final ArrayList<GameData> selectList = new ArrayList<>();
+
+    private final SimpleStorageHelper storageHelper = new SimpleStorageHelper(this);
 
     public String getGameIdByPosition(int position) {
         localStockViewModel.getGameData().observe(this, gameDataArrayList -> {
@@ -109,13 +108,11 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
     public void setRecyclerAdapter () {
         var gameData = getSortedGames();
         var localGameData = new ArrayList<GameData>();
-
         for (GameData data : gameData) {
             if (data.isInstalled()) {
                 localGameData.add(data);
             }
         }
-
         localStockViewModel.setGameDataArrayList(localGameData);
     }
 
@@ -224,22 +221,15 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
                 }
         );
 
-        resultInstallLauncher = registerForActivityResult(
-                new ActivityResultContracts.StartActivityForResult(),
-                result -> {
-                    Uri uri;
-                    DocumentFile file;
-                    if (result.getResultCode() == RESULT_OK) {
-                        if ((uri = Objects.requireNonNull(result.getData()).getData()) == null) {
-                            showErrorDialog("Archive or file is not selected");
-                        }
-                        file = DocumentFile.fromSingleUri(this, Objects.requireNonNull(uri));
-                        assert file != null;
-                        activityStock.setTempInstallFile(file);
-                        activityStock.isSelectArchive.set(true);
-                    }
-                }
-        );
+        storageHelper.setOnFileSelected((integer , documentFiles) -> {
+            if (documentFiles != null) {
+                activityStock.setTempInstallFile(documentFiles.get(0));
+                activityStock.isSelectArchive.set(true);
+            } else {
+                showErrorDialog("Archive or file is not selected");
+            }
+            return null;
+        });
 
         resultInstallDir = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
@@ -358,6 +348,10 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
 
     public void showSelectDialogFragment (DialogFragment selectDialog) {
         selectDialog.show(getSupportFragmentManager(), "selectDialogFragment");
+    }
+
+    public void showFilePickerDialog (String[] mimeTypes) {
+        storageHelper.openFilePicker(mimeTypes);
     }
 
     public void onItemClick(int position) {

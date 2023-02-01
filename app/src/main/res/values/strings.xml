@@ -105,8 +105,6 @@
     <!-- Menu delete -->
         <string name="selectAllTitle">Select all</string>
         <string name="deleteGameTitle">Delete game</string>
-    <!-- Menu settings activity -->
-    <string name="bugReport">Bug report</string>
     <!-- Menu settings fragment -->
         <!-- General section -->
         <string name="generalCatTitle">General</string>

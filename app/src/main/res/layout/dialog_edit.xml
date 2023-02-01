@@ -86,15 +86,15 @@
 
                 <TextView
                     android:id="@+id/modTV"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:textStyle="bold"
-                    android:text="@string/selectModFile" />
+                    android:text="@string/selectModFile"
+                    android:textStyle="bold" />
 
                 <Button
                     android:id="@+id/buttonSelectMod"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:onClick="@{stockVM::sendIntent}"
@@ -114,7 +114,7 @@
 
                 <TextView
                     android:id="@+id/fileTV"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="@string/selectPathFile"
@@ -123,7 +123,7 @@
 
                 <Button
                     android:id="@+id/buttonSelectPath"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:onClick="@{stockVM::sendIntent}"
@@ -145,24 +145,24 @@
 
                 <ImageView
                     android:id="@+id/imageView"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:contentDescription="@string/add" />
 
                 <TextView
                     android:id="@+id/imageTV"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="@string/selectIcon"
-                    android:textAlignment="textEnd"
+                    android:textAlignment="center"
                     android:textAllCaps="false"
                     android:textStyle="bold" />
 
                 <Button
                     android:id="@+id/buttonSelectIcon"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:onClick="@{stockVM::sendIntent}"

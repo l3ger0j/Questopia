@@ -104,8 +104,6 @@
     <!-- Menu delete -->
         <string name="selectAllTitle">Выбрать всё</string>
         <string name="deleteGameTitle">Удалить игру</string>
-    <!-- Menu settings activity -->
-    <string name="bugReport">Сообщить об ошибке</string>
     <!-- Menu settings fragment -->
         <!-- General section -->
         <string name="generalCatTitle">Главное</string>

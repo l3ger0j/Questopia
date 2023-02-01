@@ -299,23 +299,11 @@ public class ActivityStock extends AndroidViewModel {
 
     public void sendIntent(@NonNull View view) {
         String action;
-        Intent intentInstall, intentInstallDir, intentGetImage, intentSetPath, intentSetMod;
+        Intent intentInstallDir, intentGetImage, intentSetPath, intentSetMod;
         int id = view.getId();
         if (id == R.id.buttonSelectArchive) {
-            action = ACTION_OPEN_DOCUMENT;
-            intentInstall = new Intent(action);
-            intentInstall.addCategory(Intent.CATEGORY_OPENABLE);
-            intentInstall.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            intentInstall.setType("*/*");
-            String[] mimeTypes = {"application/zip" , "application/rar"};
-            intentInstall.putExtra(EXTRA_MIME_TYPES , mimeTypes);
-            try {
-                Objects.requireNonNull(activityObservableField.get())
-                        .resultInstallLauncher.launch(
-                                Intent.createChooser(intentInstall , "Select an archive"));
-            } catch (ActivityNotFoundException e) {
-                Log.e(TAG , e.toString());
-            }
+            Objects.requireNonNull(activityObservableField.get())
+                    .showFilePickerDialog(new String[] {"application/zip" , "application/rar"});
         } else if (id == R.id.buttonSelectFolder) {
             action = ACTION_OPEN_DOCUMENT_TREE;
             intentInstallDir = new Intent(action);
