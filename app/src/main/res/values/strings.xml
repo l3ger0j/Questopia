@@ -105,8 +105,6 @@
     <!-- Menu delete -->
         <string name="selectAllTitle">Select all</string>
         <string name="deleteGameTitle">Delete game</string>
-    <!-- Menu settings activity -->
-    <string name="bugReport">Bug report</string>
     <!-- Menu settings fragment -->
         <!-- General section -->
         <string name="generalCatTitle">General</string>
@@ -123,10 +121,16 @@
         <string name="fontStyleTitle">Font Style</string>
         <string name="fontSizeTitle">Font Size</string>
         <string name="useGameFontTitle">Use Game Font</string>
-        <string name="useGameFontSum">Use font settings from the game</string>
-        <string name="textColorTitle">Text Color</string>
-        <string name="backColorTitle">Background Color</string>
-        <string name="linkColorTitle">Link Color</string>
+        <string name="useGameFontSum">Use the font settings from the game</string>
+        <string name="useGameTextColorTitle">Use Game Text Color</string>
+        <string name="useGameTextColorSum">Use the text color settings from the game</string>
+        <string name="textColorTitle">Custom Text Color</string>
+        <string name="useGameBackgroundColorTitle">Use Game Background Color</string>
+        <string name="useGameBackgroundColorSum">Use the background color settings from the game</string>
+        <string name="backColorTitle">Custom Background Color</string>
+        <string name="useGameLinkColorTitle">Use Game Link Color</string>
+        <string name="useGameLinkColorSum">Use the link color settings from the game</string>
+        <string name="linkColorTitle">Custom Link Color</string>
         <string name="textBackLinkColorSum">Default value -VALUE-</string>
         <string name="extendedName">QuestPlayerAndroid -VERSION-</string>
         <!-- Image section -->

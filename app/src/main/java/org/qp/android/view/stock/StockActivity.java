@@ -27,6 +27,7 @@ import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.anggrayudi.storage.SimpleStorageHelper;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.zhpan.bannerview.BannerViewPager;
 import com.zhpan.bannerview.BaseBannerAdapter;
@@ -37,12 +38,12 @@ import org.qp.android.databinding.ActivityStockBinding;
 import org.qp.android.dto.stock.GameData;
 import org.qp.android.view.settings.SettingsActivity;
 import org.qp.android.view.settings.SettingsController;
-import org.qp.android.view.stock.fragment.dialogs.StockDialogFrags;
-import org.qp.android.view.stock.fragment.dialogs.StockDialogType;
-import org.qp.android.view.stock.fragment.dialogs.StockPatternDialogFrags;
 import org.qp.android.view.stock.fragment.StockGameFragment;
 import org.qp.android.view.stock.fragment.StockPatternFragment;
 import org.qp.android.view.stock.fragment.StockRecyclerFragment;
+import org.qp.android.view.stock.fragment.dialogs.StockDialogFrags;
+import org.qp.android.view.stock.fragment.dialogs.StockDialogType;
+import org.qp.android.view.stock.fragment.dialogs.StockPatternDialogFrags;
 import org.qp.android.viewModel.ActivityStock;
 import org.qp.android.viewModel.FragmentStock;
 import org.qp.android.viewModel.FragmentStockGame;
@@ -55,9 +56,7 @@ import java.util.Objects;
 
 public class StockActivity extends AppCompatActivity implements StockPatternDialogFrags.StockPatternDialogList, StockPatternFragment.StockPatternFragmentList {
     private final String TAG = this.getClass().getSimpleName();
-
     private HashMap<String, GameData> gamesMap = new HashMap<>();
-
     public SettingsController settingsController;
     private ActivityStock activityStock;
     private FragmentStock localStockViewModel;
@@ -66,13 +65,13 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
     protected ActivityStockBinding activityStockBinding;
     public ActivityResultLauncher<Intent>
             resultInstallLauncher, resultInstallDir, resultGetImageLauncher, resultSetPath, resultSetMod;
-
     private boolean isEnable = false;
-
     private FloatingActionButton mFAB;
     private RecyclerView mRecyclerView;
     private ArrayList<GameData> tempList;
     private final ArrayList<GameData> selectList = new ArrayList<>();
+
+    private final SimpleStorageHelper storageHelper = new SimpleStorageHelper(this);
 
     public String getGameIdByPosition(int position) {
         localStockViewModel.getGameData().observe(this, gameDataArrayList -> {
@@ -109,13 +108,11 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
     public void setRecyclerAdapter () {
         var gameData = getSortedGames();
         var localGameData = new ArrayList<GameData>();
-
         for (GameData data : gameData) {
             if (data.isInstalled()) {
                 localGameData.add(data);
             }
         }
-
         localStockViewModel.setGameDataArrayList(localGameData);
     }
 
@@ -126,11 +123,10 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         mFAB = activityStockBinding.stockFAB;
         localStockViewModel =
                 new ViewModelProvider(this).get(FragmentStock.class);
-        ArrayList<Integer> list = new ArrayList<>();
+        var list = new ArrayList<Integer>();
         list.add(R.drawable.banner_1);
         list.add(R.drawable.banner_0);
-        BannerViewPager<Integer> bannerViewPager;
-        bannerViewPager = activityStockBinding.bannerView;
+        BannerViewPager<Integer> bannerViewPager = activityStockBinding.bannerView;
         bannerViewPager.registerLifecycleObserver(getLifecycle()).setAdapter(new BaseBannerAdapter<>() {
             @Override
             protected void bindData(BaseViewHolder<Integer> holder , Integer data , int position , int pageSize) {
@@ -225,22 +221,15 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
                 }
         );
 
-        resultInstallLauncher = registerForActivityResult(
-                new ActivityResultContracts.StartActivityForResult(),
-                result -> {
-                    Uri uri;
-                    DocumentFile file;
-                    if (result.getResultCode() == RESULT_OK) {
-                        if ((uri = Objects.requireNonNull(result.getData()).getData()) == null) {
-                            showErrorDialog("Archive or file is not selected");
-                        }
-                        file = DocumentFile.fromSingleUri(this, Objects.requireNonNull(uri));
-                        assert file != null;
-                        activityStock.setTempInstallFile(file);
-                        activityStock.isSelectArchive.set(true);
-                    }
-                }
-        );
+        storageHelper.setOnFileSelected((integer , documentFiles) -> {
+            if (documentFiles != null) {
+                activityStock.setTempInstallFile(documentFiles.get(0));
+                activityStock.isSelectArchive.set(true);
+            } else {
+                showErrorDialog("Archive or file is not selected");
+            }
+            return null;
+        });
 
         resultInstallDir = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
@@ -361,6 +350,10 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         selectDialog.show(getSupportFragmentManager(), "selectDialogFragment");
     }
 
+    public void showFilePickerDialog (String[] mimeTypes) {
+        storageHelper.openFilePicker(mimeTypes);
+    }
+
     public void onItemClick(int position) {
         if (isEnable) {
             for (GameData gameData : gamesMap.values()) {
@@ -369,27 +362,26 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
             }
             var mViewHolder =
                     mRecyclerView.findViewHolderForAdapterPosition(position);
-            var gameData = tempList.get(Objects.requireNonNull(mViewHolder)
-                    .getAdapterPosition());
-
+            var gameData =
+                    tempList.get(Objects.requireNonNull(mViewHolder).getAdapterPosition());
             if (selectList.isEmpty() || !selectList.contains(gameData)) {
                 selectList.add(gameData);
-                CardView cardView = mViewHolder.itemView.findViewWithTag("gameCardView");
+                var cardView = (CardView) mViewHolder.itemView.findViewWithTag("gameCardView");
                 cardView.setCardBackgroundColor(Color.LTGRAY);
             } else {
                 selectList.remove(gameData);
-                CardView cardView = mViewHolder.itemView.findViewWithTag("gameCardView");
+                var cardView = (CardView) mViewHolder.itemView.findViewWithTag("gameCardView");
                 cardView.setCardBackgroundColor(Color.DKGRAY);
             }
         } else {
             if (!getSupportFragmentManager().getFragments().isEmpty()) {
-                StockGameFragment fragment = new StockGameFragment();
-                FragmentStockGame fragmentStockGame = new ViewModelProvider(this).get(FragmentStockGame.class);
-                fragmentStockGame.setGameData(activityStock.getGamesMap()
+                new ViewModelProvider(this)
+                        .get(FragmentStockGame.class)
+                        .setGameData(activityStock.getGamesMap()
                         .get(getGameIdByPosition(position)));
                 getSupportFragmentManager()
                         .beginTransaction()
-                        .replace(R.id.stockFragContainer, fragment, "StockGameFragment")
+                        .replace(R.id.stockFragContainer, new StockGameFragment(), "StockGameFragment")
                         .commit();
             }
             // showGameInfo(getGameIdByPosition(position));
@@ -466,17 +458,18 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
                         if(selectList.size() == tempList.size()) {
                             selectList.clear();
                             for (int childCount = mRecyclerView.getChildCount(), i = 0; i < childCount; ++i) {
-                                final RecyclerView.ViewHolder holder =
+                                final var holder =
                                         mRecyclerView.getChildViewHolder(mRecyclerView.getChildAt(i));
-                                CardView cardView = holder.itemView.findViewWithTag("gameCardView");
+                                var cardView = (CardView) holder.itemView.findViewWithTag("gameCardView");
                                 cardView.setCardBackgroundColor(Color.DKGRAY);
                             }
                         } else {
                             selectList.clear();
                             selectList.addAll(tempList);
                             for (int childCount = mRecyclerView.getChildCount(), i = 0; i < childCount; ++i) {
-                                final RecyclerView.ViewHolder holder = mRecyclerView.getChildViewHolder(mRecyclerView.getChildAt(i));
-                                CardView cardView = holder.itemView.findViewWithTag("gameCardView");
+                                final var holder =
+                                        mRecyclerView.getChildViewHolder(mRecyclerView.getChildAt(i));
+                                var cardView = (CardView) holder.itemView.findViewWithTag("gameCardView");
                                 cardView.setCardBackgroundColor(Color.LTGRAY);
                             }
                         }
@@ -487,9 +480,9 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
                 @Override
                 public void onDestroyActionMode(ActionMode mode) {
                     for (int childCount = mRecyclerView.getChildCount(), i = 0; i < childCount; ++i) {
-                        final RecyclerView.ViewHolder holder =
+                        final var holder =
                                 mRecyclerView.getChildViewHolder(mRecyclerView.getChildAt(i));
-                        CardView cardView = holder.itemView.findViewWithTag("gameCardView");
+                        var cardView = (CardView) holder.itemView.findViewWithTag("gameCardView");
                         cardView.setCardBackgroundColor(Color.DKGRAY);
                     }
                     actionMode = null;
@@ -600,7 +593,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
     }
 
     private void showSettings() {
-        Intent intent = new Intent(this, SettingsActivity.class);
+        var intent = new Intent(this, SettingsActivity.class);
         startActivity(intent);
     }
 
@@ -612,7 +605,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
     private void filter(String text){
         var gameData = getSortedGames();
         var filteredList = new ArrayList<GameData>();
-        for (GameData item : gameData) {
+        for (var item : gameData) {
             if (item.title.toLowerCase().contains(text.toLowerCase())) {
                 filteredList.add(item);
             }

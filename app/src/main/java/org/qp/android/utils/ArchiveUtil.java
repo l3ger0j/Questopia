@@ -30,7 +30,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -54,7 +53,7 @@ public final class ArchiveUtil {
                                               Uri uri,
                                               File targetFolder) {
         assertNonUiThread();
-        Map<Integer, String> fileNames = new HashMap<>();
+        var fileNames = new HashMap<Integer, String>();
         try (var stream = new DocumentFileRandomInStream(context, uri);
              var inArchive = SevenZip.openInArchive(null, stream)) {
             var itemCount = inArchive.getNumberOfItems();

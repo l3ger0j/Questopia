@@ -72,20 +72,29 @@ public class ActivityGame extends AndroidViewModel {
 
     public int getTextColor() {
         var config = libQpProxy.getGameState().interfaceConfig;
-        return config.fontColor != 0 ?
-                convertRGBAToBGRA(config.fontColor) : settingsController.textColor;
+        if (settingsController.isUseGameTextColor && config.fontColor != 0) {
+            return convertRGBAToBGRA(config.fontColor);
+        } else {
+            return settingsController.textColor;
+        }
     }
 
     public int getBackgroundColor() {
         var config = libQpProxy.getGameState().interfaceConfig;
-        return settingsController.backColor != 0 ?
-                settingsController.backColor : convertRGBAToBGRA(config.backColor);
+        if (settingsController.isUseGameBackgroundColor && config.backColor != 0) {
+            return convertRGBAToBGRA(config.backColor);
+        } else {
+            return settingsController.backColor;
+        }
     }
 
     public int getLinkColor() {
         var config = libQpProxy.getGameState().interfaceConfig;
-        return config.linkColor != 0 ?
-                convertRGBAToBGRA(config.linkColor) : settingsController.linkColor;
+        if (settingsController.isUseGameLinkColor && config.linkColor != 0) {
+            return convertRGBAToBGRA(config.linkColor);
+        } else {
+            return settingsController.linkColor;
+        }
     }
 
     public int getFontSize() {

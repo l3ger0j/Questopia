@@ -38,30 +38,37 @@ public class SettingsFragment extends SettingsPatternPrefFrag {
 
         var controller = SettingsController
                 .newInstance().loadSettings(getContext());
-        if (controller.isUseAutoWidth) {
-            var customWidthImage = findPreference("customWidthImage");
-            if (customWidthImage != null) {
-                customWidthImage.setEnabled(false);
-            }
+
+        var customWidthImage = findPreference("customWidth");
+        if (customWidthImage != null) {
+            customWidthImage.setEnabled(!controller.isUseAutoWidth);
         }
-        if (controller.isUseAutoHeight) {
-            var customHeightImage = findPreference("customHeightImage");
-            if (customHeightImage != null) {
-                customHeightImage.setEnabled(false);
-            }
+
+        var customHeightImage = findPreference("customHeight");
+        if (customHeightImage != null) {
+            customHeightImage.setEnabled(!controller.isUseAutoHeight);
+        }
+
+        var textColor = findPreference("textColor");
+        if (textColor != null) {
+            textColor.setSummary(getString(R.string.textBackLinkColorSum)
+                    .replace("-VALUE-", "#000000"));
+            textColor.setEnabled(!controller.isUseGameTextColor);
         }
 
         var backColor = findPreference("backColor");
-        Objects.requireNonNull(backColor).setSummary(getString(R.string.textBackLinkColorSum)
-                .replace("-VALUE-", "#e0e0e0"));
-
-        var textColor = findPreference("textColor");
-        Objects.requireNonNull(textColor).setSummary(getString(R.string.textBackLinkColorSum)
-                .replace("-VALUE-", "#000000"));
+        if (backColor != null) {
+            backColor.setSummary(getString(R.string.textBackLinkColorSum)
+                    .replace("-VALUE-", "#e0e0e0"));
+            backColor.setEnabled(!controller.isUseGameBackgroundColor);
+        }
 
         var linkColor = findPreference("linkColor");
-        Objects.requireNonNull(linkColor).setSummary(getString(R.string.textBackLinkColorSum)
-                .replace("-VALUE-", "#0000ff"));
+        if (linkColor != null) {
+            linkColor.setSummary(getString(R.string.textBackLinkColorSum)
+                    .replace("-VALUE-", "#0000ff"));
+            linkColor.setEnabled(!controller.isUseGameLinkColor);
+        }
 
         var click = findPreference("showExtensionMenu");
         if (click != null) {

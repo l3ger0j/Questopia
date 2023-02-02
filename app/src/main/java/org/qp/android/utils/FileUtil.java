@@ -31,7 +31,8 @@ public final class FileUtil {
         return dir != null && dir.exists() && dir.isDirectory() && dir.canWrite();
     }
 
-    public static File getOrCreateFile(File parentDir, String name) {
+    public static File getOrCreateFile(File parentDir,
+                                       String name) {
         var file = findFileOrDirectory(parentDir, name);
         if (file == null) {
             file = createFile(parentDir, name);
@@ -39,7 +40,8 @@ public final class FileUtil {
         return file;
     }
 
-    public static File createFile(File parentDir, String name) {
+    public static File createFile(File parentDir,
+                                  String name) {
         var file = new File(parentDir, name);
         if (!file.exists()) {
             try {
@@ -55,7 +57,8 @@ public final class FileUtil {
     }
 
     @NonNull
-    public static File getOrCreateDirectory(File parentDir, String name) {
+    public static File getOrCreateDirectory(File parentDir,
+                                            String name) {
         var dir = findFileOrDirectory(parentDir, name);
         if (dir == null) {
             dir = createDirectory(parentDir, name);
@@ -64,7 +67,8 @@ public final class FileUtil {
     }
 
     @NonNull
-    public static File createDirectory(File parentDir, String name) {
+    public static File createDirectory(File parentDir,
+                                       String name) {
         var dir = new File(parentDir, name);
         if (dir.mkdir()) {
             Log.i(TAG,"Directory created");
@@ -75,14 +79,16 @@ public final class FileUtil {
     }
 
     @Nullable
-    public static File findFileOrDirectory(File parentDir, final String name) {
+    public static File findFileOrDirectory(File parentDir,
+                                           final String name) {
         var files = parentDir.listFiles((dir, filename) -> filename.equalsIgnoreCase(name));
         if (files == null || files.length == 0) return null;
         return files[0];
     }
 
     @Nullable
-    public static File findFileRecursively(File parentDir, String path) {
+    public static File findFileRecursively(File parentDir,
+                                           String path) {
         var idx = path.indexOf("/");
         if (idx == -1) {
             return findFileOrDirectory(parentDir, path);
@@ -145,8 +151,25 @@ public final class FileUtil {
         }
     }
 
+    public static long dirSize(@NonNull DocumentFile dir) {
+        if (dir.exists()) {
+            long result = 0;
+            var fileList = dir.listFiles();
+            for (var file : fileList) {
+                if (file.isDirectory()) {
+                    result += dirSize(file);
+                } else {
+                    result += file.length();
+                }
+            }
+            return result;
+        }
+        return 0;
+    }
+
     @NonNull
-    public static String formatFileSize(long size, int numCountInfo) {
+    public static String formatFileSize(long size,
+                                        int numCountInfo) {
         if (size <= 0) {
             return "0";
         }
@@ -162,7 +185,9 @@ public final class FileUtil {
                 + " " + units[digitGroups];
     }
 
-    public static void copyFile(Context context, DocumentFile srcFile, File destDir) {
+    public static void copyFile(Context context,
+                                @NonNull DocumentFile srcFile,
+                                File destDir) {
         var destFile = createFile(destDir, srcFile.getName());
         if (destFile == null) {
             return;

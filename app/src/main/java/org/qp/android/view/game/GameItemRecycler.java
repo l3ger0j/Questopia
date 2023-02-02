@@ -92,7 +92,7 @@ public class GameItemRecycler extends RecyclerView.Adapter<GameItemRecycler.View
     @Override
     public GameItemRecycler.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent,
                                                           int viewType) {
-        LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+        var inflater = LayoutInflater.from(parent.getContext());
         ListGameItemBinding listGameItemBinding =
                 DataBindingUtil.inflate(inflater, R.layout.list_game_item , parent, false);
         return new GameItemRecycler.ViewHolder(listGameItemBinding);
@@ -101,7 +101,7 @@ public class GameItemRecycler extends RecyclerView.Adapter<GameItemRecycler.View
     @Override
     public void onBindViewHolder(@NonNull GameItemRecycler.ViewHolder holder, int position) {
         holder.listItemActionObjectBinding(differ.getCurrentList().get(position));
-        QpListItem qpListItem = getItem(position);
+        var qpListItem = getItem(position);
 
         if (qpListItem.pathToImage != null) {
             Picasso.get()
@@ -125,9 +125,9 @@ public class GameItemRecycler extends RecyclerView.Adapter<GameItemRecycler.View
     public static class ViewHolder extends RecyclerView.ViewHolder {
         ListGameItemBinding listGameItemBinding;
 
-        ViewHolder(ListGameItemBinding listGameItemBinding){
-            super(listGameItemBinding.getRoot());
-            this.listGameItemBinding = listGameItemBinding;
+        ViewHolder(ListGameItemBinding binding){
+            super(binding.getRoot());
+            this.listGameItemBinding = binding;
         }
 
         public void listItemActionObjectBinding(QpListItem qpListItem) {

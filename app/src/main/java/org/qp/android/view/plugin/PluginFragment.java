@@ -20,14 +20,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import org.qp.android.R;
 import org.qp.android.databinding.FragmentPluginBinding;
 import org.qp.android.dto.plugin.PluginInfo;
-import org.qp.android.utils.ViewUtil;
+import org.qp.android.model.plugin.PluginClient;
 import org.qp.android.view.adapters.RecyclerItemClickListener;
 import org.qp.android.view.settings.SettingsActivity;
 import org.qp.android.viewModel.FragmentPlugin;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 
 public class PluginFragment extends Fragment {
     private final String TAG = getClass().getSimpleName();
@@ -70,7 +69,7 @@ public class PluginFragment extends Fragment {
         fillPluginList();
         var pluginInfo = new PluginInfo();
         pluginInfo.title = namePlugin;
-        ArrayList<PluginInfo> arrayList = new ArrayList<>();
+        var arrayList = new ArrayList<PluginInfo>();
         arrayList.add(pluginInfo);
 
         packageFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
@@ -93,8 +92,9 @@ public class PluginFragment extends Fragment {
                 new RecyclerItemClickListener.OnItemClickListener() {
                     @Override
                     public void onItemClick(View view , int position) {
-                        // TODO implement opening or linking a plugin by clicking
-                        ViewUtil.showSnackBar(getView(), "Click!");
+                        if (namePlugin != null) {
+                            new PluginClient().connectPlugin(requireContext() , namePlugin);
+                        }
                     }
 
                     @Override
@@ -118,14 +118,15 @@ public class PluginFragment extends Fragment {
             var filter = info.filter;
             Log.d(TAG, "fillPluginList: i: " + i + "; serviceInfo: " + serviceInfo + ";filter: " + filter);
             if (serviceInfo != null) {
-                HashMap<String, String> item = new HashMap<>();
+                var item = new HashMap<String, String>();
                 item.put(KEY_PKG, serviceInfo.packageName);
                 namePlugin = serviceInfo.packageName;
                 item.put(KEY_SERVICENAME, serviceInfo.name);
                 String firstCategory = null;
                 if (filter != null) {
                     var actions = new StringBuilder();
-                    for (Iterator<String> actionIterator = filter.actionsIterator(); actionIterator.hasNext(); ) {
+                    for (var actionIterator = filter.actionsIterator();
+                         actionIterator.hasNext(); ) {
                         var action = actionIterator.next();
                         if (actions.length() > 0)
                             actions.append(",");

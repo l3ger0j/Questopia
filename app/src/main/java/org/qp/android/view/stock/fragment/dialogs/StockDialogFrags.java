@@ -55,6 +55,7 @@ public class StockDialogFrags extends StockPatternDialogFrags {
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
+        var builder = new MaterialAlertDialogBuilder(requireContext());
         if (savedInstanceState != null ) {
             if (savedInstanceState.containsKey("selectedDialogType")) {
                 dialogType = StockDialogType.valueOf(savedInstanceState.getString("selectedDialogType"));
@@ -72,8 +73,6 @@ public class StockDialogFrags extends StockPatternDialogFrags {
                 title = savedInstanceState.getString("stringTitle");
             }
         }
-
-        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(requireContext());
         switch (dialogType) {
             case EDIT_DIALOG:
                 if (editBinding != null) {
