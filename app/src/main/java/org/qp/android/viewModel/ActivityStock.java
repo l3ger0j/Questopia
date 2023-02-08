@@ -18,6 +18,7 @@ import static org.qp.android.utils.PathUtil.removeExtension;
 import static org.qp.android.utils.XmlUtil.objectToXml;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Application;
 import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
@@ -60,6 +61,7 @@ import java.util.HashMap;
 import java.util.Objects;
 
 public class ActivityStock extends AndroidViewModel {
+    private static final int PICKFILE_RESULT_CODE = 101;
     private final String TAG = this.getClass().getSimpleName();
 
     public ObservableField<StockActivity> activityObservableField = new
@@ -177,12 +179,12 @@ public class ActivityStock extends AndroidViewModel {
                     : Objects.requireNonNull(
                     installBinding.ET2.getEditText()).getText().toString());
             if (tempInstallFile != null) {
-                gameData.fileSize = formatFileSize(tempInstallFile.length() , controller.binaryPrefixes);
+                gameData.fileSize = formatFileSize(tempInstallFile.length(), controller.binaryPrefixes);
             } else if (tempInstallDir != null) {
-                gameData.fileSize = formatFileSize(dirSize(tempInstallDir) , controller.binaryPrefixes);
+                gameData.fileSize = formatFileSize(dirSize(tempInstallDir), controller.binaryPrefixes);
             }
             gameData.icon = (tempImageFile == null ? null : tempImageFile.getUri().toString());
-            installGame(tempInstallFile != null ? tempInstallFile : tempInstallDir , gameData);
+            installGame(tempInstallFile != null ? tempInstallFile : tempInstallDir, gameData);
             isSelectArchive.set(false);
             isSelectFolder.set(false);
             dialogFragments.dismiss();
@@ -201,6 +203,7 @@ public class ActivityStock extends AndroidViewModel {
             public void cancel() {
                 isShowDialog.set(false);
             }
+
             @Override
             public void dismiss() {
             }
@@ -211,18 +214,18 @@ public class ActivityStock extends AndroidViewModel {
     }
 
     public void playGame() {
-        var intent = new Intent(activityObservableField.get() ,
+        var intent = new Intent(activityObservableField.get(),
                 GameActivity.class);
-        intent.putExtra("gameId" , tempGameData.id);
-        intent.putExtra("gameTitle" , tempGameData.title);
-        intent.putExtra("gameDirUri" , tempGameData.gameDir.getAbsolutePath());
+        intent.putExtra("gameId", tempGameData.id);
+        intent.putExtra("gameTitle", tempGameData.title);
+        intent.putExtra("gameDirUri", tempGameData.gameDir.getAbsolutePath());
         var gameFileCount = tempGameData.gameFiles.size();
         switch (gameFileCount) {
             case 0:
-                Log.w(TAG , "GameData has no game files");
+                Log.w(TAG, "GameData has no game files");
                 break;
             case 1:
-                intent.putExtra("gameFileUri" , tempGameData.gameFiles.get(0).getAbsolutePath());
+                intent.putExtra("gameFileUri", tempGameData.gameFiles.get(0).getAbsolutePath());
                 Objects.requireNonNull(activityObservableField.get()).startActivity(intent);
                 break;
             default:
@@ -239,7 +242,7 @@ public class ActivityStock extends AndroidViewModel {
                 Objects.requireNonNull(activityObservableField.get())
                         .showSelectDialogFragment(dialogFragments);
                 outputIntObserver.observeForever(integer -> {
-                    intent.putExtra("gameFileUri" ,
+                    intent.putExtra("gameFileUri",
                             tempGameData.gameFiles.get(integer).getAbsolutePath());
                     Objects.requireNonNull(activityObservableField.get()).startActivity(intent);
                 });
@@ -278,14 +281,14 @@ public class ActivityStock extends AndroidViewModel {
             }
             if (tempGameData.fileSize == null || tempGameData.fileSize.isEmpty()) {
                 tempGameData.fileSize = formatFileSize(dirSize(DocumentFile
-                                .fromFile(tempGameData.gameDir)) , controller.binaryPrefixes);
+                        .fromFile(tempGameData.gameDir)), controller.binaryPrefixes);
             }
-            writeGameInfo(tempGameData , tempGameData.gameDir);
+            writeGameInfo(tempGameData, tempGameData.gameDir);
             if (tempPathFile != null) {
-                copyFile(activityObservableField.get() , tempPathFile , tempGameData.gameDir);
+                copyFile(activityObservableField.get(), tempPathFile, tempGameData.gameDir);
             }
             if (tempModFile != null) {
-                copyFile(activityObservableField.get() , tempModFile ,
+                copyFile(activityObservableField.get(), tempModFile,
                         findFileRecursively(tempGameData.gameDir, "mods"));
             }
             refreshGamesDirectory();
@@ -297,59 +300,38 @@ public class ActivityStock extends AndroidViewModel {
         }
     }
 
+    @SuppressLint("NonConstantResourceId")
     public void sendIntent(@NonNull View view) {
-        String action;
-        Intent intentInstallDir, intentGetImage, intentSetPath, intentSetMod;
-        int id = view.getId();
-        if (id == R.id.buttonSelectArchive) {
-            Objects.requireNonNull(activityObservableField.get())
-                    .showFilePickerDialog(new String[] {"application/zip" , "application/rar"});
-        } else if (id == R.id.buttonSelectFolder) {
-            action = ACTION_OPEN_DOCUMENT_TREE;
-            intentInstallDir = new Intent(action);
-            intentInstallDir.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        Intent intentToStart = null;
+        switch (view.getId()) {
+            case R.id.buttonSelectArchive:
+                Objects.requireNonNull(activityObservableField.get())
+                        .showFilePickerDialog(new String[]{"application/zip", "application/rar"});
+                break;
+            case R.id.buttonSelectFolder:
+                intentToStart = new Intent(ACTION_OPEN_DOCUMENT_TREE)
+                        .setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                break;
+            case R.id.buttonSelectIcon:
+                intentToStart = new Intent(ACTION_OPEN_DOCUMENT)
+                        .addCategory(Intent.CATEGORY_OPENABLE)
+                        .setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        .setType("*/*")
+                        .putExtra(EXTRA_MIME_TYPES, new String[]{"image/png", "image/jpeg"});
+                break;
+            default:
+                intentToStart = new Intent(ACTION_OPEN_DOCUMENT)
+                        .setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        .setType("application/octet-stream");
+                break;
+        }
+
+        if(intentToStart != null){
             try {
                 Objects.requireNonNull(activityObservableField.get())
-                        .resultInstallDir.launch(intentInstallDir);
+                        .resultSetMod.launch(intentToStart);
             } catch (ActivityNotFoundException e) {
-                Log.e(TAG , e.toString());
-            }
-        } else if (id == R.id.buttonSelectIcon) {
-            action = ACTION_OPEN_DOCUMENT;
-            intentGetImage = new Intent(action);
-            intentGetImage.addCategory(Intent.CATEGORY_OPENABLE);
-            intentGetImage.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            intentGetImage.setType("*/*");
-            String[] mimeTypes = {"image/png" , "image/jpeg"};
-            intentGetImage.putExtra(EXTRA_MIME_TYPES , mimeTypes);
-            try {
-                Objects.requireNonNull(activityObservableField.get())
-                        .resultGetImageLauncher.launch(
-                                Intent.createChooser(intentGetImage , "Select an image"));
-            } catch (ActivityNotFoundException e) {
-                Log.e(TAG , e.toString());
-            }
-        } else if (id == R.id.buttonSelectPath) {
-            action = ACTION_OPEN_DOCUMENT;
-            intentSetPath = new Intent(action);
-            intentSetPath.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            intentSetPath.setType("application/octet-stream");
-            try {
-                Objects.requireNonNull(activityObservableField.get())
-                        .resultSetPath.launch(intentSetPath);
-            } catch (ActivityNotFoundException e) {
-                Log.e(TAG , e.toString());
-            }
-        } else if (id == R.id.buttonSelectMod) {
-            action = ACTION_OPEN_DOCUMENT;
-            intentSetMod = new Intent(action);
-            intentSetMod.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            intentSetMod.setType("application/octet-stream");
-            try {
-                Objects.requireNonNull(activityObservableField.get())
-                        .resultSetMod.launch(intentSetMod);
-            } catch (ActivityNotFoundException e) {
-                Log.e(TAG , e.toString());
+                Log.e(TAG, e.toString());
             }
         }
     }
@@ -380,22 +362,22 @@ public class ActivityStock extends AndroidViewModel {
     @NonNull
     public File getOrCreateGameDirectory(String gameName) {
         var folderName = normalizeFolderName(gameName);
-        return getOrCreateDirectory(gamesDir , folderName);
+        return getOrCreateDirectory(gamesDir, folderName);
     }
 
-    public void installGame(DocumentFile gameFile , GameData gameData) {
+    public void installGame(DocumentFile gameFile, GameData gameData) {
         if (!isWritableDirectory(gamesDir)) {
             Objects.requireNonNull(activityObservableField.get())
                     .showErrorDialog("Games directory is not writable");
             return;
         }
         try {
-            doInstallGame(gameFile , gameData);
+            doInstallGame(gameFile, gameData);
         } catch (InstallException ex) {
             if (Objects.requireNonNull(ex.getMessage()).equals("NIG")) {
                 String message = getApplication()
                         .getString(R.string.installError)
-                        .replace("-GAMENAME-" , gameData.title);
+                        .replace("-GAMENAME-", gameData.title);
                 Objects.requireNonNull(activityObservableField.get()).showErrorDialog(message);
             } else if (ex.getMessage().equals("NFE")) {
                 String message = getApplication()
@@ -405,7 +387,7 @@ public class ActivityStock extends AndroidViewModel {
         }
     }
 
-    private void doInstallGame(DocumentFile gameFile , GameData gameData) {
+    private void doInstallGame(DocumentFile gameFile, GameData gameData) {
         var gameDir = getOrCreateGameDirectory(gameData.title);
         if (!isWritableDirectory(gameDir)) {
             Objects.requireNonNull(activityObservableField.get())
@@ -416,9 +398,9 @@ public class ActivityStock extends AndroidViewModel {
             notificationStateGame(gameData.title);
         }
         var installer = new Installer(activityObservableField.get());
-        installer.gameInstall(gameFile , gameDir).observeForever(aBoolean -> {
+        installer.gameInstall(gameFile, gameDir).observeForever(aBoolean -> {
             if (aBoolean) {
-                writeGameInfo(gameData , gameDir);
+                writeGameInfo(gameData, gameDir);
                 refreshGames();
             }
         });
@@ -427,7 +409,7 @@ public class ActivityStock extends AndroidViewModel {
 
     private void notificationStateGame(String gameName) {
         var builder =
-                new NotifyBuilder(activityObservableField.get() , "gameInstallationProgress");
+                new NotifyBuilder(activityObservableField.get(), "gameInstallationProgress");
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             builder.createDefaultChannel();
             builder.createProgressChannel();
@@ -438,26 +420,26 @@ public class ActivityStock extends AndroidViewModel {
                 NotificationManagerCompat.from(getApplication());
         if (ActivityCompat.checkSelfPermission(getApplication(),
                 Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
-            notificationManager.notify(1 , builder.buildWithProgress());
+            notificationManager.notify(1, builder.buildWithProgress());
             ArchiveUtil.progressInstall.observeForever(aLong -> {
                 notificationManager
-                        .notify(1 , builder.updateProgress((int) (aLong * 100 / ArchiveUtil.totalSize)));
+                        .notify(1, builder.updateProgress((int) (aLong * 100 / ArchiveUtil.totalSize)));
                 if (aLong == ArchiveUtil.totalSize) {
                     notificationManager.cancelAll();
                     var notifyBuilder =
-                            new NotifyBuilder(activityObservableField.get() , "gameInstalled");
+                            new NotifyBuilder(activityObservableField.get(), "gameInstalled");
                     notifyBuilder.setTitleNotify(getApplication().getString(R.string.titleNotify));
                     var tempMessage = getApplication()
                             .getString(R.string.textInstallNotify)
-                            .replace("-GAMENAME-" , gameName);
+                            .replace("-GAMENAME-", gameName);
                     notifyBuilder.setTextNotify(tempMessage);
-                    notificationManager.notify(1 , notifyBuilder.buildWithoutProgress());
+                    notificationManager.notify(1, notifyBuilder.buildWithoutProgress());
                 }
             });
         }
     }
 
-    public void writeGameInfo(GameData gameData , File gameDir) {
+    public void writeGameInfo(GameData gameData, File gameDir) {
         var infoFile = findFileOrDirectory(gameDir, GAME_INFO_FILENAME);
         if (infoFile == null) {
             infoFile = createFile(gameDir, GAME_INFO_FILENAME);

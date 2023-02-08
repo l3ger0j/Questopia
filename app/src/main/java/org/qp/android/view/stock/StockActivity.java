@@ -3,6 +3,7 @@ package org.qp.android.view.stock;
 import static org.qp.android.utils.DirUtil.doesDirectoryContainGameFiles;
 import static org.qp.android.utils.FileUtil.deleteDirectory;
 
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -20,6 +21,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.view.ActionMode;
+import androidx.appcompat.widget.SearchView;
 import androidx.cardview.widget.CardView;
 import androidx.core.os.LocaleListCompat;
 import androidx.documentfile.provider.DocumentFile;
@@ -48,11 +50,16 @@ import org.qp.android.viewModel.ActivityStock;
 import org.qp.android.viewModel.FragmentStock;
 import org.qp.android.viewModel.FragmentStockGame;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Objects;
+import java.util.zip.ZipFile;
 
 public class StockActivity extends AppCompatActivity implements StockPatternDialogFrags.StockPatternDialogList, StockPatternFragment.StockPatternFragmentList {
     private final String TAG = this.getClass().getSimpleName();
@@ -92,9 +99,9 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            Collections.sort(gameData , Comparator.comparing(game -> game.title.toLowerCase()));
+            Collections.sort(gameData, Comparator.comparing(game -> game.title.toLowerCase()));
         } else {
-            Collections.sort(gameData , (first, second) -> first.title.toLowerCase()
+            Collections.sort(gameData, (first, second) -> first.title.toLowerCase()
                     .compareTo(second.title.toLowerCase()));
         }
 
@@ -105,7 +112,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         this.mRecyclerView = mRecyclerView;
     }
 
-    public void setRecyclerAdapter () {
+    public void setRecyclerAdapter() {
         var gameData = getSortedGames();
         var localGameData = new ArrayList<GameData>();
         for (GameData data : gameData) {
@@ -129,8 +136,8 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         BannerViewPager<Integer> bannerViewPager = activityStockBinding.bannerView;
         bannerViewPager.registerLifecycleObserver(getLifecycle()).setAdapter(new BaseBannerAdapter<>() {
             @Override
-            protected void bindData(BaseViewHolder<Integer> holder , Integer data , int position , int pageSize) {
-                holder.setImageResource(R.id.banner_image , data);
+            protected void bindData(BaseViewHolder<Integer> holder, Integer data, int position, int pageSize) {
+                holder.setImageResource(R.id.banner_image, data);
             }
 
             @Override
@@ -138,7 +145,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
                 return R.layout.list_item_banner;
             }
         }).create(list);
-        bannerViewPager.setOnPageClickListener((clickedView , position) -> {
+        bannerViewPager.setOnPageClickListener((clickedView, position) -> {
             switch (position) {
                 case 0:
                     var intentImg0 = new Intent(Intent.ACTION_VIEW, Uri
@@ -158,18 +165,16 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         if (mRecyclerView != null) {
             mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
                 @Override
-                public void onScrollStateChanged(@NonNull RecyclerView recyclerView , int newState) {
-                    if (newState == RecyclerView.SCROLL_STATE_IDLE)
-                    {
+                public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                    if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                         mFAB.show();
                     }
                     super.onScrollStateChanged(recyclerView, newState);
                 }
 
                 @Override
-                public void onScrolled(@NonNull RecyclerView recyclerView , int dx , int dy) {
-                    if (dy > 0 ||dy<0 && mFAB.isShown())
-                    {
+                public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                    if (dy > 0 || dy < 0 && mFAB.isShown()) {
                         mFAB.hide();
                     }
                 }
@@ -221,7 +226,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
                 }
         );
 
-        storageHelper.setOnFileSelected((integer , documentFiles) -> {
+        storageHelper.setOnFileSelected((integer, documentFiles) -> {
             if (documentFiles != null) {
                 activityStock.setTempInstallFile(documentFiles.get(0));
                 activityStock.isSelectArchive.set(true);
@@ -259,7 +264,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
                         }
                         getContentResolver().takePersistableUriPermission(uri,
                                 Intent.FLAG_GRANT_READ_URI_PERMISSION
-                                | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                                        | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
                         assert uri != null;
                         file = DocumentFile.fromSingleUri(this, uri);
                         assert file != null;
@@ -270,14 +275,14 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
 
         loadSettings();
 
-        Log.i(TAG,"Stock Activity created");
+        Log.i(TAG, "Stock Activity created");
 
         setContentView(activityStockBinding.getRoot());
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode , @NonNull String[] permissions , @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode , permissions , grantResults);
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == 1) {
             if (grantResults.length > 0
                     && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -313,7 +318,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         } else {
             getSupportFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.stockFragContainer , stockFragment , "stockRecyclerFragment")
+                    .replace(R.id.stockFragContainer, stockFragment, "stockRecyclerFragment")
                     .commit();
         }
     }
@@ -338,20 +343,47 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         dialogFragments.show(getSupportFragmentManager(), "errorDialogFragment");
     }
 
-    public void showEditDialogFragment (DialogFragment editDialog) {
+    public void showEditDialogFragment(DialogFragment editDialog) {
         editDialog.show(getSupportFragmentManager(), "editDialogFragment");
     }
 
-    public void showInstallDialogFragment (DialogFragment installDialog) {
+    public void showInstallDialogFragment(DialogFragment installDialog) {
         installDialog.show(getSupportFragmentManager(), "installDialogFragment");
     }
 
-    public void showSelectDialogFragment (DialogFragment selectDialog) {
+    public void showSelectDialogFragment(DialogFragment selectDialog) {
         selectDialog.show(getSupportFragmentManager(), "selectDialogFragment");
     }
 
-    public void showFilePickerDialog (String[] mimeTypes) {
+    public void showFilePickerDialog(String[] mimeTypes) {
+//        Intent fileintent = new Intent(Intent.ACTION_GET_CONTENT);
+//        fileintent.setType("application/zip");
+//        try {
+//            startActivityForResult(fileintent, 923067);
+//        } catch (ActivityNotFoundException e) {
+//            Log.e("tag", "No activity can handle picking a file. Showing alternatives.");
+//        }
         storageHelper.openFilePicker(mimeTypes);
+    }
+
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (data == null)
+            return;
+        if (requestCode == 923067) {
+            if (resultCode == RESULT_OK) {
+//                activityStock.setTempInstallFile(DocumentFile.fromFile(
+//                        new File(data.getData().getPath()
+//                        )
+//                ));
+//                activityStock.isSelectArchive.set(true);
+//                assert url != null;
+//                File file = new File(url.getPath());
+
+                //Log.e("path", new File(data.getData().getPath()
+//                ).getName());
+            }
+        }
     }
 
     public void onItemClick(int position) {
@@ -378,7 +410,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
                 new ViewModelProvider(this)
                         .get(FragmentStockGame.class)
                         .setGameData(activityStock.getGamesMap()
-                        .get(getGameIdByPosition(position)));
+                                .get(getGameIdByPosition(position)));
                 getSupportFragmentManager()
                         .beginTransaction()
                         .replace(R.id.stockFragContainer, new StockGameFragment(), "StockGameFragment")
@@ -395,14 +427,14 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
 
     @Override
     public void onDialogPositiveClick(DialogFragment dialog) {
-        if (Objects.equals(dialog.getTag() , "infoDialogFragment")) {
+        if (Objects.equals(dialog.getTag(), "infoDialogFragment")) {
             activityStock.showDialogEdit();
         }
     }
 
     @Override
     public void onDialogNeutralClick(DialogFragment dialog) {
-        if (Objects.equals(dialog.getTag() , "infoDialogFragment")) {
+        if (Objects.equals(dialog.getTag(), "infoDialogFragment")) {
             activityStock.playGame();
         }
     }
@@ -419,7 +451,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
 
     @Override
     public void onDialogListClick(DialogFragment dialog, int which) {
-        if (Objects.equals(dialog.getTag() , "selectDialogFragment")) {
+        if (Objects.equals(dialog.getTag(), "selectDialogFragment")) {
             activityStock.outputIntObserver.setValue(which);
         }
     }
@@ -428,20 +460,20 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         if (!isEnable) {
             var callback = new ActionMode.Callback() {
                 @Override
-                public boolean onCreateActionMode(ActionMode mode , Menu menu) {
+                public boolean onCreateActionMode(ActionMode mode, Menu menu) {
                     mode.getMenuInflater().inflate(R.menu.menu_delete, menu);
                     return true;
                 }
 
                 @Override
-                public boolean onPrepareActionMode(ActionMode mode , Menu menu) {
+                public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
                     tempList = getSortedGames();
                     isEnable = true;
                     return true;
                 }
 
                 @Override
-                public boolean onActionItemClicked(ActionMode mode , MenuItem item) {
+                public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
                     int itemId = item.getItemId();
                     if (itemId == R.id.delete_game) {
                         for (GameData data : selectList) {
@@ -449,13 +481,13 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
                             try {
                                 deleteDirectory(data.gameDir);
                             } catch (NullPointerException e) {
-                                showErrorDialog("Error: "+"\n"+e);
+                                showErrorDialog("Error: " + "\n" + e);
                             }
                             activityStock.refreshGames();
                         }
                         actionMode.finish();
                     } else if (itemId == R.id.select_all) {
-                        if(selectList.size() == tempList.size()) {
+                        if (selectList.size() == tempList.size()) {
                             selectList.clear();
                             for (int childCount = mRecyclerView.getChildCount(), i = 0; i < childCount; ++i) {
                                 final var holder =
@@ -551,7 +583,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Log.i(TAG , "Stock Activity destroyed");
+        Log.i(TAG, "Stock Activity destroyed");
     }
 
     @Override
@@ -575,8 +607,8 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
             showSettings();
             return true;
         } else if (itemId == R.id.action_search) {
-            var searchView = (androidx.appcompat.widget.SearchView) item.getActionView();
-            searchView.setOnQueryTextListener(new androidx.appcompat.widget.SearchView.OnQueryTextListener() {
+            var searchView = (SearchView) item.getActionView();
+            searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
                 @Override
                 public boolean onQueryTextSubmit(String query) {
                     return false;
@@ -602,7 +634,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         return super.onKeyDown(keyCode, event);
     }
 
-    private void filter(String text){
+    private void filter(String text) {
         var gameData = getSortedGames();
         var filteredList = new ArrayList<GameData>();
         for (var item : gameData) {
