@@ -3,6 +3,7 @@ package org.qp.android.view.stock;
 import static org.qp.android.utils.DirUtil.doesDirectoryContainGameFiles;
 import static org.qp.android.utils.FileUtil.deleteDirectory;
 
+import android.app.Dialog;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -10,10 +11,15 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -364,23 +370,42 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
 //            Log.e("tag", "No activity can handle picking a file. Showing alternatives.");
 //        }
 
-//        resultInstallLauncher = registerForActivityResult(
-//                new ActivityResultContracts.StartActivityForResult(),
-//                result -> {
-//                    Uri uri;
-//                    DocumentFile file;
-//                    if (result.getResultCode() == RESULT_OK) {
-//                        if ((uri = Objects.requireNonNull(result.getData()).getData()) == null) {
-//                            Log.e(TAG, "Archive or file is not selected");
-//                        }
-//                        file = DocumentFile.fromSingleUri(this, Objects.requireNonNull(uri));
-//                        assert file != null;
-//                        activityStock.setTempInstallFile(file);
-//                        activityStock.isSelectArchive.set(true);
-//                    }
-//                }
-//        );
-        storageHelper.openFilePicker(mimeTypes);
+        ViewGroup add_phone = (ViewGroup) getLayoutInflater().inflate(R.layout.filepicker_dialog_layout, null);
+        TextView okay_text, cancel_text;
+        Dialog dialog = new Dialog(StockActivity.this);
+        dialog.setContentView(add_phone);
+        dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        dialog.setCancelable(false);
+
+        File directory = new File(String.valueOf(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)));
+        String[] files = directory.list();
+        assert files != null;
+        Log.d("Files", "Size: "+ files.length);
+        StringBuilder filer = new StringBuilder();
+        for (String file : files) {
+            filer.append(file).append("\n");
+        }
+        TextView first = add_phone.findViewById(R.id.textpath);
+        first.setText(filer);
+//        okay_text.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                dialog.dismiss();
+//                Toast.makeText(StockActivity.this, "okay clicked", Toast.LENGTH_SHORT).show();
+//            }
+//        });
+
+//        cancel_text.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                dialog.dismiss();
+//                Toast.makeText(StockActivity.this, "Cancel clicked", Toast.LENGTH_SHORT).show();
+//            }
+//        });
+
+        dialog.show();
+        Log.e("test", Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString());
+        //storageHelper.openFilePicker(mimeTypes);
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
