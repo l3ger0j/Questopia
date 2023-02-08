@@ -363,6 +363,23 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
 //        } catch (ActivityNotFoundException e) {
 //            Log.e("tag", "No activity can handle picking a file. Showing alternatives.");
 //        }
+
+//        resultInstallLauncher = registerForActivityResult(
+//                new ActivityResultContracts.StartActivityForResult(),
+//                result -> {
+//                    Uri uri;
+//                    DocumentFile file;
+//                    if (result.getResultCode() == RESULT_OK) {
+//                        if ((uri = Objects.requireNonNull(result.getData()).getData()) == null) {
+//                            Log.e(TAG, "Archive or file is not selected");
+//                        }
+//                        file = DocumentFile.fromSingleUri(this, Objects.requireNonNull(uri));
+//                        assert file != null;
+//                        activityStock.setTempInstallFile(file);
+//                        activityStock.isSelectArchive.set(true);
+//                    }
+//                }
+//        );
         storageHelper.openFilePicker(mimeTypes);
     }
 
@@ -372,16 +389,11 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
             return;
         if (requestCode == 923067) {
             if (resultCode == RESULT_OK) {
-//                activityStock.setTempInstallFile(DocumentFile.fromFile(
-//                        new File(data.getData().getPath()
-//                        )
-//                ));
-//                activityStock.isSelectArchive.set(true);
-//                assert url != null;
-//                File file = new File(url.getPath());
-
-                //Log.e("path", new File(data.getData().getPath()
-//                ).getName());
+                //File file = new File(data.getData().getPath());
+                DocumentFile dFile = DocumentFile.fromSingleUri(this, data.getData());
+                assert dFile != null;
+                activityStock.setTempInstallFile(dFile);
+                activityStock.isSelectArchive.set(true);
             }
         }
     }

@@ -8,6 +8,7 @@ import static org.qp.android.utils.FileUtil.getOrCreateFile;
 import static org.qp.android.utils.ThreadUtil.isMainThread;
 import static org.qp.android.utils.ViewUtil.getFontStyle;
 
+import android.annotation.SuppressLint;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.media.AudioManager;
@@ -714,6 +715,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
         return (slot + 1) + ".sav";
     }
 
+    @SuppressLint("NonConstantResourceId")
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int i = item.getItemId();

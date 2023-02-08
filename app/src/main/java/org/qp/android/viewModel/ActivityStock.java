@@ -302,7 +302,7 @@ public class ActivityStock extends AndroidViewModel {
 
     @SuppressLint("NonConstantResourceId")
     public void sendIntent(@NonNull View view) {
-        Intent intentToStart = null;
+        Intent intentToStart;
         switch (view.getId()) {
             case R.id.buttonSelectArchive:
                 Objects.requireNonNull(activityObservableField.get())
@@ -311,6 +311,12 @@ public class ActivityStock extends AndroidViewModel {
             case R.id.buttonSelectFolder:
                 intentToStart = new Intent(ACTION_OPEN_DOCUMENT_TREE)
                         .setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                try {
+                    Objects.requireNonNull(activityObservableField.get())
+                            .resultInstallDir.launch(intentToStart);
+                } catch (ActivityNotFoundException e) {
+                    Log.e(TAG , e.toString());
+                }
                 break;
             case R.id.buttonSelectIcon:
                 intentToStart = new Intent(ACTION_OPEN_DOCUMENT)
@@ -318,21 +324,36 @@ public class ActivityStock extends AndroidViewModel {
                         .setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                         .setType("*/*")
                         .putExtra(EXTRA_MIME_TYPES, new String[]{"image/png", "image/jpeg"});
+                try {
+                    Objects.requireNonNull(activityObservableField.get())
+                            .resultGetImageLauncher.launch(
+                                    Intent.createChooser(intentToStart , "Select an image"));
+                } catch (ActivityNotFoundException e) {
+                    Log.e(TAG , e.toString());
+                }
                 break;
-            default:
+            case R.id.buttonSelectPath:
                 intentToStart = new Intent(ACTION_OPEN_DOCUMENT)
                         .setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                         .setType("application/octet-stream");
+                try {
+                    Objects.requireNonNull(activityObservableField.get())
+                            .resultSetPath.launch(intentToStart);
+                } catch (ActivityNotFoundException e) {
+                    Log.e(TAG, e.toString());
+                }
                 break;
-        }
-
-        if(intentToStart != null){
-            try {
-                Objects.requireNonNull(activityObservableField.get())
-                        .resultSetMod.launch(intentToStart);
-            } catch (ActivityNotFoundException e) {
-                Log.e(TAG, e.toString());
-            }
+            case R.id.buttonSelectMod:
+                intentToStart = new Intent(ACTION_OPEN_DOCUMENT)
+                        .setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        .setType("application/octet-stream");
+                try {
+                    Objects.requireNonNull(activityObservableField.get())
+                            .resultSetMod.launch(intentToStart);
+                } catch (ActivityNotFoundException e) {
+                    Log.e(TAG, e.toString());
+                }
+                break;
         }
     }
 
