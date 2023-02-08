@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel;
 
 import org.qp.android.view.plugin.PluginFragment;
 
-public class FragmentPlugin extends ViewModel {
+public class PluginViewModel extends ViewModel {
     public ObservableField<PluginFragment> fragmentObservableField =
             new ObservableField<>();
 

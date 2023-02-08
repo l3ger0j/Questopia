@@ -1,6 +1,5 @@
 package org.qp.android;
 
 interface IQuestPlugin {
-
-    void showQSPFile (String pathToQSPFile);
+    int sum(int first, int second);
 }

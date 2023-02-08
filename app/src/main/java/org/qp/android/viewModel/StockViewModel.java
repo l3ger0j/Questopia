@@ -48,6 +48,7 @@ import org.qp.android.utils.ArchiveUtil;
 import org.qp.android.view.game.GameActivity;
 import org.qp.android.view.settings.SettingsController;
 import org.qp.android.view.stock.StockActivity;
+import org.qp.android.view.stock.fragment.StockGameFragment;
 import org.qp.android.view.stock.fragment.dialogs.StockDialogFrags;
 import org.qp.android.view.stock.fragment.dialogs.StockDialogType;
 import org.qp.android.viewModel.repository.LocalGame;
@@ -59,11 +60,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
 
-public class ActivityStock extends AndroidViewModel {
+public class StockViewModel extends AndroidViewModel {
     private final String TAG = this.getClass().getSimpleName();
 
     public ObservableField<StockActivity> activityObservableField = new
             ObservableField<>();
+
+    public ObservableField<StockGameFragment> fragmentObservableField =
+            new ObservableField<>();
+
     public ObservableBoolean isShowDialog = new ObservableBoolean();
     public ObservableBoolean isSelectArchive = new ObservableBoolean();
     public ObservableBoolean isSelectFolder = new ObservableBoolean();
@@ -79,15 +84,13 @@ public class ActivityStock extends AndroidViewModel {
     private DialogEditBinding editBinding;
     private SettingsController controller;
 
+    private final MutableLiveData<ArrayList<GameData>> gameDataList;
+
     public MutableLiveData<Integer> outputIntObserver = new MutableLiveData<>();
 
     // region Getter/Setter
     public void setController(SettingsController controller) {
         this.controller = controller;
-    }
-
-    public GameData getTempGameData() {
-        return tempGameData;
     }
 
     public void setTempGameData(GameData tempGameData) {
@@ -123,13 +126,62 @@ public class ActivityStock extends AndroidViewModel {
         this.gamesDir = gamesDir;
     }
 
+    public void setGameDataArrayList(ArrayList<GameData> gameDataArrayList) {
+        gameDataList.postValue(gameDataArrayList);
+    }
+
+    public MutableLiveData<ArrayList<GameData>> getGameData() {
+        return gameDataList;
+    }
+
+    public GameData getTempGameData() {
+        return tempGameData;
+    }
+
     public HashMap<String, GameData> getGamesMap() {
         return gamesMap;
     }
+
+    public String getGameAuthor () {
+        if (tempGameData.author.length() > 0 && fragmentObservableField.get() != null) {
+            return fragmentObservableField.get().getString(R.string.author).replace("-AUTHOR-" , tempGameData.author);
+        } else {
+            return "";
+        }
+    }
+
+    public String getGameVersion () {
+        if (tempGameData.version.length() > 0 && fragmentObservableField.get() != null) {
+            return fragmentObservableField.get().getString(R.string.version).replace("-VERSION-" , tempGameData.version);
+        } else {
+            return "";
+        }
+    }
+
+    public String getGameType () {
+        if (tempGameData.fileExt.length() > 0 && fragmentObservableField.get() != null) {
+            if (tempGameData.fileExt.equals("aqsp")) {
+                return fragmentObservableField.get().getString(R.string.fileType).replace("-TYPE-", tempGameData.fileExt)
+                        + " " + fragmentObservableField.get().getString(R.string.experimental);
+            }
+            return fragmentObservableField.get().getString(R.string.fileType).replace("-TYPE-", tempGameData.fileExt);
+        } else {
+            return "";
+        }
+    }
+
+    public String getGameSize () {
+        if (tempGameData.getFileSize() != null  && fragmentObservableField.get() != null) {
+            return fragmentObservableField.get().getString(R.string.fileSize).replace("-SIZE-" , tempGameData.getFileSize());
+        } else {
+            return "";
+        }
+    }
     // endregion Getter/Setter
 
-    public ActivityStock(@NonNull Application application) {
+    public StockViewModel(@NonNull Application application) {
         super(application);
+        gameDataList = new MutableLiveData<>();
     }
 
     // region Dialog
@@ -298,16 +350,14 @@ public class ActivityStock extends AndroidViewModel {
     }
 
     public void sendIntent(@NonNull View view) {
-        String action;
         Intent intentInstallDir, intentGetImage, intentSetPath, intentSetMod;
         int id = view.getId();
         if (id == R.id.buttonSelectArchive) {
             Objects.requireNonNull(activityObservableField.get())
                     .showFilePickerDialog(new String[] {"application/zip" , "application/rar"});
         } else if (id == R.id.buttonSelectFolder) {
-            action = ACTION_OPEN_DOCUMENT_TREE;
-            intentInstallDir = new Intent(action);
-            intentInstallDir.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            intentInstallDir = new Intent(ACTION_OPEN_DOCUMENT_TREE)
+                    .setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             try {
                 Objects.requireNonNull(activityObservableField.get())
                         .resultInstallDir.launch(intentInstallDir);
@@ -315,13 +365,11 @@ public class ActivityStock extends AndroidViewModel {
                 Log.e(TAG , e.toString());
             }
         } else if (id == R.id.buttonSelectIcon) {
-            action = ACTION_OPEN_DOCUMENT;
-            intentGetImage = new Intent(action);
-            intentGetImage.addCategory(Intent.CATEGORY_OPENABLE);
-            intentGetImage.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            intentGetImage.setType("*/*");
-            String[] mimeTypes = {"image/png" , "image/jpeg"};
-            intentGetImage.putExtra(EXTRA_MIME_TYPES , mimeTypes);
+            intentGetImage = new Intent(ACTION_OPEN_DOCUMENT)
+                    .addCategory(Intent.CATEGORY_OPENABLE)
+                    .setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    .setType("*/*")
+                    .putExtra(EXTRA_MIME_TYPES , new String[]{"image/png" , "image/jpeg"});
             try {
                 Objects.requireNonNull(activityObservableField.get())
                         .resultGetImageLauncher.launch(
@@ -330,10 +378,9 @@ public class ActivityStock extends AndroidViewModel {
                 Log.e(TAG , e.toString());
             }
         } else if (id == R.id.buttonSelectPath) {
-            action = ACTION_OPEN_DOCUMENT;
-            intentSetPath = new Intent(action);
-            intentSetPath.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            intentSetPath.setType("application/octet-stream");
+            intentSetPath = new Intent(ACTION_OPEN_DOCUMENT)
+                    .setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    .setType("application/octet-stream");
             try {
                 Objects.requireNonNull(activityObservableField.get())
                         .resultSetPath.launch(intentSetPath);
@@ -341,10 +388,9 @@ public class ActivityStock extends AndroidViewModel {
                 Log.e(TAG , e.toString());
             }
         } else if (id == R.id.buttonSelectMod) {
-            action = ACTION_OPEN_DOCUMENT;
-            intentSetMod = new Intent(action);
-            intentSetMod.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            intentSetMod.setType("application/octet-stream");
+            intentSetMod = new Intent(ACTION_OPEN_DOCUMENT)
+                    .setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    .setType("application/octet-stream");
             try {
                 Objects.requireNonNull(activityObservableField.get())
                         .resultSetMod.launch(intentSetMod);

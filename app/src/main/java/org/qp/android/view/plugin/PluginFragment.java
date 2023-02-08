@@ -23,7 +23,7 @@ import org.qp.android.dto.plugin.PluginInfo;
 import org.qp.android.model.plugin.PluginClient;
 import org.qp.android.view.adapters.RecyclerItemClickListener;
 import org.qp.android.view.settings.SettingsActivity;
-import org.qp.android.viewModel.FragmentPlugin;
+import org.qp.android.viewModel.PluginViewModel;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,7 +31,7 @@ import java.util.HashMap;
 public class PluginFragment extends Fragment {
     private final String TAG = getClass().getSimpleName();
 
-    private FragmentPlugin pluginViewModel;
+    private PluginViewModel pluginViewModel;
     private RecyclerView recyclerView;
 
     public static final String ACTION_PICK_PLUGIN = "org.qp.intent.action.PICK_PLUGIN";
@@ -58,7 +58,7 @@ public class PluginFragment extends Fragment {
                 FragmentPluginBinding.inflate(getLayoutInflater());
         recyclerView = fragmentPluginBinding.pluginRecyclerView;
         pluginViewModel = new ViewModelProvider(requireActivity())
-                .get(FragmentPlugin.class);
+                .get(PluginViewModel.class);
         fragmentPluginBinding.setPluginViewModel(pluginViewModel);
         pluginViewModel.fragmentObservableField.set(this);
         refreshPluginInfo();
@@ -92,8 +92,12 @@ public class PluginFragment extends Fragment {
                 new RecyclerItemClickListener.OnItemClickListener() {
                     @Override
                     public void onItemClick(View view , int position) {
-                        if (namePlugin != null) {
-                            new PluginClient().connectPlugin(requireContext() , namePlugin);
+                        var pluginClient  = new PluginClient();
+                        pluginClient.connectPlugin(requireContext());
+                        Log.d(TAG, "TRUE");
+                        int i = pluginClient.calculateSum(20, 30);
+                        if (i != 0) {
+                            Log.d(TAG, String.valueOf(i));
                         }
                     }
 
@@ -120,8 +124,8 @@ public class PluginFragment extends Fragment {
             if (serviceInfo != null) {
                 var item = new HashMap<String, String>();
                 item.put(KEY_PKG, serviceInfo.packageName);
-                namePlugin = serviceInfo.packageName;
                 item.put(KEY_SERVICENAME, serviceInfo.name);
+                namePlugin = serviceInfo.name;
                 String firstCategory = null;
                 if (filter != null) {
                     var actions = new StringBuilder();

@@ -5,8 +5,7 @@
     <data>
         <variable
             name="gameViewModel"
-            type="org.qp.android.viewModel.ActivityGame"
-            />
+            type="org.qp.android.viewModel.GameViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
