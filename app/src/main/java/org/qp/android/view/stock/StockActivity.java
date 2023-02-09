@@ -3,23 +3,16 @@ package org.qp.android.view.stock;
 import static org.qp.android.utils.DirUtil.doesDirectoryContainGameFiles;
 import static org.qp.android.utils.FileUtil.deleteDirectory;
 
-import android.app.Dialog;
-import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -44,6 +37,7 @@ import com.zhpan.bannerview.BaseViewHolder;
 import org.qp.android.R;
 import org.qp.android.databinding.ActivityStockBinding;
 import org.qp.android.dto.stock.GameData;
+import org.qp.android.utils.QspDataPicker;
 import org.qp.android.view.settings.SettingsActivity;
 import org.qp.android.view.settings.SettingsController;
 import org.qp.android.view.stock.fragment.StockGameFragment;
@@ -56,16 +50,11 @@ import org.qp.android.viewModel.ActivityStock;
 import org.qp.android.viewModel.FragmentStock;
 import org.qp.android.viewModel.FragmentStockGame;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Objects;
-import java.util.zip.ZipFile;
 
 public class StockActivity extends AppCompatActivity implements StockPatternDialogFrags.StockPatternDialogList, StockPatternFragment.StockPatternFragmentList {
     private final String TAG = this.getClass().getSimpleName();
@@ -369,43 +358,9 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
 //        } catch (ActivityNotFoundException e) {
 //            Log.e("tag", "No activity can handle picking a file. Showing alternatives.");
 //        }
-
-        ViewGroup add_phone = (ViewGroup) getLayoutInflater().inflate(R.layout.filepicker_dialog_layout, null);
-        TextView okay_text, cancel_text;
-        Dialog dialog = new Dialog(StockActivity.this);
-        dialog.setContentView(add_phone);
-        dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        dialog.setCancelable(false);
-
-        File directory = new File(String.valueOf(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)));
-        String[] files = directory.list();
-        assert files != null;
-        Log.d("Files", "Size: "+ files.length);
-        StringBuilder filer = new StringBuilder();
-        for (String file : files) {
-            filer.append(file).append("\n");
-        }
-        TextView first = add_phone.findViewById(R.id.textpath);
-        first.setText(filer);
-//        okay_text.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                dialog.dismiss();
-//                Toast.makeText(StockActivity.this, "okay clicked", Toast.LENGTH_SHORT).show();
-//            }
-//        });
-
-//        cancel_text.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                dialog.dismiss();
-//                Toast.makeText(StockActivity.this, "Cancel clicked", Toast.LENGTH_SHORT).show();
-//            }
-//        });
-
-        dialog.show();
-        Log.e("test", Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString());
+//
         //storageHelper.openFilePicker(mimeTypes);
+        new QspDataPicker(this).generateDataPicker();
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {

@@ -1,5 +1,6 @@
 plugins {
     id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
 }
 
 def viewBind = true
@@ -70,6 +71,7 @@ dependencies {
     implementation 'org.simpleframework:simple-xml:2.7.1'
     implementation 'com.google.android.material:material:1.8.0'
     implementation 'com.squareup.picasso:picasso:2.71828'
+    implementation 'androidx.core:core-ktx:+'
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test:core:1.5.0'
