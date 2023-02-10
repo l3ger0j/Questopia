@@ -14,19 +14,17 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.view.ActionMode;
 import androidx.cardview.widget.CardView;
 import androidx.core.os.LocaleListCompat;
-import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.anggrayudi.storage.FileWrapper;
 import com.anggrayudi.storage.SimpleStorageHelper;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.zhpan.bannerview.BannerViewPager;
@@ -60,8 +58,6 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
 
     private ActionMode actionMode;
     protected ActivityStockBinding activityStockBinding;
-    public ActivityResultLauncher<Intent>
-            resultInstallDir, resultGetImageLauncher, resultSetPath, resultSetMod;
     private boolean isEnable = false;
     private FloatingActionButton mFAB;
     private RecyclerView mRecyclerView;
@@ -183,84 +179,43 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
                     .commit();
         }
 
-        resultSetPath = registerForActivityResult(
-                new ActivityResultContracts.StartActivityForResult(),
-                result -> {
-                    Uri uri;
-                    DocumentFile file;
-                    if (result.getResultCode() == RESULT_OK) {
-                        if ((uri = Objects.requireNonNull(result.getData()).getData()) == null) {
-                            showErrorDialog("Archive or file is not selected");
-                        }
-                        file = DocumentFile.fromSingleUri(this, Objects.requireNonNull(uri));
-                        assert file != null;
-                        stockViewModel.setTempPathFile(file);
-                    }
-                }
-        );
-
-        resultSetMod = registerForActivityResult(
-                new ActivityResultContracts.StartActivityForResult(),
-                result -> {
-                    Uri uri;
-                    DocumentFile file;
-                    if (result.getResultCode() == RESULT_OK) {
-                        if ((uri = Objects.requireNonNull(result.getData()).getData()) == null) {
-                            showErrorDialog("Archive or file is not selected");
-                        }
-                        file = DocumentFile.fromSingleUri(this, Objects.requireNonNull(uri));
-                        assert file != null;
-                        stockViewModel.setTempModFile(file);
-                    }
-                }
-        );
-
         storageHelper.setOnFileSelected((integer , documentFiles) -> {
             if (documentFiles != null) {
-                stockViewModel.setTempInstallFile(documentFiles.get(0));
-                stockViewModel.isSelectArchive.set(true);
+                for (int i = 0; documentFiles.size() > i; i++) {
+                    var document =
+                            new FileWrapper.Document(documentFiles.get(i));
+                    switch (document.getExtension()) {
+                        case "zip":
+                        case "rar":
+                            stockViewModel.setTempInstallFile(document.getDocumentFile());
+                            stockViewModel.isSelectArchive.set(true);
+                            break;
+                        case "png":
+                        case "jpg":
+                        case "jpeg":
+                            Log.d(TAG, "TRUE");
+                            getContentResolver().takePersistableUriPermission(document.getUri(),
+                                    Intent.FLAG_GRANT_READ_URI_PERMISSION
+                                            | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                            stockViewModel.setTempImageFile(document.getDocumentFile());
+                            break;
+                        case "qsp":
+                            stockViewModel.setTempPathFile(document.getDocumentFile());
+                            stockViewModel.setTempModFile(document.getDocumentFile());
+                            break;
+                    }
+                }
             } else {
                 showErrorDialog("Archive or file is not selected");
             }
             return null;
         });
 
-        resultInstallDir = registerForActivityResult(
-                new ActivityResultContracts.StartActivityForResult(),
-                result -> {
-                    Uri uri;
-                    DocumentFile file;
-                    if (result.getResultCode() == RESULT_OK) {
-                        if ((uri = Objects.requireNonNull(result.getData()).getData()) == null) {
-                            showErrorDialog("Archive or file is not selected");
-                        }
-                        file = DocumentFile.fromTreeUri(this, Objects.requireNonNull(uri));
-                        assert file != null;
-                        stockViewModel.setTempInstallDir(file);
-                        stockViewModel.isSelectFolder.set(true);
-                    }
-                }
-        );
-
-        resultGetImageLauncher = registerForActivityResult(
-                new ActivityResultContracts.StartActivityForResult(),
-                result -> {
-                    Uri uri;
-                    DocumentFile file;
-                    if (result.getResultCode() == RESULT_OK) {
-                        if ((uri = Objects.requireNonNull(result.getData()).getData()) == null) {
-                            showErrorDialog("Archive or file is not selected");
-                        }
-                        getContentResolver().takePersistableUriPermission(uri,
-                                Intent.FLAG_GRANT_READ_URI_PERMISSION
-                                | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-                        assert uri != null;
-                        file = DocumentFile.fromSingleUri(this, uri);
-                        assert file != null;
-                        stockViewModel.setTempImageFile(file);
-                    }
-                }
-        );
+        storageHelper.setOnFolderSelected((integer , documentFile) -> {
+            stockViewModel.setTempInstallDir(documentFile);
+            stockViewModel.isSelectFolder.set(true);
+            return null;
+        });
 
         loadSettings();
 
@@ -346,6 +301,10 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
 
     public void showFilePickerDialog (String[] mimeTypes) {
         storageHelper.openFilePicker(mimeTypes);
+    }
+
+    public void showDirPickerDialog () {
+        storageHelper.openFolderPicker();
     }
 
     public void onItemClick(int position) {

@@ -1,8 +1,5 @@
 package org.qp.android.viewModel;
 
-import static android.content.Intent.ACTION_OPEN_DOCUMENT;
-import static android.content.Intent.ACTION_OPEN_DOCUMENT_TREE;
-import static android.content.Intent.EXTRA_MIME_TYPES;
 import static org.qp.android.utils.FileUtil.GAME_INFO_FILENAME;
 import static org.qp.android.utils.FileUtil.copyFile;
 import static org.qp.android.utils.FileUtil.createFile;
@@ -19,7 +16,6 @@ import static org.qp.android.utils.XmlUtil.objectToXml;
 
 import android.Manifest;
 import android.app.Application;
-import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -36,6 +32,8 @@ import androidx.databinding.ObservableField;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.MutableLiveData;
+
+import com.squareup.picasso.Picasso;
 
 import org.qp.android.R;
 import org.qp.android.databinding.DialogEditBinding;
@@ -120,6 +118,19 @@ public class StockViewModel extends AndroidViewModel {
 
     public void setTempImageFile(@NonNull DocumentFile tempImageFile) {
         this.tempImageFile = tempImageFile;
+        if (installBinding != null) {
+            installBinding.imageTV.setText(tempImageFile.getName());
+            Picasso.get()
+                    .load(tempImageFile.getUri())
+                    .fit()
+                    .into(installBinding.imageView);
+        } else if (editBinding != null) {
+            editBinding.imageTV.setText(tempImageFile.getName());
+            Picasso.get()
+                    .load(tempImageFile.getUri())
+                    .fit()
+                    .into(editBinding.imageView);
+        }
     }
 
     public void setGamesDir(File gamesDir) {
@@ -350,53 +361,23 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     public void sendIntent(@NonNull View view) {
-        Intent intentInstallDir, intentGetImage, intentSetPath, intentSetMod;
+        Intent intentSetPath, intentSetMod;
         int id = view.getId();
         if (id == R.id.buttonSelectArchive) {
             Objects.requireNonNull(activityObservableField.get())
-                    .showFilePickerDialog(new String[] {"application/zip" , "application/rar"});
+                    .showFilePickerDialog(new String[]{"application/zip" , "application/rar"});
         } else if (id == R.id.buttonSelectFolder) {
-            intentInstallDir = new Intent(ACTION_OPEN_DOCUMENT_TREE)
-                    .setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            try {
-                Objects.requireNonNull(activityObservableField.get())
-                        .resultInstallDir.launch(intentInstallDir);
-            } catch (ActivityNotFoundException e) {
-                Log.e(TAG , e.toString());
-            }
+            Objects.requireNonNull(activityObservableField.get())
+                    .showDirPickerDialog();
         } else if (id == R.id.buttonSelectIcon) {
-            intentGetImage = new Intent(ACTION_OPEN_DOCUMENT)
-                    .addCategory(Intent.CATEGORY_OPENABLE)
-                    .setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                    .setType("*/*")
-                    .putExtra(EXTRA_MIME_TYPES , new String[]{"image/png" , "image/jpeg"});
-            try {
-                Objects.requireNonNull(activityObservableField.get())
-                        .resultGetImageLauncher.launch(
-                                Intent.createChooser(intentGetImage , "Select an image"));
-            } catch (ActivityNotFoundException e) {
-                Log.e(TAG , e.toString());
-            }
+            Objects.requireNonNull(activityObservableField.get())
+                    .showFilePickerDialog(new String[]{"image/png" , "image/jpeg"});
         } else if (id == R.id.buttonSelectPath) {
-            intentSetPath = new Intent(ACTION_OPEN_DOCUMENT)
-                    .setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                    .setType("application/octet-stream");
-            try {
-                Objects.requireNonNull(activityObservableField.get())
-                        .resultSetPath.launch(intentSetPath);
-            } catch (ActivityNotFoundException e) {
-                Log.e(TAG , e.toString());
-            }
+            Objects.requireNonNull(activityObservableField.get())
+                    .showFilePickerDialog(new String[]{"application/octet-stream"});
         } else if (id == R.id.buttonSelectMod) {
-            intentSetMod = new Intent(ACTION_OPEN_DOCUMENT)
-                    .setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                    .setType("application/octet-stream");
-            try {
-                Objects.requireNonNull(activityObservableField.get())
-                        .resultSetMod.launch(intentSetMod);
-            } catch (ActivityNotFoundException e) {
-                Log.e(TAG , e.toString());
-            }
+            Objects.requireNonNull(activityObservableField.get())
+                    .showFilePickerDialog(new String[]{"application/octet-stream"});
         }
     }
 

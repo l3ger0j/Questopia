@@ -94,7 +94,6 @@ public class PluginFragment extends Fragment {
                     public void onItemClick(View view , int position) {
                         var pluginClient  = new PluginClient();
                         pluginClient.connectPlugin(requireContext());
-                        Log.d(TAG, "TRUE");
                         int i = pluginClient.calculateSum(20, 30);
                         if (i != 0) {
                             Log.d(TAG, String.valueOf(i));

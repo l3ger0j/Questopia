@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.util.Log;
 
 import androidx.annotation.Nullable;
 
@@ -17,22 +18,24 @@ public class PluginClient {
     ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name , IBinder service) {
+            Log.d(getClass().getSimpleName(), "CONNECT");
             questPlugin = IQuestPlugin.Stub.asInterface(service);
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
+            Log.d(getClass().getSimpleName(), "DISCONNECT");
             questPlugin = null;
         }
     };
 
     public void connectPlugin (Context context) {
-        // var intent = new Intent(pluginName);
-        // Log.d (getClass().getSimpleName(), intent.toString());
-        // var updatedIntent = createExplicitIntent(context, intent);
-        // if (updatedIntent != null) {
-        //    context.bindService(updatedIntent, serviceConnection, Context.BIND_AUTO_CREATE);
-        // }
+        var intent = new Intent("org.qp.intent.action.PICK_PLUGIN");
+        Log.d (getClass().getSimpleName(), intent.toString());
+        var updatedIntent = createExplicitIntent(context, intent);
+        if (updatedIntent != null) {
+            context.bindService(updatedIntent, serviceConnection, Context.BIND_AUTO_CREATE);
+        }
     }
 
     public int calculateSum(int firstNumber, int secondNumber) {
