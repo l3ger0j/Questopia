@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -93,11 +94,10 @@ public class PluginFragment extends Fragment {
                     @Override
                     public void onItemClick(View view , int position) {
                         var pluginClient  = new PluginClient();
-                        pluginClient.connectPlugin(requireContext());
-                        int i = pluginClient.calculateSum(20, 30);
-                        if (i != 0) {
-                            Log.d(TAG, String.valueOf(i));
-                        }
+                        pluginClient.connectPlugin(requireContext(), namePlugin);
+                        Log.d(TAG, namePlugin);
+                        new Handler().postDelayed(() ->
+                                Log.d(TAG, String.valueOf(pluginClient.calculateSum(20, 30))) ,1000);
                     }
 
                     @Override

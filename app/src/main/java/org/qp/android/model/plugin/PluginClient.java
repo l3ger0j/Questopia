@@ -10,7 +10,7 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
-import org.qp.android.IQuestPlugin;
+import org.qp.android.plugin.IQuestPlugin;
 
 public class PluginClient {
     private IQuestPlugin questPlugin;
@@ -29,12 +29,14 @@ public class PluginClient {
         }
     };
 
-    public void connectPlugin (Context context) {
-        var intent = new Intent("org.qp.intent.action.PICK_PLUGIN");
-        Log.d (getClass().getSimpleName(), intent.toString());
-        var updatedIntent = createExplicitIntent(context, intent);
-        if (updatedIntent != null) {
-            context.bindService(updatedIntent, serviceConnection, Context.BIND_AUTO_CREATE);
+    public void connectPlugin (Context context, String namePlugin) {
+        if (namePlugin.equals("org.qp.android.plugin.AidlService")) {
+            var intent = new Intent("org.qp.android.plugin.DOWNLOAD_PLUGIN");
+            Log.d (getClass().getSimpleName(), intent.toString());
+            var updatedIntent = createExplicitIntent(context, intent);
+            if (updatedIntent != null) {
+                context.bindService(updatedIntent, serviceConnection, Context.BIND_AUTO_CREATE);
+            }
         }
     }
 

@@ -114,37 +114,6 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         super.onCreate(savedInstanceState);
         activityStockBinding = ActivityStockBinding.inflate(getLayoutInflater());
         mFAB = activityStockBinding.stockFAB;
-        var list = new ArrayList<Integer>();
-        list.add(R.drawable.banner_1);
-        list.add(R.drawable.banner_0);
-        BannerViewPager<Integer> bannerViewPager = activityStockBinding.bannerView;
-        bannerViewPager.registerLifecycleObserver(getLifecycle()).setAdapter(new BaseBannerAdapter<>() {
-            @Override
-            protected void bindData(BaseViewHolder<Integer> holder , Integer data , int position , int pageSize) {
-                holder.setImageResource(R.id.banner_image , data);
-            }
-
-            @Override
-            public int getLayoutId(int viewType) {
-                return R.layout.list_item_banner;
-            }
-        }).create(list);
-        bannerViewPager.setOnPageClickListener((clickedView , position) -> {
-            switch (position) {
-                case 0:
-                    var intentImg0 = new Intent(Intent.ACTION_VIEW, Uri
-                            .parse("https://t.me/joinchat/AAAAAFgqAMXq0SA34umFbQ"));
-                    intentImg0.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(intentImg0);
-                    break;
-                case 1:
-                    var intentImg1 = new Intent(Intent.ACTION_VIEW, Uri
-                            .parse("https://schoollife.fludilka.su/viewtopic.php?id=828#p63540"));
-                    intentImg1.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(intentImg1);
-                    break;
-            }
-        });
         if (mRecyclerView != null) {
             mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
                 @Override
@@ -217,6 +186,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
             return null;
         });
 
+        loadBannerViewPager();
         loadSettings();
 
         Log.i(TAG,"Stock Activity created");
@@ -278,6 +248,40 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         } else {
             AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("en"));
         }
+    }
+
+    private void loadBannerViewPager () {
+        var list = new ArrayList<Integer>();
+        list.add(R.drawable.banner_1);
+        list.add(R.drawable.banner_0);
+        BannerViewPager<Integer> bannerViewPager = activityStockBinding.bannerView;
+        bannerViewPager.registerLifecycleObserver(getLifecycle()).setAdapter(new BaseBannerAdapter<>() {
+            @Override
+            protected void bindData(BaseViewHolder<Integer> holder , Integer data , int position , int pageSize) {
+                holder.setImageResource(R.id.banner_image , data);
+            }
+
+            @Override
+            public int getLayoutId(int viewType) {
+                return R.layout.list_item_banner;
+            }
+        }).create(list);
+        bannerViewPager.setOnPageClickListener((clickedView , position) -> {
+            switch (position) {
+                case 0:
+                    var intentImg0 = new Intent(Intent.ACTION_VIEW, Uri
+                            .parse("https://t.me/joinchat/AAAAAFgqAMXq0SA34umFbQ"));
+                    intentImg0.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intentImg0);
+                    break;
+                case 1:
+                    var intentImg1 = new Intent(Intent.ACTION_VIEW, Uri
+                            .parse("https://schoollife.fludilka.su/viewtopic.php?id=828#p63540"));
+                    intentImg1.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intentImg1);
+                    break;
+            }
+        });
     }
 
     public void showErrorDialog(String errorMessage) {

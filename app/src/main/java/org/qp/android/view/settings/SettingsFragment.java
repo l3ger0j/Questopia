@@ -12,6 +12,7 @@ import org.qp.android.BuildConfig;
 import org.qp.android.QuestPlayerApplication;
 import org.qp.android.R;
 import org.qp.android.utils.ViewUtil;
+import org.qp.android.view.plugin.PluginFragment;
 import org.qp.android.view.settings.dialogs.SettingsDialogFrag;
 import org.qp.android.view.settings.dialogs.SettingsPatternPrefFrag;
 
@@ -68,7 +69,20 @@ public class SettingsFragment extends SettingsPatternPrefFrag {
                     .replace("-VALUE-", "#0000ff"));
             linkColor.setEnabled(!controller.isUseGameLinkColor);
         }
-        
+
+        var click = findPreference("showExtensionMenu");
+        if (click != null) {
+            click.setOnPreferenceClickListener(preference -> {
+                listener.onClickShowPlugin(true);
+                var pluginFragment = new PluginFragment();
+                requireActivity().getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.settings_container, pluginFragment , "pluginFragment")
+                        .addToBackStack(null)
+                        .commit();
+                return true;
+            });
+        }
+
         var button = findPreference("showAbout");
         if (button != null) {
             button.setOnPreferenceClickListener(preference -> {

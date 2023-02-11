@@ -361,7 +361,6 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     public void sendIntent(@NonNull View view) {
-        Intent intentSetPath, intentSetMod;
         int id = view.getId();
         if (id == R.id.buttonSelectArchive) {
             Objects.requireNonNull(activityObservableField.get())
