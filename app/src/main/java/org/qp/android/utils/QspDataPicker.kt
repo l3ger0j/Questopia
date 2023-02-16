@@ -25,14 +25,13 @@ class QspDataPicker(val context: Context) {
         dialog.setCancelable(false)
 
         val directory = File(java.lang.String.valueOf(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)))
-        val files: Array<String> = directory.list()!!
-        Log.d("Files", "Size: " + files.size)
-        val filer = StringBuilder()
-        for (file in files) {
-            filer.append(file)
-        }
+        val files = File(java.lang.String.valueOf(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS))).listFiles()
+        val fileNames = arrayOfNulls<String>(files.size)
         val first: TextView = add_phone.findViewById(R.id.textpath)
-        first.text = files.toString()
+        files?.mapIndexed { index, item ->
+            fileNames[index] = item?.name
+        }
+        first.text = fileNames.joinToString("\n")
 //        okay_text.setOnClickListener{
 //            dialog.dismiss()
 //            Toast.makeText(context, "okay clicked", Toast.LENGTH_SHORT).show()
