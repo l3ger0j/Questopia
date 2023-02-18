@@ -1,5 +1,6 @@
 package org.qp.android.view.stock;
 
+import static android.provider.Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION;
 import static org.qp.android.utils.DirUtil.doesDirectoryContainGameFiles;
 import static org.qp.android.utils.FileUtil.deleteDirectory;
 
@@ -9,6 +10,8 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -30,14 +33,15 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.anggrayudi.storage.SimpleStorageHelper;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.picker.prettyfilepicker.PrettyFilePicker;
 import com.zhpan.bannerview.BannerViewPager;
 import com.zhpan.bannerview.BaseBannerAdapter;
 import com.zhpan.bannerview.BaseViewHolder;
 
+import org.qp.android.BuildConfig;
 import org.qp.android.R;
 import org.qp.android.databinding.ActivityStockBinding;
 import org.qp.android.dto.stock.GameData;
-import org.qp.android.utils.QspDataPicker;
 import org.qp.android.view.settings.SettingsActivity;
 import org.qp.android.view.settings.SettingsController;
 import org.qp.android.view.stock.fragment.StockGameFragment;
@@ -121,6 +125,14 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.R){
+            if (!Environment.isExternalStorageManager()) {
+                Intent requestFilePermissionsIntent = new Intent(ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, Uri.parse("package:" + BuildConfig.APPLICATION_ID));
+                startActivity(requestFilePermissionsIntent);
+            }
+        }
+
         activityStockBinding = ActivityStockBinding.inflate(getLayoutInflater());
         mFAB = activityStockBinding.stockFAB;
         localStockViewModel =
@@ -351,31 +363,12 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
     }
 
     public void showFilePickerDialog(String[] mimeTypes) {
-//        Intent fileintent = new Intent(Intent.ACTION_GET_CONTENT);
-//        fileintent.setType("application/zip");
-//        try {
-//            startActivityForResult(fileintent, 923067);
-//        } catch (ActivityNotFoundException e) {
-//            Log.e("tag", "No activity can handle picking a file. Showing alternatives.");
-//        }
-//
-        //storageHelper.openFilePicker(mimeTypes);
-        new QspDataPicker(this).generateDataPicker();
-    }
-
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (data == null)
-            return;
-        if (requestCode == 923067) {
-            if (resultCode == RESULT_OK) {
-                //File file = new File(data.getData().getPath());
-                DocumentFile dFile = DocumentFile.fromSingleUri(this, data.getData());
-                assert dFile != null;
-                activityStock.setTempInstallFile(dFile);
-                activityStock.isSelectArchive.set(true);
-            }
-        }
+        final PrettyFilePicker filePicker = new PrettyFilePicker(this);
+        filePicker.create("Select file");
+        PrettyFilePicker.Companion.getFileFromPrettyFilePickerAsFile().observe(this, file -> {
+            activityStock.setTempInstallFile(file);
+            activityStock.isSelectArchive.set(true);
+        });
     }
 
     public void onItemClick(int position) {
