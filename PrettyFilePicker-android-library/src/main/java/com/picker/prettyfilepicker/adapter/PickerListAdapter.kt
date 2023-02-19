@@ -9,10 +9,8 @@ import androidx.documentfile.provider.DocumentFile
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.picker.prettyfilepicker.PrettyFilePicker.Companion.fileFromPrettyFilePickerAsFile
-import com.picker.prettyfilepicker.PrettyFilePicker.Companion.fileFromPrettyFilePickerAsString
+import com.picker.prettyfilepicker.PrettyFilePicker
 import com.picker.prettyfilepicker.databinding.FileElementInListBinding
-import com.picker.prettyfilepicker.factory.DialogFactory
 import com.picker.prettyfilepicker.models.FileModel
 import java.io.File
 import java.nio.file.Files
@@ -20,10 +18,12 @@ import java.nio.file.Paths
 
 class PickerListAdapter(
     private val view: View,
-    private val dialogFactory: DialogFactory
+    private val prettyFilePicker: PrettyFilePicker,
+    private val returnAsDocumentFile: Boolean,
+    filters: ArrayList<String>
 ) :
     ListAdapter<FileModel, PickerListAdapter.MainViewHolder>(ItemComparator()) {
-    private val reDrawer = AdapterReDraw(this)
+    private val reDrawer = AdapterReDraw(this, filters)
 
     class MainViewHolder(private val binding: FileElementInListBinding) :
         RecyclerView.ViewHolder(binding.root) {
@@ -64,10 +64,12 @@ class PickerListAdapter(
         val item = getItem(position)
         holder.bind(item)
         holder.itemView.setOnClickListener {
-            if(!Files.isDirectory(Paths.get(item.filePath))) {
-                fileFromPrettyFilePickerAsString.value = item.filePath
-                fileFromPrettyFilePickerAsFile.value = DocumentFile.fromFile(File(item.filePath))
-                dialogFactory.destroy()
+            if (!Files.isDirectory(Paths.get(item.filePath))) {
+                prettyFilePicker.destroy()
+                prettyFilePicker.returnedData.value = if (!returnAsDocumentFile)
+                    item.filePath
+                else
+                    DocumentFile.fromFile(File(item.filePath))
             } else {
                 reDrawer.openFolder(item.filePath, view)
             }

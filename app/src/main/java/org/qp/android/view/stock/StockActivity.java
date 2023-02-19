@@ -23,6 +23,7 @@ import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.os.LocaleListCompat;
+import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
@@ -331,13 +332,18 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         storageHelper.openFilePicker(mimeTypes);
     }
 
-    public void showFilePickerDialog () {
-        final var filePicker = new PrettyFilePicker(this);
-        filePicker.create("Select file");
-        PrettyFilePicker.Companion.getFileFromPrettyFilePickerAsFile().observe(this, file -> {
-            stockViewModel.setTempInstallFile(file);
-            stockViewModel.isSelectArchive.set(true);
-        });
+    public void showFilePickerDialog (ArrayList<String> mimeTypes) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            new PrettyFilePicker(
+                    this,
+                    "Select file",
+                    true,
+                    mimeTypes).runFilePicker(data -> {
+                stockViewModel.setTempInstallFile((DocumentFile) data);
+                stockViewModel.isSelectArchive.set(true);
+                return null;
+            });
+        }
     }
 
     public void showDirPickerDialog () {

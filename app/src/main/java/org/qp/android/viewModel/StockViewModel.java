@@ -400,8 +400,11 @@ public class StockViewModel extends AndroidViewModel {
         int id = view.getId();
         if (id == R.id.buttonSelectArchive) {
             if (controller.isUseNewFilePicker) {
+                var strings = new ArrayList<String>();
+                strings.add("application/zip");
+                strings.add("application/rar");
                 Objects.requireNonNull(activityObservableField.get())
-                        .showFilePickerDialog();
+                        .showFilePickerDialog(strings);
             } else {
                 Objects.requireNonNull(activityObservableField.get())
                         .showFilePickerActivity(new String[]{"application/zip" , "application/rar"});
