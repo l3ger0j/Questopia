@@ -1,5 +1,7 @@
 package org.qp.android.dto.stock;
 
+import static org.qp.android.utils.StringUtil.isNotEmpty;
+
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.Root;
 
@@ -70,6 +72,10 @@ public class GameData {
         return (fileSize != null) ? fileSize : "";
     }
 
+    public boolean hasRemoteUrl() {
+        return isNotEmpty(fileUrl);
+    }
+
     public boolean isInstalled() {
         return gameDir != null;
     }
@@ -98,6 +104,6 @@ public class GameData {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, listId, author, portedBy, version, title, lang, player, icon, fileUrl, fileSize, fileExt, descUrl, pubDate, modDate);
+        return Objects.hash(id , listId , author , portedBy , version , title , lang , player , icon , fileUrl , fileSize , fileExt , descUrl , pubDate , modDate);
     }
 }

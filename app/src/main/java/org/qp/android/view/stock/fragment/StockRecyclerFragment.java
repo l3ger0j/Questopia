@@ -16,13 +16,13 @@ import org.qp.android.databinding.FragmentStockRecyclerBinding;
 import org.qp.android.dto.stock.GameData;
 import org.qp.android.view.adapters.RecyclerItemClickListener;
 import org.qp.android.view.stock.StockGamesRecycler;
-import org.qp.android.viewModel.FragmentStock;
+import org.qp.android.viewModel.StockViewModel;
 
 import java.util.ArrayList;
 import java.util.Objects;
 
 public class StockRecyclerFragment extends Fragment {
-    private FragmentStock localViewModel;
+    private StockViewModel stockViewModel;
     private RecyclerView mRecyclerView;
 
     @Nullable
@@ -33,10 +33,10 @@ public class StockRecyclerFragment extends Fragment {
         org.qp.android.databinding.FragmentStockRecyclerBinding fragmentStockBinding =
                 FragmentStockRecyclerBinding.inflate(getLayoutInflater());
         mRecyclerView = fragmentStockBinding.gamesLocal;
-        localViewModel = new ViewModelProvider(requireActivity())
-                .get(FragmentStock.class);
-        localViewModel.getGameData().observe(getViewLifecycleOwner(), gameData);
-        Objects.requireNonNull(localViewModel.activityObservableField.get())
+        stockViewModel = new ViewModelProvider(requireActivity())
+                .get(StockViewModel.class);
+        stockViewModel.getGameData().observe(getViewLifecycleOwner(), gameData);
+        Objects.requireNonNull(stockViewModel.activityObservableField.get())
                 .setRecyclerView(mRecyclerView);
         return fragmentStockBinding.getRoot();
     }
@@ -59,13 +59,13 @@ public class StockRecyclerFragment extends Fragment {
                 new RecyclerItemClickListener.OnItemClickListener() {
                     @Override
                     public void onItemClick(View view , int position) {
-                        Objects.requireNonNull(localViewModel.activityObservableField
+                        Objects.requireNonNull(stockViewModel.activityObservableField
                                 .get()).onItemClick(position);
                     }
 
                     @Override
                     public void onLongItemClick(View view , int position) {
-                        Objects.requireNonNull(localViewModel.activityObservableField
+                        Objects.requireNonNull(stockViewModel.activityObservableField
                                 .get()).onLongItemClick();
                     }
                 }));

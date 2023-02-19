@@ -10,10 +10,11 @@ import androidx.databinding.ObservableField;
 import androidx.lifecycle.ViewModel;
 
 import org.qp.android.R;
+import org.qp.android.view.plugin.PluginFragment;
 import org.qp.android.view.settings.SettingsActivity;
 import org.qp.android.view.settings.SettingsController;
 
-public class ActivitySettings extends ViewModel {
+public class SettingsViewModel extends ViewModel {
     private static final String ABOUT_TEMPLATE = "<html><head>\n" +
             "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1\">\n" +
             "<style type=\"text/css\">\n" +
@@ -23,8 +24,10 @@ public class ActivitySettings extends ViewModel {
             "table{font-size: QSPFONTSIZE; font-family: QSPFONTSTYLE; }\n" +
             "</style></head><body>REPLACETEXT</body></html>";
 
-
     public ObservableField<SettingsActivity> settingsActivityObservableField =
+            new ObservableField<>();
+
+    public ObservableField<PluginFragment> fragmentObservableField =
             new ObservableField<>();
 
     public boolean isShowPluginFragment = false;

@@ -11,12 +11,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
 import org.qp.android.databinding.FragmentStockGameBinding;
-import org.qp.android.viewModel.FragmentStockGame;
+import org.qp.android.viewModel.StockViewModel;
 
 public class StockGameFragment extends StockPatternFragment {
     private FragmentStockGameBinding fragmentStockGameBinding;
-    private FragmentStockGame fragmentStockGame;
-
+    private StockViewModel stockViewModel;
 
     @Nullable
     @Override
@@ -26,10 +25,10 @@ public class StockGameFragment extends StockPatternFragment {
             appCompatActivity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
         fragmentStockGameBinding = FragmentStockGameBinding.inflate(getLayoutInflater());
-        fragmentStockGame = new ViewModelProvider(requireActivity())
-                .get(FragmentStockGame.class);
-        fragmentStockGame.fragmentObservableField.set(this);
-        fragmentStockGameBinding.setViewModel(fragmentStockGame);
+        stockViewModel = new ViewModelProvider(requireActivity())
+                .get(StockViewModel.class);
+        stockViewModel.fragmentObservableField.set(this);
+        fragmentStockGameBinding.setViewModel(stockViewModel);
         return fragmentStockGameBinding.getRoot();
     }
 

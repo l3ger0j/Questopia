@@ -82,7 +82,7 @@ public class SettingsFragment extends SettingsPatternPrefFrag {
                 return true;
             });
         }
-        
+
         var button = findPreference("showAbout");
         if (button != null) {
             button.setOnPreferenceClickListener(preference -> {

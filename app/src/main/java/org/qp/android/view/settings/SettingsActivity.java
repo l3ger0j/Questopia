@@ -8,23 +8,23 @@ import androidx.lifecycle.ViewModelProvider;
 
 import org.qp.android.R;
 import org.qp.android.view.settings.dialogs.SettingsPatternPrefFrag;
-import org.qp.android.viewModel.ActivitySettings;
+import org.qp.android.viewModel.SettingsViewModel;
 
 import java.util.Objects;
 
 public class SettingsActivity extends AppCompatActivity implements
         SettingsPatternPrefFrag.SettingsPatternFragmentList {
     private SettingsController settingsController;
-    private ActivitySettings activitySettings;
+    private SettingsViewModel settingsViewModel;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
 
-        activitySettings = new ViewModelProvider(this)
-                .get(ActivitySettings.class);
-        activitySettings.settingsActivityObservableField.set(this);
+        settingsViewModel = new ViewModelProvider(this)
+                .get(SettingsViewModel.class);
+        settingsViewModel.settingsActivityObservableField.set(this);
         settingsController = SettingsController.newInstance().loadSettings(this);
 
         Objects.requireNonNull(getSupportActionBar())
@@ -35,7 +35,7 @@ public class SettingsActivity extends AppCompatActivity implements
                 .beginTransaction()
                 .replace(R.id.settings_container,
                         SettingsFragment
-                                .newInstance(activitySettings
+                                .newInstance(settingsViewModel
                                         .formationAboutDesc(settingsController , this)),
                         "settingsFragment")
                 .addToBackStack(null)
@@ -50,12 +50,12 @@ public class SettingsActivity extends AppCompatActivity implements
 
     @Override
     public void onClickShowPlugin(boolean onShow) {
-        activitySettings.isShowPluginFragment = onShow;
+        settingsViewModel.isShowPluginFragment = onShow;
     }
 
     @Override
     public boolean onSupportNavigateUp() {
-        if (activitySettings.isShowPluginFragment) {
+        if (settingsViewModel.isShowPluginFragment) {
             onBackPressed();
         } else {
             finish();

@@ -55,7 +55,8 @@
 <ul>
     <li><b>Разработка:</b></li>
     <ul style="list-style-type:none">
-        <li>l3ger0j (~v2.1+)</li>
+        <li><a href=\"https://github.com/l3ger0j/\">l3ger0j</a></li>
+        <li><a href=\"https://github.com/shirrumon/\">shirrumon</a></li>
     </ul>
 </ul>
 <center><h3>Люди, принимавшие участие в разработке оригинального форка от seedharta</h3></center>
@@ -101,6 +102,7 @@
         <string name="gameStockTitle">Полка игр</string>
         <string name="search">Поиск</string>
         <string name="settingsTitle">Настройки</string>
+        <string name="refresh">Перезагрузка</string>
     <!-- Menu delete -->
         <string name="selectAllTitle">Выбрать всё</string>
         <string name="deleteGameTitle">Удалить игру</string>
@@ -142,6 +144,7 @@
         <string name="customHeightTitle">Своё Значение Высоты</string>
         <!-- Switch section -->
         <string name="switchCatTitle">Переключатели</string>
+        <string name="filePicker">Диалог Выбора Файла (альфа)</string>
         <string name="immersiveModeTitle">Режим Погружения</string>
         <string name="immersiveModeSum">Включение/выключение режима погружения</string>
         <string name="separatorTitle">Разделитель</string>

@@ -7,7 +7,7 @@
         <import type="android.view.View"/>
         <variable
             name="stockVM"
-            type="org.qp.android.viewModel.ActivityStock" />
+            type="org.qp.android.viewModel.StockViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -18,7 +18,11 @@
             android:id="@+id/banner_view"
             android:layout_width="match_parent"
             android:layout_height="100dp"
-            android:background="#000000"
+            android:layout_marginStart="5dp"
+            android:layout_marginEnd="5dp"
+            android:layout_marginBottom="5dp"
+            android:background="@color/cardview_dark_background"
+            app:bvp_round_corner="12dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.473"

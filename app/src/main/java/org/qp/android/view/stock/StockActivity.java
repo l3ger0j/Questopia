@@ -3,6 +3,7 @@ package org.qp.android.view.stock;
 import static org.qp.android.utils.DirUtil.doesDirectoryContainGameFiles;
 import static org.qp.android.utils.FileUtil.deleteDirectory;
 
+import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -14,21 +15,23 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.view.ActionMode;
 import androidx.cardview.widget.CardView;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.os.LocaleListCompat;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.anggrayudi.storage.FileWrapper;
 import com.anggrayudi.storage.SimpleStorageHelper;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.picker.prettyfilepicker.PrettyFilePicker;
 import com.zhpan.bannerview.BannerViewPager;
 import com.zhpan.bannerview.BaseBannerAdapter;
 import com.zhpan.bannerview.BaseViewHolder;
@@ -44,9 +47,7 @@ import org.qp.android.view.stock.fragment.StockRecyclerFragment;
 import org.qp.android.view.stock.fragment.dialogs.StockDialogFrags;
 import org.qp.android.view.stock.fragment.dialogs.StockDialogType;
 import org.qp.android.view.stock.fragment.dialogs.StockPatternDialogFrags;
-import org.qp.android.viewModel.ActivityStock;
-import org.qp.android.viewModel.FragmentStock;
-import org.qp.android.viewModel.FragmentStockGame;
+import org.qp.android.viewModel.StockViewModel;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -55,16 +56,15 @@ import java.util.HashMap;
 import java.util.Objects;
 
 public class StockActivity extends AppCompatActivity implements StockPatternDialogFrags.StockPatternDialogList, StockPatternFragment.StockPatternFragmentList {
+    private static final int READ_EXTERNAL_STORAGE_CODE = 200;
+    private static final int MANAGE_EXTERNAL_STORAGE_CODE = 201;
     private final String TAG = this.getClass().getSimpleName();
     private HashMap<String, GameData> gamesMap = new HashMap<>();
     public SettingsController settingsController;
-    private ActivityStock activityStock;
-    private FragmentStock localStockViewModel;
+    private StockViewModel stockViewModel;
 
     private ActionMode actionMode;
     protected ActivityStockBinding activityStockBinding;
-    public ActivityResultLauncher<Intent>
-            resultInstallLauncher, resultInstallDir, resultGetImageLauncher, resultSetPath, resultSetMod;
     private boolean isEnable = false;
     private FloatingActionButton mFAB;
     private RecyclerView mRecyclerView;
@@ -74,12 +74,12 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
     private final SimpleStorageHelper storageHelper = new SimpleStorageHelper(this);
 
     public String getGameIdByPosition(int position) {
-        localStockViewModel.getGameData().observe(this, gameDataArrayList -> {
+        stockViewModel.getGameData().observe(this, gameDataArrayList -> {
             if (!gameDataArrayList.isEmpty() && gameDataArrayList.size() > position) {
-                activityStock.setTempGameData(gameDataArrayList.get(position));
+                stockViewModel.setTempGameData(gameDataArrayList.get(position));
             }
         });
-        return activityStock.getTempGameData().id;
+        return stockViewModel.getTempGameData().id;
     }
 
     @NonNull
@@ -113,7 +113,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
                 localGameData.add(data);
             }
         }
-        localStockViewModel.setGameDataArrayList(localGameData);
+        stockViewModel.setGameDataArrayList(localGameData);
     }
 
     @Override
@@ -121,40 +121,6 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         super.onCreate(savedInstanceState);
         activityStockBinding = ActivityStockBinding.inflate(getLayoutInflater());
         mFAB = activityStockBinding.stockFAB;
-        localStockViewModel =
-                new ViewModelProvider(this).get(FragmentStock.class);
-        var list = new ArrayList<Integer>();
-        list.add(R.drawable.banner_1);
-        list.add(R.drawable.banner_0);
-        BannerViewPager<Integer> bannerViewPager = activityStockBinding.bannerView;
-        bannerViewPager.registerLifecycleObserver(getLifecycle()).setAdapter(new BaseBannerAdapter<>() {
-            @Override
-            protected void bindData(BaseViewHolder<Integer> holder , Integer data , int position , int pageSize) {
-                holder.setImageResource(R.id.banner_image , data);
-            }
-
-            @Override
-            public int getLayoutId(int viewType) {
-                return R.layout.list_item_banner;
-            }
-        }).create(list);
-        bannerViewPager.setOnPageClickListener((clickedView , position) -> {
-            switch (position) {
-                case 0:
-                    var intentImg0 = new Intent(Intent.ACTION_VIEW, Uri
-                            .parse("https://t.me/joinchat/AAAAAFgqAMXq0SA34umFbQ"));
-                    intentImg0.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(intentImg0);
-                    break;
-                case 1:
-                    var intentImg1 = new Intent(Intent.ACTION_VIEW, Uri
-                            .parse("https://schoollife.fludilka.su/viewtopic.php?id=828#p63540"));
-                    intentImg1.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(intentImg1);
-                    break;
-            }
-        });
-        localStockViewModel.activityObservableField.set(this);
         if (mRecyclerView != null) {
             mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
                 @Override
@@ -176,10 +142,25 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
             });
         }
 
-        activityStock = new ViewModelProvider(this).get(ActivityStock.class);
-        activityStockBinding.setStockVM(activityStock);
-        activityStock.activityObservableField.set(this);
-        gamesMap = activityStock.getGamesMap();
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.MANAGE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.MANAGE_EXTERNAL_STORAGE}, MANAGE_EXTERNAL_STORAGE_CODE);
+            }
+        }
+
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, READ_EXTERNAL_STORAGE_CODE);
+            }
+        }
+
+
+        stockViewModel = new ViewModelProvider(this).get(StockViewModel.class);
+        activityStockBinding.setStockVM(stockViewModel);
+        stockViewModel.activityObservableField.set(this);
+        gamesMap = stockViewModel.getGamesMap();
 
         if (savedInstanceState == null) {
             var stockFragment = new StockRecyclerFragment();
@@ -189,85 +170,45 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
                     .commit();
         }
 
-        resultSetPath = registerForActivityResult(
-                new ActivityResultContracts.StartActivityForResult(),
-                result -> {
-                    Uri uri;
-                    DocumentFile file;
-                    if (result.getResultCode() == RESULT_OK) {
-                        if ((uri = Objects.requireNonNull(result.getData()).getData()) == null) {
-                            showErrorDialog("Archive or file is not selected");
-                        }
-                        file = DocumentFile.fromSingleUri(this, Objects.requireNonNull(uri));
-                        assert file != null;
-                        activityStock.setTempPathFile(file);
-                    }
-                }
-        );
-
-        resultSetMod = registerForActivityResult(
-                new ActivityResultContracts.StartActivityForResult(),
-                result -> {
-                    Uri uri;
-                    DocumentFile file;
-                    if (result.getResultCode() == RESULT_OK) {
-                        if ((uri = Objects.requireNonNull(result.getData()).getData()) == null) {
-                            showErrorDialog("Archive or file is not selected");
-                        }
-                        file = DocumentFile.fromSingleUri(this, Objects.requireNonNull(uri));
-                        assert file != null;
-                        activityStock.setTempModFile(file);
-                    }
-                }
-        );
-
         storageHelper.setOnFileSelected((integer , documentFiles) -> {
             if (documentFiles != null) {
-                activityStock.setTempInstallFile(documentFiles.get(0));
-                activityStock.isSelectArchive.set(true);
+                for (int i = 0; documentFiles.size() > i; i++) {
+                    var document =
+                            new FileWrapper.Document(documentFiles.get(i));
+                    switch (document.getExtension()) {
+                        case "zip":
+                        case "rar":
+                            stockViewModel.setTempInstallFile(document.getDocumentFile());
+                            stockViewModel.isSelectArchive.set(true);
+                            break;
+                        case "png":
+                        case "jpg":
+                        case "jpeg":
+                            Log.d(TAG, "TRUE");
+                            getContentResolver().takePersistableUriPermission(document.getUri(),
+                                    Intent.FLAG_GRANT_READ_URI_PERMISSION
+                                            | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                            stockViewModel.setTempImageFile(document.getDocumentFile());
+                            break;
+                        case "qsp":
+                            stockViewModel.setTempPathFile(document.getDocumentFile());
+                            stockViewModel.setTempModFile(document.getDocumentFile());
+                            break;
+                    }
+                }
             } else {
                 showErrorDialog("Archive or file is not selected");
             }
             return null;
         });
 
-        resultInstallDir = registerForActivityResult(
-                new ActivityResultContracts.StartActivityForResult(),
-                result -> {
-                    Uri uri;
-                    DocumentFile file;
-                    if (result.getResultCode() == RESULT_OK) {
-                        if ((uri = Objects.requireNonNull(result.getData()).getData()) == null) {
-                            showErrorDialog("Archive or file is not selected");
-                        }
-                        file = DocumentFile.fromTreeUri(this, Objects.requireNonNull(uri));
-                        assert file != null;
-                        activityStock.setTempInstallDir(file);
-                        activityStock.isSelectFolder.set(true);
-                    }
-                }
-        );
+        storageHelper.setOnFolderSelected((integer , documentFile) -> {
+            stockViewModel.setTempInstallDir(documentFile);
+            stockViewModel.isSelectFolder.set(true);
+            return null;
+        });
 
-        resultGetImageLauncher = registerForActivityResult(
-                new ActivityResultContracts.StartActivityForResult(),
-                result -> {
-                    Uri uri;
-                    DocumentFile file;
-                    if (result.getResultCode() == RESULT_OK) {
-                        if ((uri = Objects.requireNonNull(result.getData()).getData()) == null) {
-                            showErrorDialog("Archive or file is not selected");
-                        }
-                        getContentResolver().takePersistableUriPermission(uri,
-                                Intent.FLAG_GRANT_READ_URI_PERMISSION
-                                | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-                        assert uri != null;
-                        file = DocumentFile.fromSingleUri(this, uri);
-                        assert file != null;
-                        activityStock.setTempImageFile(file);
-                    }
-                }
-        );
-
+        loadBannerViewPager();
         loadSettings();
 
         Log.i(TAG,"Stock Activity created");
@@ -278,13 +219,16 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
     @Override
     public void onRequestPermissionsResult(int requestCode , @NonNull String[] permissions , @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode , permissions , grantResults);
-        if (requestCode == 1) {
-            if (grantResults.length > 0
-                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Log.d(TAG, "Success");
-            } else {
-                showErrorDialog("Permission denied to read your External storage");
-            }
+        switch (requestCode) {
+            case MANAGE_EXTERNAL_STORAGE_CODE:
+            case READ_EXTERNAL_STORAGE_CODE:
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Log.d(TAG, "Success");
+                } else {
+                    showErrorDialog("Permission denied to read your External storage");
+                }
+                break;
         }
     }
 
@@ -320,15 +264,49 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
 
     private void loadSettings() {
         settingsController = SettingsController.newInstance().loadSettings(this);
-        activityStock.setController(settingsController);
+        stockViewModel.setController(settingsController);
         if (settingsController.binaryPrefixes <= 1000) {
-            activityStock.refreshGames();
+            stockViewModel.refreshGames();
         }
         if (settingsController.language.equals("ru")) {
             AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("ru"));
         } else {
             AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("en"));
         }
+    }
+
+    private void loadBannerViewPager () {
+        var list = new ArrayList<Integer>();
+        list.add(R.drawable.banner_1);
+        list.add(R.drawable.banner_0);
+        BannerViewPager<Integer> bannerViewPager = activityStockBinding.bannerView;
+        bannerViewPager.registerLifecycleObserver(getLifecycle()).setAdapter(new BaseBannerAdapter<>() {
+            @Override
+            protected void bindData(BaseViewHolder<Integer> holder , Integer data , int position , int pageSize) {
+                holder.setImageResource(R.id.banner_image , data);
+            }
+
+            @Override
+            public int getLayoutId(int viewType) {
+                return R.layout.list_item_banner;
+            }
+        }).create(list);
+        bannerViewPager.setOnPageClickListener((clickedView , position) -> {
+            switch (position) {
+                case 0:
+                    var intentImg0 = new Intent(Intent.ACTION_VIEW, Uri
+                            .parse("https://t.me/joinchat/AAAAAFgqAMXq0SA34umFbQ"));
+                    intentImg0.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intentImg0);
+                    break;
+                case 1:
+                    var intentImg1 = new Intent(Intent.ACTION_VIEW, Uri
+                            .parse("https://schoollife.fludilka.su/viewtopic.php"));
+                    intentImg1.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intentImg1);
+                    break;
+            }
+        });
     }
 
     public void showErrorDialog(String errorMessage) {
@@ -350,8 +328,26 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         selectDialog.show(getSupportFragmentManager(), "selectDialogFragment");
     }
 
-    public void showFilePickerDialog (String[] mimeTypes) {
+    public void showFilePickerActivity(String[] mimeTypes) {
         storageHelper.openFilePicker(mimeTypes);
+    }
+
+    public void showFilePickerDialog (ArrayList<String> mimeTypes) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            new PrettyFilePicker(
+                    this,
+                    "Select file",
+                    true,
+                    mimeTypes).runFilePicker(data -> {
+                stockViewModel.setTempInstallFile((DocumentFile) data);
+                stockViewModel.isSelectArchive.set(true);
+                return null;
+            });
+        }
+    }
+
+    public void showDirPickerDialog () {
+        storageHelper.openFolderPicker();
     }
 
     public void onItemClick(int position) {
@@ -376,8 +372,8 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         } else {
             if (!getSupportFragmentManager().getFragments().isEmpty()) {
                 new ViewModelProvider(this)
-                        .get(FragmentStockGame.class)
-                        .setGameData(activityStock.getGamesMap()
+                        .get(StockViewModel.class)
+                        .setTempGameData(stockViewModel.getGamesMap()
                         .get(getGameIdByPosition(position)));
                 getSupportFragmentManager()
                         .beginTransaction()
@@ -390,37 +386,37 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
 
     @Override
     public void onDialogDestroy(DialogFragment dialog) {
-        activityStock.isShowDialog.set(false);
+        stockViewModel.isShowDialog.set(false);
     }
 
     @Override
     public void onDialogPositiveClick(DialogFragment dialog) {
         if (Objects.equals(dialog.getTag() , "infoDialogFragment")) {
-            activityStock.showDialogEdit();
+            stockViewModel.showDialogEdit();
         }
     }
 
     @Override
     public void onDialogNeutralClick(DialogFragment dialog) {
         if (Objects.equals(dialog.getTag() , "infoDialogFragment")) {
-            activityStock.playGame();
+            stockViewModel.playGame();
         }
     }
 
     @Override
     public void onClickEditButton() {
-        activityStock.showDialogEdit();
+        stockViewModel.showDialogEdit();
     }
 
     @Override
     public void onClickPlayButton() {
-        activityStock.playGame();
+        stockViewModel.playGame();
     }
 
     @Override
     public void onDialogListClick(DialogFragment dialog, int which) {
         if (Objects.equals(dialog.getTag() , "selectDialogFragment")) {
-            activityStock.outputIntObserver.setValue(which);
+            stockViewModel.outputIntObserver.setValue(which);
         }
     }
 
@@ -451,7 +447,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
                             } catch (NullPointerException e) {
                                 showErrorDialog("Error: "+"\n"+e);
                             }
-                            activityStock.refreshGames();
+                            stockViewModel.refreshGames();
                         }
                         actionMode.finish();
                     } else if (itemId == R.id.select_all) {
@@ -499,7 +495,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
 
     @Deprecated
     private void showGameInfo(String gameId) {
-        var gameData = activityStock.getGamesMap().get(gameId);
+        var gameData = stockViewModel.getGamesMap().get(gameId);
         if (gameData == null) {
             showErrorDialog("GameData not found: " + gameId);
             return;
@@ -558,13 +554,20 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
     public void onResume() {
         super.onResume();
         loadSettings();
-        activityStock.refreshGamesDirectory();
+        stockViewModel.refreshGamesDirectory();
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         var inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_stock, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        var refresh = menu.findItem(R.id.action_refresh);
+        refresh.setVisible(stockViewModel.isDownloadPlugin());
         return true;
     }
 
@@ -588,6 +591,8 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
                     return false;
                 }
             });
+        } else if (itemId == R.id.action_refresh) {
+            stockViewModel.startDownloadPlugin();
         }
         return false;
     }
@@ -611,7 +616,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
             }
         }
         if (!filteredList.isEmpty()) {
-            localStockViewModel.setGameDataArrayList(filteredList);
+            stockViewModel.setGameDataArrayList(filteredList);
         }
     }
 }

@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <data>
         <import type="android.text.TextUtils" />
         <import type="android.view.View" />
         <variable
             name="viewModel"
-            type="org.qp.android.viewModel.FragmentStockGame" />
+            type="org.qp.android.viewModel.StockViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -31,7 +32,7 @@
                 android:layout_marginTop="8dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:imageUrl="@{viewModel.gameData.icon}" />
+                app:imageUrl="@{viewModel.tempGameData.icon}" />
 
             <TextView
                 android:id="@+id/gameTitleTV"
@@ -40,7 +41,7 @@
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="16dp"
-                android:text="@{viewModel.gameData.title}"
+                android:text="@{viewModel.tempGameData.title}"
                 android:textSize="24sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/gameIconIV"
@@ -59,6 +60,19 @@
                 app:layout_constraintStart_toEndOf="@+id/gameIconIV"
                 app:layout_constraintTop_toBottomOf="@+id/gameTitleTV" />
 
+            <TextView
+                android:id="@+id/gamePortTV"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="8dp"
+                android:text="@{viewModel.getGamePortBy()}"
+                android:textSize="16sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/gameTitleTV" />
+
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <LinearLayout
@@ -71,7 +85,7 @@
             app:layout_constraintTop_toBottomOf="@+id/constraintLayout">
 
             <TextView
-                android:id="@+id/textView5"
+                android:id="@+id/gameSizeTV"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.5"
@@ -79,7 +93,7 @@
                 android:textSize="16sp" />
 
             <TextView
-                android:tag="gameType"
+                android:tag="gameTypeTV"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.5"
@@ -101,27 +115,55 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
             android:orientation="horizontal"
+            android:visibility="@{viewModel.isGameInstalled() ? View.VISIBLE : View.GONE}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tableLayout">
+            app:layout_constraintTop_toBottomOf="@+id/linearLayout5">
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/editButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:textColor="@color/def_back_color"
                 android:text="@string/editButton"
-                app:cornerRadius="10dp"/>
+                android:textColor="@color/def_back_color"
+                app:cornerRadius="10dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/playButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:textColor="@color/def_back_color"
                 android:text="@string/play"
-                app:cornerRadius="10dp"/>
+                android:textColor="@color/def_back_color"
+                app:cornerRadius="10dp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linearLayout5"
+            android:layout_width="409dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tableLayout">
+
+            <TextView
+                android:id="@+id/gamePubDataTV"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.5"
+                android:text="@{viewModel.getGamePubData}"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/gameModDataTV"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.5"
+                android:text="@{viewModel.getGameModData}"
+                android:textSize="16sp" />
         </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>

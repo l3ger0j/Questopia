@@ -55,7 +55,7 @@ import org.qp.android.view.game.fragments.dialogs.GameDialogType;
 import org.qp.android.view.game.fragments.dialogs.GamePatternDialogFrags;
 import org.qp.android.view.settings.SettingsActivity;
 import org.qp.android.view.settings.SettingsController;
-import org.qp.android.viewModel.ActivityGame;
+import org.qp.android.viewModel.GameViewModel;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -126,7 +126,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
     };
 
     private int slotAction = 0;
-    private ActivityGame activityGame;
+    private GameViewModel gameViewModel;
     private ActivityGameBinding activityGameBinding;
     private ActivityResultLauncher<Intent> resultLauncher, templateLauncher;
 
@@ -149,10 +149,10 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
         super.onCreate(savedInstanceState);
 
         activityGameBinding = DataBindingUtil.setContentView(this, R.layout.activity_game);
-        activityGame = new ViewModelProvider(this).get(ActivityGame.class);
-        activityGameBinding.setGameViewModel(activityGame);
-        activityGame.gameActivityObservableField.set(this);
-        settingsController = activityGame.getSettingsController();
+        gameViewModel = new ViewModelProvider(this).get(GameViewModel.class);
+        activityGameBinding.setGameViewModel(gameViewModel);
+        gameViewModel.gameActivityObservableField.set(this);
+        settingsController = gameViewModel.getSettingsController();
 
         mDecorView = getWindow().getDecorView();
         if (settingsController.isUseImmersiveMode) {
@@ -315,11 +315,11 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
         actionsView = activityGameBinding.actions;
         var actions = libQpProxy.getGameState().actions;
         var recycler = new GameItemRecycler(this);
-        recycler.setTypeface(activityGame.getSettingsController().getTypeface());
-        recycler.setTextSize(activityGame.getFontSize());
-        recycler.setBackgroundColor(activityGame.getBackgroundColor());
-        recycler.setTextColor(activityGame.getTextColor());
-        recycler.setLinkTextColor(activityGame.getLinkColor());
+        recycler.setTypeface(gameViewModel.getSettingsController().getTypeface());
+        recycler.setTextSize(gameViewModel.getFontSize());
+        recycler.setBackgroundColor(gameViewModel.getBackgroundColor());
+        recycler.setTextColor(gameViewModel.getTextColor());
+        recycler.setLinkTextColor(gameViewModel.getLinkColor());
         recycler.submitList(actions);
         actionsView.setAdapter(recycler);
         actionsView.addOnItemTouchListener(new RecyclerItemClickListener(
@@ -344,11 +344,11 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
         objectsView = activityGameBinding.objects;
         var objects = libQpProxy.getGameState().objects;
         var recycler = new GameItemRecycler(this);
-        recycler.setTypeface(activityGame.getSettingsController().getTypeface());
-        recycler.setTextSize(activityGame.getFontSize());
-        recycler.setBackgroundColor(activityGame.getBackgroundColor());
-        recycler.setTextColor(activityGame.getTextColor());
-        recycler.setLinkTextColor(activityGame.getLinkColor());
+        recycler.setTypeface(gameViewModel.getSettingsController().getTypeface());
+        recycler.setTextSize(gameViewModel.getFontSize());
+        recycler.setBackgroundColor(gameViewModel.getBackgroundColor());
+        recycler.setTextColor(gameViewModel.getTextColor());
+        recycler.setLinkTextColor(gameViewModel.getLinkColor());
         recycler.submitList(objects);
         objectsView.setAdapter(recycler);
         objectsView.addOnItemTouchListener(new RecyclerItemClickListener(
@@ -373,15 +373,15 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
     }
 
     private void initServices() {
-        htmlProcessor = activityGame.getHtmlProcessor();
-        audioPlayer = activityGame.startAudio();
-        libQpProxy = activityGame.startLibQsp(this);
+        htmlProcessor = gameViewModel.getHtmlProcessor();
+        audioPlayer = gameViewModel.startAudio();
+        libQpProxy = gameViewModel.startLibQsp(this);
     }
 
     private void restartServices() {
-        htmlProcessor = activityGame.getHtmlProcessor();
-        audioPlayer = activityGame.getAudioPlayer();
-        libQpProxy = activityGame.getLibQspProxy();
+        htmlProcessor = gameViewModel.getHtmlProcessor();
+        audioPlayer = gameViewModel.getAudioPlayer();
+        libQpProxy = gameViewModel.getLibQspProxy();
         libQpProxy.setGameInterface(this);
     }
 
@@ -483,7 +483,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
         applyGameState();
 
         if (settingsController.isUseSeparator) {
-            separatorView.setBackgroundColor(activityGame.getBackgroundColor());
+            separatorView.setBackgroundColor(gameViewModel.getBackgroundColor());
         } else {
             separatorView.setBackgroundColor(getResources().getColor(R.color.materialcolorpicker__grey));
         }
@@ -496,7 +496,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
         htmlProcessor.setController(settingsController);
 
         var backColor =
-                activityGame.getBackgroundColor();
+                gameViewModel.getBackgroundColor();
         layoutTop.setBackgroundColor(backColor);
         mainDescView.setBackgroundColor(backColor);
         varsDescView.setBackgroundColor(backColor);
@@ -516,11 +516,11 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
 
     private void updatePageTemplate() {
         var pageHeadTemplate = PAGE_HEAD_TEMPLATE
-                .replace("QSPTEXTCOLOR", getHexColor(activityGame.getTextColor()))
-                .replace("QSPBACKCOLOR", getHexColor(activityGame.getBackgroundColor()))
-                .replace("QSPLINKCOLOR", getHexColor(activityGame.getLinkColor()))
+                .replace("QSPTEXTCOLOR", getHexColor(gameViewModel.getTextColor()))
+                .replace("QSPBACKCOLOR", getHexColor(gameViewModel.getBackgroundColor()))
+                .replace("QSPLINKCOLOR", getHexColor(gameViewModel.getLinkColor()))
                 .replace("QSPFONTSTYLE", getFontStyle(settingsController.getTypeface()))
-                .replace("QSPFONTSIZE", Integer.toString(activityGame.getFontSize()));
+                .replace("QSPFONTSIZE", Integer.toString(gameViewModel.getFontSize()));
         pageTemplate = pageHeadTemplate + PAGE_BODY_TEMPLATE;
     }
 
@@ -566,11 +566,11 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
     private void refreshActions() {
         var actions = libQpProxy.getGameState().actions;
         var recycler = new GameItemRecycler(this);
-        recycler.setTypeface(activityGame.getSettingsController().getTypeface());
-        recycler.setTextSize(activityGame.getFontSize());
-        recycler.setBackgroundColor(activityGame.getBackgroundColor());
-        recycler.setTextColor(activityGame.getTextColor());
-        recycler.setLinkTextColor(activityGame.getLinkColor());
+        recycler.setTypeface(gameViewModel.getSettingsController().getTypeface());
+        recycler.setTextSize(gameViewModel.getFontSize());
+        recycler.setBackgroundColor(gameViewModel.getBackgroundColor());
+        recycler.setTextColor(gameViewModel.getTextColor());
+        recycler.setLinkTextColor(gameViewModel.getLinkColor());
         recycler.submitList(actions);
         actionsView.setAdapter(recycler);
         refreshActionsVisibility();
@@ -579,11 +579,11 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
     private void refreshObjects() {
         var objects = libQpProxy.getGameState().objects;
         var recycler = new GameItemRecycler(this);
-        recycler.setTypeface(activityGame.getSettingsController().getTypeface());
-        recycler.setTextSize(activityGame.getFontSize());
-        recycler.setBackgroundColor(activityGame.getBackgroundColor());
-        recycler.setTextColor(activityGame.getTextColor());
-        recycler.setLinkTextColor(activityGame.getLinkColor());
+        recycler.setTypeface(gameViewModel.getSettingsController().getTypeface());
+        recycler.setTextSize(gameViewModel.getFontSize());
+        recycler.setBackgroundColor(gameViewModel.getBackgroundColor());
+        recycler.setTextColor(gameViewModel.getTextColor());
+        recycler.setLinkTextColor(gameViewModel.getLinkColor());
         recycler.submitList(objects);
         objectsView.setAdapter(recycler);
     }
@@ -804,8 +804,8 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
                 processedMsg = "";
             }
 
-            if (activityGame.outputBooleanObserver.hasObservers()) {
-                activityGame.outputBooleanObserver = new MutableLiveData<>();
+            if (gameViewModel.outputBooleanObserver.hasObservers()) {
+                gameViewModel.outputBooleanObserver = new MutableLiveData<>();
             }
 
             var dialogFragment = new GameDialogFrags();
@@ -813,7 +813,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
             dialogFragment.setProcessedMsg(processedMsg);
             dialogFragment.setCancelable(false);
             dialogFragment.show(getSupportFragmentManager(), "showMessageDialogFragment");
-            activityGame.outputBooleanObserver.observeForever(aBoolean -> {
+            gameViewModel.outputBooleanObserver.observeForever(aBoolean -> {
                 if (aBoolean) {
                     latch.countDown();
                 }
@@ -841,8 +841,8 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
                 message = "";
             }
 
-            if (activityGame.outputTextObserver.hasObservers()) {
-                activityGame.outputTextObserver = new MutableLiveData<>();
+            if (gameViewModel.outputTextObserver.hasObservers()) {
+                gameViewModel.outputTextObserver = new MutableLiveData<>();
             }
 
             var dialogFragment = new GameDialogFrags();
@@ -854,7 +854,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
             }
             dialogFragment.setCancelable(false);
             dialogFragment.show(getSupportFragmentManager(), "inputDialogFragment");
-            activityGame.outputTextObserver.observeForever(inputQueue::add);
+            gameViewModel.outputTextObserver.observeForever(inputQueue::add);
         });
 
         try {
@@ -879,8 +879,8 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
                 message = "";
             }
 
-            if (activityGame.outputTextObserver.hasObservers()) {
-                activityGame.outputTextObserver = new MutableLiveData<>();
+            if (gameViewModel.outputTextObserver.hasObservers()) {
+                gameViewModel.outputTextObserver = new MutableLiveData<>();
             }
 
             var dialogFragment = new GameDialogFrags();
@@ -892,7 +892,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
             }
             dialogFragment.setCancelable(false);
             dialogFragment.show(getSupportFragmentManager(), "executorDialogFragment");
-            activityGame.outputTextObserver.observeForever(inputQueue::add);
+            gameViewModel.outputTextObserver.observeForever(inputQueue::add);
         });
 
         try {
@@ -916,8 +916,8 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
         }
 
         runOnUiThread(() -> {
-            if (activityGame.outputIntObserver.hasObservers()) {
-                activityGame.outputIntObserver = new MutableLiveData<>();
+            if (gameViewModel.outputIntObserver.hasObservers()) {
+                gameViewModel.outputIntObserver = new MutableLiveData<>();
             }
 
             var dialogFragment = new GameDialogFrags();
@@ -925,7 +925,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
             dialogFragment.setItems(items);
             dialogFragment.setCancelable(false);
             dialogFragment.show(getSupportFragmentManager(), "showMenuDialogFragment");
-            activityGame.outputIntObserver.observeForever(resultQueue::add);
+            gameViewModel.outputIntObserver.observeForever(resultQueue::add);
         });
 
         try {
@@ -985,8 +985,8 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
     @Override
     public void onDialogPositiveClick(@NonNull DialogFragment dialog) {
         if (Objects.equals(dialog.getTag() , "closeGameDialogFragment")) {
-            activityGame.stopAudio();
-            activityGame.stopLibQsp();
+            gameViewModel.stopAudio();
+            gameViewModel.stopLibQsp();
             counterHandler.removeCallbacks(counterTask);
             finish();
         } else if (Objects.equals(dialog.getTag() , "inputDialogFragment") ||
@@ -997,16 +997,16 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
                 if (editText.getEditText() != null) {
                     var outputText = editText.getEditText().getText().toString();
                     if (Objects.equals(outputText , "")) {
-                        activityGame.outputTextObserver.setValue("");
+                        gameViewModel.outputTextObserver.setValue("");
                     } else {
-                        activityGame.outputTextObserver.setValue(outputText);
+                        gameViewModel.outputTextObserver.setValue(outputText);
                     }
                 }
             }
         } else if (Objects.equals(dialog.getTag() , "loadGameDialogFragment")) {
             startReadOrWriteSave(LOAD);
         } else if (Objects.equals(dialog.getTag() , "showMessageDialogFragment")) {
-            activityGame.outputBooleanObserver.setValue(true);
+            gameViewModel.outputBooleanObserver.setValue(true);
         }
     }
 
@@ -1016,7 +1016,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
             showError("Dialog is null");
         } else {
             if (Objects.equals(dialog.getTag() , "showMenuDialogFragment")) {
-                activityGame.outputIntObserver.setValue(-1);
+                gameViewModel.outputIntObserver.setValue(-1);
             } else if (Objects.equals(dialog.getTag() , "executorDialogFragment")) {
                 Intent intentInstall = new Intent(ACTION_OPEN_DOCUMENT);
                 intentInstall.addCategory(Intent.CATEGORY_OPENABLE);
@@ -1037,7 +1037,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
             showError("Dialog is null");
         } else {
             if (Objects.equals(dialog.getTag() , "showMenuDialogFragment")) {
-                activityGame.outputIntObserver.setValue(which);
+                gameViewModel.outputIntObserver.setValue(which);
             }
         }
     }

@@ -23,6 +23,7 @@ public class SettingsController {
     public boolean isUseAutoHeight;
     public boolean isUseSeparator;
     public boolean isUseGameFont;
+    public boolean isUseNewFilePicker;
     public boolean isUseAutoscroll;
     public boolean isUseExecString;
     public boolean isUseImmersiveMode;
@@ -65,6 +66,7 @@ public class SettingsController {
         settingsController.fontSize = Integer.parseInt(preferences.getString("fontSize", "16"));
         settingsController.binaryPrefixes = Integer.parseInt(preferences.getString("binPref","1000"));
         settingsController.actionsHeightRatio = parseActionsHeightRatio(preferences.getString("actsHeight", "1/3"));
+        settingsController.isUseNewFilePicker = preferences.getBoolean("filePicker", false);
         settingsController.isUseAutoscroll = preferences.getBoolean("autoscroll", true);
         settingsController.isUseExecString = preferences.getBoolean("execString", false);
         settingsController.isUseSeparator = preferences.getBoolean("separator", false);

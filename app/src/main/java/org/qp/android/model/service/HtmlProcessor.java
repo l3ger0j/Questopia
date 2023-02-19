@@ -177,7 +177,6 @@ public class HtmlProcessor {
     }
 
     public boolean hasHTMLTags(String text){
-        var matcher = pattern.matcher(text);
-        return matcher.find();
+        return pattern.matcher(text).find();
     }
 }
