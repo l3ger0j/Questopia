@@ -55,7 +55,8 @@
 <ul>
     <li><b>Coding:</b>
     <ul style="list-style-type:none">
-        <li>l3ger0j (~v2.1+)</li>
+        <li><a href=\"https://github.com/l3ger0j/\">l3ger0j</a></li>
+        <li><a href=\"https://github.com/shirrumon/\">shirrumon</a></li>
     </ul>
 </ul>
 <center><h3>People who participated in the development of the original fork from seedharta</h3></center>
@@ -102,6 +103,7 @@
         <string name="gameStockTitle">Game Stock</string>
         <string name="search">Search</string>
         <string name="settingsTitle">Settings</string>
+        <string name="refresh">Refresh</string>
     <!-- Menu delete -->
         <string name="selectAllTitle">Select all</string>
         <string name="deleteGameTitle">Delete game</string>

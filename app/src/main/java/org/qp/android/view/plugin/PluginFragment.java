@@ -4,9 +4,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.RemoteException;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,9 +22,11 @@ import org.qp.android.R;
 import org.qp.android.databinding.FragmentPluginBinding;
 import org.qp.android.dto.plugin.PluginInfo;
 import org.qp.android.model.plugin.PluginClient;
+import org.qp.android.model.plugin.PluginType;
+import org.qp.android.plugin.IQuestPlugin;
 import org.qp.android.view.adapters.RecyclerItemClickListener;
 import org.qp.android.view.settings.SettingsActivity;
-import org.qp.android.viewModel.PluginViewModel;
+import org.qp.android.viewModel.SettingsViewModel;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,20 +34,15 @@ import java.util.HashMap;
 public class PluginFragment extends Fragment {
     private final String TAG = getClass().getSimpleName();
 
-    private PluginViewModel pluginViewModel;
+    private SettingsViewModel settingsViewModel;
     private RecyclerView recyclerView;
-
-    public static final String ACTION_PICK_PLUGIN = "org.qp.intent.action.PICK_PLUGIN";
-    private static final String KEY_PKG = "pkg";
-    private static final String KEY_SERVICENAME = "servicename";
-    private static final String KEY_ACTIONS = "actions";
-    private static final String KEY_CATEGORIES = "categories";
     private ArrayList<HashMap<String, String>> services;
     private ArrayList<String> categories;
 
     private PackageBroadcastReceiver packageBroadcastReceiver;
     private IntentFilter packageFilter;
     private String namePlugin;
+    private  IQuestPlugin questPlugin;
 
     @Nullable
     @Override
@@ -58,31 +55,45 @@ public class PluginFragment extends Fragment {
         var fragmentPluginBinding =
                 FragmentPluginBinding.inflate(getLayoutInflater());
         recyclerView = fragmentPluginBinding.pluginRecyclerView;
-        pluginViewModel = new ViewModelProvider(requireActivity())
-                .get(PluginViewModel.class);
-        fragmentPluginBinding.setPluginViewModel(pluginViewModel);
-        pluginViewModel.fragmentObservableField.set(this);
+        settingsViewModel = new ViewModelProvider(requireActivity())
+                .get(SettingsViewModel.class);
+        fragmentPluginBinding.setPluginViewModel(settingsViewModel);
+        settingsViewModel.fragmentObservableField.set(this);
         refreshPluginInfo();
         return fragmentPluginBinding.getRoot();
     }
 
     public void refreshPluginInfo() {
-        fillPluginList();
         var pluginInfo = new PluginInfo();
-        pluginInfo.title = namePlugin;
-        var arrayList = new ArrayList<PluginInfo>();
-        arrayList.add(pluginInfo);
+        var pluginClient = new PluginClient();
+
+        fillPluginList(pluginClient);
+
+        if (namePlugin != null) {
+            pluginClient.connectPlugin(requireContext() , PluginType.DOWNLOAD_PLUGIN);
+            new Handler().postDelayed(() -> {
+                try {
+                    questPlugin = pluginClient.getQuestPlugin();
+                    pluginInfo.title = questPlugin.titlePlugin();
+                    pluginInfo.version = questPlugin.versionPlugin();
+                    pluginInfo.author = questPlugin.authorPlugin();
+                    var arrayList = new ArrayList<PluginInfo>();
+                    arrayList.add(pluginInfo);
+                    var adapter =
+                            new PluginRecycler(requireActivity());
+                    adapter.submitList(arrayList);
+                    recyclerView.setAdapter(adapter);
+                } catch (RemoteException e) {
+                    throw new RuntimeException(e);
+                }
+            } , 1000);
+        }
 
         packageFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
         packageFilter.addAction(Intent.ACTION_PACKAGE_REPLACED);
         packageFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
         packageFilter.addCategory(Intent.CATEGORY_DEFAULT);
         packageFilter.addDataScheme("package");
-
-        var adapter =
-                new PluginRecycler(requireActivity());
-        adapter.submitList(arrayList);
-        recyclerView.setAdapter(adapter);
     }
 
     @Override
@@ -93,11 +104,11 @@ public class PluginFragment extends Fragment {
                 new RecyclerItemClickListener.OnItemClickListener() {
                     @Override
                     public void onItemClick(View view , int position) {
-                        var pluginClient  = new PluginClient();
-                        pluginClient.connectPlugin(requireContext(), namePlugin);
-                        Log.d(TAG, namePlugin);
-                        new Handler().postDelayed(() ->
-                                Log.d(TAG, String.valueOf(pluginClient.calculateSum(20, 30))) ,1000);
+                        var launchIntent = requireActivity().getPackageManager()
+                                .getLaunchIntentForPackage("org.qp.android.plugin");
+                        if (launchIntent != null) {
+                            startActivity(launchIntent);
+                        }
                     }
 
                     @Override
@@ -106,59 +117,13 @@ public class PluginFragment extends Fragment {
                 }));
     }
 
-    private void fillPluginList() {
-        services = new ArrayList<>();
-        categories = new ArrayList<>();
-        var packageManager = requireActivity().getPackageManager();
-        var baseIntent = new Intent(ACTION_PICK_PLUGIN);
-        baseIntent.setFlags(Intent.FLAG_DEBUG_LOG_RESOLUTION);
-        var list = packageManager.queryIntentServices(baseIntent,
-                PackageManager.GET_RESOLVED_FILTER);
-        Log.d(TAG, "fillPluginList: " + list);
-        for (int i = 0; i < list.size(); ++i) {
-            var info = list.get(i);
-            var serviceInfo = info.serviceInfo;
-            var filter = info.filter;
-            Log.d(TAG, "fillPluginList: i: " + i + "; serviceInfo: " + serviceInfo + ";filter: " + filter);
-            if (serviceInfo != null) {
-                var item = new HashMap<String, String>();
-                item.put(KEY_PKG, serviceInfo.packageName);
-                item.put(KEY_SERVICENAME, serviceInfo.name);
-                namePlugin = serviceInfo.name;
-                String firstCategory = null;
-                if (filter != null) {
-                    var actions = new StringBuilder();
-                    for (var actionIterator = filter.actionsIterator();
-                         actionIterator.hasNext(); ) {
-                        var action = actionIterator.next();
-                        if (actions.length() > 0)
-                            actions.append(",");
-                        actions.append(action);
-                    }
-                    var categories = new StringBuilder();
-                    for (var categoryIterator = filter.categoriesIterator();
-                         categoryIterator.hasNext(); ) {
-                        var category = categoryIterator.next();
-                        if (firstCategory == null)
-                            firstCategory = category;
-                        if (categories.length() > 0)
-                            categories.append(",");
-                        categories.append(category);
-                    }
-                    item.put(KEY_ACTIONS, new String(actions));
-                    item.put(KEY_CATEGORIES, new String(categories));
-                } else {
-                    item.put(KEY_ACTIONS, "<null>");
-                    item.put(KEY_CATEGORIES, "<null>");
-                }
-                if (firstCategory == null)
-                    firstCategory = "";
-                categories.add(firstCategory);
-                services.add(item);
-            }
-        }
-        Log.d(TAG, "services: " + services);
-        Log.d(TAG, "categories: " + categories);
+    private void fillPluginList(@NonNull PluginClient pluginClient) {
+        pluginClient.loadListPlugin(requireContext());
+        namePlugin = pluginClient.getNamePlugin();
+        pluginClient.getCategoriesLiveData().observe(getViewLifecycleOwner() ,
+                strings -> categories = strings);
+        pluginClient.getServicesLiveData().observe(getViewLifecycleOwner() ,
+                hashMaps -> services = hashMaps);
     }
 
     @Override
@@ -184,7 +149,7 @@ public class PluginFragment extends Fragment {
         public void onReceive(Context context, Intent intent) {
             Log.d(TAG, "onReceive: " + intent);
             services.clear();
-            fillPluginList();
+            fillPluginList(new PluginClient());
         }
     }
 }

@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <data>
         <import type="android.view.View"/>
         <import type="android.text.TextUtils"/>
@@ -8,9 +10,7 @@
             name="pluginInfo"
             type="org.qp.android.dto.plugin.PluginInfo" />
     </data>
-
-    <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/relativeLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -37,7 +37,6 @@
             android:layout_marginEnd="8dp"
             android:padding="5dp"
             android:text="@{pluginInfo.title}"
-            android:textAlignment="center"
             android:textSize="16sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
@@ -48,11 +47,10 @@
             android:id="@+id/plugin_author"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
+            android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
             android:lineSpacingExtra="8sp"
-            android:textAlignment="center"
             android:textColor="#F9A825"
             android:textSize="14sp"
             android:textStyle="bold"
@@ -70,6 +68,5 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/plugin_author" />
-
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

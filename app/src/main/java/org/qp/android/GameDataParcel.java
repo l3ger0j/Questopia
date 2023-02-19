@@ -1,54 +1,38 @@
-package org.qp.android.dto.stock;
+package org.qp.android;
 
-import static org.qp.android.utils.StringUtil.isNotEmpty;
+import android.os.Parcel;
+import android.os.Parcelable;
 
-import org.simpleframework.xml.Element;
-import org.simpleframework.xml.Root;
+import androidx.annotation.NonNull;
 
 import java.io.File;
 import java.util.List;
 import java.util.Objects;
 
-@Root(name = "game", strict = false)
-public class GameData {
-    @Element(name = "id", data = true)
+public class GameDataParcel implements Parcelable {
     public String id = "";
-    @Element(name = "list_id", data = true, required = false)
     public String listId = "";
-    @Element(name = "author", data = true, required = false)
     public String author = "";
-    @Element(name = "ported_by", data = true, required = false)
     public String portedBy = "";
-    @Element(name = "version", data = true, required = false)
     public String version = "";
-    @Element(name = "title", data = true, required = false)
     public String title = "";
-    @Element(name = "lang", data = true, required = false)
     public String lang = "";
-    @Element(name = "player", data = true, required = false)
     public String player = "";
-    @Element(name = "icon", data = true, required = false)
     public String icon = "";
-    @Element(name = "file_url", data = true, required = false)
     public String fileUrl = "";
-    @Element(name = "file_size", data = true, required = false)
     public String fileSize;
-    @Element(name = "file_ext", data = true, required = false)
     public String fileExt = "";
-    @Element(name = "desc_url", data = true, required = false)
     public String descUrl = "";
-    @Element(name = "pub_date", data = true, required = false)
     public String pubDate = "";
-    @Element(name = "mod_date", data = true, required = false)
     public String modDate = "";
 
     public File gameDir;
     public List<File> gameFiles;
 
-    public GameData() {
+    public GameDataParcel() {
     }
 
-    public GameData(GameData other) {
+    public GameDataParcel(GameDataParcel other) {
         id = other.id;
         listId = other.listId;
         author = other.author;
@@ -68,23 +52,11 @@ public class GameData {
         gameFiles = other.gameFiles;
     }
 
-    public String getFileSize() {
-        return (fileSize != null) ? fileSize : "";
-    }
-
-    public boolean hasRemoteUrl() {
-        return isNotEmpty(fileUrl);
-    }
-
-    public boolean isInstalled() {
-        return gameDir != null;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        var that = (GameData) o;
+        var that = (GameDataParcel) o;
         return Objects.equals(id, that.id)
                 && Objects.equals(listId, that.listId)
                 && Objects.equals(author, that.author)
@@ -104,6 +76,60 @@ public class GameData {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id , listId , author , portedBy , version , title , lang , player , icon , fileUrl , fileSize , fileExt , descUrl , pubDate , modDate);
+        return Objects.hash(id, listId, author, portedBy, version, title, lang, player, icon, fileUrl, fileSize, fileExt, descUrl, pubDate, modDate);
+    }
+
+    public GameDataParcel(@NonNull Parcel in) {
+        id = in.readString();
+        listId = in.readString();
+        author = in.readString();
+        portedBy = in.readString();
+        version = in.readString();
+        title = in.readString();
+        lang = in.readString();
+        player = in.readString();
+        icon = in.readString();
+        fileUrl = in.readString();
+        fileSize = in.readString();
+        fileExt = in.readString();
+        descUrl = in.readString();
+        pubDate = in.readString();
+        modDate = in.readString();
+    }
+
+    public static final Creator<GameDataParcel> CREATOR = new Creator<>() {
+        @Override
+        public GameDataParcel createFromParcel(Parcel in) {
+            return new GameDataParcel(in);
+        }
+
+        @Override
+        public GameDataParcel[] newArray(int size) {
+            return new GameDataParcel[size];
+        }
+    };
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(@NonNull Parcel parcel , int i) {
+        parcel.writeString(id);
+        parcel.writeString(listId);
+        parcel.writeString(author);
+        parcel.writeString(portedBy);
+        parcel.writeString(version);
+        parcel.writeString(title);
+        parcel.writeString(lang);
+        parcel.writeString(player);
+        parcel.writeString(icon);
+        parcel.writeString(fileUrl);
+        parcel.writeString(fileSize);
+        parcel.writeString(fileExt);
+        parcel.writeString(descUrl);
+        parcel.writeString(pubDate);
+        parcel.writeString(modDate);
     }
 }

@@ -10,6 +10,7 @@ import androidx.databinding.ObservableField;
 import androidx.lifecycle.ViewModel;
 
 import org.qp.android.R;
+import org.qp.android.view.plugin.PluginFragment;
 import org.qp.android.view.settings.SettingsActivity;
 import org.qp.android.view.settings.SettingsController;
 
@@ -23,8 +24,10 @@ public class SettingsViewModel extends ViewModel {
             "table{font-size: QSPFONTSIZE; font-family: QSPFONTSTYLE; }\n" +
             "</style></head><body>REPLACETEXT</body></html>";
 
-
     public ObservableField<SettingsActivity> settingsActivityObservableField =
+            new ObservableField<>();
+
+    public ObservableField<PluginFragment> fragmentObservableField =
             new ObservableField<>();
 
     public boolean isShowPluginFragment = false;

@@ -1,5 +1,6 @@
 package org.qp.android.viewModel;
 
+import static org.qp.android.utils.DirUtil.doesDirectoryContainGameFiles;
 import static org.qp.android.utils.FileUtil.GAME_INFO_FILENAME;
 import static org.qp.android.utils.FileUtil.copyFile;
 import static org.qp.android.utils.FileUtil.createFile;
@@ -20,6 +21,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.os.Handler;
+import android.os.RemoteException;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,6 +38,7 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.squareup.picasso.Picasso;
 
+import org.qp.android.GameDataParcel;
 import org.qp.android.R;
 import org.qp.android.databinding.DialogEditBinding;
 import org.qp.android.databinding.DialogInstallBinding;
@@ -42,6 +46,9 @@ import org.qp.android.dto.stock.GameData;
 import org.qp.android.model.install.InstallException;
 import org.qp.android.model.install.Installer;
 import org.qp.android.model.notify.NotifyBuilder;
+import org.qp.android.model.plugin.PluginClient;
+import org.qp.android.model.plugin.PluginType;
+import org.qp.android.plugin.AsyncCallback;
 import org.qp.android.utils.ArchiveUtil;
 import org.qp.android.view.game.GameActivity;
 import org.qp.android.view.settings.SettingsController;
@@ -56,6 +63,7 @@ import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Objects;
 
 public class StockViewModel extends AndroidViewModel {
@@ -154,8 +162,16 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     public String getGameAuthor () {
-        if (tempGameData.author.length() > 0 && fragmentObservableField.get() != null) {
+        if (fragmentObservableField.get() != null && tempGameData.author.length() > 0) {
             return fragmentObservableField.get().getString(R.string.author).replace("-AUTHOR-" , tempGameData.author);
+        } else {
+            return "";
+        }
+    }
+
+    public String getGamePortBy () {
+        if (fragmentObservableField.get() != null && tempGameData.portedBy.length() > 0) {
+            return fragmentObservableField.get().getString(R.string.ported_by).replace("-PORTED_BY-", tempGameData.portedBy);
         } else {
             return "";
         }
@@ -187,6 +203,26 @@ public class StockViewModel extends AndroidViewModel {
         } else {
             return "";
         }
+    }
+
+    public String getGamePubData () {
+        if (tempGameData.pubDate.length() > 0 && fragmentObservableField.get() != null) {
+            return fragmentObservableField.get().getString(R.string.pub_data).replace("-PUB_DATA-", tempGameData.pubDate);
+        } else {
+            return "";
+        }
+    }
+
+    public String getGameModData () {
+        if (tempGameData.modDate.length() > 0 && fragmentObservableField.get() != null) {
+            return fragmentObservableField.get().getString(R.string.mod_data).replace("-MOD_DATA-", tempGameData.pubDate);
+        } else {
+            return "";
+        }
+    }
+
+    public boolean isGameInstalled () {
+        return tempGameData.isInstalled() && doesDirectoryContainGameFiles(tempGameData.gameDir);
     }
     // endregion Getter/Setter
 
@@ -538,6 +574,93 @@ public class StockViewModel extends AndroidViewModel {
         }
         Objects.requireNonNull(activityObservableField.get()).setRecyclerAdapter();
     }
+
+    public void refreshGames(ArrayList<GameData> gameDataArrayList) {
+        gamesMap.clear();
+        for (var localGameData : gameDataArrayList) {
+            var remoteGameData = gamesMap.get(localGameData.id);
+            if (remoteGameData != null) {
+                var aggregateGameData = new GameData(remoteGameData);
+                aggregateGameData.gameDir = localGameData.gameDir;
+                aggregateGameData.gameFiles = localGameData.gameFiles;
+                gamesMap.put(localGameData.id, aggregateGameData);
+            } else {
+                gamesMap.put(localGameData.id, localGameData);
+            }
+        }
+
+        HashMap<String, GameData> tempGamesMap = new HashMap<>();
+        for (var localGameData : localGame.getGames(gamesDir)) {
+            var remoteGameData = tempGamesMap.get(localGameData.id);
+            if (remoteGameData != null) {
+                var aggregateGameData = new GameData(remoteGameData);
+                aggregateGameData.gameDir = localGameData.gameDir;
+                aggregateGameData.gameFiles = localGameData.gameFiles;
+                tempGamesMap.put(localGameData.id, aggregateGameData);
+            } else {
+                tempGamesMap.put(localGameData.id, localGameData);
+            }
+        }
+
+        gamesMap.putAll(tempGamesMap);
+
+        Objects.requireNonNull(activityObservableField.get()).setRecyclerAdapter();
+    }
     // endregion Refresh
+
+    // region Plugin
+    public boolean isDownloadPlugin () {
+        var pluginClient = new PluginClient();
+        pluginClient.loadListPlugin(getApplication());
+        return pluginClient.getNamePlugin() != null
+                && pluginClient.getNamePlugin().equals("org.qp.android.plugin.AidlService");
+    }
+
+    public void startDownloadPlugin () {
+        var pluginClient = new PluginClient();
+        pluginClient.loadListPlugin(getApplication());
+        pluginClient.connectPlugin(getApplication() , PluginType.DOWNLOAD_PLUGIN);
+        new Handler().postDelayed(() -> {
+            try {
+                pluginClient.getQuestPlugin().arrayGameData(new AsyncCallback.Stub() {
+                    @Override
+                    public void onSuccess(List<GameDataParcel> gameDataParcel) throws RemoteException {
+                        refreshGames(convertDTO(gameDataParcel));
+                        setGameDataArrayList(convertDTO(gameDataParcel));
+                    }
+                });
+            } catch (RemoteException e) {
+                throw new RuntimeException(e);
+            }
+        } , 1000);
+    }
+
+    @NonNull
+    private ArrayList<GameData> convertDTO (List<GameDataParcel> gameDataParcelList) {
+        var gameDataArrayList = new ArrayList<GameData>();
+        for (GameDataParcel gameDataParcel : gameDataParcelList) {
+            var gameData = new GameData();
+            gameData.id = gameDataParcel.id;
+            gameData.listId = gameDataParcel.listId;
+            gameData.author = gameDataParcel.author;
+            gameData.portedBy = gameDataParcel.portedBy;
+            gameData.version = gameDataParcel.version;
+            gameData.title = gameDataParcel.title;
+            gameData.lang = gameDataParcel.lang;
+            gameData.player = gameDataParcel.player;
+            gameData.icon = gameDataParcel.icon;
+            gameData.fileUrl = gameDataParcel.fileUrl;
+            gameData.fileSize = gameDataParcel.fileSize;
+            gameData.fileExt = gameDataParcel.fileExt;
+            gameData.descUrl = gameDataParcel.descUrl;
+            gameData.pubDate = gameDataParcel.pubDate;
+            gameData.modDate = gameDataParcel.modDate;
+            gameData.gameDir = gameDataParcel.gameDir;
+            gameData.gameFiles = gameDataParcel.gameFiles;
+            gameDataArrayList.add(gameData);
+        }
+        return gameDataArrayList;
+    }
+    // endregion Plugin
 }
 

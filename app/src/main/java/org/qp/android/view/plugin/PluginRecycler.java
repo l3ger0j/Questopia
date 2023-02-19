@@ -5,13 +5,10 @@ import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
-import androidx.core.content.res.ResourcesCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.AsyncListDiffer;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
-
-import com.squareup.picasso.Picasso;
 
 import org.qp.android.R;
 import org.qp.android.databinding.ListItemPluginBinding;
@@ -19,6 +16,7 @@ import org.qp.android.dto.plugin.PluginInfo;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class PluginRecycler extends RecyclerView.Adapter<PluginRecycler.ViewHolder> {
     private final Context context;
@@ -42,7 +40,7 @@ public class PluginRecycler extends RecyclerView.Adapter<PluginRecycler.ViewHold
             new DiffUtil.ItemCallback<>() {
                 @Override
                 public boolean areItemsTheSame(@NonNull PluginInfo oldItem , @NonNull PluginInfo newItem) {
-                    return oldItem.id == newItem.id;
+                    return Objects.equals(oldItem.version , newItem.version);
                 }
 
                 @Override
@@ -73,28 +71,7 @@ public class PluginRecycler extends RecyclerView.Adapter<PluginRecycler.ViewHold
         holder.listItemPluginBinding(differ.getCurrentList().get(position));
         var pluginInfo = getItem(position);
 
-        // gameIcon
-        if (pluginInfo.image != null && pluginInfo.image.isEmpty()) {
-            var drawable = ResourcesCompat.getDrawable(
-                    context.getResources(),
-                    R.drawable.broken_image , null
-            );
-            holder.listItemPluginBinding.pluginIcon.setImageDrawable(drawable);
-        } else {
-            Picasso.get()
-                    .load(pluginInfo.image)
-                    .fit()
-                    .into(holder.listItemPluginBinding.pluginIcon);
-        }
-
-        // gameSize
-        if (pluginInfo.fileSize != null) {
-            holder.listItemPluginBinding.pluginSize
-                    .setText(context.getString(R.string.fileSize)
-                            .replace("-SIZE-", Integer.toString(pluginInfo.getFileSize())));
-        }
-
-        // gameAuthor
+        // pluginAuthor
         if (pluginInfo.author != null && pluginInfo.author.length() > 0) {
             holder.listItemPluginBinding.pluginAuthor
                     .setText(context.getString(R.string.author)
@@ -107,7 +84,7 @@ public class PluginRecycler extends RecyclerView.Adapter<PluginRecycler.ViewHold
     public static class ViewHolder extends RecyclerView.ViewHolder {
         ListItemPluginBinding listItemPluginBinding;
 
-        ViewHolder(ListItemPluginBinding listItemPluginBinding){
+        ViewHolder(@NonNull ListItemPluginBinding listItemPluginBinding){
             super(listItemPluginBinding.getRoot());
             this.listItemPluginBinding = listItemPluginBinding;
         }

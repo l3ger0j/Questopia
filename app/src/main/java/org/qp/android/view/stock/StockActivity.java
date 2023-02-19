@@ -276,7 +276,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
                     break;
                 case 1:
                     var intentImg1 = new Intent(Intent.ACTION_VIEW, Uri
-                            .parse("https://schoollife.fludilka.su/viewtopic.php?id=828#p63540"));
+                            .parse("https://schoollife.fludilka.su/viewtopic.php"));
                     intentImg1.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(intentImg1);
                     break;
@@ -526,6 +526,13 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
     }
 
     @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        var refresh = menu.findItem(R.id.action_refresh);
+        refresh.setVisible(stockViewModel.isDownloadPlugin());
+        return true;
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         var itemId = item.getItemId();
         if (itemId == R.id.menu_options) {
@@ -545,6 +552,8 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
                     return false;
                 }
             });
+        } else if (itemId == R.id.action_refresh) {
+            stockViewModel.startDownloadPlugin();
         }
         return false;
     }
