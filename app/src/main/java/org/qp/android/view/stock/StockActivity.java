@@ -313,8 +313,8 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         final PrettyFilePicker filePicker = new PrettyFilePicker(this);
         filePicker.create("Select file");
         PrettyFilePicker.Companion.getFileFromPrettyFilePickerAsFile().observe(this, file -> {
-//            activityStock.setTempInstallFile(file);
-//            activityStock.isSelectArchive.set(true);
+            stockViewModel.setTempInstallFile(file);
+            stockViewModel.isSelectArchive.set(true);
         });
     }
 
