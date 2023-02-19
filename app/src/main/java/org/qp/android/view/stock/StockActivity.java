@@ -1,16 +1,15 @@
 package org.qp.android.view.stock;
 
-import static android.provider.Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION;
 import static org.qp.android.utils.DirUtil.doesDirectoryContainGameFiles;
 import static org.qp.android.utils.FileUtil.deleteDirectory;
 
+import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -21,6 +20,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.view.ActionMode;
 import androidx.cardview.widget.CardView;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.os.LocaleListCompat;
 import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.ViewModelProvider;
@@ -30,7 +31,6 @@ import com.anggrayudi.storage.FileWrapper;
 import com.anggrayudi.storage.SimpleStorageHelper;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.picker.prettyfilepicker.PrettyFilePicker;
-import com.squareup.picasso.BuildConfig;
 import com.zhpan.bannerview.BannerViewPager;
 import com.zhpan.bannerview.BaseBannerAdapter;
 import com.zhpan.bannerview.BaseViewHolder;
@@ -55,6 +55,8 @@ import java.util.HashMap;
 import java.util.Objects;
 
 public class StockActivity extends AppCompatActivity implements StockPatternDialogFrags.StockPatternDialogList, StockPatternFragment.StockPatternFragmentList {
+    private static final int READ_EXTERNAL_STORAGE_CODE = 200;
+    private static final int MANAGE_EXTERNAL_STORAGE_CODE = 201;
     private final String TAG = this.getClass().getSimpleName();
     private HashMap<String, GameData> gamesMap = new HashMap<>();
     public SettingsController settingsController;
@@ -116,12 +118,6 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.R){
-            if (!Environment.isExternalStorageManager()) {
-                Intent requestFilePermissionsIntent = new Intent(ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, Uri.parse("package:" + BuildConfig.APPLICATION_ID));
-                startActivity(requestFilePermissionsIntent);
-            }
-        }
         activityStockBinding = ActivityStockBinding.inflate(getLayoutInflater());
         mFAB = activityStockBinding.stockFAB;
         if (mRecyclerView != null) {
@@ -144,6 +140,21 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
                 }
             });
         }
+
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.MANAGE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.MANAGE_EXTERNAL_STORAGE}, MANAGE_EXTERNAL_STORAGE_CODE);
+            }
+        }
+
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, READ_EXTERNAL_STORAGE_CODE);
+            }
+        }
+
 
         stockViewModel = new ViewModelProvider(this).get(StockViewModel.class);
         activityStockBinding.setStockVM(stockViewModel);
@@ -207,13 +218,16 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
     @Override
     public void onRequestPermissionsResult(int requestCode , @NonNull String[] permissions , @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode , permissions , grantResults);
-        if (requestCode == 1) {
-            if (grantResults.length > 0
-                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Log.d(TAG, "Success");
-            } else {
-                showErrorDialog("Permission denied to read your External storage");
-            }
+        switch (requestCode) {
+            case MANAGE_EXTERNAL_STORAGE_CODE:
+            case READ_EXTERNAL_STORAGE_CODE:
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Log.d(TAG, "Success");
+                } else {
+                    showErrorDialog("Permission denied to read your External storage");
+                }
+                break;
         }
     }
 
@@ -313,8 +327,12 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         selectDialog.show(getSupportFragmentManager(), "selectDialogFragment");
     }
 
-    public void showFilePickerDialog (String[] mimeTypes) {
-        final PrettyFilePicker filePicker = new PrettyFilePicker(this);
+    public void showFilePickerActivity(String[] mimeTypes) {
+        storageHelper.openFilePicker(mimeTypes);
+    }
+
+    public void showFilePickerDialog () {
+        final var filePicker = new PrettyFilePicker(this);
         filePicker.create("Select file");
         PrettyFilePicker.Companion.getFileFromPrettyFilePickerAsFile().observe(this, file -> {
             stockViewModel.setTempInstallFile(file);

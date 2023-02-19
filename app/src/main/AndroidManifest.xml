@@ -23,6 +23,7 @@
         tools:targetApi="s"
         android:allowBackup="false"
         android:fullBackupContent="false"
+        android:requestLegacyExternalStorage="true"
         android:dataExtractionRules="@xml/data_extraction_rules">
 
         <activity

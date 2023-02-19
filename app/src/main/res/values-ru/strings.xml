@@ -144,6 +144,7 @@
         <string name="customHeightTitle">Своё Значение Высоты</string>
         <!-- Switch section -->
         <string name="switchCatTitle">Переключатели</string>
+        <string name="filePicker">Диалог Выбора Файла (альфа)</string>
         <string name="immersiveModeTitle">Режим Погружения</string>
         <string name="immersiveModeSum">Включение/выключение режима погружения</string>
         <string name="separatorTitle">Разделитель</string>

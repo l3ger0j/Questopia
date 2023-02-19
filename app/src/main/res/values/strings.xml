@@ -145,6 +145,7 @@
         <string name="customHeightTitle">Custom Height Image</string>
         <!-- Switch section -->
         <string name="switchCatTitle">Switches</string>
+        <string name="filePicker">File Picker Dialog (alpha)</string>
         <string name="immersiveModeTitle">Immersive Mode</string>
         <string name="immersiveModeSum">Enable/disable immersive mode</string>
         <string name="separatorTitle">Separator</string>

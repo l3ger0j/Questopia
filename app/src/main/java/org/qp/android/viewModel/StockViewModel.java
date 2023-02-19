@@ -399,20 +399,25 @@ public class StockViewModel extends AndroidViewModel {
     public void sendIntent(@NonNull View view) {
         int id = view.getId();
         if (id == R.id.buttonSelectArchive) {
-            Objects.requireNonNull(activityObservableField.get())
-                    .showFilePickerDialog(new String[]{"application/zip" , "application/rar"});
+            if (controller.isUseNewFilePicker) {
+                Objects.requireNonNull(activityObservableField.get())
+                        .showFilePickerDialog();
+            } else {
+                Objects.requireNonNull(activityObservableField.get())
+                        .showFilePickerActivity(new String[]{"application/zip" , "application/rar"});
+            }
         } else if (id == R.id.buttonSelectFolder) {
             Objects.requireNonNull(activityObservableField.get())
                     .showDirPickerDialog();
         } else if (id == R.id.buttonSelectIcon) {
             Objects.requireNonNull(activityObservableField.get())
-                    .showFilePickerDialog(new String[]{"image/png" , "image/jpeg"});
+                    .showFilePickerActivity(new String[]{"image/png" , "image/jpeg"});
         } else if (id == R.id.buttonSelectPath) {
             Objects.requireNonNull(activityObservableField.get())
-                    .showFilePickerDialog(new String[]{"application/octet-stream"});
+                    .showFilePickerActivity(new String[]{"application/octet-stream"});
         } else if (id == R.id.buttonSelectMod) {
             Objects.requireNonNull(activityObservableField.get())
-                    .showFilePickerDialog(new String[]{"application/octet-stream"});
+                    .showFilePickerActivity(new String[]{"application/octet-stream"});
         }
     }
 

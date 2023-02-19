@@ -2,6 +2,7 @@ package org.qp.android.view.game;
 
 import android.content.Context;
 import android.graphics.Typeface;
+import android.text.Html;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
@@ -118,7 +119,7 @@ public class GameItemRecycler extends RecyclerView.Adapter<GameItemRecycler.View
             itemText.setBackgroundColor(backgroundColor);
             itemText.setTextColor(textColor);
             itemText.setLinkTextColor(linkTextColor);
-            itemText.setText(qpListItem.text);
+            itemText.setText(Html.fromHtml(String.valueOf(qpListItem.text)));
         }
     }
 
