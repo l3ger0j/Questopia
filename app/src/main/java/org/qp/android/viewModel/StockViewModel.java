@@ -1,8 +1,5 @@
 package org.qp.android.viewModel;
 
-import static android.content.Intent.ACTION_OPEN_DOCUMENT;
-import static android.content.Intent.ACTION_OPEN_DOCUMENT_TREE;
-import static android.content.Intent.EXTRA_MIME_TYPES;
 import static org.qp.android.utils.FileUtil.GAME_INFO_FILENAME;
 import static org.qp.android.utils.FileUtil.copyFile;
 import static org.qp.android.utils.FileUtil.createFile;
@@ -20,7 +17,6 @@ import static org.qp.android.utils.XmlUtil.objectToXml;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Application;
-import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -38,6 +34,8 @@ import androidx.documentfile.provider.DocumentFile;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.MutableLiveData;
 
+import com.squareup.picasso.Picasso;
+
 import org.qp.android.R;
 import org.qp.android.databinding.DialogEditBinding;
 import org.qp.android.databinding.DialogInstallBinding;
@@ -49,6 +47,7 @@ import org.qp.android.utils.ArchiveUtil;
 import org.qp.android.view.game.GameActivity;
 import org.qp.android.view.settings.SettingsController;
 import org.qp.android.view.stock.StockActivity;
+import org.qp.android.view.stock.fragment.StockGameFragment;
 import org.qp.android.view.stock.fragment.dialogs.StockDialogFrags;
 import org.qp.android.view.stock.fragment.dialogs.StockDialogType;
 import org.qp.android.viewModel.repository.LocalGame;
@@ -60,12 +59,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
 
-public class ActivityStock extends AndroidViewModel {
-    private static final int PICKFILE_RESULT_CODE = 101;
+public class StockViewModel extends AndroidViewModel {
     private final String TAG = this.getClass().getSimpleName();
 
     public ObservableField<StockActivity> activityObservableField = new
             ObservableField<>();
+
+    public ObservableField<StockGameFragment> fragmentObservableField =
+            new ObservableField<>();
+
     public ObservableBoolean isShowDialog = new ObservableBoolean();
     public ObservableBoolean isSelectArchive = new ObservableBoolean();
     public ObservableBoolean isSelectFolder = new ObservableBoolean();
@@ -81,15 +83,13 @@ public class ActivityStock extends AndroidViewModel {
     private DialogEditBinding editBinding;
     private SettingsController controller;
 
+    private final MutableLiveData<ArrayList<GameData>> gameDataList;
+
     public MutableLiveData<Integer> outputIntObserver = new MutableLiveData<>();
 
     // region Getter/Setter
     public void setController(SettingsController controller) {
         this.controller = controller;
-    }
-
-    public GameData getTempGameData() {
-        return tempGameData;
     }
 
     public void setTempGameData(GameData tempGameData) {
@@ -119,19 +119,81 @@ public class ActivityStock extends AndroidViewModel {
 
     public void setTempImageFile(@NonNull DocumentFile tempImageFile) {
         this.tempImageFile = tempImageFile;
+        if (installBinding != null) {
+            installBinding.imageTV.setText(tempImageFile.getName());
+            Picasso.get()
+                    .load(tempImageFile.getUri())
+                    .fit()
+                    .into(installBinding.imageView);
+        } else if (editBinding != null) {
+            editBinding.imageTV.setText(tempImageFile.getName());
+            Picasso.get()
+                    .load(tempImageFile.getUri())
+                    .fit()
+                    .into(editBinding.imageView);
+        }
     }
 
     public void setGamesDir(File gamesDir) {
         this.gamesDir = gamesDir;
     }
 
+    public void setGameDataArrayList(ArrayList<GameData> gameDataArrayList) {
+        gameDataList.postValue(gameDataArrayList);
+    }
+
+    public MutableLiveData<ArrayList<GameData>> getGameData() {
+        return gameDataList;
+    }
+
+    public GameData getTempGameData() {
+        return tempGameData;
+    }
+
     public HashMap<String, GameData> getGamesMap() {
         return gamesMap;
     }
+
+    public String getGameAuthor () {
+        if (tempGameData.author.length() > 0 && fragmentObservableField.get() != null) {
+            return fragmentObservableField.get().getString(R.string.author).replace("-AUTHOR-" , tempGameData.author);
+        } else {
+            return "";
+        }
+    }
+
+    public String getGameVersion () {
+        if (tempGameData.version.length() > 0 && fragmentObservableField.get() != null) {
+            return fragmentObservableField.get().getString(R.string.version).replace("-VERSION-" , tempGameData.version);
+        } else {
+            return "";
+        }
+    }
+
+    public String getGameType () {
+        if (tempGameData.fileExt.length() > 0 && fragmentObservableField.get() != null) {
+            if (tempGameData.fileExt.equals("aqsp")) {
+                return fragmentObservableField.get().getString(R.string.fileType).replace("-TYPE-", tempGameData.fileExt)
+                        + " " + fragmentObservableField.get().getString(R.string.experimental);
+            }
+            return fragmentObservableField.get().getString(R.string.fileType).replace("-TYPE-", tempGameData.fileExt);
+        } else {
+            return "";
+        }
+    }
+
+    public String getGameSize () {
+        if (tempGameData.getFileSize() != null  && fragmentObservableField.get() != null) {
+            return fragmentObservableField.get().getString(R.string.fileSize).replace("-SIZE-" , tempGameData.getFileSize());
+        } else {
+            return "";
+        }
+    }
     // endregion Getter/Setter
 
-    public ActivityStock(@NonNull Application application) {
+    public StockViewModel(@NonNull Application application) {
         super(application);
+        gameDataList = new MutableLiveData<>();
     }
 
     // region Dialog

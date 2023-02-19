@@ -5,7 +5,7 @@
         <import type="android.view.View"/>
         <variable
             name="pluginViewModel"
-            type="org.qp.android.viewModel.FragmentPlugin" />
+            type="org.qp.android.viewModel.PluginViewModel" />
     </data>
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/plugin_recyclerView"

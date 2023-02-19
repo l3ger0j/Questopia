@@ -13,7 +13,7 @@ import org.qp.android.R;
 import org.qp.android.view.settings.SettingsActivity;
 import org.qp.android.view.settings.SettingsController;
 
-public class ActivitySettings extends ViewModel {
+public class SettingsViewModel extends ViewModel {
     private static final String ABOUT_TEMPLATE = "<html><head>\n" +
             "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1\">\n" +
             "<style type=\"text/css\">\n" +

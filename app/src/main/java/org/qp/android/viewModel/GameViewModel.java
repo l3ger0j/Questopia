@@ -32,7 +32,7 @@ import org.qp.android.view.settings.SettingsController;
 
 import java.io.FileNotFoundException;
 
-public class ActivityGame extends AndroidViewModel {
+public class GameViewModel extends AndroidViewModel {
     private final String TAG = this.getClass().getCanonicalName();
 
     private final QuestPlayerApplication questPlayerApplication;
@@ -104,7 +104,7 @@ public class ActivityGame extends AndroidViewModel {
     }
     // endregion Getter/Setter
 
-    public ActivityGame(@NonNull Application application) {
+    public GameViewModel(@NonNull Application application) {
         super(application);
         questPlayerApplication = getApplication();
         gameContentResolver = questPlayerApplication.getGameContentResolver();
