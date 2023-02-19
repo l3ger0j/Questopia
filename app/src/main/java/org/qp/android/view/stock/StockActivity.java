@@ -1,5 +1,6 @@
 package org.qp.android.view.stock;
 
+import static android.provider.Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION;
 import static org.qp.android.utils.DirUtil.doesDirectoryContainGameFiles;
 import static org.qp.android.utils.FileUtil.deleteDirectory;
 
@@ -9,6 +10,7 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -27,6 +29,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.anggrayudi.storage.FileWrapper;
 import com.anggrayudi.storage.SimpleStorageHelper;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.picker.prettyfilepicker.PrettyFilePicker;
+import com.squareup.picasso.BuildConfig;
 import com.zhpan.bannerview.BannerViewPager;
 import com.zhpan.bannerview.BaseBannerAdapter;
 import com.zhpan.bannerview.BaseViewHolder;
@@ -112,6 +116,12 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.R){
+            if (!Environment.isExternalStorageManager()) {
+                Intent requestFilePermissionsIntent = new Intent(ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, Uri.parse("package:" + BuildConfig.APPLICATION_ID));
+                startActivity(requestFilePermissionsIntent);
+            }
+        }
         activityStockBinding = ActivityStockBinding.inflate(getLayoutInflater());
         mFAB = activityStockBinding.stockFAB;
         var list = new ArrayList<Integer>();
@@ -300,7 +310,12 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
     }
 
     public void showFilePickerDialog (String[] mimeTypes) {
-        storageHelper.openFilePicker(mimeTypes);
+        final PrettyFilePicker filePicker = new PrettyFilePicker(this);
+        filePicker.create("Select file");
+        PrettyFilePicker.Companion.getFileFromPrettyFilePickerAsFile().observe(this, file -> {
+            stockViewModel.setTempInstallFile(file);
+            stockViewModel.isSelectArchive.set(true);
+        });
     }
 
     public void showDirPickerDialog () {
