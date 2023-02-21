@@ -41,15 +41,17 @@
             app:srcCompat="@drawable/add"
             tools:ignore="ContentDescription" />
 
-        <FrameLayout
-            android:id="@+id/stockFragContainer"
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/stockFragHost"
+            android:name="androidx.navigation.fragment.NavHostFragment"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             app:layout_constraintBottom_toTopOf="@+id/banner_view"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:navGraph="@navigation/stock_graph" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

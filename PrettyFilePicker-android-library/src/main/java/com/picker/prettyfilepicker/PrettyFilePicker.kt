@@ -16,7 +16,7 @@ class PrettyFilePicker(
     private val activity: Activity,
     private val title: String,
     private val returnAsDocumentFile: Boolean = false,
-    private val filters: ArrayList<String> = arrayListOf()
+    private val filters: Array<String> = arrayOf()
 ) {
     private val builder = AlertDialog.Builder(activity)
     private lateinit var createdPickerInstance: AlertDialog

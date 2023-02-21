@@ -20,6 +20,7 @@
             android:id="@+id/file_list_elem"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:text="alien shooter game.exe"
             android:textSize="16sp" />
 
     </LinearLayout>

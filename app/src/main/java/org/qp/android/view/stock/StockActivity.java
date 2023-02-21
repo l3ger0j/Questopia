@@ -26,6 +26,8 @@ import androidx.core.os.LocaleListCompat;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
+import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.anggrayudi.storage.FileWrapper;
@@ -41,9 +43,7 @@ import org.qp.android.databinding.ActivityStockBinding;
 import org.qp.android.dto.stock.GameData;
 import org.qp.android.view.settings.SettingsActivity;
 import org.qp.android.view.settings.SettingsController;
-import org.qp.android.view.stock.fragment.StockGameFragment;
 import org.qp.android.view.stock.fragment.StockPatternFragment;
-import org.qp.android.view.stock.fragment.StockRecyclerFragment;
 import org.qp.android.view.stock.fragment.dialogs.StockDialogFrags;
 import org.qp.android.view.stock.fragment.dialogs.StockDialogType;
 import org.qp.android.view.stock.fragment.dialogs.StockPatternDialogFrags;
@@ -62,6 +62,8 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
     private HashMap<String, GameData> gamesMap = new HashMap<>();
     public SettingsController settingsController;
     private StockViewModel stockViewModel;
+
+    private NavController navController;
 
     private ActionMode actionMode;
     protected ActivityStockBinding activityStockBinding;
@@ -121,26 +123,6 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         super.onCreate(savedInstanceState);
         activityStockBinding = ActivityStockBinding.inflate(getLayoutInflater());
         mFAB = activityStockBinding.stockFAB;
-        if (mRecyclerView != null) {
-            mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-                @Override
-                public void onScrollStateChanged(@NonNull RecyclerView recyclerView , int newState) {
-                    if (newState == RecyclerView.SCROLL_STATE_IDLE)
-                    {
-                        mFAB.show();
-                    }
-                    super.onScrollStateChanged(recyclerView, newState);
-                }
-
-                @Override
-                public void onScrolled(@NonNull RecyclerView recyclerView , int dx , int dy) {
-                    if (dy > 0 ||dy<0 && mFAB.isShown())
-                    {
-                        mFAB.hide();
-                    }
-                }
-            });
-        }
 
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.MANAGE_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -156,19 +138,10 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
             }
         }
 
-
         stockViewModel = new ViewModelProvider(this).get(StockViewModel.class);
         activityStockBinding.setStockVM(stockViewModel);
         stockViewModel.activityObservableField.set(this);
         gamesMap = stockViewModel.getGamesMap();
-
-        if (savedInstanceState == null) {
-            var stockFragment = new StockRecyclerFragment();
-            getSupportFragmentManager().beginTransaction()
-                    .add(activityStockBinding.stockFragContainer.getId(),
-                            stockFragment, "stockRecyclerFragment")
-                    .commit();
-        }
 
         storageHelper.setOnFileSelected((integer , documentFiles) -> {
             if (documentFiles != null) {
@@ -214,6 +187,14 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         Log.i(TAG,"Stock Activity created");
 
         setContentView(activityStockBinding.getRoot());
+
+        var navFragment = (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.stockFragHost);
+        if (navFragment != null) {
+            navController = navFragment.getNavController();
+        }
+        if (savedInstanceState == null) {
+            navController.navigate(R.id.stockRecyclerFragment);
+        }
     }
 
     @Override
@@ -237,11 +218,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(false);
         }
-        var stockFragment = new StockRecyclerFragment();
-        getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.stockFragContainer, stockFragment, "stockRecyclerFragment")
-                .commit();
+        navController.popBackStack();
         return true;
     }
 
@@ -250,15 +227,16 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(false);
         }
-        var manager = getSupportFragmentManager();
-        var stockFragment = new StockRecyclerFragment();
-        if (manager.findFragmentByTag("stockRecyclerFragment") != null) {
-            super.onBackPressed();
+        if (navController.getCurrentDestination().getLabel() != null) {
+            if (Objects.equals(navController.getCurrentDestination().getLabel()
+                    , "StockRecyclerFragment")) {
+                super.onBackPressed();
+            } else {
+                Log.d(TAG , String.valueOf(navController.getCurrentDestination().getLabel()));
+                navController.popBackStack();
+            }
         } else {
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.stockFragContainer , stockFragment , "stockRecyclerFragment")
-                    .commit();
+            super.onBackPressed();
         }
     }
 
@@ -332,7 +310,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         storageHelper.openFilePicker(mimeTypes);
     }
 
-    public void showFilePickerDialog (ArrayList<String> mimeTypes) {
+    public void showFilePickerDialog (String[] mimeTypes) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             new PrettyFilePicker(
                     this,
@@ -375,10 +353,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
                         .get(StockViewModel.class)
                         .setTempGameData(stockViewModel.getGamesMap()
                         .get(getGameIdByPosition(position)));
-                getSupportFragmentManager()
-                        .beginTransaction()
-                        .replace(R.id.stockFragContainer, new StockGameFragment(), "StockGameFragment")
-                        .commit();
+                navController.navigate(R.id.stockGameFragment);
             }
             // showGameInfo(getGameIdByPosition(position));
         }
@@ -491,6 +466,18 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
             mFAB.hide();
             actionMode = startSupportActionMode(callback);
         }
+    }
+
+    @Override
+    public void onScrolled(RecyclerView recyclerView , int dx , int dy) {
+        Log.d(TAG, "TRUE");
+        if (dy > 0 || dy < 0 && mFAB.isShown()) mFAB.hide();
+    }
+
+    @Override
+    public void onScrollStateChanged(RecyclerView recyclerView , int newState) {
+        Log.d(TAG, "TRUE");
+        if (newState == RecyclerView.SCROLL_STATE_IDLE) mFAB.show();
     }
 
     @Deprecated

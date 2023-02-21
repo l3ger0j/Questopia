@@ -14,7 +14,7 @@ import java.nio.file.Paths
 
 class AdapterReDraw(
     private val adapter: PickerListAdapter,
-    private val filters: ArrayList<String>
+    private val filters: Array<String>
 ) {
     @RequiresApi(Build.VERSION_CODES.O)
     fun reDrawList(view: View) {
@@ -23,9 +23,11 @@ class AdapterReDraw(
                 view.findViewById<TextView>(R.id.currentDirectoryPath).text.toString()
             ).parentFile
             if (path != null) {
-                adapter.submitList(
-                    getFileList(path.toString(), view)
-                )
+                if (!path.parentFile?.name.equals("storage")) {
+                    adapter.submitList(
+                        getFileList(path.toString(), view)
+                    )
+                }
             }
         }
     }
@@ -57,12 +59,14 @@ class AdapterReDraw(
                         }
                     }
                 } else {
-                    fileList.add(
-                        FileModel(
-                            file.name,
-                            file.toString()
+                    if(!file.isHidden){
+                        fileList.add(
+                            FileModel(
+                                file.name,
+                                file.toString()
+                            )
                         )
-                    )
+                    }
                 }
             }
         }
