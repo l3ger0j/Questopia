@@ -53,7 +53,6 @@ import org.qp.android.utils.ArchiveUtil;
 import org.qp.android.view.game.GameActivity;
 import org.qp.android.view.settings.SettingsController;
 import org.qp.android.view.stock.StockActivity;
-import org.qp.android.view.stock.fragment.StockGameFragment;
 import org.qp.android.view.stock.fragment.dialogs.StockDialogFrags;
 import org.qp.android.view.stock.fragment.dialogs.StockDialogType;
 import org.qp.android.viewModel.repository.LocalGame;
@@ -71,9 +70,6 @@ public class StockViewModel extends AndroidViewModel {
 
     public ObservableField<StockActivity> activityObservableField = new
             ObservableField<>();
-
-    public ObservableField<StockGameFragment> fragmentObservableField =
-            new ObservableField<>();
 
     public ObservableBoolean isShowDialog = new ObservableBoolean();
     public ObservableBoolean isSelectArchive = new ObservableBoolean();
@@ -105,35 +101,36 @@ public class StockViewModel extends AndroidViewModel {
 
     public void setTempPathFile(DocumentFile tempPathFile) {
         this.tempPathFile = tempPathFile;
-        editBinding.fileTV.setText(tempPathFile.getName());
+        editBinding.buttonSelectPath.setText(tempPathFile.getName());
     }
 
     public void setTempModFile(DocumentFile tempModFile) {
         this.tempModFile = tempModFile;
-        editBinding.modTV.setText(tempModFile.getName());
+        editBinding.buttonSelectMod.setText(tempModFile.getName());
     }
 
     public void setTempInstallFile(@NonNull DocumentFile tempInstallFile) {
         this.tempInstallFile = tempInstallFile;
-        installBinding.fileTV.setText(tempInstallFile.getName());
+        installBinding.buttonSelectArchive.setText(tempInstallFile.getName());
     }
 
     public void setTempInstallDir(@NonNull DocumentFile tempInstallDir) {
         this.tempInstallDir = tempInstallDir;
         installBinding.buttonSelectArchive.setEnabled(false);
-        installBinding.folderTV.setText(tempInstallDir.getName());
+        installBinding.buttonSelectFolder.setText(tempInstallDir.getName());
     }
 
     public void setTempImageFile(@NonNull DocumentFile tempImageFile) {
         this.tempImageFile = tempImageFile;
         if (installBinding != null) {
-            installBinding.imageTV.setText(tempImageFile.getName());
+            installBinding.buttonSelectIcon.setText(tempImageFile.getName());
             Picasso.get()
                     .load(tempImageFile.getUri())
                     .fit()
                     .into(installBinding.imageView);
-        } else if (editBinding != null) {
-            editBinding.imageTV.setText(tempImageFile.getName());
+        }
+        if (editBinding != null) {
+            editBinding.buttonSelectIcon.setText(tempImageFile.getName());
             Picasso.get()
                     .load(tempImageFile.getUri())
                     .fit()
@@ -162,60 +159,76 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     public String getGameAuthor () {
-        if (fragmentObservableField.get() != null && tempGameData.author.length() > 0) {
-            return fragmentObservableField.get().getString(R.string.author).replace("-AUTHOR-" , tempGameData.author);
+        if (tempGameData.author.length() > 0) {
+            return getApplication()
+                    .getString(R.string.author)
+                    .replace("-AUTHOR-" , tempGameData.author);
         } else {
             return "";
         }
     }
 
     public String getGamePortBy () {
-        if (fragmentObservableField.get() != null && tempGameData.portedBy.length() > 0) {
-            return fragmentObservableField.get().getString(R.string.ported_by).replace("-PORTED_BY-", tempGameData.portedBy);
+        if (tempGameData.portedBy.length() > 0) {
+            return getApplication()
+                    .getString(R.string.ported_by)
+                    .replace("-PORTED_BY-", tempGameData.portedBy);
         } else {
             return "";
         }
     }
 
     public String getGameVersion () {
-        if (tempGameData.version.length() > 0 && fragmentObservableField.get() != null) {
-            return fragmentObservableField.get().getString(R.string.version).replace("-VERSION-" , tempGameData.version);
+        if (tempGameData.version.length() > 0) {
+            return getApplication()
+                    .getString(R.string.version)
+                    .replace("-VERSION-" , tempGameData.version);
         } else {
             return "";
         }
     }
 
     public String getGameType () {
-        if (tempGameData.fileExt.length() > 0 && fragmentObservableField.get() != null) {
+        if (tempGameData.fileExt.length() > 0) {
             if (tempGameData.fileExt.equals("aqsp")) {
-                return fragmentObservableField.get().getString(R.string.fileType).replace("-TYPE-", tempGameData.fileExt)
-                        + " " + fragmentObservableField.get().getString(R.string.experimental);
+                return getApplication()
+                        .getString(R.string.fileType)
+                        .replace("-TYPE-", tempGameData.fileExt)
+                        + " " + getApplication().getString(R.string.experimental);
             }
-            return fragmentObservableField.get().getString(R.string.fileType).replace("-TYPE-", tempGameData.fileExt);
+            return getApplication()
+                    .getString(R.string.fileType)
+                    .replace("-TYPE-", tempGameData.fileExt);
         } else {
             return "";
         }
     }
 
     public String getGameSize () {
-        if (tempGameData.getFileSize() != null  && fragmentObservableField.get() != null) {
-            return fragmentObservableField.get().getString(R.string.fileSize).replace("-SIZE-" , tempGameData.getFileSize());
+        if (tempGameData.getFileSize() != null) {
+            return getApplication()
+                    .getString(R.string.fileSize)
+                    .replace("-SIZE-" , tempGameData.getFileSize());
         } else {
             return "";
         }
     }
 
     public String getGamePubData () {
-        if (tempGameData.pubDate.length() > 0 && fragmentObservableField.get() != null) {
-            return fragmentObservableField.get().getString(R.string.pub_data).replace("-PUB_DATA-", tempGameData.pubDate);
+        if (tempGameData.pubDate.length() > 0) {
+            return getApplication()
+                    .getString(R.string.pub_data)
+                    .replace("-PUB_DATA-", tempGameData.pubDate);
         } else {
             return "";
         }
     }
 
     public String getGameModData () {
-        if (tempGameData.modDate.length() > 0 && fragmentObservableField.get() != null) {
-            return fragmentObservableField.get().getString(R.string.mod_data).replace("-MOD_DATA-", tempGameData.pubDate);
+        if (tempGameData.modDate.length() > 0) {
+            return getApplication()
+                    .getString(R.string.mod_data)
+                    .replace("-MOD_DATA-", tempGameData.pubDate);
         } else {
             return "";
         }
@@ -223,6 +236,10 @@ public class StockViewModel extends AndroidViewModel {
 
     public boolean isGameInstalled () {
         return tempGameData.isInstalled() && doesDirectoryContainGameFiles(tempGameData.gameDir);
+    }
+
+    public boolean isHasRemoteUrl () {
+        return tempGameData.hasRemoteUrl();
     }
     // endregion Getter/Setter
 
@@ -396,15 +413,29 @@ public class StockViewModel extends AndroidViewModel {
         }
     }
 
+    private String[] getSupportArchiveType() {
+        return new String[]{
+                "application/x-7z-compressed" ,
+                "application/rar" ,
+                "application/zip" ,
+                "application/x-freearc" ,
+                "application/x-arj" ,
+                "application/x-b1" ,
+                "application/x-cfs-compressed" ,
+                "application/x-gtar" ,
+                "application/x-xar" ,
+                "application/x-zoo"};
+    }
+
     public void sendIntent(@NonNull View view) {
         int id = view.getId();
         if (id == R.id.buttonSelectArchive) {
             if (controller.isUseNewFilePicker) {
                 Objects.requireNonNull(activityObservableField.get())
-                        .showFilePickerDialog(new String[]{"application/zip" , "application/rar"});
+                        .showFilePickerDialog(getSupportArchiveType());
             } else {
                 Objects.requireNonNull(activityObservableField.get())
-                        .showFilePickerActivity(new String[]{"application/zip" , "application/rar"});
+                        .showFilePickerActivity(getSupportArchiveType());
             }
         } else if (id == R.id.buttonSelectFolder) {
             Objects.requireNonNull(activityObservableField.get())
@@ -435,9 +466,9 @@ public class StockViewModel extends AndroidViewModel {
                 DialogEditBinding.inflate(LayoutInflater.from(activityObservableField.get()));
         editBinding.setStockVM(this);
         if (findFileRecursively(tempGameData.gameDir, "mods") != null) {
-            editBinding.linearLayout4.setVisibility(View.VISIBLE);
+            editBinding.buttonSelectMod.setVisibility(View.VISIBLE);
         } else {
-            editBinding.linearLayout4.setVisibility(View.GONE);
+            editBinding.buttonSelectMod.setVisibility(View.GONE);
         }
         return editBinding;
     }

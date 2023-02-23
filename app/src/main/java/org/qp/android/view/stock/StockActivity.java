@@ -151,13 +151,31 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
                     switch (document.getExtension()) {
                         case "zip":
                         case "rar":
+                        case "7z":
+                        case "s7z":
+                        case "arc":
+                        case "cdx":
+                        case "arj":
+                        case "b1":
+                        case "cfs":
+                        case "tar.gz":
+                        case "tgz":
+                        case "tar.Z":
+                        case "tar.bz2":
+                        case "tbz2":
+                        case "tar.lz":
+                        case "tlz":
+                        case "tar.xz":
+                        case "txz":
+                        case "tar.zst":
+                        case "xar":
+                        case "zoo":
                             stockViewModel.setTempInstallFile(document.getDocumentFile());
                             stockViewModel.isSelectArchive.set(true);
                             break;
                         case "png":
                         case "jpg":
                         case "jpeg":
-                            Log.d(TAG, "TRUE");
                             getContentResolver().takePersistableUriPermission(document.getUri(),
                                     Intent.FLAG_GRANT_READ_URI_PERMISSION
                                             | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
@@ -227,12 +245,11 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(false);
         }
-        if (navController.getCurrentDestination().getLabel() != null) {
+        if (navController.getCurrentDestination() != null) {
             if (Objects.equals(navController.getCurrentDestination().getLabel()
                     , "StockRecyclerFragment")) {
                 super.onBackPressed();
             } else {
-                Log.d(TAG , String.valueOf(navController.getCurrentDestination().getLabel()));
                 navController.popBackStack();
             }
         } else {
