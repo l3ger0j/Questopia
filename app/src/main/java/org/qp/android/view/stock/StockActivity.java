@@ -327,6 +327,10 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         storageHelper.openFilePicker(mimeTypes);
     }
 
+    public void startGameActivity(Intent intent) {
+        startActivity(intent);
+    }
+
     public void showFilePickerDialog (String[] mimeTypes) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             new PrettyFilePicker(
@@ -487,13 +491,11 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
 
     @Override
     public void onScrolled(RecyclerView recyclerView , int dx , int dy) {
-        Log.d(TAG, "TRUE");
         if (dy > 0 || dy < 0 && mFAB.isShown()) mFAB.hide();
     }
 
     @Override
     public void onScrollStateChanged(RecyclerView recyclerView , int newState) {
-        Log.d(TAG, "TRUE");
         if (newState == RecyclerView.SCROLL_STATE_IDLE) mFAB.show();
     }
 
@@ -559,6 +561,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         super.onResume();
         loadSettings();
         stockViewModel.refreshGamesDirectory();
+        navController.navigate(R.id.stockRecyclerFragment);
     }
 
     @Override

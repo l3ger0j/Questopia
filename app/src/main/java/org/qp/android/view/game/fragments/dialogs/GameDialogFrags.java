@@ -46,10 +46,6 @@ public class GameDialogFrags extends GamePatternDialogFrags {
         this.message = message;
     }
 
-    public void setTemplate(String template) {
-        this.template = template;
-    }
-
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {

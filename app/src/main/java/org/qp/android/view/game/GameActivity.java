@@ -1,14 +1,10 @@
 package org.qp.android.view.game;
 
-import static android.content.Intent.ACTION_OPEN_DOCUMENT;
-import static org.qp.android.utils.ColorUtil.getHexColor;
 import static org.qp.android.utils.FileUtil.findFileOrDirectory;
 import static org.qp.android.utils.FileUtil.getOrCreateDirectory;
 import static org.qp.android.utils.FileUtil.getOrCreateFile;
 import static org.qp.android.utils.ThreadUtil.isMainThread;
-import static org.qp.android.utils.ViewUtil.getFontStyle;
 
-import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.net.Uri;
@@ -36,21 +32,23 @@ import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.databinding.DataBindingUtil;
-import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.Fragment;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.anggrayudi.storage.FileWrapper;
+import com.anggrayudi.storage.SimpleStorageHelper;
 import com.google.android.material.textfield.TextInputLayout;
 
 import org.jetbrains.annotations.Contract;
 import org.qp.android.R;
 import org.qp.android.databinding.ActivityGameBinding;
-import org.qp.android.model.libQSP.LibQpProxy;
-import org.qp.android.model.libQSP.QpMenuItem;
-import org.qp.android.model.libQSP.RefreshInterfaceRequest;
-import org.qp.android.model.libQSP.WindowType;
+import org.qp.android.model.libQP.LibQpProxy;
+import org.qp.android.model.libQP.QpMenuItem;
+import org.qp.android.model.libQP.RefreshInterfaceRequest;
+import org.qp.android.model.libQP.WindowType;
 import org.qp.android.model.service.AudioPlayer;
 import org.qp.android.model.service.HtmlProcessor;
 import org.qp.android.view.adapters.RecyclerItemClickListener;
@@ -65,15 +63,13 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CountDownLatch;
 
-public class GameActivity extends AppCompatActivity implements GameInterface,
-        GamePatternDialogFrags.GamePatternDialogList {
+public class GameActivity extends AppCompatActivity implements GameInterface, GamePatternDialogFrags.GamePatternDialogList {
     private final String TAG = this.getClass().getSimpleName();
 
     private static final int MAX_SAVE_SLOTS = 5;
@@ -83,26 +79,8 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
     private static final int LOAD = 0;
     private static final int SAVE = 1;
 
-    private static final String PAGE_HEAD_TEMPLATE = "<head>\n"
-            + "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1\">\n"
-            + "<style type=\"text/css\">\n"
-            + "  body {\n"
-            + "    margin: 0;\n"
-            + "    padding: 0.5em;\n"
-            + "    color: QSPTEXTCOLOR;\n"
-            + "    background-color: QSPBACKCOLOR;\n"
-            + "    font-size: QSPFONTSIZE;\n"
-            + "    font-family: QSPFONTSTYLE;\n"
-            + "  }\n"
-            + "  a { color: QSPLINKCOLOR; }\n"
-            + "  a:link { color: QSPLINKCOLOR; }\n"
-            + "</style></head>";
-
-    private static final String PAGE_BODY_TEMPLATE = "<body>REPLACETEXT</body>";
-
     private SettingsController settingsController;
     private int activeTab;
-    private String pageTemplate = "";
     private boolean showActions = true;
 
     private ActionBar actionBar;
@@ -132,7 +110,8 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
     private int slotAction = 0;
     private GameViewModel gameViewModel;
     private ActivityGameBinding activityGameBinding;
-    private ActivityResultLauncher<Intent> resultLauncher, templateLauncher;
+    private final SimpleStorageHelper storageHelper = new SimpleStorageHelper(this);
+    private ActivityResultLauncher<Intent> saveResultLaunch;
 
     private final Runnable onScroll = new Runnable() {
         @Override
@@ -168,7 +147,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
         setContentView(activityGameBinding.getRoot());
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
-        resultLauncher = registerForActivityResult(
+        saveResultLaunch = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
                     Uri uri;
@@ -196,43 +175,36 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
                 }
         );
 
-        templateLauncher = registerForActivityResult(
-                new ActivityResultContracts.StartActivityForResult(),
-                result -> {
-                    Uri uri;
-                    DocumentFile file;
-                    if (result.getResultCode() == RESULT_OK) {
-                        if ((uri = Objects.requireNonNull(result.getData()).getData()) == null) {
-                            showError("File is not selected");
-                        }
-                        file = DocumentFile.fromSingleUri(this, Objects.requireNonNull(uri));
-                        assert file != null;
-                        try {
-                            InputStream inputStream = getContentResolver().openInputStream(file.getUri());
-                            if ( inputStream != null ) {
+        storageHelper.setOnFileSelected((integer , documentFiles) -> {
+            for (int i = 0; documentFiles.size() > i; i++) {
+                var document =
+                        new FileWrapper.Document(documentFiles.get(i));
+                switch (document.getExtension()) {
+                    case "text":
+                    case "pl":
+                    case "txt":
+                    case "el":
+                        var stringBuilder = new StringBuilder();
+                        try (var inputStream = document.openInputStream(this)) {
+                            if (inputStream != null) {
                                 var inputStreamReader = new InputStreamReader(inputStream);
                                 var bufferedReader = new BufferedReader(inputStreamReader);
                                 String receiveString;
-                                var stringBuilder = new StringBuilder();
                                 while ((receiveString = bufferedReader.readLine()) != null) {
                                     stringBuilder.append("\n").append(receiveString);
                                 }
-                                inputStream.close();
-                                var manager = getSupportFragmentManager();
-                                var fragment = manager.findFragmentByTag("executorDialogFragment");
-                                var bundle = new Bundle();
-                                bundle.putString("template", stringBuilder.toString());
-                                Objects.requireNonNull(fragment).setArguments(bundle);
                             }
-                        }
-                        catch (FileNotFoundException e) {
+                        } catch (FileNotFoundException e) {
                             showError("File not found: "+"\n"+e);
                         } catch (IOException e) {
                             showError("Can not read file: "+"\n"+e);
                         }
-                    }
+                        postTextInDialogFrags(stringBuilder.toString());
+                        break;
                 }
-        );
+            }
+            return null;
+        });
 
         tempIdGame = getIntent().getStringExtra("gameId");
         if (savedInstanceState != null && savedInstanceState.containsKey("tempGameId")) {
@@ -252,6 +224,18 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
         }
 
         Log.i(TAG, "Game created");
+    }
+
+    private void postTextInDialogFrags (String text) {
+        var manager = getSupportFragmentManager();
+        for (Fragment fragment : manager.getFragments()) {
+            if (Objects.equals(fragment.getTag() , "executorDialogFragment")
+                    || Objects.equals(fragment.getTag() , "inputDialogFragment")) {
+                var bundle = new Bundle();
+                bundle.putString("template", text);
+                Objects.requireNonNull(fragment).setArguments(bundle);
+            }
+        }
     }
 
     private void hideSystemUI() {
@@ -329,7 +313,6 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
     }
 
     private void initControls() {
-        htmlProcessor.setController(settingsController);
         layoutTop = activityGameBinding.layoutTop;
         separatorView = activityGameBinding.separator;
 
@@ -355,7 +338,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
     private void initActionsView() {
         actionsView = activityGameBinding.actions;
         var actions = libQpProxy.getGameState().actions;
-        var recycler = new GameItemRecycler(this);
+        var recycler = new GameItemRecycler();
         recycler.setTypeface(gameViewModel.getSettingsController().getTypeface());
         recycler.setTextSize(gameViewModel.getFontSize());
         recycler.setBackgroundColor(gameViewModel.getBackgroundColor());
@@ -370,7 +353,6 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
                     @Override
                     public void onItemClick(View view , int position) {
                         libQpProxy.onActionClicked(position);
-                        libQpProxy.onActionSelected(position);
                     }
 
                     @Override
@@ -384,7 +366,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
     private void initObjectsView() {
         objectsView = activityGameBinding.objects;
         var objects = libQpProxy.getGameState().objects;
-        var recycler = new GameItemRecycler(this);
+        var recycler = new GameItemRecycler();
         recycler.setTypeface(gameViewModel.getSettingsController().getTypeface());
         recycler.setTextSize(gameViewModel.getFontSize());
         recycler.setBackgroundColor(gameViewModel.getBackgroundColor());
@@ -414,9 +396,11 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
     }
 
     private void initServices() {
+        gameViewModel.startAudio();
+        gameViewModel.startLibQsp(this);
         htmlProcessor = gameViewModel.getHtmlProcessor();
-        audioPlayer = gameViewModel.startAudio();
-        libQpProxy = gameViewModel.startLibQsp(this);
+        audioPlayer = gameViewModel.getAudioPlayer();
+        libQpProxy = gameViewModel.getLibQspProxy();
     }
 
     private void restartServices() {
@@ -534,7 +518,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
             AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("en"));
         }
 
-        htmlProcessor.setController(settingsController);
+        htmlProcessor = gameViewModel.getHtmlProcessor();
 
         var backColor =
                 gameViewModel.getBackgroundColor();
@@ -544,7 +528,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
         actionsView.setBackgroundColor(backColor);
         objectsView.setBackgroundColor(backColor);
 
-        updatePageTemplate();
+        gameViewModel.updatePageTemplate();
     }
 
     private void applyActionsHeightRatio() {
@@ -555,16 +539,6 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
         constraintSet.applyTo(layoutTop);
     }
 
-    private void updatePageTemplate() {
-        var pageHeadTemplate = PAGE_HEAD_TEMPLATE
-                .replace("QSPTEXTCOLOR", getHexColor(gameViewModel.getTextColor()))
-                .replace("QSPBACKCOLOR", getHexColor(gameViewModel.getBackgroundColor()))
-                .replace("QSPLINKCOLOR", getHexColor(gameViewModel.getLinkColor()))
-                .replace("QSPFONTSTYLE", getFontStyle(settingsController.getTypeface()))
-                .replace("QSPFONTSIZE", Integer.toString(gameViewModel.getFontSize()));
-        pageTemplate = pageHeadTemplate + PAGE_BODY_TEMPLATE;
-    }
-
     private void applyGameState() {
         refreshMainDesc();
         refreshVarsDesc();
@@ -573,32 +547,21 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
     }
 
     private void refreshMainDesc() {
-        var mainDesc = getHtml(libQpProxy.getGameState().mainDesc);
-
         if (settingsController.isUseAutoscroll) {
             mainDescView.postDelayed(onScroll, 300);
         }
-
         mainDescView.loadDataWithBaseURL(
                 "file:///",
-                pageTemplate.replace("REPLACETEXT", mainDesc),
+                gameViewModel.getMainDesc(),
                 "text/html",
                 "UTF-8",
                 null);
     }
 
-    private String getHtml(String str) {
-        var config = libQpProxy.getGameState().interfaceConfig;
-        return config.useHtml ?
-                htmlProcessor.convertQspHtmlToWebViewHtml(str) :
-                htmlProcessor.convertQspStringToWebViewHtml(str);
-    }
-
     private void refreshVarsDesc() {
-        var varsDesc = getHtml(libQpProxy.getGameState().varsDesc);
         varsDescView.loadDataWithBaseURL(
                 "file:///",
-                pageTemplate.replace("REPLACETEXT", varsDesc),
+                gameViewModel.getVarsDesc(),
                 "text/html",
                 "UTF-8",
                 null);
@@ -606,7 +569,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
 
     private void refreshActions() {
         var actions = libQpProxy.getGameState().actions;
-        var recycler = new GameItemRecycler(this);
+        var recycler = new GameItemRecycler();
         recycler.setTypeface(gameViewModel.getSettingsController().getTypeface());
         recycler.setTextSize(gameViewModel.getFontSize());
         recycler.setBackgroundColor(gameViewModel.getBackgroundColor());
@@ -619,7 +582,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
 
     private void refreshObjects() {
         var objects = libQpProxy.getGameState().objects;
-        var recycler = new GameItemRecycler(this);
+        var recycler = new GameItemRecycler();
         recycler.setTypeface(gameViewModel.getSettingsController().getTypeface());
         recycler.setTextSize(gameViewModel.getFontSize());
         recycler.setBackgroundColor(gameViewModel.getBackgroundColor());
@@ -655,7 +618,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
     }
 
     @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
+    public boolean onPrepareOptionsMenu(@NonNull Menu menu) {
         var gameRunning = libQpProxy.getGameState().gameRunning;
         menu.setGroupVisible(R.id.menuGroup_running , gameRunning);
         if (gameRunning) {
@@ -667,7 +630,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
         return true;
     }
 
-    private void addSaveSlotsSubMenu(MenuItem parent, int action) {
+    private void addSaveSlotsSubMenu(@NonNull MenuItem parent, int action) {
         var id = parent.getItemId();
         mainMenu.removeItem(id);
 
@@ -737,14 +700,14 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
                 mIntent.putExtra(Intent.ACTION_GET_CONTENT, true);
                 mIntent.setType("application/octet-stream");
                 this.slotAction = slotAction;
-                resultLauncher.launch(mIntent);
+                saveResultLaunch.launch(mIntent);
                 break;
             case SAVE:
                 mIntent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
                 mIntent.putExtra(Intent.EXTRA_TITLE, libQpProxy.getGameState().gameFile + ".sav");
                 mIntent.setType("application/octet-stream");
                 this.slotAction = slotAction;
-                resultLauncher.launch(mIntent);
+                saveResultLaunch.launch(mIntent);
                 break;
         }
     }
@@ -778,9 +741,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
             promptCloseGame();
             return true;
         } else if (i == R.id.menu_options) {
-            var intent = new Intent();
-            intent.setClass(this , SettingsActivity.class);
-            startActivity(intent);
+            startActivity(new Intent().setClass(this , SettingsActivity.class));
             return true;
         } else if (i == R.id.menu_newGame) {
             libQpProxy.restartGame();
@@ -1058,16 +1019,9 @@ public class GameActivity extends AppCompatActivity implements GameInterface,
         } else {
             if (Objects.equals(dialog.getTag() , "showMenuDialogFragment")) {
                 gameViewModel.outputIntObserver.setValue(-1);
-            } else if (Objects.equals(dialog.getTag() , "executorDialogFragment")) {
-                Intent intentInstall = new Intent(ACTION_OPEN_DOCUMENT);
-                intentInstall.addCategory(Intent.CATEGORY_OPENABLE);
-                intentInstall.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                intentInstall.setType("text/plain");
-                try {
-                    templateLauncher.launch(intentInstall);
-                } catch (ActivityNotFoundException e) {
-                    showError("Error: "+"\n"+e);
-                }
+            } else if (Objects.equals(dialog.getTag() , "inputDialogFragment") ||
+                    Objects.equals(dialog.getTag() , "executorDialogFragment")) {
+                storageHelper.openFilePicker("text/plain");
             }
         }
     }

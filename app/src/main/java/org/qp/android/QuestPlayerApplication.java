@@ -2,8 +2,8 @@ package org.qp.android;
 
 import android.app.Application;
 
-import org.qp.android.model.libQSP.LibQpProxy;
-import org.qp.android.model.libQSP.LibQpProxyImpl;
+import org.qp.android.model.libQP.LibQpProxy;
+import org.qp.android.model.libQP.LibQpProxyImpl;
 import org.qp.android.model.service.AudioPlayer;
 import org.qp.android.model.service.GameContentResolver;
 import org.qp.android.model.service.HtmlProcessor;

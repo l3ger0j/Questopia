@@ -1,7 +1,7 @@
 package org.qp.android.view.game;
 
-import org.qp.android.model.libQSP.RefreshInterfaceRequest;
-import org.qp.android.model.libQSP.WindowType;
+import org.qp.android.model.libQP.RefreshInterfaceRequest;
+import org.qp.android.model.libQP.WindowType;
 
 public interface GameInterface {
 

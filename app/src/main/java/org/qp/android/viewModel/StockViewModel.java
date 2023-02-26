@@ -23,7 +23,6 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.RemoteException;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 
@@ -38,6 +37,7 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.squareup.picasso.Picasso;
 
+import org.jetbrains.annotations.Contract;
 import org.qp.android.GameDataParcel;
 import org.qp.android.R;
 import org.qp.android.databinding.DialogEditBinding;
@@ -66,7 +66,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class StockViewModel extends AndroidViewModel {
-    private final String TAG = this.getClass().getSimpleName();
+    // private final String TAG = this.getClass().getSimpleName();
 
     public ObservableField<StockActivity> activityObservableField = new
             ObservableField<>();
@@ -335,11 +335,12 @@ public class StockViewModel extends AndroidViewModel {
         var gameFileCount = tempGameData.gameFiles.size();
         switch (gameFileCount) {
             case 0:
-                Log.w(TAG , "GameData has no game files");
+                Objects.requireNonNull(activityObservableField.get())
+                        .showErrorDialog("Game folder has no game files!");
                 break;
             case 1:
                 intent.putExtra("gameFileUri" , tempGameData.gameFiles.get(0).getAbsolutePath());
-                Objects.requireNonNull(activityObservableField.get()).startActivity(intent);
+                Objects.requireNonNull(activityObservableField.get()).startGameActivity(intent);
                 break;
             default:
                 if (outputIntObserver.hasObservers()) {
@@ -357,7 +358,7 @@ public class StockViewModel extends AndroidViewModel {
                 outputIntObserver.observeForever(integer -> {
                     intent.putExtra("gameFileUri" ,
                             tempGameData.gameFiles.get(integer).getAbsolutePath());
-                    Objects.requireNonNull(activityObservableField.get()).startActivity(intent);
+                    Objects.requireNonNull(activityObservableField.get()).startGameActivity(intent);
                 });
                 break;
         }
@@ -413,6 +414,8 @@ public class StockViewModel extends AndroidViewModel {
         }
     }
 
+    @NonNull
+    @Contract(value = " -> new", pure = true)
     private String[] getSupportArchiveType() {
         return new String[]{
                 "application/x-7z-compressed" ,

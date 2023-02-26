@@ -1,4 +1,4 @@
-package org.qp.android.model.libQSP;
+package org.qp.android.model.libQP;
 
 public class QpMenuItem {
     public String name;

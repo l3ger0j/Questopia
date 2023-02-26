@@ -1,4 +1,4 @@
-package org.qp.android.dto.libQSP;
+package org.qp.android.dto.libQP;
 
 public class ActionData {
     public String name;

@@ -3,7 +3,9 @@ package org.qp.android.viewModel;
 import static org.qp.android.utils.Base64Util.decodeBase64;
 import static org.qp.android.utils.Base64Util.hasBase64;
 import static org.qp.android.utils.ColorUtil.convertRGBAToBGRA;
+import static org.qp.android.utils.ColorUtil.getHexColor;
 import static org.qp.android.utils.PathUtil.getExtension;
+import static org.qp.android.utils.ViewUtil.getFontStyle;
 
 import android.app.Application;
 import android.content.Intent;
@@ -22,7 +24,7 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.MutableLiveData;
 
 import org.qp.android.QuestPlayerApplication;
-import org.qp.android.model.libQSP.LibQpProxy;
+import org.qp.android.model.libQP.LibQpProxy;
 import org.qp.android.model.service.AudioPlayer;
 import org.qp.android.model.service.GameContentResolver;
 import org.qp.android.model.service.HtmlProcessor;
@@ -37,7 +39,6 @@ public class GameViewModel extends AndroidViewModel {
 
     private final QuestPlayerApplication questPlayerApplication;
     private final GameContentResolver gameContentResolver;
-    private final SettingsController settingsController;
     private final HtmlProcessor htmlProcessor;
     private LibQpProxy libQpProxy;
     private AudioPlayer audioPlayer;
@@ -49,8 +50,27 @@ public class GameViewModel extends AndroidViewModel {
     public MutableLiveData<Integer> outputIntObserver = new MutableLiveData<>();
     public MutableLiveData<Boolean> outputBooleanObserver = new MutableLiveData<>(false);
 
+    private static final String PAGE_HEAD_TEMPLATE = "<head>\n"
+            + "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1\">\n"
+            + "<style type=\"text/css\">\n"
+            + "  body {\n"
+            + "    margin: 0;\n"
+            + "    padding: 0.5em;\n"
+            + "    color: QSPTEXTCOLOR;\n"
+            + "    background-color: QSPBACKCOLOR;\n"
+            + "    font-size: QSPFONTSIZE;\n"
+            + "    font-family: QSPFONTSTYLE;\n"
+            + "  }\n"
+            + "  a { color: QSPLINKCOLOR; }\n"
+            + "  a:link { color: QSPLINKCOLOR; }\n"
+            + "</style></head>";
+
+    private static final String PAGE_BODY_TEMPLATE = "<body>REPLACETEXT</body>";
+    public String pageTemplate = "";
+
     // region Getter/Setter
     public HtmlProcessor getHtmlProcessor() {
+        htmlProcessor.setController(getSettingsController());
         return htmlProcessor;
     }
 
@@ -63,7 +83,7 @@ public class GameViewModel extends AndroidViewModel {
     }
 
     public SettingsController getSettingsController() {
-        return settingsController;
+        return SettingsController.newInstance().loadSettings(getApplication());
     }
 
     public WebViewClient getWebViewClient() {
@@ -72,50 +92,75 @@ public class GameViewModel extends AndroidViewModel {
 
     public int getTextColor() {
         var config = libQpProxy.getGameState().interfaceConfig;
-        if (settingsController.isUseGameTextColor && config.fontColor != 0) {
+        if (getSettingsController().isUseGameTextColor && config.fontColor != 0) {
             return convertRGBAToBGRA(config.fontColor);
         } else {
-            return settingsController.textColor;
+            return getSettingsController().textColor;
         }
     }
 
     public int getBackgroundColor() {
         var config = libQpProxy.getGameState().interfaceConfig;
-        if (settingsController.isUseGameBackgroundColor && config.backColor != 0) {
+        if (getSettingsController().isUseGameBackgroundColor && config.backColor != 0) {
             return convertRGBAToBGRA(config.backColor);
         } else {
-            return settingsController.backColor;
+            return getSettingsController().backColor;
         }
     }
 
     public int getLinkColor() {
         var config = libQpProxy.getGameState().interfaceConfig;
-        if (settingsController.isUseGameLinkColor && config.linkColor != 0) {
+        if (getSettingsController().isUseGameLinkColor && config.linkColor != 0) {
             return convertRGBAToBGRA(config.linkColor);
         } else {
-            return settingsController.linkColor;
+            return getSettingsController().linkColor;
         }
     }
 
     public int getFontSize() {
         var config = libQpProxy.getGameState().interfaceConfig;
-        return settingsController.isUseGameFont && config.fontSize != 0 ?
-                config.fontSize : settingsController.fontSize;
+        return getSettingsController().isUseGameFont && config.fontSize != 0 ?
+                config.fontSize : getSettingsController().fontSize;
+    }
+
+    public String getHtml(String str) {
+        var config = libQpProxy.getGameState().interfaceConfig;
+        return config.useHtml ?
+                getHtmlProcessor().convertQspHtmlToWebViewHtml(str) :
+                getHtmlProcessor().convertQspStringToWebViewHtml(str);
+    }
+
+    public String getMainDesc () {
+        var mainDesc = getHtml(libQpProxy.getGameState().mainDesc);
+        return pageTemplate.replace("REPLACETEXT", mainDesc);
+    }
+
+    public String getVarsDesc () {
+        var varsDesc = getHtml(libQpProxy.getGameState().varsDesc);
+        return pageTemplate.replace("REPLACETEXT", varsDesc);
     }
     // endregion Getter/Setter
+
+    public void updatePageTemplate() {
+        var pageHeadTemplate = PAGE_HEAD_TEMPLATE
+                .replace("QSPTEXTCOLOR", getHexColor(getTextColor()))
+                .replace("QSPBACKCOLOR", getHexColor(getBackgroundColor()))
+                .replace("QSPLINKCOLOR", getHexColor(getLinkColor()))
+                .replace("QSPFONTSTYLE", getFontStyle(getSettingsController().getTypeface()))
+                .replace("QSPFONTSIZE", Integer.toString(getFontSize()));
+        pageTemplate = pageHeadTemplate + PAGE_BODY_TEMPLATE;
+    }
 
     public GameViewModel(@NonNull Application application) {
         super(application);
         questPlayerApplication = getApplication();
         gameContentResolver = questPlayerApplication.getGameContentResolver();
         htmlProcessor = questPlayerApplication.getHtmlProcessor();
-        settingsController = SettingsController.newInstance().loadSettings(application);
     }
 
-    public AudioPlayer startAudio () {
+    public void startAudio () {
         audioPlayer = questPlayerApplication.getAudioPlayer();
         audioPlayer.start();
-        return audioPlayer;
     }
 
     public void stopAudio () {
@@ -123,11 +168,10 @@ public class GameViewModel extends AndroidViewModel {
         audioPlayer = null;
     }
 
-    public LibQpProxy startLibQsp (GameInterface gameInterface) {
+    public void startLibQsp (GameInterface gameInterface) {
         libQpProxy = questPlayerApplication.getLibQspProxy();
         libQpProxy.setGameInterface(gameInterface);
         libQpProxy.start();
-        return libQpProxy;
     }
 
     public void stopLibQsp () {

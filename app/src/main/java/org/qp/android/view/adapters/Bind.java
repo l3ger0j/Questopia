@@ -11,6 +11,8 @@ import com.squareup.picasso.Picasso;
 
 import org.qp.android.R;
 
+import java.io.File;
+
 public class Bind {
     @BindingAdapter({"setWebViewClient"})
     public static void setWebViewClient(WebView view, WebViewClient client) {
@@ -23,10 +25,16 @@ public class Bind {
     @BindingAdapter({"imageUrl"})
     public static void loadImage(ImageView view, String imageUrl) {
         if (imageUrl != null && !imageUrl.isEmpty()) {
-            Picasso.get()
-                    .load(imageUrl)
-                    .fit()
-                    .into(view);
+            if (view.getId() == R.id.imageBox) {
+                Picasso.get()
+                        .load(new File(imageUrl))
+                        .into(view);
+            } else {
+                Picasso.get()
+                        .load(imageUrl)
+                        .fit()
+                        .into(view);
+            }
         } else {
             var drawable = ResourcesCompat.getDrawable(
                     view.getContext().getResources() ,
