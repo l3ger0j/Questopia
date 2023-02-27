@@ -11,7 +11,7 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
-import org.qp.android.databinding.FragmentStockRecyclerBinding;
+import org.qp.android.databinding.FragmentRecyclerBinding;
 import org.qp.android.dto.stock.GameData;
 import org.qp.android.view.adapters.RecyclerItemClickListener;
 import org.qp.android.view.stock.StockGamesRecycler;
@@ -29,15 +29,15 @@ public class StockRecyclerFragment extends StockPatternFragment {
     public View onCreateView(@NonNull LayoutInflater inflater ,
                              @Nullable ViewGroup container ,
                              @Nullable Bundle savedInstanceState) {
-        org.qp.android.databinding.FragmentStockRecyclerBinding fragmentStockBinding =
-                FragmentStockRecyclerBinding.inflate(getLayoutInflater());
-        mRecyclerView = fragmentStockBinding.gamesLocal;
+        org.qp.android.databinding.FragmentRecyclerBinding recyclerBinding =
+                FragmentRecyclerBinding.inflate(inflater);
+        mRecyclerView = recyclerBinding.shareRecyclerView;
         stockViewModel = new ViewModelProvider(requireActivity())
                 .get(StockViewModel.class);
         stockViewModel.getGameData().observe(getViewLifecycleOwner(), gameData);
         Objects.requireNonNull(stockViewModel.activityObservableField.get())
                 .setRecyclerView(mRecyclerView);
-        return fragmentStockBinding.getRoot();
+        return recyclerBinding.getRoot();
     }
 
     Observer<ArrayList<GameData>> gameData = new Observer<>() {
@@ -63,7 +63,7 @@ public class StockRecyclerFragment extends StockPatternFragment {
             }
         });
         mRecyclerView.addOnItemTouchListener(new RecyclerItemClickListener(
-                getContext() ,
+                requireContext() ,
                 mRecyclerView ,
                 new RecyclerItemClickListener.OnItemClickListener() {
                     @Override

@@ -41,6 +41,7 @@ import com.zhpan.bannerview.BaseViewHolder;
 import org.qp.android.R;
 import org.qp.android.databinding.ActivityStockBinding;
 import org.qp.android.dto.stock.GameData;
+import org.qp.android.utils.ViewUtil;
 import org.qp.android.view.settings.SettingsActivity;
 import org.qp.android.view.settings.SettingsController;
 import org.qp.android.view.stock.fragment.StockPatternFragment;
@@ -218,16 +219,13 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
     @Override
     public void onRequestPermissionsResult(int requestCode , @NonNull String[] permissions , @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode , permissions , grantResults);
-        switch (requestCode) {
-            case MANAGE_EXTERNAL_STORAGE_CODE:
-            case READ_EXTERNAL_STORAGE_CODE:
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Log.d(TAG, "Success");
-                } else {
-                    showErrorDialog("Permission denied to read your External storage");
-                }
-                break;
+        if (requestCode == READ_EXTERNAL_STORAGE_CODE) {
+            if (grantResults.length > 0
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                ViewUtil.showSnackBar(activityStockBinding.getRoot() , "Success");
+            } else {
+                ViewUtil.showSnackBar(activityStockBinding.getRoot() , "Permission denied to read your External storage");
+            }
         }
     }
 

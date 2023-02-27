@@ -5,11 +5,13 @@ import static org.qp.android.utils.Base64Util.hasBase64;
 import static org.qp.android.utils.ColorUtil.convertRGBAToBGRA;
 import static org.qp.android.utils.ColorUtil.getHexColor;
 import static org.qp.android.utils.PathUtil.getExtension;
+import static org.qp.android.utils.ThreadUtil.isMainThread;
 import static org.qp.android.utils.ViewUtil.getFontStyle;
 
 import android.app.Application;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Handler;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
 import android.webkit.WebResourceRequest;
@@ -25,6 +27,10 @@ import androidx.lifecycle.MutableLiveData;
 
 import org.qp.android.QuestPlayerApplication;
 import org.qp.android.model.libQP.LibQpProxy;
+import org.qp.android.model.libQP.QpListItem;
+import org.qp.android.model.libQP.QpMenuItem;
+import org.qp.android.model.libQP.RefreshInterfaceRequest;
+import org.qp.android.model.libQP.WindowType;
 import org.qp.android.model.service.AudioPlayer;
 import org.qp.android.model.service.GameContentResolver;
 import org.qp.android.model.service.HtmlProcessor;
@@ -33,9 +39,13 @@ import org.qp.android.view.game.GameInterface;
 import org.qp.android.view.settings.SettingsController;
 
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.CountDownLatch;
 
-public class GameViewModel extends AndroidViewModel {
+public class GameViewModel extends AndroidViewModel implements GameInterface {
     private final String TAG = this.getClass().getCanonicalName();
+    private static final int TAB_MAIN_DESC_AND_ACTIONS = 0;
 
     private final QuestPlayerApplication questPlayerApplication;
     private final GameContentResolver gameContentResolver;
@@ -68,6 +78,18 @@ public class GameViewModel extends AndroidViewModel {
     private static final String PAGE_BODY_TEMPLATE = "<body>REPLACETEXT</body>";
     public String pageTemplate = "";
 
+    private final Handler counterHandler = new Handler();
+
+    private int counterInterval = 500;
+
+    private final Runnable counterTask = new Runnable() {
+        @Override
+        public void run() {
+            libQpProxy.executeCounter();
+            counterHandler.postDelayed(this, counterInterval);
+        }
+    };
+
     // region Getter/Setter
     public HtmlProcessor getHtmlProcessor() {
         htmlProcessor.setController(getSettingsController());
@@ -79,6 +101,7 @@ public class GameViewModel extends AndroidViewModel {
     }
 
     public LibQpProxy getLibQspProxy() {
+        libQpProxy.setGameInterface(this);
         return libQpProxy;
     }
 
@@ -131,13 +154,17 @@ public class GameViewModel extends AndroidViewModel {
     }
 
     public String getMainDesc () {
-        var mainDesc = getHtml(libQpProxy.getGameState().mainDesc);
+        var mainDesc = getHtml(getLibQspProxy().getGameState().mainDesc);
         return pageTemplate.replace("REPLACETEXT", mainDesc);
     }
 
     public String getVarsDesc () {
-        var varsDesc = getHtml(libQpProxy.getGameState().varsDesc);
+        var varsDesc = getHtml(getLibQspProxy().getGameState().varsDesc);
         return pageTemplate.replace("REPLACETEXT", varsDesc);
+    }
+
+    public ArrayList<QpListItem> getObjects () {
+        return libQpProxy.getGameState().objects;
     }
     // endregion Getter/Setter
 
@@ -149,6 +176,14 @@ public class GameViewModel extends AndroidViewModel {
                 .replace("QSPFONTSTYLE", getFontStyle(getSettingsController().getTypeface()))
                 .replace("QSPFONTSIZE", Integer.toString(getFontSize()));
         pageTemplate = pageHeadTemplate + PAGE_BODY_TEMPLATE;
+    }
+
+    public void setCallback () {
+        counterHandler.postDelayed(counterTask, counterInterval);
+    }
+
+    public void removeCallback() {
+        counterHandler.removeCallbacks(counterTask);
     }
 
     public GameViewModel(@NonNull Application application) {
@@ -168,9 +203,8 @@ public class GameViewModel extends AndroidViewModel {
         audioPlayer = null;
     }
 
-    public void startLibQsp (GameInterface gameInterface) {
+    public void startLibQsp () {
         libQpProxy = questPlayerApplication.getLibQspProxy();
-        libQpProxy.setGameInterface(gameInterface);
         libQpProxy.start();
     }
 
@@ -232,4 +266,168 @@ public class GameViewModel extends AndroidViewModel {
             return super.shouldInterceptRequest(view , request);
         }
     }
+
+    // region GameInterface
+
+    @Nullable
+    private GameActivity getGameActivity () {
+        if (gameActivityObservableField.get() != null) {
+            return gameActivityObservableField.get();
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public void refresh(final RefreshInterfaceRequest request) {
+        if (request.interfaceConfigChanged) {
+            if (getGameActivity() != null) {
+                getGameActivity().applySettings();
+            }
+        }
+        if (request.interfaceConfigChanged || request.mainDescChanged) {
+            if (getGameActivity() != null) {
+                getGameActivity().refreshMainDesc();
+            }
+        }
+        if (request.actionsChanged) {
+            if (getGameActivity() != null) {
+                getGameActivity().refreshActions();
+            }
+        }
+        if (request.objectsChanged) {
+            if (getGameActivity() != null) {
+                getGameActivity().refreshObjects();
+            }
+        }
+        if (request.interfaceConfigChanged || request.varsDescChanged) {
+            if (getGameActivity() != null) {
+                getGameActivity().refreshVarsDesc();
+            }
+        }
+    }
+
+    @Override
+    public void showError(final String message) {
+        if (getGameActivity() != null) {
+            getGameActivity().showErrorDialog(message);
+        }
+    }
+
+    @Override
+    public void showPicture(final String pathToImg) {
+        if (getGameActivity() != null) {
+            getGameActivity().showPictureDialog(pathToImg);
+        }
+    }
+
+    @Override
+    public void showMessage(final String message) {
+        if (isMainThread()) {
+            throw new RuntimeException("Must not be called on the main thread");
+        }
+        final var latch = new CountDownLatch(1);
+        if (getGameActivity() != null) {
+            getGameActivity().showMessageDialog(message, latch);
+        }
+        try {
+            latch.await();
+        } catch (InterruptedException ex) {
+            showError("Wait failed"+"\n"+ex);
+        }
+    }
+
+    @Override
+    public String showInputDialog(final String prompt) {
+        if (isMainThread()) {
+            throw new RuntimeException("Must not be called on the main thread");
+        }
+        final ArrayBlockingQueue<String> inputQueue = new ArrayBlockingQueue<>(1);
+        if (getGameActivity() != null) {
+            getGameActivity().showInputDialog(prompt, inputQueue);
+        }
+        try {
+            return inputQueue.take();
+        } catch (InterruptedException ex) {
+            showError("Wait for input failed"+"\n"+ex);
+            return "";
+        }
+    }
+
+    @Override
+    public String showExecutorDialog(final String text) {
+        if (isMainThread()) {
+            throw new RuntimeException("Must not be called on the main thread");
+        }
+        final ArrayBlockingQueue<String> inputQueue = new ArrayBlockingQueue<>(1);
+        if (getGameActivity() != null) {
+            getGameActivity().showExecutorDialog(text, inputQueue);
+        }
+        try {
+            return inputQueue.take();
+        } catch (InterruptedException ex) {
+            showError("Wait for input failed"+ex);
+            return "";
+        }
+    }
+
+    @Override
+    public int showMenu() {
+        if (isMainThread()) {
+            throw new RuntimeException("Must not be called on the main thread");
+        }
+        final var resultQueue = new ArrayBlockingQueue<Integer>(1);
+        final var items = new ArrayList<String>();
+        for (QpMenuItem item : libQpProxy.getGameState().menuItems) {
+            items.add(item.name);
+        }
+        if (getGameActivity() != null) {
+            getGameActivity().showMenuDialog(items, resultQueue);
+        }
+        try {
+            return resultQueue.take();
+        } catch (InterruptedException ex) {
+            showError("Wait failed"+"\n"+ex);
+            return -1;
+        }
+    }
+
+    @Override
+    public void showLoadGamePopup() {
+        if (getGameActivity() != null) {
+            getGameActivity().showLoadDialog();
+        }
+    }
+
+    @Override
+    public void showSaveGamePopup(String filename) {
+        if (getGameActivity() != null) {
+            getGameActivity().showSavePopup();
+        }
+    }
+
+    @Override
+    public void showWindow(WindowType type, final boolean show) {
+        if (type == WindowType.ACTIONS) {
+            if (getGameActivity() != null) {
+                if (getGameActivity().getActiveTab() == TAB_MAIN_DESC_AND_ACTIONS) {
+                    getGameActivity().refreshActionsVisibility(show);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void setCounterInterval(int millis) {
+        counterInterval = millis;
+    }
+
+    @Override
+    public void doWithCounterDisabled(Runnable runnable) {
+        counterHandler.removeCallbacks(counterTask);
+        runnable.run();
+        counterHandler.postDelayed(counterTask, counterInterval);
+    }
+
+    // endregion GameInterface
 }

@@ -10,7 +10,6 @@ import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -32,6 +31,7 @@ import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.databinding.DataBindingUtil;
+import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.MutableLiveData;
@@ -46,9 +46,6 @@ import org.jetbrains.annotations.Contract;
 import org.qp.android.R;
 import org.qp.android.databinding.ActivityGameBinding;
 import org.qp.android.model.libQP.LibQpProxy;
-import org.qp.android.model.libQP.QpMenuItem;
-import org.qp.android.model.libQP.RefreshInterfaceRequest;
-import org.qp.android.model.libQP.WindowType;
 import org.qp.android.model.service.AudioPlayer;
 import org.qp.android.model.service.HtmlProcessor;
 import org.qp.android.view.adapters.RecyclerItemClickListener;
@@ -69,7 +66,7 @@ import java.util.Objects;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CountDownLatch;
 
-public class GameActivity extends AppCompatActivity implements GameInterface, GamePatternDialogFrags.GamePatternDialogList {
+public class GameActivity extends AppCompatActivity implements GamePatternDialogFrags.GamePatternDialogList {
     private final String TAG = this.getClass().getSimpleName();
 
     private static final int MAX_SAVE_SLOTS = 5;
@@ -81,7 +78,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ga
 
     private SettingsController settingsController;
     private int activeTab;
-    private boolean showActions = true;
+    private final boolean showActions = true;
 
     private ActionBar actionBar;
     private Menu mainMenu;
@@ -94,18 +91,6 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ga
     private HtmlProcessor htmlProcessor;
     private LibQpProxy libQpProxy;
     private AudioPlayer audioPlayer;
-
-    private final Handler counterHandler = new Handler();
-
-    private int counterInterval = 500;
-
-    private final Runnable counterTask = new Runnable() {
-        @Override
-        public void run() {
-            libQpProxy.executeCounter();
-            counterHandler.postDelayed(this, counterInterval);
-        }
-    };
 
     private int slotAction = 0;
     private GameViewModel gameViewModel;
@@ -123,9 +108,11 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ga
             }
         }
     };
-
-    private String tempIdGame;
     private View mDecorView;
+
+    public int getActiveTab() {
+        return activeTab;
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -157,7 +144,8 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ga
                             case LOAD:
                                 if (data != null) {
                                     uri = data.getData();
-                                    doWithCounterDisabled(() -> libQpProxy.loadGameState(uri));
+                                    gameViewModel.doWithCounterDisabled(() ->
+                                            libQpProxy.loadGameState(uri));
                                 } else {
                                     break;
                                 }
@@ -176,9 +164,9 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ga
         );
 
         storageHelper.setOnFileSelected((integer , documentFiles) -> {
-            for (int i = 0; documentFiles.size() > i; i++) {
+            for (DocumentFile documentFile : documentFiles) {
                 var document =
-                        new FileWrapper.Document(documentFiles.get(i));
+                        new FileWrapper.Document(documentFile);
                 switch (document.getExtension()) {
                     case "text":
                     case "pl":
@@ -195,9 +183,9 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ga
                                 }
                             }
                         } catch (FileNotFoundException e) {
-                            showError("File not found: "+"\n"+e);
+                            showErrorDialog("File not found: "+"\n"+e);
                         } catch (IOException e) {
-                            showError("Can not read file: "+"\n"+e);
+                            showErrorDialog("Can not read file: "+"\n"+e);
                         }
                         postTextInDialogFrags(stringBuilder.toString());
                         break;
@@ -206,17 +194,9 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ga
             return null;
         });
 
-        tempIdGame = getIntent().getStringExtra("gameId");
-        if (savedInstanceState != null && savedInstanceState.containsKey("tempGameId")) {
-            var gameId = savedInstanceState.getString("tempGameId");
-            if (!gameId.equals(tempIdGame)) {
-                initServices();
-                initControls();
-                initGame();
-            } else {
-                restartServices();
-                initControls();
-            }
+        if (savedInstanceState != null) {
+            restartServices();
+            initControls();
         } else {
             initServices();
             initControls();
@@ -306,12 +286,6 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ga
         }
     }
 
-    @Override
-    protected void onSaveInstanceState(@NonNull Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putString("tempGameId", tempIdGame);
-    }
-
     private void initControls() {
         layoutTop = activityGameBinding.layoutTop;
         separatorView = activityGameBinding.separator;
@@ -397,7 +371,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ga
 
     private void initServices() {
         gameViewModel.startAudio();
-        gameViewModel.startLibQsp(this);
+        gameViewModel.startLibQsp();
         htmlProcessor = gameViewModel.getHtmlProcessor();
         audioPlayer = gameViewModel.getAudioPlayer();
         libQpProxy = gameViewModel.getLibQspProxy();
@@ -407,7 +381,6 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ga
         htmlProcessor = gameViewModel.getHtmlProcessor();
         audioPlayer = gameViewModel.getAudioPlayer();
         libQpProxy = gameViewModel.getLibQspProxy();
-        libQpProxy.setGameInterface(this);
     }
 
     private void initGame() {
@@ -478,7 +451,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ga
     @Override
     protected void onDestroy() {
         libQpProxy.setGameInterface(null);
-        counterHandler.removeCallbacks(counterTask);
+        gameViewModel.removeCallback();
         super.onDestroy();
         Log.i(TAG,"Game destroyed");
     }
@@ -486,7 +459,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ga
     @Override
     public void onPause() {
         audioPlayer.pause();
-        counterHandler.removeCallbacks(counterTask);
+        gameViewModel.removeCallback();
         super.onPause();
     }
 
@@ -499,36 +472,36 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ga
             applyGameState();
             audioPlayer.setSoundEnabled(settingsController.isSoundEnabled);
             audioPlayer.resume();
-            counterHandler.postDelayed(counterTask, counterInterval);
+            gameViewModel.setCallback();
         }
     }
 
-    private void applySettings() {
-        applyActionsHeightRatio();
-        applyGameState();
-
-        if (settingsController.isUseSeparator) {
-            separatorView.setBackgroundColor(gameViewModel.getBackgroundColor());
+    public void applySettings() {
+        if (isMainThread()) {
+            applyActionsHeightRatio();
+            applyGameState();
+            if (settingsController.isUseSeparator) {
+                separatorView.setBackgroundColor(gameViewModel.getBackgroundColor());
+            } else {
+                separatorView.setBackgroundColor(getResources().getColor(R.color.materialcolorpicker__grey));
+            }
+            if (settingsController.language.equals("ru")) {
+                AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("ru"));
+            } else {
+                AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("en"));
+            }
+            htmlProcessor = gameViewModel.getHtmlProcessor();
+            var backColor =
+                    gameViewModel.getBackgroundColor();
+            layoutTop.setBackgroundColor(backColor);
+            mainDescView.setBackgroundColor(backColor);
+            varsDescView.setBackgroundColor(backColor);
+            actionsView.setBackgroundColor(backColor);
+            objectsView.setBackgroundColor(backColor);
+            gameViewModel.updatePageTemplate();
         } else {
-            separatorView.setBackgroundColor(getResources().getColor(R.color.materialcolorpicker__grey));
+            runOnUiThread(this::applySettings);
         }
-        if (settingsController.language.equals("ru")) {
-            AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("ru"));
-        } else {
-            AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("en"));
-        }
-
-        htmlProcessor = gameViewModel.getHtmlProcessor();
-
-        var backColor =
-                gameViewModel.getBackgroundColor();
-        layoutTop.setBackgroundColor(backColor);
-        mainDescView.setBackgroundColor(backColor);
-        varsDescView.setBackgroundColor(backColor);
-        actionsView.setBackgroundColor(backColor);
-        objectsView.setBackgroundColor(backColor);
-
-        gameViewModel.updatePageTemplate();
     }
 
     private void applyActionsHeightRatio() {
@@ -546,50 +519,79 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ga
         refreshObjects();
     }
 
-    private void refreshMainDesc() {
-        if (settingsController.isUseAutoscroll) {
-            mainDescView.postDelayed(onScroll, 300);
+    public void refreshMainDesc() {
+        if (isMainThread()) {
+            if (settingsController.isUseAutoscroll) {
+                mainDescView.postDelayed(onScroll, 300);
+            }
+            mainDescView.loadDataWithBaseURL(
+                    "file:///",
+                    gameViewModel.getMainDesc(),
+                    "text/html",
+                    "UTF-8",
+                    null);
+        } else {
+            runOnUiThread(this::refreshMainDesc);
         }
-        mainDescView.loadDataWithBaseURL(
-                "file:///",
-                gameViewModel.getMainDesc(),
-                "text/html",
-                "UTF-8",
-                null);
     }
 
-    private void refreshVarsDesc() {
-        varsDescView.loadDataWithBaseURL(
-                "file:///",
-                gameViewModel.getVarsDesc(),
-                "text/html",
-                "UTF-8",
-                null);
+    public void refreshVarsDesc() {
+        if (isMainThread()) {
+            varsDescView.loadDataWithBaseURL(
+                    "file:///" ,
+                    gameViewModel.getVarsDesc() ,
+                    "text/html" ,
+                    "UTF-8" ,
+                    null);
+        } else {
+            runOnUiThread(this::refreshVarsDesc);
+        }
     }
 
-    private void refreshActions() {
-        var actions = libQpProxy.getGameState().actions;
-        var recycler = new GameItemRecycler();
-        recycler.setTypeface(gameViewModel.getSettingsController().getTypeface());
-        recycler.setTextSize(gameViewModel.getFontSize());
-        recycler.setBackgroundColor(gameViewModel.getBackgroundColor());
-        recycler.setTextColor(gameViewModel.getTextColor());
-        recycler.setLinkTextColor(gameViewModel.getLinkColor());
-        recycler.submitList(actions);
-        actionsView.setAdapter(recycler);
-        refreshActionsVisibility();
+    public void refreshActions() {
+        if (isMainThread()) {
+            var actions = libQpProxy.getGameState().actions;
+            var recycler = new GameItemRecycler();
+            recycler.setTypeface(gameViewModel.getSettingsController().getTypeface());
+            recycler.setTextSize(gameViewModel.getFontSize());
+            recycler.setBackgroundColor(gameViewModel.getBackgroundColor());
+            recycler.setTextColor(gameViewModel.getTextColor());
+            recycler.setLinkTextColor(gameViewModel.getLinkColor());
+            recycler.submitList(actions);
+            actionsView.setAdapter(recycler);
+            refreshActionsVisibility(showActions);
+        } else {
+            runOnUiThread(this::refreshActions);
+        }
     }
 
-    private void refreshObjects() {
-        var objects = libQpProxy.getGameState().objects;
-        var recycler = new GameItemRecycler();
-        recycler.setTypeface(gameViewModel.getSettingsController().getTypeface());
-        recycler.setTextSize(gameViewModel.getFontSize());
-        recycler.setBackgroundColor(gameViewModel.getBackgroundColor());
-        recycler.setTextColor(gameViewModel.getTextColor());
-        recycler.setLinkTextColor(gameViewModel.getLinkColor());
-        recycler.submitList(objects);
-        objectsView.setAdapter(recycler);
+    public void refreshActionsVisibility(final boolean showState) {
+        if (isMainThread()) {
+            if (actionsView.getAdapter() != null) {
+                int count = actionsView.getAdapter().getItemCount();
+                boolean show = showState && count > 0;
+                separatorView.setVisibility(show ? View.VISIBLE : View.GONE);
+                actionsView.setVisibility(show ? View.VISIBLE : View.GONE);
+            }
+        } else {
+            runOnUiThread(() -> refreshActionsVisibility(showState));
+        }
+    }
+
+    public void refreshObjects() {
+        if (isMainThread()) {
+            var objects = libQpProxy.getGameState().objects;
+            var recycler = new GameItemRecycler();
+            recycler.setTypeface(gameViewModel.getSettingsController().getTypeface());
+            recycler.setTextSize(gameViewModel.getFontSize());
+            recycler.setBackgroundColor(gameViewModel.getBackgroundColor());
+            recycler.setTextColor(gameViewModel.getTextColor());
+            recycler.setLinkTextColor(gameViewModel.getLinkColor());
+            recycler.submitList(objects);
+            objectsView.setAdapter(recycler);
+        } else {
+            runOnUiThread(this::refreshObjects);
+        }
     }
 
     private void promptCloseGame() {
@@ -597,6 +599,138 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ga
         dialogFragment.setDialogType(GameDialogType.CLOSE_DIALOG);
         dialogFragment.setCancelable(false);
         dialogFragment.show(getSupportFragmentManager(), "closeGameDialogFragment");
+    }
+
+    public void showErrorDialog (String message) {
+        if (isMainThread()) {
+            var dialogFragment = new GameDialogFrags();
+            dialogFragment.setDialogType(GameDialogType.ERROR_DIALOG);
+            dialogFragment.setMessage(message);
+            dialogFragment.show(getSupportFragmentManager(), "errorDialogFragment");
+        } else {
+            runOnUiThread(() -> showErrorDialog(message));
+        }
+    }
+
+    public void showPictureDialog (String pathToImg) {
+        if (isMainThread()) {
+            var dialogFragment = new GameDialogFrags();
+            dialogFragment.setDialogType(GameDialogType.IMAGE_DIALOG);
+            dialogFragment.pathToImage.set(pathToImg);
+            dialogFragment.show(getSupportFragmentManager(), "imageDialogFragment");
+        } else {
+            runOnUiThread(() -> showPictureDialog(pathToImg));
+        }
+    }
+
+    public void showMessageDialog (String message, CountDownLatch latch) {
+        if (isMainThread()) {
+            var config = libQpProxy.getGameState().interfaceConfig;
+            var processedMsg = config.useHtml ? htmlProcessor.removeHTMLTags(message) : message;
+            if (processedMsg == null) {
+                processedMsg = "";
+            }
+            if (gameViewModel.outputBooleanObserver.hasObservers()) {
+                gameViewModel.outputBooleanObserver = new MutableLiveData<>();
+            }
+            var dialogFragment = new GameDialogFrags();
+            dialogFragment.setDialogType(GameDialogType.MESSAGE_DIALOG);
+            dialogFragment.setProcessedMsg(processedMsg);
+            dialogFragment.setCancelable(false);
+            dialogFragment.show(getSupportFragmentManager(), "showMessageDialogFragment");
+            gameViewModel.outputBooleanObserver.observeForever(aBoolean -> {
+                if (aBoolean) {
+                    latch.countDown();
+                }
+            });
+        } else {
+            runOnUiThread(() -> showMessageDialog(message, latch));
+        }
+    }
+
+    public void showInputDialog (String prompt, ArrayBlockingQueue<String> inputQueue) {
+        if (isMainThread()) {
+            var config = libQpProxy.getGameState().interfaceConfig;
+            var message = config.useHtml ? htmlProcessor.removeHTMLTags(prompt) : prompt;
+            if (message == null) {
+                message = "";
+            }
+            if (gameViewModel.outputTextObserver.hasObservers()) {
+                gameViewModel.outputTextObserver = new MutableLiveData<>();
+            }
+            var dialogFragment = new GameDialogFrags();
+            dialogFragment.setDialogType(GameDialogType.INPUT_DIALOG);
+            if (message.equals("userInputTitle")) {
+                dialogFragment.setMessage(getString(R.string.userInputTitle));
+            } else {
+                dialogFragment.setMessage(message);
+            }
+            dialogFragment.setCancelable(false);
+            dialogFragment.show(getSupportFragmentManager(), "inputDialogFragment");
+            gameViewModel.outputTextObserver.observeForever(inputQueue::add);
+        } else {
+            runOnUiThread(() -> showInputDialog(prompt, inputQueue));
+        }
+    }
+
+    public void showExecutorDialog (String text, ArrayBlockingQueue<String> inputQueue) {
+        if (isMainThread()) {
+            var config = libQpProxy.getGameState().interfaceConfig;
+            var message = config.useHtml ? htmlProcessor.removeHTMLTags(text) : text;
+            if (message == null) {
+                message = "";
+            }
+            if (gameViewModel.outputTextObserver.hasObservers()) {
+                gameViewModel.outputTextObserver = new MutableLiveData<>();
+            }
+            var dialogFragment = new GameDialogFrags();
+            dialogFragment.setDialogType(GameDialogType.EXECUTOR_DIALOG);
+            if (message.equals("execStringTitle")) {
+                dialogFragment.setMessage(getString(R.string.execStringTitle));
+            } else {
+                dialogFragment.setMessage(message);
+            }
+            dialogFragment.setCancelable(false);
+            dialogFragment.show(getSupportFragmentManager(), "executorDialogFragment");
+            gameViewModel.outputTextObserver.observeForever(inputQueue::add);
+        } else {
+            runOnUiThread(() -> showExecutorDialog(text, inputQueue));
+        }
+    }
+
+    public void showMenuDialog (ArrayList<String> items, ArrayBlockingQueue<Integer> resultQueue) {
+        if (isMainThread()) {
+            if (gameViewModel.outputIntObserver.hasObservers()) {
+                gameViewModel.outputIntObserver = new MutableLiveData<>();
+            }
+            var dialogFragment = new GameDialogFrags();
+            dialogFragment.setDialogType(GameDialogType.MENU_DIALOG);
+            dialogFragment.setItems(items);
+            dialogFragment.setCancelable(false);
+            dialogFragment.show(getSupportFragmentManager(), "showMenuDialogFragment");
+            gameViewModel.outputIntObserver.observeForever(resultQueue::add);
+        } else {
+            runOnUiThread(() -> showMenuDialog(items, resultQueue));
+        }
+    }
+
+    public void showLoadDialog () {
+        if (isMainThread()) {
+            var dialogFragment = new GameDialogFrags();
+            dialogFragment.setDialogType(GameDialogType.LOAD_DIALOG);
+            dialogFragment.setCancelable(true);
+            dialogFragment.show(getSupportFragmentManager(), "loadGameDialogFragment");
+        } else {
+            runOnUiThread(this::showLoadDialog);
+        }
+    }
+
+    public void showSavePopup () {
+        if (isMainThread()) {
+            mainMenu.performIdentifierAction(R.id.menu_saveGame , 0);
+        } else {
+            runOnUiThread(this::showSavePopup);
+        }
     }
 
     @Override
@@ -661,7 +795,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ga
                 switch (action) {
                     case LOAD:
                         if (file != null) {
-                            doWithCounterDisabled(() -> proxy.loadGameState(Uri.fromFile(file)));
+                            gameViewModel.doWithCounterDisabled(() -> proxy.loadGameState(Uri.fromFile(file)));
                         }
                         break;
                     case SAVE:
@@ -749,247 +883,13 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ga
             return true;
         } else return i == R.id.menu_loadGame || i == R.id.menu_saveGame;
     }
-    // region GameInterface
-
-    @Override
-    public void refresh(final RefreshInterfaceRequest request) {
-        runOnUiThread(() -> {
-            if (request.interfaceConfigChanged) {
-                applySettings();
-            }
-            if (request.interfaceConfigChanged || request.mainDescChanged) {
-                refreshMainDesc();
-            }
-            if (request.actionsChanged) {
-                refreshActions();
-            }
-            if (request.objectsChanged) {
-                refreshObjects();
-            }
-            if (request.interfaceConfigChanged || request.varsDescChanged) {
-                refreshVarsDesc();
-            }
-        });
-    }
-
-    @Override
-    public void showError(final String message) {
-        runOnUiThread(() -> {
-            var dialogFragment = new GameDialogFrags();
-            dialogFragment.setDialogType(GameDialogType.ERROR_DIALOG);
-            dialogFragment.setMessage(message);
-            dialogFragment.show(getSupportFragmentManager(), "errorDialogFragment");
-        });
-    }
-
-    @Override
-    public void showPicture(final String pathToImg) {
-        runOnUiThread(() -> {
-            var dialogFragment = new GameDialogFrags();
-            dialogFragment.setDialogType(GameDialogType.IMAGE_DIALOG);
-            dialogFragment.pathToImage.set(pathToImg);
-            dialogFragment.show(getSupportFragmentManager(), "imageDialogFragment");
-        });
-    }
-
-    @Override
-    public void showMessage(final String message) {
-        if (isMainThread()) {
-            throw new RuntimeException("Must not be called on the main thread");
-        }
-        final var latch = new CountDownLatch(1);
-
-        runOnUiThread(() -> {
-            var config = libQpProxy.getGameState().interfaceConfig;
-            var processedMsg = config.useHtml ? htmlProcessor.removeHTMLTags(message) : message;
-            if (processedMsg == null) {
-                processedMsg = "";
-            }
-
-            if (gameViewModel.outputBooleanObserver.hasObservers()) {
-                gameViewModel.outputBooleanObserver = new MutableLiveData<>();
-            }
-
-            var dialogFragment = new GameDialogFrags();
-            dialogFragment.setDialogType(GameDialogType.MESSAGE_DIALOG);
-            dialogFragment.setProcessedMsg(processedMsg);
-            dialogFragment.setCancelable(false);
-            dialogFragment.show(getSupportFragmentManager(), "showMessageDialogFragment");
-            gameViewModel.outputBooleanObserver.observeForever(aBoolean -> {
-                if (aBoolean) {
-                    latch.countDown();
-                }
-            });
-        });
-
-        try {
-            latch.await();
-        } catch (InterruptedException ex) {
-            showError("Wait failed"+"\n"+ex);
-        }
-    }
-
-    @Override
-    public String showInputDialog(final String prompt) {
-        if (isMainThread()) {
-            throw new RuntimeException("Must not be called on the main thread");
-        }
-        final ArrayBlockingQueue<String> inputQueue = new ArrayBlockingQueue<>(1);
-
-        runOnUiThread(() -> {
-            var config = libQpProxy.getGameState().interfaceConfig;
-            var message = config.useHtml ? htmlProcessor.removeHTMLTags(prompt) : prompt;
-            if (message == null) {
-                message = "";
-            }
-
-            if (gameViewModel.outputTextObserver.hasObservers()) {
-                gameViewModel.outputTextObserver = new MutableLiveData<>();
-            }
-
-            var dialogFragment = new GameDialogFrags();
-            dialogFragment.setDialogType(GameDialogType.INPUT_DIALOG);
-            if (message.equals("userInputTitle")) {
-                dialogFragment.setMessage(getString(R.string.userInputTitle));
-            } else {
-                dialogFragment.setMessage(message);
-            }
-            dialogFragment.setCancelable(false);
-            dialogFragment.show(getSupportFragmentManager(), "inputDialogFragment");
-            gameViewModel.outputTextObserver.observeForever(inputQueue::add);
-        });
-
-        try {
-            return inputQueue.take();
-        } catch (InterruptedException ex) {
-            showError("Wait for input failed"+"\n"+ex);
-            return "";
-        }
-    }
-
-    @Override
-    public String showExecutorDialog(final String text) {
-        if (isMainThread()) {
-            throw new RuntimeException("Must not be called on the main thread");
-        }
-        final ArrayBlockingQueue<String> inputQueue = new ArrayBlockingQueue<>(1);
-
-        runOnUiThread(() -> {
-            var config = libQpProxy.getGameState().interfaceConfig;
-            var message = config.useHtml ? htmlProcessor.removeHTMLTags(text) : text;
-            if (message == null) {
-                message = "";
-            }
-
-            if (gameViewModel.outputTextObserver.hasObservers()) {
-                gameViewModel.outputTextObserver = new MutableLiveData<>();
-            }
-
-            var dialogFragment = new GameDialogFrags();
-            dialogFragment.setDialogType(GameDialogType.EXECUTOR_DIALOG);
-            if (message.equals("execStringTitle")) {
-                dialogFragment.setMessage(getString(R.string.execStringTitle));
-            } else {
-                dialogFragment.setMessage(message);
-            }
-            dialogFragment.setCancelable(false);
-            dialogFragment.show(getSupportFragmentManager(), "executorDialogFragment");
-            gameViewModel.outputTextObserver.observeForever(inputQueue::add);
-        });
-
-        try {
-            return inputQueue.take();
-        } catch (InterruptedException ex) {
-            showError("Wait for input failed"+ex);
-            return "";
-        }
-    }
-
-    @Override
-    public int showMenu() {
-        if (isMainThread()) {
-            throw new RuntimeException("Must not be called on the main thread");
-        }
-        final var resultQueue = new ArrayBlockingQueue<Integer>(1);
-        final var items = new ArrayList<String>();
-
-        for (QpMenuItem item : libQpProxy.getGameState().menuItems) {
-            items.add(item.name);
-        }
-
-        runOnUiThread(() -> {
-            if (gameViewModel.outputIntObserver.hasObservers()) {
-                gameViewModel.outputIntObserver = new MutableLiveData<>();
-            }
-
-            var dialogFragment = new GameDialogFrags();
-            dialogFragment.setDialogType(GameDialogType.MENU_DIALOG);
-            dialogFragment.setItems(items);
-            dialogFragment.setCancelable(false);
-            dialogFragment.show(getSupportFragmentManager(), "showMenuDialogFragment");
-            gameViewModel.outputIntObserver.observeForever(resultQueue::add);
-        });
-
-        try {
-            return resultQueue.take();
-        } catch (InterruptedException ex) {
-            showError("Wait failed"+"\n"+ex);
-            return -1;
-        }
-    }
-
-    @Override
-    public void showLoadGamePopup() {
-        runOnUiThread(() -> {
-            var dialogFragment = new GameDialogFrags();
-            dialogFragment.setDialogType(GameDialogType.LOAD_DIALOG);
-            dialogFragment.setCancelable(true);
-            dialogFragment.show(getSupportFragmentManager(), "loadGameDialogFragment");
-        });
-    }
-
-    @Override
-    public void showSaveGamePopup(String filename) {
-        runOnUiThread(() -> mainMenu.performIdentifierAction(R.id.menu_saveGame , 0));
-    }
-
-    @Override
-    public void showWindow(WindowType type, final boolean show) {
-        if (type == WindowType.ACTIONS) {
-            showActions = show;
-            if (activeTab == TAB_MAIN_DESC_AND_ACTIONS) {
-                runOnUiThread(this::refreshActionsVisibility);
-            }
-        }
-    }
-
-    private void refreshActionsVisibility() {
-        if (actionsView.getAdapter() != null) {
-            int count = actionsView.getAdapter().getItemCount();
-            boolean show = showActions && count > 0;
-            separatorView.setVisibility(show ? View.VISIBLE : View.GONE);
-            actionsView.setVisibility(show ? View.VISIBLE : View.GONE);
-        }
-    }
-
-    @Override
-    public void setCounterInterval(int millis) {
-        counterInterval = millis;
-    }
-
-    @Override
-    public void doWithCounterDisabled(Runnable runnable) {
-        counterHandler.removeCallbacks(counterTask);
-        runnable.run();
-        counterHandler.postDelayed(counterTask, counterInterval);
-    }
 
     @Override
     public void onDialogPositiveClick(@NonNull DialogFragment dialog) {
         if (Objects.equals(dialog.getTag() , "closeGameDialogFragment")) {
             gameViewModel.stopAudio();
             gameViewModel.stopLibQsp();
-            counterHandler.removeCallbacks(counterTask);
+            gameViewModel.removeCallback();
             finish();
         } else if (Objects.equals(dialog.getTag() , "inputDialogFragment") ||
                 Objects.equals(dialog.getTag() , "executorDialogFragment")) {
@@ -1015,7 +915,7 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ga
     @Override
     public void onDialogNegativeClick(DialogFragment dialog) {
         if (dialog == null) {
-            showError("Dialog is null");
+            showErrorDialog("Dialog is null");
         } else {
             if (Objects.equals(dialog.getTag() , "showMenuDialogFragment")) {
                 gameViewModel.outputIntObserver.setValue(-1);
@@ -1029,13 +929,11 @@ public class GameActivity extends AppCompatActivity implements GameInterface, Ga
     @Override
     public void onDialogListClick(DialogFragment dialog , int which) {
         if (dialog == null) {
-            showError("Dialog is null");
+            showErrorDialog("Dialog is null");
         } else {
             if (Objects.equals(dialog.getTag() , "showMenuDialogFragment")) {
                 gameViewModel.outputIntObserver.setValue(which);
             }
         }
     }
-
-    // endregion GameInterface
 }
