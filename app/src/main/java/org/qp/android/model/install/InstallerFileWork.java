@@ -19,11 +19,11 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 
-public class InstallerWork extends Worker {
+public class InstallerFileWork extends Worker {
     private final File destDir = new File(Objects.requireNonNull(getInputData().getString("destDir")));
     private final DocumentFile srcFile = DocumentFile.fromSingleUri(getApplicationContext(), Uri.parse(getInputData().getString("srcFile")));
 
-    public InstallerWork(@NonNull Context context , @NonNull WorkerParameters workerParams) {
+    public InstallerFileWork(@NonNull Context context , @NonNull WorkerParameters workerParams) {
         super(context , workerParams);
     }
 

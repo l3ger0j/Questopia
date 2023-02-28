@@ -1,10 +1,5 @@
 package org.qp.android.model.install;
 
-import static org.qp.android.utils.DirUtil.doesDirectoryContainGameFiles;
-import static org.qp.android.utils.DirUtil.normalizeGameDirectory;
-import static org.qp.android.utils.FileUtil.copyFile;
-import static org.qp.android.utils.FileUtil.getOrCreateDirectory;
-
 import android.content.Context;
 
 import androidx.annotation.NonNull;
@@ -39,7 +34,7 @@ public class Installer {
                 .putString("destDir", destDir.getAbsolutePath())
                 .build();
 
-        var workRequest = new OneTimeWorkRequest.Builder(InstallerWork.class)
+        var workRequest = new OneTimeWorkRequest.Builder(InstallerFileWork.class)
                 .setInputData(inputData)
                 .build();
 
@@ -68,24 +63,34 @@ public class Installer {
     }
 
     private void installDirectory(@NonNull DocumentFile srcFile , File destDir) {
-        for (DocumentFile file : srcFile.listFiles()) {
-            copyFileOrDirectory(file, destDir);
-        }
-        normalizeGameDirectory(destDir);
-        if (!doesDirectoryContainGameFiles(destDir)) {
-            throw new InstallException("NFE");
-        }
-        isDone.postValue(true);
-    }
+        var inputData = new Data.Builder()
+                .putString("srcDir", srcFile.getUri().toString())
+                .putString("destDir", destDir.getAbsolutePath())
+                .build();
 
-    private void copyFileOrDirectory(@NonNull DocumentFile srcFile, File destDir) {
-        if (srcFile.isDirectory()) {
-            File subDestDir = getOrCreateDirectory(destDir, srcFile.getName());
-            for (DocumentFile subSrcFile : srcFile.listFiles()) {
-                copyFileOrDirectory(subSrcFile, subDestDir);
-            }
-        } else {
-            copyFile(context, srcFile, destDir);
-        }
+        var workRequest = new OneTimeWorkRequest.Builder(InstallerDirWork.class)
+                .setInputData(inputData)
+                .build();
+
+        WorkManager.getInstance(context).enqueue(workRequest);
+
+        WorkManager.getInstance(context)
+                .getWorkInfoByIdLiveData(workRequest.getId()).observeForever(workInfo -> {
+                    if (workInfo.getState().isFinished()) {
+                        switch (workInfo.getState()) {
+                            case SUCCEEDED:
+                                isDone.postValue(true);
+                                break;
+                            case FAILED:
+                                isDone.postValue(false);
+                                if (!workInfo.getOutputData().equals(Data.EMPTY)) {
+                                    if (workInfo.getOutputData().getString("errorTwo") != null) {
+                                        throw new InstallException("NFE");
+                                    }
+                                }
+                                break;
+                        }
+                    }
+                });
     }
 }
