@@ -83,19 +83,17 @@ public class HtmlProcessor {
 
     private void processHTMLImages(@NonNull Element documentBody) {
         for (var img : documentBody.select("img")) {
-            if (controller.isUseAutoWidth) {
-                if (shouldChangeWidth(img)) {
-                    img.attr("style", "max-width:100%;");
-                }
-            } else {
-                img.attr("style", "width:"+controller.customWidthImage);
+            if (controller.isUseAutoWidth && controller.isUseAutoHeight) {
+                img.attr("style", "display: inline; height: auto; max-width: 100%;");
             }
-            if (controller.isUseAutoHeight) {
-                if (shouldChangeHeight(img)) {
-                    img.attr("style", "max-height:100%;");
+            if (!controller.isUseAutoWidth) {
+                if (shouldChangeWidth(img)) {
+                    img.attr("style" , "width:" + controller.customWidthImage+";");
                 }
-            } else {
-                img.attr("style", "height:"+controller.customWidthImage);
+            } else if (!controller.isUseAutoHeight) {
+                if (shouldChangeHeight(img)) {
+                    img.attr("style" , "height:" + controller.customHeightImage+";");
+                }
             }
         }
     }
@@ -105,11 +103,7 @@ public class HtmlProcessor {
         var absPath = gameContentResolver.getAbsolutePath(relPath);
         var drawable = imageProvider.get(absPath);
         if (drawable == null) return false;
-        if (drawable.getIntrinsicWidth() == -1) {
-            return drawable.getIntrinsicWidth() < Resources.getSystem()
-                    .getDisplayMetrics().widthPixels;
-        }
-        return drawable.getIntrinsicWidth() > Resources.getSystem()
+        return drawable.getIntrinsicWidth() < Resources.getSystem()
                 .getDisplayMetrics().widthPixels;
     }
 
@@ -118,11 +112,7 @@ public class HtmlProcessor {
         var absPath = gameContentResolver.getAbsolutePath(relPath);
         var drawable = imageProvider.get(absPath);
         if (drawable == null) return false;
-        if (drawable.getIntrinsicWidth() == -1) {
-            return drawable.getIntrinsicHeight() < Resources.getSystem()
-                    .getDisplayMetrics().heightPixels;
-        }
-        return drawable.getIntrinsicHeight() > Resources.getSystem()
+        return drawable.getIntrinsicHeight() < Resources.getSystem()
                 .getDisplayMetrics().heightPixels;
     }
 
