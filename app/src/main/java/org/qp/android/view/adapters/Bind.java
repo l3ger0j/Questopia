@@ -19,6 +19,7 @@ public class Bind {
         var webViewSettings = view.getSettings();
         webViewSettings.setAllowFileAccess(true);
         webViewSettings.setDomStorageEnabled(true);
+        webViewSettings.setJavaScriptEnabled(true);
         view.setWebViewClient(client);
     }
 

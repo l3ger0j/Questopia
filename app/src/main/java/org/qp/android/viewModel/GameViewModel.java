@@ -153,6 +153,11 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
                 getHtmlProcessor().convertQspStringToWebViewHtml(str);
     }
 
+    public String getImageAbsolutePath(String src) {
+        var relPath = Uri.decode(src.substring(8));
+        return gameContentResolver.getFile(relPath).getAbsolutePath();
+    }
+
     public String getMainDesc () {
         var mainDesc = getHtml(getLibQspProxy().getGameState().mainDesc);
         return pageTemplate.replace("REPLACETEXT", mainDesc);

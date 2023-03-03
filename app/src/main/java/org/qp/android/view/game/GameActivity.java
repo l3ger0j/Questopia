@@ -16,6 +16,7 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -220,7 +221,7 @@ public class GameActivity extends AppCompatActivity implements GamePatternDialog
 
     private void hideSystemUI() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            WindowInsetsControllerCompat windowInsetsController =
+            var windowInsetsController =
                     WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
             windowInsetsController.setSystemBarsBehavior(
                     WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
@@ -304,6 +305,12 @@ public class GameActivity extends AppCompatActivity implements GamePatternDialog
 
     private void initMainDescView() {
         mainDescView = activityGameBinding.mainDesc;
+        mainDescView.addJavascriptInterface(new Object() {
+            @JavascriptInterface
+            public void onClickImage(String src) {
+                showPictureDialog(gameViewModel.getImageAbsolutePath(src));
+            }
+        }, "img");
         if (settingsController.isUseAutoscroll) {
             mainDescView.postDelayed(onScroll, 300);
         }

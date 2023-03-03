@@ -14,6 +14,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
 import org.qp.android.view.settings.SettingsController;
 
+import java.util.ArrayList;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
@@ -82,7 +83,16 @@ public class HtmlProcessor {
     }
 
     private void processHTMLImages(@NonNull Element documentBody) {
+        var dynBlackList = new ArrayList<String>();
+        for (var element : documentBody.select("a")) {
+            if (element.attr("href").contains("exec:")) {
+                dynBlackList.add(element.select("img").attr("src"));
+            }
+        }
         for (var img : documentBody.select("img")) {
+            if (!dynBlackList.contains(img.attr("src"))) {
+                img.attr("onclick", "img.onClickImage(this.src);");
+            }
             if (controller.isUseAutoWidth && controller.isUseAutoHeight) {
                 img.attr("style", "display: inline; height: auto; max-width: 100%;");
             }
