@@ -142,6 +142,8 @@
         <string name="autoHeightTitle">Авто Высота Изображения</string>
         <string name="autoHeightSum">Использовать автоматически определяемое значение для высоты изображения</string>
         <string name="customHeightTitle">Своё Значение Высоты</string>
+        <string name="fullScreenImageSum">При нажатии на картинку, она откроется в диалоговом окне</string>
+        <string name="fullScreenImageTitle">Полноэкранные изображения</string>
         <!-- Switch section -->
         <string name="switchCatTitle">Переключатели</string>
         <string name="filePicker">Диалог Выбора Файла (альфа)</string>

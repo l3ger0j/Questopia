@@ -30,20 +30,16 @@ public class SettingsController {
     public boolean isUseGameTextColor;
     public boolean isUseGameBackgroundColor;
     public boolean isUseGameLinkColor;
+    public boolean isUseFullscreenImages;
     public String language;
 
     private static SettingsController INSTANCE;
 
-    public static SettingsController newInstance() {
+    public static SettingsController newInstance(Context context) {
         if (INSTANCE == null) {
             INSTANCE = new SettingsController();
         }
-        return INSTANCE;
-    }
-
-    public SettingsController loadSettings(Context context) {
-        var preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        return from(preferences);
+        return from(PreferenceManager.getDefaultSharedPreferences(context));
     }
 
     public Typeface getTypeface() {
@@ -95,6 +91,7 @@ public class SettingsController {
         settingsController.customWidthImage = Integer.parseInt(preferences.getString("customWidthImage", "400"));
         settingsController.isUseAutoHeight = preferences.getBoolean("autoHeight", true);
         settingsController.customHeightImage = Integer.parseInt(preferences.getString("customHeightImage", "400"));
+        settingsController.isUseFullscreenImages = preferences.getBoolean("fullScreenImage", true);
     }
 
     private static float parseActionsHeightRatio(@NonNull String str) {

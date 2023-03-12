@@ -254,7 +254,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
     }
 
     private void loadSettings() {
-        settingsController = SettingsController.newInstance().loadSettings(this);
+        settingsController = stockViewModel.getSettingsController();
         stockViewModel.setController(settingsController);
         if (settingsController.binaryPrefixes <= 1000) {
             stockViewModel.refreshGames();

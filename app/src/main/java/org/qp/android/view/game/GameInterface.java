@@ -4,7 +4,6 @@ import org.qp.android.model.libQP.RefreshInterfaceRequest;
 import org.qp.android.model.libQP.WindowType;
 
 public interface GameInterface {
-
     void refresh(RefreshInterfaceRequest request);
     void showError(String message);
     void showPicture(String path);

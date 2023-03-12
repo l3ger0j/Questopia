@@ -5,7 +5,8 @@
         <item name="android:colorForeground">#fff</item>
     </style>
     <style name="Theme.QP.Translucent.NoActionBar" parent="Theme.MaterialComponents.NoActionBar.Bridge">
-        <item name="android:windowNoTitle">true</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
         <item name="android:colorForeground">#fff</item>
     </style>
     <style name="roundedImageView" parent="">

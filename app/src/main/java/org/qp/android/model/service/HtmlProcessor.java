@@ -90,7 +90,8 @@ public class HtmlProcessor {
             }
         }
         for (var img : documentBody.select("img")) {
-            if (!dynBlackList.contains(img.attr("src"))) {
+            if (!dynBlackList.isEmpty()
+                    && !dynBlackList.contains(img.attr("src"))) {
                 img.attr("onclick", "img.onClickImage(this.src);");
             }
             if (controller.isUseAutoWidth && controller.isUseAutoHeight) {

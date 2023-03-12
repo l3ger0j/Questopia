@@ -16,31 +16,31 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.webkit.JavascriptInterface;
-import android.webkit.WebView;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.core.os.LocaleListCompat;
+import androidx.core.view.GravityCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
-import androidx.databinding.DataBindingUtil;
 import androidx.documentfile.provider.DocumentFile;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.RecyclerView;
+import androidx.navigation.NavController;
+import androidx.navigation.fragment.NavHostFragment;
 
 import com.anggrayudi.storage.FileWrapper;
 import com.anggrayudi.storage.SimpleStorageHelper;
+import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.textfield.TextInputLayout;
 
 import org.jetbrains.annotations.Contract;
@@ -49,7 +49,7 @@ import org.qp.android.databinding.ActivityGameBinding;
 import org.qp.android.model.libQP.LibQpProxy;
 import org.qp.android.model.service.AudioPlayer;
 import org.qp.android.model.service.HtmlProcessor;
-import org.qp.android.view.adapters.RecyclerItemClickListener;
+import org.qp.android.view.game.fragments.GamePatternFragment;
 import org.qp.android.view.game.fragments.dialogs.GameDialogFrags;
 import org.qp.android.view.game.fragments.dialogs.GameDialogType;
 import org.qp.android.view.game.fragments.dialogs.GamePatternDialogFrags;
@@ -66,8 +66,11 @@ import java.util.ArrayList;
 import java.util.Objects;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ThreadLocalRandom;
 
-public class GameActivity extends AppCompatActivity implements GamePatternDialogFrags.GamePatternDialogList {
+public class GameActivity extends AppCompatActivity implements GamePatternFragment.GamePatternFragmentList,
+        GamePatternDialogFrags.GamePatternDialogList,
+        NavigationView.OnNavigationItemSelectedListener {
     private final String TAG = this.getClass().getSimpleName();
 
     private static final int MAX_SAVE_SLOTS = 5;
@@ -79,15 +82,11 @@ public class GameActivity extends AppCompatActivity implements GamePatternDialog
 
     private SettingsController settingsController;
     private int activeTab;
-    private final boolean showActions = true;
 
     private ActionBar actionBar;
     private Menu mainMenu;
-    private ConstraintLayout layoutTop;
-    private WebView mainDescView;
-    private WebView varsDescView;
-    private View separatorView;
-    private RecyclerView actionsView, objectsView;
+    private NavController navController;
+    private NavigationView navigationView;
 
     private HtmlProcessor htmlProcessor;
     private LibQpProxy libQpProxy;
@@ -98,30 +97,14 @@ public class GameActivity extends AppCompatActivity implements GamePatternDialog
     private ActivityGameBinding activityGameBinding;
     private final SimpleStorageHelper storageHelper = new SimpleStorageHelper(this);
     private ActivityResultLauncher<Intent> saveResultLaunch;
-
-    private final Runnable onScroll = new Runnable() {
-        @Override
-        public void run() {
-            if (mainDescView.getContentHeight()
-                    * getResources().getDisplayMetrics().density
-                    >= mainDescView.getScrollY() ){
-                mainDescView.scrollBy(0, mainDescView.getHeight());
-            }
-        }
-    };
     private View mDecorView;
-
-    public int getActiveTab() {
-        return activeTab;
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        activityGameBinding = DataBindingUtil.setContentView(this, R.layout.activity_game);
+        activityGameBinding = ActivityGameBinding.inflate(getLayoutInflater());
         gameViewModel = new ViewModelProvider(this).get(GameViewModel.class);
-        activityGameBinding.setGameViewModel(gameViewModel);
         gameViewModel.gameActivityObservableField.set(this);
         settingsController = gameViewModel.getSettingsController();
 
@@ -134,6 +117,12 @@ public class GameActivity extends AppCompatActivity implements GamePatternDialog
 
         setContentView(activityGameBinding.getRoot());
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
+
+        var navFragment = (NavHostFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.gameFragHost);
+        if (navFragment != null) {
+            navController = navFragment.getNavController();
+        }
 
         saveResultLaunch = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
@@ -202,6 +191,11 @@ public class GameActivity extends AppCompatActivity implements GamePatternDialog
             initServices();
             initControls();
             initGame();
+        }
+
+        for (var data : gameViewModel.getGameDataList()) {
+            var menu = navigationView.getMenu();
+            menu.add(data.title);
         }
 
         Log.i(TAG, "Game created");
@@ -288,92 +282,21 @@ public class GameActivity extends AppCompatActivity implements GamePatternDialog
     }
 
     private void initControls() {
-        layoutTop = activityGameBinding.layoutTop;
-        separatorView = activityGameBinding.separator;
-
-        initActionBar();
-        initMainDescView();
-        initActionsView();
-        initObjectsView();
-        initVarsDescView();
-    }
-
-    private void initActionBar() {
-        setSupportActionBar(activityGameBinding.toolbar);
+        setSupportActionBar(activityGameBinding.appBarGame.toolbar);
         actionBar = getSupportActionBar();
-    }
 
-    private void initMainDescView() {
-        mainDescView = activityGameBinding.mainDesc;
-        mainDescView.addJavascriptInterface(new Object() {
-            @JavascriptInterface
-            public void onClickImage(String src) {
-                showPictureDialog(gameViewModel.getImageAbsolutePath(src));
-            }
-        }, "img");
-        if (settingsController.isUseAutoscroll) {
-            mainDescView.postDelayed(onScroll, 300);
-        }
-    }
-
-    private void initActionsView() {
-        actionsView = activityGameBinding.actions;
-        var actions = libQpProxy.getGameState().actions;
-        var recycler = new GameItemRecycler();
-        recycler.setTypeface(gameViewModel.getSettingsController().getTypeface());
-        recycler.setTextSize(gameViewModel.getFontSize());
-        recycler.setBackgroundColor(gameViewModel.getBackgroundColor());
-        recycler.setTextColor(gameViewModel.getTextColor());
-        recycler.setLinkTextColor(gameViewModel.getLinkColor());
-        recycler.submitList(actions);
-        actionsView.setAdapter(recycler);
-        actionsView.addOnItemTouchListener(new RecyclerItemClickListener(
+        var layout = activityGameBinding.gameDrawerLayout;
+        var toggle = new ActionBarDrawerToggle(
                 this ,
-                actionsView ,
-                new RecyclerItemClickListener.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(View view , int position) {
-                        libQpProxy.onActionClicked(position);
-                    }
+                layout ,
+                activityGameBinding.appBarGame.toolbar ,
+                R.string.add ,
+                R.string.close);
+        layout.addDrawerListener(toggle);
+        toggle.syncState();
 
-                    @Override
-                    public void onLongItemClick(View view , int position) {
-
-                    }
-                }
-        ));
-    }
-
-    private void initObjectsView() {
-        objectsView = activityGameBinding.objects;
-        var objects = libQpProxy.getGameState().objects;
-        var recycler = new GameItemRecycler();
-        recycler.setTypeface(gameViewModel.getSettingsController().getTypeface());
-        recycler.setTextSize(gameViewModel.getFontSize());
-        recycler.setBackgroundColor(gameViewModel.getBackgroundColor());
-        recycler.setTextColor(gameViewModel.getTextColor());
-        recycler.setLinkTextColor(gameViewModel.getLinkColor());
-        recycler.submitList(objects);
-        objectsView.setAdapter(recycler);
-        objectsView.addOnItemTouchListener(new RecyclerItemClickListener(
-                this ,
-                objectsView ,
-                new RecyclerItemClickListener.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(View view , int position) {
-                        libQpProxy.onObjectSelected(position);
-                    }
-
-                    @Override
-                    public void onLongItemClick(View view , int position) {
-
-                    }
-                }
-        ));
-    }
-
-    private void initVarsDescView() {
-        varsDescView = activityGameBinding.varsDesc;
+        navigationView = activityGameBinding.navView;
+        navigationView.setNavigationItemSelectedListener(this);
     }
 
     private void initServices() {
@@ -404,44 +327,23 @@ public class GameActivity extends AppCompatActivity implements GamePatternDialog
     private void setActiveTab(int tab) {
         switch (tab) {
             case TAB_MAIN_DESC_AND_ACTIONS:
-                toggleMainDescAndActions(true);
-                toggleObjects(false);
-                toggleVarsDesc(false);
+                navController.navigate(R.id.gameMainFragment);
                 setTitle(getString(R.string.mainDescTitle));
                 break;
 
             case TAB_OBJECTS:
-                toggleMainDescAndActions(false);
-                toggleObjects(true);
-                toggleVarsDesc(false);
+                navController.navigate(R.id.gameObjectFragment);
                 setTitle(getString(R.string.inventoryTitle));
                 break;
 
             case TAB_VARS_DESC:
-                toggleMainDescAndActions(false);
-                toggleObjects(false);
-                toggleVarsDesc(true);
+                navController.navigate(R.id.gameVarsFragment);
                 setTitle(getString(R.string.varsDescTitle));
                 break;
         }
 
         activeTab = tab;
         updateTabIcons();
-    }
-
-    private void toggleMainDescAndActions(boolean show) {
-        boolean shouldShowActions = show && showActions;
-        activityGameBinding.mainDesc.setVisibility(show ? View.VISIBLE : View.GONE);
-        activityGameBinding.separator.setVisibility(shouldShowActions ? View.VISIBLE : View.GONE);
-        activityGameBinding.actions.setVisibility(shouldShowActions ? View.VISIBLE : View.GONE);
-    }
-
-    private void toggleObjects(boolean show) {
-        activityGameBinding.objects.setVisibility(show ? View.VISIBLE : View.GONE);
-    }
-
-    private void toggleVarsDesc(boolean show) {
-        activityGameBinding.varsDesc.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
     private void setTitle(String title) {
@@ -473,10 +375,9 @@ public class GameActivity extends AppCompatActivity implements GamePatternDialog
     @Override
     public void onResume() {
         super.onResume();
-        settingsController = SettingsController.newInstance().loadSettings(this);
+        settingsController = gameViewModel.getSettingsController();
         applySettings();
         if (libQpProxy.getGameState().gameRunning) {
-            applyGameState();
             audioPlayer.setSoundEnabled(settingsController.isSoundEnabled);
             audioPlayer.resume();
             gameViewModel.setCallback();
@@ -485,119 +386,14 @@ public class GameActivity extends AppCompatActivity implements GamePatternDialog
 
     public void applySettings() {
         if (isMainThread()) {
-            applyActionsHeightRatio();
-            applyGameState();
-            if (settingsController.isUseSeparator) {
-                separatorView.setBackgroundColor(gameViewModel.getBackgroundColor());
-            } else {
-                separatorView.setBackgroundColor(getResources().getColor(R.color.materialcolorpicker__grey));
-            }
             if (settingsController.language.equals("ru")) {
                 AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("ru"));
             } else {
                 AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("en"));
             }
             htmlProcessor = gameViewModel.getHtmlProcessor();
-            var backColor =
-                    gameViewModel.getBackgroundColor();
-            layoutTop.setBackgroundColor(backColor);
-            mainDescView.setBackgroundColor(backColor);
-            varsDescView.setBackgroundColor(backColor);
-            actionsView.setBackgroundColor(backColor);
-            objectsView.setBackgroundColor(backColor);
-            gameViewModel.updatePageTemplate();
         } else {
             runOnUiThread(this::applySettings);
-        }
-    }
-
-    private void applyActionsHeightRatio() {
-        var constraintSet = new ConstraintSet();
-        constraintSet.clone(layoutTop);
-        constraintSet.setVerticalWeight(R.id.main_desc, 1.0f - settingsController.actionsHeightRatio);
-        constraintSet.setVerticalWeight(R.id.actions, settingsController.actionsHeightRatio);
-        constraintSet.applyTo(layoutTop);
-    }
-
-    private void applyGameState() {
-        refreshMainDesc();
-        refreshVarsDesc();
-        refreshActions();
-        refreshObjects();
-    }
-
-    public void refreshMainDesc() {
-        if (isMainThread()) {
-            if (settingsController.isUseAutoscroll) {
-                mainDescView.postDelayed(onScroll, 300);
-            }
-            mainDescView.loadDataWithBaseURL(
-                    "file:///",
-                    gameViewModel.getMainDesc(),
-                    "text/html",
-                    "UTF-8",
-                    null);
-        } else {
-            runOnUiThread(this::refreshMainDesc);
-        }
-    }
-
-    public void refreshVarsDesc() {
-        if (isMainThread()) {
-            varsDescView.loadDataWithBaseURL(
-                    "file:///" ,
-                    gameViewModel.getVarsDesc() ,
-                    "text/html" ,
-                    "UTF-8" ,
-                    null);
-        } else {
-            runOnUiThread(this::refreshVarsDesc);
-        }
-    }
-
-    public void refreshActions() {
-        if (isMainThread()) {
-            var actions = libQpProxy.getGameState().actions;
-            var recycler = new GameItemRecycler();
-            recycler.setTypeface(gameViewModel.getSettingsController().getTypeface());
-            recycler.setTextSize(gameViewModel.getFontSize());
-            recycler.setBackgroundColor(gameViewModel.getBackgroundColor());
-            recycler.setTextColor(gameViewModel.getTextColor());
-            recycler.setLinkTextColor(gameViewModel.getLinkColor());
-            recycler.submitList(actions);
-            actionsView.setAdapter(recycler);
-            refreshActionsVisibility(showActions);
-        } else {
-            runOnUiThread(this::refreshActions);
-        }
-    }
-
-    public void refreshActionsVisibility(final boolean showState) {
-        if (isMainThread()) {
-            if (actionsView.getAdapter() != null) {
-                int count = actionsView.getAdapter().getItemCount();
-                boolean show = showState && count > 0;
-                separatorView.setVisibility(show ? View.VISIBLE : View.GONE);
-                actionsView.setVisibility(show ? View.VISIBLE : View.GONE);
-            }
-        } else {
-            runOnUiThread(() -> refreshActionsVisibility(showState));
-        }
-    }
-
-    public void refreshObjects() {
-        if (isMainThread()) {
-            var objects = libQpProxy.getGameState().objects;
-            var recycler = new GameItemRecycler();
-            recycler.setTypeface(gameViewModel.getSettingsController().getTypeface());
-            recycler.setTextSize(gameViewModel.getFontSize());
-            recycler.setBackgroundColor(gameViewModel.getBackgroundColor());
-            recycler.setTextColor(gameViewModel.getTextColor());
-            recycler.setLinkTextColor(gameViewModel.getLinkColor());
-            recycler.submitList(objects);
-            objectsView.setAdapter(recycler);
-        } else {
-            runOnUiThread(this::refreshObjects);
         }
     }
 
@@ -743,7 +539,12 @@ public class GameActivity extends AppCompatActivity implements GamePatternDialog
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
-            promptCloseGame();
+            var drawer = (DrawerLayout) activityGameBinding.gameDrawerLayout;
+            if (drawer.isDrawerOpen(GravityCompat.START)) {
+                drawer.closeDrawer(GravityCompat.START);
+            } else {
+                promptCloseGame();
+            }
             return true;
         }
         return super.onKeyDown(keyCode, event);
@@ -810,7 +611,6 @@ public class GameActivity extends AppCompatActivity implements GamePatternDialog
                         proxy.saveGameState(Uri.fromFile(file1));
                         break;
                 }
-
                 return true;
             });
         }
@@ -857,6 +657,38 @@ public class GameActivity extends AppCompatActivity implements GamePatternDialog
     @Contract(pure = true)
     private String getSaveSlotFilename(int slot) {
         return (slot + 1) + ".sav";
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        if (!libQpProxy.getGameState().gameTitle.contentEquals(item.getTitle())) {
+            var temGameSaveMap = gameViewModel.getGameSaveMap();
+            final var savesDir = getOrCreateDirectory(libQpProxy.getGameState().gameDir , "saves");
+            var file1 = getOrCreateFile(savesDir, libQpProxy.getGameState().gameTitle+"#"+ ThreadLocalRandom.current().nextInt());
+            libQpProxy.saveGameState(Uri.fromFile(file1));
+            temGameSaveMap.putSerializable(libQpProxy.getGameState().gameTitle , file1);
+            gameViewModel.setGameSaveMap(temGameSaveMap);
+
+            for (var data : gameViewModel.getGameDataList()) {
+                if (data.title.contentEquals(item.getTitle())) {
+                    var gameId = data.id;
+                    var gameTitle = data.title;
+                    var gameDir = data.gameDir;
+                    var gameFiles = data.gameFiles;
+                    libQpProxy.runGame(gameId , gameTitle , gameDir , gameFiles.get(0));
+
+                    if (gameViewModel.getGameSaveMap().containsKey(data.title)) {
+                        var save = (File) gameViewModel.getGameSaveMap().getSerializable(data.title);
+                        gameViewModel.doWithCounterDisabled(() ->
+                                libQpProxy.loadGameState(Uri.fromFile(save)));
+                    }
+                }
+            }
+        }
+
+        var drawer = (DrawerLayout) activityGameBinding.gameDrawerLayout;
+        drawer.closeDrawer(GravityCompat.START);
+        return false;
     }
 
     @Override

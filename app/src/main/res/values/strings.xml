@@ -143,6 +143,8 @@
         <string name="autoHeightTitle">Auto Height Image</string>
         <string name="autoHeightSum">Use an auto-detectable value for the height of the image</string>
         <string name="customHeightTitle">Custom Height Image</string>
+        <string name="fullScreenImageSum">When clicked, the picture will open in the dialog</string>
+        <string name="fullScreenImageTitle">Fullscreen Images</string>
         <!-- Switch section -->
         <string name="switchCatTitle">Switches</string>
         <string name="filePicker">File Picker Dialog (alpha)</string>

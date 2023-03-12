@@ -10,7 +10,9 @@ import static org.qp.android.utils.ViewUtil.getFontStyle;
 
 import android.app.Application;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
@@ -21,13 +23,16 @@ import android.webkit.WebViewClient;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.databinding.ObservableBoolean;
 import androidx.databinding.ObservableField;
 import androidx.lifecycle.AndroidViewModel;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+import androidx.preference.PreferenceManager;
 
 import org.qp.android.QuestPlayerApplication;
+import org.qp.android.dto.stock.GameData;
 import org.qp.android.model.libQP.LibQpProxy;
-import org.qp.android.model.libQP.QpListItem;
 import org.qp.android.model.libQP.QpMenuItem;
 import org.qp.android.model.libQP.RefreshInterfaceRequest;
 import org.qp.android.model.libQP.WindowType;
@@ -36,6 +41,7 @@ import org.qp.android.model.service.GameContentResolver;
 import org.qp.android.model.service.HtmlProcessor;
 import org.qp.android.view.game.GameActivity;
 import org.qp.android.view.game.GameInterface;
+import org.qp.android.view.game.GameItemRecycler;
 import org.qp.android.view.settings.SettingsController;
 
 import java.io.FileNotFoundException;
@@ -44,8 +50,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CountDownLatch;
 
 public class GameViewModel extends AndroidViewModel implements GameInterface {
-    private final String TAG = this.getClass().getCanonicalName();
-    private static final int TAB_MAIN_DESC_AND_ACTIONS = 0;
+    private final String TAG = this.getClass().getSimpleName();
 
     private final QuestPlayerApplication questPlayerApplication;
     private final GameContentResolver gameContentResolver;
@@ -55,10 +60,17 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
 
     public ObservableField<GameActivity> gameActivityObservableField =
             new ObservableField<>();
+    public ObservableBoolean isActionVisible = new ObservableBoolean();
 
     public MutableLiveData<String> outputTextObserver = new MutableLiveData<>();
     public MutableLiveData<Integer> outputIntObserver = new MutableLiveData<>();
     public MutableLiveData<Boolean> outputBooleanObserver = new MutableLiveData<>(false);
+
+    private final MutableLiveData<SettingsController> controllerObserver = new MutableLiveData<>();
+    private final MutableLiveData<String> mainDescLiveData = new MutableLiveData<>();
+    private final MutableLiveData<String> varsDescLiveData = new MutableLiveData<>();
+    private final MutableLiveData<GameItemRecycler> actionLiveData = new MutableLiveData<>();
+    private final MutableLiveData<GameItemRecycler> objectLiveData = new MutableLiveData<>();
 
     private static final String PAGE_HEAD_TEMPLATE = "<head>\n"
             + "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1\">\n"
@@ -77,6 +89,8 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
 
     private static final String PAGE_BODY_TEMPLATE = "<body>REPLACETEXT</body>";
     public String pageTemplate = "";
+    public SharedPreferences preferences;
+    private boolean showActions = true;
 
     private final Handler counterHandler = new Handler();
 
@@ -106,11 +120,21 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
     }
 
     public SettingsController getSettingsController() {
-        return SettingsController.newInstance().loadSettings(getApplication());
+        return SettingsController.newInstance(getApplication());
     }
+
+    SharedPreferences.OnSharedPreferenceChangeListener preferenceChangeListener = (sharedPreferences , key) -> {
+        controllerObserver.postValue(getSettingsController());
+        refreshActionsRecycler();
+        refreshObjectsRecycler();
+    };
 
     public WebViewClient getWebViewClient() {
         return new GameWebViewClient();
+    }
+
+    public LiveData<SettingsController> getControllerObserver() {
+        return controllerObserver;
     }
 
     public int getTextColor() {
@@ -158,18 +182,31 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         return gameContentResolver.getFile(relPath).getAbsolutePath();
     }
 
-    public String getMainDesc () {
-        var mainDesc = getHtml(getLibQspProxy().getGameState().mainDesc);
-        return pageTemplate.replace("REPLACETEXT", mainDesc);
+    public LiveData<String> getMainDescObserver () {
+        return mainDescLiveData;
     }
 
-    public String getVarsDesc () {
-        var varsDesc = getHtml(getLibQspProxy().getGameState().varsDesc);
-        return pageTemplate.replace("REPLACETEXT", varsDesc);
+    public LiveData<String> getVarsDescObserver () {
+        return varsDescLiveData;
     }
 
-    public ArrayList<QpListItem> getObjects () {
-        return libQpProxy.getGameState().objects;
+    public LiveData<GameItemRecycler> getObjectsObserver () {
+        if (objectLiveData.getValue() == null) {
+            refreshObjectsRecycler();
+        }
+        return objectLiveData;
+    }
+
+    public LiveData<GameItemRecycler> getActionObserver () {
+        if (actionLiveData.getValue() == null) {
+            refreshActionsRecycler();
+        }
+        return actionLiveData;
+    }
+
+    @Nullable
+    private GameActivity getGameActivity () {
+        return gameActivityObservableField.get();
     }
     // endregion Getter/Setter
 
@@ -183,6 +220,40 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         pageTemplate = pageHeadTemplate + PAGE_BODY_TEMPLATE;
     }
 
+    private void refreshMainDesc() {
+        var mainDesc = getHtml(getLibQspProxy().getGameState().mainDesc);
+        mainDescLiveData.postValue(pageTemplate.replace("REPLACETEXT", mainDesc));
+    }
+
+    private void refreshVarsDesc() {
+        var varsDesc = getHtml(getLibQspProxy().getGameState().varsDesc);
+        varsDescLiveData.postValue(pageTemplate.replace("REPLACETEXT", varsDesc));
+    }
+
+    private void refreshActionsRecycler() {
+        var actionsRecycler = new GameItemRecycler();
+        actionsRecycler.setTypeface(getSettingsController().getTypeface());
+        actionsRecycler.setTextSize(getFontSize());
+        actionsRecycler.setBackgroundColor(getBackgroundColor());
+        actionsRecycler.setTextColor(getTextColor());
+        actionsRecycler.setLinkTextColor(getLinkColor());
+        actionsRecycler.submitList(libQpProxy.getGameState().actions);
+        actionLiveData.postValue(actionsRecycler);
+        int count = actionsRecycler.getItemCount();
+        isActionVisible.set(showActions && count > 0);
+    }
+
+    private void refreshObjectsRecycler() {
+        var objectsRecycler = new GameItemRecycler();
+        objectsRecycler.setTypeface(getSettingsController().getTypeface());
+        objectsRecycler.setTextSize(getFontSize());
+        objectsRecycler.setBackgroundColor(getBackgroundColor());
+        objectsRecycler.setTextColor(getTextColor());
+        objectsRecycler.setLinkTextColor(getLinkColor());
+        objectsRecycler.submitList(libQpProxy.getGameState().objects);
+        objectLiveData.postValue(objectsRecycler);
+    }
+
     public void setCallback () {
         counterHandler.postDelayed(counterTask, counterInterval);
     }
@@ -193,9 +264,30 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
 
     public GameViewModel(@NonNull Application application) {
         super(application);
+        preferences = PreferenceManager.getDefaultSharedPreferences(application);
+        preferences.registerOnSharedPreferenceChangeListener(preferenceChangeListener);
+
         questPlayerApplication = getApplication();
         gameContentResolver = questPlayerApplication.getGameContentResolver();
         htmlProcessor = questPlayerApplication.getHtmlProcessor();
+    }
+
+    public void setGameSaveMap(Bundle gameSaveMap) {
+        questPlayerApplication.setGameSaveMap(gameSaveMap);
+    }
+
+    public Bundle getGameSaveMap() {
+        return questPlayerApplication.getGameSaveMap();
+    }
+
+    public ArrayList<GameData> getGameDataList() {
+        return questPlayerApplication.getGameList();
+    }
+
+    @Override
+    protected void onCleared() {
+        super.onCleared();
+        preferences.unregisterOnSharedPreferenceChangeListener(preferenceChangeListener);
     }
 
     public void startAudio () {
@@ -273,16 +365,6 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
     }
 
     // region GameInterface
-
-    @Nullable
-    private GameActivity getGameActivity () {
-        if (gameActivityObservableField.get() != null) {
-            return gameActivityObservableField.get();
-        } else {
-            return null;
-        }
-    }
-
     @Override
     public void refresh(final RefreshInterfaceRequest request) {
         if (request.interfaceConfigChanged) {
@@ -291,24 +373,18 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
             }
         }
         if (request.interfaceConfigChanged || request.mainDescChanged) {
-            if (getGameActivity() != null) {
-                getGameActivity().refreshMainDesc();
-            }
+            updatePageTemplate();
+            refreshMainDesc();
         }
         if (request.actionsChanged) {
-            if (getGameActivity() != null) {
-                getGameActivity().refreshActions();
-            }
+            refreshActionsRecycler();
         }
         if (request.objectsChanged) {
-            if (getGameActivity() != null) {
-                getGameActivity().refreshObjects();
-            }
+            refreshObjectsRecycler();
         }
         if (request.interfaceConfigChanged || request.varsDescChanged) {
-            if (getGameActivity() != null) {
-                getGameActivity().refreshVarsDesc();
-            }
+            updatePageTemplate();
+            refreshVarsDesc();
         }
     }
 
@@ -414,11 +490,8 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
     @Override
     public void showWindow(WindowType type, final boolean show) {
         if (type == WindowType.ACTIONS) {
-            if (getGameActivity() != null) {
-                if (getGameActivity().getActiveTab() == TAB_MAIN_DESC_AND_ACTIONS) {
-                    getGameActivity().refreshActionsVisibility(show);
-                }
-            }
+            showActions = show;
+            refreshActionsRecycler();
         }
     }
 

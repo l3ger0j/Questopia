@@ -39,6 +39,7 @@ import com.squareup.picasso.Picasso;
 
 import org.jetbrains.annotations.Contract;
 import org.qp.android.GameDataParcel;
+import org.qp.android.QuestPlayerApplication;
 import org.qp.android.R;
 import org.qp.android.databinding.DialogEditBinding;
 import org.qp.android.databinding.DialogInstallBinding;
@@ -66,7 +67,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class StockViewModel extends AndroidViewModel {
-    // private final String TAG = this.getClass().getSimpleName();
+    private final String TAG = this.getClass().getSimpleName();
 
     public ObservableField<StockActivity> activityObservableField = new
             ObservableField<>();
@@ -147,6 +148,10 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     public MutableLiveData<ArrayList<GameData>> getGameData() {
+        if (gameDataList.getValue() != null) {
+            QuestPlayerApplication application = getApplication();
+            application.setGameList(gameDataList.getValue());
+        }
         return gameDataList;
     }
 
@@ -232,6 +237,10 @@ public class StockViewModel extends AndroidViewModel {
         } else {
             return "";
         }
+    }
+
+    public SettingsController getSettingsController() {
+        return SettingsController.newInstance(getApplication());
     }
 
     public boolean isGameInstalled () {

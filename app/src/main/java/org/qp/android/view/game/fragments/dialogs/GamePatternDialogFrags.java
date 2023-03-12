@@ -6,7 +6,6 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.DialogFragment;
 
 public abstract class GamePatternDialogFrags extends DialogFragment {
-
     public interface GamePatternDialogList {
         void onDialogPositiveClick(DialogFragment dialog);
         void onDialogNegativeClick(DialogFragment dialog);
