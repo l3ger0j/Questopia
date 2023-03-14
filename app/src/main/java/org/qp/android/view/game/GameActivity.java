@@ -24,6 +24,7 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.appcompat.widget.TooltipCompat;
 import androidx.core.os.LocaleListCompat;
 import androidx.core.view.GravityCompat;
 import androidx.core.view.WindowCompat;
@@ -195,7 +196,13 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
 
         for (var data : gameViewModel.getGameDataList()) {
             var menu = navigationView.getMenu();
-            menu.add(data.title);
+            for (var file : data.gameFiles) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    menu.add(file.getName()).setTooltipText(data.title);
+                } else {
+                    TooltipCompat.setTooltipText(menu.add(file.getName()).getActionView() , data.title);
+                }
+            }
         }
 
         Log.i(TAG, "Game created");
@@ -662,25 +669,29 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         if (!libQpProxy.getGameState().gameTitle.contentEquals(item.getTitle())) {
+            var simpleNameForSave = libQpProxy.getGameState().gameFile.getName();
+            var hardNameForSave = simpleNameForSave+"#"+ThreadLocalRandom.current().nextInt();
+            var currentGameDir = libQpProxy.getGameState().gameDir;
+
             var temGameSaveMap = gameViewModel.getGameSaveMap();
-            final var savesDir = getOrCreateDirectory(libQpProxy.getGameState().gameDir , "saves");
-            var file1 = getOrCreateFile(savesDir, libQpProxy.getGameState().gameTitle+"#"+ ThreadLocalRandom.current().nextInt());
-            libQpProxy.saveGameState(Uri.fromFile(file1));
-            temGameSaveMap.putSerializable(libQpProxy.getGameState().gameTitle , file1);
+            final var savesDir = getOrCreateDirectory(currentGameDir , "saves");
+            var tempSaveFile = getOrCreateFile(savesDir , hardNameForSave);
+            libQpProxy.saveGameState(Uri.fromFile(tempSaveFile));
+            temGameSaveMap.putSerializable(simpleNameForSave , tempSaveFile);
             gameViewModel.setGameSaveMap(temGameSaveMap);
 
             for (var data : gameViewModel.getGameDataList()) {
-                if (data.title.contentEquals(item.getTitle())) {
-                    var gameId = data.id;
-                    var gameTitle = data.title;
-                    var gameDir = data.gameDir;
-                    var gameFiles = data.gameFiles;
-                    libQpProxy.runGame(gameId , gameTitle , gameDir , gameFiles.get(0));
-
-                    if (gameViewModel.getGameSaveMap().containsKey(data.title)) {
-                        var save = (File) gameViewModel.getGameSaveMap().getSerializable(data.title);
-                        gameViewModel.doWithCounterDisabled(() ->
-                                libQpProxy.loadGameState(Uri.fromFile(save)));
+                for (var file : data.gameFiles) {
+                    if (file.getName().contentEquals(item.getTitle())) {
+                        var gameId = data.id;
+                        var gameTitle = data.title;
+                        var gameDir = data.gameDir;
+                        libQpProxy.runGame(gameId , gameTitle , gameDir , file);
+                        if (gameViewModel.getGameSaveMap().containsKey(file.getName())) {
+                            var save = (File) gameViewModel.getGameSaveMap().getSerializable(file.getName());
+                            gameViewModel.doWithCounterDisabled(() ->
+                                    libQpProxy.loadGameState(Uri.fromFile(save)));
+                        }
                     }
                 }
             }
