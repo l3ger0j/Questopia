@@ -1,11 +1,14 @@
 package org.qp.android.model.install;
 
 import static org.qp.android.utils.ArchiveUtil.extractArchiveEntries;
+import static org.qp.android.utils.ArchiveUtil.extractArchiveEntriesWithPassword;
+import static org.qp.android.utils.ArchiveUtil.testArchiveEntries;
 import static org.qp.android.utils.DirUtil.doesDirectoryContainGameFiles;
 import static org.qp.android.utils.DirUtil.normalizeGameDirectory;
 
 import android.content.Context;
 import android.net.Uri;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.documentfile.provider.DocumentFile;
@@ -22,6 +25,7 @@ import java.util.concurrent.FutureTask;
 public class InstallerFileWork extends Worker {
     private final File destDir = new File(Objects.requireNonNull(getInputData().getString("destDir")));
     private final DocumentFile srcFile = DocumentFile.fromSingleUri(getApplicationContext(), Uri.parse(getInputData().getString("srcFile")));
+    private final String passwordForArchive = getInputData().getString("passwordForArchive");
 
     public InstallerFileWork(@NonNull Context context , @NonNull WorkerParameters workerParams) {
         super(context , workerParams);
@@ -38,21 +42,62 @@ public class InstallerFileWork extends Worker {
                 .putString("errorTwo", "NFE")
                 .build();
 
+        var outputErrorThree = new Data.Builder()
+                .putString("errorThree", "PasswordNotFound")
+                .build();
+
         var service = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-        var task = new FutureTask<>(() ->
-                extractArchiveEntries(getApplicationContext() , Objects.requireNonNull(srcFile).getUri() , destDir));
-        service.submit(task);
+        var test = new FutureTask<>(() ->
+                testArchiveEntries(
+                        getApplicationContext() ,
+                        Objects.requireNonNull(srcFile).getUri() ,
+                        destDir));
+        service.submit(test);
+
         try {
-            if (task.get()) {
-                normalizeGameDirectory(destDir);
-                if (!doesDirectoryContainGameFiles(destDir)) {
-                    return Result.failure(outputErrorTwo);
+            if (test.get() != null) {
+                if (test.get().toString().contains("Password is 'null'")) {
+                    if (passwordForArchive != null
+                            && !passwordForArchive.isEmpty()) {
+                        var taskWithPassword = new FutureTask<>(() ->
+                                extractArchiveEntriesWithPassword(
+                                        getApplicationContext() ,
+                                        Objects.requireNonNull(srcFile).getUri() ,
+                                        destDir,
+                                        passwordForArchive));
+                        service.submit(taskWithPassword);
+                        if (taskWithPassword.get()) {
+                            normalizeGameDirectory(destDir);
+                            if (!doesDirectoryContainGameFiles(destDir)) {
+                                return Result.failure(outputErrorTwo);
+                            }
+                        } else {
+                            return Result.failure(outputErrorOne);
+                        }
+                    } else {
+                        return Result.failure(outputErrorThree);
+                    }
+                } else {
+                    return Result.failure();
                 }
             } else {
-                return Result.failure(outputErrorOne);
+                var taskWithoutPassword = new FutureTask<>(() ->
+                        extractArchiveEntries(
+                                getApplicationContext() ,
+                                Objects.requireNonNull(srcFile).getUri() ,
+                                destDir));
+                service.submit(taskWithoutPassword);
+                if (taskWithoutPassword.get()) {
+                    normalizeGameDirectory(destDir);
+                    if (!doesDirectoryContainGameFiles(destDir)) {
+                        return Result.failure(outputErrorTwo);
+                    }
+                } else {
+                    return Result.failure(outputErrorOne);
+                }
             }
         } catch (ExecutionException | InterruptedException e) {
-            e.printStackTrace();
+            Log.e(this.getClass().getSimpleName() , "Error: ", e);
         }
         return Result.success();
     }

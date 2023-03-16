@@ -44,7 +44,6 @@ import org.qp.android.R;
 import org.qp.android.databinding.DialogEditBinding;
 import org.qp.android.databinding.DialogInstallBinding;
 import org.qp.android.dto.stock.GameData;
-import org.qp.android.model.install.InstallException;
 import org.qp.android.model.install.Installer;
 import org.qp.android.model.notify.NotifyBuilder;
 import org.qp.android.model.plugin.PluginClient;
@@ -67,7 +66,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class StockViewModel extends AndroidViewModel {
-    private final String TAG = this.getClass().getSimpleName();
+    // private final String TAG = this.getClass().getSimpleName();
 
     public ObservableField<StockActivity> activityObservableField = new
             ObservableField<>();
@@ -278,6 +277,8 @@ public class StockViewModel extends AndroidViewModel {
         isShowDialog.set(true);
     }
 
+    private String passwordForArchive;
+
     public void createInstallIntent() {
         var gameData = new GameData();
         try {
@@ -301,6 +302,11 @@ public class StockViewModel extends AndroidViewModel {
                     null
                     : Objects.requireNonNull(
                     installBinding.ET2.getEditText()).getText().toString());
+            passwordForArchive = (Objects.requireNonNull(
+                    installBinding.ET3.getEditText()).getText().toString().isEmpty() ?
+                    null
+                    : Objects.requireNonNull(
+                    installBinding.ET3.getEditText()).getText().toString());
             if (tempInstallFile != null) {
                 gameData.fileSize = formatFileSize(tempInstallFile.length() , controller.binaryPrefixes);
             } else if (tempInstallDir != null) {
@@ -499,20 +505,7 @@ public class StockViewModel extends AndroidViewModel {
                     .showErrorDialog("Games directory is not writable");
             return;
         }
-        try {
-            doInstallGame(gameFile , gameData);
-        } catch (InstallException ex) {
-            if (Objects.requireNonNull(ex.getMessage()).equals("NIG")) {
-                String message = getApplication()
-                        .getString(R.string.installError)
-                        .replace("-GAMENAME-" , gameData.title);
-                Objects.requireNonNull(activityObservableField.get()).showErrorDialog(message);
-            } else if (ex.getMessage().equals("NFE")) {
-                String message = getApplication()
-                        .getString(R.string.noGameFilesError);
-                Objects.requireNonNull(activityObservableField.get()).showErrorDialog(message);
-            }
-        }
+        doInstallGame(gameFile , gameData);
     }
 
     private void doInstallGame(DocumentFile gameFile , GameData gameData) {
@@ -525,13 +518,36 @@ public class StockViewModel extends AndroidViewModel {
         if (!gameFile.isDirectory()) {
             notificationStateGame(gameData.title);
         }
+
         var installer = new Installer(activityObservableField.get());
+        if (passwordForArchive != null) {
+            installer.setPasswordForArchive(passwordForArchive);
+        }
+        installer.getErrorCode().observeForever(error -> {
+            if (error != null) {
+                if (error.equals("PasswordNotFound")) {
+                    Objects.requireNonNull(activityObservableField.get()).showErrorDialog("Empty password");
+                }
+                if (error.equals("NIG")) {
+                    String message = getApplication()
+                            .getString(R.string.installError)
+                            .replace("-GAMENAME-" , gameData.title);
+                    Objects.requireNonNull(activityObservableField.get()).showErrorDialog(message);
+                }
+                if (error.equals("NFE")) {
+                    String message = getApplication()
+                            .getString(R.string.noGameFilesError);
+                    Objects.requireNonNull(activityObservableField.get()).showErrorDialog(message);
+                }
+            }
+        });
         installer.gameInstall(gameFile , gameDir).observeForever(aBoolean -> {
             if (aBoolean) {
                 writeGameInfo(gameData , gameDir);
                 refreshGames();
             }
         });
+
         isShowDialog.set(false);
     }
 

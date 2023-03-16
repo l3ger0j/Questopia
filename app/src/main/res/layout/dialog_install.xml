@@ -75,6 +75,25 @@
                     android:hint="@string/gameVersion" />
             </com.google.android.material.textfield.TextInputLayout>
 
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/ET3"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                app:endIconMode="password_toggle"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/ET2">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/archivePassword" />
+            </com.google.android.material.textfield.TextInputLayout>
+
             <Button
                 android:id="@+id/buttonSelectArchive"
                 android:layout_width="match_parent"
@@ -88,7 +107,7 @@
                 android:visibility="@{stockVM.isSelectFolder ? View.GONE : View.VISIBLE}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/ET2" />
+                app:layout_constraintTop_toBottomOf="@+id/ET3" />
 
             <Button
                 android:id="@+id/buttonSelectFolder"

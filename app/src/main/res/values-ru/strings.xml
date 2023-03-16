@@ -26,6 +26,7 @@
         <string name="gameName">Название игры</string>
         <string name="gameAuthor">Автор</string>
         <string name="gameVersion">Версия</string>
+        <string name="archivePassword">Пароль для архива</string>
         <string name="selectArchive">Выберите архив</string>
         <string name="selectFolder">Выберите папку с файлом</string>
         <string name="selectIcon">Выберите иконку</string>
