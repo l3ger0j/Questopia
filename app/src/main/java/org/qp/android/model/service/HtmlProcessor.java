@@ -90,9 +90,10 @@ public class HtmlProcessor {
             }
         }
         for (var img : documentBody.select("img")) {
-            if (!dynBlackList.isEmpty()
-                    && !dynBlackList.contains(img.attr("src"))) {
-                img.attr("onclick", "img.onClickImage(this.src);");
+            if (controller.isUseFullscreenImages) {
+                if (!dynBlackList.contains(img.attr("src"))) {
+                    img.attr("onclick" , "img.onClickImage(this.src);");
+                }
             }
             if (controller.isUseAutoWidth && controller.isUseAutoHeight) {
                 img.attr("style", "display: inline; height: auto; max-width: 100%;");
