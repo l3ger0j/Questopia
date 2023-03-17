@@ -19,15 +19,23 @@ public class Bind {
         var webViewSettings = view.getSettings();
         webViewSettings.setAllowFileAccess(true);
         webViewSettings.setDomStorageEnabled(true);
+        webViewSettings.setJavaScriptEnabled(true);
         view.setWebViewClient(client);
     }
 
     @BindingAdapter({"imageUrl"})
     public static void loadImage(ImageView view, String imageUrl) {
         if (imageUrl != null && !imageUrl.isEmpty()) {
-            Picasso.get()
-                    .load(new File(imageUrl))
-                    .into(view);
+            if (view.getId() == R.id.imageBox) {
+                Picasso.get()
+                        .load(new File(imageUrl))
+                        .into(view);
+            } else {
+                Picasso.get()
+                        .load(imageUrl)
+                        .fit()
+                        .into(view);
+            }
         } else {
             var drawable = ResourcesCompat.getDrawable(
                     view.getContext().getResources() ,

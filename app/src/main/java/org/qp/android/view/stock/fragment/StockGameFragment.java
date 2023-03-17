@@ -27,7 +27,6 @@ public class StockGameFragment extends StockPatternFragment {
         fragmentStockGameBinding = FragmentStockGameBinding.inflate(getLayoutInflater());
         stockViewModel = new ViewModelProvider(requireActivity())
                 .get(StockViewModel.class);
-        stockViewModel.fragmentObservableField.set(this);
         fragmentStockGameBinding.setViewModel(stockViewModel);
         return fragmentStockGameBinding.getRoot();
     }

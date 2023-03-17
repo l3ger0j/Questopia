@@ -20,7 +20,7 @@ class PickerListAdapter(
     private val view: View,
     private val prettyFilePicker: PrettyFilePicker,
     private val returnAsDocumentFile: Boolean,
-    filters: ArrayList<String>
+    filters: Array<String>
 ) :
     ListAdapter<FileModel, PickerListAdapter.MainViewHolder>(ItemComparator()) {
     private val reDrawer = AdapterReDraw(this, filters)

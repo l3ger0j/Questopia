@@ -1,4 +1,4 @@
-package org.qp.android.model.libQSP;
+package org.qp.android.model.libQP;
 
 public class RefreshInterfaceRequest {
     public boolean interfaceConfigChanged;

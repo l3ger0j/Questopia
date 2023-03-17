@@ -1,4 +1,4 @@
-package org.qp.android.model.libQSP;
+package org.qp.android.model.libQP;
 
 import android.net.Uri;
 
@@ -27,7 +27,6 @@ public interface LibQpProxy {
     void loadGameState(Uri uri);
     void saveGameState(Uri uri);
 
-    void onActionSelected(int index);
     void onActionClicked(int index);
     void onObjectSelected(int index);
     void onInputAreaClicked();

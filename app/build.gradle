@@ -61,17 +61,19 @@ dependencies {
     implementation 'androidx.documentfile:documentfile:1.0.1'
     implementation 'androidx.preference:preference:1.2.0'
     implementation 'androidx.fragment:fragment:1.5.5'
+    implementation "androidx.navigation:navigation-fragment:2.5.3"
+    implementation "androidx.navigation:navigation-ui:2.5.3"
 
     implementation 'androidx.work:work-runtime:2.8.0'
+    implementation "io.reactivex.rxjava3:rxjava:3.1.6"
     implementation 'com.github.omicronapps:7-Zip-JBinding-4Android:Release-16.02-2.02'
     implementation 'com.jaredrummler:colorpicker:1.1.0'
     implementation 'com.github.zhpanvip:bannerviewpager:3.5.8'
-    implementation 'org.jsoup:jsoup:1.15.3'
+    implementation 'org.jsoup:jsoup:1.15.4'
     implementation "com.anggrayudi:storage:1.5.4"
     implementation 'org.simpleframework:simple-xml:2.7.1'
     implementation 'com.google.android.material:material:1.8.0'
     implementation 'com.squareup.picasso:picasso:2.71828'
-    implementation 'androidx.core:core-ktx:+'
     implementation project(path: ':PrettyFilePicker-android-library')
 
     testImplementation 'junit:junit:4.13.2'

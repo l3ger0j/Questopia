@@ -1,4 +1,4 @@
-package org.qp.android.dto.libQSP;
+package org.qp.android.dto.libQP;
 
 public class ErrorData {
     public String locName;

@@ -12,10 +12,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.qp.android.R;
@@ -25,7 +27,6 @@ import org.qp.android.model.plugin.PluginClient;
 import org.qp.android.model.plugin.PluginType;
 import org.qp.android.plugin.IQuestPlugin;
 import org.qp.android.view.adapters.RecyclerItemClickListener;
-import org.qp.android.view.settings.SettingsActivity;
 import org.qp.android.viewModel.SettingsViewModel;
 
 import java.util.ArrayList;
@@ -34,10 +35,8 @@ import java.util.HashMap;
 public class PluginFragment extends Fragment {
     private final String TAG = getClass().getSimpleName();
 
-    private SettingsViewModel settingsViewModel;
     private RecyclerView recyclerView;
     private ArrayList<HashMap<String, String>> services;
-    private ArrayList<String> categories;
 
     private PackageBroadcastReceiver packageBroadcastReceiver;
     private IntentFilter packageFilter;
@@ -50,12 +49,22 @@ public class PluginFragment extends Fragment {
                              @Nullable ViewGroup container ,
                              @Nullable Bundle savedInstanceState) {
         requireActivity().setTitle(R.string.pluginMenuTitle);
+
+        var callback = new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                Navigation.findNavController(requireView()).navigate(R.id.settingsFragment);
+            }
+        };
+        requireActivity().getOnBackPressedDispatcher()
+                .addCallback(getViewLifecycleOwner(), callback);
+
         packageBroadcastReceiver = new PackageBroadcastReceiver();
         packageFilter = new IntentFilter();
         var fragmentPluginBinding =
                 FragmentPluginBinding.inflate(getLayoutInflater());
         recyclerView = fragmentPluginBinding.pluginRecyclerView;
-        settingsViewModel = new ViewModelProvider(requireActivity())
+        var settingsViewModel = new ViewModelProvider(requireActivity())
                 .get(SettingsViewModel.class);
         fragmentPluginBinding.setPluginViewModel(settingsViewModel);
         settingsViewModel.fragmentObservableField.set(this);
@@ -120,8 +129,6 @@ public class PluginFragment extends Fragment {
     private void fillPluginList(@NonNull PluginClient pluginClient) {
         pluginClient.loadListPlugin(requireContext());
         namePlugin = pluginClient.getNamePlugin();
-        pluginClient.getCategoriesLiveData().observe(getViewLifecycleOwner() ,
-                strings -> categories = strings);
         pluginClient.getServicesLiveData().observe(getViewLifecycleOwner() ,
                 hashMaps -> services = hashMaps);
     }
@@ -136,13 +143,6 @@ public class PluginFragment extends Fragment {
     public void onPause() {
         super.onPause();
         requireActivity().unregisterReceiver(packageBroadcastReceiver);
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        requireActivity().setTitle(R.string.settingsTitle);
-        ((SettingsActivity) requireActivity()).onClickShowPlugin(false);
     }
 
     class PackageBroadcastReceiver extends BroadcastReceiver {

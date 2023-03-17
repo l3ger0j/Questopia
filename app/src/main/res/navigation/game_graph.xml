@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/game_graph"
+    app:startDestination="@id/gameMainFragment">
+
+    <fragment
+        android:id="@+id/gameMainFragment"
+        android:name="org.qp.android.view.game.fragments.GameMainFragment"
+        android:label="GameMainFragment" />
+    <fragment
+        android:id="@+id/gameObjectFragment"
+        android:name="org.qp.android.view.game.fragments.GameObjectFragment"
+        android:label="GameObjectFragment" />
+    <fragment
+        android:id="@+id/gameVarsFragment"
+        android:name="org.qp.android.view.game.fragments.GameVarsFragment"
+        android:label="GameVarsFragment" />
+</navigation>

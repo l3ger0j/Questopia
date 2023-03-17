@@ -15,13 +15,13 @@ and you no longer have to catch the return file from the intent!
 
 ## How to use
 
-> MIME: ArrayList<String> 
+> MIME: Array<String> 
 ```sh
 PrettyFilePicker(
     activity: Activty, 
     "Title of filepick", 
     returnAsFile: Boolean, 
-    mime: ArrayList<String> ).runFilePicker { data -> //return data as Any
+    mime: Array<String> ).runFilePicker { data -> //return data as Any
                     val file = data as DocumentFile
                     println(file.name)
                 }

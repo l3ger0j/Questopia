@@ -6,7 +6,7 @@
         <import type="android.view.View" />
         <variable
             name="qpListItem"
-            type="org.qp.android.model.libQSP.QpListItem" />
+            type="org.qp.android.model.libQP.QpListItem" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

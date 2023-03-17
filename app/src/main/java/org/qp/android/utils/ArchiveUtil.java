@@ -15,6 +15,7 @@ import androidx.lifecycle.MutableLiveData;
 import net.sf.sevenzipjbinding.ExtractAskMode;
 import net.sf.sevenzipjbinding.ExtractOperationResult;
 import net.sf.sevenzipjbinding.IArchiveExtractCallback;
+import net.sf.sevenzipjbinding.ICryptoGetTextPassword;
 import net.sf.sevenzipjbinding.IInArchive;
 import net.sf.sevenzipjbinding.IInStream;
 import net.sf.sevenzipjbinding.ISeekableStream;
@@ -38,6 +39,7 @@ public final class ArchiveUtil {
 
     public static long totalSize;
     public static MutableLiveData<Long> progressInstall = new MutableLiveData<>();
+    public static MutableLiveData<String> passwordForArchive = new MutableLiveData<>();
 
     @NonNull
     public static int[] getPrimitiveLongArrayFromInt(@NonNull Set<Integer> input) {
@@ -68,7 +70,56 @@ public final class ArchiveUtil {
                     new ArchiveExtractCallback(targetFolder, inArchive, context));
             return true;
         } catch (IOException e) {
-            Log.w(TAG, "", e);
+            Log.e(TAG, "Error: ", e);
+            return false;
+        }
+    }
+
+    @Nullable
+    public static Throwable testArchiveEntries(Context context,
+                                            Uri uri,
+                                            File targetFolder) {
+        assertNonUiThread();
+        var fileNames = new HashMap<Integer, String>();
+        try (var stream = new DocumentFileRandomInStream(context, uri);
+             var inArchive = SevenZip.openInArchive(null, stream)) {
+            var itemCount = inArchive.getNumberOfItems();
+            for (var index = 0; index < itemCount; index++) {
+                var fileName = inArchive.getStringProperty(index, PropID.PATH);
+                var lastSeparator = fileName.lastIndexOf(File.separator);
+                if (lastSeparator > -1) fileName = fileName.substring(lastSeparator + 1);
+                fileNames.put(index, fileName);
+            }
+            var indexes = getPrimitiveLongArrayFromInt(fileNames.keySet());
+            inArchive.extract(indexes, true,
+                    new ArchiveExtractCallback(targetFolder, inArchive, context));
+            return null;
+        } catch (IOException er) {
+            return er;
+        }
+    }
+
+    public static boolean extractArchiveEntriesWithPassword(Context context,
+                                                            Uri uri,
+                                                            File targetFolder,
+                                                            String password) {
+        assertNonUiThread();
+        var fileNames = new HashMap<Integer, String>();
+        try (var stream = new DocumentFileRandomInStream(context, uri);
+             var inArchive = SevenZip.openInArchive(null, stream, password)) {
+            var itemCount = inArchive.getNumberOfItems();
+            for (var index = 0; index < itemCount; index++) {
+                var fileName = inArchive.getStringProperty(index, PropID.PATH);
+                var lastSeparator = fileName.lastIndexOf(File.separator);
+                if (lastSeparator > -1) fileName = fileName.substring(lastSeparator + 1);
+                fileNames.put(index, fileName);
+            }
+            var indexes = getPrimitiveLongArrayFromInt(fileNames.keySet());
+            inArchive.extract(indexes, false,
+                    new ArchiveExtractCallback(targetFolder, inArchive, context, password));
+            return true;
+        } catch (IOException er) {
+            Log.e(TAG , "Error: " , er);
             return false;
         }
     }
@@ -165,12 +216,13 @@ public final class ArchiveUtil {
         }
     }
 
-    private static class ArchiveExtractCallback implements IArchiveExtractCallback {
+    private static class ArchiveExtractCallback implements IArchiveExtractCallback, ICryptoGetTextPassword {
         private final File targetFolder;
         private final IInArchive inArchive;
         private final Context context;
         private ExtractAskMode extractAskMode;
         private SequentialOutStream stream;
+        private String textPassword;
 
         public ArchiveExtractCallback(
                 File targetFolder,
@@ -179,6 +231,17 @@ public final class ArchiveUtil {
             this.targetFolder = targetFolder;
             this.inArchive = inArchive;
             this.context = context;
+        }
+
+        public ArchiveExtractCallback(
+                File targetFolder,
+                IInArchive inArchive,
+                Context context,
+                String textPassword) {
+            this.targetFolder = targetFolder;
+            this.inArchive = inArchive;
+            this.context = context;
+            this.textPassword = textPassword;
         }
 
         @Nullable
@@ -245,6 +308,11 @@ public final class ArchiveUtil {
         public void setCompleted(long complete) {
             progressInstall.postValue(complete);
             Log.v(TAG, String.format("Extract archive, work completed: %s", complete));
+        }
+
+        @Override
+        public String cryptoGetTextPassword() {
+            return textPassword;
         }
     }
 

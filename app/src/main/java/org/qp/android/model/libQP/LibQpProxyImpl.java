@@ -1,4 +1,4 @@
-package org.qp.android.model.libQSP;
+package org.qp.android.model.libQP;
 
 import static org.qp.android.utils.FileUtil.findFileOrDirectory;
 import static org.qp.android.utils.FileUtil.findFileRecursively;
@@ -18,10 +18,10 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
-import org.qp.android.dto.libQSP.ActionData;
-import org.qp.android.dto.libQSP.ErrorData;
-import org.qp.android.dto.libQSP.GetVarValuesResponse;
-import org.qp.android.dto.libQSP.ObjectData;
+import org.qp.android.dto.libQP.ActionData;
+import org.qp.android.dto.libQP.ErrorData;
+import org.qp.android.dto.libQP.GetVarValuesResponse;
+import org.qp.android.dto.libQP.ObjectData;
 import org.qp.android.model.service.AudioPlayer;
 import org.qp.android.model.service.GameContentResolver;
 import org.qp.android.model.service.HtmlProcessor;
@@ -68,13 +68,12 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
 
     private void runOnQspThread(final Runnable runnable) {
         throwIfNotMainThread();
-
         if (libQspThread == null) {
-            Log.w(TAG,"libqsp thread has not been started");
+            Log.w(TAG ,"Lib thread has not been started!");
             return;
         }
         if (!libQspThreadInit) {
-            Log.w(TAG,"libqsp thread has been started, but not initialized");
+            Log.w(TAG ,"Lib thread has been started, but not initialized!");
             return;
         }
         var handler = libQspHandler;
@@ -98,7 +97,7 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
                 gameData = out.toByteArray();
             }
         } catch (IOException ex) {
-            Log.e(TAG,"Failed to load the game world", ex);
+            Log.e(TAG ,"Failed to load the game world", ex);
             return false;
         }
         var fileName = gameState.gameFile.getAbsolutePath();
@@ -106,7 +105,6 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
             showLastQspError();
             return false;
         }
-
         return true;
     }
 
@@ -114,7 +112,6 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
         var errorData = (ErrorData) nativeMethods.QSPGetLastErrorData();
         var locName = getStringOrEmpty(errorData.locName);
         var desc = getStringOrEmpty(nativeMethods.QSPGetErrorDesc(errorData.errorNum));
-
         final var message = String.format(
                 Locale.getDefault(),
                 "Location: %s\nAction: %d\nLine: %d\nError number: %d\nDescription: %s",
@@ -123,19 +120,16 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
                 errorData.line,
                 errorData.errorNum,
                 desc);
-
         Log.e(TAG,message);
-
-        var inter = gameInterface;
-        if (inter != null) {
+        if (gameInterface != null) {
             gameInterface.showError(message);
         }
     }
 
     /**
-     * Загружает конфигурацию интерфейса - использование HTML, шрифт и цвета - из библиотеки.
+     * Loads the interface configuration - using HTML, font and colors - from the library.
      *
-     * @return <code>true</code> если конфигурация изменилась, иначе <code>false</code>
+     * @return <code>true</code> if the configuration has changed, otherwise <code>false</code>
      */
     private boolean loadInterfaceConfiguration() {
         var config = gameState.interfaceConfig;
@@ -217,21 +211,23 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
     // region LibQpProxy
 
     public void start() {
-        libQspThread = new Thread("libqsp") {
-            @Override
-            public void run() {
-                try {
-                    nativeMethods.QSPInit();
-                    Looper.prepare();
-                    libQspHandler = new Handler();
-                    libQspThreadInit = true;
-                    Looper.loop();
-                    nativeMethods.QSPDeInit();
-                } catch (Throwable t) {
-                    Log.e(TAG,"libqsp thread has stopped exceptionally", t);
+        libQspThread = new Thread(() -> {
+            synchronized (LibQpProxy.class) {
+                while (!Thread.currentThread().isInterrupted()) {
+                    try {
+                        nativeMethods.QSPInit();
+                        Looper.prepare();
+                        libQspHandler = new Handler();
+                        libQspThreadInit = true;
+                        Looper.loop();
+                        nativeMethods.QSPDeInit();
+                    } catch (Throwable t) {
+                        Thread.currentThread().interrupt();
+                        Log.e(TAG , "libQSP thread has stopped exceptionally" , t);
+                    }
                 }
             }
-        };
+        } , "libQSP");
         libQspThread.start();
     }
 
@@ -247,7 +243,7 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
         } else {
             Log.w(TAG,"libqsp thread has been started, but not initialized");
         }
-        libQspThread = null;
+        libQspThread.interrupt();
     }
 
     public void enableDebugMode (boolean isDebug) {
@@ -294,10 +290,9 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
 
     @Override
     public void restartGame() {
-        runOnQspThread(() -> {
-            var state = gameState;
-            doRunGame(state.gameId, state.gameTitle, state.gameDir, state.gameFile);
-        });
+        runOnQspThread(() ->
+                doRunGame(gameState.gameId, gameState.gameTitle,
+                        gameState.gameDir, gameState.gameFile));
     }
 
     @Override
@@ -334,15 +329,6 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
         } catch (IOException ex) {
             Log.e(TAG,"Failed to save the game state", ex);
         }
-    }
-
-    @Override
-    public void onActionSelected(final int index) {
-        runOnQspThread(() -> {
-            if (!nativeMethods.QSPSetSelActionIndex(index, true)) {
-                showLastQspError();
-            }
-        });
     }
 
     @Override

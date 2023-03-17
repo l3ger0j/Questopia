@@ -6,79 +6,65 @@ import android.webkit.WebView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation;
+import androidx.preference.PreferenceFragmentCompat;
 
 import org.qp.android.BuildConfig;
 import org.qp.android.QuestPlayerApplication;
 import org.qp.android.R;
 import org.qp.android.utils.ViewUtil;
-import org.qp.android.view.plugin.PluginFragment;
 import org.qp.android.view.settings.dialogs.SettingsDialogFrag;
-import org.qp.android.view.settings.dialogs.SettingsPatternPrefFrag;
+import org.qp.android.viewModel.SettingsViewModel;
 
-import java.util.Objects;
-
-public class SettingsFragment extends SettingsPatternPrefFrag {
+public class SettingsFragment extends PreferenceFragmentCompat
+        implements SharedPreferences.OnSharedPreferenceChangeListener  {
     private int countClick = 3;
-
-    @NonNull
-    public static SettingsFragment newInstance(String desc) {
-        var args = new Bundle();
-        args.putString("desc", desc);
-        var fragment = new SettingsFragment();
-        fragment.setArguments(args);
-        return fragment;
-    }
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         requireActivity().setTitle(R.string.settingsTitle);
         addPreferencesFromResource(R.xml.settings);
-        var desc = requireArguments().getString("desc");
 
-        var controller = SettingsController
-                .newInstance().loadSettings(getContext());
+        var viewModel =
+                new ViewModelProvider(requireActivity()).get(SettingsViewModel.class);
 
         var customWidthImage = findPreference("customWidth");
         if (customWidthImage != null) {
-            customWidthImage.setEnabled(!controller.isUseAutoWidth);
+            customWidthImage.setEnabled(!viewModel.getSettingsController().isUseAutoWidth);
         }
 
         var customHeightImage = findPreference("customHeight");
         if (customHeightImage != null) {
-            customHeightImage.setEnabled(!controller.isUseAutoHeight);
+            customHeightImage.setEnabled(!viewModel.getSettingsController().isUseAutoHeight);
         }
 
         var textColor = findPreference("textColor");
         if (textColor != null) {
             textColor.setSummary(getString(R.string.textBackLinkColorSum)
                     .replace("-VALUE-", "#000000"));
-            textColor.setEnabled(!controller.isUseGameTextColor);
+            textColor.setEnabled(!viewModel.getSettingsController().isUseGameTextColor);
         }
 
         var backColor = findPreference("backColor");
         if (backColor != null) {
             backColor.setSummary(getString(R.string.textBackLinkColorSum)
                     .replace("-VALUE-", "#e0e0e0"));
-            backColor.setEnabled(!controller.isUseGameBackgroundColor);
+            backColor.setEnabled(!viewModel.getSettingsController().isUseGameBackgroundColor);
         }
 
         var linkColor = findPreference("linkColor");
         if (linkColor != null) {
             linkColor.setSummary(getString(R.string.textBackLinkColorSum)
                     .replace("-VALUE-", "#0000ff"));
-            linkColor.setEnabled(!controller.isUseGameLinkColor);
+            linkColor.setEnabled(!viewModel.getSettingsController().isUseGameLinkColor);
         }
 
         var click = findPreference("showExtensionMenu");
         if (click != null) {
             click.setOnPreferenceClickListener(preference -> {
-                listener.onClickShowPlugin(true);
-                var pluginFragment = new PluginFragment();
-                requireActivity().getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.settings_container, pluginFragment , "pluginFragment")
-                        .addToBackStack(null)
-                        .commit();
+                Navigation.findNavController(requireView())
+                        .navigate(R.id.pluginFragment);
                 return true;
             });
         }
@@ -96,8 +82,12 @@ public class SettingsFragment extends SettingsPatternPrefFrag {
                         new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
                                 LinearLayout.LayoutParams.WRAP_CONTENT);
                 var webView = new WebView(getContext());
-                webView.loadDataWithBaseURL("", desc,
-                        "text/html", "utf-8", "");
+                webView.loadDataWithBaseURL(
+                        "",
+                        viewModel.formationAboutDesc(requireContext()),
+                        "text/html",
+                        "utf-8",
+                        "");
                 webView.setLayoutParams(lpView);
                 linearLayout.addView(webView);
                 var dialogFrag = new SettingsDialogFrag();
@@ -118,23 +108,30 @@ public class SettingsFragment extends SettingsPatternPrefFrag {
                     var application = (QuestPlayerApplication) requireActivity().getApplication();
                     var libQspProxy = application.getLibQspProxy();
                     try {
-                        Toast.makeText(getContext(), libQspProxy.getCompiledDateTime()
+                        Toast.makeText(requireContext(), libQspProxy.getCompiledDateTime()
                                 +"\n"+libQspProxy.getVersionQSP(), Toast.LENGTH_SHORT).show();
                     } catch (NullPointerException ex) {
-                        Toast.makeText(getContext(),
-                                "▒▒▒▒▒▒▒▒▄▄▄▄▄▄▄▄▒▒▒▒▒▒▒▒\n" +
-                                "▒▒▒▒▒▄█▀▀░░░░░░▀▀█▄▒▒▒▒▒\n" +
-                                "▒▒▒▄█▀▄██▄░░░░░░░░▀█▄▒▒▒\n" +
-                                "▒▒█▀░▀░░▄▀░░░░▄▀▀▀▀░▀█▒▒\n" +
-                                "▒█▀░░░░███░░░░▄█▄░░░░▀█▒\n" +
-                                "▒█░░░░░░▀░░░░░▀█▀░░░░░█▒\n" +
-                                "▒█░░░░░░░░░░░░░░░░░░░░█▒\n" +
-                                "▒█░░██▄░░▀▀▀▀▄▄░░░░░░░█▒\n" +
-                                "▒▀█░█░█░░░▄▄▄▄▄░░░░░░█▀▒\n" +
-                                "▒▒▀█▀░▀▀▀▀░▄▄▄▀░░░░▄█▀▒▒\n" +
-                                "▒▒▒█░░░░░░▀█░░░░░▄█▀▒▒▒▒\n" +
-                                "▒▒▒█▄░░░░░▀█▄▄▄█▀▀▒▒▒▒▒▒\n" +
-                                "▒▒▒▒▀▀▀▀▀▀▀▒▒▒▒▒▒▒▒▒▒▒▒▒\n", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(requireContext(), ".\n" +
+                                "⠄⠄⠄⢀⡀⠰⠖⠶⣶⣂⣄⣀⣈⠙⢶⣶⣦⣀⡀⠄⠄⠄⠄⠄\n" +
+                                "⠄⠄⣴⣿⣿⡇⢠⣾⣿⣿⣿⣿⣿⣯⣲⣾⣍⠉⢛⠆⠄⠄⠄⠄\n" +
+                                "⢀⣾⣿⣿⣿⠆⠄⣠⣿⣿⣿⣿⣿⣿⡟⠹⣿⣿⣿⣿⣷⣦⡀⠄\n" +
+                                "⣿⣿⡿⠟⣵⣿⣰⣿⣿⣿⣿⣿⣿⣿⣿⡆⢸⣿⣿⣿⣿⣿⣿⡆\n" +
+                                "⣿⣍⠄⣸⡿⣿⣿⣿⣿⣿⡿⠋⠉⠉⠉⡇⣸⣿⣿⣿⣿⣿⣿⣿\n" +
+                                "⣿⣿⣶⣽⣷⣿⣿⡿⠟⠁⠄⠄⠄⠄⠄⠄⣾⣿⣿⣿⣿⣿⣿⣿\n" +
+                                "⣿⣿⣿⣿⣿⣿⡿⠄⠄⠄⠄⠄⠄⠄⠄⠄⠈⢿⣿⣿⣿⣿⣿⣿\n" +
+                                "⣿⣿⣿⣿⣿⣿⠁⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠙⣿⣿⣿⣿⣿\n" +
+                                "⣿⣿⣿⣿⡟⠛⢤⢄⣀⣀⡀⠄⠄⠄⣠⣴⣶⣶⣶⣾⣿⣿⣿⣿\n" +
+                                "⣿⣿⣿⣿⣧⣐⣡⣤⣽⣿⣿⠶⠶⢾⣿⣿⣯⣭⣿⣿⣿⣿⣿⣿\n" +
+                                "⣿⣿⣿⡏⠉⢇⠄⠄⠉⠉⢠⠄⠄⠘⡿⠄⠉⠙⠛⡟⢿⣿⣿⣿\n" +
+                                "⣿⣿⣿⣷⠄⠈⠳⠤⠤⠔⠁⠄⠄⠐⣞⠦⠤⠤⠞⣡⣿⣿⣿⣿\n" +
+                                "⠙⣿⣿⣿⠄⠄⠄⠄⠄⠄⠄⠄⠄⢸⣿⡇⠄⠄⢸⣿⣿⣿⣿⣿\n" +
+                                "⠄⢿⣿⣿⡇⠄⠄⠄⠄⠄⠐⠦⣤⣾⣿⣇⠄⠄⢹⣿⣿⣿⣿⡿\n" +
+                                "⠄⠄⠙⣿⣇⠄⠄⠄⠄⠄⠄⠄⠙⣻⣿⣿⡄⠄⣿⣿⣿⣿⠿⠃\n" +
+                                "⠄⠄⠄⠈⢿⣆⠄⠄⠄⠉⠉⠉⣉⣩⠿⠛⢁⣼⣿⡿⠋⠄⠄⠄\n" +
+                                "⠄⠄⠄⢀⣠⡝⠄⠄⠄⠄⠄⠄⠄⠄⠄⢀⣿⣿⣿⣿⣦⣤⣀⡀\n" +
+                                "⠄⠄⠄⠙⠄⠄⠄⠘⠢⡄⡀⠄⠄⢀⣤⣿⣿⣿⣿⣿⣿⣿⣿⣷\n" +
+                                "⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠈⠻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n" +
+                                "⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠈⠹⠿⠿⠿⠿⠿⠿⠿⠿⠟⠋", Toast.LENGTH_LONG).show();
                     }
                 }
                 return true;
@@ -145,15 +142,19 @@ public class SettingsFragment extends SettingsPatternPrefFrag {
     @Override
     public void onResume() {
         super.onResume();
-        Objects.requireNonNull(getPreferenceScreen().getSharedPreferences())
-                .registerOnSharedPreferenceChangeListener(this);
+        if (getPreferenceScreen().getSharedPreferences() != null) {
+            getPreferenceScreen().getSharedPreferences()
+                    .registerOnSharedPreferenceChangeListener(this);
+        }
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        Objects.requireNonNull(getPreferenceScreen().getSharedPreferences())
-                .unregisterOnSharedPreferenceChangeListener(this);
+        if (getPreferenceScreen().getSharedPreferences() != null) {
+            getPreferenceScreen().getSharedPreferences()
+                    .unregisterOnSharedPreferenceChangeListener(this);
+        }
     }
 
     @Override

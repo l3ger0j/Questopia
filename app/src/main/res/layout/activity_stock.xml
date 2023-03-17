@@ -32,8 +32,8 @@
             android:id="@+id/stockFAB"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="24dp"
-            android:layout_marginBottom="32dp"
+            android:layout_marginEnd="@dimen/fab_margin"
+            android:layout_marginBottom="16dp"
             android:onClick="@{() -> stockVM.showDialogInstall()}"
             android:visibility="@{stockVM.isShowDialog ? View.GONE : View.VISIBLE}"
             app:layout_constraintBottom_toTopOf="@+id/banner_view"
@@ -41,15 +41,18 @@
             app:srcCompat="@drawable/add"
             tools:ignore="ContentDescription" />
 
-        <FrameLayout
-            android:id="@+id/stockFragContainer"
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/stockFragHost"
+            android:name="androidx.navigation.fragment.NavHostFragment"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             app:layout_constraintBottom_toTopOf="@+id/banner_view"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:navGraph="@navigation/stock_graph"
+            tools:layout="@layout/dialog_image" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

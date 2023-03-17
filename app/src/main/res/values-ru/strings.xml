@@ -26,6 +26,7 @@
         <string name="gameName">Название игры</string>
         <string name="gameAuthor">Автор</string>
         <string name="gameVersion">Версия</string>
+        <string name="archivePassword">Пароль для архива</string>
         <string name="selectArchive">Выберите архив</string>
         <string name="selectFolder">Выберите папку с файлом</string>
         <string name="selectIcon">Выберите иконку</string>
@@ -142,6 +143,8 @@
         <string name="autoHeightTitle">Авто Высота Изображения</string>
         <string name="autoHeightSum">Использовать автоматически определяемое значение для высоты изображения</string>
         <string name="customHeightTitle">Своё Значение Высоты</string>
+        <string name="fullScreenImageSum">При нажатии на картинку, она откроется в диалоговом окне</string>
+        <string name="fullScreenImageTitle">Полноэкранные изображения</string>
         <!-- Switch section -->
         <string name="switchCatTitle">Переключатели</string>
         <string name="filePicker">Диалог Выбора Файла (альфа)</string>

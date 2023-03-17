@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <data>
         <import type="android.view.View"/>
@@ -74,106 +75,79 @@
                     android:hint="@string/gameVersion" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <LinearLayout
-                android:id="@+id/linearLayout"
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/ET3"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="16dp"
                 android:layout_marginEnd="16dp"
-                android:orientation="horizontal"
-                android:visibility="@{stockVM.isSelectFolder ? View.GONE : View.VISIBLE}"
+                app:endIconMode="password_toggle"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/ET2">
 
-                <TextView
-                    android:id="@+id/fileTV"
+                <com.google.android.material.textfield.TextInputEditText
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/selectArchive"
-                    android:textAlignment="center"
-                    android:textStyle="bold" />
+                    android:hint="@string/archivePassword" />
+            </com.google.android.material.textfield.TextInputLayout>
 
-                <Button
-                    android:id="@+id/buttonSelectArchive"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:onClick="@{stockVM::sendIntent}"
-                    android:text="@string/buttonSelect" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/linearLayout1"
-                android:layout_width="0dp"
+            <Button
+                android:id="@+id/buttonSelectArchive"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="16dp"
                 android:layout_marginEnd="16dp"
-                android:orientation="horizontal"
+                android:layout_weight="1"
+                android:onClick="@{stockVM::sendIntent}"
+                android:text="@string/selectArchive"
+                android:visibility="@{stockVM.isSelectFolder ? View.GONE : View.VISIBLE}"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/ET3" />
+
+            <Button
+                android:id="@+id/buttonSelectFolder"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_weight="1"
+                android:onClick="@{stockVM::sendIntent}"
+                android:text="@string/selectFolder"
                 android:visibility="@{stockVM.isSelectArchive ? View.GONE : View.VISIBLE}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/linearLayout">
+                app:layout_constraintTop_toBottomOf="@+id/buttonSelectArchive" />
 
-                <TextView
-                    android:id="@+id/folderTV"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/selectFolder"
-                    android:textAlignment="center"
-                    android:textStyle="bold" />
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/imageView"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_weight="1"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/buttonSelectFolder"
+                app:shapeAppearanceOverlay="@style/roundedImageView" />
 
-                <Button
-                    android:id="@+id/buttonSelectFolder"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:onClick="@{stockVM::sendIntent}"
-                    android:text="@string/buttonSelect" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/linearLayout2"
+            <Button
+                android:id="@+id/buttonSelectIcon"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="16dp"
                 android:layout_marginEnd="16dp"
-                android:orientation="horizontal"
+                android:layout_weight="1"
+                android:onClick="@{stockVM::sendIntent}"
+                android:text="@string/selectIcon"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.0"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/linearLayout1">
-
-                <ImageView
-                    android:id="@+id/imageView"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:contentDescription="@string/add" />
-
-                <TextView
-                    android:id="@+id/imageTV"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/selectIcon"
-                    android:textAlignment="center"
-                    android:textAllCaps="false"
-                    android:textStyle="bold" />
-
-                <Button
-                    android:id="@+id/buttonSelectIcon"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:onClick="@{stockVM::sendIntent}"
-                    android:text="@string/buttonSelect" />
-            </LinearLayout>
+                app:layout_constraintStart_toEndOf="@+id/imageView"
+                app:layout_constraintTop_toBottomOf="@+id/buttonSelectFolder" />
 
             <Button
                 android:id="@+id/installBT"
@@ -184,10 +158,10 @@
                 android:layout_marginEnd="16dp"
                 android:onClick="@{() -> stockVM.createInstallIntent()}"
                 android:text="@string/add"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/linearLayout2" />
+                app:layout_constraintTop_toBottomOf="@+id/buttonSelectIcon" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>

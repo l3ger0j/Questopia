@@ -1,6 +1,5 @@
 package org.qp.android.view.game;
 
-import android.content.Context;
 import android.graphics.Typeface;
 import android.text.Html;
 import android.util.TypedValue;
@@ -17,7 +16,7 @@ import com.squareup.picasso.Picasso;
 
 import org.qp.android.R;
 import org.qp.android.databinding.ListGameItemBinding;
-import org.qp.android.model.libQSP.QpListItem;
+import org.qp.android.model.libQP.QpListItem;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -25,7 +24,6 @@ import java.util.List;
 import java.util.Objects;
 
 public class GameItemRecycler extends RecyclerView.Adapter<GameItemRecycler.ViewHolder> {
-    private final Context context;
     private final AsyncListDiffer<QpListItem> differ =
             new AsyncListDiffer<>(this , DIFF_CALLBACK);
 
@@ -83,10 +81,6 @@ public class GameItemRecycler extends RecyclerView.Adapter<GameItemRecycler.View
 
     public void submitList(ArrayList<QpListItem> gameData){
         differ.submitList(gameData);
-    }
-
-    public GameItemRecycler(Context context) {
-        this.context = context;
     }
 
     @NonNull

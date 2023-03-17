@@ -33,7 +33,7 @@ public class AudioPlayer {
             } catch (Throwable t) {
                 Log.e(TAG,"Audio thread has stopped exceptionally", t);
             }
-        });
+        } , "audioThread");
         audioThread.start();
     }
 

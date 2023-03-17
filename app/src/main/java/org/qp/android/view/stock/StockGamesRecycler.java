@@ -1,7 +1,6 @@
 package org.qp.android.view.stock;
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
@@ -73,13 +72,12 @@ public class StockGamesRecycler extends RecyclerView.Adapter<StockGamesRecycler.
     @Override
     public void onBindViewHolder(@NonNull StockGamesRecycler.ViewHolder holder, int position) {
         holder.listItemGameBinding(differ.getCurrentList().get(position));
-        GameData gameData = getItem(position);
+        var gameData = getItem(position);
         if (gameData.icon.isEmpty()) {
-            Drawable drawable = ResourcesCompat.getDrawable(
+            holder.listItemGameBinding.gameIcon.setImageDrawable(ResourcesCompat.getDrawable(
                     context.getResources(),
                     R.drawable.broken_image , null
-            );
-            holder.listItemGameBinding.gameIcon.setImageDrawable(drawable);
+            ));
         } else {
             Picasso.get()
                     .load(gameData.icon)

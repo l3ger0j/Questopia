@@ -1,7 +1,7 @@
-package org.qp.android.model.libQSP;
+package org.qp.android.model.libQP;
 
 /**
- * Методы данного интерфейса вызываются из нативного кода. См. <code>android_callbacks.c</code>.
+ * Methods of this interface are called from native code. See <code>android_callbacks.c</code>.
  */
 public interface LibQpCallbacks {
     void RefreshInt();

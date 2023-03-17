@@ -14,6 +14,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
 import org.qp.android.view.settings.SettingsController;
 
+import java.util.ArrayList;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
@@ -82,20 +83,29 @@ public class HtmlProcessor {
     }
 
     private void processHTMLImages(@NonNull Element documentBody) {
-        for (var img : documentBody.select("img")) {
-            if (controller.isUseAutoWidth) {
-                if (shouldChangeWidth(img)) {
-                    img.attr("style", "max-width:100%;");
-                }
-            } else {
-                img.attr("style", "width:"+controller.customWidthImage);
+        var dynBlackList = new ArrayList<String>();
+        for (var element : documentBody.select("a")) {
+            if (element.attr("href").contains("exec:")) {
+                dynBlackList.add(element.select("img").attr("src"));
             }
-            if (controller.isUseAutoHeight) {
-                if (shouldChangeHeight(img)) {
-                    img.attr("style", "max-height:100%;");
+        }
+        for (var img : documentBody.select("img")) {
+            if (controller.isUseFullscreenImages) {
+                if (!dynBlackList.contains(img.attr("src"))) {
+                    img.attr("onclick" , "img.onClickImage(this.src);");
                 }
-            } else {
-                img.attr("style", "height:"+controller.customWidthImage);
+            }
+            if (controller.isUseAutoWidth && controller.isUseAutoHeight) {
+                img.attr("style", "display: inline; height: auto; max-width: 100%;");
+            }
+            if (!controller.isUseAutoWidth) {
+                if (shouldChangeWidth(img)) {
+                    img.attr("style" , "width:" + controller.customWidthImage+";");
+                }
+            } else if (!controller.isUseAutoHeight) {
+                if (shouldChangeHeight(img)) {
+                    img.attr("style" , "height:" + controller.customHeightImage+";");
+                }
             }
         }
     }
@@ -105,11 +115,7 @@ public class HtmlProcessor {
         var absPath = gameContentResolver.getAbsolutePath(relPath);
         var drawable = imageProvider.get(absPath);
         if (drawable == null) return false;
-        if (drawable.getIntrinsicWidth() == -1) {
-            return drawable.getIntrinsicWidth() < Resources.getSystem()
-                    .getDisplayMetrics().widthPixels;
-        }
-        return drawable.getIntrinsicWidth() > Resources.getSystem()
+        return drawable.getIntrinsicWidth() < Resources.getSystem()
                 .getDisplayMetrics().widthPixels;
     }
 
@@ -118,11 +124,7 @@ public class HtmlProcessor {
         var absPath = gameContentResolver.getAbsolutePath(relPath);
         var drawable = imageProvider.get(absPath);
         if (drawable == null) return false;
-        if (drawable.getIntrinsicWidth() == -1) {
-            return drawable.getIntrinsicHeight() < Resources.getSystem()
-                    .getDisplayMetrics().heightPixels;
-        }
-        return drawable.getIntrinsicHeight() > Resources.getSystem()
+        return drawable.getIntrinsicHeight() < Resources.getSystem()
                 .getDisplayMetrics().heightPixels;
     }
 
