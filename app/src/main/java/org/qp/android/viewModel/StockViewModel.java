@@ -249,6 +249,10 @@ public class StockViewModel extends AndroidViewModel {
     public boolean isHasRemoteUrl () {
         return tempGameData.hasRemoteUrl();
     }
+
+    public boolean isModsDirExist() {
+        return findFileRecursively(tempGameData.gameDir, "mods") != null;
+    }
     // endregion Getter/Setter
 
     public StockViewModel(@NonNull Application application) {
@@ -475,6 +479,14 @@ public class StockViewModel extends AndroidViewModel {
         installBinding =
                 DialogInstallBinding.inflate(LayoutInflater.from(activityObservableField.get()));
         installBinding.setStockVM(this);
+        installBinding.buttonSelectArchive.setOnClickListener(v ->
+                sendIntent(installBinding.buttonSelectArchive));
+        installBinding.buttonSelectFolder.setOnClickListener(v ->
+                sendIntent(installBinding.buttonSelectFolder));
+        installBinding.buttonSelectIcon.setOnClickListener(v ->
+                sendIntent(installBinding.buttonSelectIcon));
+        installBinding.installBT.setOnClickListener(v ->
+                createInstallIntent());
         return installBinding;
     }
 
@@ -483,11 +495,18 @@ public class StockViewModel extends AndroidViewModel {
         editBinding =
                 DialogEditBinding.inflate(LayoutInflater.from(activityObservableField.get()));
         editBinding.setStockVM(this);
-        if (findFileRecursively(tempGameData.gameDir, "mods") != null) {
-            editBinding.buttonSelectMod.setVisibility(View.VISIBLE);
-        } else {
-            editBinding.buttonSelectMod.setVisibility(View.GONE);
+
+        if (!tempGameData.icon.isEmpty()) {
+            Picasso.get()
+                    .load(tempGameData.icon)
+                    .fit()
+                    .into(editBinding.imageView);
         }
+
+        editBinding.buttonSelectPath.setOnClickListener(this::sendIntent);
+        editBinding.buttonSelectMod.setOnClickListener(this::sendIntent);
+        editBinding.buttonSelectIcon.setOnClickListener(this::sendIntent);
+        editBinding.editBT.setOnClickListener(v -> createEditIntent());
         return editBinding;
     }
     // endregion Dialog

@@ -5,6 +5,7 @@
     <data>
         <import type="android.text.TextUtils" />
         <import type="android.view.View" />
+
         <variable
             name="viewModel"
             type="org.qp.android.viewModel.StockViewModel" />

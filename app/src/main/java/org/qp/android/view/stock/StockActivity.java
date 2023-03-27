@@ -1,13 +1,11 @@
 package org.qp.android.view.stock;
 
-import static org.qp.android.utils.DirUtil.doesDirectoryContainGameFiles;
 import static org.qp.android.utils.FileUtil.deleteDirectory;
 
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -29,21 +27,21 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.anggrayudi.storage.FileWrapper;
 import com.anggrayudi.storage.SimpleStorageHelper;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.picker.prettyfilepicker.PrettyFilePicker;
-import com.zhpan.bannerview.BannerViewPager;
-import com.zhpan.bannerview.BaseBannerAdapter;
-import com.zhpan.bannerview.BaseViewHolder;
 
 import org.qp.android.R;
 import org.qp.android.databinding.ActivityStockBinding;
 import org.qp.android.dto.stock.GameData;
 import org.qp.android.utils.ViewUtil;
+import org.qp.android.view.adapters.AutoScrollRunnable;
 import org.qp.android.view.settings.SettingsActivity;
 import org.qp.android.view.settings.SettingsController;
+import org.qp.android.view.stock.fragment.StockAdapterFragment;
 import org.qp.android.view.stock.fragment.StockPatternFragment;
 import org.qp.android.view.stock.fragment.dialogs.StockDialogFrags;
 import org.qp.android.view.stock.fragment.dialogs.StockDialogType;
@@ -119,11 +117,18 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         stockViewModel.setGameDataArrayList(localGameData);
     }
 
+    private AutoScrollRunnable autoScrollRunnable;
+    private ViewPager2 bannerViewPager;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         activityStockBinding = ActivityStockBinding.inflate(getLayoutInflater());
-        mFAB = activityStockBinding.stockFAB;
+
+        bannerViewPager = activityStockBinding.bannerView;
+        var fragmentAdapter = new StockAdapterFragment(this);
+        bannerViewPager.setAdapter(fragmentAdapter);
+        autoScrollRunnable = new AutoScrollRunnable(bannerViewPager, 3000, false);
 
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.MANAGE_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -141,6 +146,9 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         activityStockBinding.setStockVM(stockViewModel);
         stockViewModel.activityObservableField.set(this);
         gamesMap = stockViewModel.getGamesMap();
+
+        mFAB = activityStockBinding.stockFAB;
+        mFAB.setOnClickListener(v -> stockViewModel.showDialogInstall());
 
         storageHelper.setOnFileSelected((integer , documentFiles) -> {
             if (documentFiles != null) {
@@ -198,7 +206,6 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
             return null;
         });
 
-        loadBannerViewPager();
         loadSettings();
 
         Log.i(TAG,"Stock Activity created");
@@ -264,40 +271,6 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         } else {
             AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("en"));
         }
-    }
-
-    private void loadBannerViewPager () {
-        var list = new ArrayList<Integer>();
-        list.add(R.drawable.banner_1);
-        list.add(R.drawable.banner_0);
-        BannerViewPager<Integer> bannerViewPager = activityStockBinding.bannerView;
-        bannerViewPager.registerLifecycleObserver(getLifecycle()).setAdapter(new BaseBannerAdapter<>() {
-            @Override
-            protected void bindData(BaseViewHolder<Integer> holder , Integer data , int position , int pageSize) {
-                holder.setImageResource(R.id.banner_image , data);
-            }
-
-            @Override
-            public int getLayoutId(int viewType) {
-                return R.layout.list_item_banner;
-            }
-        }).create(list);
-        bannerViewPager.setOnPageClickListener((clickedView , position) -> {
-            switch (position) {
-                case 0:
-                    var intentImg0 = new Intent(Intent.ACTION_VIEW, Uri
-                            .parse("https://t.me/joinchat/AAAAAFgqAMXq0SA34umFbQ"));
-                    intentImg0.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(intentImg0);
-                    break;
-                case 1:
-                    var intentImg1 = new Intent(Intent.ACTION_VIEW, Uri
-                            .parse("https://schoollife.fludilka.su/viewtopic.php"));
-                    intentImg1.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(intentImg1);
-                    break;
-            }
-        });
     }
 
     public void showErrorDialog(String errorMessage) {
@@ -495,61 +468,16 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         if (newState == RecyclerView.SCROLL_STATE_IDLE) mFAB.show();
     }
 
-    @Deprecated
-    private void showGameInfo(String gameId) {
-        var gameData = stockViewModel.getGamesMap().get(gameId);
-        if (gameData == null) {
-            showErrorDialog("GameData not found: " + gameId);
-            return;
-        }
-        StringBuilder message = new StringBuilder();
-        if (gameData.author.length() > 0) {
-            message.append(getString(R.string.author).replace("-AUTHOR-", gameData.author));
-        }
-        if (gameData.portedBy.length() > 0) {
-            message.append('\n');
-            message.append(getString(R.string.ported_by)
-                    .replace("-PORTED_BY-", gameData.portedBy));
-        }
-        if (gameData.version.length() > 0) {
-            message.append('\n');
-            message.append(getString(R.string.version).replace("-VERSION-", gameData.version));
-        }
-        if (gameData.fileSize != null) {
-            message.append('\n');
-            message.append(getString(R.string.fileSize).replace("-SIZE-",
-                    gameData.getFileSize()));
-        }
-        if (gameData.fileExt.length() > 0) {
-            message.append('\n');
-            message.append(getString(R.string.fileType).replace("-TYPE-", gameData.fileExt));
-            if (gameData.fileExt.equals("aqsp")) {
-                message.append(" ");
-                message.append(getString(R.string.experimental));
-            }
-        }
-        if (gameData.pubDate.length() > 0) {
-            message.append('\n');
-            message.append(getString(R.string.pub_data).replace("-PUB_DATA-", gameData.pubDate));
-        }
-        if (gameData.modDate.length() > 0) {
-            message.append('\n');
-            message.append(getString(R.string.mod_data).replace("-MOD_DATA-", gameData.pubDate));
-        }
-        var dialogFrags = new StockDialogFrags();
-        dialogFrags.setDialogType(StockDialogType.INFO_DIALOG);
-        dialogFrags.setTitle(gameData.title);
-        dialogFrags.setMessage(String.valueOf(message));
-        if (gameData.isInstalled() && doesDirectoryContainGameFiles(gameData.gameDir)) {
-            dialogFrags.setInstalled(true);
-        }
-        dialogFrags.show(getSupportFragmentManager(), "infoDialogFragment");
-    }
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
         Log.i(TAG , "Stock Activity destroyed");
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        bannerViewPager.removeCallbacks(autoScrollRunnable);
     }
 
     @Override
@@ -558,6 +486,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         loadSettings();
         stockViewModel.refreshGamesDirectory();
         navController.navigate(R.id.stockRecyclerFragment);
+        bannerViewPager.postDelayed(autoScrollRunnable, 3000);
     }
 
     @Override

@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:tools="http://schemas.android.com/tools"
+<layout
+    xmlns:tools="http://schemas.android.com/tools"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
         <import type="android.view.View"/>
+
         <variable
             name="stockVM"
             type="org.qp.android.viewModel.StockViewModel" />
@@ -14,7 +16,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <com.zhpan.bannerview.BannerViewPager
+        <androidx.viewpager2.widget.ViewPager2
             android:id="@+id/banner_view"
             android:layout_width="match_parent"
             android:layout_height="100dp"
@@ -22,7 +24,6 @@
             android:layout_marginEnd="5dp"
             android:layout_marginBottom="5dp"
             android:background="@color/cardview_dark_background"
-            app:bvp_round_corner="12dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.473"
@@ -34,12 +35,11 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="@dimen/fab_margin"
             android:layout_marginBottom="16dp"
-            android:onClick="@{() -> stockVM.showDialogInstall()}"
             android:visibility="@{stockVM.isShowDialog ? View.GONE : View.VISIBLE}"
             app:layout_constraintBottom_toTopOf="@+id/banner_view"
             app:layout_constraintEnd_toEndOf="parent"
             app:srcCompat="@drawable/add"
-            tools:ignore="ContentDescription" />
+            android:contentDescription="@string/add" />
 
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/stockFragHost"

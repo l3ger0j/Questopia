@@ -3,6 +3,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <data>
+        <import type="android.view.View"/>
+
         <variable
             name="stockVM"
             type="org.qp.android.viewModel.StockViewModel" />
@@ -81,7 +83,6 @@
                 android:layout_marginTop="16dp"
                 android:layout_marginEnd="16dp"
                 android:layout_weight="1"
-                android:onClick="@{stockVM::sendIntent}"
                 android:text="@string/selectPathFile"
                 app:icon="@drawable/add"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -96,8 +97,8 @@
                 android:layout_marginTop="16dp"
                 android:layout_marginEnd="16dp"
                 android:layout_weight="1"
-                android:onClick="@{stockVM::sendIntent}"
                 android:text="@string/selectModFile"
+                android:visibility="@{stockVM.isModsDirExist ? View.GONE : View.VISIBLE}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/buttonSelectPath" />
@@ -109,7 +110,6 @@
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="16dp"
                 android:layout_weight="1"
-                android:contentDescription="@string/add"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/buttonSelectMod"
                 app:shapeAppearanceOverlay="@style/roundedImageView" />
@@ -122,7 +122,6 @@
                 android:layout_marginTop="16dp"
                 android:layout_marginEnd="16dp"
                 android:layout_weight="1"
-                android:onClick="@{stockVM::sendIntent}"
                 android:text="@string/selectIcon"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
@@ -136,7 +135,6 @@
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="16dp"
                 android:layout_marginEnd="16dp"
-                android:onClick="@{() -> stockVM.createEditIntent()}"
                 android:text="@string/editButton"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"

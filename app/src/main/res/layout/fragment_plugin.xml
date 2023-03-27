@@ -4,6 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <data>
         <import type="android.view.View"/>
+
         <variable
             name="pluginViewModel"
             type="org.qp.android.viewModel.SettingsViewModel" />
