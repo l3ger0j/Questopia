@@ -1,11 +1,11 @@
 package org.qp.android.view.stock;
 
 import android.content.Context;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
-import androidx.core.content.res.ResourcesCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.AsyncListDiffer;
 import androidx.recyclerview.widget.DiffUtil;
@@ -73,17 +73,15 @@ public class StockGamesRecycler extends RecyclerView.Adapter<StockGamesRecycler.
     public void onBindViewHolder(@NonNull StockGamesRecycler.ViewHolder holder, int position) {
         holder.listItemGameBinding(differ.getCurrentList().get(position));
         var gameData = getItem(position);
-        if (gameData.icon.isEmpty()) {
-            holder.listItemGameBinding.gameIcon.setImageDrawable(ResourcesCompat.getDrawable(
-                    context.getResources(),
-                    R.drawable.broken_image , null
-            ));
-        } else {
+
+        if (gameData.icon != null) {
             Picasso.get()
-                    .load(gameData.icon)
+                    .load(Uri.parse(gameData.icon))
                     .fit()
+                    .error(R.drawable.broken_image)
                     .into(holder.listItemGameBinding.gameIcon);
         }
+
         if (gameData.fileSize != null) {
             holder.listItemGameBinding.gameSize
                     .setText(context.getString(R.string.fileSize)

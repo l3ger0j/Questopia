@@ -17,8 +17,10 @@
         <string name="selectPathFile">Выберите патч-файл в формате .qsp</string>
         <string name="selectModFile">Выберите файл мода в формате .qsp</string>
         <string name="editButton">Изменить игру</string>
+        <string name="downloadButton">Скачать игру</string>
     <!-- Dialog Error -->
         <string name="error">Ошибка</string>
+        <string name="incorrectPassword">Вы ввели пустой или некорректный пароль!</string>
         <string name="gamesDirError">Невозможно создать или открыть папку с играми.</string>
         <string name="installError">Невозможно установить игру -GAMENAME-.</string>
         <string name="noGameFilesError">Файлы игры не найдены после установки.</string>

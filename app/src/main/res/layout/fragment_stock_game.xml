@@ -142,6 +142,18 @@
                 app:cornerRadius="10dp" />
         </LinearLayout>
 
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/downloadButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:visibility="@{viewModel.isGameInstalled() ? View.GONE : View.VISIBLE}"
+            android:text="@string/downloadButton"
+            android:textColor="@color/def_back_color"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/linearLayout3" />
+
         <LinearLayout
             android:id="@+id/linearLayout5"
             android:layout_width="409dp"

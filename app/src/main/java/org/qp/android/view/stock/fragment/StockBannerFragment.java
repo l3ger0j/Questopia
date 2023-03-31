@@ -13,12 +13,12 @@ import androidx.annotation.Nullable;
 import org.qp.android.R;
 import org.qp.android.databinding.ListItemBannerBinding;
 
-public class StockAdFragment extends StockPatternFragment{
+public class StockBannerFragment extends StockPatternFragment{
     private ListItemBannerBinding binding;
     private int pageNumber;
 
-    public static StockAdFragment newInstance(int numPage) {
-        var fragment = new StockAdFragment();
+    public static StockBannerFragment newInstance(int numPage) {
+        var fragment = new StockBannerFragment();
         var args = new Bundle();
         args.putInt("num", numPage);
         fragment.setArguments(args);

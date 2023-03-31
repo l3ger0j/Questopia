@@ -585,8 +585,10 @@ public class StockViewModel extends AndroidViewModel {
                 Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
             notificationManager.notify(1 , builder.buildWithProgress());
             ArchiveUtil.progressInstall.observeForever(aLong -> {
-                notificationManager
-                        .notify(1 , builder.updateProgress((int) (aLong * 100 / ArchiveUtil.totalSize)));
+                if ((aLong % 2) == 0) {
+                    notificationManager
+                            .notify(1 , builder.updateProgress((int) (aLong * 100 / ArchiveUtil.totalSize)));
+                }
                 if (aLong == ArchiveUtil.totalSize) {
                     notificationManager.cancelAll();
                     var notifyBuilder =

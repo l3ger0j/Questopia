@@ -36,5 +36,6 @@ public class StockGameFragment extends StockPatternFragment {
         super.onViewCreated(view , savedInstanceState);
         fragmentStockGameBinding.editButton.setOnClickListener(view1 -> listener.onClickEditButton());
         fragmentStockGameBinding.playButton.setOnClickListener(view2 -> listener.onClickPlayButton());
+        fragmentStockGameBinding.downloadButton.setOnClickListener(view3 -> listener.onClickDownloadButton());
     }
 }

@@ -70,8 +70,8 @@ public class PluginClient {
     }
 
     public void loadListPlugin(Context context) {
-        ArrayList<HashMap<String, String>> servicesList = new ArrayList<>();
-        ArrayList<String> categoriesList = new ArrayList<>();
+        var servicesList = new ArrayList<HashMap<String, String>>();
+        var categoriesList = new ArrayList<String>();
         var packageManager = context.getPackageManager();
         var baseIntent = new Intent(ACTION_PICK_PLUGIN);
         baseIntent.setFlags(Intent.FLAG_DEBUG_LOG_RESOLUTION);

@@ -14,7 +14,7 @@ public class StockAdapterFragment extends FragmentStateAdapter {
     @NonNull
     @Override
     public Fragment createFragment(int position) {
-        return (StockAdFragment.newInstance(position));
+        return (StockBannerFragment.newInstance(position));
     }
 
     @Override
