@@ -421,14 +421,11 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
     @Override
     public void onClickDownloadButton() {
         var gameData = stockViewModel.getTempGameData();
-
-        Uri uri = Uri.parse(gameData.fileUrl);
-
+        var uri = Uri.parse(gameData.fileUrl);
         var files = Environment
                 .getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
                 .mkdirs();
         Log.i(TAG , String.valueOf(files));
-
         mgr.enqueue(new DownloadManager.Request(uri)
                 .setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI
                         | DownloadManager.Request.NETWORK_MOBILE)
