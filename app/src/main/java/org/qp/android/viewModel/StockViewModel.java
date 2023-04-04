@@ -23,6 +23,7 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.RemoteException;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 
@@ -66,7 +67,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class StockViewModel extends AndroidViewModel {
-    // private final String TAG = this.getClass().getSimpleName();
+    private final String TAG = this.getClass().getSimpleName();
 
     public ObservableField<StockActivity> activityObservableField = new
             ObservableField<>();
@@ -715,7 +716,7 @@ public class StockViewModel extends AndroidViewModel {
                     }
                 });
             } catch (RemoteException e) {
-                throw new RuntimeException(e);
+                Log.e(TAG , "Error: " , e);
             }
         } , 1000);
     }

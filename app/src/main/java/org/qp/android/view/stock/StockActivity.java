@@ -268,9 +268,9 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         if (requestCode == READ_EXTERNAL_STORAGE_CODE) {
             if (grantResults.length > 0
                     && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                ViewUtil.showSnackBar(activityStockBinding.getRoot() , "Success");
+                ViewUtil.showSnackBar(findViewById(android.R.id.content) , "Success");
             } else {
-                ViewUtil.showSnackBar(activityStockBinding.getRoot() , "Permission denied to read your External storage");
+                ViewUtil.showSnackBar(findViewById(android.R.id.content) , "Permission denied to read your External storage");
             }
         }
     }
