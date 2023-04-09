@@ -34,6 +34,7 @@ import androidx.databinding.ObservableBoolean;
 import androidx.databinding.ObservableField;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.lifecycle.AndroidViewModel;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.squareup.picasso.Picasso;
@@ -62,6 +63,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
@@ -143,13 +146,52 @@ public class StockViewModel extends AndroidViewModel {
         this.gamesDir = gamesDir;
     }
 
-    public void setGameDataArrayList(ArrayList<GameData> gameDataArrayList) {
+    public void setGameDataList(ArrayList<GameData> gameDataArrayList) {
         gameDataList.postValue(gameDataArrayList);
     }
 
-    public MutableLiveData<ArrayList<GameData>> getGameData() {
+    public void setLocalGameDataList () {
+        var gameData = getSortedGames();
+        var localGameData = new ArrayList<GameData>();
+        for (var data : gameData) {
+            if (data.isInstalled()) {
+                localGameData.add(data);
+            }
+        }
+        setGameDataList(localGameData);
+    }
+
+    public String getGameIdByPosition(int position) {
+        getGameData().observeForever(gameDataArrayList -> {
+            if (!gameDataArrayList.isEmpty() && gameDataArrayList.size() > position) {
+                setTempGameData(gameDataArrayList.get(position));
+            }
+        });
+        return getTempGameData().id;
+    }
+
+    @NonNull
+    public ArrayList<GameData> getSortedGames() {
+        var unsortedGameData = gamesMap.values();
+        var gameData = new ArrayList<>(unsortedGameData);
+
+        if (gameData.size() < 2) {
+            return gameData;
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            Collections.sort(gameData , Comparator.comparing(game -> game.title.toLowerCase()));
+        } else {
+            Collections.sort(gameData , (first, second) -> first.title.toLowerCase()
+                    .compareTo(second.title.toLowerCase()));
+        }
+
+        return gameData;
+    }
+
+    public LiveData<ArrayList<GameData>> getGameData() {
         if (gameDataList.getValue() != null) {
-            QuestPlayerApplication application = getApplication();
+            var application = (QuestPlayerApplication) getApplication();
             application.setGameList(gameDataList.getValue());
         }
         return gameDataList;
@@ -658,7 +700,7 @@ public class StockViewModel extends AndroidViewModel {
                 gamesMap.put(localGameData.id, localGameData);
             }
         }
-        Objects.requireNonNull(activityObservableField.get()).setRecyclerAdapter();
+        setLocalGameDataList();
     }
 
     public void refreshGames(ArrayList<GameData> gameDataArrayList) {
@@ -687,10 +729,8 @@ public class StockViewModel extends AndroidViewModel {
                 tempGamesMap.put(localGameData.id, localGameData);
             }
         }
-
         gamesMap.putAll(tempGamesMap);
-
-        Objects.requireNonNull(activityObservableField.get()).setRecyclerAdapter();
+        setLocalGameDataList();
     }
     // endregion Refresh
 
@@ -712,7 +752,7 @@ public class StockViewModel extends AndroidViewModel {
                     @Override
                     public void onSuccess(List<GameDataParcel> gameDataParcel) throws RemoteException {
                         refreshGames(convertDTO(gameDataParcel));
-                        setGameDataArrayList(convertDTO(gameDataParcel));
+                        setGameDataList(convertDTO(gameDataParcel));
                     }
                 });
             } catch (RemoteException e) {

@@ -24,6 +24,12 @@ public class StockRecyclerFragment extends StockPatternFragment {
     private StockViewModel stockViewModel;
     private RecyclerView mRecyclerView;
 
+    Observer<ArrayList<GameData>> gameData = gameData -> {
+        var adapter = new StockGamesRecycler(requireActivity());
+        adapter.submitList(gameData);
+        mRecyclerView.setAdapter(adapter);
+    };
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater ,
@@ -39,16 +45,6 @@ public class StockRecyclerFragment extends StockPatternFragment {
                 .setRecyclerView(mRecyclerView);
         return recyclerBinding.getRoot();
     }
-
-    Observer<ArrayList<GameData>> gameData = new Observer<>() {
-        @Override
-        public void onChanged(ArrayList<GameData> gameData) {
-            var adapter =
-                    new StockGamesRecycler(requireActivity());
-            adapter.submitList(gameData);
-            mRecyclerView.setAdapter(adapter);
-        }
-    };
 
     @Override
     public void onViewCreated(@NonNull View view , @Nullable Bundle savedInstanceState) {

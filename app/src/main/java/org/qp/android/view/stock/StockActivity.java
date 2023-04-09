@@ -58,8 +58,6 @@ import org.qp.android.view.stock.fragment.dialogs.StockPatternDialogFrags;
 import org.qp.android.viewModel.StockViewModel;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Objects;
 
@@ -83,47 +81,8 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
 
     private final SimpleStorageHelper storageHelper = new SimpleStorageHelper(this);
 
-    public String getGameIdByPosition(int position) {
-        stockViewModel.getGameData().observe(this, gameDataArrayList -> {
-            if (!gameDataArrayList.isEmpty() && gameDataArrayList.size() > position) {
-                stockViewModel.setTempGameData(gameDataArrayList.get(position));
-            }
-        });
-        return stockViewModel.getTempGameData().id;
-    }
-
-    @NonNull
-    public ArrayList<GameData> getSortedGames() {
-        var unsortedGameData = gamesMap.values();
-        var gameData = new ArrayList<>(unsortedGameData);
-
-        if (gameData.size() < 2) {
-            return gameData;
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            Collections.sort(gameData , Comparator.comparing(game -> game.title.toLowerCase()));
-        } else {
-            Collections.sort(gameData , (first, second) -> first.title.toLowerCase()
-                    .compareTo(second.title.toLowerCase()));
-        }
-
-        return gameData;
-    }
-
     public void setRecyclerView(RecyclerView mRecyclerView) {
         this.mRecyclerView = mRecyclerView;
-    }
-
-    public void setRecyclerAdapter () {
-        var gameData = getSortedGames();
-        var localGameData = new ArrayList<GameData>();
-        for (GameData data : gameData) {
-            if (data.isInstalled()) {
-                localGameData.add(data);
-            }
-        }
-        stockViewModel.setGameDataArrayList(localGameData);
     }
 
     private AutoScrollRunnable autoScrollRunnable;
@@ -383,7 +342,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
                 new ViewModelProvider(this)
                         .get(StockViewModel.class)
                         .setTempGameData(stockViewModel.getGamesMap()
-                        .get(getGameIdByPosition(position)));
+                        .get(stockViewModel.getGameIdByPosition(position)));
                 navController.navigate(R.id.stockGameFragment);
             }
         }
@@ -453,7 +412,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
 
                 @Override
                 public boolean onPrepareActionMode(ActionMode mode , Menu menu) {
-                    tempList = getSortedGames();
+                    tempList = stockViewModel.getSortedGames();
                     isEnable = true;
                     return true;
                 }
@@ -542,6 +501,11 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
     public void onResume() {
         super.onResume();
         loadSettings();
+
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+        }
+
         stockViewModel.refreshGamesDirectory();
         navController.navigate(R.id.stockRecyclerFragment);
         bannerViewPager.postDelayed(autoScrollRunnable, 3000);
@@ -598,7 +562,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
     }
 
     private void filter(String text){
-        var gameData = getSortedGames();
+        var gameData = stockViewModel.getSortedGames();
         var filteredList = new ArrayList<GameData>();
         for (var item : gameData) {
             if (item.title.toLowerCase().contains(text.toLowerCase())) {
@@ -606,7 +570,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
             }
         }
         if (!filteredList.isEmpty()) {
-            stockViewModel.setGameDataArrayList(filteredList);
+            stockViewModel.setGameDataList(filteredList);
         }
     }
 }
