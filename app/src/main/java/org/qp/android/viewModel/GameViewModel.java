@@ -125,6 +125,9 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
 
     SharedPreferences.OnSharedPreferenceChangeListener preferenceChangeListener = (sharedPreferences , key) -> {
         controllerObserver.postValue(getSettingsController());
+        updatePageTemplate();
+        refreshMainDesc();
+        refreshVarsDesc();
         refreshActionsRecycler();
         refreshObjectsRecycler();
     };
@@ -234,7 +237,6 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         var actionsRecycler = new GameItemRecycler();
         actionsRecycler.setTypeface(getSettingsController().getTypeface());
         actionsRecycler.setTextSize(getFontSize());
-        actionsRecycler.setBackgroundColor(getBackgroundColor());
         actionsRecycler.setTextColor(getTextColor());
         actionsRecycler.setLinkTextColor(getLinkColor());
         actionsRecycler.submitList(libQpProxy.getGameState().actions);
@@ -247,7 +249,6 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         var objectsRecycler = new GameItemRecycler();
         objectsRecycler.setTypeface(getSettingsController().getTypeface());
         objectsRecycler.setTextSize(getFontSize());
-        objectsRecycler.setBackgroundColor(getBackgroundColor());
         objectsRecycler.setTextColor(getTextColor());
         objectsRecycler.setLinkTextColor(getLinkColor());
         objectsRecycler.submitList(libQpProxy.getGameState().objects);

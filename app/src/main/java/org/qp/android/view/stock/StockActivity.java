@@ -88,8 +88,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
     private AutoScrollRunnable autoScrollRunnable;
     private ViewPager2 bannerViewPager;
     private DownloadManager mgr = null;
-
-
+    
     BroadcastReceiver onComplete = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
             var gameData = stockViewModel.getTempGameData();
