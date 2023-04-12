@@ -64,6 +64,7 @@ import java.util.Objects;
 public class StockActivity extends AppCompatActivity implements StockPatternDialogFrags.StockPatternDialogList, StockPatternFragment.StockPatternFragmentList {
     private static final int READ_EXTERNAL_STORAGE_CODE = 200;
     private static final int MANAGE_EXTERNAL_STORAGE_CODE = 201;
+    private static final int POST_NOTIFICATION_CODE = 202;
     private final String TAG = this.getClass().getSimpleName();
     private HashMap<String, GameData> gamesMap = new HashMap<>();
     public SettingsController settingsController;
@@ -105,11 +106,11 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
                 );
 
                 stockViewModel.installGame(downloadedFile, stockViewModel.getTempGameData());
-                ViewUtil.showSnackBar(activityStockBinding.getRoot() ,
+                ViewUtil.showSnackBar(findViewById(android.R.id.content) ,
                         getString(R.string.textInstallNotify)
                                 .replace("-GAMENAME-" , gameData.title));
             } else {
-                ViewUtil.showSnackBar(activityStockBinding.getRoot() ,
+                ViewUtil.showSnackBar(findViewById(android.R.id.content) ,
                         getString(R.string.installError)
                                 .replace("-GAMENAME-" , gameData.title));
             }
@@ -126,16 +127,16 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         bannerViewPager.setAdapter(fragmentAdapter);
         autoScrollRunnable = new AutoScrollRunnable(bannerViewPager, 3000, false);
 
-        if(ContextCompat.checkSelfPermission(this, Manifest.permission.MANAGE_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.MANAGE_EXTERNAL_STORAGE}, MANAGE_EXTERNAL_STORAGE_CODE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if(ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.POST_NOTIFICATIONS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(
+                        this,
+                        new String[]{Manifest.permission.POST_NOTIFICATIONS},
+                        MANAGE_EXTERNAL_STORAGE_CODE);
             }
-        }
-
-        if(ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, READ_EXTERNAL_STORAGE_CODE);
         }
 
         mgr = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
@@ -205,6 +206,19 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
             return null;
         });
 
+        if (stockViewModel.getSettingsController().isUseNewFilePicker) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                if (ContextCompat.checkSelfPermission(this, Manifest.permission.MANAGE_EXTERNAL_STORAGE)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.MANAGE_EXTERNAL_STORAGE}, MANAGE_EXTERNAL_STORAGE_CODE);
+                }
+            } else {
+                if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, READ_EXTERNAL_STORAGE_CODE);
+                }
+            }
+        }
+
         loadSettings();
 
         Log.i(TAG,"Stock Activity created");
@@ -223,13 +237,32 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
     @Override
     public void onRequestPermissionsResult(int requestCode , @NonNull String[] permissions , @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode , permissions , grantResults);
-        if (requestCode == READ_EXTERNAL_STORAGE_CODE) {
-            if (grantResults.length > 0
-                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                ViewUtil.showSnackBar(findViewById(android.R.id.content) , "Success");
-            } else {
-                ViewUtil.showSnackBar(findViewById(android.R.id.content) , "Permission denied to read your External storage");
-            }
+
+        switch (requestCode) {
+            case READ_EXTERNAL_STORAGE_CODE:
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    ViewUtil.showSnackBar(findViewById(android.R.id.content) , "Success");
+                } else {
+                    ViewUtil.showSnackBar(findViewById(android.R.id.content) , "Permission denied to read your External storage");
+                }
+                break;
+            case MANAGE_EXTERNAL_STORAGE_CODE:
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    ViewUtil.showSnackBar(findViewById(android.R.id.content) , "Success");
+                } else {
+                    ViewUtil.showSnackBar(findViewById(android.R.id.content) , "Permission denied to manage your External storage");
+                }
+                break;
+            case POST_NOTIFICATION_CODE:
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    ViewUtil.showSnackBar(findViewById(android.R.id.content) , "Success");
+                } else {
+                    ViewUtil.showSnackBar(findViewById(android.R.id.content) , "Permission denied to post notification");
+                }
+                break;
         }
     }
 

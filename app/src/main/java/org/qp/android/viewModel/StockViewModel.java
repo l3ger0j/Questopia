@@ -624,13 +624,11 @@ public class StockViewModel extends AndroidViewModel {
         builder.setTextNotify(getApplication().getString(R.string.textProgressNotify));
         var notificationManager =
                 NotificationManagerCompat.from(getApplication());
-        if (ActivityCompat.checkSelfPermission(getApplication(),
-                Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(getApplication(), Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
             notificationManager.notify(1 , builder.buildWithProgress());
             ArchiveUtil.progressInstall.observeForever(aLong -> {
                 if ((aLong % 2) == 0) {
-                    notificationManager
-                            .notify(1 , builder.updateProgress((int) (aLong * 100 / ArchiveUtil.totalSize)));
+                    notificationManager.notify(1 , builder.updateProgress((int) (aLong * 100 / ArchiveUtil.totalSize)));
                 }
                 if (aLong == ArchiveUtil.totalSize) {
                     notificationManager.cancelAll();
