@@ -14,7 +14,7 @@ android {
         targetSdkVersion 33
         versionCode 201400
         versionName "3.14.0"
-        resConfigs 'en', 'ru'
+        resourceConfigurations += ['en', 'ru']
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -45,6 +45,7 @@ android {
     buildFeatures {
         viewBinding viewBind
         dataBinding dataBind
+        aidl true
     }
 
     ndkVersion = '25.1.8937393'
@@ -59,7 +60,7 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.documentfile:documentfile:1.0.1'
     implementation 'androidx.preference:preference:1.2.0'
-    implementation 'androidx.fragment:fragment:1.5.6'
+    implementation 'androidx.fragment:fragment:1.5.7'
     implementation 'androidx.navigation:navigation-fragment:2.5.3'
     implementation 'androidx.navigation:navigation-ui:2.5.3'
     implementation 'androidx.work:work-runtime:2.8.1'

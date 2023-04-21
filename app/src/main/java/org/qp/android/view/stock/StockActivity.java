@@ -152,9 +152,8 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
 
         storageHelper.setOnFileSelected((integer , documentFiles) -> {
             if (documentFiles != null) {
-                for (int i = 0; documentFiles.size() > i; i++) {
-                    var document =
-                            new FileWrapper.Document(documentFiles.get(i));
+                for (var file : documentFiles) {
+                    var document = new FileWrapper.Document(file);
                     switch (document.getExtension()) {
                         case "zip":
                         case "rar":
@@ -205,6 +204,13 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
             stockViewModel.isSelectFolder.set(true);
             return null;
         });
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.POST_NOTIFICATIONS}, POST_NOTIFICATION_CODE);
+            }
+        }
 
         if (stockViewModel.getSettingsController().isUseNewFilePicker) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
