@@ -17,6 +17,7 @@ public class StockBannerFragment extends StockPatternFragment{
     private ListItemBannerBinding binding;
     private int pageNumber;
 
+    @NonNull
     public static StockBannerFragment newInstance(int numPage) {
         var fragment = new StockBannerFragment();
         var args = new Bundle();

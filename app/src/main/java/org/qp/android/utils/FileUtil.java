@@ -40,6 +40,7 @@ public final class FileUtil {
         return file;
     }
 
+    @Nullable
     public static File createFile(File parentDir,
                                   String name) {
         var file = new File(parentDir, name);

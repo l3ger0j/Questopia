@@ -14,7 +14,6 @@ import org.qp.android.R;
 import org.qp.android.view.stock.StockActivity;
 
 public class SquashActivity extends AppCompatActivity {
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

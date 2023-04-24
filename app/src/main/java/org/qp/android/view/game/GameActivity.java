@@ -24,7 +24,6 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
-import androidx.appcompat.widget.TooltipCompat;
 import androidx.core.os.LocaleListCompat;
 import androidx.core.view.GravityCompat;
 import androidx.core.view.WindowCompat;
@@ -295,11 +294,7 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
         for (var data : gameViewModel.getGameDataList()) {
             var menu = navigationView.getMenu();
             for (var file : data.gameFiles) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    menu.add(file.getName()).setTooltipText(data.title);
-                } else {
-                    TooltipCompat.setTooltipText(menu.add(file.getName()).getActionView() , data.title);
-                }
+                menu.add(file.getName()).setTooltipText(data.title);
             }
         }
     }

@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class PluginClient {
-
     public static final String ACTION_PICK_PLUGIN = "org.qp.intent.action.PICK_PLUGIN";
     private static final String KEY_PKG = "pkg";
     private static final String KEY_SERVICENAME = "servicename";

@@ -7,7 +7,6 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
 public abstract class StockPatternFragment extends Fragment {
-
     public interface StockPatternFragmentList {
         void onClickEditButton();
         void onClickPlayButton();

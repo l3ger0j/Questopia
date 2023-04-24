@@ -4,7 +4,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 public final class PathUtil {
-
     @NonNull
     public static String normalizeFolderName(@NonNull String name) {
         var result = name.endsWith("...") ? name.substring(0, name.length() - 3) : name;
