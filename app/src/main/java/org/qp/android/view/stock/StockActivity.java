@@ -243,7 +243,6 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
     @Override
     public void onRequestPermissionsResult(int requestCode , @NonNull String[] permissions , @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode , permissions , grantResults);
-
         switch (requestCode) {
             case READ_EXTERNAL_STORAGE_CODE:
                 if (grantResults.length > 0
