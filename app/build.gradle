@@ -1,6 +1,5 @@
 plugins {
     id 'com.android.application'
-    id 'org.jetbrains.kotlin.android'
 }
 
 def viewBind = true
@@ -11,11 +10,11 @@ android {
 
     defaultConfig {
         applicationId "org.qp.android"
-        minSdkVersion 21
+        minSdkVersion 26
         targetSdkVersion 33
         versionCode 201401
         versionName "3.14.1"
-        resConfigs 'en', 'ru'
+        resourceConfigurations += ['en', 'ru']
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -33,7 +32,7 @@ android {
     }
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             proguardFiles fileTree('proguard').asList().toArray()
         }
@@ -46,6 +45,7 @@ android {
     buildFeatures {
         viewBinding viewBind
         dataBinding dataBind
+        aidl true
     }
 
     ndkVersion = '25.1.8937393'
@@ -60,19 +60,17 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.documentfile:documentfile:1.0.1'
     implementation 'androidx.preference:preference:1.2.0'
-    implementation 'androidx.fragment:fragment:1.5.5'
-    implementation "androidx.navigation:navigation-fragment:2.5.3"
-    implementation "androidx.navigation:navigation-ui:2.5.3"
+    implementation 'androidx.fragment:fragment:1.5.7'
+    implementation 'androidx.navigation:navigation-fragment:2.5.3'
+    implementation 'androidx.navigation:navigation-ui:2.5.3'
+    implementation 'androidx.work:work-runtime:2.8.1'
+    implementation 'com.google.android.material:material:1.8.0'
 
-    implementation 'androidx.work:work-runtime:2.8.0'
-    implementation "io.reactivex.rxjava3:rxjava:3.1.6"
     implementation 'com.github.omicronapps:7-Zip-JBinding-4Android:Release-16.02-2.02'
     implementation 'com.jaredrummler:colorpicker:1.1.0'
-    implementation 'com.github.zhpanvip:bannerviewpager:3.5.8'
     implementation 'org.jsoup:jsoup:1.15.4'
-    implementation "com.anggrayudi:storage:1.5.4"
+    implementation 'com.anggrayudi:storage:1.5.4'
     implementation 'org.simpleframework:simple-xml:2.7.1'
-    implementation 'com.google.android.material:material:1.8.0'
     implementation 'com.squareup.picasso:picasso:2.71828'
     implementation project(path: ':PrettyFilePicker-android-library')
 

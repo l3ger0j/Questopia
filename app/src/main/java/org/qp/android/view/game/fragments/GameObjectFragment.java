@@ -26,14 +26,18 @@ public class GameObjectFragment extends GamePatternFragment {
                              @Nullable Bundle savedInstanceState) {
         recyclerBinding = FragmentRecyclerBinding.inflate(inflater);
         viewModel = new ViewModelProvider(requireActivity()).get(GameViewModel.class);
+
+        // RecyclerView
         recyclerView = recyclerBinding.shareRecyclerView;
         recyclerView.setBackgroundColor(viewModel.getBackgroundColor());
+        viewModel.getObjectsObserver().observe(getViewLifecycleOwner() , gameItemRecycler ->
+                recyclerBinding.shareRecyclerView.setAdapter(gameItemRecycler));
+
+        // Settings
         viewModel.getControllerObserver().observe(getViewLifecycleOwner() , settingsController -> {
             recyclerView.setBackgroundColor(viewModel.getBackgroundColor());
             recyclerBinding.getRoot().refreshDrawableState();
         });
-        viewModel.getObjectsObserver().observe(getViewLifecycleOwner() , gameItemRecycler ->
-                recyclerBinding.shareRecyclerView.setAdapter(gameItemRecycler));
         return recyclerBinding.getRoot();
     }
 

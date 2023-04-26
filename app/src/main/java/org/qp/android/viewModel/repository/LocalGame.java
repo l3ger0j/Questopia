@@ -4,7 +4,6 @@ import static org.qp.android.utils.FileUtil.GAME_INFO_FILENAME;
 import static org.qp.android.utils.FileUtil.readFileAsString;
 import static org.qp.android.utils.XmlUtil.xmlToObject;
 
-import android.os.Build;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -84,12 +83,7 @@ public class LocalGame {
 
     private void sortFilesByName(@NonNull List<File> files) {
         if (files.size() < 2) return;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            Collections.sort(files, Comparator.comparing(o -> o.getName().toLowerCase()));
-        } else {
-            Collections.sort(files, (o1, o2) -> o1.getName().toLowerCase()
-                    .compareTo(o2.getName().toLowerCase()));
-        }
+        files.sort(Comparator.comparing(o -> o.getName().toLowerCase()));
     }
 
     @Nullable

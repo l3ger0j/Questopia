@@ -3,7 +3,7 @@ package org.qp.android.model.libQP;
 import java.util.Objects;
 
 /**
- * Методы данного класса определены в <code>androidqspwrapper.c</code>.
+ * The methods of this class are defined in <code>androidqspwrapper.c</code>.
  */
 public class NativeMethods {
     private final LibQpCallbacks callbacks;

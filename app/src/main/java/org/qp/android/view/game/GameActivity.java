@@ -24,7 +24,6 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
-import androidx.appcompat.widget.TooltipCompat;
 import androidx.core.os.LocaleListCompat;
 import androidx.core.view.GravityCompat;
 import androidx.core.view.WindowCompat;
@@ -70,8 +69,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class GameActivity extends AppCompatActivity implements GamePatternFragment.GamePatternFragmentList,
-        GamePatternDialogFrags.GamePatternDialogList,
-        NavigationView.OnNavigationItemSelectedListener {
+        GamePatternDialogFrags.GamePatternDialogList, NavigationView.OnNavigationItemSelectedListener {
     private final String TAG = this.getClass().getSimpleName();
 
     private static final int MAX_SAVE_SLOTS = 5;
@@ -87,7 +85,6 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
     private ActionBar actionBar;
     private Menu mainMenu;
     private NavController navController;
-    private NavigationView navigationView;
 
     private HtmlProcessor htmlProcessor;
     private LibQpProxy libQpProxy;
@@ -194,17 +191,6 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
             initGame();
         }
 
-        for (var data : gameViewModel.getGameDataList()) {
-            var menu = navigationView.getMenu();
-            for (var file : data.gameFiles) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    menu.add(file.getName()).setTooltipText(data.title);
-                } else {
-                    TooltipCompat.setTooltipText(menu.add(file.getName()).getActionView() , data.title);
-                }
-            }
-        }
-
         Log.i(TAG, "Game created");
     }
 
@@ -302,8 +288,15 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
         layout.addDrawerListener(toggle);
         toggle.syncState();
 
-        navigationView = activityGameBinding.navView;
+        var navigationView = activityGameBinding.navView;
+        navigationView.setFitsSystemWindows(false);
         navigationView.setNavigationItemSelectedListener(this);
+        for (var data : gameViewModel.getGameDataList()) {
+            var menu = navigationView.getMenu();
+            for (var file : data.gameFiles) {
+                menu.add(file.getName()).setTooltipText(data.title);
+            }
+        }
     }
 
     private void initServices() {

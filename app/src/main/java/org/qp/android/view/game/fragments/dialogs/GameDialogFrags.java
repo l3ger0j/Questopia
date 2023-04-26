@@ -91,6 +91,7 @@ public class GameDialogFrags extends GamePatternDialogFrags {
             case IMAGE_DIALOG:
                 imageBinding = DialogImageBinding.inflate(getLayoutInflater());
                 imageBinding.setDialogFragment(this);
+                imageBinding.imageBox.setOnClickListener(v -> dismiss());
                 builder.setView(imageBinding.getRoot());
                 return builder.create();
             case LOAD_DIALOG:

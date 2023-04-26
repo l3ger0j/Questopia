@@ -5,7 +5,6 @@ import androidx.annotation.NonNull;
 import org.jetbrains.annotations.Contract;
 
 public final class StringUtil {
-
     public static boolean isNotEmpty(String str) {
         return str != null && !str.isEmpty();
     }

@@ -125,6 +125,9 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
 
     SharedPreferences.OnSharedPreferenceChangeListener preferenceChangeListener = (sharedPreferences , key) -> {
         controllerObserver.postValue(getSettingsController());
+        updatePageTemplate();
+        refreshMainDesc();
+        refreshVarsDesc();
         refreshActionsRecycler();
         refreshObjectsRecycler();
     };
@@ -234,7 +237,6 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         var actionsRecycler = new GameItemRecycler();
         actionsRecycler.setTypeface(getSettingsController().getTypeface());
         actionsRecycler.setTextSize(getFontSize());
-        actionsRecycler.setBackgroundColor(getBackgroundColor());
         actionsRecycler.setTextColor(getTextColor());
         actionsRecycler.setLinkTextColor(getLinkColor());
         actionsRecycler.submitList(libQpProxy.getGameState().actions);
@@ -247,7 +249,6 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         var objectsRecycler = new GameItemRecycler();
         objectsRecycler.setTypeface(getSettingsController().getTypeface());
         objectsRecycler.setTextSize(getFontSize());
-        objectsRecycler.setBackgroundColor(getBackgroundColor());
         objectsRecycler.setTextColor(getTextColor());
         objectsRecycler.setLinkTextColor(getLinkColor());
         objectsRecycler.submitList(libQpProxy.getGameState().objects);
@@ -266,7 +267,6 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         super(application);
         preferences = PreferenceManager.getDefaultSharedPreferences(application);
         preferences.registerOnSharedPreferenceChangeListener(preferenceChangeListener);
-
         questPlayerApplication = getApplication();
         gameContentResolver = questPlayerApplication.getGameContentResolver();
         htmlProcessor = questPlayerApplication.getHtmlProcessor();
@@ -313,31 +313,35 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
 
     public class GameWebViewClient extends WebViewClient {
         @Override
-        public boolean shouldOverrideUrlLoading(WebView view ,
-                                                @NonNull final String href) {
-            var uriDecode = Uri.decode(href);
-            if (href.toLowerCase().startsWith("exec:")) {
-                var tempUriDecode = uriDecode.substring(5);
-                if (hasBase64(tempUriDecode)) {
-                    tempUriDecode = decodeBase64(uriDecode.substring(5));
-                } else {
-                    tempUriDecode = uriDecode.substring(5);
-                }
-                if (htmlProcessor.hasHTMLTags(tempUriDecode)) {
-                    libQpProxy.execute(htmlProcessor.removeHTMLTags(tempUriDecode));
-                } else {
-                    libQpProxy.execute(tempUriDecode);
-                }
-            } else if (href.toLowerCase().startsWith("https:")
-                    || href.toLowerCase().startsWith("http:")) {
-                var intent = new Intent(Intent.ACTION_VIEW , Uri.parse(uriDecode));
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                getApplication().startActivity(intent);
-            } else if (href.toLowerCase().startsWith("file:")) {
-                var tempLink = href.replace("file:/" , "https:");
-                var intent = new Intent(Intent.ACTION_VIEW , Uri.parse(tempLink));
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                getApplication().startActivity(intent);
+        public boolean shouldOverrideUrlLoading(WebView view , WebResourceRequest request) {
+            final var uri = request.getUrl();
+            final var uriDecode = Uri.decode(uri.toString());
+            switch (uri.getScheme()) {
+                case "exec":
+                    var tempUriDecode = uriDecode.substring(5);
+                    if (hasBase64(tempUriDecode)) {
+                        tempUriDecode = decodeBase64(uriDecode.substring(5));
+                    } else {
+                        tempUriDecode = uriDecode.substring(5);
+                    }
+                    if (htmlProcessor.hasHTMLTags(tempUriDecode)) {
+                        libQpProxy.execute(htmlProcessor.removeHTMLTags(tempUriDecode));
+                    } else {
+                        libQpProxy.execute(tempUriDecode);
+                    }
+                    break;
+                case "https":
+                case "http":
+                    var viewLink = new Intent(Intent.ACTION_VIEW , Uri.parse(uriDecode));
+                    viewLink.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    getApplication().startActivity(viewLink);
+                    break;
+                case "file":
+                    var tempLink = uri.getScheme().replace("file:/" , "https:");
+                    var viewLazyLink = new Intent(Intent.ACTION_VIEW , Uri.parse(tempLink));
+                    viewLazyLink.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    getApplication().startActivity(viewLazyLink);
+                    break;
             }
             return true;
         }

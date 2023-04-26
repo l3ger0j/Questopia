@@ -16,6 +16,5 @@
         android:gravity="center|center_vertical"
         android:scaleType="fitCenter"
         android:adjustViewBounds="true"
-        android:onClick="@{() -> dialogFragment.dismiss()}"
         app:imageUrl="@{dialogFragment.pathToImage}" />
 </layout>

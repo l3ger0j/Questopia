@@ -2,7 +2,6 @@ package org.qp.android;
 
 import android.app.Application;
 import android.os.Bundle;
-import android.util.Log;
 
 import org.qp.android.dto.stock.GameData;
 import org.qp.android.model.libQP.LibQpProxy;
@@ -29,7 +28,6 @@ public class QuestPlayerApplication extends Application {
     }
 
     public Bundle getGameSaveMap() {
-        Log.d(this.getClass().getSimpleName() , gameSaveMap.toString());
         return gameSaveMap;
     }
 

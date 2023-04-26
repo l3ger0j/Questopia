@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Use in dialog/toast/notification -->
+    <!-- Notification channel -->
+        <string name="statusNameChannel">Статус установки</string>
+        <string name="statusDescChannel">Канал для отображения информации о текущем статусе установки игры</string>
+        <string name="progressNameChannel">Ход установки игры</string>
+        <string name="progressDescChannel">Канал для отображения информации о прогрессе установки игры</string>
     <!-- Install notification -->
         <string name="titleNotify">Установка игры</string>
         <string name="textProgressNotify">Прогресс установки игры</string>
@@ -8,7 +13,7 @@
     <!-- Dialog LoadGamePopup -->
         <string name="loadGamePopup">Файл сохранения не был найден в gameDir. Хотите ли вы вручную указать путь к файлу сохранения?</string>
     <!-- Dialog Close -->
-        <string name="promptCloseGame">Уверены, что хотите закрыть игру?</string>
+        <string name="promptCloseGame">Вы уверены, что хотите закрыть игру?</string>
     <!-- Dialog Select -->
         <string name="selectGameFile">Выберите файл игры для запуска</string>
     <!-- Dialog Executor -->
@@ -16,9 +21,11 @@
     <!-- Dialog Edit -->
         <string name="selectPathFile">Выберите патч-файл в формате .qsp</string>
         <string name="selectModFile">Выберите файл мода в формате .qsp</string>
-        <string name="editButton">Изменить</string>
+        <string name="editButton">Изменить игру</string>
+        <string name="downloadButton">Скачать игру</string>
     <!-- Dialog Error -->
         <string name="error">Ошибка</string>
+        <string name="incorrectPassword">Вы ввели пустой или некорректный пароль!</string>
         <string name="gamesDirError">Невозможно создать или открыть папку с играми.</string>
         <string name="installError">Невозможно установить игру -GAMENAME-.</string>
         <string name="noGameFilesError">Файлы игры не найдены после установки.</string>
@@ -31,7 +38,8 @@
         <string name="selectFolder">Выберите папку с файлом</string>
         <string name="selectIcon">Выберите иконку</string>
         <string name="buttonSelect">Выбрать</string>
-        <string name="add">Добавить</string>
+        <string name="add">Добавить игру</string>
+        <string name="or">Или</string>
     <!-- Dialog GameInfo -->
         <string name="author">Автор: -AUTHOR-</string>
         <string name="ported_by">Портировал: -PORTED_BY-</string>

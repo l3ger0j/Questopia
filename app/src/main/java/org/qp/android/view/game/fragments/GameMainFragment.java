@@ -59,7 +59,8 @@ public class GameMainFragment extends GamePatternFragment {
         if (viewModel.getSettingsController().isUseSeparator) {
             separatorView.setBackgroundColor(viewModel.getBackgroundColor());
         } else {
-            separatorView.setBackgroundColor(getResources().getColor(R.color.materialcolorpicker__grey));
+            separatorView.setBackgroundColor(
+                    requireContext().getColor(R.color.materialcolorpicker__grey));
         }
 
         // WebView
@@ -93,7 +94,8 @@ public class GameMainFragment extends GamePatternFragment {
             if (settingsController.isUseSeparator) {
                 separatorView.setBackgroundColor(viewModel.getBackgroundColor());
             } else {
-                separatorView.setBackgroundColor(getResources().getColor(R.color.materialcolorpicker__grey));
+                separatorView.setBackgroundColor(
+                        requireContext().getColor(R.color.materialcolorpicker__grey));
             }
 
             constraintSet.clone(layoutTop);

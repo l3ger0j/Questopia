@@ -7,7 +7,6 @@ import android.content.Context;
 import android.graphics.Color;
 import android.os.Build;
 
-import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 
 import org.qp.android.R;
@@ -35,15 +34,13 @@ public class NotifyBuilder {
         this.CHANNEL_ID = CHANNEL_ID;
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    public void createDefaultChannel () {
-        var notificationManager =
-                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        var notificationChannel =
-                new NotificationChannel("gameInstalled",
-                        "Installation status",
-                        NotificationManager.IMPORTANCE_DEFAULT);
-        notificationChannel.setDescription("Channel for displaying information about the current installation status of the game");
+    public void createStatusChannel() {
+        var notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        var notificationChannel = new NotificationChannel(
+                "gameInstalled",
+                context.getString(R.string.statusNameChannel),
+                NotificationManager.IMPORTANCE_DEFAULT);
+        notificationChannel.setDescription(context.getString(R.string.statusDescChannel));
         notificationChannel.enableLights(true);
         notificationChannel.setLightColor(Color.GREEN);
         notificationChannel.enableVibration(false);
@@ -53,15 +50,13 @@ public class NotifyBuilder {
         notificationManager.createNotificationChannel(notificationChannel);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     public void createProgressChannel () {
-        var notificationManager =
-                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        var notificationChannel =
-                new NotificationChannel("gameInstallationProgress",
-                        "Progress install of game",
-                        NotificationManager.IMPORTANCE_LOW);
-        notificationChannel.setDescription("Channel for displaying information about the current installation status of the game");
+        var notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        var notificationChannel = new NotificationChannel(
+                "gameInstallationProgress",
+                context.getString(R.string.progressNameChannel),
+                NotificationManager.IMPORTANCE_LOW);
+        notificationChannel.setDescription(context.getString(R.string.progressDescChannel));
         notificationChannel.enableLights(true);
         notificationChannel.setLightColor(Color.RED);
         notificationChannel.enableVibration(false);

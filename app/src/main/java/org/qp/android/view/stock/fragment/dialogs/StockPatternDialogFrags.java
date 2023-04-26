@@ -6,7 +6,6 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.DialogFragment;
 
 public abstract class StockPatternDialogFrags extends DialogFragment {
-
     public interface StockPatternDialogList {
         void onDialogDestroy(DialogFragment dialog);
         void onDialogPositiveClick(DialogFragment dialog);
