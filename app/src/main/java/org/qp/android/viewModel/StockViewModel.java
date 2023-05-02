@@ -27,7 +27,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.databinding.ObservableBoolean;
@@ -40,6 +39,7 @@ import androidx.lifecycle.MutableLiveData;
 import com.squareup.picasso.Picasso;
 
 import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 import org.qp.android.GameDataParcel;
 import org.qp.android.QuestPlayerApplication;
 import org.qp.android.R;
@@ -160,9 +160,14 @@ public class StockViewModel extends AndroidViewModel {
         setGameDataList(localGameData);
     }
 
-    @Nullable
+    @NotNull
     private StockActivity getStockActivity() {
-        return activityObservableField.get();
+        var tempStockActivity = activityObservableField.get();
+        if (tempStockActivity != null) {
+            return tempStockActivity;
+        } else {
+            throw new NullPointerException();
+        }
     }
 
     public String getGameIdByPosition(int position) {
@@ -200,8 +205,7 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     public String getGameAuthor () {
-        if (tempGameData.author.length() > 0
-                && getStockActivity() != null) {
+        if (tempGameData.author.length() > 0) {
             return getStockActivity()
                     .getString(R.string.author)
                     .replace("-AUTHOR-" , tempGameData.author);
@@ -211,8 +215,7 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     public String getGamePortBy () {
-        if (tempGameData.portedBy.length() > 0
-                && getStockActivity() != null) {
+        if (tempGameData.portedBy.length() > 0) {
             return getStockActivity()
                     .getString(R.string.ported_by)
                     .replace("-PORTED_BY-", tempGameData.portedBy);
@@ -222,8 +225,7 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     public String getGameVersion () {
-        if (tempGameData.version.length() > 0
-                && getStockActivity() != null) {
+        if (tempGameData.version.length() > 0) {
             return getStockActivity()
                     .getString(R.string.version)
                     .replace("-VERSION-" , tempGameData.version);
@@ -233,8 +235,7 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     public String getGameType () {
-        if (tempGameData.fileExt.length() > 0
-                && getStockActivity() != null) {
+        if (tempGameData.fileExt.length() > 0) {
             if (tempGameData.fileExt.equals("aqsp")) {
                 return getStockActivity()
                         .getString(R.string.fileType)
@@ -250,8 +251,7 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     public String getGameSize () {
-        if (tempGameData.getFileSize() != null
-                && getStockActivity() != null) {
+        if (tempGameData.getFileSize() != null) {
             return getStockActivity()
                     .getString(R.string.fileSize)
                     .replace("-SIZE-" , tempGameData.getFileSize());
@@ -261,8 +261,7 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     public String getGamePubData () {
-        if (tempGameData.pubDate.length() > 0
-                && getStockActivity() != null) {
+        if (tempGameData.pubDate.length() > 0) {
             return getStockActivity()
                     .getString(R.string.pub_data)
                     .replace("-PUB_DATA-", tempGameData.pubDate);
@@ -272,8 +271,7 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     public String getGameModData () {
-        if (tempGameData.modDate.length() > 0
-                && getStockActivity() != null) {
+        if (tempGameData.modDate.length() > 0) {
             return getStockActivity()
                     .getString(R.string.mod_data)
                     .replace("-MOD_DATA-", tempGameData.pubDate);
@@ -320,7 +318,7 @@ public class StockViewModel extends AndroidViewModel {
             public void dismiss() {
             }
         });
-        Objects.requireNonNull(activityObservableField.get())
+        getStockActivity()
                 .showInstallDialogFragment(dialogFragments);
         isShowDialog.set(true);
     }
@@ -366,7 +364,7 @@ public class StockViewModel extends AndroidViewModel {
             isSelectFolder.set(false);
             dialogFragments.dismiss();
         } catch (NullPointerException ex) {
-            Objects.requireNonNull(activityObservableField.get())
+            getStockActivity()
                     .showErrorDialog("Error: " + ex);
         }
     }
@@ -384,13 +382,13 @@ public class StockViewModel extends AndroidViewModel {
             public void dismiss() {
             }
         });
-        Objects.requireNonNull(activityObservableField.get())
+        getStockActivity()
                 .showEditDialogFragment(dialogFragments);
         isShowDialog.set(true);
     }
 
     public void playGame() {
-        var intent = new Intent(activityObservableField.get() ,
+        var intent = new Intent(getStockActivity() ,
                 GameActivity.class);
         intent.putExtra("gameId" , tempGameData.id);
         intent.putExtra("gameTitle" , tempGameData.title);
@@ -398,12 +396,12 @@ public class StockViewModel extends AndroidViewModel {
         var gameFileCount = tempGameData.gameFiles.size();
         switch (gameFileCount) {
             case 0:
-                Objects.requireNonNull(activityObservableField.get())
+                getStockActivity()
                         .showErrorDialog("Game folder has no game files!");
                 break;
             case 1:
                 intent.putExtra("gameFileUri" , tempGameData.gameFiles.get(0).getAbsolutePath());
-                Objects.requireNonNull(activityObservableField.get()).startGameActivity(intent);
+                getStockActivity().startGameActivity(intent);
                 break;
             default:
                 if (outputIntObserver.hasObservers()) {
@@ -416,12 +414,12 @@ public class StockViewModel extends AndroidViewModel {
                 var dialogFragments = new StockDialogFrags();
                 dialogFragments.setDialogType(StockDialogType.SELECT_DIALOG);
                 dialogFragments.setNames(names);
-                Objects.requireNonNull(activityObservableField.get())
+                getStockActivity()
                         .showSelectDialogFragment(dialogFragments);
                 outputIntObserver.observeForever(integer -> {
                     intent.putExtra("gameFileUri" ,
                             tempGameData.gameFiles.get(integer).getAbsolutePath());
-                    Objects.requireNonNull(activityObservableField.get()).startGameActivity(intent);
+                    getStockActivity().startGameActivity(intent);
                 });
                 break;
         }
@@ -462,17 +460,17 @@ public class StockViewModel extends AndroidViewModel {
             }
             writeGameInfo(tempGameData , tempGameData.gameDir);
             if (tempPathFile != null) {
-                copyFile(activityObservableField.get() , tempPathFile , tempGameData.gameDir);
+                copyFile(getStockActivity() , tempPathFile , tempGameData.gameDir);
             }
             if (tempModFile != null) {
-                copyFile(activityObservableField.get() , tempModFile ,
+                copyFile(getStockActivity() , tempModFile ,
                         findFileRecursively(tempGameData.gameDir, "mods"));
             }
             refreshGamesDirectory();
             isShowDialog.set(false);
             dialogFragments.dismiss();
         } catch (NullPointerException ex) {
-            Objects.requireNonNull(activityObservableField.get())
+            getStockActivity()
                     .showErrorDialog("Error: " + ex);
         }
     }
@@ -497,23 +495,23 @@ public class StockViewModel extends AndroidViewModel {
         int id = view.getId();
         if (id == R.id.buttonSelectArchive) {
             if (controller.isUseNewFilePicker) {
-                Objects.requireNonNull(activityObservableField.get())
+                getStockActivity()
                         .showFilePickerDialog(getSupportArchiveType());
             } else {
-                Objects.requireNonNull(activityObservableField.get())
+                getStockActivity()
                         .showFilePickerActivity(getSupportArchiveType());
             }
         } else if (id == R.id.buttonSelectFolder) {
-            Objects.requireNonNull(activityObservableField.get())
+            getStockActivity()
                     .showDirPickerDialog();
         } else if (id == R.id.buttonSelectIcon) {
-            Objects.requireNonNull(activityObservableField.get())
+            getStockActivity()
                     .showFilePickerActivity(new String[]{"image/png" , "image/jpeg"});
         } else if (id == R.id.buttonSelectPath) {
-            Objects.requireNonNull(activityObservableField.get())
+            getStockActivity()
                     .showFilePickerActivity(new String[]{"application/octet-stream"});
         } else if (id == R.id.buttonSelectMod) {
-            Objects.requireNonNull(activityObservableField.get())
+            getStockActivity()
                     .showFilePickerActivity(new String[]{"application/octet-stream"});
         }
     }
@@ -564,7 +562,7 @@ public class StockViewModel extends AndroidViewModel {
 
     public void installGame(DocumentFile gameFile , GameData gameData) {
         if (!isWritableDirectory(gamesDir)) {
-            Objects.requireNonNull(activityObservableField.get())
+            getStockActivity()
                     .showErrorDialog("Games directory is not writable");
             return;
         }
@@ -574,7 +572,7 @@ public class StockViewModel extends AndroidViewModel {
     private void doInstallGame(DocumentFile gameFile , GameData gameData) {
         var gameDir = getOrCreateGameDirectory(gameData.title);
         if (!isWritableDirectory(gameDir)) {
-            Objects.requireNonNull(activityObservableField.get())
+            getStockActivity()
                     .showErrorDialog("Games directory is not writable");
             return;
         }
@@ -587,23 +585,19 @@ public class StockViewModel extends AndroidViewModel {
             installer.setPasswordForArchive(passwordForArchive);
         }
         installer.getErrorCode().observeForever(error -> {
-            if (error != null) {
-                if (error.equals("PasswordNotFound")) {
-                    Objects.requireNonNull(activityObservableField.get()).showErrorDialog("Empty password");
-                }
-                if (error.equals("NIG")
-                        && getStockActivity() != null) {
-                    String message = getStockActivity()
+            switch (error) {
+                case "PasswordNotFound":
+                    getStockActivity().showErrorDialog("Empty password");
+                    break;
+                case "NIG":
+                    getStockActivity().showErrorDialog(getStockActivity()
                             .getString(R.string.installError)
-                            .replace("-GAMENAME-" , gameData.title);
-                    Objects.requireNonNull(activityObservableField.get()).showErrorDialog(message);
-                }
-                if (error.equals("NFE")
-                        && getStockActivity() != null) {
-                    String message = getStockActivity()
-                            .getString(R.string.noGameFilesError);
-                    Objects.requireNonNull(activityObservableField.get()).showErrorDialog(message);
-                }
+                            .replace("-GAMENAME-" , gameData.title));
+                    break;
+                case "NFE":
+                    getStockActivity().showErrorDialog(getStockActivity()
+                            .getString(R.string.noGameFilesError));
+                    break;
             }
         });
         installer.gameInstall(gameFile , gameDir).observeForever(aBoolean -> {
@@ -618,57 +612,32 @@ public class StockViewModel extends AndroidViewModel {
 
     private void notificationStateGame(String gameName) {
         var builder =
-                new NotifyBuilder(activityObservableField.get() , "gameInstallationProgress");
+                new NotifyBuilder(getStockActivity() , "gameInstallationProgress");
         builder.createStatusChannel();
         builder.createProgressChannel();
-        if (getStockActivity() != null) {
-            builder.setTitleNotify(getStockActivity().getString(R.string.titleNotify));
-            builder.setTextNotify(getStockActivity().getString(R.string.textProgressNotify));
-            var notificationManager =
-                    NotificationManagerCompat.from(getApplication());
-            if (ActivityCompat.checkSelfPermission(getApplication(), Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
-                notificationManager.notify(1 , builder.buildWithProgress());
-                ArchiveUtil.progressInstall.observeForever(aLong -> {
-                    if ((aLong % 2) == 0) {
-                        notificationManager.notify(1 , builder.updateProgress((int) (aLong * 100 / ArchiveUtil.totalSize)));
-                    }
-                    if (aLong == ArchiveUtil.totalSize) {
-                        notificationManager.cancelAll();
-                        var notifyBuilder =
-                                new NotifyBuilder(activityObservableField.get() , "gameInstalled");
-                        notifyBuilder.setTitleNotify(getStockActivity().getString(R.string.titleNotify));
-                        var tempMessage = getStockActivity()
-                                .getString(R.string.textInstallNotify)
-                                .replace("-GAMENAME-" , gameName);
-                        notifyBuilder.setTextNotify(tempMessage);
-                        notificationManager.notify(1 , notifyBuilder.buildWithoutProgress());
-                    }
-                });
-            }
-        } else {
-            builder.setTitleNotify(getApplication().getString(R.string.titleNotify));
-            builder.setTextNotify(getApplication().getString(R.string.textProgressNotify));
-            var notificationManager =
-                    NotificationManagerCompat.from(getApplication());
-            if (ActivityCompat.checkSelfPermission(getApplication(), Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
-                notificationManager.notify(1 , builder.buildWithProgress());
-                ArchiveUtil.progressInstall.observeForever(aLong -> {
-                    if ((aLong % 2) == 0) {
-                        notificationManager.notify(1 , builder.updateProgress((int) (aLong * 100 / ArchiveUtil.totalSize)));
-                    }
-                    if (aLong == ArchiveUtil.totalSize) {
-                        notificationManager.cancelAll();
-                        var notifyBuilder =
-                                new NotifyBuilder(activityObservableField.get() , "gameInstalled");
-                        notifyBuilder.setTitleNotify(getApplication().getString(R.string.titleNotify));
-                        var tempMessage = getApplication()
-                                .getString(R.string.textInstallNotify)
-                                .replace("-GAMENAME-" , gameName);
-                        notifyBuilder.setTextNotify(tempMessage);
-                        notificationManager.notify(1 , notifyBuilder.buildWithoutProgress());
-                    }
-                });
-            }
+        builder.setTitleNotify(getStockActivity().getString(R.string.titleNotify));
+        builder.setTextNotify(getStockActivity().getString(R.string.textProgressNotify));
+        var notificationManager =
+                NotificationManagerCompat.from(getApplication());
+        if (ActivityCompat.checkSelfPermission(getApplication(),
+                Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
+            notificationManager.notify(1 , builder.buildWithProgress());
+            ArchiveUtil.progressInstall.observeForever(aLong -> {
+                if ((aLong % 2) == 0) {
+                    notificationManager.notify(1 , builder.updateProgress((int) (aLong * 100 / ArchiveUtil.totalSize)));
+                }
+                if (aLong == ArchiveUtil.totalSize) {
+                    notificationManager.cancelAll();
+                    var notifyBuilder =
+                            new NotifyBuilder(getStockActivity() , "gameInstalled");
+                    notifyBuilder.setTitleNotify(getStockActivity().getString(R.string.titleNotify));
+                    var tempMessage = getStockActivity()
+                            .getString(R.string.textInstallNotify)
+                            .replace("-GAMENAME-" , gameName);
+                    notifyBuilder.setTextNotify(tempMessage);
+                    notificationManager.notify(1 , notifyBuilder.buildWithoutProgress());
+                }
+            });
         }
     }
 
@@ -678,7 +647,7 @@ public class StockViewModel extends AndroidViewModel {
             infoFile = createFile(gameDir, GAME_INFO_FILENAME);
         }
         if (!isWritableFile(infoFile)) {
-            Objects.requireNonNull(activityObservableField.get())
+            getStockActivity()
                     .showErrorDialog("Game data info file is not writable");
             return;
         }
@@ -686,7 +655,7 @@ public class StockViewModel extends AndroidViewModel {
              var writer = new OutputStreamWriter(out)) {
             writer.write(objectToXml(gameData));
         } catch (Exception ex) {
-            Objects.requireNonNull(activityObservableField.get())
+            getStockActivity()
                     .showErrorDialog("Failed to write to a gameData info file");
         }
     }
@@ -696,16 +665,15 @@ public class StockViewModel extends AndroidViewModel {
     public void refreshGamesDirectory() {
         var extFilesDir = getApplication().getExternalFilesDir(null);
         if (extFilesDir == null) {
-            Objects.requireNonNull(activityObservableField.get())
+            getStockActivity()
                     .showErrorDialog("External files directory not found");
             return;
         }
         var dir = getOrCreateDirectory(extFilesDir, "games");
-        if (!isWritableDirectory(dir)
-                && getStockActivity() != null) {
+        if (!isWritableDirectory(dir)) {
             var message = "Games directory is not writable" + " " +
                     getStockActivity().getString(R.string.gamesDirError);
-            Objects.requireNonNull(activityObservableField.get())
+            getStockActivity()
                     .showErrorDialog(message);
             return;
         }
@@ -743,7 +711,7 @@ public class StockViewModel extends AndroidViewModel {
             }
         }
 
-        HashMap<String, GameData> tempGamesMap = new HashMap<>();
+        var tempGamesMap = new HashMap<String, GameData>();
         for (var localGameData : localGame.getGames(gamesDir)) {
             var remoteGameData = tempGamesMap.get(localGameData.id);
             if (remoteGameData != null) {
