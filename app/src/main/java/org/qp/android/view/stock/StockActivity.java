@@ -30,6 +30,7 @@ import androidx.core.content.ContextCompat;
 import androidx.core.os.LocaleListCompat;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.DialogFragment;
+import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
@@ -311,22 +312,48 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
     }
 
     public void showErrorDialog(String errorMessage) {
-        var dialogFragments = new StockDialogFrags();
-        dialogFragments.setDialogType(StockDialogType.ERROR_DIALOG);
-        dialogFragments.setMessage(errorMessage);
-        dialogFragments.show(getSupportFragmentManager(), "errorDialogFragment");
+        if (getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED)) {
+            var dialogFragments = new StockDialogFrags();
+            dialogFragments.setDialogType(StockDialogType.ERROR_DIALOG);
+            dialogFragments.setMessage(errorMessage);
+            var fragment = getSupportFragmentManager()
+                    .findFragmentByTag("errorDialogFragment");
+            if (fragment != null && fragment.isAdded()) {
+                fragment.onDestroy();
+            } else {
+                dialogFragments.show(getSupportFragmentManager() , "errorDialogFragment");
+            }
+        }
     }
 
     public void showEditDialogFragment (DialogFragment editDialog) {
-        editDialog.show(getSupportFragmentManager(), "editDialogFragment");
+        var fragment = getSupportFragmentManager()
+                .findFragmentByTag("editDialogFragment");
+        if (fragment != null && fragment.isAdded()) {
+            fragment.onDestroy();
+        } else {
+            editDialog.show(getSupportFragmentManager() , "editDialogFragment");
+        }
     }
 
     public void showInstallDialogFragment (DialogFragment installDialog) {
-        installDialog.show(getSupportFragmentManager(), "installDialogFragment");
+        var fragment = getSupportFragmentManager()
+                .findFragmentByTag("installDialogFragment");
+        if (fragment != null && fragment.isAdded()) {
+            fragment.onDestroy();
+        } else {
+            installDialog.show(getSupportFragmentManager() , "installDialogFragment");
+        }
     }
 
     public void showSelectDialogFragment (DialogFragment selectDialog) {
-        selectDialog.show(getSupportFragmentManager(), "selectDialogFragment");
+        var fragment = getSupportFragmentManager()
+                .findFragmentByTag("selectDialogFragment");
+        if (fragment != null && fragment.isAdded()) {
+            fragment.onDestroy();
+        } else {
+            selectDialog.show(getSupportFragmentManager() , "selectDialogFragment");
+        }
     }
 
     public void showFilePickerActivity(String[] mimeTypes) {
@@ -419,7 +446,9 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         var files = Environment
                 .getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
                 .mkdirs();
-        Log.i(TAG , String.valueOf(files));
+        if (!files) {
+            showErrorDialog("Files not found");
+        }
         mgr.enqueue(new DownloadManager.Request(uri)
                 .setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI
                         | DownloadManager.Request.NETWORK_MOBILE)

@@ -4,7 +4,6 @@ import static org.qp.android.utils.Base64Util.decodeBase64;
 import static org.qp.android.utils.Base64Util.hasBase64;
 import static org.qp.android.utils.ColorUtil.convertRGBAToBGRA;
 import static org.qp.android.utils.ColorUtil.getHexColor;
-import static org.qp.android.utils.PathUtil.getExtension;
 import static org.qp.android.utils.ThreadUtil.isMainThread;
 import static org.qp.android.utils.ViewUtil.getFontStyle;
 
@@ -25,6 +24,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.databinding.ObservableBoolean;
 import androidx.databinding.ObservableField;
+import androidx.documentfile.provider.DocumentFile;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -354,10 +354,10 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
             if (uri.getScheme().startsWith("file")) {
                 try {
                     var relPath = Uri.decode(uri.toString().substring(8));
-                    var file = gameContentResolver.getFile(relPath);
-                    var extension = getExtension(file.getName());
+                    var file = DocumentFile.fromFile(gameContentResolver.getFile(relPath));
+                    var extension = file.getName();
                     var mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
-                    var in = getApplication().getContentResolver().openInputStream(Uri.fromFile(file));
+                    var in = getApplication().getContentResolver().openInputStream(file.getUri());
                     return new WebResourceResponse(mimeType , null , in);
                 } catch (FileNotFoundException | NullPointerException ex) {
                     Log.e(TAG , "File not found" , ex);

@@ -661,7 +661,11 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        if (!libQpProxy.getGameState().gameTitle.contentEquals(item.getTitle())) {
+        if (item.getTitle() == null) {
+            var drawer = (DrawerLayout) activityGameBinding.gameDrawerLayout;
+            drawer.closeDrawer(GravityCompat.START);
+            return false;
+        } else if (!libQpProxy.getGameState().gameTitle.contentEquals(item.getTitle())) {
             var simpleNameForSave = libQpProxy.getGameState().gameFile.getName();
             var hardNameForSave = simpleNameForSave+"#"+ThreadLocalRandom.current().nextInt();
             var currentGameDir = libQpProxy.getGameState().gameDir;

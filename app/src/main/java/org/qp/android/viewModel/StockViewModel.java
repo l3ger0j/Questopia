@@ -284,6 +284,10 @@ public class StockViewModel extends AndroidViewModel {
         return SettingsController.newInstance(getApplication());
     }
 
+    public boolean isGamePossiblyDownload() {
+        return !isGameInstalled() && isHasRemoteUrl();
+    }
+
     public boolean isGameInstalled () {
         return tempGameData.isInstalled() && doesDirectoryContainGameFiles(tempGameData.gameDir);
     }
