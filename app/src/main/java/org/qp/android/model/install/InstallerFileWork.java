@@ -1,7 +1,6 @@
 package org.qp.android.model.install;
 
 import static org.qp.android.utils.ArchiveUtil.extractArchiveEntries;
-import static org.qp.android.utils.ArchiveUtil.extractArchiveEntriesWithPassword;
 import static org.qp.android.utils.ArchiveUtil.testArchiveEntries;
 import static org.qp.android.utils.DirUtil.doesDirectoryContainGameFiles;
 import static org.qp.android.utils.DirUtil.normalizeGameDirectory;
@@ -22,6 +21,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 
+@Deprecated
 public class InstallerFileWork extends Worker {
     private final File destDir = new File(Objects.requireNonNull(getInputData().getString("destDir")));
     private final DocumentFile srcFile = DocumentFile.fromSingleUri(getApplicationContext(), Uri.parse(getInputData().getString("srcFile")));
@@ -34,6 +34,10 @@ public class InstallerFileWork extends Worker {
     @NonNull
     @Override
     public Result doWork() {
+        if (srcFile == null) {
+            return Result.failure();
+        }
+
         var outputErrorOne = new Data.Builder()
                 .putString("errorOne", "NIG")
                 .build();
@@ -50,19 +54,18 @@ public class InstallerFileWork extends Worker {
         var test = new FutureTask<>(() ->
                 testArchiveEntries(
                         getApplicationContext() ,
-                        Objects.requireNonNull(srcFile).getUri() ,
+                        srcFile.getUri() ,
                         destDir));
         service.submit(test);
 
         try {
             if (test.get() != null) {
                 if (test.get().toString().contains("Password is 'null'")) {
-                    if (passwordForArchive != null
-                            && !passwordForArchive.isEmpty()) {
+                    if (passwordForArchive != null && !passwordForArchive.isEmpty()) {
                         var taskWithPassword = new FutureTask<>(() ->
-                                extractArchiveEntriesWithPassword(
+                                extractArchiveEntries(
                                         getApplicationContext() ,
-                                        Objects.requireNonNull(srcFile).getUri() ,
+                                        srcFile.getUri() ,
                                         destDir,
                                         passwordForArchive));
                         service.submit(taskWithPassword);
@@ -84,7 +87,7 @@ public class InstallerFileWork extends Worker {
                 var taskWithoutPassword = new FutureTask<>(() ->
                         extractArchiveEntries(
                                 getApplicationContext() ,
-                                Objects.requireNonNull(srcFile).getUri() ,
+                                srcFile.getUri() ,
                                 destDir));
                 service.submit(taskWithoutPassword);
                 if (taskWithoutPassword.get()) {

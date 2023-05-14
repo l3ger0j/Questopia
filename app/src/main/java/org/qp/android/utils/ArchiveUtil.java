@@ -34,12 +34,12 @@ import java.util.HashMap;
 import java.util.Objects;
 import java.util.Set;
 
+@Deprecated
 public final class ArchiveUtil {
     private static final String TAG = ArchiveUtil.class.getSimpleName();
 
     public static long totalSize;
     public static MutableLiveData<Long> progressInstall = new MutableLiveData<>();
-    public static MutableLiveData<String> passwordForArchive = new MutableLiveData<>();
 
     @NonNull
     public static int[] getPrimitiveLongArrayFromInt(@NonNull Set<Integer> input) {
@@ -51,15 +51,39 @@ public final class ArchiveUtil {
         return ret;
     }
 
-    public static boolean extractArchiveEntries(Context context,
-                                              Uri uri,
-                                              File targetFolder) {
+    @Nullable
+    public static Throwable testArchiveEntries(Context context,
+                                               Uri uri,
+                                               File targetFolder) {
         assertNonUiThread();
         var fileNames = new HashMap<Integer, String>();
         try (var stream = new DocumentFileRandomInStream(context, uri);
              var inArchive = SevenZip.openInArchive(null, stream)) {
             var itemCount = inArchive.getNumberOfItems();
-            for (var index = 0; index < itemCount; index++) {
+            for (var index = 0; index <= itemCount; index++) {
+                var fileName = inArchive.getStringProperty(index, PropID.PATH);
+                var lastSeparator = fileName.lastIndexOf(File.separator);
+                if (lastSeparator > -1) fileName = fileName.substring(lastSeparator + 1);
+                fileNames.put(index, fileName);
+            }
+            var indexes = getPrimitiveLongArrayFromInt(fileNames.keySet());
+            inArchive.extract(indexes, true,
+                    new ArchiveExtractCallback(targetFolder, inArchive, context));
+            return null;
+        } catch (Throwable er) {
+            return er;
+        }
+    }
+
+    public static boolean extractArchiveEntries(Context context,
+                                                Uri uri,
+                                                File targetFolder) {
+        assertNonUiThread();
+        var fileNames = new HashMap<Integer, String>();
+        try (var stream = new DocumentFileRandomInStream(context, uri);
+             var inArchive = SevenZip.openInArchive(null, stream)) {
+            var itemCount = inArchive.getNumberOfItems();
+            for (var index = 0; index <= itemCount; index++) {
                 var fileName = inArchive.getStringProperty(index, PropID.PATH);
                 var lastSeparator = fileName.lastIndexOf(File.separator);
                 if (lastSeparator > -1) fileName = fileName.substring(lastSeparator + 1);
@@ -75,40 +99,16 @@ public final class ArchiveUtil {
         }
     }
 
-    @Nullable
-    public static Throwable testArchiveEntries(Context context,
-                                            Uri uri,
-                                            File targetFolder) {
-        assertNonUiThread();
-        var fileNames = new HashMap<Integer, String>();
-        try (var stream = new DocumentFileRandomInStream(context, uri);
-             var inArchive = SevenZip.openInArchive(null, stream)) {
-            var itemCount = inArchive.getNumberOfItems();
-            for (var index = 0; index < itemCount; index++) {
-                var fileName = inArchive.getStringProperty(index, PropID.PATH);
-                var lastSeparator = fileName.lastIndexOf(File.separator);
-                if (lastSeparator > -1) fileName = fileName.substring(lastSeparator + 1);
-                fileNames.put(index, fileName);
-            }
-            var indexes = getPrimitiveLongArrayFromInt(fileNames.keySet());
-            inArchive.extract(indexes, true,
-                    new ArchiveExtractCallback(targetFolder, inArchive, context));
-            return null;
-        } catch (IOException er) {
-            return er;
-        }
-    }
-
-    public static boolean extractArchiveEntriesWithPassword(Context context,
-                                                            Uri uri,
-                                                            File targetFolder,
-                                                            String password) {
+    public static boolean extractArchiveEntries(Context context,
+                                                Uri uri,
+                                                File targetFolder,
+                                                String password) {
         assertNonUiThread();
         var fileNames = new HashMap<Integer, String>();
         try (var stream = new DocumentFileRandomInStream(context, uri);
              var inArchive = SevenZip.openInArchive(null, stream, password)) {
             var itemCount = inArchive.getNumberOfItems();
-            for (var index = 0; index < itemCount; index++) {
+            for (var index = 0; index <= itemCount; index++) {
                 var fileName = inArchive.getStringProperty(index, PropID.PATH);
                 var lastSeparator = fileName.lastIndexOf(File.separator);
                 if (lastSeparator > -1) fileName = fileName.substring(lastSeparator + 1);
@@ -149,7 +149,7 @@ public final class ArchiveUtil {
         private void openUri() throws IOException {
             if (stream != null) stream.close();
             if (pfdInput != null) pfdInput.close();
-            pfdInput = contentResolver.openFileDescriptor(uri, "r");
+            pfdInput = contentResolver.openFileDescriptor(uri, "rw");
             if (pfdInput != null)
                 stream = new FileInputStream(pfdInput.getFileDescriptor());
         }
@@ -250,8 +250,7 @@ public final class ArchiveUtil {
                 throws SevenZipException {
             Log.v(TAG, "Extract archive, get stream: " + index + " to: " + extractAskMode);
             this.extractAskMode = extractAskMode;
-            var isFolder = (Boolean) inArchive.getProperty(index ,
-                    PropID.IS_FOLDER);
+            var isFolder = (Boolean) inArchive.getProperty(index , PropID.IS_FOLDER);
             var path = (String) inArchive.getProperty(index, PropID.PATH);
             var file = new File(targetFolder.getAbsolutePath(), path);
             if (isFolder) {
@@ -261,7 +260,7 @@ public final class ArchiveUtil {
             createDirectory(Objects.requireNonNull(file.getParentFile()));
             try {
                 stream = new SequentialOutStream(context.getContentResolver()
-                        .openOutputStream(Uri.parse(Uri.decode(String.valueOf(Uri.fromFile(file)))) , "rwt"));
+                        .openOutputStream(Uri.parse(Uri.decode(String.valueOf(Uri.fromFile(file)))) , "rw"));
             } catch (FileNotFoundException e) {
                 Log.e(TAG, "Error: ", e);
             }
@@ -271,8 +270,7 @@ public final class ArchiveUtil {
         private void createDirectory(File parentFile) throws SevenZipException {
             if (!parentFile.exists()) {
                 if (!parentFile.mkdirs()) {
-                    throw new SevenZipException("Error creating directory: "
-                            + parentFile.getAbsolutePath());
+                    throw new SevenZipException("Error creating directory: " + parentFile.getAbsolutePath());
                 }
             }
         }

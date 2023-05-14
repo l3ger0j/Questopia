@@ -28,7 +28,7 @@ import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.os.LocaleListCompat;
-import androidx.documentfile.provider.DocumentFile;
+import androidx.core.splashscreen.SplashScreen;
 import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.ViewModelProvider;
@@ -120,6 +120,8 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        SplashScreen splashScreen = SplashScreen.installSplashScreen(this);
+
         super.onCreate(savedInstanceState);
         activityStockBinding = ActivityStockBinding.inflate(getLayoutInflater());
 
@@ -156,30 +158,6 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
                 for (var file : documentFiles) {
                     var document = new FileWrapper.Document(file);
                     switch (document.getExtension()) {
-                        case "zip":
-                        case "rar":
-                        case "7z":
-                        case "s7z":
-                        case "arc":
-                        case "cdx":
-                        case "arj":
-                        case "b1":
-                        case "cfs":
-                        case "tar.gz":
-                        case "tgz":
-                        case "tar.Z":
-                        case "tar.bz2":
-                        case "tbz2":
-                        case "tar.lz":
-                        case "tlz":
-                        case "tar.xz":
-                        case "txz":
-                        case "tar.zst":
-                        case "xar":
-                        case "zoo":
-                            stockViewModel.setTempInstallFile(document.getDocumentFile());
-                            stockViewModel.isSelectArchive.set(true);
-                            break;
                         case "png":
                         case "jpg":
                         case "jpeg":
@@ -370,7 +348,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
                 "Select file",
                 true,
                 mimeTypes).runFilePicker(data -> {
-            stockViewModel.setTempInstallFile((DocumentFile) data);
+            // stockViewModel.setTempInstallFile((DocumentFile) data);
             stockViewModel.isSelectArchive.set(true);
             return null;
         });

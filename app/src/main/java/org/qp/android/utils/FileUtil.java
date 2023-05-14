@@ -1,5 +1,7 @@
 package org.qp.android.utils;
 
+import static org.qp.android.utils.PathUtil.normalizeFolderName;
+
 import android.content.Context;
 import android.util.Log;
 
@@ -17,18 +19,37 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.text.DecimalFormat;
-import java.util.Objects;
 
 public final class FileUtil {
     private static final String TAG = FileUtil.class.getSimpleName();
     public static final String GAME_INFO_FILENAME = "gameStockInfo";
 
-    public static boolean isWritableFile(File file) {
-        return file != null && file.exists() && file.canWrite();
+    public static <T> boolean isWritableFile(T file) {
+        if (file == null) {
+            return false;
+        }
+        if (file instanceof File) {
+            var tempFile = (File) file;
+            return tempFile.exists() && tempFile.canWrite();
+        } else if (file instanceof DocumentFile) {
+            var tempFile = (DocumentFile) file;
+            return tempFile.exists() && tempFile.isFile() && tempFile.canWrite();
+        }
+        return false;
     }
 
-    public static boolean isWritableDirectory(File dir) {
-        return dir != null && dir.exists() && dir.isDirectory() && dir.canWrite();
+    public static <T> boolean isWritableDirectory(T dir) {
+        if (dir == null) {
+            return false;
+        }
+        if (dir instanceof File) {
+            var tempDir = (File) dir;
+            return tempDir.exists() && tempDir.isDirectory() && tempDir.canWrite();
+        } else if (dir instanceof DocumentFile) {
+            var tempFile = (DocumentFile) dir;
+            return tempFile.exists() && tempFile.isDirectory() && tempFile.canWrite();
+        }
+        return false;
     }
 
     public static File getOrCreateFile(File parentDir,
@@ -58,6 +79,13 @@ public final class FileUtil {
     }
 
     @NonNull
+    public static File getOrCreateGameDirectory(File gamesDir,
+                                         String gameName) {
+        var folderName = normalizeFolderName(gameName);
+        return getOrCreateDirectory(gamesDir , folderName);
+    }
+
+    @NonNull
     public static File getOrCreateDirectory(File parentDir,
                                             String name) {
         var dir = findFileOrDirectory(parentDir, name);
@@ -80,11 +108,20 @@ public final class FileUtil {
     }
 
     @Nullable
-    public static File findFileOrDirectory(File parentDir,
-                                           final String name) {
-        var files = parentDir.listFiles((dir, filename) -> filename.equalsIgnoreCase(name));
-        if (files == null || files.length == 0) return null;
-        return files[0];
+    public static <T> T findFileOrDirectory(T parentDir,
+                                            final String name) {
+        if (parentDir instanceof File) {
+            var tempDir = (File) parentDir;
+            var files = tempDir.listFiles((dir, filename) -> filename.equalsIgnoreCase(name));
+            if (files == null || files.length == 0) return null;
+            return (T) files[0];
+        } else if (parentDir instanceof DocumentFile) {
+            var tempDir = (DocumentFile) parentDir;
+            var found = tempDir.findFile(name);
+            if (found == null || found.isVirtual()) return null;
+            return (T) found;
+        }
+        return null;
     }
 
     @Nullable
@@ -97,7 +134,6 @@ public final class FileUtil {
         var dirName = path.substring(0, idx);
         var dir = findFileOrDirectory(parentDir, dirName);
         if (dir == null) return null;
-
         return findFileRecursively(dir, path.substring(idx + 1));
     }
 
@@ -120,7 +156,11 @@ public final class FileUtil {
     }
 
     public static void deleteDirectory(File dir) {
-        for (var file : Objects.requireNonNull(dir.listFiles())) {
+        if (dir.listFiles() == null) {
+            return;
+        }
+
+        for (var file : dir.listFiles()) {
             if (file.isDirectory()) {
                 deleteDirectory(file);
             } else {

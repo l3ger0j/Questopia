@@ -9,17 +9,15 @@ import static org.qp.android.utils.FileUtil.findFileOrDirectory;
 import static org.qp.android.utils.FileUtil.findFileRecursively;
 import static org.qp.android.utils.FileUtil.formatFileSize;
 import static org.qp.android.utils.FileUtil.getOrCreateDirectory;
+import static org.qp.android.utils.FileUtil.getOrCreateGameDirectory;
 import static org.qp.android.utils.FileUtil.isWritableDirectory;
 import static org.qp.android.utils.FileUtil.isWritableFile;
-import static org.qp.android.utils.PathUtil.normalizeFolderName;
 import static org.qp.android.utils.PathUtil.removeExtension;
 import static org.qp.android.utils.XmlUtil.objectToXml;
 
-import android.Manifest;
 import android.app.Application;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Log;
@@ -27,8 +25,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 
 import androidx.annotation.NonNull;
-import androidx.core.app.ActivityCompat;
-import androidx.core.app.NotificationManagerCompat;
 import androidx.databinding.ObservableBoolean;
 import androidx.databinding.ObservableField;
 import androidx.documentfile.provider.DocumentFile;
@@ -38,7 +34,6 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.squareup.picasso.Picasso;
 
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.qp.android.GameDataParcel;
 import org.qp.android.QuestPlayerApplication;
@@ -47,11 +42,9 @@ import org.qp.android.databinding.DialogEditBinding;
 import org.qp.android.databinding.DialogInstallBinding;
 import org.qp.android.dto.stock.GameData;
 import org.qp.android.model.install.Installer;
-import org.qp.android.model.notify.NotifyBuilder;
 import org.qp.android.model.plugin.PluginClient;
 import org.qp.android.model.plugin.PluginType;
 import org.qp.android.plugin.AsyncCallback;
-import org.qp.android.utils.ArchiveUtil;
 import org.qp.android.view.game.GameActivity;
 import org.qp.android.view.settings.SettingsController;
 import org.qp.android.view.stock.StockActivity;
@@ -82,7 +75,7 @@ public class StockViewModel extends AndroidViewModel {
     private final HashMap<String, GameData> gamesMap = new HashMap<>();
 
     private File gamesDir;
-    private DocumentFile tempInstallFile, tempInstallDir, tempImageFile, tempPathFile, tempModFile;
+    private DocumentFile tempInstallDir, tempImageFile, tempPathFile, tempModFile;
 
     private DialogInstallBinding installBinding;
     private GameData tempGameData;
@@ -112,14 +105,8 @@ public class StockViewModel extends AndroidViewModel {
         editBinding.buttonSelectMod.setText(tempModFile.getName());
     }
 
-    public void setTempInstallFile(@NonNull DocumentFile tempInstallFile) {
-        this.tempInstallFile = tempInstallFile;
-        installBinding.buttonSelectArchive.setText(tempInstallFile.getName());
-    }
-
     public void setTempInstallDir(@NonNull DocumentFile tempInstallDir) {
         this.tempInstallDir = tempInstallDir;
-        installBinding.buttonSelectArchive.setEnabled(false);
         installBinding.buttonSelectFolder.setText(tempInstallDir.getName());
     }
 
@@ -327,19 +314,13 @@ public class StockViewModel extends AndroidViewModel {
         isShowDialog.set(true);
     }
 
-    private String passwordForArchive;
-
     public void createInstallIntent() {
         var gameData = new GameData();
         try {
-            gameData.id = removeExtension(Objects.requireNonNull(tempInstallFile != null ?
-                    tempInstallFile.getName()
-                    : tempInstallDir.getName()));
+            gameData.id = removeExtension(Objects.requireNonNull(tempInstallDir.getName()));
             gameData.title = (Objects.requireNonNull(
                     installBinding.ET0.getEditText()).getText().toString().isEmpty() ?
-                    removeExtension(Objects.requireNonNull(tempInstallFile != null ?
-                            tempInstallFile.getName() :
-                            tempInstallDir.getName()))
+                    removeExtension(Objects.requireNonNull(tempInstallDir.getName()))
                     : Objects.requireNonNull(
                     installBinding.ET0.getEditText()).getText().toString());
             gameData.author = (Objects.requireNonNull(
@@ -352,18 +333,11 @@ public class StockViewModel extends AndroidViewModel {
                     null
                     : Objects.requireNonNull(
                     installBinding.ET2.getEditText()).getText().toString());
-            passwordForArchive = (Objects.requireNonNull(
-                    installBinding.ET3.getEditText()).getText().toString().isEmpty() ?
-                    null
-                    : Objects.requireNonNull(
-                    installBinding.ET3.getEditText()).getText().toString());
-            if (tempInstallFile != null) {
-                gameData.fileSize = formatFileSize(tempInstallFile.length() , controller.binaryPrefixes);
-            } else if (tempInstallDir != null) {
+            if (tempInstallDir != null) {
                 gameData.fileSize = formatFileSize(dirSize(tempInstallDir) , controller.binaryPrefixes);
             }
             gameData.icon = (tempImageFile == null ? null : tempImageFile.getUri().toString());
-            installGame(tempInstallFile != null ? tempInstallFile : tempInstallDir , gameData);
+            installGame(tempInstallDir , gameData);
             isSelectArchive.set(false);
             isSelectFolder.set(false);
             dialogFragments.dismiss();
@@ -479,33 +453,9 @@ public class StockViewModel extends AndroidViewModel {
         }
     }
 
-    @NonNull
-    @Contract(value = " -> new", pure = true)
-    private String[] getSupportArchiveType() {
-        return new String[]{
-                "application/x-7z-compressed" ,
-                "application/rar" ,
-                "application/zip" ,
-                "application/x-freearc" ,
-                "application/x-arj" ,
-                "application/x-b1" ,
-                "application/x-cfs-compressed" ,
-                "application/x-gtar" ,
-                "application/x-xar" ,
-                "application/x-zoo"};
-    }
-
     public void sendIntent(@NonNull View view) {
         int id = view.getId();
-        if (id == R.id.buttonSelectArchive) {
-            if (controller.isUseNewFilePicker) {
-                getStockActivity()
-                        .showFilePickerDialog(getSupportArchiveType());
-            } else {
-                getStockActivity()
-                        .showFilePickerActivity(getSupportArchiveType());
-            }
-        } else if (id == R.id.buttonSelectFolder) {
+        if (id == R.id.buttonSelectFolder) {
             getStockActivity()
                     .showDirPickerDialog();
         } else if (id == R.id.buttonSelectIcon) {
@@ -523,10 +473,8 @@ public class StockViewModel extends AndroidViewModel {
     @NonNull
     private DialogInstallBinding formingInstallView() {
         installBinding =
-                DialogInstallBinding.inflate(LayoutInflater.from(activityObservableField.get()));
+                DialogInstallBinding.inflate(LayoutInflater.from(getStockActivity()));
         installBinding.setStockVM(this);
-        installBinding.buttonSelectArchive.setOnClickListener(v ->
-                sendIntent(installBinding.buttonSelectArchive));
         installBinding.buttonSelectFolder.setOnClickListener(v ->
                 sendIntent(installBinding.buttonSelectFolder));
         installBinding.buttonSelectIcon.setOnClickListener(v ->
@@ -539,7 +487,7 @@ public class StockViewModel extends AndroidViewModel {
     @NonNull
     private DialogEditBinding formingEditView() {
         editBinding =
-                DialogEditBinding.inflate(LayoutInflater.from(activityObservableField.get()));
+                DialogEditBinding.inflate(LayoutInflater.from(getStockActivity()));
         editBinding.setStockVM(this);
 
         if (!tempGameData.icon.isEmpty()) {
@@ -558,12 +506,6 @@ public class StockViewModel extends AndroidViewModel {
     // endregion Dialog
 
     // region Game install
-    @NonNull
-    public File getOrCreateGameDirectory(String gameName) {
-        var folderName = normalizeFolderName(gameName);
-        return getOrCreateDirectory(gamesDir , folderName);
-    }
-
     public void installGame(DocumentFile gameFile , GameData gameData) {
         if (!isWritableDirectory(gamesDir)) {
             getStockActivity()
@@ -574,25 +516,18 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     private void doInstallGame(DocumentFile gameFile , GameData gameData) {
-        var gameDir = getOrCreateGameDirectory(gameData.title);
+        var gameDir = getOrCreateGameDirectory(gamesDir , gameData.title);
         if (!isWritableDirectory(gameDir)) {
             getStockActivity()
                     .showErrorDialog("Games directory is not writable");
             return;
         }
-        if (!gameFile.isDirectory()) {
-            notificationStateGame(gameData.title);
-        }
 
-        var installer = new Installer(activityObservableField.get());
-        if (passwordForArchive != null) {
-            installer.setPasswordForArchive(passwordForArchive);
-        }
+        isShowDialog.set(false);
+
+        var installer = new Installer(getStockActivity());
         installer.getErrorCode().observeForever(error -> {
             switch (error) {
-                case "PasswordNotFound":
-                    getStockActivity().showErrorDialog("Empty password");
-                    break;
                 case "NIG":
                     getStockActivity().showErrorDialog(getStockActivity()
                             .getString(R.string.installError)
@@ -610,39 +545,6 @@ public class StockViewModel extends AndroidViewModel {
                 refreshGames();
             }
         });
-
-        isShowDialog.set(false);
-    }
-
-    private void notificationStateGame(String gameName) {
-        var builder =
-                new NotifyBuilder(getStockActivity() , "gameInstallationProgress");
-        builder.createStatusChannel();
-        builder.createProgressChannel();
-        builder.setTitleNotify(getStockActivity().getString(R.string.titleNotify));
-        builder.setTextNotify(getStockActivity().getString(R.string.textProgressNotify));
-        var notificationManager =
-                NotificationManagerCompat.from(getApplication());
-        if (ActivityCompat.checkSelfPermission(getApplication(),
-                Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
-            notificationManager.notify(1 , builder.buildWithProgress());
-            ArchiveUtil.progressInstall.observeForever(aLong -> {
-                if ((aLong % 2) == 0) {
-                    notificationManager.notify(1 , builder.updateProgress((int) (aLong * 100 / ArchiveUtil.totalSize)));
-                }
-                if (aLong == ArchiveUtil.totalSize) {
-                    notificationManager.cancelAll();
-                    var notifyBuilder =
-                            new NotifyBuilder(getStockActivity() , "gameInstalled");
-                    notifyBuilder.setTitleNotify(getStockActivity().getString(R.string.titleNotify));
-                    var tempMessage = getStockActivity()
-                            .getString(R.string.textInstallNotify)
-                            .replace("-GAMENAME-" , gameName);
-                    notifyBuilder.setTextNotify(tempMessage);
-                    notificationManager.notify(1 , notifyBuilder.buildWithoutProgress());
-                }
-            });
-        }
     }
 
     public void writeGameInfo(GameData gameData , File gameDir) {

@@ -19,7 +19,7 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/appName"
         android:largeHeap="true"
-        android:theme="@style/Theme.QP.Translucent"
+        android:theme="@style/Theme.App.Starting"
         tools:targetApi="s"
         android:allowBackup="false"
         android:fullBackupContent="false"
@@ -27,16 +27,13 @@
         android:dataExtractionRules="@xml/data_extraction_rules">
 
         <activity
-            android:name=".view.splash.SquashActivity"
+            android:name=".view.stock.StockActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <activity
-            android:name=".view.stock.StockActivity" />
 
         <activity
             android:name=".view.game.GameActivity"
