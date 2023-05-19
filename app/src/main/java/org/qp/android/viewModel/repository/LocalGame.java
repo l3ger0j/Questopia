@@ -1,6 +1,5 @@
 package org.qp.android.viewModel.repository;
 
-import static org.qp.android.utils.FileUtil.GAME_INFO_FILENAME;
 import static org.qp.android.utils.FileUtil.readFileAsString;
 import static org.qp.android.utils.XmlUtil.xmlToObject;
 
@@ -21,6 +20,7 @@ import java.util.Objects;
 
 public class LocalGame {
     private final String TAG = this.getClass().getSimpleName();
+    private static final String GAME_INFO_FILENAME = "gameStockInfo";
 
     public List<GameData> getGames(File gamesDir) {
         if (gamesDir == null) {

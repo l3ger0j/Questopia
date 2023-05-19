@@ -1,8 +1,8 @@
 package org.qp.android.view.game;
 
+import static org.qp.android.utils.FileUtil.createFile;
+import static org.qp.android.utils.FileUtil.createFolder;
 import static org.qp.android.utils.FileUtil.findFileOrDirectory;
-import static org.qp.android.utils.FileUtil.getOrCreateDirectory;
-import static org.qp.android.utils.FileUtil.getOrCreateFile;
 import static org.qp.android.utils.ThreadUtil.isMainThread;
 
 import android.content.Intent;
@@ -581,7 +581,7 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
         subMenu.setHeaderTitle(getString(R.string.selectSlot));
 
         MenuItem item;
-        final var savesDir = getOrCreateDirectory(libQpProxy.getGameState().gameDir, "saves");
+        final var savesDir = createFolder(libQpProxy.getGameState().gameDir, "saves");
         final var proxy = libQpProxy;
 
         for (int i = 0; i < MAX_SAVE_SLOTS; ++i) {
@@ -607,7 +607,7 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
                         }
                         break;
                     case SAVE:
-                        var file1 = getOrCreateFile(savesDir, filename);
+                        var file1 = createFile(savesDir, filename);
                         proxy.saveGameState(Uri.fromFile(file1));
                         break;
                 }
@@ -671,8 +671,8 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
             var currentGameDir = libQpProxy.getGameState().gameDir;
 
             var temGameSaveMap = gameViewModel.getGameSaveMap();
-            final var savesDir = getOrCreateDirectory(currentGameDir , "saves");
-            var tempSaveFile = getOrCreateFile(savesDir , hardNameForSave);
+            final var savesDir = createFolder(currentGameDir , "saves");
+            var tempSaveFile = createFile(savesDir , hardNameForSave);
             libQpProxy.saveGameState(Uri.fromFile(tempSaveFile));
             temGameSaveMap.putSerializable(simpleNameForSave , tempSaveFile);
             gameViewModel.setGameSaveMap(temGameSaveMap);

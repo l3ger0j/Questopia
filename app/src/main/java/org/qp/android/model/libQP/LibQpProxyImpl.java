@@ -1,9 +1,9 @@
 package org.qp.android.model.libQP;
 
+import static org.qp.android.utils.FileUtil.createFolder;
 import static org.qp.android.utils.FileUtil.findFileOrDirectory;
 import static org.qp.android.utils.FileUtil.findFileRecursively;
 import static org.qp.android.utils.FileUtil.getFileContents;
-import static org.qp.android.utils.FileUtil.getOrCreateDirectory;
 import static org.qp.android.utils.StringUtil.getStringOrEmpty;
 import static org.qp.android.utils.StringUtil.isNotEmpty;
 import static org.qp.android.utils.ThreadUtil.isSameThread;
@@ -517,30 +517,28 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
     @Override
     public void OpenGame(String filename) {
         var inter = gameInterface;
-        var savesDir = getOrCreateDirectory(gameState.gameDir, "saves");
-        var saveFile = findFileOrDirectory(savesDir, filename);
-        if (saveFile == null && inter != null) {
-            Log.e(TAG,"Save file not found: " + filename);
-            inter.showLoadGamePopup();
-            return;
-        }
-        if (inter != null) {
-            inter.doWithCounterDisabled(() -> loadGameState(Uri.fromFile(saveFile)));
+        var savesDir = createFolder(gameState.gameDir, "saves");
+        if (savesDir != null && inter != null) {
+            var saveFile = findFileOrDirectory(savesDir , filename);
+            if (saveFile == null) {
+                Log.e(TAG , "Save file not found: " + filename);
+                inter.showLoadGamePopup();
+            } else {
+                inter.doWithCounterDisabled(() -> loadGameState(Uri.fromFile(saveFile)));
+            }
         }
     }
 
     @Override
     public void SaveGame(String filename) {
-        var inter = gameInterface;
-        if (inter != null) {
-            inter.showSaveGamePopup(filename);
+        if (gameInterface != null) {
+            gameInterface.showSaveGamePopup(filename);
         }
     }
 
     @Override
     public String InputBox(String prompt) {
-        var inter = gameInterface;
-        return inter != null ? inter.showInputDialog(prompt) : null;
+        return gameInterface != null ? gameInterface.showInputDialog(prompt) : null;
     }
 
     @Override

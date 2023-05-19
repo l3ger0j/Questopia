@@ -3,7 +3,7 @@ package org.qp.android.model.install;
 import static org.qp.android.utils.DirUtil.doesDirectoryContainGameFiles;
 import static org.qp.android.utils.DirUtil.normalizeGameDirectory;
 import static org.qp.android.utils.FileUtil.copyFile;
-import static org.qp.android.utils.FileUtil.getOrCreateDirectory;
+import static org.qp.android.utils.FileUtil.createFolder;
 
 import android.content.Context;
 import android.net.Uri;
@@ -30,18 +30,21 @@ public class InstallerDirWork extends Worker {
     @NonNull
     @Override
     public Result doWork() {
+        if (srcDir == null) {
+            return Result.failure();
+        }
+
         var outputErrorTwo = new Data.Builder()
                 .putString("errorTwo", "NFE")
                 .build();
 
         var service = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
         var task = service.submit(() -> {
-            if (srcDir != null) {
-                for (DocumentFile file : srcDir.listFiles()) {
-                    copyFileOrDirectory(file , destDir);
-                }
+            for (var file : srcDir.listFiles()) {
+                copyFileOrDirectory(file , destDir);
             }
         });
+
         try {
             task.get();
             normalizeGameDirectory(destDir);
@@ -49,18 +52,18 @@ public class InstallerDirWork extends Worker {
                 return Result.failure(outputErrorTwo);
             }
         } catch (ExecutionException | InterruptedException e) {
-            e.printStackTrace();
+            return Result.failure();
         }
         return Result.success();
     }
 
     private void copyFileOrDirectory(@NonNull DocumentFile srcFile, File destDir) {
         if (srcFile.isDirectory()) {
-            File subDestDir = getOrCreateDirectory(destDir, srcFile.getName());
-            for (DocumentFile subSrcFile : srcFile.listFiles()) {
+            var subDestDir = createFolder(destDir, srcFile.getName());
+            for (var subSrcFile : srcFile.listFiles()) {
                 copyFileOrDirectory(subSrcFile, subDestDir);
             }
-        } else {
+        } else if (srcFile.isFile()) {
             copyFile(getApplicationContext(), srcFile, destDir);
         }
     }

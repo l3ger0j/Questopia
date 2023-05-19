@@ -24,7 +24,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.databinding.ObservableBoolean;
 import androidx.databinding.ObservableField;
-import androidx.documentfile.provider.DocumentFile;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -44,6 +43,7 @@ import org.qp.android.view.game.GameInterface;
 import org.qp.android.view.game.GameItemRecycler;
 import org.qp.android.view.settings.SettingsController;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -353,12 +353,12 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
             var uri = request.getUrl();
             if (uri.getScheme().startsWith("file")) {
                 try {
-                    var relPath = Uri.decode(uri.toString().substring(8));
-                    var file = DocumentFile.fromFile(gameContentResolver.getFile(relPath));
-                    var extension = file.getName();
+                    var relPath = uri.getPath();
+                    var fileFromDefaultCon = new File(libQpProxy.getGameState().gameDir , relPath);
+                    var extension = fileFromDefaultCon.getName();
                     var mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
-                    var in = getApplication().getContentResolver().openInputStream(file.getUri());
-                    return new WebResourceResponse(mimeType , null , in);
+                    var in = getApplication().getContentResolver().openInputStream(Uri.fromFile(fileFromDefaultCon));
+                    return new WebResourceResponse(mimeType , "utf-8" , in);
                 } catch (FileNotFoundException | NullPointerException ex) {
                     Log.e(TAG , "File not found" , ex);
                     return null;

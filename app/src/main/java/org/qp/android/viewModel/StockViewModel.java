@@ -1,17 +1,16 @@
 package org.qp.android.viewModel;
 
 import static org.qp.android.utils.DirUtil.doesDirectoryContainGameFiles;
-import static org.qp.android.utils.FileUtil.GAME_INFO_FILENAME;
 import static org.qp.android.utils.FileUtil.copyFile;
 import static org.qp.android.utils.FileUtil.createFile;
+import static org.qp.android.utils.FileUtil.createFolder;
 import static org.qp.android.utils.FileUtil.dirSize;
 import static org.qp.android.utils.FileUtil.findFileOrDirectory;
 import static org.qp.android.utils.FileUtil.findFileRecursively;
 import static org.qp.android.utils.FileUtil.formatFileSize;
-import static org.qp.android.utils.FileUtil.getOrCreateDirectory;
-import static org.qp.android.utils.FileUtil.getOrCreateGameDirectory;
 import static org.qp.android.utils.FileUtil.isWritableDirectory;
 import static org.qp.android.utils.FileUtil.isWritableFile;
+import static org.qp.android.utils.PathUtil.normalizeFolderName;
 import static org.qp.android.utils.PathUtil.removeExtension;
 import static org.qp.android.utils.XmlUtil.objectToXml;
 
@@ -63,9 +62,10 @@ import java.util.Objects;
 
 public class StockViewModel extends AndroidViewModel {
     private final String TAG = this.getClass().getSimpleName();
+    private static final String GAME_INFO_FILENAME = "gameStockInfo";
 
-    public ObservableField<StockActivity> activityObservableField = new
-            ObservableField<>();
+    public ObservableField<StockActivity> activityObservableField =
+            new ObservableField<>();
 
     public ObservableBoolean isShowDialog = new ObservableBoolean();
     public ObservableBoolean isSelectArchive = new ObservableBoolean();
@@ -516,10 +516,9 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     private void doInstallGame(DocumentFile gameFile , GameData gameData) {
-        var gameDir = getOrCreateGameDirectory(gamesDir , gameData.title);
+        var gameDir = createFolder(gamesDir , normalizeFolderName(gameData.title));
         if (!isWritableDirectory(gameDir)) {
-            getStockActivity()
-                    .showErrorDialog("Games directory is not writable");
+            getStockActivity().showErrorDialog("Games directory is not writable");
             return;
         }
 
@@ -575,15 +574,14 @@ public class StockViewModel extends AndroidViewModel {
                     .showErrorDialog("External files directory not found");
             return;
         }
-        var dir = getOrCreateDirectory(extFilesDir, "games");
-        if (!isWritableDirectory(dir)) {
+        var tempGameDir = createFolder(extFilesDir, "games");
+        if (!isWritableDirectory(tempGameDir)) {
             var message = "Games directory is not writable" + " " +
                     getStockActivity().getString(R.string.gamesDirError);
-            getStockActivity()
-                    .showErrorDialog(message);
+            getStockActivity().showErrorDialog(message);
             return;
         }
-        setGamesDir(dir);
+        setGamesDir(tempGameDir);
         refreshGames();
     }
 

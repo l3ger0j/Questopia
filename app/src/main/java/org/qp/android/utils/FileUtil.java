@@ -1,7 +1,5 @@
 package org.qp.android.utils;
 
-import static org.qp.android.utils.PathUtil.normalizeFolderName;
-
 import android.content.Context;
 import android.util.Log;
 
@@ -22,7 +20,6 @@ import java.text.DecimalFormat;
 
 public final class FileUtil {
     private static final String TAG = FileUtil.class.getSimpleName();
-    public static final String GAME_INFO_FILENAME = "gameStockInfo";
 
     public static <T> boolean isWritableFile(T file) {
         if (file == null) {
@@ -52,76 +49,55 @@ public final class FileUtil {
         return false;
     }
 
-    public static File getOrCreateFile(File parentDir,
-                                       String name) {
-        var file = findFileOrDirectory(parentDir, name);
-        if (file == null) {
-            file = createFile(parentDir, name);
-        }
-        return file;
-    }
-
     @Nullable
     public static File createFile(File parentDir,
                                   String name) {
-        var file = new File(parentDir, name);
-        if (!file.exists()) {
+        if (!isWritableDirectory(parentDir)) {
+            return null;
+        }
+
+        var checkFile = findFileOrDirectory(parentDir, name);
+        if (checkFile == null) {
+            var file = new File(parentDir , name);
             try {
                 if (file.createNewFile()) {
                     Log.i(TAG, "File created");
+                    return file;
                 }
             } catch (IOException ex) {
                 Log.e(TAG , "Error creating a file: " + name, ex);
                 return null;
             }
         }
-        return file;
-    }
-
-    @NonNull
-    public static File getOrCreateGameDirectory(File gamesDir,
-                                         String gameName) {
-        var folderName = normalizeFolderName(gameName);
-        return getOrCreateDirectory(gamesDir , folderName);
-    }
-
-    @NonNull
-    public static File getOrCreateDirectory(File parentDir,
-                                            String name) {
-        var dir = findFileOrDirectory(parentDir, name);
-        if (dir == null) {
-            dir = createDirectory(parentDir, name);
-        }
-        return dir;
-    }
-
-    @NonNull
-    public static File createDirectory(File parentDir,
-                                       String name) {
-        var dir = new File(parentDir, name);
-        if (dir.mkdir()) {
-            Log.i(TAG,"Directory created");
-        } else {
-            Log.i(TAG,"Directory not created");
-        }
-        return dir;
+        return checkFile;
     }
 
     @Nullable
-    public static <T> T findFileOrDirectory(T parentDir,
-                                            final String name) {
-        if (parentDir instanceof File) {
-            var tempDir = (File) parentDir;
-            var files = tempDir.listFiles((dir, filename) -> filename.equalsIgnoreCase(name));
-            if (files == null || files.length == 0) return null;
-            return (T) files[0];
-        } else if (parentDir instanceof DocumentFile) {
-            var tempDir = (DocumentFile) parentDir;
-            var found = tempDir.findFile(name);
-            if (found == null || found.isVirtual()) return null;
-            return (T) found;
+    public static File createFolder(File parentDir,
+                                    String name) {
+        if (!isWritableDirectory(parentDir)) {
+            return null;
         }
-        return null;
+
+        var checkDir = findFileOrDirectory(parentDir, name);
+        if (checkDir == null) {
+            var newDir = new File(parentDir, name);
+            if (newDir.mkdir()) {
+                Log.i(TAG,"Directory created");
+                return newDir;
+            } else {
+                Log.i(TAG,"Directory not created");
+                return null;
+            }
+        }
+        return checkDir;
+    }
+
+    @Nullable
+    public static File findFileOrDirectory(File parentDir , final String name) {
+        var files = parentDir.listFiles((dir, filename) -> filename.equalsIgnoreCase(name));
+        if (files == null || files.length == 0) return null;
+        return files[0];
     }
 
     @Nullable
