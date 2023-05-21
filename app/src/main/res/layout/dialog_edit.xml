@@ -98,7 +98,7 @@
                 android:layout_marginEnd="16dp"
                 android:layout_weight="1"
                 android:text="@string/selectModFile"
-                android:visibility="@{stockVM.isModsDirExist ? View.GONE : View.VISIBLE}"
+                android:visibility="@{stockVM.isModsDirExist ? View.VISIBLE : View.GONE}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/buttonSelectPath" />

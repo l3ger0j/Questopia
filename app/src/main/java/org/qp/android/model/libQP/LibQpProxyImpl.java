@@ -1,6 +1,6 @@
 package org.qp.android.model.libQP;
 
-import static org.qp.android.utils.FileUtil.createFolder;
+import static org.qp.android.utils.FileUtil.createFindFolder;
 import static org.qp.android.utils.FileUtil.findFileOrDirectory;
 import static org.qp.android.utils.FileUtil.findFileRecursively;
 import static org.qp.android.utils.FileUtil.getFileContents;
@@ -517,7 +517,7 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
     @Override
     public void OpenGame(String filename) {
         var inter = gameInterface;
-        var savesDir = createFolder(gameState.gameDir, "saves");
+        var savesDir = createFindFolder(gameState.gameDir, "saves");
         if (savesDir != null && inter != null) {
             var saveFile = findFileOrDirectory(savesDir , filename);
             if (saveFile == null) {

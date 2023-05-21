@@ -2,6 +2,8 @@ package org.qp.android.dto.stock;
 
 import static org.qp.android.utils.StringUtil.isNotEmpty;
 
+import androidx.annotation.NonNull;
+
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.Root;
 
@@ -105,5 +107,29 @@ public class GameData {
     @Override
     public int hashCode() {
         return Objects.hash(id , listId , author , portedBy , version , title , lang , player , icon , fileUrl , fileSize , fileExt , descUrl , pubDate , modDate);
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return "GameData{" +
+                "id='" + id + '\'' +
+                ", listId='" + listId + '\'' +
+                ", author='" + author + '\'' +
+                ", portedBy='" + portedBy + '\'' +
+                ", version='" + version + '\'' +
+                ", title='" + title + '\'' +
+                ", lang='" + lang + '\'' +
+                ", player='" + player + '\'' +
+                ", icon='" + icon + '\'' +
+                ", fileUrl='" + fileUrl + '\'' +
+                ", fileSize='" + fileSize + '\'' +
+                ", fileExt='" + fileExt + '\'' +
+                ", descUrl='" + descUrl + '\'' +
+                ", pubDate='" + pubDate + '\'' +
+                ", modDate='" + modDate + '\'' +
+                ", gameDir=" + gameDir +
+                ", gameFiles=" + gameFiles +
+                '}';
     }
 }

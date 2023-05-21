@@ -349,7 +349,6 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
                 true,
                 mimeTypes).runFilePicker(data -> {
             // stockViewModel.setTempInstallFile((DocumentFile) data);
-            stockViewModel.isSelectArchive.set(true);
             return null;
         });
     }
@@ -548,7 +547,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
             getSupportActionBar().setDisplayHomeAsUpEnabled(false);
         }
 
-        stockViewModel.refreshGamesDirectory();
+        stockViewModel.refreshIntGameDirectory();
         navController.navigate(R.id.stockRecyclerFragment);
         bannerViewPager.postDelayed(autoScrollRunnable, 3000);
     }

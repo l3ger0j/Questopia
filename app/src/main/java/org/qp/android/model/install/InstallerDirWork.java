@@ -3,7 +3,7 @@ package org.qp.android.model.install;
 import static org.qp.android.utils.DirUtil.doesDirectoryContainGameFiles;
 import static org.qp.android.utils.DirUtil.normalizeGameDirectory;
 import static org.qp.android.utils.FileUtil.copyFile;
-import static org.qp.android.utils.FileUtil.createFolder;
+import static org.qp.android.utils.FileUtil.createFindFolder;
 
 import android.content.Context;
 import android.net.Uri;
@@ -59,7 +59,7 @@ public class InstallerDirWork extends Worker {
 
     private void copyFileOrDirectory(@NonNull DocumentFile srcFile, File destDir) {
         if (srcFile.isDirectory()) {
-            var subDestDir = createFolder(destDir, srcFile.getName());
+            var subDestDir = createFindFolder(destDir, srcFile.getName());
             for (var subSrcFile : srcFile.listFiles()) {
                 copyFileOrDirectory(subSrcFile, subDestDir);
             }

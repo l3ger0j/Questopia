@@ -2,8 +2,8 @@ package org.qp.android.viewModel;
 
 import static org.qp.android.utils.DirUtil.doesDirectoryContainGameFiles;
 import static org.qp.android.utils.FileUtil.copyFile;
-import static org.qp.android.utils.FileUtil.createFile;
-import static org.qp.android.utils.FileUtil.createFolder;
+import static org.qp.android.utils.FileUtil.createFindFile;
+import static org.qp.android.utils.FileUtil.createFindFolder;
 import static org.qp.android.utils.FileUtil.dirSize;
 import static org.qp.android.utils.FileUtil.findFileOrDirectory;
 import static org.qp.android.utils.FileUtil.findFileRecursively;
@@ -58,7 +58,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
 
 public class StockViewModel extends AndroidViewModel {
     private final String TAG = this.getClass().getSimpleName();
@@ -68,7 +67,6 @@ public class StockViewModel extends AndroidViewModel {
             new ObservableField<>();
 
     public ObservableBoolean isShowDialog = new ObservableBoolean();
-    public ObservableBoolean isSelectArchive = new ObservableBoolean();
     public ObservableBoolean isSelectFolder = new ObservableBoolean();
 
     private final LocalGame localGame = new LocalGame();
@@ -97,16 +95,19 @@ public class StockViewModel extends AndroidViewModel {
 
     public void setTempPathFile(DocumentFile tempPathFile) {
         this.tempPathFile = tempPathFile;
+        if (editBinding == null) return;
         editBinding.buttonSelectPath.setText(tempPathFile.getName());
     }
 
     public void setTempModFile(DocumentFile tempModFile) {
         this.tempModFile = tempModFile;
+        if (editBinding == null) return;
         editBinding.buttonSelectMod.setText(tempModFile.getName());
     }
 
     public void setTempInstallDir(@NonNull DocumentFile tempInstallDir) {
         this.tempInstallDir = tempInstallDir;
+        if (installBinding == null) return;
         installBinding.buttonSelectFolder.setText(tempInstallDir.getName());
     }
 
@@ -317,33 +318,34 @@ public class StockViewModel extends AndroidViewModel {
     public void createInstallIntent() {
         var gameData = new GameData();
         try {
-            gameData.id = removeExtension(Objects.requireNonNull(tempInstallDir.getName()));
-            gameData.title = (Objects.requireNonNull(
-                    installBinding.ET0.getEditText()).getText().toString().isEmpty() ?
-                    removeExtension(Objects.requireNonNull(tempInstallDir.getName()))
-                    : Objects.requireNonNull(
-                    installBinding.ET0.getEditText()).getText().toString());
-            gameData.author = (Objects.requireNonNull(
-                    installBinding.ET1.getEditText()).getText().toString().isEmpty() ?
-                    null
-                    : Objects.requireNonNull(
-                    installBinding.ET1.getEditText()).getText().toString());
-            gameData.version = (Objects.requireNonNull(
-                    installBinding.ET2.getEditText()).getText().toString().isEmpty() ?
-                    null
-                    : Objects.requireNonNull(
-                    installBinding.ET2.getEditText()).getText().toString());
-            if (tempInstallDir != null) {
+            if (tempInstallDir != null && tempInstallDir.getName() != null) {
+                gameData.id = removeExtension(tempInstallDir.getName());
+                var installTextTitle = installBinding.ET0.getEditText();
+                if (installTextTitle != null) {
+                    gameData.title = installTextTitle.getText().toString().isEmpty()
+                            ? removeExtension(tempInstallDir.getName())
+                            : installTextTitle.getText().toString();
+                }
+                var installTextAuthor = installBinding.ET1.getEditText();
+                if (installTextAuthor != null) {
+                    gameData.author = installTextAuthor.getText().toString().isEmpty()
+                            ? null
+                            : installTextAuthor.getText().toString();
+                }
+                var installTextVersion = installBinding.ET2.getEditText();
+                if (installTextVersion != null) {
+                    gameData.version = installTextVersion.getText().toString().isEmpty()
+                            ? null
+                            : installTextVersion.getText().toString();
+                }
                 gameData.fileSize = formatFileSize(dirSize(tempInstallDir) , controller.binaryPrefixes);
+                gameData.icon = (tempImageFile == null ? null : tempImageFile.getUri().toString());
+                installGame(tempInstallDir , gameData);
+                isSelectFolder.set(false);
+                dialogFragments.dismiss();
             }
-            gameData.icon = (tempImageFile == null ? null : tempImageFile.getUri().toString());
-            installGame(tempInstallDir , gameData);
-            isSelectArchive.set(false);
-            isSelectFolder.set(false);
-            dialogFragments.dismiss();
         } catch (NullPointerException ex) {
-            getStockActivity()
-                    .showErrorDialog("Error: " + ex);
+            Log.d(TAG , "Error: " , ex);
         }
     }
 
@@ -407,31 +409,23 @@ public class StockViewModel extends AndroidViewModel {
         try {
             var editTextTitle = editBinding.ET0.getEditText();
             if (editTextTitle != null) {
-                if (editTextTitle.getText().toString().isEmpty()) {
-                    tempGameData.title = removeExtension(tempGameData.title);
-                } else {
-                    tempGameData.title = editTextTitle.getText().toString();
-                }
+                tempGameData.title = editTextTitle.getText().toString().isEmpty()
+                        ? removeExtension(tempGameData.title)
+                        : editTextTitle.getText().toString();
             }
             var editTextAuthor = editBinding.ET1.getEditText();
             if (editTextAuthor != null) {
-                if (editTextAuthor.getText().toString().isEmpty()) {
-                    tempGameData.author = removeExtension(tempGameData.author);
-                } else {
-                    tempGameData.author = editTextAuthor.getText().toString();
-                }
+                tempGameData.author = editTextAuthor.getText().toString().isEmpty()
+                        ? removeExtension(tempGameData.author)
+                        : editTextAuthor.getText().toString();
             }
             var editTextVersion = editBinding.ET2.getEditText();
             if (editTextVersion != null) {
-                if (editTextVersion.toString().isEmpty()) {
-                    tempGameData.version = removeExtension(tempGameData.version);
-                } else {
-                    tempGameData.version = editTextVersion.getText().toString();
-                }
+                tempGameData.version = editTextVersion.toString().isEmpty()
+                        ? removeExtension(tempGameData.version)
+                        : editTextVersion.getText().toString();
             }
-            if (tempImageFile != null) {
-                tempGameData.icon = tempImageFile.getUri().toString();
-            }
+            if (tempImageFile != null) tempGameData.icon = tempImageFile.getUri().toString();
             if (tempGameData.fileSize == null || tempGameData.fileSize.isEmpty()) {
                 tempGameData.fileSize = formatFileSize(dirSize(DocumentFile
                                 .fromFile(tempGameData.gameDir)) , controller.binaryPrefixes);
@@ -444,12 +438,11 @@ public class StockViewModel extends AndroidViewModel {
                 copyFile(getStockActivity() , tempModFile ,
                         findFileRecursively(tempGameData.gameDir, "mods"));
             }
-            refreshGamesDirectory();
+            refreshIntGameDirectory();
             isShowDialog.set(false);
             dialogFragments.dismiss();
         } catch (NullPointerException ex) {
-            getStockActivity()
-                    .showErrorDialog("Error: " + ex);
+            getStockActivity().showErrorDialog("Error: " + ex);
         }
     }
 
@@ -516,7 +509,7 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     private void doInstallGame(DocumentFile gameFile , GameData gameData) {
-        var gameDir = createFolder(gamesDir , normalizeFolderName(gameData.title));
+        var gameDir = createFindFolder(gamesDir , normalizeFolderName(gameData.title));
         if (!isWritableDirectory(gameDir)) {
             getStockActivity().showErrorDialog("Games directory is not writable");
             return;
@@ -538,6 +531,7 @@ public class StockViewModel extends AndroidViewModel {
                     break;
             }
         });
+
         installer.gameInstall(gameFile , gameDir).observeForever(aBoolean -> {
             if (aBoolean) {
                 writeGameInfo(gameData , gameDir);
@@ -549,7 +543,7 @@ public class StockViewModel extends AndroidViewModel {
     public void writeGameInfo(GameData gameData , File gameDir) {
         var infoFile = findFileOrDirectory(gameDir, GAME_INFO_FILENAME);
         if (infoFile == null) {
-            infoFile = createFile(gameDir, GAME_INFO_FILENAME);
+            infoFile = createFindFile(gameDir, GAME_INFO_FILENAME);
         }
         if (!isWritableFile(infoFile)) {
             getStockActivity()
@@ -567,14 +561,14 @@ public class StockViewModel extends AndroidViewModel {
     // endregion Game install
 
     // region Refresh
-    public void refreshGamesDirectory() {
-        var extFilesDir = getApplication().getExternalFilesDir(null);
-        if (extFilesDir == null) {
+    public void refreshIntGameDirectory() {
+        var intFilesDir = getApplication().getExternalFilesDir(null);
+        if (intFilesDir == null) {
             getStockActivity()
-                    .showErrorDialog("External files directory not found");
+                    .showErrorDialog("Internal files directory not found");
             return;
         }
-        var tempGameDir = createFolder(extFilesDir, "games");
+        var tempGameDir = createFindFolder(intFilesDir, "games");
         if (!isWritableDirectory(tempGameDir)) {
             var message = "Games directory is not writable" + " " +
                     getStockActivity().getString(R.string.gamesDirError);
@@ -583,6 +577,10 @@ public class StockViewModel extends AndroidViewModel {
         }
         setGamesDir(tempGameDir);
         refreshGames();
+    }
+
+    public void refreshExtGameDirectory() {
+
     }
 
     public void refreshGames() {
