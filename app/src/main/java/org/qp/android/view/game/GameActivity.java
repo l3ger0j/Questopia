@@ -666,7 +666,8 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
             drawer.closeDrawer(GravityCompat.START);
             return false;
         } else if (!libQpProxy.getGameState().gameTitle.contentEquals(item.getTitle())) {
-            var simpleNameForSave = libQpProxy.getGameState().gameFile.getName();
+            var simpleNameForSave = libQpProxy.getGameState()
+                    .gameFile.getName().replace(".qsp" , "AUTO");
             var hardNameForSave = simpleNameForSave+"#"+ThreadLocalRandom.current().nextInt();
             var currentGameDir = libQpProxy.getGameState().gameDir;
 

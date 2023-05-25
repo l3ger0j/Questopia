@@ -65,7 +65,6 @@ import java.util.Objects;
 public class StockActivity extends AppCompatActivity implements StockPatternDialogFrags.StockPatternDialogList, StockPatternFragment.StockPatternFragmentList {
     private static final int READ_EXTERNAL_STORAGE_CODE = 200;
     private static final int MANAGE_EXTERNAL_STORAGE_CODE = 201;
-    private static final int POST_NOTIFICATION_CODE = 202;
     private final String TAG = this.getClass().getSimpleName();
     private HashMap<String, GameData> gamesMap = new HashMap<>();
     public SettingsController settingsController;
@@ -130,18 +129,6 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         bannerViewPager.setAdapter(fragmentAdapter);
         autoScrollRunnable = new AutoScrollRunnable(bannerViewPager, 3000, false);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if(ContextCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.POST_NOTIFICATIONS)
-                    != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(
-                        this,
-                        new String[]{Manifest.permission.POST_NOTIFICATIONS},
-                        MANAGE_EXTERNAL_STORAGE_CODE);
-            }
-        }
-
         mgr = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
         registerReceiver(onComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
 
@@ -184,13 +171,6 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
             return null;
         });
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
-                    != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.POST_NOTIFICATIONS}, POST_NOTIFICATION_CODE);
-            }
-        }
-
         if (stockViewModel.getSettingsController().isUseNewFilePicker) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 if (ContextCompat.checkSelfPermission(this, Manifest.permission.MANAGE_EXTERNAL_STORAGE)
@@ -198,7 +178,8 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
                     ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.MANAGE_EXTERNAL_STORAGE}, MANAGE_EXTERNAL_STORAGE_CODE);
                 }
             } else {
-                if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
+                        != PackageManager.PERMISSION_GRANTED) {
                     ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, READ_EXTERNAL_STORAGE_CODE);
                 }
             }
@@ -239,14 +220,6 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
                     ViewUtil.showSnackBar(findViewById(android.R.id.content) , "Permission denied to manage your External storage");
                 }
                 break;
-            case POST_NOTIFICATION_CODE:
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    ViewUtil.showSnackBar(findViewById(android.R.id.content) , "Success");
-                } else {
-                    ViewUtil.showSnackBar(findViewById(android.R.id.content) , "Permission denied to post notification");
-                }
-                break;
         }
     }
 
@@ -280,7 +253,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         settingsController = stockViewModel.getSettingsController();
         stockViewModel.setController(settingsController);
         if (settingsController.binaryPrefixes <= 1000) {
-            stockViewModel.refreshGames();
+            stockViewModel.refreshGameData();
         }
         if (settingsController.language.equals("ru")) {
             AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("ru"));
@@ -353,7 +326,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         });
     }
 
-    public void showDirPickerDialog () {
+    public void showDirPickerDialog() {
         storageHelper.openFolderPicker();
     }
 
@@ -469,7 +442,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
                             } catch (NullPointerException e) {
                                 showErrorDialog("Error: "+"\n"+e);
                             }
-                            stockViewModel.refreshGames();
+                            stockViewModel.refreshGameData();
                         }
                         actionMode.finish();
                     } else if (itemId == R.id.select_all) {
@@ -535,6 +508,10 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
     @Override
     protected void onPause() {
         super.onPause();
+//        var application = (QuestPlayerApplication) getApplication();
+//        if (application.getGameList() != null) {
+//            stockViewModel.saveGameLists(application.getGameList());
+//        }
         bannerViewPager.removeCallbacks(autoScrollRunnable);
     }
 
@@ -547,7 +524,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
             getSupportActionBar().setDisplayHomeAsUpEnabled(false);
         }
 
-        stockViewModel.refreshIntGameDirectory();
+        stockViewModel.refreshIntGamesDirectory();
         navController.navigate(R.id.stockRecyclerFragment);
         bannerViewPager.postDelayed(autoScrollRunnable, 3000);
     }

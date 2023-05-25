@@ -2,6 +2,7 @@ package org.qp.android.viewModel;
 
 import static org.qp.android.utils.DirUtil.doesDirectoryContainGameFiles;
 import static org.qp.android.utils.FileUtil.copyFile;
+import static org.qp.android.utils.FileUtil.createFindDFile;
 import static org.qp.android.utils.FileUtil.createFindFile;
 import static org.qp.android.utils.FileUtil.createFindFolder;
 import static org.qp.android.utils.FileUtil.dirSize;
@@ -31,6 +32,8 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.anggrayudi.storage.FileWrapper;
+import com.anggrayudi.storage.file.MimeType;
 import com.squareup.picasso.Picasso;
 
 import org.jetbrains.annotations.NotNull;
@@ -349,6 +352,40 @@ public class StockViewModel extends AndroidViewModel {
         }
     }
 
+    public void createUseIntent() {
+        var gameData = new GameData();
+        try {
+            if (tempInstallDir != null && tempInstallDir.getName() != null) {
+                gameData.id = removeExtension(tempInstallDir.getName());
+                var installTextTitle = installBinding.ET0.getEditText();
+                if (installTextTitle != null) {
+                    gameData.title = installTextTitle.getText().toString().isEmpty()
+                            ? removeExtension(tempInstallDir.getName())
+                            : installTextTitle.getText().toString();
+                }
+                var installTextAuthor = installBinding.ET1.getEditText();
+                if (installTextAuthor != null) {
+                    gameData.author = installTextAuthor.getText().toString().isEmpty()
+                            ? null
+                            : installTextAuthor.getText().toString();
+                }
+                var installTextVersion = installBinding.ET2.getEditText();
+                if (installTextVersion != null) {
+                    gameData.version = installTextVersion.getText().toString().isEmpty()
+                            ? null
+                            : installTextVersion.getText().toString();
+                }
+                gameData.fileSize = formatFileSize(dirSize(tempInstallDir) , controller.binaryPrefixes);
+                gameData.icon = (tempImageFile == null ? null : tempImageFile.getUri().toString());
+                connectingDir(tempInstallDir , gameData);
+                isSelectFolder.set(false);
+                dialogFragments.dismiss();
+            }
+        } catch (NullPointerException ex) {
+            Log.d(TAG , "Error: " , ex);
+        }
+    }
+
     public void showDialogEdit() {
         dialogFragments = new StockDialogFrags();
         dialogFragments.setDialogType(StockDialogType.EDIT_DIALOG);
@@ -438,7 +475,7 @@ public class StockViewModel extends AndroidViewModel {
                 copyFile(getStockActivity() , tempModFile ,
                         findFileRecursively(tempGameData.gameDir, "mods"));
             }
-            refreshIntGameDirectory();
+            refreshIntGamesDirectory();
             isShowDialog.set(false);
             dialogFragments.dismiss();
         } catch (NullPointerException ex) {
@@ -474,6 +511,8 @@ public class StockViewModel extends AndroidViewModel {
                 sendIntent(installBinding.buttonSelectIcon));
         installBinding.installBT.setOnClickListener(v ->
                 createInstallIntent());
+        installBinding.useBT.setOnClickListener(v ->
+                createUseIntent());
         return installBinding;
     }
 
@@ -497,6 +536,35 @@ public class StockViewModel extends AndroidViewModel {
         return editBinding;
     }
     // endregion Dialog
+
+    // region Game connecting
+    public void connectingDir(DocumentFile gameFile , GameData gameData) {
+        writeGameInfo(gameData , gameFile);
+        FileWrapper.Document fos = new FileWrapper.Document(gameFile);
+        var file = new File(fos.getAbsolutePath(getApplication()));
+        Log.d(TAG , file.getAbsolutePath());
+        refreshExtGameDirectory(file);
+    }
+
+    public void writeGameInfo(GameData gameData , DocumentFile gameDir) {
+        var infoFile = findFileOrDirectory(gameDir, GAME_INFO_FILENAME);
+        if (infoFile == null) {
+            infoFile = createFindDFile(gameDir, MimeType.TEXT , GAME_INFO_FILENAME);
+        }
+        if (!isWritableFile(infoFile)) {
+            getStockActivity()
+                    .showErrorDialog("Game data info file is not writable");
+            return;
+        }
+        try (var out = getStockActivity().getContentResolver()
+                .openOutputStream(infoFile.getUri(), "w");
+             var writer = new OutputStreamWriter(out)) {
+            writer.write(objectToXml(gameData));
+        } catch (Exception ex) {
+            Log.d(TAG , "Error: " , ex);
+        }
+    }
+    // endregion Game connecting
 
     // region Game install
     public void installGame(DocumentFile gameFile , GameData gameData) {
@@ -535,7 +603,7 @@ public class StockViewModel extends AndroidViewModel {
         installer.gameInstall(gameFile , gameDir).observeForever(aBoolean -> {
             if (aBoolean) {
                 writeGameInfo(gameData , gameDir);
-                refreshGames();
+                refreshGameData();
             }
         });
     }
@@ -561,7 +629,7 @@ public class StockViewModel extends AndroidViewModel {
     // endregion Game install
 
     // region Refresh
-    public void refreshIntGameDirectory() {
+    public void refreshIntGamesDirectory() {
         var intFilesDir = getApplication().getExternalFilesDir(null);
         if (intFilesDir == null) {
             getStockActivity()
@@ -576,16 +644,11 @@ public class StockViewModel extends AndroidViewModel {
             return;
         }
         setGamesDir(tempGameDir);
-        refreshGames();
+        refreshGameData();
     }
 
-    public void refreshExtGameDirectory() {
-
-    }
-
-    public void refreshGames() {
-        gamesMap.clear();
-        for (var localGameData : localGame.getGames(gamesDir)) {
+    public void refreshExtGameDirectory(File gamesDir) {
+        for (var localGameData : localGame.getGame(gamesDir)) {
             var remoteGameData = gamesMap.get(localGameData.id);
             if (remoteGameData != null) {
                 var aggregateGameData = new GameData(remoteGameData);
@@ -598,6 +661,69 @@ public class StockViewModel extends AndroidViewModel {
         }
         setLocalGameDataList();
     }
+
+    public void refreshGameData() {
+        var application = (QuestPlayerApplication) getApplication();
+
+        gamesMap.clear();
+        for (var localGameData : localGame.getGames(gamesDir)) {
+            var remoteGameData = gamesMap.get(localGameData.id);
+            if (remoteGameData != null) {
+                var aggregateGameData = new GameData(remoteGameData);
+                aggregateGameData.gameDir = localGameData.gameDir;
+                aggregateGameData.gameFiles = localGameData.gameFiles;
+                gamesMap.put(localGameData.id, aggregateGameData);
+            } else {
+                gamesMap.put(localGameData.id, localGameData);
+            }
+        }
+
+//        var list = restoreGameLists();
+//        if (list != null) {
+//            refreshGames(list);
+//        } else if (application.getGameList() != null) {
+//            refreshGames(application.getGameList());
+//        }
+
+        if (application.getGameList() != null) {
+            refreshGames(application.getGameList());
+        }
+
+        setLocalGameDataList();
+    }
+
+//    public void saveGameLists(ArrayList<GameData> inputListGameData) {
+//        try {
+//            var tempSaveGameList = File
+//                    .createTempFile(
+//                            "tempGameLists",
+//                            null ,
+//                            getStockActivity().getCacheDir());
+//            if (isWritableFile(tempSaveGameList)) {
+//                try (var fos = new FileOutputStream(tempSaveGameList);
+//                     var writer = new ObjectOutputStream(fos)) {
+//                    writer.writeObject(inputListGameData);
+//                }
+//            }
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
+//    }
+//
+//    @Nullable
+//    public ArrayList<GameData> restoreGameLists() {
+//        var tempDataList = new ArrayList<GameData>();
+//        var tempSaveGameList = new File(getStockActivity().getCacheDir() , "tempGameLists");
+//        if (isWritableFile(tempSaveGameList)) {
+//            try (var fis = new FileInputStream(tempSaveGameList);
+//                 var reader = new ObjectInputStream(fis)) {
+//                tempDataList = (ArrayList<GameData>) reader.readObject();
+//            } catch (ClassNotFoundException | IOException e) {
+//                throw new RuntimeException(e);
+//            }
+//        }
+//        return tempDataList;
+//    }
 
     public void refreshGames(ArrayList<GameData> gameDataArrayList) {
         gamesMap.clear();
@@ -660,7 +786,7 @@ public class StockViewModel extends AndroidViewModel {
     @NonNull
     private ArrayList<GameData> convertDTO (List<GameDataParcel> gameDataParcelList) {
         var gameDataArrayList = new ArrayList<GameData>();
-        for (GameDataParcel gameDataParcel : gameDataParcelList) {
+        for (var gameDataParcel : gameDataParcelList) {
             var gameData = new GameData();
             gameData.id = gameDataParcel.id;
             gameData.listId = gameDataParcel.listId;

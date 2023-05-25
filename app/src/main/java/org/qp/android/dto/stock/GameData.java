@@ -8,11 +8,12 @@ import org.simpleframework.xml.Element;
 import org.simpleframework.xml.Root;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 
 @Root(name = "game", strict = false)
-public class GameData {
+public class GameData implements Serializable {
     @Element(name = "id", data = true)
     public String id = "";
     @Element(name = "list_id", data = true, required = false)

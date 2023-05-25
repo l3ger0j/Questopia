@@ -72,6 +72,25 @@ public final class FileUtil {
     }
 
     @Nullable
+    public static DocumentFile createFindDFile(DocumentFile parentDir ,
+                                                 String mimeType ,
+                                                 String displayName) {
+        if (!isWritableDirectory(parentDir)) {
+            return null;
+        }
+
+        var checkFile =  parentDir.findFile(displayName);
+        if (checkFile == null) {
+            var tempFile = parentDir.createFile(mimeType , displayName);
+            if (isWritableFile(tempFile)) {
+                Log.i(TAG, "File created");
+                return tempFile;
+            }
+        }
+        return checkFile;
+    }
+
+    @Nullable
     public static File createFindFolder(File parentDir , String name) {
         if (!isWritableDirectory(parentDir)) {
             return null;
@@ -92,10 +111,34 @@ public final class FileUtil {
     }
 
     @Nullable
+    public static DocumentFile createFindDFolder(DocumentFile parentDir ,
+                                                 String displayName) {
+        if (!isWritableDirectory(parentDir)) {
+            return null;
+        }
+
+        var checkDir = findFileOrDirectory(parentDir , displayName);
+        if (checkDir == null) {
+            var tempDir = parentDir.createDirectory(displayName);
+            if (isWritableDirectory(tempDir)) {
+                Log.i(TAG,"Directory created");
+                return tempDir;
+            } else {
+                Log.e(TAG,"Directory not created");
+            }
+        }
+        return checkDir;
+    }
+
+    @Nullable
     public static File findFileOrDirectory(File parentDir , final String name) {
         var files = parentDir.listFiles((dir , filename) -> filename.equalsIgnoreCase(name));
         if (files == null || files.length == 0) return null;
         return files[0];
+    }
+
+    public static DocumentFile findFileOrDirectory(DocumentFile parentDir , final String name) {
+        return parentDir.findFile(name);
     }
 
     @Nullable
@@ -128,26 +171,49 @@ public final class FileUtil {
         return result.toString();
     }
 
-    public static void deleteDirectory(File dir) {
-        if (dir.listFiles() == null) {
-            return;
-        }
-
-        for (var file : dir.listFiles()) {
-            if (file.isDirectory()) {
-                deleteDirectory(file);
-            } else {
-                if (file.delete()) {
-                    Log.i(TAG , "File delete");
+    public static <T> void deleteDirectory(T dir) {
+        if (dir instanceof File) {
+            var delDir = (File) dir;
+            if (delDir.listFiles() != null) {
+                for (var file : delDir.listFiles()) {
+                    if (file.isDirectory()) {
+                        deleteDirectory(file);
+                    } else {
+                        if (file.delete()) {
+                            Log.i(TAG , "File delete");
+                        } else {
+                            Log.e(TAG , "File not delete");
+                        }
+                    }
+                }
+                if (delDir.delete()) {
+                    Log.i(TAG , "Directory delete");
                 } else {
-                    Log.e(TAG , "File not delete");
+                    Log.e(TAG , "Directory not delete");
                 }
             }
-        }
-        if (dir.delete()) {
-            Log.i(TAG , "Directory delete");
-        } else {
-            Log.e(TAG , "Directory not delete");
+        } else if (dir instanceof DocumentFile) {
+            var delDir = (DocumentFile) dir;
+            try {
+                for (var file : delDir.listFiles()) {
+                    if (file.isDirectory()) {
+                        deleteDirectory(file);
+                    } else {
+                        if (file.delete()) {
+                            Log.i(TAG , "File delete");
+                        } else {
+                            Log.e(TAG , "File not delete");
+                        }
+                    }
+                }
+                if (delDir.delete()) {
+                    Log.i(TAG , "Directory delete");
+                } else {
+                    Log.e(TAG , "Directory not delete");
+                }
+            } catch (UnsupportedOperationException e) {
+                Log.e(TAG , "Error: " , e);
+            }
         }
     }
 
