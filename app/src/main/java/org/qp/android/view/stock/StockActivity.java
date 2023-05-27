@@ -42,8 +42,8 @@ import com.anggrayudi.storage.SimpleStorageHelper;
 import com.anggrayudi.storage.file.DocumentFileCompat;
 import com.anggrayudi.storage.file.DocumentFileType;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.picker.prettyfilepicker.PrettyFilePicker;
 
+import org.qp.android.QuestPlayerApplication;
 import org.qp.android.R;
 import org.qp.android.databinding.ActivityStockBinding;
 import org.qp.android.dto.stock.GameData;
@@ -316,14 +316,14 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
     }
 
     public void showFilePickerDialog (String[] mimeTypes) {
-        new PrettyFilePicker(
-                this,
-                "Select file",
-                true,
-                mimeTypes).runFilePicker(data -> {
-            // stockViewModel.setTempInstallFile((DocumentFile) data);
-            return null;
-        });
+//        new PrettyFilePicker(
+//                this ,
+//                "Title" ,
+//                true ,
+//                mimeTypes).runFilePicker(data -> {
+//            // stockViewModel.setTempInstallFile((DocumentFile) data);
+//            return null;
+//        });
     }
 
     public void showDirPickerDialog() {
@@ -435,7 +435,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
                 public boolean onActionItemClicked(ActionMode mode , MenuItem item) {
                     int itemId = item.getItemId();
                     if (itemId == R.id.delete_game) {
-                        for (GameData data : selectList) {
+                        for (var data : selectList) {
                             tempList.remove(data);
                             try {
                                 deleteDirectory(data.gameDir);
@@ -502,16 +502,16 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
     protected void onDestroy() {
         super.onDestroy();
         unregisterReceiver(onComplete);
+        var application = (QuestPlayerApplication) getApplication();
+        if (application.getGameList() != null) {
+            stockViewModel.saveGameLists(application.getGameList());
+        }
         Log.i(TAG , "Stock Activity destroyed");
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-//        var application = (QuestPlayerApplication) getApplication();
-//        if (application.getGameList() != null) {
-//            stockViewModel.saveGameLists(application.getGameList());
-//        }
         bannerViewPager.removeCallbacks(autoScrollRunnable);
     }
 

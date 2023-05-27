@@ -582,6 +582,7 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
 
         MenuItem item;
         final var savesDir = createFindFolder(libQpProxy.getGameState().gameDir, "saves");
+        if (savesDir == null) return;
         final var proxy = libQpProxy;
 
         for (int i = 0; i < MAX_SAVE_SLOTS; ++i) {
@@ -666,8 +667,7 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
             drawer.closeDrawer(GravityCompat.START);
             return false;
         } else if (!libQpProxy.getGameState().gameTitle.contentEquals(item.getTitle())) {
-            var simpleNameForSave = libQpProxy.getGameState()
-                    .gameFile.getName().replace(".qsp" , "AUTO");
+            var simpleNameForSave = libQpProxy.getGameState().gameFile.getName();
             var hardNameForSave = simpleNameForSave+"#"+ThreadLocalRandom.current().nextInt();
             var currentGameDir = libQpProxy.getGameState().gameDir;
 

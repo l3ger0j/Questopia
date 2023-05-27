@@ -25,6 +25,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.databinding.ObservableBoolean;
 import androidx.databinding.ObservableField;
 import androidx.documentfile.provider.DocumentFile;
@@ -47,6 +48,7 @@ import org.qp.android.model.install.Installer;
 import org.qp.android.model.plugin.PluginClient;
 import org.qp.android.model.plugin.PluginType;
 import org.qp.android.plugin.AsyncCallback;
+import org.qp.android.utils.SerializeObject;
 import org.qp.android.view.game.GameActivity;
 import org.qp.android.view.settings.SettingsController;
 import org.qp.android.view.stock.StockActivity;
@@ -56,6 +58,7 @@ import org.qp.android.viewModel.repository.LocalGame;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -663,8 +666,6 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     public void refreshGameData() {
-        var application = (QuestPlayerApplication) getApplication();
-
         gamesMap.clear();
         for (var localGameData : localGame.getGames(gamesDir)) {
             var remoteGameData = gamesMap.get(localGameData.id);
@@ -678,52 +679,50 @@ public class StockViewModel extends AndroidViewModel {
             }
         }
 
-//        var list = restoreGameLists();
-//        if (list != null) {
-//            refreshGames(list);
-//        } else if (application.getGameList() != null) {
-//            refreshGames(application.getGameList());
-//        }
-
-        if (application.getGameList() != null) {
-            refreshGames(application.getGameList());
+        var restoreList = restoreGameLists();
+        if (restoreList != null) {
+            restoreList.removeIf(data -> !data.gameDir.exists());
+            refreshGames(restoreList);
         }
 
         setLocalGameDataList();
     }
 
-//    public void saveGameLists(ArrayList<GameData> inputListGameData) {
-//        try {
-//            var tempSaveGameList = File
-//                    .createTempFile(
-//                            "tempGameLists",
-//                            null ,
-//                            getStockActivity().getCacheDir());
-//            if (isWritableFile(tempSaveGameList)) {
-//                try (var fos = new FileOutputStream(tempSaveGameList);
-//                     var writer = new ObjectOutputStream(fos)) {
-//                    writer.writeObject(inputListGameData);
-//                }
-//            }
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
-//    }
-//
-//    @Nullable
-//    public ArrayList<GameData> restoreGameLists() {
-//        var tempDataList = new ArrayList<GameData>();
-//        var tempSaveGameList = new File(getStockActivity().getCacheDir() , "tempGameLists");
-//        if (isWritableFile(tempSaveGameList)) {
-//            try (var fis = new FileInputStream(tempSaveGameList);
-//                 var reader = new ObjectInputStream(fis)) {
-//                tempDataList = (ArrayList<GameData>) reader.readObject();
-//            } catch (ClassNotFoundException | IOException e) {
-//                throw new RuntimeException(e);
-//            }
-//        }
-//        return tempDataList;
-//    }
+    public void saveGameLists(ArrayList<GameData> inputListGameData) {
+        var tempSaveGameList = createFindFile(getStockActivity().getCacheDir() , "tempGameLists");
+        if (tempSaveGameList == null) {
+            try {
+                tempSaveGameList = File.createTempFile("tempGameLists" , null);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        if (isWritableFile(tempSaveGameList)) {
+            var ser = SerializeObject.objectToString(inputListGameData);
+            if (ser != null && !ser.equalsIgnoreCase("")) {
+                SerializeObject.WriteSettings(getStockActivity(), ser, "tempGameLists");
+            } else {
+                SerializeObject.WriteSettings(getStockActivity(), "", "tempGameLists");
+            }
+        }
+    }
+
+    @Nullable
+    public ArrayList<GameData> restoreGameLists() {
+        var tempSaveGameList = createFindFile(getStockActivity().getCacheDir() , "tempGameLists");
+        var tempDataList = new ArrayList<GameData>();
+        if (isWritableFile(tempSaveGameList)) {
+            var ser = SerializeObject.ReadSettings(getStockActivity(), "tempGameLists");
+            if (ser != null && !ser.equalsIgnoreCase("")) {
+                Object obj = SerializeObject.stringToObject(ser);
+                if (obj instanceof ArrayList) {
+                    tempDataList = (ArrayList<GameData>) obj;
+                }
+            }
+        }
+        return tempDataList;
+    }
 
     public void refreshGames(ArrayList<GameData> gameDataArrayList) {
         gamesMap.clear();
