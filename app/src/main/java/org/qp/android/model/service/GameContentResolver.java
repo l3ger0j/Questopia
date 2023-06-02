@@ -2,6 +2,8 @@ package org.qp.android.model.service;
 
 import static org.qp.android.utils.FileUtil.findFileRecursively;
 
+import androidx.annotation.Nullable;
+
 import java.io.File;
 
 public class GameContentResolver {
@@ -18,6 +20,7 @@ public class GameContentResolver {
         return findFileRecursively(gameDir, normalizeContentPath(relPath));
     }
 
+    @Nullable
     public String getAbsolutePath(String relPath) {
         var file = getFile(relPath);
         return file != null ? file.getAbsolutePath() : null;

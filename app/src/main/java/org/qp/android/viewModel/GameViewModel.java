@@ -7,6 +7,7 @@ import static org.qp.android.utils.ColorUtil.getHexColor;
 import static org.qp.android.utils.ThreadUtil.isMainThread;
 import static org.qp.android.utils.ViewUtil.getFontStyle;
 
+import android.annotation.SuppressLint;
 import android.app.Application;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -134,6 +135,16 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
 
     public WebViewClient getWebViewClient() {
         return new GameWebViewClient();
+    }
+
+    @SuppressLint("SetJavaScriptEnabled")
+    public WebView getDefaultWebClient(WebView view) {
+        var webClientSettings = view.getSettings();
+        webClientSettings.setAllowFileAccess(true);
+        webClientSettings.setJavaScriptEnabled(true);
+        webClientSettings.setUseWideViewPort(true);
+        view.setWebViewClient(getWebViewClient());
+        return view;
     }
 
     public LiveData<SettingsController> getControllerObserver() {

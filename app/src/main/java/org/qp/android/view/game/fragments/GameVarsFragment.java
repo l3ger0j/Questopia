@@ -27,7 +27,7 @@ public class GameVarsFragment extends GamePatternFragment {
         varsDescView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT));
         varsDescView.setBackgroundColor(viewModel.getBackgroundColor());
-        varsDescView.setWebViewClient(viewModel.getWebViewClient());
+        varsDescView = viewModel.getDefaultWebClient(varsDescView);
         viewModel.getControllerObserver().observe(getViewLifecycleOwner() , settingsController -> {
             varsDescView.setBackgroundColor(viewModel.getBackgroundColor());
             varsDescView.refreshDrawableState();

@@ -344,7 +344,7 @@ public class StockViewModel extends AndroidViewModel {
                             ? null
                             : installTextVersion.getText().toString();
                 }
-                gameData.fileSize = formatFileSize(dirSize(tempInstallDir) , controller.binaryPrefixes);
+                // gameData.fileSize = formatFileSize(dirSize(tempInstallDir) , controller.binaryPrefixes);
                 gameData.icon = (tempImageFile == null ? null : tempImageFile.getUri().toString());
                 installGame(tempInstallDir , gameData);
                 isSelectFolder.set(false);
@@ -378,7 +378,7 @@ public class StockViewModel extends AndroidViewModel {
                             ? null
                             : installTextVersion.getText().toString();
                 }
-                gameData.fileSize = formatFileSize(dirSize(tempInstallDir) , controller.binaryPrefixes);
+                // gameData.fileSize = formatFileSize(dirSize(tempInstallDir) , controller.binaryPrefixes);
                 gameData.icon = (tempImageFile == null ? null : tempImageFile.getUri().toString());
                 connectingDir(tempInstallDir , gameData);
                 isSelectFolder.set(false);
