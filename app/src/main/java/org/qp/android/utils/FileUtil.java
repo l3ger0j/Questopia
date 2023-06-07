@@ -7,7 +7,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.documentfile.provider.DocumentFile;
 
-import org.qp.android.model.install.InstallException;
+import org.qp.android.model.copy.CopyException;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -25,11 +25,9 @@ public final class FileUtil {
         if (file == null) {
             return false;
         }
-        if (file instanceof File) {
-            var tempFile = (File) file;
+        if (file instanceof File tempFile) {
             return tempFile.exists() && tempFile.canWrite();
-        } else if (file instanceof DocumentFile) {
-            var tempFile = (DocumentFile) file;
+        } else if (file instanceof DocumentFile tempFile) {
             return tempFile.exists() && tempFile.isFile() && tempFile.canWrite();
         }
         return false;
@@ -39,11 +37,9 @@ public final class FileUtil {
         if (dir == null) {
             return false;
         }
-        if (dir instanceof File) {
-            var tempDir = (File) dir;
+        if (dir instanceof File tempDir) {
             return tempDir.exists() && tempDir.isDirectory() && tempDir.canWrite();
-        } else if (dir instanceof DocumentFile) {
-            var tempFile = (DocumentFile) dir;
+        } else if (dir instanceof DocumentFile tempFile) {
             return tempFile.exists() && tempFile.isDirectory() && tempFile.canWrite();
         }
         return false;
@@ -172,8 +168,7 @@ public final class FileUtil {
     }
 
     public static <T> void deleteDirectory(T dir) {
-        if (dir instanceof File) {
-            var delDir = (File) dir;
+        if (dir instanceof File delDir) {
             if (delDir.listFiles() != null) {
                 for (var file : delDir.listFiles()) {
                     if (file.isDirectory()) {
@@ -192,8 +187,7 @@ public final class FileUtil {
                     Log.e(TAG , "Directory not delete");
                 }
             }
-        } else if (dir instanceof DocumentFile) {
-            var delDir = (DocumentFile) dir;
+        } else if (dir instanceof DocumentFile delDir) {
             try {
                 for (var file : delDir.listFiles()) {
                     if (file.isDirectory()) {
@@ -231,22 +225,6 @@ public final class FileUtil {
         }
     }
 
-    public static long dirSize(@NonNull DocumentFile dir) {
-        if (dir.exists()) {
-            long result = 0;
-            var fileList = dir.listFiles();
-            for (var file : fileList) {
-                if (file.isDirectory()) {
-                    result += dirSize(file);
-                } else {
-                    result += file.length();
-                }
-            }
-            return result;
-        }
-        return 0;
-    }
-
     @NonNull
     public static String formatFileSize(long size ,
                                         int numCountInfo) {
@@ -276,7 +254,7 @@ public final class FileUtil {
              var out = new FileOutputStream(destFile)) {
             StreamUtil.copy(in , out);
         } catch (IOException ex) {
-            throw new InstallException("CGF");
+            throw new CopyException("CGF");
         }
     }
 }

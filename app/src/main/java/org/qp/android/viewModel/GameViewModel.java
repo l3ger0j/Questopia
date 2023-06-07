@@ -15,6 +15,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.View;
 import android.webkit.MimeTypeMap;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
@@ -31,7 +32,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.preference.PreferenceManager;
 
 import org.qp.android.QuestPlayerApplication;
-import org.qp.android.dto.stock.GameData;
+import org.qp.android.dto.stock.InnerGameData;
 import org.qp.android.model.libQP.LibQpProxy;
 import org.qp.android.model.libQP.QpMenuItem;
 import org.qp.android.model.libQP.RefreshInterfaceRequest;
@@ -73,20 +74,21 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
     private final MutableLiveData<GameItemRecycler> actionLiveData = new MutableLiveData<>();
     private final MutableLiveData<GameItemRecycler> objectLiveData = new MutableLiveData<>();
 
-    private static final String PAGE_HEAD_TEMPLATE = "<head>\n"
-            + "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1\">\n"
-            + "<style type=\"text/css\">\n"
-            + "  body {\n"
-            + "    margin: 0;\n"
-            + "    padding: 0.5em;\n"
-            + "    color: QSPTEXTCOLOR;\n"
-            + "    background-color: QSPBACKCOLOR;\n"
-            + "    font-size: QSPFONTSIZE;\n"
-            + "    font-family: QSPFONTSTYLE;\n"
-            + "  }\n"
-            + "  a { color: QSPLINKCOLOR; }\n"
-            + "  a:link { color: QSPLINKCOLOR; }\n"
-            + "</style></head>";
+    private static final String PAGE_HEAD_TEMPLATE = """
+            <head>
+            <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1">
+            <style type="text/css">
+              body {
+                margin: 0;
+                padding: 0.5em;
+                color: QSPTEXTCOLOR;
+                background-color: QSPBACKCOLOR;
+                font-size: QSPFONTSIZE;
+                font-family: QSPFONTSTYLE;
+              }
+              a { color: QSPLINKCOLOR; }
+              a:link { color: QSPLINKCOLOR; }
+            </style></head>""";
 
     private static final String PAGE_BODY_TEMPLATE = "<body>REPLACETEXT</body>";
     public String pageTemplate = "";
@@ -143,6 +145,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         webClientSettings.setAllowFileAccess(true);
         webClientSettings.setJavaScriptEnabled(true);
         webClientSettings.setUseWideViewPort(true);
+        view.setOverScrollMode(View.OVER_SCROLL_NEVER);
         view.setWebViewClient(getWebViewClient());
         return view;
     }
@@ -291,7 +294,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         return questPlayerApplication.getGameSaveMap();
     }
 
-    public ArrayList<GameData> getGameDataList() {
+    public ArrayList<InnerGameData> getGameDataList() {
         return questPlayerApplication.getGameList();
     }
 
@@ -328,7 +331,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
             final var uri = request.getUrl();
             final var uriDecode = Uri.decode(uri.toString());
             switch (uri.getScheme()) {
-                case "exec":
+                case "exec" -> {
                     var tempUriDecode = uriDecode.substring(5);
                     if (hasBase64(tempUriDecode)) {
                         tempUriDecode = decodeBase64(uriDecode.substring(5));
@@ -340,19 +343,18 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
                     } else {
                         libQpProxy.execute(tempUriDecode);
                     }
-                    break;
-                case "https":
-                case "http":
+                }
+                case "https" , "http" -> {
                     var viewLink = new Intent(Intent.ACTION_VIEW , Uri.parse(uriDecode));
                     viewLink.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     getApplication().startActivity(viewLink);
-                    break;
-                case "file":
+                }
+                case "file" -> {
                     var tempLink = uri.getScheme().replace("file:/" , "https:");
                     var viewLazyLink = new Intent(Intent.ACTION_VIEW , Uri.parse(tempLink));
                     viewLazyLink.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     getApplication().startActivity(viewLazyLink);
-                    break;
+                }
             }
             return true;
         }

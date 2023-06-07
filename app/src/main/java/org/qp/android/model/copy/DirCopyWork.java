@@ -1,4 +1,4 @@
-package org.qp.android.model.install;
+package org.qp.android.model.copy;
 
 import static org.qp.android.utils.DirUtil.doesDirectoryContainGameFiles;
 import static org.qp.android.utils.DirUtil.normalizeGameDirectory;
@@ -19,11 +19,12 @@ import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 
-public class InstallerDirWork extends Worker {
+public class DirCopyWork extends Worker {
     private final File destDir = new File(Objects.requireNonNull(getInputData().getString("destDir")));
     private final DocumentFile srcDir = DocumentFile.fromTreeUri(getApplicationContext(), Uri.parse(getInputData().getString("srcDir")));
 
-    public InstallerDirWork(@NonNull Context context , @NonNull WorkerParameters workerParams) {
+    public DirCopyWork(@NonNull Context context ,
+                       @NonNull WorkerParameters workerParams) {
         super(context , workerParams);
     }
 

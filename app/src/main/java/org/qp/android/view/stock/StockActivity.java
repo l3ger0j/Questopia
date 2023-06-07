@@ -46,7 +46,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import org.qp.android.QuestPlayerApplication;
 import org.qp.android.R;
 import org.qp.android.databinding.ActivityStockBinding;
-import org.qp.android.dto.stock.GameData;
+import org.qp.android.dto.stock.InnerGameData;
 import org.qp.android.utils.ViewUtil;
 import org.qp.android.view.adapters.AutoScrollRunnable;
 import org.qp.android.view.settings.SettingsActivity;
@@ -66,7 +66,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
     private static final int READ_EXTERNAL_STORAGE_CODE = 200;
     private static final int MANAGE_EXTERNAL_STORAGE_CODE = 201;
     private final String TAG = this.getClass().getSimpleName();
-    private HashMap<String, GameData> gamesMap = new HashMap<>();
+    private HashMap<String, InnerGameData> gamesMap = new HashMap<>();
     public SettingsController settingsController;
     private StockViewModel stockViewModel;
 
@@ -77,8 +77,8 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
     private boolean isEnable = false;
     private FloatingActionButton mFAB;
     private RecyclerView mRecyclerView;
-    private ArrayList<GameData> tempList;
-    private final ArrayList<GameData> selectList = new ArrayList<>();
+    private ArrayList<InnerGameData> tempList;
+    private final ArrayList<InnerGameData> selectList = new ArrayList<>();
 
     private final SimpleStorageHelper storageHelper = new SimpleStorageHelper(this);
 
@@ -145,18 +145,16 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
                 for (var file : documentFiles) {
                     var document = new FileWrapper.Document(file);
                     switch (document.getExtension()) {
-                        case "png":
-                        case "jpg":
-                        case "jpeg":
-                            getContentResolver().takePersistableUriPermission(document.getUri(),
+                        case "png" , "jpg" , "jpeg" -> {
+                            getContentResolver().takePersistableUriPermission(document.getUri() ,
                                     Intent.FLAG_GRANT_READ_URI_PERMISSION
                                             | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
                             stockViewModel.setTempImageFile(document.getDocumentFile());
-                            break;
-                        case "qsp":
+                        }
+                        case "qsp" -> {
                             stockViewModel.setTempPathFile(document.getDocumentFile());
                             stockViewModel.setTempModFile(document.getDocumentFile());
-                            break;
+                        }
                     }
                 }
             } else {
@@ -332,9 +330,9 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
 
     public void onItemClick(int position) {
         if (isEnable) {
-            for (GameData gameData : gamesMap.values()) {
-                if (!gameData.isInstalled()) continue;
-                tempList.add(gameData);
+            for (InnerGameData innerGameData : gamesMap.values()) {
+                if (!innerGameData.isInstalled()) continue;
+                tempList.add(innerGameData);
             }
             var mViewHolder =
                     mRecyclerView.findViewHolderForAdapterPosition(position);
@@ -581,7 +579,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
 
     private void filter(String text){
         var gameData = stockViewModel.getSortedGames();
-        var filteredList = new ArrayList<GameData>();
+        var filteredList = new ArrayList<InnerGameData>();
         for (var item : gameData) {
             if (item.title.toLowerCase().contains(text.toLowerCase())) {
                 filteredList.add(item);

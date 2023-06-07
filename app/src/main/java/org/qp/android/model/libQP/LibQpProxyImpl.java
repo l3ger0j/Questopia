@@ -191,7 +191,7 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
             var object = new QpListItem();
             if (objectResult.name.contains("<img")) {
                 if (htmlProcessor.hasHTMLTags(objectResult.name)) {
-                    String tempPath = htmlProcessor.getSrcDir(objectResult.name);
+                    var tempPath = htmlProcessor.getSrcDir(objectResult.name);
                     object.pathToImage = String.valueOf(findFileRecursively(gameState.gameDir,
                             tempPath));
                 } else {
@@ -602,7 +602,7 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
     public void ChangeQuestPath(String path) {
         var dir = new File(path);
         if (!dir.exists()) {
-            Log.e(TAG,"GameData directory not found: " + path);
+            Log.e(TAG,"InnerGameData directory not found: " + path);
             return;
         }
         if (!gameState.gameDir.equals(dir)) {

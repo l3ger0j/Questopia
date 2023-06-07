@@ -8,7 +8,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import org.qp.android.dto.stock.GameData;
+import org.qp.android.dto.stock.InnerGameData;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -22,7 +22,7 @@ public class LocalGame {
     private final String TAG = this.getClass().getSimpleName();
     private static final String GAME_INFO_FILENAME = "gameStockInfo";
 
-    public List<GameData> getGames(File gamesDir) {
+    public List<InnerGameData> getGames(File gamesDir) {
         if (gamesDir == null) {
             return Collections.emptyList();
         }
@@ -31,16 +31,16 @@ public class LocalGame {
             if (gameDirs.isEmpty()) {
                 return Collections.emptyList();
             }
-            var items = new ArrayList<GameData>();
+            var items = new ArrayList<InnerGameData>();
             for (var folder : getGameFolders(gameDirs)) {
-                var item = (GameData) null;
+                var item = (InnerGameData) null;
                 var info = getGameInfo(folder);
                 if (info != null) {
                     item = parseGameInfo(info);
                 }
                 if (item == null) {
                     var name = folder.dir.getName();
-                    item = new GameData();
+                    item = new InnerGameData();
                     item.id = name;
                     item.title = name;
                 }
@@ -55,23 +55,23 @@ public class LocalGame {
         }
     }
 
-    public List<GameData> getGame(File gameDir) {
+    public List<InnerGameData> getGame(File gameDir) {
         if (gameDir == null) {
             Log.e(TAG,"Games directory is not specified");
             return Collections.emptyList();
         }
         var gameDirs = new ArrayList<File>();
         gameDirs.add(gameDir);
-        var items = new ArrayList<GameData>();
+        var items = new ArrayList<InnerGameData>();
         for (var folder : getGameFolders(gameDirs)) {
-            var item = (GameData) null;
+            var item = (InnerGameData) null;
             var info = getGameInfo(folder);
             if (info != null) {
                 item = parseGameInfo(info);
             }
             if (item == null) {
                 var name = folder.dir.getName();
-                item = new GameData();
+                item = new InnerGameData();
                 item.id = name;
                 item.title = name;
             }
@@ -126,16 +126,16 @@ public class LocalGame {
     private String getGameInfo(@NonNull GameFolder game) {
         var gameInfoFiles = game.dir.listFiles((dir, name) -> name.equalsIgnoreCase(GAME_INFO_FILENAME));
         if (gameInfoFiles == null || gameInfoFiles.length == 0) {
-            Log.w(TAG, "GameData info file not found in " + game.dir.getName());
+            Log.w(TAG, "InnerGameData info file not found in " + game.dir.getName());
             return null;
         }
         return readFileAsString(gameInfoFiles[0]);
     }
 
     @Nullable
-    private GameData parseGameInfo(String xml) {
+    private InnerGameData parseGameInfo(String xml) {
         try {
-            return xmlToObject(xml, GameData.class);
+            return xmlToObject(xml, InnerGameData.class);
         } catch (Exception ex) {
             Log.e(TAG,"Failed to parse game info file", ex);
             return null;

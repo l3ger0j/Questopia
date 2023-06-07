@@ -12,7 +12,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.qp.android.databinding.FragmentRecyclerBinding;
-import org.qp.android.dto.stock.GameData;
+import org.qp.android.dto.stock.InnerGameData;
 import org.qp.android.view.adapters.RecyclerItemClickListener;
 import org.qp.android.view.stock.StockGamesRecycler;
 import org.qp.android.viewModel.StockViewModel;
@@ -24,7 +24,7 @@ public class StockRecyclerFragment extends StockPatternFragment {
     private StockViewModel stockViewModel;
     private RecyclerView mRecyclerView;
 
-    Observer<ArrayList<GameData>> gameData = gameData -> {
+    Observer<ArrayList<InnerGameData>> gameData = gameData -> {
         var adapter = new StockGamesRecycler(requireActivity());
         adapter.submitList(gameData);
         mRecyclerView.setAdapter(adapter);

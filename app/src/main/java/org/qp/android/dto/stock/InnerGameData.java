@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Root(name = "game", strict = false)
-public class GameData implements Serializable {
+public class InnerGameData implements Serializable {
     @Element(name = "id", data = true)
     public String id = "";
     @Element(name = "list_id", data = true, required = false)
@@ -48,10 +48,10 @@ public class GameData implements Serializable {
     public File gameDir;
     public List<File> gameFiles;
 
-    public GameData() {
+    public InnerGameData() {
     }
 
-    public GameData(GameData other) {
+    public InnerGameData(InnerGameData other) {
         id = other.id;
         listId = other.listId;
         author = other.author;
@@ -87,7 +87,7 @@ public class GameData implements Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        var that = (GameData) o;
+        var that = (InnerGameData) o;
         return Objects.equals(id, that.id)
                 && Objects.equals(listId, that.listId)
                 && Objects.equals(author, that.author)
@@ -113,7 +113,7 @@ public class GameData implements Serializable {
     @NonNull
     @Override
     public String toString() {
-        return "GameData{" +
+        return "InnerGameData{" +
                 "id='" + id + '\'' +
                 ", listId='" + listId + '\'' +
                 ", author='" + author + '\'' +

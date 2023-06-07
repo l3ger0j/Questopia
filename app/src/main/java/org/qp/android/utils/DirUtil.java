@@ -2,6 +2,8 @@ package org.qp.android.utils;
 
 import android.util.Log;
 
+import androidx.documentfile.provider.DocumentFile;
+
 import java.io.File;
 
 public final class DirUtil {
@@ -50,5 +52,21 @@ public final class DirUtil {
             }
         }
         return false;
+    }
+
+    public static long dirSize(DocumentFile dir) {
+        if (dir.exists()) {
+            long result = 0;
+            var fileList = dir.listFiles();
+            for (var file : fileList) {
+                if (file.isDirectory()) {
+                    result += dirSize(file);
+                } else {
+                    result += file.length();
+                }
+            }
+            return result;
+        }
+        return 0;
     }
 }
