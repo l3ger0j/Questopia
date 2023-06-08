@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+<manifest
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"/>
@@ -19,7 +19,7 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/appName"
         android:largeHeap="true"
-        android:theme="@style/Theme.QP.Translucent"
+        android:theme="@style/Theme.App.Starting"
         tools:targetApi="s"
         android:allowBackup="false"
         android:fullBackupContent="false"
@@ -27,7 +27,7 @@
         android:dataExtractionRules="@xml/data_extraction_rules">
 
         <activity
-            android:name=".view.splash.SquashActivity"
+            android:name=".view.stock.StockActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -36,16 +36,14 @@
         </activity>
 
         <activity
-            android:name=".view.stock.StockActivity" />
-
-        <activity
             android:name=".view.game.GameActivity"
             android:alwaysRetainTaskState="true"
             android:theme="@style/Theme.QP.Translucent.NoActionBar" />
 
         <activity
             android:name=".view.settings.SettingsActivity"
-            android:label="@string/settingsTitle" />
+            android:label="@string/settingsTitle"
+            android:theme="@style/Theme.QP.Translucent" />
 
         <service
             android:name="androidx.appcompat.app.AppLocalesMetadataHolderService"

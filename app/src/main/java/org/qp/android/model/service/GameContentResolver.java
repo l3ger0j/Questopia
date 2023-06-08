@@ -2,10 +2,16 @@ package org.qp.android.model.service;
 
 import static org.qp.android.utils.FileUtil.findFileRecursively;
 
+import androidx.annotation.Nullable;
+
 import java.io.File;
 
 public class GameContentResolver {
     private File gameDir;
+
+    public void setGameDir(File gameDir) {
+        this.gameDir = gameDir;
+    }
 
     public File getFile(String relPath) {
         if (gameDir == null) {
@@ -14,6 +20,7 @@ public class GameContentResolver {
         return findFileRecursively(gameDir, normalizeContentPath(relPath));
     }
 
+    @Nullable
     public String getAbsolutePath(String relPath) {
         var file = getFile(relPath);
         return file != null ? file.getAbsolutePath() : null;
@@ -31,9 +38,5 @@ public class GameContentResolver {
             result = result.substring(2);
         }
         return result.replace("\\", "/");
-    }
-
-    public void setGameDir(File gameDir) {
-        this.gameDir = gameDir;
     }
 }

@@ -2,15 +2,18 @@ package org.qp.android.dto.stock;
 
 import static org.qp.android.utils.StringUtil.isNotEmpty;
 
+import androidx.annotation.NonNull;
+
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.Root;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 
 @Root(name = "game", strict = false)
-public class GameData {
+public class InnerGameData implements Serializable {
     @Element(name = "id", data = true)
     public String id = "";
     @Element(name = "list_id", data = true, required = false)
@@ -45,10 +48,10 @@ public class GameData {
     public File gameDir;
     public List<File> gameFiles;
 
-    public GameData() {
+    public InnerGameData() {
     }
 
-    public GameData(GameData other) {
+    public InnerGameData(InnerGameData other) {
         id = other.id;
         listId = other.listId;
         author = other.author;
@@ -84,7 +87,7 @@ public class GameData {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        var that = (GameData) o;
+        var that = (InnerGameData) o;
         return Objects.equals(id, that.id)
                 && Objects.equals(listId, that.listId)
                 && Objects.equals(author, that.author)
@@ -105,5 +108,29 @@ public class GameData {
     @Override
     public int hashCode() {
         return Objects.hash(id , listId , author , portedBy , version , title , lang , player , icon , fileUrl , fileSize , fileExt , descUrl , pubDate , modDate);
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return "InnerGameData{" +
+                "id='" + id + '\'' +
+                ", listId='" + listId + '\'' +
+                ", author='" + author + '\'' +
+                ", portedBy='" + portedBy + '\'' +
+                ", version='" + version + '\'' +
+                ", title='" + title + '\'' +
+                ", lang='" + lang + '\'' +
+                ", player='" + player + '\'' +
+                ", icon='" + icon + '\'' +
+                ", fileUrl='" + fileUrl + '\'' +
+                ", fileSize='" + fileSize + '\'' +
+                ", fileExt='" + fileExt + '\'' +
+                ", descUrl='" + descUrl + '\'' +
+                ", pubDate='" + pubDate + '\'' +
+                ", modDate='" + modDate + '\'' +
+                ", gameDir=" + gameDir +
+                ", gameFiles=" + gameFiles +
+                '}';
     }
 }

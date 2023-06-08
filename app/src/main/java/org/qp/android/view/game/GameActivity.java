@@ -1,8 +1,9 @@
 package org.qp.android.view.game;
 
+import static org.qp.android.utils.FileUtil.createFindDFile;
+import static org.qp.android.utils.FileUtil.createFindFile;
+import static org.qp.android.utils.FileUtil.createFindFolder;
 import static org.qp.android.utils.FileUtil.findFileOrDirectory;
-import static org.qp.android.utils.FileUtil.getOrCreateDirectory;
-import static org.qp.android.utils.FileUtil.getOrCreateFile;
 import static org.qp.android.utils.ThreadUtil.isMainThread;
 
 import android.content.Intent;
@@ -40,6 +41,7 @@ import androidx.navigation.fragment.NavHostFragment;
 
 import com.anggrayudi.storage.FileWrapper;
 import com.anggrayudi.storage.SimpleStorageHelper;
+import com.anggrayudi.storage.file.MimeType;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.textfield.TextInputLayout;
 
@@ -156,27 +158,24 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
                 var document =
                         new FileWrapper.Document(documentFile);
                 switch (document.getExtension()) {
-                    case "text":
-                    case "pl":
-                    case "txt":
-                    case "el":
+                    case "text" , "pl" , "txt" , "el" -> {
                         var stringBuilder = new StringBuilder();
                         try (var inputStream = document.openInputStream(this)) {
                             if (inputStream != null) {
                                 var inputStreamReader = new InputStreamReader(inputStream);
                                 var bufferedReader = new BufferedReader(inputStreamReader);
-                                String receiveString;
+                                var receiveString = "";
                                 while ((receiveString = bufferedReader.readLine()) != null) {
                                     stringBuilder.append("\n").append(receiveString);
                                 }
                             }
                         } catch (FileNotFoundException e) {
-                            showErrorDialog("File not found: "+"\n"+e);
+                            showErrorDialog("File not found: " + "\n" + e);
                         } catch (IOException e) {
-                            showErrorDialog("Can not read file: "+"\n"+e);
+                            showErrorDialog("Can not read file: " + "\n" + e);
                         }
                         postTextInDialogFrags(stringBuilder.toString());
-                        break;
+                    }
                 }
             }
             return null;
@@ -284,7 +283,8 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
                 layout ,
                 activityGameBinding.appBarGame.toolbar ,
                 R.string.add ,
-                R.string.close);
+                R.string.close
+        );
         layout.addDrawerListener(toggle);
         toggle.syncState();
 
@@ -326,20 +326,18 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
 
     private void setActiveTab(int tab) {
         switch (tab) {
-            case TAB_MAIN_DESC_AND_ACTIONS:
+            case TAB_MAIN_DESC_AND_ACTIONS -> {
                 navController.navigate(R.id.gameMainFragment);
                 setTitle(getString(R.string.mainDescTitle));
-                break;
-
-            case TAB_OBJECTS:
+            }
+            case TAB_OBJECTS -> {
                 navController.navigate(R.id.gameObjectFragment);
                 setTitle(getString(R.string.inventoryTitle));
-                break;
-
-            case TAB_VARS_DESC:
+            }
+            case TAB_VARS_DESC -> {
                 navController.navigate(R.id.gameVarsFragment);
                 setTitle(getString(R.string.varsDescTitle));
-                break;
+            }
         }
 
         activeTab = tab;
@@ -572,84 +570,103 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
         return true;
     }
 
-    private void addSaveSlotsSubMenu(@NonNull MenuItem parent, int action) {
+    private void addSaveSlotsSubMenu(MenuItem parent, int action) {
+        if (parent == null) {
+            return;
+        }
+
+        final var proxy = libQpProxy;
+        final var savesDir = createFindFolder(libQpProxy.getGameState().gameDir, "saves");
+        if (savesDir == null) return;
+
         var id = parent.getItemId();
         mainMenu.removeItem(id);
 
         var order = action == LOAD ? 2 : 3;
-        var subMenu = mainMenu.addSubMenu(R.id.menuGroup_running , id, order, parent.getTitle());
+        var subMenu = mainMenu.addSubMenu(
+                R.id.menuGroup_running ,
+                id ,
+                order ,
+                parent.getTitle()
+        );
         subMenu.setHeaderTitle(getString(R.string.selectSlot));
 
         MenuItem item;
-        final var savesDir = getOrCreateDirectory(libQpProxy.getGameState().gameDir, "saves");
-        final var proxy = libQpProxy;
-
-        for (int i = 0; i < MAX_SAVE_SLOTS; ++i) {
+        for (int i = 0; i <= MAX_SAVE_SLOTS; i++) {
             final var filename = getSaveSlotFilename(i);
             final var file = findFileOrDirectory(savesDir, filename);
-            String title;
+            var title = "";
 
             if (file != null) {
-                var lastMod =
-                        DateFormat.format("yyyy-MM-dd HH:mm:ss",
-                                file.lastModified()).toString();
+                var lastMod = DateFormat.format(
+                        "yyyy-MM-dd HH:mm:ss" ,
+                        file.lastModified()
+                ).toString();
                 title = getString(R.string.slotPresent, i + 1, lastMod);
             } else {
                 title = getString(R.string.slotEmpty, i + 1);
             }
 
             item = subMenu.add(title);
-            item.setOnMenuItemClickListener(item13 -> {
+            item.setOnMenuItemClickListener(menuItem -> {
                 switch (action) {
-                    case LOAD:
-                        if (file != null) {
+                    case LOAD -> {
+                        try {
                             gameViewModel.doWithCounterDisabled(() -> proxy.loadGameState(Uri.fromFile(file)));
+                        } catch (NullPointerException e) {
+                            Log.d(TAG , "File is empty!" , e);
                         }
-                        break;
-                    case SAVE:
-                        var file1 = getOrCreateFile(savesDir, filename);
-                        proxy.saveGameState(Uri.fromFile(file1));
-                        break;
+                    }
+                    case SAVE -> {
+                        var saveFile = createFindDFile(
+                                DocumentFile.fromFile(savesDir) ,
+                                MimeType.TEXT ,
+                                filename
+                        );
+                        if (saveFile != null) {
+                            proxy.saveGameState(saveFile.getUri());
+                        }
+                    }
                 }
                 return true;
             });
         }
 
         switch (action) {
-            case LOAD:
+            case LOAD -> {
                 item = subMenu.add(getString(R.string.loadFrom));
                 item.setOnMenuItemClickListener(item12 -> {
                     startReadOrWriteSave(LOAD);
                     return true;
                 });
-                break;
-            case SAVE:
+            }
+            case SAVE -> {
                 item = subMenu.add(getString(R.string.saveTo));
                 item.setOnMenuItemClickListener(item1 -> {
                     startReadOrWriteSave(SAVE);
                     return true;
                 });
-                break;
+            }
         }
     }
 
     private void startReadOrWriteSave (int slotAction) {
         Intent mIntent;
         switch (slotAction) {
-            case LOAD:
+            case LOAD -> {
                 mIntent = new Intent(Intent.ACTION_GET_CONTENT);
-                mIntent.putExtra(Intent.ACTION_GET_CONTENT, true);
+                mIntent.putExtra(Intent.ACTION_GET_CONTENT , true);
                 mIntent.setType("application/octet-stream");
                 this.slotAction = slotAction;
                 saveResultLaunch.launch(mIntent);
-                break;
-            case SAVE:
+            }
+            case SAVE -> {
                 mIntent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
-                mIntent.putExtra(Intent.EXTRA_TITLE, libQpProxy.getGameState().gameFile + ".sav");
+                mIntent.putExtra(Intent.EXTRA_TITLE , libQpProxy.getGameState().gameFile + ".sav");
                 mIntent.setType("application/octet-stream");
                 this.slotAction = slotAction;
                 saveResultLaunch.launch(mIntent);
-                break;
+            }
         }
     }
 
@@ -661,14 +678,18 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        if (!libQpProxy.getGameState().gameTitle.contentEquals(item.getTitle())) {
+        if (item.getTitle() == null) {
+            var drawer = (DrawerLayout) activityGameBinding.gameDrawerLayout;
+            drawer.closeDrawer(GravityCompat.START);
+            return false;
+        } else if (!libQpProxy.getGameState().gameTitle.contentEquals(item.getTitle())) {
             var simpleNameForSave = libQpProxy.getGameState().gameFile.getName();
             var hardNameForSave = simpleNameForSave+"#"+ThreadLocalRandom.current().nextInt();
             var currentGameDir = libQpProxy.getGameState().gameDir;
 
             var temGameSaveMap = gameViewModel.getGameSaveMap();
-            final var savesDir = getOrCreateDirectory(currentGameDir , "saves");
-            var tempSaveFile = getOrCreateFile(savesDir , hardNameForSave);
+            final var savesDir = createFindFolder(currentGameDir , "saves");
+            var tempSaveFile = createFindFile(savesDir , hardNameForSave);
             libQpProxy.saveGameState(Uri.fromFile(tempSaveFile));
             temGameSaveMap.putSerializable(simpleNameForSave , tempSaveFile);
             gameViewModel.setGameSaveMap(temGameSaveMap);

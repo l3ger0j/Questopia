@@ -7,7 +7,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.documentfile.provider.DocumentFile;
 
-import org.qp.android.model.install.InstallException;
+import org.qp.android.model.copy.CopyException;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -17,88 +17,136 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.text.DecimalFormat;
-import java.util.Objects;
 
 public final class FileUtil {
     private static final String TAG = FileUtil.class.getSimpleName();
-    public static final String GAME_INFO_FILENAME = "gameStockInfo";
 
-    public static boolean isWritableFile(File file) {
-        return file != null && file.exists() && file.canWrite();
-    }
-
-    public static boolean isWritableDirectory(File dir) {
-        return dir != null && dir.exists() && dir.isDirectory() && dir.canWrite();
-    }
-
-    public static File getOrCreateFile(File parentDir,
-                                       String name) {
-        var file = findFileOrDirectory(parentDir, name);
+    public static <T> boolean isWritableFile(T file) {
         if (file == null) {
-            file = createFile(parentDir, name);
+            return false;
         }
-        return file;
+        if (file instanceof File tempFile) {
+            return tempFile.exists() && tempFile.canWrite();
+        } else if (file instanceof DocumentFile tempFile) {
+            return tempFile.exists() && tempFile.isFile() && tempFile.canWrite();
+        }
+        return false;
+    }
+
+    public static <T> boolean isWritableDirectory(T dir) {
+        if (dir == null) {
+            return false;
+        }
+        if (dir instanceof File tempDir) {
+            return tempDir.exists() && tempDir.isDirectory() && tempDir.canWrite();
+        } else if (dir instanceof DocumentFile tempFile) {
+            return tempFile.exists() && tempFile.isDirectory() && tempFile.canWrite();
+        }
+        return false;
     }
 
     @Nullable
-    public static File createFile(File parentDir,
-                                  String name) {
-        var file = new File(parentDir, name);
-        if (!file.exists()) {
+    public static File createFindFile(File parentDir , String name) {
+        if (!isWritableDirectory(parentDir)) {
+            return null;
+        }
+
+        var checkFile = findFileOrDirectory(parentDir , name);
+        if (checkFile == null) {
+            var file = new File(parentDir , name);
             try {
                 if (file.createNewFile()) {
-                    Log.i(TAG, "File created");
+                    Log.i(TAG , "File created");
+                    return file;
                 }
             } catch (IOException ex) {
-                Log.e(TAG , "Error creating a file: " + name, ex);
+                Log.e(TAG , "Error creating a file: " + name , ex);
                 return null;
             }
         }
-        return file;
-    }
-
-    @NonNull
-    public static File getOrCreateDirectory(File parentDir,
-                                            String name) {
-        var dir = findFileOrDirectory(parentDir, name);
-        if (dir == null) {
-            dir = createDirectory(parentDir, name);
-        }
-        return dir;
-    }
-
-    @NonNull
-    public static File createDirectory(File parentDir,
-                                       String name) {
-        var dir = new File(parentDir, name);
-        if (dir.mkdir()) {
-            Log.i(TAG,"Directory created");
-        } else {
-            Log.i(TAG,"Directory not created");
-        }
-        return dir;
+        return checkFile;
     }
 
     @Nullable
-    public static File findFileOrDirectory(File parentDir,
-                                           final String name) {
-        var files = parentDir.listFiles((dir, filename) -> filename.equalsIgnoreCase(name));
+    public static DocumentFile createFindDFile(DocumentFile parentDir ,
+                                                 String mimeType ,
+                                                 String displayName) {
+        if (!isWritableDirectory(parentDir)) {
+            return null;
+        }
+
+        var checkFile =  parentDir.findFile(displayName);
+        if (checkFile == null) {
+            var tempFile = parentDir.createFile(mimeType , displayName);
+            if (isWritableFile(tempFile)) {
+                Log.i(TAG, "File created");
+                return tempFile;
+            }
+        }
+        return checkFile;
+    }
+
+    @Nullable
+    public static File createFindFolder(File parentDir , String name) {
+        if (!isWritableDirectory(parentDir)) {
+            return null;
+        }
+
+        var checkDir = findFileOrDirectory(parentDir , name);
+        if (checkDir == null) {
+            var newDir = new File(parentDir , name);
+            if (newDir.mkdir()) {
+                Log.i(TAG , "Directory created");
+                return newDir;
+            } else {
+                Log.i(TAG , "Directory not created");
+                return null;
+            }
+        }
+        return checkDir;
+    }
+
+    @Nullable
+    public static DocumentFile createFindDFolder(DocumentFile parentDir ,
+                                                 String displayName) {
+        if (!isWritableDirectory(parentDir)) {
+            return null;
+        }
+
+        var checkDir = findFileOrDirectory(parentDir , displayName);
+        if (checkDir == null) {
+            var tempDir = parentDir.createDirectory(displayName);
+            if (isWritableDirectory(tempDir)) {
+                Log.i(TAG,"Directory created");
+                return tempDir;
+            } else {
+                Log.e(TAG,"Directory not created");
+            }
+        }
+        return checkDir;
+    }
+
+    @Nullable
+    public static File findFileOrDirectory(File parentDir , final String name) {
+        var files = parentDir.listFiles((dir , filename) -> filename.equalsIgnoreCase(name));
         if (files == null || files.length == 0) return null;
         return files[0];
     }
 
+    public static DocumentFile findFileOrDirectory(DocumentFile parentDir , final String name) {
+        return parentDir.findFile(name);
+    }
+
     @Nullable
-    public static File findFileRecursively(File parentDir,
-                                           String path) {
+    public static File findFileRecursively(File parentDir , String path) {
         var idx = path.indexOf("/");
         if (idx == -1) {
-            return findFileOrDirectory(parentDir, path);
+            return findFileOrDirectory(parentDir , path);
         }
-        var dirName = path.substring(0, idx);
-        var dir = findFileOrDirectory(parentDir, dirName);
+        var dirName = path.substring(0 , idx);
+        var dir = findFileOrDirectory(parentDir , dirName);
         if (dir == null) return null;
-
-        return findFileRecursively(dir, path.substring(idx + 1));
+        return findFileRecursively(dir , path.substring(idx + 1));
     }
 
     @Nullable
@@ -113,28 +161,53 @@ public final class FileUtil {
                 }
             }
         } catch (IOException ex) {
-            Log.e(TAG,"Error reading a file", ex);
+            Log.e(TAG , "Error reading a file" , ex);
             return null;
         }
         return result.toString();
     }
 
-    public static void deleteDirectory(File dir) {
-        for (var file : Objects.requireNonNull(dir.listFiles())) {
-            if (file.isDirectory()) {
-                deleteDirectory(file);
-            } else {
-                if (file.delete()) {
-                    Log.i(TAG,"File delete");
+    public static <T> void deleteDirectory(T dir) {
+        if (dir instanceof File delDir) {
+            if (delDir.listFiles() != null) {
+                for (var file : delDir.listFiles()) {
+                    if (file.isDirectory()) {
+                        deleteDirectory(file);
+                    } else {
+                        if (file.delete()) {
+                            Log.i(TAG , "File delete");
+                        } else {
+                            Log.e(TAG , "File not delete");
+                        }
+                    }
+                }
+                if (delDir.delete()) {
+                    Log.i(TAG , "Directory delete");
                 } else {
-                    Log.e(TAG,"File not delete");
+                    Log.e(TAG , "Directory not delete");
                 }
             }
-        }
-        if (dir.delete()) {
-            Log.i(TAG,"Directory delete");
-        } else {
-            Log.e(TAG,"Directory not delete");
+        } else if (dir instanceof DocumentFile delDir) {
+            try {
+                for (var file : delDir.listFiles()) {
+                    if (file.isDirectory()) {
+                        deleteDirectory(file);
+                    } else {
+                        if (file.delete()) {
+                            Log.i(TAG , "File delete");
+                        } else {
+                            Log.e(TAG , "File not delete");
+                        }
+                    }
+                }
+                if (delDir.delete()) {
+                    Log.i(TAG , "Directory delete");
+                } else {
+                    Log.e(TAG , "Directory not delete");
+                }
+            } catch (UnsupportedOperationException e) {
+                Log.e(TAG , "Error: " , e);
+            }
         }
     }
 
@@ -143,33 +216,17 @@ public final class FileUtil {
         var file = new File(path);
         try (var in = new FileInputStream(file)) {
             try (var out = new ByteArrayOutputStream()) {
-                StreamUtil.copy(in, out);
+                StreamUtil.copy(in , out);
                 return out.toByteArray();
             }
         } catch (IOException ex) {
-            Log.e(TAG,"Error reading file: " + path, ex);
+            Log.e(TAG , "Error reading file: " + path , ex);
             return null;
         }
     }
 
-    public static long dirSize(@NonNull DocumentFile dir) {
-        if (dir.exists()) {
-            long result = 0;
-            var fileList = dir.listFiles();
-            for (var file : fileList) {
-                if (file.isDirectory()) {
-                    result += dirSize(file);
-                } else {
-                    result += file.length();
-                }
-            }
-            return result;
-        }
-        return 0;
-    }
-
     @NonNull
-    public static String formatFileSize(long size,
+    public static String formatFileSize(long size ,
                                         int numCountInfo) {
         if (size <= 0) {
             return "0";
@@ -186,18 +243,18 @@ public final class FileUtil {
                 + " " + units[digitGroups];
     }
 
-    public static void copyFile(Context context,
-                                @NonNull DocumentFile srcFile,
+    public static void copyFile(Context context ,
+                                @NonNull DocumentFile srcFile ,
                                 File destDir) {
-        var destFile = createFile(destDir, srcFile.getName());
+        var destFile = createFindFile(destDir , srcFile.getName());
         if (destFile == null) {
             return;
         }
         try (var in = context.getContentResolver().openInputStream(srcFile.getUri());
              var out = new FileOutputStream(destFile)) {
-            StreamUtil.copy(in, out);
+            StreamUtil.copy(in , out);
         } catch (IOException ex) {
-            throw new InstallException("CGF");
+            throw new CopyException("CGF");
         }
     }
 }
