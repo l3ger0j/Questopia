@@ -10,6 +10,10 @@
         <string name="titleNotify">Game install</string>
         <string name="textProgressNotify">Game Installation Progress</string>
         <string name="textInstallNotify">The game -GAMENAME- has been successfully installed!</string>
+    <!-- Copy notification -->
+        <string name="titleCopyNotify">Copying the game directory</string>
+        <string name="bodyCopyNotify">The game is currently being copied to the internal storage!</string>
+        <string name="bodyCopiedNotify">The game -GAMENAME- has been successfully copied to the internal storage!</string>
     <!-- Dialog LoadGamePopup -->
         <string name="loadGamePopup">The save file was not found in gameDir. Would you like to manually specify the path to the save file?</string>
     <!-- Dialog Close -->

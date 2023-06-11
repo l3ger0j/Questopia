@@ -1,7 +1,5 @@
 package org.qp.android.model.libQP;
 
-import static org.qp.android.utils.FileUtil.createFindFolder;
-import static org.qp.android.utils.FileUtil.findFileOrDirectory;
 import static org.qp.android.utils.FileUtil.findFileRecursively;
 import static org.qp.android.utils.FileUtil.getFileContents;
 import static org.qp.android.utils.StringUtil.getStringOrEmpty;
@@ -517,14 +515,15 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
     @Override
     public void OpenGame(String filename) {
         var inter = gameInterface;
-        var savesDir = createFindFolder(gameState.gameDir, "saves");
-        if (savesDir != null && inter != null) {
-            var saveFile = findFileOrDirectory(savesDir , filename);
-            if (saveFile == null) {
-                Log.e(TAG , "Save file not found: " + filename);
-                inter.showLoadGamePopup();
+        if (inter != null) {
+            if (filename != null) {
+                var saveFile = new File(filename);
+                if (saveFile.exists()) {
+                    inter.doWithCounterDisabled(() -> loadGameState(Uri.fromFile(saveFile)));
+                }
             } else {
-                inter.doWithCounterDisabled(() -> loadGameState(Uri.fromFile(saveFile)));
+                Log.e(TAG , "Save file not found");
+                inter.showLoadGamePopup();
             }
         }
     }
@@ -532,7 +531,19 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
     @Override
     public void SaveGame(String filename) {
         if (gameInterface != null) {
-            gameInterface.showSaveGamePopup(filename);
+            if (filename != null) {
+                File file = new File(filename);
+                try {
+                    if (file.createNewFile()) {
+                        Log.i(TAG , "File created");
+                        saveGameState(Uri.fromFile(file));
+                    }
+                } catch (IOException e) {
+                    Log.e(TAG , "Error: " , e);
+                }
+            } else {
+                gameInterface.showSaveGamePopup();
+            }
         }
     }
 

@@ -526,7 +526,7 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
         }
     }
 
-    public void showSavePopup () {
+    public void showSavePopup() {
         if (isMainThread()) {
             mainMenu.performIdentifierAction(R.id.menu_saveGame , 0);
         } else {
@@ -688,7 +688,7 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
             var currentGameDir = libQpProxy.getGameState().gameDir;
 
             var temGameSaveMap = gameViewModel.getGameSaveMap();
-            final var savesDir = createFindFolder(currentGameDir , "saves");
+            final var savesDir = createFindFolder(currentGameDir , "tempSaves");
             var tempSaveFile = createFindFile(savesDir , hardNameForSave);
             libQpProxy.saveGameState(Uri.fromFile(tempSaveFile));
             temGameSaveMap.putSerializable(simpleNameForSave , tempSaveFile);

@@ -29,6 +29,11 @@
             android:key="actsHeight"
             android:summary="@string/actsHeightSum"
             android:title="@string/actsHeightTitle" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="separator"
+            android:summary="@string/separatorSum"
+            android:title="@string/separatorTitle" />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/textCatTitle">
@@ -119,11 +124,6 @@
             android:key="immersiveMode"
             android:summary="@string/immersiveModeSum"
             android:title="@string/immersiveModeTitle" />
-        <SwitchPreferenceCompat
-            android:defaultValue="false"
-            android:key="separator"
-            android:summary="@string/separatorSum"
-            android:title="@string/separatorTitle" />
         <SwitchPreferenceCompat
             android:defaultValue="true"
             android:key="autoscroll"

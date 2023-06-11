@@ -26,7 +26,6 @@ import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.view.ActionMode;
 import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.core.os.LocaleListCompat;
 import androidx.core.splashscreen.SplashScreen;
 import androidx.fragment.app.DialogFragment;
@@ -43,7 +42,6 @@ import com.anggrayudi.storage.file.DocumentFileCompat;
 import com.anggrayudi.storage.file.DocumentFileType;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import org.qp.android.QuestPlayerApplication;
 import org.qp.android.R;
 import org.qp.android.databinding.ActivityStockBinding;
 import org.qp.android.dto.stock.InnerGameData;
@@ -65,6 +63,7 @@ import java.util.Objects;
 public class StockActivity extends AppCompatActivity implements StockPatternDialogFrags.StockPatternDialogList, StockPatternFragment.StockPatternFragmentList {
     private static final int READ_EXTERNAL_STORAGE_CODE = 200;
     private static final int MANAGE_EXTERNAL_STORAGE_CODE = 201;
+    private static final int POST_NOTIFICATION = 203;
     private final String TAG = this.getClass().getSimpleName();
     private HashMap<String, InnerGameData> gamesMap = new HashMap<>();
     public SettingsController settingsController;
@@ -169,14 +168,21 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
             return null;
         });
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ActivityCompat.checkSelfPermission(this , Manifest.permission.POST_NOTIFICATIONS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this , new String[]{ Manifest.permission.POST_NOTIFICATIONS } , POST_NOTIFICATION);
+            }
+        }
+
         if (stockViewModel.getSettingsController().isUseNewFilePicker) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                if (ContextCompat.checkSelfPermission(this, Manifest.permission.MANAGE_EXTERNAL_STORAGE)
+                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.MANAGE_EXTERNAL_STORAGE)
                         != PackageManager.PERMISSION_GRANTED) {
                     ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.MANAGE_EXTERNAL_STORAGE}, MANAGE_EXTERNAL_STORAGE_CODE);
                 }
             } else {
-                if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
+                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
                         != PackageManager.PERMISSION_GRANTED) {
                     ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, READ_EXTERNAL_STORAGE_CODE);
                 }
@@ -216,6 +222,14 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
                     ViewUtil.showSnackBar(findViewById(android.R.id.content) , "Success");
                 } else {
                     ViewUtil.showSnackBar(findViewById(android.R.id.content) , "Permission denied to manage your External storage");
+                }
+                break;
+            case POST_NOTIFICATION:
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    ViewUtil.showSnackBar(findViewById(android.R.id.content) , "Success");
+                } else {
+                    ViewUtil.showSnackBar(findViewById(android.R.id.content) , "Permission denied to post notification");
                 }
                 break;
         }
@@ -500,10 +514,6 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
     protected void onDestroy() {
         super.onDestroy();
         unregisterReceiver(onComplete);
-        var application = (QuestPlayerApplication) getApplication();
-        if (application.getGameList() != null) {
-            stockViewModel.saveGameLists(application.getGameList());
-        }
         Log.i(TAG , "Stock Activity destroyed");
     }
 

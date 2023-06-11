@@ -12,7 +12,7 @@ public interface GameInterface {
     String showExecutorDialog(String prompt);
     int showMenu();
     void showLoadGamePopup();
-    void showSaveGamePopup(String filename);
+    void showSaveGamePopup();
     void showWindow(WindowType type, boolean show);
 
     /**

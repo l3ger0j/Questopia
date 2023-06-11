@@ -221,9 +221,14 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         return actionLiveData;
     }
 
-    @Nullable
+    @NonNull
     private GameActivity getGameActivity () {
-        return gameActivityObservableField.get();
+        var tempGameActivity = gameActivityObservableField.get();
+        if (tempGameActivity != null) {
+            return tempGameActivity;
+        } else {
+            throw new NullPointerException();
+        }
     }
     // endregion Getter/Setter
 
@@ -385,9 +390,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
     @Override
     public void refresh(final RefreshInterfaceRequest request) {
         if (request.interfaceConfigChanged) {
-            if (getGameActivity() != null) {
-                getGameActivity().applySettings();
-            }
+            getGameActivity().applySettings();
         }
         if (request.interfaceConfigChanged || request.mainDescChanged) {
             updatePageTemplate();
@@ -407,16 +410,12 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
 
     @Override
     public void showError(final String message) {
-        if (getGameActivity() != null) {
-            getGameActivity().showErrorDialog(message);
-        }
+        getGameActivity().showErrorDialog(message);
     }
 
     @Override
     public void showPicture(final String pathToImg) {
-        if (getGameActivity() != null) {
-            getGameActivity().showPictureDialog(pathToImg);
-        }
+        getGameActivity().showPictureDialog(pathToImg);
     }
 
     @Override
@@ -425,9 +424,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
             throw new RuntimeException("Must not be called on the main thread");
         }
         final var latch = new CountDownLatch(1);
-        if (getGameActivity() != null) {
-            getGameActivity().showMessageDialog(message, latch);
-        }
+        getGameActivity().showMessageDialog(message, latch);
         try {
             latch.await();
         } catch (InterruptedException ex) {
@@ -441,9 +438,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
             throw new RuntimeException("Must not be called on the main thread");
         }
         final ArrayBlockingQueue<String> inputQueue = new ArrayBlockingQueue<>(1);
-        if (getGameActivity() != null) {
-            getGameActivity().showInputDialog(prompt, inputQueue);
-        }
+        getGameActivity().showInputDialog(prompt, inputQueue);
         try {
             return inputQueue.take();
         } catch (InterruptedException ex) {
@@ -458,9 +453,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
             throw new RuntimeException("Must not be called on the main thread");
         }
         final ArrayBlockingQueue<String> inputQueue = new ArrayBlockingQueue<>(1);
-        if (getGameActivity() != null) {
-            getGameActivity().showExecutorDialog(text, inputQueue);
-        }
+        getGameActivity().showExecutorDialog(text, inputQueue);
         try {
             return inputQueue.take();
         } catch (InterruptedException ex) {
@@ -479,9 +472,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         for (QpMenuItem item : libQpProxy.getGameState().menuItems) {
             items.add(item.name);
         }
-        if (getGameActivity() != null) {
-            getGameActivity().showMenuDialog(items, resultQueue);
-        }
+        getGameActivity().showMenuDialog(items, resultQueue);
         try {
             return resultQueue.take();
         } catch (InterruptedException ex) {
@@ -492,16 +483,12 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
 
     @Override
     public void showLoadGamePopup() {
-        if (getGameActivity() != null) {
-            getGameActivity().showLoadDialog();
-        }
+        getGameActivity().showLoadDialog();
     }
 
     @Override
-    public void showSaveGamePopup(String filename) {
-        if (getGameActivity() != null) {
-            getGameActivity().showSavePopup();
-        }
+    public void showSaveGamePopup() {
+        getGameActivity().showSavePopup();
     }
 
     @Override

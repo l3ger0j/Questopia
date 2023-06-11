@@ -10,6 +10,10 @@
         <string name="titleNotify">Установка игры</string>
         <string name="textProgressNotify">Прогресс установки игры</string>
         <string name="textInstallNotify">Игра -GAMENAME- была успешно установлена!</string>
+    <!-- Copy notification -->
+        <string name="titleCopyNotify">Копирование каталога игры</string>
+        <string name="bodyCopyNotify">В данный момент игра копируется во внутреннее хранилище!</string>
+        <string name="bodyCopiedNotify">Игра -GAMENAME- была успешно скопирована во внутреннее хранилище!</string>
     <!-- Dialog LoadGamePopup -->
         <string name="loadGamePopup">Файл сохранения не был найден в gameDir. Хотите ли вы вручную указать путь к файлу сохранения?</string>
     <!-- Dialog Close -->

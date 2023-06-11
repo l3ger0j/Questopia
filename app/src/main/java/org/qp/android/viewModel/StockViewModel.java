@@ -14,6 +14,7 @@ import static org.qp.android.utils.PathUtil.normalizeFolderName;
 import static org.qp.android.utils.PathUtil.removeExtension;
 import static org.qp.android.utils.XmlUtil.objectToXml;
 
+import android.annotation.SuppressLint;
 import android.app.Application;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -25,6 +26,7 @@ import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.databinding.ObservableBoolean;
 import androidx.databinding.ObservableField;
 import androidx.documentfile.provider.DocumentFile;
@@ -44,6 +46,7 @@ import org.qp.android.databinding.DialogEditBinding;
 import org.qp.android.databinding.DialogInstallBinding;
 import org.qp.android.dto.stock.InnerGameData;
 import org.qp.android.model.copy.CopyBuilder;
+import org.qp.android.model.notify.NotifyBuilder;
 import org.qp.android.model.plugin.PluginClient;
 import org.qp.android.model.plugin.PluginType;
 import org.qp.android.plugin.AsyncCallback;
@@ -142,7 +145,7 @@ public class StockViewModel extends AndroidViewModel {
         gameDataList.postValue(innerGameDataArrayList);
     }
 
-    public void setLocalGameDataList () {
+    public void setLocalGameDataList() {
         var gameData = getSortedGames();
         var localGameData = new ArrayList<InnerGameData>();
         for (var data : gameData) {
@@ -197,7 +200,7 @@ public class StockViewModel extends AndroidViewModel {
         return gamesMap;
     }
 
-    public String getGameAuthor () {
+    public String getGameAuthor() {
         if (tempInnerGameData.author.length() > 0) {
             return getStockActivity()
                     .getString(R.string.author)
@@ -207,17 +210,17 @@ public class StockViewModel extends AndroidViewModel {
         }
     }
 
-    public String getGamePortBy () {
+    public String getGamePortBy() {
         if (tempInnerGameData.portedBy.length() > 0) {
             return getStockActivity()
                     .getString(R.string.ported_by)
-                    .replace("-PORTED_BY-", tempInnerGameData.portedBy);
+                    .replace("-PORTED_BY-" , tempInnerGameData.portedBy);
         } else {
             return "";
         }
     }
 
-    public String getGameVersion () {
+    public String getGameVersion() {
         if (tempInnerGameData.version.length() > 0) {
             return getStockActivity()
                     .getString(R.string.version)
@@ -227,23 +230,23 @@ public class StockViewModel extends AndroidViewModel {
         }
     }
 
-    public String getGameType () {
+    public String getGameType() {
         if (tempInnerGameData.fileExt.length() > 0) {
             if (tempInnerGameData.fileExt.equals("aqsp")) {
                 return getStockActivity()
                         .getString(R.string.fileType)
-                        .replace("-TYPE-", tempInnerGameData.fileExt)
+                        .replace("-TYPE-" , tempInnerGameData.fileExt)
                         + " " + getStockActivity().getString(R.string.experimental);
             }
             return getStockActivity()
                     .getString(R.string.fileType)
-                    .replace("-TYPE-", tempInnerGameData.fileExt);
+                    .replace("-TYPE-" , tempInnerGameData.fileExt);
         } else {
             return "";
         }
     }
 
-    public String getGameSize () {
+    public String getGameSize() {
         if (tempInnerGameData.getFileSize() != null) {
             return getStockActivity()
                     .getString(R.string.fileSize)
@@ -253,21 +256,21 @@ public class StockViewModel extends AndroidViewModel {
         }
     }
 
-    public String getGamePubData () {
+    public String getGamePubData() {
         if (tempInnerGameData.pubDate.length() > 0) {
             return getStockActivity()
                     .getString(R.string.pub_data)
-                    .replace("-PUB_DATA-", tempInnerGameData.pubDate);
+                    .replace("-PUB_DATA-" , tempInnerGameData.pubDate);
         } else {
             return "";
         }
     }
 
-    public String getGameModData () {
+    public String getGameModData() {
         if (tempInnerGameData.modDate.length() > 0) {
             return getStockActivity()
                     .getString(R.string.mod_data)
-                    .replace("-MOD_DATA-", tempInnerGameData.pubDate);
+                    .replace("-MOD_DATA-" , tempInnerGameData.pubDate);
         } else {
             return "";
         }
@@ -281,16 +284,16 @@ public class StockViewModel extends AndroidViewModel {
         return !isGameInstalled() && isHasRemoteUrl();
     }
 
-    public boolean isGameInstalled () {
+    public boolean isGameInstalled() {
         return tempInnerGameData.isInstalled() && doesDirectoryContainGameFiles(tempInnerGameData.gameDir);
     }
 
-    public boolean isHasRemoteUrl () {
+    public boolean isHasRemoteUrl() {
         return tempInnerGameData.hasRemoteUrl();
     }
 
     public boolean isModsDirExist() {
-        return findFileRecursively(tempInnerGameData.gameDir, "mods") != null;
+        return findFileRecursively(tempInnerGameData.gameDir , "mods") != null;
     }
     // endregion Getter/Setter
 
@@ -443,7 +446,7 @@ public class StockViewModel extends AndroidViewModel {
             }
             if (tempModFile != null) {
                 copyFile(getStockActivity() , tempModFile ,
-                        findFileRecursively(tempInnerGameData.gameDir, "mods"));
+                        findFileRecursively(tempInnerGameData.gameDir , "mods"));
             }
             refreshIntGamesDirectory();
             isShowDialog.set(false);
@@ -553,9 +556,9 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     public void writeGameInfo(InnerGameData innerGameData , DocumentFile gameDir) {
-        var infoFile = findFileOrDirectory(gameDir, GAME_INFO_FILENAME);
+        var infoFile = findFileOrDirectory(gameDir , GAME_INFO_FILENAME);
         if (infoFile == null) {
-            infoFile = createFindDFile(gameDir, MimeType.TEXT , GAME_INFO_FILENAME);
+            infoFile = createFindDFile(gameDir , MimeType.TEXT , GAME_INFO_FILENAME);
         }
         if (!isWritableFile(infoFile)) {
             getStockActivity()
@@ -563,7 +566,7 @@ public class StockViewModel extends AndroidViewModel {
             return;
         }
         try (var out = getStockActivity().getContentResolver()
-                .openOutputStream(infoFile.getUri(), "w");
+                .openOutputStream(infoFile.getUri() , "w");
              var writer = new OutputStreamWriter(out)) {
             writer.write(objectToXml(innerGameData));
         } catch (Exception ex) {
@@ -582,6 +585,7 @@ public class StockViewModel extends AndroidViewModel {
         doInstallGame(gameFile , innerGameData);
     }
 
+    @SuppressLint("MissingPermission")
     private void doInstallGame(DocumentFile gameFile , InnerGameData innerGameData) {
         var gameDir = createFindFolder(gamesDir , normalizeFolderName(innerGameData.title));
         if (!isWritableDirectory(gameDir)) {
@@ -589,7 +593,20 @@ public class StockViewModel extends AndroidViewModel {
             return;
         }
 
+        var builder =
+                new NotifyBuilder(getStockActivity() , "gameInstallationProgress");
+        builder.createProgressChannel();
+        var nBuilder =
+                new NotifyBuilder(getStockActivity() , "gameInstalled");
+        nBuilder.createStatusChannel();
+        var notificationManager =
+                NotificationManagerCompat.from(getStockActivity());
+
         isShowDialog.set(false);
+
+        builder.setTitleNotify(getStockActivity().getString(R.string.titleCopyNotify));
+        builder.setTextNotify(getStockActivity().getString(R.string.bodyCopyNotify));
+        notificationManager.notify(1 , builder.buildStandardNotification());
 
         var installer = new CopyBuilder(getStockActivity());
         installer.getErrorCode().observeForever(error -> {
@@ -604,6 +621,14 @@ public class StockViewModel extends AndroidViewModel {
 
         installer.copyDirToAnotherDir(gameFile , gameDir).observeForever(aBoolean -> {
             if (aBoolean) {
+                notificationManager.cancel(1);
+                nBuilder.setTitleNotify(getStockActivity().getString(R.string.titleNotify));
+                var tempMessage = getStockActivity()
+                        .getString(R.string.bodyCopiedNotify)
+                        .replace("-GAMENAME-" , innerGameData.title);
+                nBuilder.setTextNotify(tempMessage);
+                notificationManager.notify(2 , nBuilder.buildStandardNotification());
+
                 writeGameInfo(innerGameData , gameDir);
                 refreshGameData();
             }
