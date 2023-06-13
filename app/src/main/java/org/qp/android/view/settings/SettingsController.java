@@ -31,10 +31,12 @@ public class SettingsController {
     public boolean isUseGameBackgroundColor;
     public boolean isUseGameLinkColor;
     public boolean isUseFullscreenImages;
+    public boolean isUseImageDebug;
     public String language;
 
     private static SettingsController INSTANCE;
 
+    @NonNull
     public static SettingsController newInstance(Context context) {
         if (INSTANCE == null) {
             INSTANCE = new SettingsController();
@@ -43,16 +45,12 @@ public class SettingsController {
     }
 
     public Typeface getTypeface() {
-        switch (typeface) {
-            case 1:
-                return Typeface.SANS_SERIF;
-            case 2:
-                return Typeface.SERIF;
-            case 3:
-                return Typeface.MONOSPACE;
-            default:
-                return Typeface.DEFAULT;
-        }
+        return switch (typeface) {
+            case 1 -> Typeface.SANS_SERIF;
+            case 2 -> Typeface.SERIF;
+            case 3 -> Typeface.MONOSPACE;
+            default -> Typeface.DEFAULT;
+        };
     }
 
     @NonNull
@@ -65,6 +63,7 @@ public class SettingsController {
         settingsController.isUseNewFilePicker = preferences.getBoolean("filePicker", false);
         settingsController.isUseAutoscroll = preferences.getBoolean("autoscroll", true);
         settingsController.isUseExecString = preferences.getBoolean("execString", false);
+        settingsController.isUseImageDebug = preferences.getBoolean("debugImage", false);
         settingsController.isUseSeparator = preferences.getBoolean("separator", false);
         settingsController.isUseGameFont = preferences.getBoolean("useGameFont", false);
         settingsController.isUseImmersiveMode = preferences.getBoolean("immersiveMode", true);
@@ -91,23 +90,17 @@ public class SettingsController {
         settingsController.customWidthImage = Integer.parseInt(preferences.getString("customWidthImage", "400"));
         settingsController.isUseAutoHeight = preferences.getBoolean("autoHeight", true);
         settingsController.customHeightImage = Integer.parseInt(preferences.getString("customHeightImage", "400"));
-        settingsController.isUseFullscreenImages = preferences.getBoolean("fullScreenImage", true);
+        settingsController.isUseFullscreenImages = preferences.getBoolean("fullScreenImage", false);
     }
 
     private static float parseActionsHeightRatio(@NonNull String str) {
-        switch (str) {
-            case "1/5":
-                return 0.2f;
-            case "1/4":
-                return 0.25f;
-            case "1/3":
-                return 0.33f;
-            case "1/2":
-                return 0.5f;
-            case "2/3":
-                return 0.67f;
-            default:
-                throw new RuntimeException("Unsupported value of actsHeight: " + str);
-        }
+        return switch (str) {
+            case "1/5" -> 0.2f;
+            case "1/4" -> 0.25f;
+            case "1/3" -> 0.33f;
+            case "1/2" -> 0.5f;
+            case "2/3" -> 0.67f;
+            default -> throw new RuntimeException("Unsupported value of actsHeight: " + str);
+        };
     }
 }

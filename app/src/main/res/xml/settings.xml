@@ -107,7 +107,7 @@
             android:singleLine="true"
             android:title="@string/customHeightTitle" />
         <SwitchPreferenceCompat
-            android:defaultValue="true"
+            android:defaultValue="false"
             android:key="fullScreenImage"
             android:selectAllOnFocus="true"
             android:singleLine="true"
@@ -129,6 +129,11 @@
             android:key="autoscroll"
             android:summary="@string/autoscrollSum"
             android:title="@string/autoscrollTitle" />
+        <SwitchPreferenceCompat
+            android:defaultValue="false"
+            android:key="debugImage"
+            android:summary="@string/imageDebugSum"
+            android:title="@string/imageDebugTitle" />
         <SwitchPreferenceCompat
             android:defaultValue="false"
             android:key="execString"

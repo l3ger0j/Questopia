@@ -86,8 +86,10 @@ public class GameMainFragment extends GamePatternFragment {
         // RecyclerView
         actionsView = gameMainBinding.actions;
         actionsView.setBackgroundColor(viewModel.getBackgroundColor());
-        viewModel.getActionObserver().observe(getViewLifecycleOwner() , actions ->
-                actionsView.setAdapter(actions));
+        viewModel.getActionObserver().observe(getViewLifecycleOwner() , actions -> {
+            actionsView.setBackgroundColor(viewModel.getBackgroundColor());
+            actionsView.setAdapter(actions);
+        });
 
         // Settings
         viewModel.getControllerObserver().observe(getViewLifecycleOwner() , settingsController -> {

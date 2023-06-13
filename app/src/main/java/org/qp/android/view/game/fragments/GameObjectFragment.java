@@ -30,8 +30,10 @@ public class GameObjectFragment extends GamePatternFragment {
         // RecyclerView
         recyclerView = recyclerBinding.shareRecyclerView;
         recyclerView.setBackgroundColor(viewModel.getBackgroundColor());
-        viewModel.getObjectsObserver().observe(getViewLifecycleOwner() , gameItemRecycler ->
-                recyclerBinding.shareRecyclerView.setAdapter(gameItemRecycler));
+        viewModel.getObjectsObserver().observe(getViewLifecycleOwner() , gameItemRecycler -> {
+            recyclerView.setBackgroundColor(viewModel.getBackgroundColor());
+            recyclerBinding.shareRecyclerView.setAdapter(gameItemRecycler);
+        });
 
         // Settings
         viewModel.getControllerObserver().observe(getViewLifecycleOwner() , settingsController -> {

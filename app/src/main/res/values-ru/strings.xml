@@ -166,6 +166,8 @@
         <string name="separatorSum">Включить/выключить разделитель в игре</string>
         <string name="autoscrollTitle">Автопролистывание</string>
         <string name="autoscrollSum">Включить/выключить автопролистывание</string>
+        <string name="imageDebugTitle">Отладчик путей к картинкам</string>
+        <string name="imageDebugSum">Режим, который включает отображение диалога с ошибкой если путь к картинке неправильный</string>
         <string name="execStringTitle">Исполнитель строк</string>
         <string name="execStringSum">Включить/выключить исполнитель строк</string>
         <!-- Extra section -->

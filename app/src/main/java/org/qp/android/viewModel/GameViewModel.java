@@ -378,6 +378,8 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
                     var in = getApplication().getContentResolver().openInputStream(Uri.fromFile(fileFromDefaultCon));
                     return new WebResourceResponse(mimeType , "utf-8" , in);
                 } catch (FileNotFoundException | NullPointerException ex) {
+                    if (getSettingsController().isUseImageDebug)
+                        getGameActivity().showErrorDialog(String.valueOf(ex));
                     Log.e(TAG , "File not found" , ex);
                     return null;
                 }

@@ -100,11 +100,11 @@ public class HtmlProcessor {
             }
             if (!controller.isUseAutoWidth) {
                 if (shouldChangeWidth(img)) {
-                    img.attr("style" , "width:" + controller.customWidthImage+";");
+                    img.attr("style" , "max-width:" + controller.customWidthImage+";");
                 }
             } else if (!controller.isUseAutoHeight) {
                 if (shouldChangeHeight(img)) {
-                    img.attr("style" , "height:" + controller.customHeightImage+";");
+                    img.attr("style" , "max-height:" + controller.customHeightImage+";");
                 }
             }
         }
