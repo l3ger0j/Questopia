@@ -530,9 +530,10 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
 
     @Override
     public void SaveGame(String filename) {
-        if (gameInterface != null) {
+        var inter = gameInterface;
+        if (inter != null) {
             if (filename != null) {
-                File file = new File(filename);
+                var file = new File(filename);
                 try {
                     if (file.createNewFile()) {
                         Log.i(TAG , "File created");
@@ -542,7 +543,7 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
                     Log.e(TAG , "Error: " , e);
                 }
             } else {
-                gameInterface.showSaveGamePopup();
+                inter.showSaveGamePopup();
             }
         }
     }

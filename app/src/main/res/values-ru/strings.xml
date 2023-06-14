@@ -8,7 +8,6 @@
         <string name="progressDescChannel">Канал для отображения информации о прогрессе установки игры</string>
     <!-- Install notification -->
         <string name="titleNotify">Установка игры</string>
-        <string name="textProgressNotify">Прогресс установки игры</string>
         <string name="textInstallNotify">Игра -GAMENAME- была успешно установлена!</string>
     <!-- Copy notification -->
         <string name="titleCopyNotify">Копирование каталога игры</string>
@@ -29,7 +28,6 @@
         <string name="downloadButton">Скачать игру</string>
     <!-- Dialog Error -->
         <string name="error">Ошибка</string>
-        <string name="incorrectPassword">Вы ввели пустой или некорректный пароль!</string>
         <string name="gamesDirError">Невозможно создать или открыть папку с играми.</string>
         <string name="installError">Невозможно установить игру -GAMENAME-.</string>
         <string name="noGameFilesError">Файлы игры не найдены после установки.</string>
@@ -37,9 +35,7 @@
         <string name="gameName">Название игры</string>
         <string name="gameAuthor">Автор</string>
         <string name="gameVersion">Версия</string>
-        <string name="archivePassword">Пароль для архива</string>
-        <string name="selectArchive">Выберите архив</string>
-        <string name="selectFolder">Выберите папку с файлом</string>
+    <string name="selectFolder">Выберите папку с файлом</string>
         <string name="selectIcon">Выберите иконку</string>
         <string name="buttonSelect">Выбрать</string>
         <string name="add">Скопировать в внутреннюю папку</string>

@@ -118,7 +118,9 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
     }
 
     public LibQpProxy getLibQspProxy() {
-        libQpProxy.setGameInterface(this);
+        if (libQpProxy.getGameState().gameRunning) {
+            libQpProxy.setGameInterface(this);
+        }
         return libQpProxy;
     }
 
