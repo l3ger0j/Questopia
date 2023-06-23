@@ -69,17 +69,17 @@ public final class FileUtil {
 
     @Nullable
     public static DocumentFile createFindDFile(DocumentFile parentDir ,
-                                                 String mimeType ,
-                                                 String displayName) {
+                                               String mimeType ,
+                                               String displayName) {
         if (!isWritableDirectory(parentDir)) {
             return null;
         }
 
-        var checkFile =  parentDir.findFile(displayName);
+        var checkFile = parentDir.findFile(displayName);
         if (checkFile == null) {
             var tempFile = parentDir.createFile(mimeType , displayName);
             if (isWritableFile(tempFile)) {
-                Log.i(TAG, "File created");
+                Log.i(TAG , "File created");
                 return tempFile;
             }
         }
@@ -117,10 +117,10 @@ public final class FileUtil {
         if (checkDir == null) {
             var tempDir = parentDir.createDirectory(displayName);
             if (isWritableDirectory(tempDir)) {
-                Log.i(TAG,"Directory created");
+                Log.i(TAG , "Directory created");
                 return tempDir;
             } else {
-                Log.e(TAG,"Directory not created");
+                Log.e(TAG , "Directory not created");
             }
         }
         return checkDir;
@@ -231,13 +231,13 @@ public final class FileUtil {
         if (size <= 0) {
             return "0";
         }
-        String[] units = new String[0];
+        var units = new String[0];
         if (numCountInfo == 1000) {
             units = new String[]{"B" , "KB" , "MB" , "GB" , "TB"};
         } else if (numCountInfo == 1024) {
             units = new String[]{"B" , "KiB" , "MiB" , "GiB" , "TiB"};
         }
-        int digitGroups = (int) (Math.log10(size) / Math.log10(numCountInfo));
+        var digitGroups = (int) (Math.log10(size) / Math.log10(numCountInfo));
         return new DecimalFormat("#,##0.#").format(size /
                 Math.pow(numCountInfo , digitGroups))
                 + " " + units[digitGroups];

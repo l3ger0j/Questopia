@@ -16,14 +16,17 @@ import org.qp.android.view.settings.SettingsActivity;
 import org.qp.android.view.settings.SettingsController;
 
 public class SettingsViewModel extends AndroidViewModel {
-    private static final String ABOUT_TEMPLATE = "<html><head>\n" +
-            "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1\">\n" +
-            "<style type=\"text/css\">\n" +
-            "body{margin: 0; padding: 0; color: QSPTEXTCOLOR; background-color: QSPBACKCOLOR; max-width: 100%; font-size: QSPFONTSIZE; font-family: QSPFONTSTYLE; }\n" +
-            "a{color: QSPLINKCOLOR; }\n" +
-            "a:link{color: QSPLINKCOLOR; }\n" +
-            "table{font-size: QSPFONTSIZE; font-family: QSPFONTSTYLE; }\n" +
-            "</style></head><body>REPLACETEXT</body></html>";
+    private static final String ABOUT_TEMPLATE =
+            """
+            <html><head>
+            <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1">
+            <style type="text/css">
+            body{margin: 0; padding: 0; color: QSPTEXTCOLOR; background-color: QSPBACKCOLOR; max-width: 100%; font-size: QSPFONTSIZE; font-family: QSPFONTSTYLE; }
+            a{color: QSPLINKCOLOR; }
+            a:link{color: QSPLINKCOLOR; }
+            table{font-size: QSPFONTSIZE; font-family: QSPFONTSTYLE; }
+            </style></head><body>REPLACETEXT</body></html>
+            """;
 
     public ObservableField<SettingsActivity> settingsActivityObservableField =
             new ObservableField<>();

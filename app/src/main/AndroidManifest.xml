@@ -21,11 +21,12 @@
         android:label="@string/appName"
         android:largeHeap="true"
         android:theme="@style/Theme.App.Starting"
-        tools:targetApi="s"
         android:allowBackup="false"
+        android:supportsRtl="true"
         android:fullBackupContent="false"
         android:requestLegacyExternalStorage="true"
-        android:dataExtractionRules="@xml/data_extraction_rules">
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        tools:targetApi="s">
 
         <activity
             android:name=".view.stock.StockActivity"

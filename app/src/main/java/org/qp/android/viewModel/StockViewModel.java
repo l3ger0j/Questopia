@@ -2,7 +2,6 @@ package org.qp.android.viewModel;
 
 import static org.qp.android.utils.DirUtil.doesDirectoryContainGameFiles;
 import static org.qp.android.utils.FileUtil.copyFile;
-import static org.qp.android.utils.FileUtil.createFindDFile;
 import static org.qp.android.utils.FileUtil.createFindFile;
 import static org.qp.android.utils.FileUtil.createFindFolder;
 import static org.qp.android.utils.FileUtil.findFileOrDirectory;
@@ -25,7 +24,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.databinding.ObservableBoolean;
 import androidx.databinding.ObservableField;
@@ -34,8 +32,6 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import com.anggrayudi.storage.FileWrapper;
-import com.anggrayudi.storage.file.MimeType;
 import com.squareup.picasso.Picasso;
 
 import org.jetbrains.annotations.NotNull;
@@ -50,7 +46,6 @@ import org.qp.android.model.notify.NotifyBuilder;
 import org.qp.android.model.plugin.PluginClient;
 import org.qp.android.model.plugin.PluginType;
 import org.qp.android.plugin.AsyncCallback;
-import org.qp.android.utils.SerializeObject;
 import org.qp.android.view.game.GameActivity;
 import org.qp.android.view.settings.SettingsController;
 import org.qp.android.view.stock.StockActivity;
@@ -60,16 +55,20 @@ import org.qp.android.viewModel.repository.LocalGame;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 public class StockViewModel extends AndroidViewModel {
     private final String TAG = this.getClass().getSimpleName();
     private static final String GAME_INFO_FILENAME = "gameStockInfo";
+
+    public static final int CODE_PICK_IMAGE = 300;
+    public static final int CODE_PICK_PATH_FILE = 301;
+    public static final int CODE_PICK_MOD_FILE = 302;
 
     public ObservableField<StockActivity> activityObservableField =
             new ObservableField<>();
@@ -180,7 +179,7 @@ public class StockViewModel extends AndroidViewModel {
         var unsortedGameData = gamesMap.values();
         var gameData = new ArrayList<>(unsortedGameData);
         if (gameData.size() < 2) return gameData;
-        gameData.sort(Comparator.comparing(game -> game.title.toLowerCase()));
+        gameData.sort(Comparator.comparing(game -> game.title.toLowerCase(Locale.ROOT)));
         return gameData;
     }
 
@@ -499,13 +498,13 @@ public class StockViewModel extends AndroidViewModel {
                     .showDirPickerDialog();
         } else if (id == R.id.buttonSelectIcon) {
             getStockActivity()
-                    .showFilePickerActivity(new String[]{"image/png" , "image/jpeg"});
+                    .showFilePickerActivity(CODE_PICK_IMAGE , new String[]{"image/png" , "image/jpeg"});
         } else if (id == R.id.buttonSelectPath) {
             getStockActivity()
-                    .showFilePickerActivity(new String[]{"application/octet-stream"});
+                    .showFilePickerActivity(CODE_PICK_PATH_FILE , new String[]{"application/octet-stream"});
         } else if (id == R.id.buttonSelectMod) {
             getStockActivity()
-                    .showFilePickerActivity(new String[]{"application/octet-stream"});
+                    .showFilePickerActivity(CODE_PICK_MOD_FILE , new String[]{"application/octet-stream"});
         }
     }
 
@@ -548,30 +547,7 @@ public class StockViewModel extends AndroidViewModel {
 
     // region Game connecting
     public void connectingDir(DocumentFile gameFile , InnerGameData innerGameData) {
-        writeGameInfo(innerGameData , gameFile);
-        FileWrapper.Document fos = new FileWrapper.Document(gameFile);
-        var file = new File(fos.getAbsolutePath(getApplication()));
-        Log.d(TAG , file.getAbsolutePath());
-        refreshExtGameDirectory(file);
-    }
-
-    public void writeGameInfo(InnerGameData innerGameData , DocumentFile gameDir) {
-        var infoFile = findFileOrDirectory(gameDir , GAME_INFO_FILENAME);
-        if (infoFile == null) {
-            infoFile = createFindDFile(gameDir , MimeType.TEXT , GAME_INFO_FILENAME);
-        }
-        if (!isWritableFile(infoFile)) {
-            getStockActivity()
-                    .showErrorDialog("Game data info file is not writable");
-            return;
-        }
-        try (var out = getStockActivity().getContentResolver()
-                .openOutputStream(infoFile.getUri() , "w");
-             var writer = new OutputStreamWriter(out)) {
-            writer.write(objectToXml(innerGameData));
-        } catch (Exception ex) {
-            Log.d(TAG , "Error: " , ex);
-        }
+        // FIXME: 14.06.2023
     }
     // endregion Game connecting
 
@@ -679,21 +655,6 @@ public class StockViewModel extends AndroidViewModel {
         refreshGameData();
     }
 
-    public void refreshExtGameDirectory(File gamesDir) {
-        for (var localGameData : localGame.getGame(gamesDir)) {
-            var remoteGameData = gamesMap.get(localGameData.id);
-            if (remoteGameData != null) {
-                var aggregateGameData = new InnerGameData(remoteGameData);
-                aggregateGameData.gameDir = localGameData.gameDir;
-                aggregateGameData.gameFiles = localGameData.gameFiles;
-                gamesMap.put(localGameData.id, aggregateGameData);
-            } else {
-                gamesMap.put(localGameData.id, localGameData);
-            }
-        }
-        setLocalGameDataList();
-    }
-
     public void refreshGameData() {
         gamesMap.clear();
         for (var localGameData : localGame.getGames(gamesDir)) {
@@ -708,49 +669,7 @@ public class StockViewModel extends AndroidViewModel {
             }
         }
 
-//        var restoreList = restoreGameLists();
-//        if (restoreList != null) {
-//            restoreList.removeIf(data -> !data.gameDir.exists());
-//            refreshGames(restoreList);
-//        }
-
         setLocalGameDataList();
-    }
-
-    public void saveGameLists(ArrayList<InnerGameData> inputListInnerGameData) {
-        var tempSaveGameList = createFindFile(getStockActivity().getCacheDir() , "tempGameLists");
-        if (tempSaveGameList == null) {
-            try {
-                tempSaveGameList = File.createTempFile("tempGameLists" , null);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        if (isWritableFile(tempSaveGameList)) {
-            var ser = SerializeObject.objectToString(inputListInnerGameData);
-            if (ser != null && !ser.equalsIgnoreCase("")) {
-                SerializeObject.WriteSettings(getStockActivity(), ser, "tempGameLists");
-            } else {
-                SerializeObject.WriteSettings(getStockActivity(), "", "tempGameLists");
-            }
-        }
-    }
-
-    @Nullable
-    public ArrayList<InnerGameData> restoreGameLists() {
-        var tempSaveGameList = createFindFile(getStockActivity().getCacheDir() , "tempGameLists");
-        var tempDataList = new ArrayList<InnerGameData>();
-        if (isWritableFile(tempSaveGameList)) {
-            var ser = SerializeObject.ReadSettings(getStockActivity(), "tempGameLists");
-            if (ser != null && !ser.equalsIgnoreCase("")) {
-                Object obj = SerializeObject.stringToObject(ser);
-                if (obj instanceof ArrayList) {
-                    tempDataList = (ArrayList<InnerGameData>) obj;
-                }
-            }
-        }
-        return tempDataList;
     }
 
     public void refreshGames(ArrayList<InnerGameData> innerGameDataArrayList) {
@@ -780,6 +699,7 @@ public class StockViewModel extends AndroidViewModel {
             }
         }
         gamesMap.putAll(tempGamesMap);
+
         setLocalGameDataList();
     }
     // endregion Refresh

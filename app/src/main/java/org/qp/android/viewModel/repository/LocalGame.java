@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 public class LocalGame {
@@ -107,7 +108,7 @@ public class LocalGame {
             var files = Arrays.asList(Objects.requireNonNull(dir.listFiles()));
             sortFilesByName(files);
             for (var file : files) {
-                var lcName = file.getName().toLowerCase();
+                var lcName = file.getName().toLowerCase(Locale.ROOT);
                 if (lcName.endsWith(".qsp") || lcName.endsWith(".gam")) {
                     gameFiles.add(file);
                 }
@@ -119,7 +120,7 @@ public class LocalGame {
 
     private void sortFilesByName(@NonNull List<File> files) {
         if (files.size() < 2) return;
-        files.sort(Comparator.comparing(o -> o.getName().toLowerCase()));
+        files.sort(Comparator.comparing(o -> o.getName().toLowerCase(Locale.ROOT)));
     }
 
     @Nullable

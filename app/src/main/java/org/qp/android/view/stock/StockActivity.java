@@ -2,6 +2,9 @@ package org.qp.android.view.stock;
 
 import static org.qp.android.utils.FileUtil.deleteDirectory;
 import static org.qp.android.utils.FileUtil.findFileRecursively;
+import static org.qp.android.viewModel.StockViewModel.CODE_PICK_IMAGE;
+import static org.qp.android.viewModel.StockViewModel.CODE_PICK_MOD_FILE;
+import static org.qp.android.viewModel.StockViewModel.CODE_PICK_PATH_FILE;
 
 import android.Manifest;
 import android.app.DownloadManager;
@@ -58,6 +61,7 @@ import org.qp.android.viewModel.StockViewModel;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Objects;
 
 public class StockActivity extends AppCompatActivity implements StockPatternDialogFrags.StockPatternDialogList, StockPatternFragment.StockPatternFragmentList {
@@ -141,23 +145,38 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
 
         storageHelper.setOnFileSelected((integer , documentFiles) -> {
             if (documentFiles != null) {
-                for (var file : documentFiles) {
-                    var document = new FileWrapper.Document(file);
-                    switch (document.getExtension()) {
-                        case "png" , "jpg" , "jpeg" -> {
-                            getContentResolver().takePersistableUriPermission(document.getUri() ,
-                                    Intent.FLAG_GRANT_READ_URI_PERMISSION
-                                            | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-                            stockViewModel.setTempImageFile(document.getDocumentFile());
+                switch (integer) {
+                    case CODE_PICK_IMAGE:
+                        for (var file : documentFiles) {
+                            var document = new FileWrapper.Document(file);
+                            switch (document.getExtension()) {
+                                case "png" , "jpg" , "jpeg" -> {
+                                    getContentResolver().takePersistableUriPermission(document.getUri() ,
+                                            Intent.FLAG_GRANT_READ_URI_PERMISSION
+                                                    | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                                    stockViewModel.setTempImageFile(document.getDocumentFile());
+                                }
+                            }
                         }
-                        case "qsp" -> {
-                            stockViewModel.setTempPathFile(document.getDocumentFile());
-                            stockViewModel.setTempModFile(document.getDocumentFile());
+                        break;
+                    case CODE_PICK_PATH_FILE:
+                        for (var file : documentFiles) {
+                            var document = new FileWrapper.Document(file);
+                            if ("qsp".equals(document.getExtension()))
+                                stockViewModel.setTempPathFile(document.getDocumentFile());
                         }
-                    }
+                        break;
+                    case CODE_PICK_MOD_FILE:
+                        for (var file : documentFiles) {
+                            var document = new FileWrapper.Document(file);
+                            if ("qsp".equals(document.getExtension()))
+                                stockViewModel.setTempModFile(document.getDocumentFile());
+                        }
+                        break;
                 }
+
             } else {
-                showErrorDialog("Archive or file is not selected");
+                showErrorDialog("File is not selected");
             }
             return null;
         });
@@ -319,8 +338,8 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         }
     }
 
-    public void showFilePickerActivity(String[] mimeTypes) {
-        storageHelper.openFilePicker(mimeTypes);
+    public void showFilePickerActivity(int requestCode , String[] mimeTypes) {
+        storageHelper.openFilePicker(requestCode , false , mimeTypes);
     }
 
     public void startGameActivity(Intent intent) {
@@ -591,7 +610,8 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         var gameData = stockViewModel.getSortedGames();
         var filteredList = new ArrayList<InnerGameData>();
         for (var item : gameData) {
-            if (item.title.toLowerCase().contains(text.toLowerCase())) {
+            if (item.title.toLowerCase(Locale.getDefault())
+                    .contains(text.toLowerCase(Locale.getDefault()))) {
                 filteredList.add(item);
             }
         }

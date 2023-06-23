@@ -65,51 +65,61 @@ public class GameDialogFrags extends GamePatternDialogFrags {
             }
         }
         switch (dialogType) {
-            case EXECUTOR_DIALOG:
-            case INPUT_DIALOG:
+            case EXECUTOR_DIALOG , INPUT_DIALOG -> {
                 final var executorView =
-                        getLayoutInflater().inflate(R.layout.dialog_input, null);
+                        getLayoutInflater().inflate(R.layout.dialog_input , null);
                 var textInputLayout =
                         (TextInputLayout) executorView.findViewById(R.id.inputBox_edit);
                 textInputLayout.setHelperText(message);
                 builder.setView(executorView);
-                builder.setPositiveButton(android.R.string.ok, (dialog, which) ->
+                builder.setPositiveButton(android.R.string.ok , (dialog , which) ->
                         listener.onDialogPositiveClick(this));
-                builder.setNegativeButton(requireContext().getString(R.string.selectTemplateFile), (dialog , which) -> {});
+                builder.setNegativeButton(requireContext().getString(R.string.selectTemplateFile) ,
+                        (dialog , which) -> {});
                 return builder.create();
-            case ERROR_DIALOG:
+            }
+            case ERROR_DIALOG -> {
                 builder.setTitle(R.string.error);
                 builder.setMessage(message);
-                builder.setPositiveButton(android.R.string.ok, (dialog, which) -> {});
+                builder.setPositiveButton(android.R.string.ok , (dialog , which) -> {
+                });
                 return builder.create();
-            case CLOSE_DIALOG:
+            }
+            case CLOSE_DIALOG -> {
                 builder.setMessage(requireContext().getString(R.string.promptCloseGame));
-                builder.setPositiveButton(android.R.string.yes, (dialog, which) ->
+                builder.setPositiveButton(android.R.string.yes , (dialog , which) ->
                         listener.onDialogPositiveClick(this));
-                builder.setNegativeButton(android.R.string.no, (dialog, which) -> { });
+                builder.setNegativeButton(android.R.string.no , (dialog , which) -> {
+                });
                 return builder.create();
-            case IMAGE_DIALOG:
+            }
+            case IMAGE_DIALOG -> {
                 imageBinding = DialogImageBinding.inflate(getLayoutInflater());
                 imageBinding.setDialogFragment(this);
                 imageBinding.imageBox.setOnClickListener(v -> dismiss());
                 builder.setView(imageBinding.getRoot());
                 return builder.create();
-            case LOAD_DIALOG:
+            }
+            case LOAD_DIALOG -> {
                 builder.setMessage(requireContext().getString(R.string.loadGamePopup));
-                builder.setPositiveButton(android.R.string.yes, (dialog, which) ->
+                builder.setPositiveButton(android.R.string.yes , (dialog , which) ->
                         listener.onDialogPositiveClick(this));
-                builder.setNegativeButton(android.R.string.no, (dialog, which) -> { });
+                builder.setNegativeButton(android.R.string.no ,
+                        (dialog , which) -> {});
                 return builder.create();
-            case MENU_DIALOG:
-                builder.setItems(items.toArray(new CharSequence[0]), (dialog, which) ->
-                        listener.onDialogListClick(this, which));
+            }
+            case MENU_DIALOG -> {
+                builder.setItems(items.toArray(new CharSequence[0]) , (dialog , which) ->
+                        listener.onDialogListClick(this , which));
                 builder.setOnCancelListener(dialog -> listener.onDialogNegativeClick(this));
                 return builder.create();
-            case MESSAGE_DIALOG:
+            }
+            case MESSAGE_DIALOG -> {
                 builder.setMessage(processedMsg);
-                builder.setPositiveButton(android.R.string.ok, (dialog, which) ->
+                builder.setPositiveButton(android.R.string.ok , (dialog , which) ->
                         listener.onDialogPositiveClick(this));
                 return builder.create();
+            }
         }
         return super.onCreateDialog(savedInstanceState);
     }
@@ -155,8 +165,7 @@ public class GameDialogFrags extends GamePatternDialogFrags {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        if (imageBinding != null) {
+        if (imageBinding != null)
             imageBinding = null;
-        }
     }
 }

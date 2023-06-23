@@ -1,5 +1,6 @@
 package org.qp.android.view.adapters;
 
+import android.annotation.SuppressLint;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ImageView;
@@ -14,6 +15,7 @@ import org.qp.android.R;
 import java.io.File;
 
 public class Bind {
+    @SuppressLint("SetJavaScriptEnabled")
     @BindingAdapter({"setWebViewClient"})
     public static void setWebViewClient(WebView view, WebViewClient client) {
         var webViewSettings = view.getSettings();

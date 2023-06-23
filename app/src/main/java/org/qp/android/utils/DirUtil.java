@@ -5,6 +5,7 @@ import android.util.Log;
 import androidx.documentfile.provider.DocumentFile;
 
 import java.io.File;
+import java.util.Locale;
 
 public final class DirUtil {
     private static final String TAG = DirUtil.class.getSimpleName();
@@ -46,7 +47,7 @@ public final class DirUtil {
         } else {
             for (var file : dir.listFiles()) {
                 var name = file.getName();
-                var lcName = name.toLowerCase();
+                var lcName = name.toLowerCase(Locale.ROOT);
                 if (lcName.endsWith(".qsp") || lcName.endsWith(".gam"))
                     return true;
             }

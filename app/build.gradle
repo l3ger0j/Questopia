@@ -1,5 +1,6 @@
 plugins {
     id 'com.android.application'
+    id 'com.google.dagger.hilt.android'
 }
 
 def viewBind = true
@@ -66,6 +67,14 @@ dependencies {
     implementation 'androidx.work:work-runtime:2.8.1'
     implementation 'com.google.android.material:material:1.9.0'
     implementation 'androidx.core:core-splashscreen:1.0.1'
+
+    // Room
+    implementation "androidx.room:room-runtime:2.5.1"
+    annotationProcessor "androidx.room:room-compiler:2.5.1"
+
+    // DI
+    implementation "com.google.dagger:hilt-android:$rootProject.hilt_version"
+    annotationProcessor "com.google.dagger:hilt-android-compiler:$rootProject.hilt_version"
 
     implementation 'com.jaredrummler:colorpicker:1.1.0'
     implementation 'org.jsoup:jsoup:1.16.1'
