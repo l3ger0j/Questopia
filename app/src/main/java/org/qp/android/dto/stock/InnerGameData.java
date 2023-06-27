@@ -1,6 +1,6 @@
 package org.qp.android.dto.stock;
 
-import static org.qp.android.utils.StringUtil.isNotEmpty;
+import static org.qp.android.helpers.utils.StringUtil.isNotEmpty;
 
 import androidx.annotation.NonNull;
 

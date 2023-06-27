@@ -1,9 +1,9 @@
 package org.qp.android.model.copy;
 
-import static org.qp.android.utils.DirUtil.doesDirectoryContainGameFiles;
-import static org.qp.android.utils.DirUtil.normalizeGameDirectory;
-import static org.qp.android.utils.FileUtil.copyFile;
-import static org.qp.android.utils.FileUtil.createFindFolder;
+import static org.qp.android.helpers.utils.DirUtil.doesDirectoryContainGameFiles;
+import static org.qp.android.helpers.utils.DirUtil.normalizeGameDirectory;
+import static org.qp.android.helpers.utils.FileUtil.copyFile;
+import static org.qp.android.helpers.utils.FileUtil.createFindFolder;
 
 import android.content.Context;
 import android.net.Uri;

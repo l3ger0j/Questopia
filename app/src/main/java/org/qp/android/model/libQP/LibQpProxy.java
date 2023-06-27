@@ -2,7 +2,7 @@ package org.qp.android.model.libQP;
 
 import android.net.Uri;
 
-import org.qp.android.view.game.GameInterface;
+import org.qp.android.ui.game.GameInterface;
 
 import java.io.File;
 

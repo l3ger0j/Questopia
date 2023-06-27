@@ -1,8 +1,8 @@
 package org.qp.android.model.service;
 
-import static org.qp.android.utils.Base64Util.encodeBase64;
-import static org.qp.android.utils.StringUtil.isNotEmpty;
-import static org.qp.android.utils.StringUtil.isNullOrEmpty;
+import static org.qp.android.helpers.utils.Base64Util.encodeBase64;
+import static org.qp.android.helpers.utils.StringUtil.isNotEmpty;
+import static org.qp.android.helpers.utils.StringUtil.isNullOrEmpty;
 
 import android.content.res.Resources;
 import android.util.Base64;
@@ -12,7 +12,7 @@ import androidx.annotation.NonNull;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
-import org.qp.android.view.settings.SettingsController;
+import org.qp.android.ui.settings.SettingsController;
 
 import java.util.ArrayList;
 import java.util.Objects;

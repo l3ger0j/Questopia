@@ -1,7 +1,7 @@
 package org.qp.android.model.service;
 
-import static org.qp.android.utils.StringUtil.isNullOrEmpty;
-import static org.qp.android.utils.ThreadUtil.isMainThread;
+import static org.qp.android.helpers.utils.StringUtil.isNullOrEmpty;
+import static org.qp.android.helpers.utils.ThreadUtil.isMainThread;
 
 import android.content.res.Resources;
 import android.graphics.Bitmap;

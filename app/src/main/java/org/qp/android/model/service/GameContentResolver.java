@@ -1,6 +1,6 @@
 package org.qp.android.model.service;
 
-import static org.qp.android.utils.FileUtil.findFileRecursively;
+import static org.qp.android.helpers.utils.FileUtil.findFileRecursively;
 
 import androidx.annotation.Nullable;
 

@@ -29,7 +29,7 @@
         tools:targetApi="s">
 
         <activity
-            android:name=".view.stock.StockActivity"
+            android:name=".ui.stock.StockActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -38,12 +38,12 @@
         </activity>
 
         <activity
-            android:name=".view.game.GameActivity"
+            android:name=".ui.game.GameActivity"
             android:alwaysRetainTaskState="true"
             android:theme="@style/Theme.QP.Translucent.NoActionBar" />
 
         <activity
-            android:name=".view.settings.SettingsActivity"
+            android:name=".ui.settings.SettingsActivity"
             android:label="@string/settingsTitle"
             android:theme="@style/Theme.QP.Translucent" />
 

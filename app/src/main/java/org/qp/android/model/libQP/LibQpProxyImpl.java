@@ -1,11 +1,11 @@
 package org.qp.android.model.libQP;
 
-import static org.qp.android.utils.FileUtil.findFileRecursively;
-import static org.qp.android.utils.FileUtil.getFileContents;
-import static org.qp.android.utils.StringUtil.getStringOrEmpty;
-import static org.qp.android.utils.StringUtil.isNotEmpty;
-import static org.qp.android.utils.ThreadUtil.isSameThread;
-import static org.qp.android.utils.ThreadUtil.throwIfNotMainThread;
+import static org.qp.android.helpers.utils.FileUtil.findFileRecursively;
+import static org.qp.android.helpers.utils.FileUtil.getFileContents;
+import static org.qp.android.helpers.utils.StringUtil.getStringOrEmpty;
+import static org.qp.android.helpers.utils.StringUtil.isNotEmpty;
+import static org.qp.android.helpers.utils.ThreadUtil.isSameThread;
+import static org.qp.android.helpers.utils.ThreadUtil.throwIfNotMainThread;
 
 import android.content.Context;
 import android.net.Uri;
@@ -20,11 +20,11 @@ import org.qp.android.dto.libQP.ActionData;
 import org.qp.android.dto.libQP.ErrorData;
 import org.qp.android.dto.libQP.GetVarValuesResponse;
 import org.qp.android.dto.libQP.ObjectData;
+import org.qp.android.helpers.utils.StreamUtil;
 import org.qp.android.model.service.AudioPlayer;
 import org.qp.android.model.service.GameContentResolver;
 import org.qp.android.model.service.HtmlProcessor;
-import org.qp.android.utils.StreamUtil;
-import org.qp.android.view.game.GameInterface;
+import org.qp.android.ui.game.GameInterface;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;

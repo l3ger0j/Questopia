@@ -1,7 +1,7 @@
 package org.qp.android.viewModel.repository;
 
-import static org.qp.android.utils.FileUtil.readFileAsString;
-import static org.qp.android.utils.XmlUtil.xmlToObject;
+import static org.qp.android.helpers.utils.FileUtil.readFileAsString;
+import static org.qp.android.helpers.utils.XmlUtil.xmlToObject;
 
 import android.util.Log;
 
