@@ -81,7 +81,7 @@ dependencies {
     implementation 'com.anggrayudi:storage:1.5.4'
     implementation 'org.simpleframework:simple-xml:2.7.1'
     implementation 'com.squareup.picasso:picasso:2.71828'
-    implementation project(path: ':PrettyFilePicker-android-library')
+    implementation project(path: ':PrettyFilePicker')
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test:core:1.5.0'

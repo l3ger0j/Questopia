@@ -8,7 +8,7 @@ Android application for launching text format games [QSP](https://github.com/see
 
 ## Thanks
 
-* **[Nikolai Reznik](https://github.com/shirrumon)** for creating a FilePicker.
+* **[Nikolai Reznik](https://github.com/shirrumon)** for creating a PrettyFilePicker.
 
 ## How to use the Plugin API
 
