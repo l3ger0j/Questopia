@@ -736,7 +736,6 @@ public class StockViewModel extends AndroidViewModel {
         for (var gameDataParcel : gameDataParcelList) {
             var gameData = new InnerGameData();
             gameData.id = gameDataParcel.id;
-            gameData.listId = gameDataParcel.listId;
             gameData.author = gameDataParcel.author;
             gameData.portedBy = gameDataParcel.portedBy;
             gameData.version = gameDataParcel.version;

@@ -69,8 +69,8 @@ dependencies {
     implementation 'androidx.core:core-splashscreen:1.0.1'
 
     // Room
-    implementation "androidx.room:room-runtime:2.5.1"
-    annotationProcessor "androidx.room:room-compiler:2.5.1"
+    implementation "androidx.room:room-runtime:2.5.2"
+    annotationProcessor "androidx.room:room-compiler:2.5.2"
 
     // DI
     implementation "com.google.dagger:hilt-android:$rootProject.hilt_version"
