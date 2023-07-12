@@ -95,7 +95,7 @@ public class GameItemRecycler extends RecyclerView.Adapter<GameItemRecycler.View
 
     @Override
     public void onBindViewHolder(@NonNull GameItemRecycler.ViewHolder holder, int position) {
-        holder.listItemActionObjectBinding(differ.getCurrentList().get(position));
+        holder.listItemActionObjectBinding(getGameData().get(position));
         var qpListItem = getItem(position);
 
         if (qpListItem.pathToImage != null) {

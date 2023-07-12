@@ -68,7 +68,7 @@ public class PluginRecycler extends RecyclerView.Adapter<PluginRecycler.ViewHold
 
     @Override
     public void onBindViewHolder(@NonNull PluginRecycler.ViewHolder holder , int position) {
-        holder.listItemPluginBinding(differ.getCurrentList().get(position));
+        holder.listItemPluginBinding(getGameData().get(position));
         var pluginInfo = getItem(position);
 
         // pluginAuthor
