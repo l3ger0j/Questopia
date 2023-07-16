@@ -380,39 +380,6 @@ public class StockViewModel extends AndroidViewModel {
         }
     }
 
-    public void createUseIntent() {
-        var gameData = new InnerGameData();
-        try {
-            if (tempInstallDir != null && tempInstallDir.getName() != null) {
-                gameData.id = removeExtension(tempInstallDir.getName());
-                var installTextTitle = installBinding.ET0.getEditText();
-                if (installTextTitle != null) {
-                    gameData.title = installTextTitle.getText().toString().isEmpty()
-                            ? removeExtension(tempInstallDir.getName())
-                            : installTextTitle.getText().toString();
-                }
-                var installTextAuthor = installBinding.ET1.getEditText();
-                if (installTextAuthor != null) {
-                    gameData.author = installTextAuthor.getText().toString().isEmpty()
-                            ? null
-                            : installTextAuthor.getText().toString();
-                }
-                var installTextVersion = installBinding.ET2.getEditText();
-                if (installTextVersion != null) {
-                    gameData.version = installTextVersion.getText().toString().isEmpty()
-                            ? null
-                            : installTextVersion.getText().toString();
-                }
-                gameData.icon = (tempImageFile == null ? null : tempImageFile.getUri().toString());
-                connectingDir(tempInstallDir , gameData);
-                isSelectFolder.set(false);
-                dialogFragments.dismiss();
-            }
-        } catch (NullPointerException ex) {
-            Log.d(TAG , "Error: " , ex);
-        }
-    }
-
     public void createEditIntent() {
         try {
             var editTextTitle = editBinding.ET0.getEditText();
@@ -521,8 +488,6 @@ public class StockViewModel extends AndroidViewModel {
                 sendIntent(installBinding.buttonSelectIcon));
         installBinding.installBT.setOnClickListener(v ->
                 createInstallIntent());
-        installBinding.useBT.setOnClickListener(v ->
-                createUseIntent());
         return installBinding;
     }
 
@@ -546,12 +511,6 @@ public class StockViewModel extends AndroidViewModel {
         return editBinding;
     }
     // endregion Dialog
-
-    // region Game connecting
-    public void connectingDir(DocumentFile gameFile , InnerGameData innerGameData) {
-        // FIXME: 14.06.2023
-    }
-    // endregion Game connecting
 
     // region Game install
     public void installGame(DocumentFile gameFile , InnerGameData innerGameData) {

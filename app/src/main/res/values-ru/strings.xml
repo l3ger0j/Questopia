@@ -35,7 +35,6 @@
         <string name="selectFolder">Выберите папку с файлом</string>
         <string name="selectIcon">Выберите иконку</string>
         <string name="add">Скопировать в внутреннюю папку</string>
-        <string name="use">Оставить без копирования</string>
     <!-- Dialog GameInfo -->
         <string name="author">Автор: -AUTHOR-</string>
         <string name="ported_by">Портировал: -PORTED_BY-</string>
