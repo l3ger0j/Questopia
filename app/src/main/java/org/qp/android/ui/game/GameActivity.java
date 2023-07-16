@@ -592,13 +592,13 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
         MenuItem item;
         for (int i = 0; i <= MAX_SAVE_SLOTS; i++) {
             final var filename = getSaveSlotFilename(i);
-            final var file = findFileOrDirectory(savesDir, filename);
+            final var loadFile = findFileOrDirectory(savesDir, filename);
             var title = "";
 
-            if (file != null) {
+            if (loadFile != null) {
                 var lastMod = DateFormat.format(
                         "yyyy-MM-dd HH:mm:ss" ,
-                        file.lastModified()
+                        loadFile.lastModified()
                 ).toString();
                 title = getString(R.string.slotPresent, i + 1, lastMod);
             } else {
@@ -609,10 +609,9 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
             item.setOnMenuItemClickListener(menuItem -> {
                 switch (action) {
                     case LOAD -> {
-                        try {
-                            gameViewModel.doWithCounterDisabled(() -> proxy.loadGameState(Uri.fromFile(file)));
-                        } catch (NullPointerException e) {
-                            Log.d(TAG , "File is empty!" , e);
+                        if (loadFile != null) {
+                            gameViewModel.doWithCounterDisabled(() ->
+                                    proxy.loadGameState(Uri.fromFile(loadFile)));
                         }
                     }
                     case SAVE -> {
@@ -688,21 +687,30 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
             var temGameSaveMap = gameViewModel.getGameSaveMap();
             final var savesDir = createFindFolder(currentGameDir , "tempSaves");
             var tempSaveFile = createFindFile(savesDir , hardNameForSave);
-            libQpProxy.saveGameState(Uri.fromFile(tempSaveFile));
-            temGameSaveMap.putSerializable(simpleNameForSave , tempSaveFile);
-            gameViewModel.setGameSaveMap(temGameSaveMap);
+            try {
+                libQpProxy.saveGameState(Uri.fromFile(tempSaveFile));
+                temGameSaveMap.putSerializable(simpleNameForSave , tempSaveFile);
+                gameViewModel.setGameSaveMap(temGameSaveMap);
+            } catch (NullPointerException e) {
+                Log.d(TAG , "Error: " , e);
+                var drawer = (DrawerLayout) activityGameBinding.gameDrawerLayout;
+                drawer.closeDrawer(GravityCompat.START);
+                return false;
+            }
 
             for (var data : gameViewModel.getGameDataList()) {
                 for (var file : data.gameFiles) {
-                    if (file.getName().contentEquals(item.getTitle())) {
-                        var gameId = data.id;
-                        var gameTitle = data.title;
-                        var gameDir = data.gameDir;
-                        libQpProxy.runGame(gameId , gameTitle , gameDir , file);
-                        if (gameViewModel.getGameSaveMap().containsKey(file.getName())) {
-                            var save = (File) gameViewModel.getGameSaveMap().getSerializable(file.getName());
-                            gameViewModel.doWithCounterDisabled(() ->
-                                    libQpProxy.loadGameState(Uri.fromFile(save)));
+                    if (file != null && item.getTitle() != null) {
+                        if (file.getName().contentEquals(item.getTitle())) {
+                            var gameId = data.id;
+                            var gameTitle = data.title;
+                            var gameDir = data.gameDir;
+                            libQpProxy.runGame(gameId , gameTitle , gameDir , file);
+                            if (gameViewModel.getGameSaveMap().containsKey(file.getName())) {
+                                var save = (File) gameViewModel.getGameSaveMap().getSerializable(file.getName());
+                                gameViewModel.doWithCounterDisabled(() ->
+                                        libQpProxy.loadGameState(Uri.fromFile(save)));
+                            }
                         }
                     }
                 }
