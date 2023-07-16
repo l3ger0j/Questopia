@@ -110,29 +110,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
                         Toast.makeText(requireContext(), libQspProxy.getCompiledDateTime()
                                 +"\n"+libQspProxy.getVersionQSP(), Toast.LENGTH_SHORT).show();
                     } catch (NullPointerException ex) {
-                        Toast.makeText(requireContext(), """
-                                .
-                                ⠄⠄⠄⢀⡀⠰⠖⠶⣶⣂⣄⣀⣈⠙⢶⣶⣦⣀⡀⠄⠄⠄⠄⠄
-                                ⠄⠄⣴⣿⣿⡇⢠⣾⣿⣿⣿⣿⣿⣯⣲⣾⣍⠉⢛⠆⠄⠄⠄⠄
-                                ⢀⣾⣿⣿⣿⠆⠄⣠⣿⣿⣿⣿⣿⣿⡟⠹⣿⣿⣿⣿⣷⣦⡀⠄
-                                ⣿⣿⡿⠟⣵⣿⣰⣿⣿⣿⣿⣿⣿⣿⣿⡆⢸⣿⣿⣿⣿⣿⣿⡆
-                                ⣿⣍⠄⣸⡿⣿⣿⣿⣿⣿⡿⠋⠉⠉⠉⡇⣸⣿⣿⣿⣿⣿⣿⣿
-                                ⣿⣿⣶⣽⣷⣿⣿⡿⠟⠁⠄⠄⠄⠄⠄⠄⣾⣿⣿⣿⣿⣿⣿⣿
-                                ⣿⣿⣿⣿⣿⣿⡿⠄⠄⠄⠄⠄⠄⠄⠄⠄⠈⢿⣿⣿⣿⣿⣿⣿
-                                ⣿⣿⣿⣿⣿⣿⠁⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠙⣿⣿⣿⣿⣿
-                                ⣿⣿⣿⣿⡟⠛⢤⢄⣀⣀⡀⠄⠄⠄⣠⣴⣶⣶⣶⣾⣿⣿⣿⣿
-                                ⣿⣿⣿⣿⣧⣐⣡⣤⣽⣿⣿⠶⠶⢾⣿⣿⣯⣭⣿⣿⣿⣿⣿⣿
-                                ⣿⣿⣿⡏⠉⢇⠄⠄⠉⠉⢠⠄⠄⠘⡿⠄⠉⠙⠛⡟⢿⣿⣿⣿
-                                ⣿⣿⣿⣷⠄⠈⠳⠤⠤⠔⠁⠄⠄⠐⣞⠦⠤⠤⠞⣡⣿⣿⣿⣿
-                                ⠙⣿⣿⣿⠄⠄⠄⠄⠄⠄⠄⠄⠄⢸⣿⡇⠄⠄⢸⣿⣿⣿⣿⣿
-                                ⠄⢿⣿⣿⡇⠄⠄⠄⠄⠄⠐⠦⣤⣾⣿⣇⠄⠄⢹⣿⣿⣿⣿⡿
-                                ⠄⠄⠙⣿⣇⠄⠄⠄⠄⠄⠄⠄⠙⣻⣿⣿⡄⠄⣿⣿⣿⣿⠿⠃
-                                ⠄⠄⠄⠈⢿⣆⠄⠄⠄⠉⠉⠉⣉⣩⠿⠛⢁⣼⣿⡿⠋⠄⠄⠄
-                                ⠄⠄⠄⢀⣠⡝⠄⠄⠄⠄⠄⠄⠄⠄⠄⢀⣿⣿⣿⣿⣦⣤⣀⡀
-                                ⠄⠄⠄⠙⠄⠄⠄⠘⠢⡄⡀⠄⠄⢀⣤⣿⣿⣿⣿⣿⣿⣿⣿⣷
-                                ⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠈⠻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
-                                ⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠈⠹⠿⠿⠿⠿⠿⠿⠿⠿⠟⠋
-                                """ , Toast.LENGTH_LONG).show();
+                        return true;
                     }
                 }
                 return true;
