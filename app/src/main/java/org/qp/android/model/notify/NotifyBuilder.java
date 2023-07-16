@@ -1,11 +1,7 @@
 package org.qp.android.model.notify;
 
 import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.content.Context;
-import android.graphics.Color;
-import android.os.Build;
 
 import androidx.core.app.NotificationCompat;
 
@@ -30,35 +26,6 @@ public class NotifyBuilder {
                           String CHANNEL_ID) {
         this.context = context;
         this.CHANNEL_ID = CHANNEL_ID;
-    }
-
-    public void createStatusChannel() {
-        var notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        var notificationChannel = new NotificationChannel(
-                "gameInstalled",
-                context.getString(R.string.statusNameChannel),
-                NotificationManager.IMPORTANCE_DEFAULT);
-        notificationChannel.setDescription(context.getString(R.string.statusDescChannel));
-        notificationChannel.enableLights(true);
-        notificationChannel.setLightColor(Color.GREEN);
-        notificationChannel.enableVibration(false);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            notificationChannel.setAllowBubbles(true);
-        }
-        notificationManager.createNotificationChannel(notificationChannel);
-    }
-
-    public void createProgressChannel () {
-        var notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        var notificationChannel = new NotificationChannel(
-                "gameInstallationProgress",
-                context.getString(R.string.progressNameChannel),
-                NotificationManager.IMPORTANCE_DEFAULT);
-        notificationChannel.setDescription(context.getString(R.string.progressDescChannel));
-        notificationChannel.enableLights(true);
-        notificationChannel.setLightColor(Color.RED);
-        notificationChannel.enableVibration(false);
-        notificationManager.createNotificationChannel(notificationChannel);
     }
 
     public Notification buildStandardNotification() {

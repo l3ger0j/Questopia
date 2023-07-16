@@ -2,10 +2,7 @@
 <resources>
     <!-- Use in dialog/toast/notification -->
     <!-- Notification channel -->
-        <string name="statusNameChannel">Installation status</string>
-        <string name="statusDescChannel">Channel for displaying information about the current installation status of the game</string>
-        <string name="progressNameChannel">Progress install of game</string>
-        <string name="progressDescChannel">Channel for displaying information about the progress of the game installation</string>
+        <string name="channelInstallGame">Install game</string>
     <!-- Install notification -->
         <string name="titleNotify">Game install</string>
         <string name="textInstallNotify">The game -GAMENAME- has been successfully installed!</string>

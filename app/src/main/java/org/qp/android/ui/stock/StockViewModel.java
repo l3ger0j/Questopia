@@ -1,5 +1,8 @@
 package org.qp.android.ui.stock;
 
+import static org.qp.android.QuestPlayerApplication.CHANNEL_INSTALL_GAME;
+import static org.qp.android.QuestPlayerApplication.INSTALL_GAME_NOTIFICATION_ID;
+import static org.qp.android.QuestPlayerApplication.POST_INSTALL_GAME_NOTIFICATION_ID;
 import static org.qp.android.helpers.utils.DirUtil.doesDirectoryContainGameFiles;
 import static org.qp.android.helpers.utils.FileUtil.copyFile;
 import static org.qp.android.helpers.utils.FileUtil.createFindFile;
@@ -569,11 +572,7 @@ public class StockViewModel extends AndroidViewModel {
         }
 
         var builder =
-                new NotifyBuilder(getStockActivity() , "gameInstallationProgress");
-        builder.createProgressChannel();
-        var nBuilder =
-                new NotifyBuilder(getStockActivity() , "gameInstalled");
-        nBuilder.createStatusChannel();
+                new NotifyBuilder(getStockActivity() , CHANNEL_INSTALL_GAME);
         var notificationManager =
                 NotificationManagerCompat.from(getStockActivity());
 
@@ -581,7 +580,7 @@ public class StockViewModel extends AndroidViewModel {
 
         builder.setTitleNotify(getStockActivity().getString(R.string.titleCopyNotify));
         builder.setTextNotify(getStockActivity().getString(R.string.bodyCopyNotify));
-        notificationManager.notify(1 , builder.buildStandardNotification());
+        notificationManager.notify(INSTALL_GAME_NOTIFICATION_ID , builder.buildStandardNotification());
 
         var installer = new CopyBuilder(getStockActivity());
         installer.getErrorCode().observeForever(error -> {
@@ -596,14 +595,16 @@ public class StockViewModel extends AndroidViewModel {
 
         installer.copyDirToAnotherDir(gameFile , gameDir).observeForever(aBoolean -> {
             if (aBoolean) {
-                notificationManager.cancel(1);
-                nBuilder.setTitleNotify(getStockActivity().getString(R.string.titleNotify));
-                var tempMessage = getStockActivity()
+                notificationManager.cancel(INSTALL_GAME_NOTIFICATION_ID);
+                builder.setTitleNotify(getStockActivity().getString(R.string.titleNotify));
+                var gameName = getStockActivity()
                         .getString(R.string.bodyCopiedNotify)
                         .replace("-GAMENAME-" , innerGameData.title);
-                nBuilder.setTextNotify(tempMessage);
-                notificationManager.notify(2 , nBuilder.buildStandardNotification());
-
+                builder.setTextNotify(gameName);
+                notificationManager.notify(
+                        POST_INSTALL_GAME_NOTIFICATION_ID ,
+                        builder.buildStandardNotification()
+                );
                 writeGameInfo(innerGameData , gameDir);
                 refreshGameData();
             }
