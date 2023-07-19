@@ -1,23 +1,16 @@
 package org.qp.android.ui.stock;
 
 import static org.qp.android.helpers.utils.FileUtil.deleteDirectory;
-import static org.qp.android.helpers.utils.FileUtil.findFileRecursively;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_IMAGE;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_MOD_FILE;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_PATH_FILE;
 
 import android.Manifest;
-import android.app.DownloadManager;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -41,8 +34,6 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.anggrayudi.storage.FileWrapper;
 import com.anggrayudi.storage.SimpleStorageHelper;
-import com.anggrayudi.storage.file.DocumentFileCompat;
-import com.anggrayudi.storage.file.DocumentFileType;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import org.qp.android.R;
@@ -88,34 +79,6 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
 
     private AutoScrollRunnable autoScrollRunnable;
     private ViewPager2 bannerViewPager;
-    private DownloadManager mgr = null;
-    
-    BroadcastReceiver onComplete = new BroadcastReceiver() {
-        public void onReceive(Context context, Intent intent) {
-            var gameData = stockViewModel.getTempGameData();
-            var downloadDir =
-                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-            var tempDownloadedFile = findFileRecursively(downloadDir ,
-                    gameData.title+"."+gameData.fileExt);
-            if (tempDownloadedFile != null) {
-                var downloadedFile = DocumentFileCompat.fromFile(
-                        context,
-                        tempDownloadedFile,
-                        DocumentFileType.FILE,
-                        true
-                );
-
-                stockViewModel.installGame(downloadedFile, stockViewModel.getTempGameData());
-                ViewUtil.showSnackBar(findViewById(android.R.id.content) ,
-                        getString(R.string.textInstallNotify)
-                                .replace("-GAMENAME-" , gameData.title));
-            } else {
-                ViewUtil.showSnackBar(findViewById(android.R.id.content) ,
-                        getString(R.string.installError)
-                                .replace("-GAMENAME-" , gameData.title));
-            }
-        }
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -128,9 +91,6 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         var fragmentAdapter = new StockAdapterFragment(this);
         bannerViewPager.setAdapter(fragmentAdapter);
         autoScrollRunnable = new AutoScrollRunnable(bannerViewPager, 3000, false);
-
-        mgr = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
-        registerReceiver(onComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
 
         stockViewModel = new ViewModelProvider(this).get(StockViewModel.class);
         activityStockBinding.setStockVM(stockViewModel);
@@ -419,21 +379,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
 
     @Override
     public void onClickDownloadButton() {
-        var gameData = stockViewModel.getTempGameData();
-        var uri = Uri.parse(gameData.fileUrl);
-        var files = Environment
-                .getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-                .mkdirs();
-        if (!files) {
-            showErrorDialog("Files not found");
-        }
-        mgr.enqueue(new DownloadManager.Request(uri)
-                .setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI
-                        | DownloadManager.Request.NETWORK_MOBILE)
-                .setAllowedOverRoaming(false)
-                .setTitle(gameData.title+"."+gameData.fileExt)
-                .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS ,
-                        gameData.title+"."+gameData.fileExt));
+        // TODO: 19.07.2023 Release this
     }
 
     @Override
@@ -529,7 +475,6 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        unregisterReceiver(onComplete);
         Log.i(TAG , "Stock Activity destroyed");
     }
 

@@ -5,7 +5,6 @@
         <string name="channelInstallGame">Install game</string>
     <!-- Install notification -->
         <string name="titleNotify">Game install</string>
-        <string name="textInstallNotify">The game -GAMENAME- has been successfully installed!</string>
     <!-- Copy notification -->
         <string name="titleCopyNotify">Copying the game directory</string>
         <string name="bodyCopyNotify">The game is currently being copied to the internal storage!</string>
