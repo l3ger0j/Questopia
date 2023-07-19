@@ -343,40 +343,36 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     public void createInstallIntent() {
-        var gameData = new InnerGameData();
-        try {
-            if (tempInstallDir != null && tempInstallDir.getName() != null) {
-                gameData.id = removeExtension(tempInstallDir.getName());
-                var installTextTitle = installBinding.ET0.getEditText();
-                if (installTextTitle != null) {
-                    gameData.title = installTextTitle.getText().toString().isEmpty()
-                            ? removeExtension(tempInstallDir.getName())
-                            : installTextTitle.getText().toString();
-                }
-                var installTextAuthor = installBinding.ET1.getEditText();
-                if (installTextAuthor != null) {
-                    gameData.author = installTextAuthor.getText().toString().isEmpty()
-                            ? null
-                            : installTextAuthor.getText().toString();
-                }
-                var installTextVersion = installBinding.ET2.getEditText();
-                if (installTextVersion != null) {
-                    gameData.version = installTextVersion.getText().toString().isEmpty()
-                            ? null
-                            : installTextVersion.getText().toString();
-                }
-                calculateSizeDir(tempInstallDir).observeForever(aLong -> {
-                    if (aLong != null) {
-                        gameData.fileSize = formatFileSize(aLong , controller.binaryPrefixes);
-                    }
-                });
-                gameData.icon = (tempImageFile == null ? null : tempImageFile.getUri().toString());
-                installGame(tempInstallDir , gameData);
-                isSelectFolder.set(false);
-                dialogFragments.dismiss();
+        if (tempInstallDir != null && tempInstallDir.getName() != null) {
+            var gameData = new InnerGameData();
+            gameData.id = removeExtension(tempInstallDir.getName());
+            var installTextTitle = installBinding.ET0.getEditText();
+            if (installTextTitle != null) {
+                gameData.title = installTextTitle.getText().toString().isEmpty()
+                        ? removeExtension(tempInstallDir.getName())
+                        : installTextTitle.getText().toString();
             }
-        } catch (NullPointerException ex) {
-            Log.d(TAG , "Error: " , ex);
+            var installTextAuthor = installBinding.ET1.getEditText();
+            if (installTextAuthor != null) {
+                gameData.author = installTextAuthor.getText().toString().isEmpty()
+                        ? null
+                        : installTextAuthor.getText().toString();
+            }
+            var installTextVersion = installBinding.ET2.getEditText();
+            if (installTextVersion != null) {
+                gameData.version = installTextVersion.getText().toString().isEmpty()
+                        ? null
+                        : installTextVersion.getText().toString();
+            }
+            calculateSizeDir(tempInstallDir).observeForever(aLong -> {
+                if (aLong != null) {
+                    gameData.fileSize = formatFileSize(aLong , controller.binaryPrefixes);
+                }
+            });
+            gameData.icon = (tempImageFile == null ? null : tempImageFile.getUri().toString());
+            installGame(tempInstallDir , gameData);
+            isSelectFolder.set(false);
+            dialogFragments.dismiss();
         }
     }
 
@@ -425,8 +421,7 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     public void playGame() {
-        var intent = new Intent(getStockActivity() ,
-                GameActivity.class);
+        var intent = new Intent(getStockActivity() , GameActivity.class);
         intent.putExtra("gameId" , tempInnerGameData.id);
         intent.putExtra("gameTitle" , tempInnerGameData.title);
         intent.putExtra("gameDirUri" , tempInnerGameData.gameDir.getAbsolutePath());
