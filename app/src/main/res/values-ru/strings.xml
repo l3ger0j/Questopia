@@ -86,6 +86,7 @@
         <string name="appName">QPlayer</string>
     <!-- SettingsFragment -->
         <string name="closeToApply">Закройте настройки для применения изменений</string>
+        <string name="settingsEffect">Настройки вступят в силу при следующей распаковке игры</string>
     <!-- FragmentImageBox -->
         <string name="image">Изображение</string>
     <!-- Use in menu -->

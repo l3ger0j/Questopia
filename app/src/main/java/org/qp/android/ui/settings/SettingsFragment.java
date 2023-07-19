@@ -141,7 +141,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
         if (key.equals("lang")) {
             ViewUtil.showSnackBar(getView(), getString(R.string.closeToApply));
         } else if (key.equals("binPref")) {
-            ViewUtil.showSnackBar(getView(), "The setting will take effect the next time you unpack the game");
+            ViewUtil.showSnackBar(getView(), getString(R.string.settingsEffect));
         }
     }
 }
