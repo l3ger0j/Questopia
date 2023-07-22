@@ -67,6 +67,14 @@ public class SettingsFragment extends PreferenceFragmentCompat
                 return true;
             });
         }
+        var news = findPreference("newsApp");
+        if (news != null) {
+            news.setOnPreferenceClickListener(preference -> {
+                Navigation.findNavController(requireView())
+                        .navigate(R.id.newsFragment);
+                return false;
+            });
+        }
 
         var button = findPreference("showAbout");
         if (button != null) {
