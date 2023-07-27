@@ -3,6 +3,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <PreferenceCategory android:title="@string/generalCatTitle">
+        <Preference
+            android:title="News Quest Player"
+            android:key="newsApp" />
         <ListPreference
             android:defaultValue="ru"
             android:entries="@array/langName"
@@ -148,9 +151,6 @@
         <Preference
             android:title="@string/aboutTitle"
             android:key="showAbout" />
-        <Preference
-            android:title="News Quest Player"
-            android:key="newsApp" />
         <Preference
             android:key="showVersion" />
     </PreferenceCategory>
