@@ -56,33 +56,6 @@ public class LocalGame {
         }
     }
 
-    public List<InnerGameData> getGame(File gameDir) {
-        if (gameDir == null) {
-            Log.e(TAG,"Games directory is not specified");
-            return Collections.emptyList();
-        }
-        var gameDirs = new ArrayList<File>();
-        gameDirs.add(gameDir);
-        var items = new ArrayList<InnerGameData>();
-        for (var folder : getGameFolders(gameDirs)) {
-            var item = (InnerGameData) null;
-            var info = getGameInfo(folder);
-            if (info != null) {
-                item = parseGameInfo(info);
-            }
-            if (item == null) {
-                var name = folder.dir.getName();
-                item = new InnerGameData();
-                item.id = name;
-                item.title = name;
-            }
-            item.gameDir = folder.dir;
-            item.gameFiles = folder.gameFiles;
-            items.add(item);
-        }
-        return items;
-    }
-
     @Nullable
     private ArrayList<File> getGameDirectories(File gamesDir) {
         try {
