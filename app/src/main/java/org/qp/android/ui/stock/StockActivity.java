@@ -103,7 +103,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         storageHelper.setOnFileSelected((integer , documentFiles) -> {
             if (documentFiles != null) {
                 switch (integer) {
-                    case CODE_PICK_IMAGE:
+                    case CODE_PICK_IMAGE -> {
                         for (var file : documentFiles) {
                             var document = new FileWrapper.Document(file);
                             switch (document.getExtension()) {
@@ -115,21 +115,21 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
                                 }
                             }
                         }
-                        break;
-                    case CODE_PICK_PATH_FILE:
+                    }
+                    case CODE_PICK_PATH_FILE -> {
                         for (var file : documentFiles) {
                             var document = new FileWrapper.Document(file);
                             if ("qsp".equals(document.getExtension()))
                                 stockViewModel.setTempPathFile(document.getDocumentFile());
                         }
-                        break;
-                    case CODE_PICK_MOD_FILE:
+                    }
+                    case CODE_PICK_MOD_FILE -> {
                         for (var file : documentFiles) {
                             var document = new FileWrapper.Document(file);
                             if ("qsp".equals(document.getExtension()))
                                 stockViewModel.setTempModFile(document.getDocumentFile());
                         }
-                        break;
+                    }
                 }
 
             } else {
@@ -184,30 +184,30 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
     public void onRequestPermissionsResult(int requestCode , @NonNull String[] permissions , @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode , permissions , grantResults);
         switch (requestCode) {
-            case READ_EXTERNAL_STORAGE_CODE:
+            case READ_EXTERNAL_STORAGE_CODE -> {
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     ViewUtil.showSnackBar(findViewById(android.R.id.content) , "Success");
                 } else {
                     ViewUtil.showSnackBar(findViewById(android.R.id.content) , "Permission denied to read your External storage");
                 }
-                break;
-            case MANAGE_EXTERNAL_STORAGE_CODE:
+            }
+            case MANAGE_EXTERNAL_STORAGE_CODE -> {
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     ViewUtil.showSnackBar(findViewById(android.R.id.content) , "Success");
                 } else {
                     ViewUtil.showSnackBar(findViewById(android.R.id.content) , "Permission denied to manage your External storage");
                 }
-                break;
-            case POST_NOTIFICATION:
+            }
+            case POST_NOTIFICATION -> {
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     ViewUtil.showSnackBar(findViewById(android.R.id.content) , "Success");
                 } else {
                     ViewUtil.showSnackBar(findViewById(android.R.id.content) , "Permission denied to post notification");
                 }
-                break;
+            }
         }
     }
 
@@ -520,18 +520,20 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
             return true;
         } else if (itemId == R.id.action_search) {
             var searchView = (androidx.appcompat.widget.SearchView) item.getActionView();
-            searchView.setOnQueryTextListener(new androidx.appcompat.widget.SearchView.OnQueryTextListener() {
-                @Override
-                public boolean onQueryTextSubmit(String query) {
-                    return false;
-                }
+            if (searchView != null) {
+                searchView.setOnQueryTextListener(new androidx.appcompat.widget.SearchView.OnQueryTextListener() {
+                    @Override
+                    public boolean onQueryTextSubmit(String query) {
+                        return false;
+                    }
 
-                @Override
-                public boolean onQueryTextChange(String newText) {
-                    filter(newText);
-                    return false;
-                }
-            });
+                    @Override
+                    public boolean onQueryTextChange(String newText) {
+                        filter(newText);
+                        return false;
+                    }
+                });
+            }
         } else if (itemId == R.id.action_refresh) {
             stockViewModel.startDownloadPlugin();
         }
