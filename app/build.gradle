@@ -7,7 +7,7 @@ def viewBind = true
 def dataBind = true
 
 android {
-    compileSdkVersion 33
+    compileSdk 33
 
     defaultConfig {
         applicationId "org.qp.android"
@@ -20,7 +20,7 @@ android {
     }
 
     configurations {
-        all {
+        configureEach {
             exclude group: 'xpp3', module: 'xpp3'
             exclude group: 'androidx.lifecycle', module: 'lifecycle-viewmodel-ktx'
         }
@@ -60,8 +60,8 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.documentfile:documentfile:1.0.1'
-    implementation 'androidx.preference:preference:1.2.0'
-    implementation 'androidx.fragment:fragment:1.6.0'
+    implementation 'androidx.preference:preference:1.2.1'
+    implementation 'androidx.fragment:fragment:1.6.1'
     implementation 'androidx.navigation:navigation-fragment:2.6.0'
     implementation 'androidx.navigation:navigation-ui:2.6.0'
     implementation 'androidx.work:work-runtime:2.8.1'
