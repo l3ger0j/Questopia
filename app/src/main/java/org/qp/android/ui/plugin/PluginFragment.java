@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class PluginFragment extends Fragment {
+
     private final String TAG = getClass().getSimpleName();
 
     private RecyclerView recyclerView;

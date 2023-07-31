@@ -4,7 +4,7 @@
 
     <PreferenceCategory android:title="@string/generalCatTitle">
         <Preference
-            android:title="News Quest Player"
+            android:title="@string/newsMenuTitle"
             android:key="newsApp" />
         <ListPreference
             android:defaultValue="ru"

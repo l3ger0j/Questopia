@@ -1,49 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <ImageView
-            android:id="@+id/banner_image1"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginEnd="16dp"
-            android:adjustViewBounds="true"
-            android:background="#757575"
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/banner_view"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:background="@color/def_text_color"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView"
-            app:srcCompat="@drawable/banner_0" />
-
-        <ImageView
-            android:id="@+id/banner_image2"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginEnd="16dp"
-            android:adjustViewBounds="true"
-            android:background="#757575"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/banner_image1"
-            app:srcCompat="@drawable/banner_1" />
+            app:layout_constraintStart_toStartOf="parent" />
 
         <TextView
             android:id="@+id/textView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="32dp"
-            android:layout_marginEnd="16dp"
-            android:text="SPONSOR BLOCK"
-            android:textStyle="bold"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:text="▒▒▒▒▒▒▒▒▄▄▄▄▄▄▄▄▒▒▒▒▒▒▒▒ ▒▒▒▒▒▄█▀▀░░░░░░▀▀█▄▒▒▒▒▒ ▒▒▒▄█▀▄██▄░░░░░░░░▀█▄▒▒▒ ▒▒█▀░▀░░▄▀░░░░▄▀▀▀▀░▀█▒▒ ▒█▀░░░░███░░░░▄█▄░░░░▀█▒ ▒█░░░░░░▀░░░░░▀█▀░░░░░█▒ ▒█░░░░░░░░░░░░░░░░░░░░█▒ ▒█░░██▄░░▀▀▀▀▄▄░░░░░░░█▒ ▒▀█░█░█░░░▄▄▄▄▄░░░░░░█▀▒ ▒▒▀█▀░▀▀▀▀░▄▄▄▀░░░░▄█▀▒▒ ▒▒▒█░░░░░░▀█░░░░░▄█▀▒▒▒▒ ▒▒▒█▄░░░░░▀█▄▄▄█▀▀▒▒▒▒▒▒ ▒▒▒▒▀▀▀▀▀▀▀▒▒▒▒▒▒▒▒▒▒▒▒▒"
+            android:textAlignment="center"
+            android:textAppearance="@style/TextAppearance.AppCompat.Large"
+            android:textStyle="italic"
+            android:typeface="serif"
+            app:layout_constraintBottom_toTopOf="@+id/banner_view"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />

@@ -1,4 +1,4 @@
-package org.qp.android.ui.stock;
+package org.qp.android.ui.news;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -9,17 +9,19 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 
 import org.qp.android.R;
 import org.qp.android.databinding.ListItemBannerBinding;
 
-public class StockBannerFragment extends StockPatternFragment{
+public class NewsBannerFragment extends Fragment {
+
     private ListItemBannerBinding binding;
     private int pageNumber;
 
     @NonNull
-    public static StockBannerFragment newInstance(int numPage) {
-        var fragment = new StockBannerFragment();
+    public static NewsBannerFragment newInstance(int numPage) {
+        var fragment = new NewsBannerFragment();
         var args = new Bundle();
         args.putInt("num", numPage);
         fragment.setArguments(args);

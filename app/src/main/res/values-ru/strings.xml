@@ -173,6 +173,8 @@
         <string name="saveTo">В файл…</string>
     <!-- Menu plugins -->
         <string name="pluginMenuTitle">Плагины</string>
+    <!-- Menu news -->
+        <string name="newsMenuTitle">Новости QPlayer</string>
 </resources>
 
 

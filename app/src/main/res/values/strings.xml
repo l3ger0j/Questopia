@@ -174,4 +174,6 @@
         <string name="saveTo">To File…</string>
     <!-- Menu plugins -->
         <string name="pluginMenuTitle">Plugins</string>
+    <!-- Menu news -->
+        <string name="newsMenuTitle">News QPlayer</string>
 </resources>

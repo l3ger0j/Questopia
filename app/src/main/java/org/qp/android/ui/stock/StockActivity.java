@@ -30,7 +30,6 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.viewpager2.widget.ViewPager2;
 
 import com.anggrayudi.storage.FileWrapper;
 import com.anggrayudi.storage.SimpleStorageHelper;
@@ -39,7 +38,6 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import org.qp.android.R;
 import org.qp.android.databinding.ActivityStockBinding;
 import org.qp.android.dto.stock.InnerGameData;
-import org.qp.android.helpers.adapters.AutoScrollRunnable;
 import org.qp.android.helpers.utils.ViewUtil;
 import org.qp.android.ui.dialogs.StockDialogFrags;
 import org.qp.android.ui.dialogs.StockDialogType;
@@ -77,21 +75,12 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         this.mRecyclerView = mRecyclerView;
     }
 
-    private AutoScrollRunnable autoScrollRunnable;
-    private ViewPager2 bannerViewPager;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         SplashScreen splashScreen = SplashScreen.installSplashScreen(this);
 
         super.onCreate(savedInstanceState);
         activityStockBinding = ActivityStockBinding.inflate(getLayoutInflater());
-
-        bannerViewPager = activityStockBinding.bannerView;
-        var fragmentAdapter = new StockAdapterFragment(this);
-        bannerViewPager.setAdapter(fragmentAdapter);
-        autoScrollRunnable = new AutoScrollRunnable(bannerViewPager, 3000, false);
-
         stockViewModel = new ViewModelProvider(this).get(StockViewModel.class);
         activityStockBinding.setStockVM(stockViewModel);
         stockViewModel.activityObservableField.set(this);
@@ -479,12 +468,6 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
-        bannerViewPager.removeCallbacks(autoScrollRunnable);
-    }
-
-    @Override
     public void onResume() {
         super.onResume();
         loadSettings();
@@ -495,7 +478,6 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
 
         stockViewModel.refreshIntGamesDirectory();
         navController.navigate(R.id.stockRecyclerFragment);
-        bannerViewPager.postDelayed(autoScrollRunnable, 3000);
     }
 
     @Override
