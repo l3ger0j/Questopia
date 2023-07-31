@@ -1,4 +1,4 @@
-package org.qp.android.viewModel.repository;
+package org.qp.android.helpers.repository;
 
 import static org.qp.android.helpers.utils.FileUtil.readFileAsString;
 import static org.qp.android.helpers.utils.XmlUtil.xmlToObject;

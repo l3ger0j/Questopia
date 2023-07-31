@@ -53,7 +53,7 @@ import org.qp.android.ui.dialogs.StockDialogFrags;
 import org.qp.android.ui.dialogs.StockDialogType;
 import org.qp.android.ui.game.GameActivity;
 import org.qp.android.ui.settings.SettingsController;
-import org.qp.android.viewModel.repository.LocalGame;
+import org.qp.android.helpers.repository.LocalGame;
 
 import java.io.File;
 import java.io.FileOutputStream;
