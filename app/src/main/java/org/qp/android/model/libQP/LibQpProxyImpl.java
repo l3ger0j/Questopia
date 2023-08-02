@@ -302,8 +302,12 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
         final byte[] gameData;
         try (var in = context.getContentResolver().openInputStream(uri)) {
             try (var out = new ByteArrayOutputStream()) {
-                StreamUtil.copy(in, out);
-                gameData = out.toByteArray();
+                if (in != null) {
+                    StreamUtil.copy(in, out);
+                    gameData = out.toByteArray();
+                } else {
+                    throw new IOException("Input is NULL!");
+                }
             }
         } catch (IOException ex) {
             Log.e(TAG,"Failed to load game state", ex);
@@ -323,7 +327,11 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
         byte[] gameData = nativeMethods.QSPSaveGameAsData(false);
         if (gameData == null) return;
         try (var out = context.getContentResolver().openOutputStream(uri, "w")) {
-            out.write(gameData);
+            if (out != null) {
+                out.write(gameData);
+            } else {
+                throw new IOException("Input is NULL!");
+            }
         } catch (IOException ex) {
             Log.e(TAG,"Failed to save the game state", ex);
         }
