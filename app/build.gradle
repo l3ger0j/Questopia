@@ -76,6 +76,7 @@ dependencies {
     implementation "com.google.dagger:hilt-android:$rootProject.hilt_version"
     annotationProcessor "com.google.dagger:hilt-android-compiler:$rootProject.hilt_version"
 
+    implementation 'com.github.AppDevNext:ChangeLog:3.5'
     implementation 'com.jaredrummler:colorpicker:1.1.0'
     implementation 'org.jsoup:jsoup:1.16.1'
     implementation 'com.anggrayudi:storage:1.5.4'
