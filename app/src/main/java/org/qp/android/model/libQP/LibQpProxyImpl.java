@@ -1,6 +1,6 @@
 package org.qp.android.model.libQP;
 
-import static org.qp.android.helpers.utils.FileUtil.findFileRecursively;
+import static org.qp.android.helpers.utils.FileUtil.findFileOrDirectory;
 import static org.qp.android.helpers.utils.FileUtil.getFileContents;
 import static org.qp.android.helpers.utils.StringUtil.getStringOrEmpty;
 import static org.qp.android.helpers.utils.StringUtil.isNotEmpty;
@@ -15,6 +15,9 @@ import android.os.SystemClock;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.documentfile.provider.DocumentFile;
+
+import com.anggrayudi.storage.FileWrapper;
 
 import org.qp.android.dto.libQP.ActionData;
 import org.qp.android.dto.libQP.ErrorData;
@@ -28,7 +31,6 @@ import org.qp.android.ui.game.GameInterface;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Locale;
@@ -89,20 +91,28 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
 
     private boolean loadGameWorld() {
         byte[] gameData;
-        try (var in = new FileInputStream(gameState.gameFile)) {
+        var tempGameFile = new FileWrapper.Document(gameState.gameFile);
+
+        try (var in = tempGameFile.openInputStream(context)) {
             try (var out = new ByteArrayOutputStream()) {
-                StreamUtil.copy(in, out);
-                gameData = out.toByteArray();
+                if (in != null) {
+                    StreamUtil.copy(in, out);
+                    gameData = out.toByteArray();
+                } else {
+                    throw new IOException();
+                }
             }
         } catch (IOException ex) {
             Log.e(TAG ,"Failed to load the game world", ex);
             return false;
         }
-        var fileName = gameState.gameFile.getAbsolutePath();
+
+        var fileName = tempGameFile.getAbsolutePath(context);
         if (!nativeMethods.QSPLoadGameWorldFromData(gameData, gameData.length, fileName)) {
             showLastQspError();
             return false;
         }
+
         return true;
     }
 
@@ -190,11 +200,9 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
             if (objectResult.name.contains("<img")) {
                 if (htmlProcessor.hasHTMLTags(objectResult.name)) {
                     var tempPath = htmlProcessor.getSrcDir(objectResult.name);
-                    object.pathToImage = String.valueOf(findFileRecursively(gameState.gameDir,
-                            tempPath));
+                    object.pathToImage = String.valueOf(findFileOrDirectory(gameState.gameDir , tempPath));
                 } else {
-                    object.pathToImage = String.valueOf(findFileRecursively(gameState.gameDir,
-                            objectResult.name));
+                    object.pathToImage = String.valueOf(findFileOrDirectory(gameState.gameDir , objectResult.name));
                 }
             } else {
                 object.pathToImage = objectResult.image;
@@ -263,11 +271,17 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
     }
 
     @Override
-    public void runGame(final String id, final String title, final File dir, final File file) {
+    public void runGame(final String id,
+                        final String title,
+                        final DocumentFile dir,
+                        final DocumentFile file) {
         runOnQspThread(() -> doRunGame(id, title, dir, file));
     }
 
-    private void doRunGame(final String id, final String title, final File dir, final File file) {
+    private void doRunGame(final String id,
+                           final String title,
+                           final DocumentFile dir,
+                           final DocumentFile file) {
         gameInterface.doWithCounterDisabled(() -> {
             audioPlayer.closeAllFiles();
             gameState.reset();
@@ -276,7 +290,7 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
             gameState.gameTitle = title;
             gameState.gameDir = dir;
             gameState.gameFile = file;
-            gameContentResolver.setGameDir(dir);
+            gameContentResolver.setGameDir(dir , context);
             if (!loadGameWorld()) return;
             gameStartTime = SystemClock.elapsedRealtime();
             lastMsCountCallTime = 0;
@@ -620,14 +634,14 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
 
     @Override
     public void ChangeQuestPath(String path) {
-        var dir = new File(path);
+        var dir = DocumentFile.fromFile(new File(path));
         if (!dir.exists()) {
             Log.e(TAG,"InnerGameData directory not found: " + path);
             return;
         }
         if (!gameState.gameDir.equals(dir)) {
             gameState.gameDir = dir;
-            gameContentResolver.setGameDir(dir);
+            gameContentResolver.setGameDir(dir , context);
         }
     }
 

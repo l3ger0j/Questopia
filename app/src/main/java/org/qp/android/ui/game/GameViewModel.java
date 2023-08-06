@@ -4,6 +4,7 @@ import static org.qp.android.helpers.utils.Base64Util.decodeBase64;
 import static org.qp.android.helpers.utils.Base64Util.hasBase64;
 import static org.qp.android.helpers.utils.ColorUtil.convertRGBAToBGRA;
 import static org.qp.android.helpers.utils.ColorUtil.getHexColor;
+import static org.qp.android.helpers.utils.FileUtil.createFindDFile;
 import static org.qp.android.helpers.utils.ThreadUtil.isMainThread;
 import static org.qp.android.helpers.utils.ViewUtil.getFontStyle;
 
@@ -31,6 +32,9 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.preference.PreferenceManager;
 
+import com.anggrayudi.storage.file.DocumentFileCompat;
+import com.anggrayudi.storage.file.MimeType;
+
 import org.qp.android.QuestPlayerApplication;
 import org.qp.android.dto.stock.InnerGameData;
 import org.qp.android.model.libQP.LibQpProxy;
@@ -42,7 +46,6 @@ import org.qp.android.model.service.GameContentResolver;
 import org.qp.android.model.service.HtmlProcessor;
 import org.qp.android.ui.settings.SettingsController;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -56,6 +59,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
     private final HtmlProcessor htmlProcessor;
     private LibQpProxy libQpProxy;
     private AudioPlayer audioPlayer;
+    private String fullPathGameDir;
 
     public ObservableField<GameActivity> gameActivityObservableField =
             new ObservableField<>();
@@ -193,7 +197,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
 
     public String getImageAbsolutePath(String src) {
         var relPath = Uri.decode(src.substring(8));
-        return gameContentResolver.getFile(relPath).getAbsolutePath();
+        return gameContentResolver.getFile(relPath).getAbsolutePath(getGameActivity());
     }
 
     public LiveData<String> getMainDescObserver () {
@@ -227,6 +231,11 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
             throw new NullPointerException();
         }
     }
+
+    public void setFullPathGameDir(String fullPathGameDir) {
+        this.fullPathGameDir = fullPathGameDir;
+    }
+
     // endregion Getter/Setter
 
     public void updatePageTemplate() {
@@ -368,11 +377,12 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
             var uri = request.getUrl();
             if (uri.getScheme().startsWith("file")) {
                 try {
-                    var relPath = uri.getPath();
-                    var fileFromDefaultCon = new File(libQpProxy.getGameState().gameDir , relPath);
+                    var relPath = uri.getPath().replace("/" , "");
+                    var rootDir = DocumentFileCompat.fromFullPath(getGameActivity() , fullPathGameDir);
+                    var fileFromDefaultCon = createFindDFile(rootDir , MimeType.UNKNOWN , relPath);
                     var extension = fileFromDefaultCon.getName();
                     var mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
-                    var in = getApplication().getContentResolver().openInputStream(Uri.fromFile(fileFromDefaultCon));
+                    var in = getGameActivity().getContentResolver().openInputStream(fileFromDefaultCon.getUri());
                     return new WebResourceResponse(mimeType , "utf-8" , in);
                 } catch (FileNotFoundException | NullPointerException ex) {
                     if (getSettingsController().isUseImageDebug)

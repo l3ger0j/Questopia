@@ -1,6 +1,7 @@
 package org.qp.android.model.libQP;
 
-import java.io.File;
+import androidx.documentfile.provider.DocumentFile;
+
 import java.util.ArrayList;
 
 public class GameState {
@@ -9,8 +10,8 @@ public class GameState {
     public boolean gameRunning;
     public String gameId;
     public String gameTitle;
-    public File gameDir;
-    public File gameFile;
+    public DocumentFile gameDir;
+    public DocumentFile gameFile;
     public String mainDesc = "";
     public String varsDesc = "";
     public ArrayList<QpListItem> actions = new ArrayList<>();

@@ -1,6 +1,8 @@
 package org.qp.android.ui.stock;
 
 import static org.qp.android.helpers.utils.FileUtil.deleteDirectory;
+import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_DIR_FILE;
+import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_GDIR_FILE;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_IMAGE;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_MOD_FILE;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_PATH_FILE;
@@ -136,8 +138,16 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         });
 
         storageHelper.setOnFolderSelected((integer , documentFile) -> {
-            stockViewModel.setTempInstallDir(documentFile);
-            stockViewModel.isSelectFolder.set(true);
+            if (documentFile != null) {
+                switch (integer) {
+                    case CODE_PICK_DIR_FILE -> {
+                        stockViewModel.setTempInstallDir(documentFile);
+                        stockViewModel.isSelectFolder.set(true);
+                    }
+                    case CODE_PICK_GDIR_FILE -> stockViewModel.setRootDir(documentFile);
+                }
+            }
+
             return null;
         });
 
@@ -311,8 +321,8 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
 //        });
     }
 
-    public void showDirPickerDialog() {
-        storageHelper.openFolderPicker();
+    public void showDirPickerDialog(int requestCode) {
+        storageHelper.openFolderPicker(requestCode);
     }
 
     public void onItemClick(int position) {
@@ -498,7 +508,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         var refresh = menu.findItem(R.id.action_refresh);
-        refresh.setVisible(stockViewModel.isDownloadPlugin());
+        refresh.setVisible(true);
         return true;
     }
 
@@ -525,7 +535,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
                 });
             }
         } else if (itemId == R.id.action_refresh) {
-            stockViewModel.startDownloadPlugin();
+           showDirPickerDialog(CODE_PICK_GDIR_FILE);
         }
         return false;
     }

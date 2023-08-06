@@ -10,8 +10,6 @@ import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
 
-import java.io.File;
-
 public class CopyBuilder {
     private final MutableLiveData<Boolean> isDone = new MutableLiveData<>();
     private final MutableLiveData<String> errorCode = new MutableLiveData<>();
@@ -27,10 +25,10 @@ public class CopyBuilder {
         this.context = context;
     }
 
-    public LiveData<Boolean> copyDirToAnotherDir(DocumentFile srcDir, File destDir) {
+    public LiveData<Boolean> copyDirToAnotherDir(DocumentFile srcDir, DocumentFile destDir) {
         var inputData = new Data.Builder()
                 .putString("srcDir", srcDir.getUri().toString())
-                .putString("destDir", destDir.getAbsolutePath())
+                .putString("destDir", destDir.getUri().toString())
                 .build();
 
         var workRequest = new OneTimeWorkRequest.Builder(DirCopyWork.class)

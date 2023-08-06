@@ -1,8 +1,7 @@
 package org.qp.android.ui.game;
 
 import static org.qp.android.helpers.utils.FileUtil.createFindDFile;
-import static org.qp.android.helpers.utils.FileUtil.createFindFile;
-import static org.qp.android.helpers.utils.FileUtil.createFindFolder;
+import static org.qp.android.helpers.utils.FileUtil.createFindDFolder;
 import static org.qp.android.helpers.utils.FileUtil.findFileOrDirectory;
 import static org.qp.android.helpers.utils.ThreadUtil.isMainThread;
 
@@ -41,6 +40,7 @@ import androidx.navigation.fragment.NavHostFragment;
 
 import com.anggrayudi.storage.FileWrapper;
 import com.anggrayudi.storage.SimpleStorageHelper;
+import com.anggrayudi.storage.file.DocumentFileCompat;
 import com.anggrayudi.storage.file.MimeType;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.textfield.TextInputLayout;
@@ -58,7 +58,6 @@ import org.qp.android.ui.settings.SettingsActivity;
 import org.qp.android.ui.settings.SettingsController;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -129,23 +128,19 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
                     Intent data = result.getData();
                     if (result.getResultCode() == RESULT_OK) {
                         switch (slotAction) {
-                            case LOAD:
+                            case LOAD -> {
                                 if (data != null) {
                                     uri = data.getData();
                                     gameViewModel.doWithCounterDisabled(() ->
                                             libQpProxy.loadGameState(uri));
-                                } else {
-                                    break;
                                 }
-                                break;
-                            case SAVE:
+                            }
+                            case SAVE -> {
                                 if (data != null) {
                                     uri = data.getData();
                                     libQpProxy.saveGameState(uri);
-                                } else {
-                                    break;
                                 }
-                                break;
+                            }
                         }
                     }
                 }
@@ -316,9 +311,10 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
         var gameId = intent.getStringExtra("gameId");
         var gameTitle = intent.getStringExtra("gameTitle");
         var gameDirUri = intent.getStringExtra("gameDirUri");
-        var gameDir = new File(gameDirUri);
+        var gameDir =  DocumentFileCompat.fromFullPath(this , gameDirUri);
+        gameViewModel.setFullPathGameDir(gameDirUri);
         var gameFileUri = intent.getStringExtra("gameFileUri");
-        var gameFile = new File(gameFileUri);
+        var gameFile = DocumentFileCompat.fromFullPath(this , gameFileUri);
         libQpProxy.runGame(gameId, gameTitle, gameDir, gameFile);
     }
 
@@ -574,7 +570,7 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
         }
 
         final var proxy = libQpProxy;
-        final var savesDir = createFindFolder(libQpProxy.getGameState().gameDir, "saves");
+        final var savesDir = createFindDFolder(libQpProxy.getGameState().gameDir , "saves");
         if (savesDir == null) return;
 
         var id = parent.getItemId();
@@ -611,12 +607,12 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
                     case LOAD -> {
                         if (loadFile != null) {
                             gameViewModel.doWithCounterDisabled(() ->
-                                    proxy.loadGameState(Uri.fromFile(loadFile)));
+                                    proxy.loadGameState(loadFile.getUri()));
                         }
                     }
                     case SAVE -> {
                         var saveFile = createFindDFile(
-                                DocumentFile.fromFile(savesDir) ,
+                                savesDir ,
                                 MimeType.TEXT ,
                                 filename
                         );
@@ -682,14 +678,14 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
         } else if (!libQpProxy.getGameState().gameTitle.contentEquals(item.getTitle())) {
             var simpleNameForSave = libQpProxy.getGameState().gameFile.getName();
             var hardNameForSave = simpleNameForSave+"#"+ThreadLocalRandom.current().nextInt();
-            var currentGameDir = libQpProxy.getGameState().gameDir;
+            var currentGameDir = DocumentFileCompat.fromFullPath(this , getIntent().getStringExtra("gameDirUri"));
 
             var temGameSaveMap = gameViewModel.getGameSaveMap();
-            final var savesDir = createFindFolder(currentGameDir , "tempSaves");
-            var tempSaveFile = createFindFile(savesDir , hardNameForSave);
+            final var savesDir = createFindDFolder(currentGameDir , "tempSaves");
+            var tempSaveFile = createFindDFile(savesDir , MimeType.TEXT , hardNameForSave);
             try {
-                libQpProxy.saveGameState(Uri.fromFile(tempSaveFile));
-                temGameSaveMap.putSerializable(simpleNameForSave , tempSaveFile);
+                libQpProxy.saveGameState(tempSaveFile.getUri());
+                temGameSaveMap.putParcelable(simpleNameForSave , tempSaveFile.getUri());
                 gameViewModel.setGameSaveMap(temGameSaveMap);
             } catch (NullPointerException e) {
                 Log.d(TAG , "Error: " , e);
@@ -707,9 +703,9 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
                             var gameDir = data.gameDir;
                             libQpProxy.runGame(gameId , gameTitle , gameDir , file);
                             if (gameViewModel.getGameSaveMap().containsKey(file.getName())) {
-                                var save = (File) gameViewModel.getGameSaveMap().getSerializable(file.getName());
+                                var save = (Uri) gameViewModel.getGameSaveMap().getParcelable(file.getName());
                                 gameViewModel.doWithCounterDisabled(() ->
-                                        libQpProxy.loadGameState(Uri.fromFile(save)));
+                                        libQpProxy.loadGameState(save));
                             }
                         }
                     }

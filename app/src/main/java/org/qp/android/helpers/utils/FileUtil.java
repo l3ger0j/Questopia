@@ -7,13 +7,14 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.documentfile.provider.DocumentFile;
 
+import com.anggrayudi.storage.file.MimeType;
+
 import org.qp.android.model.copy.CopyException;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.text.DecimalFormat;
@@ -167,6 +168,24 @@ public final class FileUtil {
         return result.toString();
     }
 
+    @Nullable
+    public static String readFileAsString(Context context , DocumentFile file) {
+        var result = new StringBuilder();
+        try (var in = context.getContentResolver().openInputStream(file.getUri())) {
+            var inReader = new InputStreamReader(in);
+            try (var bufReader = new BufferedReader(inReader)) {
+                String line;
+                while ((line = bufReader.readLine()) != null) {
+                    result.append(line);
+                }
+            }
+        } catch (IOException ex) {
+            Log.e(TAG , "Error reading a file" , ex);
+            return null;
+        }
+        return result.toString();
+    }
+
     public static <T> void deleteDirectory(T dir) {
         if (dir instanceof File delDir) {
             if (delDir.listFiles() != null) {
@@ -245,14 +264,18 @@ public final class FileUtil {
 
     public static void copyFile(Context context ,
                                 @NonNull DocumentFile srcFile ,
-                                File destDir) {
-        var destFile = createFindFile(destDir , srcFile.getName());
+                                @NonNull DocumentFile destDir) {
+        var destFile = createFindDFile(destDir , MimeType.UNKNOWN , srcFile.getName());
         if (destFile == null) {
             return;
         }
         try (var in = context.getContentResolver().openInputStream(srcFile.getUri());
-             var out = new FileOutputStream(destFile)) {
-            StreamUtil.copy(in , out);
+             var out = context.getContentResolver().openOutputStream(destFile.getUri())) {
+            if (in != null) {
+                StreamUtil.copy(in , out);
+            } else {
+                throw new IOException();
+            }
         } catch (IOException ex) {
             throw new CopyException("CGF");
         }

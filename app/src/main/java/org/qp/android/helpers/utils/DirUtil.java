@@ -1,5 +1,6 @@
 package org.qp.android.helpers.utils;
 
+import android.content.Context;
 import android.util.Log;
 
 import androidx.documentfile.provider.DocumentFile;
@@ -16,40 +17,77 @@ public final class DirUtil {
      * or there will be a folder in which there will be something other than one subfolder.
      */
     @SuppressWarnings("ConstantConditions")
-    public static void normalizeGameDirectory(File dir) {
-        var it = dir;
-        if (it == null) return;
-        if (it.listFiles() == null) return;
-
-        while (true) {
-            var files = it.listFiles();
-            if (files.length != 1 || !files[0].isDirectory()) break;
-            it = files[0];
+    public static <T> void normalizeGameDirectory(Context context , T dir) {
+        if (dir == null) {
+            return;
         }
-        if (it == dir) return;
-        Log.i(TAG,"Normalizing game directory: " + dir.getAbsolutePath());
+        if (dir instanceof File it) {
+            if (it.listFiles() != null) {
+                while (true) {
+                    var files = it.listFiles();
+                    if (files.length != 1 || !files[0].isDirectory()) break;
+                    it = files[0];
+                }
+                if (it == dir) return;
+                Log.i(TAG,"Normalizing game directory: " + it.getAbsolutePath());
 
-        for (var file : it.listFiles()) {
-            var dest = new File(dir.getAbsolutePath(), file.getName());
-            Log.d(TAG,"Moving game file"+ file.getAbsolutePath() + " to " + dest.getAbsolutePath());
-            if (file.renameTo(dest)) {
-                Log.i(TAG,"Renaming file success");
-            } else {
-                Log.e(TAG,"Renaming file error");
+                for (var file : it.listFiles()) {
+                    var dest = new File(it.getAbsolutePath(), file.getName());
+                    Log.d(TAG,"Moving game file"+ file.getAbsolutePath() + " to " + dest.getAbsolutePath());
+                    if (file.renameTo(dest)) {
+                        Log.i(TAG,"Renaming file success");
+                    } else {
+                        Log.e(TAG,"Renaming file error");
+                    }
+                }
+            }
+        } else if (dir instanceof DocumentFile it) {
+            if (it.listFiles() != null) {
+                while (true) {
+                    var files = it.listFiles();
+                    if (files.length != 1 || !files[0].isDirectory()) break;
+                    it = files[0];
+                }
+                if (it == dir) return;
+
+                for (var file : it.listFiles()) {
+                    var dest = DocumentFile.fromTreeUri(context , file.getUri());
+                    if (file.renameTo(dest.getName())) {
+                        Log.i(TAG,"Renaming file success");
+                    } else {
+                        Log.e(TAG,"Renaming file error");
+                    }
+                }
             }
         }
     }
 
     @SuppressWarnings("ConstantConditions")
-    public static boolean doesDirectoryContainGameFiles(File dir) {
-        if (dir.listFiles() == null) {
+    public static <T> boolean doesDirectoryContainGameFiles(T dir) {
+        if (dir == null) {
             return false;
-        } else {
-            for (var file : dir.listFiles()) {
-                var name = file.getName();
-                var lcName = name.toLowerCase(Locale.ROOT);
-                if (lcName.endsWith(".qsp") || lcName.endsWith(".gam"))
-                    return true;
+        }
+        if (dir instanceof File tempDir) {
+            if (tempDir.listFiles() == null) {
+                return false;
+            } else {
+                for (var file : tempDir.listFiles()) {
+                    var name = file.getName();
+                    var lcName = name.toLowerCase(Locale.ROOT);
+                    if (lcName.endsWith(".qsp") || lcName.endsWith(".gam"))
+                        return true;
+                }
+            }
+        } else if (dir instanceof DocumentFile tempDir) {
+            if (tempDir.listFiles() == null) {
+                return false;
+            } else {
+                for (var file : tempDir.listFiles()) {
+                    var name = file.getName();
+                    var lcName = name.toLowerCase(Locale.ROOT);
+                    if (lcName.endsWith(".qsp") || lcName.endsWith(".gam"))
+                        return true;
+                }
             }
         }
         return false;

@@ -5,10 +5,10 @@ import static org.qp.android.QuestPlayerApplication.INSTALL_GAME_NOTIFICATION_ID
 import static org.qp.android.QuestPlayerApplication.POST_INSTALL_GAME_NOTIFICATION_ID;
 import static org.qp.android.helpers.utils.DirUtil.doesDirectoryContainGameFiles;
 import static org.qp.android.helpers.utils.FileUtil.copyFile;
-import static org.qp.android.helpers.utils.FileUtil.createFindFile;
+import static org.qp.android.helpers.utils.FileUtil.createFindDFile;
+import static org.qp.android.helpers.utils.FileUtil.createFindDFolder;
 import static org.qp.android.helpers.utils.FileUtil.createFindFolder;
 import static org.qp.android.helpers.utils.FileUtil.findFileOrDirectory;
-import static org.qp.android.helpers.utils.FileUtil.findFileRecursively;
 import static org.qp.android.helpers.utils.FileUtil.formatFileSize;
 import static org.qp.android.helpers.utils.FileUtil.isWritableDirectory;
 import static org.qp.android.helpers.utils.FileUtil.isWritableFile;
@@ -20,8 +20,6 @@ import android.annotation.SuppressLint;
 import android.app.Application;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.Handler;
-import android.os.RemoteException;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,33 +33,28 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.anggrayudi.storage.FileWrapper;
+import com.anggrayudi.storage.file.MimeType;
 import com.squareup.picasso.Picasso;
 
 import org.jetbrains.annotations.NotNull;
-import org.qp.android.GameDataParcel;
 import org.qp.android.QuestPlayerApplication;
 import org.qp.android.R;
 import org.qp.android.databinding.DialogEditBinding;
 import org.qp.android.databinding.DialogInstallBinding;
 import org.qp.android.dto.stock.InnerGameData;
+import org.qp.android.helpers.repository.LocalGame;
 import org.qp.android.model.copy.CopyBuilder;
 import org.qp.android.model.notify.NotifyBuilder;
-import org.qp.android.model.plugin.PluginClient;
-import org.qp.android.model.plugin.PluginType;
-import org.qp.android.plugin.AsyncCallback;
 import org.qp.android.ui.dialogs.StockDialogFrags;
 import org.qp.android.ui.dialogs.StockDialogType;
 import org.qp.android.ui.game.GameActivity;
 import org.qp.android.ui.settings.SettingsController;
-import org.qp.android.helpers.repository.LocalGame;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 
 public class StockViewModel extends AndroidViewModel {
@@ -71,6 +64,8 @@ public class StockViewModel extends AndroidViewModel {
     public static final int CODE_PICK_IMAGE = 300;
     public static final int CODE_PICK_PATH_FILE = 301;
     public static final int CODE_PICK_MOD_FILE = 302;
+    public static final int CODE_PICK_DIR_FILE = 303;
+    public static final int CODE_PICK_GDIR_FILE = 304;
 
     public ObservableField<StockActivity> activityObservableField =
             new ObservableField<>();
@@ -80,9 +75,8 @@ public class StockViewModel extends AndroidViewModel {
 
     private final LocalGame localGame = new LocalGame();
     private final HashMap<String, InnerGameData> gamesMap = new HashMap<>();
-
-    private File gamesDir;
-    private DocumentFile tempInstallDir, tempImageFile, tempPathFile, tempModFile;
+    private DocumentFile gamesDir , tempInstallDir, tempImageFile, tempPathFile, tempModFile;
+    private DocumentFile rootDir;
 
     private DialogInstallBinding installBinding;
     private InnerGameData tempInnerGameData;
@@ -138,9 +132,11 @@ public class StockViewModel extends AndroidViewModel {
         }
     }
 
-    public void setGamesDir(File gamesDir) {
+    public void setGamesDir(DocumentFile gamesDir) {
         this.gamesDir = gamesDir;
     }
+
+    public void setRootDir(DocumentFile rootDir) { this.rootDir = rootDir; }
 
     public void setGameDataList(ArrayList<InnerGameData> innerGameDataArrayList) {
         gameDataList.postValue(innerGameDataArrayList);
@@ -294,7 +290,7 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     public boolean isModsDirExist() {
-        return findFileRecursively(tempInnerGameData.gameDir , "mods") != null;
+        return findFileOrDirectory(tempInnerGameData.gameDir , "mods") != null;
     }
     // endregion Getter/Setter
 
@@ -398,7 +394,7 @@ public class StockViewModel extends AndroidViewModel {
             }
             if (tempImageFile != null) tempInnerGameData.icon = tempImageFile.getUri().toString();
             if (tempInnerGameData.fileSize == null || tempInnerGameData.fileSize.isEmpty()) {
-                calculateSizeDir(DocumentFile.fromFile(tempInnerGameData.gameDir)).observeForever(aLong -> {
+                calculateSizeDir(tempInnerGameData.gameDir).observeForever(aLong -> {
                     if (aLong != null) {
                         tempInnerGameData.fileSize = formatFileSize(aLong , controller.binaryPrefixes);
                     }
@@ -410,7 +406,7 @@ public class StockViewModel extends AndroidViewModel {
             }
             if (tempModFile != null) {
                 copyFile(getStockActivity() , tempModFile ,
-                        findFileRecursively(tempInnerGameData.gameDir , "mods"));
+                        findFileOrDirectory(tempInnerGameData.gameDir , "mods"));
             }
             refreshIntGamesDirectory();
             isShowDialog.set(false);
@@ -424,13 +420,15 @@ public class StockViewModel extends AndroidViewModel {
         var intent = new Intent(getStockActivity() , GameActivity.class);
         intent.putExtra("gameId" , tempInnerGameData.id);
         intent.putExtra("gameTitle" , tempInnerGameData.title);
-        intent.putExtra("gameDirUri" , tempInnerGameData.gameDir.getAbsolutePath());
+        var tempDir = new FileWrapper.Document(tempInnerGameData.gameDir);
+        intent.putExtra("gameDirUri" , tempDir.getAbsolutePath(getStockActivity()));
         var gameFileCount = tempInnerGameData.gameFiles.size();
         switch (gameFileCount) {
             case 0 -> getStockActivity()
                     .showErrorDialog("Game folder has no game files!");
             case 1 -> {
-                intent.putExtra("gameFileUri" , tempInnerGameData.gameFiles.get(0).getAbsolutePath());
+                var tempFile = new FileWrapper.Document(tempInnerGameData.gameFiles.get(0));
+                intent.putExtra("gameFileUri" ,  tempFile.getAbsolutePath(getStockActivity()));
                 getStockActivity().startGameActivity(intent);
             }
             default -> {
@@ -447,8 +445,8 @@ public class StockViewModel extends AndroidViewModel {
                 getStockActivity()
                         .showSelectDialogFragment(dialogFragments);
                 outputIntObserver.observeForever(integer -> {
-                    intent.putExtra("gameFileUri" ,
-                            tempInnerGameData.gameFiles.get(integer).getAbsolutePath());
+                    var tempFile = new FileWrapper.Document(tempInnerGameData.gameFiles.get(integer));
+                    intent.putExtra("gameFileUri" , tempFile.getAbsolutePath(getStockActivity()));
                     getStockActivity().startGameActivity(intent);
                 });
             }
@@ -459,7 +457,7 @@ public class StockViewModel extends AndroidViewModel {
         int id = view.getId();
         if (id == R.id.buttonSelectFolder) {
             getStockActivity()
-                    .showDirPickerDialog();
+                    .showDirPickerDialog(CODE_PICK_DIR_FILE);
         } else if (id == R.id.buttonSelectIcon) {
             getStockActivity()
                     .showFilePickerActivity(CODE_PICK_IMAGE , new String[]{"image/png" , "image/jpeg"});
@@ -519,7 +517,7 @@ public class StockViewModel extends AndroidViewModel {
 
     @SuppressLint("MissingPermission")
     private void doInstallGame(DocumentFile gameFile , InnerGameData innerGameData) {
-        var gameDir = createFindFolder(gamesDir , normalizeFolderName(innerGameData.title));
+        var gameDir = createFindDFolder(gamesDir , normalizeFolderName(innerGameData.title));
         if (!isWritableDirectory(gameDir)) {
             getStockActivity().showErrorDialog("Games directory is not writable");
             return;
@@ -565,20 +563,23 @@ public class StockViewModel extends AndroidViewModel {
         });
     }
 
-    public void writeGameInfo(InnerGameData innerGameData , File gameDir) {
-        var infoFile = findFileOrDirectory(gameDir, GAME_INFO_FILENAME);
+    public void writeGameInfo(InnerGameData innerGameData , DocumentFile gameDir) {
+        var infoFile = findFileOrDirectory(gameDir , GAME_INFO_FILENAME);
         if (infoFile == null) {
-            infoFile = createFindFile(gameDir, GAME_INFO_FILENAME);
+            infoFile = createFindDFile(gameDir , MimeType.TEXT , GAME_INFO_FILENAME);
         }
         if (!isWritableFile(infoFile)) {
             getStockActivity()
                     .showErrorDialog("Game data info file is not writable");
             return;
         }
-        try (var out = new FileOutputStream(infoFile);
+        var tempInfoFile = new FileWrapper.Document(infoFile);
+
+        try (var out = tempInfoFile.openOutputStream(getStockActivity() , false);
              var writer = new OutputStreamWriter(out)) {
             writer.write(objectToXml(innerGameData));
         } catch (Exception ex) {
+            Log.d(TAG , "EROR: " , ex);
             getStockActivity()
                     .showErrorDialog("Failed to write to a innerGameData info file");
         }
@@ -592,26 +593,39 @@ public class StockViewModel extends AndroidViewModel {
 
     // region Refresh
     public void refreshIntGamesDirectory() {
-        var intFilesDir = getApplication().getExternalFilesDir(null);
-        if (intFilesDir == null) {
-            getStockActivity()
-                    .showErrorDialog("Internal files directory not found");
-            return;
+        if (rootDir != null) {
+            var intFilesDir = rootDir;
+            var tempGameDir = createFindDFolder(intFilesDir, "games");
+            if (!isWritableDirectory(tempGameDir)) {
+                var message = "Games directory is not writable" + " " +
+                        getStockActivity().getString(R.string.gamesDirError);
+                getStockActivity().showErrorDialog(message);
+                return;
+            }
+            setGamesDir(tempGameDir);
+            refreshGameData();
+        } else {
+            var intFilesDir = getApplication().getExternalFilesDir(null);
+            if (intFilesDir == null) {
+                getStockActivity()
+                        .showErrorDialog("Internal files directory not found");
+                return;
+            }
+            var tempGameDir = createFindFolder(intFilesDir, "games");
+            if (!isWritableDirectory(tempGameDir)) {
+                var message = "Games directory is not writable" + " " +
+                        getStockActivity().getString(R.string.gamesDirError);
+                getStockActivity().showErrorDialog(message);
+                return;
+            }
+            setGamesDir(DocumentFile.fromFile(tempGameDir));
+            refreshGameData();
         }
-        var tempGameDir = createFindFolder(intFilesDir, "games");
-        if (!isWritableDirectory(tempGameDir)) {
-            var message = "Games directory is not writable" + " " +
-                    getStockActivity().getString(R.string.gamesDirError);
-            getStockActivity().showErrorDialog(message);
-            return;
-        }
-        setGamesDir(tempGameDir);
-        refreshGameData();
     }
 
     public void refreshGameData() {
         gamesMap.clear();
-        for (var localGameData : localGame.getGames(gamesDir)) {
+        for (var localGameData : localGame.getGames(getStockActivity() , gamesDir)) {
             var remoteGameData = gamesMap.get(localGameData.id);
             if (remoteGameData != null) {
                 var aggregateGameData = new InnerGameData(remoteGameData);
@@ -626,90 +640,6 @@ public class StockViewModel extends AndroidViewModel {
         setLocalGameDataList();
     }
 
-    public void refreshGames(ArrayList<InnerGameData> innerGameDataArrayList) {
-        gamesMap.clear();
-        for (var localGameData : innerGameDataArrayList) {
-            var remoteGameData = gamesMap.get(localGameData.id);
-            if (remoteGameData != null) {
-                var aggregateGameData = new InnerGameData(remoteGameData);
-                aggregateGameData.gameDir = localGameData.gameDir;
-                aggregateGameData.gameFiles = localGameData.gameFiles;
-                gamesMap.put(localGameData.id, aggregateGameData);
-            } else {
-                gamesMap.put(localGameData.id, localGameData);
-            }
-        }
-
-        var tempGamesMap = new HashMap<String, InnerGameData>();
-        for (var localGameData : localGame.getGames(gamesDir)) {
-            var remoteGameData = tempGamesMap.get(localGameData.id);
-            if (remoteGameData != null) {
-                var aggregateGameData = new InnerGameData(remoteGameData);
-                aggregateGameData.gameDir = localGameData.gameDir;
-                aggregateGameData.gameFiles = localGameData.gameFiles;
-                tempGamesMap.put(localGameData.id, aggregateGameData);
-            } else {
-                tempGamesMap.put(localGameData.id, localGameData);
-            }
-        }
-        gamesMap.putAll(tempGamesMap);
-
-        setLocalGameDataList();
-    }
     // endregion Refresh
-
-    // region Plugin
-    public boolean isDownloadPlugin () {
-        var pluginClient = new PluginClient();
-        pluginClient.loadListPlugin(getApplication());
-        return pluginClient.getNamePlugin() != null
-                && pluginClient.getNamePlugin().equals("org.qp.android.plugin.AidlService");
-    }
-
-    public void startDownloadPlugin () {
-        var pluginClient = new PluginClient();
-        pluginClient.loadListPlugin(getApplication());
-        pluginClient.connectPlugin(getApplication() , PluginType.DOWNLOAD_PLUGIN);
-        new Handler().postDelayed(() -> {
-            try {
-                pluginClient.getQuestPlugin().arrayGameData(new AsyncCallback.Stub() {
-                    @Override
-                    public void onSuccess(List<GameDataParcel> gameDataParcel) throws RemoteException {
-                        refreshGames(convertDTO(gameDataParcel));
-                        setGameDataList(convertDTO(gameDataParcel));
-                    }
-                });
-            } catch (RemoteException e) {
-                Log.e(TAG , "Error: " , e);
-            }
-        } , 1000);
-    }
-
-    @NonNull
-    private ArrayList<InnerGameData> convertDTO (List<GameDataParcel> gameDataParcelList) {
-        var gameDataArrayList = new ArrayList<InnerGameData>();
-        for (var gameDataParcel : gameDataParcelList) {
-            var gameData = new InnerGameData();
-            gameData.id = gameDataParcel.id;
-            gameData.author = gameDataParcel.author;
-            gameData.portedBy = gameDataParcel.portedBy;
-            gameData.version = gameDataParcel.version;
-            gameData.title = gameDataParcel.title;
-            gameData.lang = gameDataParcel.lang;
-            gameData.player = gameDataParcel.player;
-            gameData.icon = gameDataParcel.icon;
-            gameData.fileUrl = gameDataParcel.fileUrl;
-            gameData.fileSize = gameDataParcel.fileSize;
-            gameData.fileExt = gameDataParcel.fileExt;
-            gameData.descUrl = gameDataParcel.descUrl;
-            gameData.pubDate = gameDataParcel.pubDate;
-            gameData.modDate = gameDataParcel.modDate;
-            gameData.gameDir = gameDataParcel.gameDir;
-            gameData.gameFiles = gameDataParcel.gameFiles;
-            gameDataArrayList.add(gameData);
-        }
-        return gameDataArrayList;
-    }
-    // endregion Plugin
 }
 

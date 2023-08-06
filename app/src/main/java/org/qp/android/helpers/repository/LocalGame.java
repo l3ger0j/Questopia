@@ -1,16 +1,18 @@
 package org.qp.android.helpers.repository;
 
+import static org.qp.android.helpers.utils.FileUtil.findFileOrDirectory;
 import static org.qp.android.helpers.utils.FileUtil.readFileAsString;
 import static org.qp.android.helpers.utils.XmlUtil.xmlToObject;
 
+import android.content.Context;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.documentfile.provider.DocumentFile;
 
 import org.qp.android.dto.stock.InnerGameData;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -23,7 +25,10 @@ public class LocalGame {
     private final String TAG = this.getClass().getSimpleName();
     private static final String GAME_INFO_FILENAME = "gameStockInfo";
 
-    public List<InnerGameData> getGames(File gamesDir) {
+    private Context context;
+
+    public List<InnerGameData> getGames(Context context , DocumentFile gamesDir) {
+        this.context = context;
         if (gamesDir == null) {
             return Collections.emptyList();
         }
@@ -57,9 +62,9 @@ public class LocalGame {
     }
 
     @Nullable
-    private ArrayList<File> getGameDirectories(File gamesDir) {
+    private ArrayList<DocumentFile> getGameDirectories(DocumentFile gamesDir) {
         try {
-            var dirs = new ArrayList<File>();
+            var dirs = new ArrayList<DocumentFile>();
             for (var f : gamesDir.listFiles()) {
                 if (f.isDirectory()) {
                     dirs.add(f);
@@ -73,11 +78,11 @@ public class LocalGame {
     }
 
     @NonNull
-    private List<GameFolder> getGameFolders(List<File> dirs) {
+    private List<GameFolder> getGameFolders(List<DocumentFile> dirs) {
         var folders = new ArrayList<GameFolder>();
         sortFilesByName(dirs);
         for (var dir : dirs) {
-            var gameFiles = new ArrayList<File>();
+            var gameFiles = new ArrayList<DocumentFile>();
             var files = Arrays.asList(Objects.requireNonNull(dir.listFiles()));
             sortFilesByName(files);
             for (var file : files) {
@@ -91,19 +96,19 @@ public class LocalGame {
         return folders;
     }
 
-    private void sortFilesByName(@NonNull List<File> files) {
+    private void sortFilesByName(@NonNull List<DocumentFile> files) {
         if (files.size() < 2) return;
         files.sort(Comparator.comparing(o -> o.getName().toLowerCase(Locale.ROOT)));
     }
 
     @Nullable
     private String getGameInfo(@NonNull GameFolder game) {
-        var gameInfoFiles = game.dir.listFiles((dir, name) -> name.equalsIgnoreCase(GAME_INFO_FILENAME));
-        if (gameInfoFiles == null || gameInfoFiles.length == 0) {
+        var gameInfoFiles = findFileOrDirectory(game.dir , GAME_INFO_FILENAME);
+        if (gameInfoFiles == null || gameInfoFiles.length() == 0) {
             Log.w(TAG, "InnerGameData info file not found in " + game.dir.getName());
             return null;
         }
-        return readFileAsString(gameInfoFiles[0]);
+        return readFileAsString(context , gameInfoFiles);
     }
 
     @Nullable
@@ -117,10 +122,10 @@ public class LocalGame {
     }
 
     private static class GameFolder {
-        private final File dir;
-        private final List<File> gameFiles;
+        private final DocumentFile dir;
+        private final List<DocumentFile> gameFiles;
 
-        private GameFolder(File dir, List<File> gameFiles) {
+        private GameFolder(DocumentFile dir, List<DocumentFile> gameFiles) {
             this.dir = dir;
             this.gameFiles = gameFiles;
         }

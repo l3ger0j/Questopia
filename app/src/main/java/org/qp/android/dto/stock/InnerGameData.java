@@ -3,11 +3,11 @@ package org.qp.android.dto.stock;
 import static org.qp.android.helpers.utils.StringUtil.isNotEmpty;
 
 import androidx.annotation.NonNull;
+import androidx.documentfile.provider.DocumentFile;
 
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.Root;
 
-import java.io.File;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
@@ -43,8 +43,8 @@ public class InnerGameData implements Serializable {
     @Element(name = "mod_date", data = true, required = false)
     public String modDate = "";
 
-    public File gameDir;
-    public List<File> gameFiles;
+    public DocumentFile gameDir;
+    public List<DocumentFile> gameFiles;
 
     public InnerGameData() {
     }
