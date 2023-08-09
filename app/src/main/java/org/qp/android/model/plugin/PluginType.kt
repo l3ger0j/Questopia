@@ -1,5 +1,5 @@
-package org.qp.android.model.plugin;
+package org.qp.android.model.plugin
 
-public enum PluginType {
+enum class PluginType {
     DOWNLOAD_PLUGIN
 }

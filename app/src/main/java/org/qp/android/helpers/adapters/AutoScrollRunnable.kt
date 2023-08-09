@@ -7,6 +7,7 @@ class AutoScrollRunnable(
     private val delayMillis: Int,
     private val reverse: Boolean
 ) : Runnable {
+
     override fun run() {
         val currentItem = viewPager.currentItem
         if (viewPager.adapter != null) {
