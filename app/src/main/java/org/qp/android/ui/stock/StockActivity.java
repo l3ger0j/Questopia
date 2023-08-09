@@ -310,17 +310,6 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         startActivity(intent);
     }
 
-    public void showFilePickerDialog (String[] mimeTypes) {
-//        new PrettyFilePicker(
-//                this ,
-//                "Title" ,
-//                true ,
-//                mimeTypes).runFilePicker(data -> {
-//            // stockViewModel.setTempInstallFile((DocumentFile) data);
-//            return null;
-//        });
-    }
-
     public void showDirPickerDialog(int requestCode) {
         storageHelper.openFolderPicker(requestCode);
     }

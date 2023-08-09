@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 public class StockRecyclerFragment extends StockPatternFragment {
+
     private StockViewModel stockViewModel;
     private RecyclerView mRecyclerView;
 

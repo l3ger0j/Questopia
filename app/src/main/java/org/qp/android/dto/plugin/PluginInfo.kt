@@ -1,22 +1,23 @@
-package org.qp.android.dto.plugin;
+package org.qp.android.dto.plugin
 
-import java.util.Objects;
-
-public class PluginInfo {
-    public String version;
-    public String title;
-    public String author;
-
-    public PluginInfo() {
+class PluginInfo {
+    @JvmField
+    var version: String? = null
+    @JvmField
+    var title: String? = null
+    @JvmField
+    var author: String? = null
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || javaClass != other.javaClass) return false
+        val that = other as PluginInfo
+        return version == that.version && title == that.title && author == that.author
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        var that = (PluginInfo) o;
-        return Objects.equals(version, that.version)
-                && Objects.equals(title, that.title)
-                && Objects.equals(author, that.author);
+    override fun hashCode(): Int {
+        var result = version?.hashCode() ?: 0
+        result = 31 * result + (title?.hashCode() ?: 0)
+        result = 31 * result + (author?.hashCode() ?: 0)
+        return result
     }
 }

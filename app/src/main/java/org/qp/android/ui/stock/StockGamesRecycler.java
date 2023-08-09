@@ -20,7 +20,8 @@ import org.qp.android.dto.stock.InnerGameData;
 import java.util.ArrayList;
 import java.util.List;
 
-public class StockGamesRecycler extends RecyclerView.Adapter<StockGamesRecycler.ViewHolder>{
+public class StockGamesRecycler extends RecyclerView.Adapter<StockGamesRecycler.ViewHolder> {
+
     private final Context context;
     private final AsyncListDiffer<InnerGameData> differ =
             new AsyncListDiffer<>(this , DIFF_CALLBACK);

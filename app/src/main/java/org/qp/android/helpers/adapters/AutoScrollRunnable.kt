@@ -1,33 +1,24 @@
-package org.qp.android.helpers.adapters;
+package org.qp.android.helpers.adapters
 
-import androidx.viewpager2.widget.ViewPager2;
+import androidx.viewpager2.widget.ViewPager2
 
-public class AutoScrollRunnable implements Runnable {
-    private final ViewPager2 viewPager;
-    private final int delayMillis;
-    private final boolean reverse;
-
-    public AutoScrollRunnable(ViewPager2 viewPager,
-                              int delayMillis,
-                              boolean reverse) {
-        this.viewPager = viewPager;
-        this.delayMillis = delayMillis;
-        this.reverse = reverse;
-    }
-
-    @Override
-    public void run() {
-        int currentItem = viewPager.getCurrentItem();
-        if (viewPager.getAdapter() != null) {
-            int itemCount = viewPager.getAdapter().getItemCount();
-            int nextItem = reverse ? currentItem - 1 : currentItem + 1;
+class AutoScrollRunnable(
+    private val viewPager: ViewPager2,
+    private val delayMillis: Int,
+    private val reverse: Boolean
+) : Runnable {
+    override fun run() {
+        val currentItem = viewPager.currentItem
+        if (viewPager.adapter != null) {
+            val itemCount = viewPager.adapter!!.itemCount
+            var nextItem = if (reverse) currentItem - 1 else currentItem + 1
             if (nextItem >= itemCount) {
-                nextItem = 0;
+                nextItem = 0
             } else if (nextItem < 0) {
-                nextItem = itemCount - 1;
+                nextItem = itemCount - 1
             }
-            viewPager.setCurrentItem(nextItem , true);
-            viewPager.postDelayed(this , delayMillis);
+            viewPager.setCurrentItem(nextItem, true)
+            viewPager.postDelayed(this, delayMillis.toLong())
         }
     }
 }

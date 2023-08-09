@@ -1,97 +1,79 @@
-package org.qp.android.ui.plugin;
+package org.qp.android.ui.plugin
 
-import android.content.Context;
-import android.view.LayoutInflater;
-import android.view.ViewGroup;
+import android.content.Context
+import android.view.LayoutInflater
+import android.view.ViewGroup
+import androidx.databinding.DataBindingUtil
+import androidx.recyclerview.widget.AsyncListDiffer
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.RecyclerView
+import org.qp.android.R
+import org.qp.android.databinding.ListItemPluginBinding
+import org.qp.android.dto.plugin.PluginInfo
 
-import androidx.annotation.NonNull;
-import androidx.databinding.DataBindingUtil;
-import androidx.recyclerview.widget.AsyncListDiffer;
-import androidx.recyclerview.widget.DiffUtil;
-import androidx.recyclerview.widget.RecyclerView;
+class PluginRecycler(private val context: Context) :
+    RecyclerView.Adapter<PluginRecycler.ViewHolder>() {
 
-import org.qp.android.R;
-import org.qp.android.databinding.ListItemPluginBinding;
-import org.qp.android.dto.plugin.PluginInfo;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
-public class PluginRecycler extends RecyclerView.Adapter<PluginRecycler.ViewHolder> {
-    private final Context context;
-    private final AsyncListDiffer<PluginInfo> differ =
-            new AsyncListDiffer<>(this , DIFF_CALLBACK);
-
-    public PluginInfo getItem(int position) {
-        return differ.getCurrentList().get(position);
+    private val differ = AsyncListDiffer(this, DIFF_CALLBACK)
+    private fun getItem(position: Int): PluginInfo {
+        return differ.currentList[position]
     }
 
-    public List<PluginInfo> getGameData() {
-        return differ.getCurrentList();
+    private val gameData: List<PluginInfo>
+        get() = differ.currentList
+
+    override fun getItemCount(): Int {
+        return differ.currentList.size
     }
 
-    @Override
-    public int getItemCount() {
-        return differ.getCurrentList().size();
+    fun submitList(pluginInfo: ArrayList<PluginInfo>?) {
+        differ.submitList(pluginInfo)
     }
 
-    private static final DiffUtil.ItemCallback<PluginInfo> DIFF_CALLBACK =
-            new DiffUtil.ItemCallback<>() {
-                @Override
-                public boolean areItemsTheSame(@NonNull PluginInfo oldItem , @NonNull PluginInfo newItem) {
-                    return Objects.equals(oldItem.version , newItem.version);
-                }
-
-                @Override
-                public boolean areContentsTheSame(@NonNull PluginInfo oldItem , @NonNull PluginInfo newItem) {
-                    return oldItem.equals(newItem);
-                }
-            };
-
-    public void submitList(ArrayList<PluginInfo> pluginInfo){
-        differ.submitList(pluginInfo);
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        val inflater = LayoutInflater.from(parent.context)
+        val listItemPluginBinding = DataBindingUtil.inflate<ListItemPluginBinding>(
+            inflater,
+            R.layout.list_item_plugin,
+            parent,
+            false
+        )
+        return ViewHolder(listItemPluginBinding)
     }
 
-    public PluginRecycler(Context context) {
-        this.context = context;
-    }
-
-    @NonNull
-    @Override
-    public PluginRecycler.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent , int viewType) {
-        var inflater = LayoutInflater.from(parent.getContext());
-        ListItemPluginBinding listItemPluginBinding =
-                DataBindingUtil.inflate(inflater, R.layout.list_item_plugin, parent, false);
-        return new PluginRecycler.ViewHolder(listItemPluginBinding);
-    }
-
-    @Override
-    public void onBindViewHolder(@NonNull PluginRecycler.ViewHolder holder , int position) {
-        holder.listItemPluginBinding(getGameData().get(position));
-        var pluginInfo = getItem(position);
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        holder.listItemPluginBinding(gameData[position])
+        val pluginInfo = getItem(position)
 
         // pluginAuthor
-        if (pluginInfo.author != null && pluginInfo.author.length() > 0) {
-            holder.listItemPluginBinding.pluginAuthor
-                    .setText(context.getString(R.string.author)
-                            .replace("-AUTHOR-", pluginInfo.author));
+        if (pluginInfo.author != null && pluginInfo.author!!.isNotEmpty()) {
+            holder.listItemPluginBinding.pluginAuthor.text = context.getString(R.string.author)
+                .replace("-AUTHOR-", pluginInfo.author!!)
         } else {
-            holder.listItemPluginBinding.pluginAuthor.setText("");
+            holder.listItemPluginBinding.pluginAuthor.text = ""
         }
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
-        ListItemPluginBinding listItemPluginBinding;
-
-        ViewHolder(@NonNull ListItemPluginBinding listItemPluginBinding){
-            super(listItemPluginBinding.getRoot());
-            this.listItemPluginBinding = listItemPluginBinding;
+    class ViewHolder internal constructor(var listItemPluginBinding: ListItemPluginBinding) :
+        RecyclerView.ViewHolder(
+            listItemPluginBinding.root
+        ) {
+        fun listItemPluginBinding(pluginInfo: PluginInfo?) {
+            listItemPluginBinding.pluginInfo = pluginInfo
+            listItemPluginBinding.executePendingBindings()
         }
+    }
 
-        public void listItemPluginBinding(PluginInfo pluginInfo) {
-            listItemPluginBinding.setPluginInfo(pluginInfo);
-            listItemPluginBinding.executePendingBindings();
-        }
+    companion object {
+        private val DIFF_CALLBACK: DiffUtil.ItemCallback<PluginInfo> =
+            object : DiffUtil.ItemCallback<PluginInfo>() {
+                override fun areItemsTheSame(oldItem: PluginInfo, newItem: PluginInfo): Boolean {
+                    return oldItem.version == newItem.version
+                }
+
+                override fun areContentsTheSame(oldItem: PluginInfo, newItem: PluginInfo): Boolean {
+                    return oldItem == newItem
+                }
+            }
     }
 }
