@@ -106,7 +106,7 @@
         <string name="gameStockTitle">Полка игр</string>
         <string name="search">Поиск</string>
         <string name="settingsTitle">Настройки</string>
-        <string name="refresh">Перезагрузка</string>
+        <string name="addFolder">Добавить папку</string>
     <!-- Menu delete -->
         <string name="selectAllTitle">Выбрать всё</string>
         <string name="deleteGameTitle">Удалить игру</string>

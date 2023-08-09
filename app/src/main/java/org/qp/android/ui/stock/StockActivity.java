@@ -495,13 +495,6 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
     }
 
     @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        var refresh = menu.findItem(R.id.action_refresh);
-        refresh.setVisible(true);
-        return true;
-    }
-
-    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         var itemId = item.getItemId();
         if (itemId == R.id.menu_options) {
@@ -523,8 +516,9 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
                     }
                 });
             }
-        } else if (itemId == R.id.action_refresh) {
+        } else if (itemId == R.id.action_add_folder) {
            showDirPickerDialog(CODE_PICK_GDIR_FILE);
+           return true;
         }
         return false;
     }

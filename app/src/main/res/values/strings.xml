@@ -107,7 +107,7 @@
         <string name="gameStockTitle">Game Stock</string>
         <string name="search">Search</string>
         <string name="settingsTitle">Settings</string>
-        <string name="refresh">Refresh</string>
+        <string name="addFolder">Add folder</string>
     <!-- Menu delete -->
         <string name="selectAllTitle">Select all</string>
         <string name="deleteGameTitle">Delete game</string>
