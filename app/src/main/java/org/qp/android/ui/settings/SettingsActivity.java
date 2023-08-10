@@ -50,8 +50,13 @@ public class SettingsActivity extends AppCompatActivity {
     @Override
     public boolean onSupportNavigateUp() {
         if (navController.getCurrentDestination() != null) {
-            if (Objects.equals(navController.getCurrentDestination()
+            if (Objects.equals(navController
+                    .getCurrentDestination()
                     .getLabel() , "PluginFragment")) {
+                onBackPressed();
+            } else if (Objects.equals(navController
+                    .getCurrentDestination()
+                    .getLabel() , "NewsFragment")) {
                 onBackPressed();
             } else {
                 finish();

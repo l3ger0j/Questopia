@@ -52,8 +52,6 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Objects;
 
-import info.hannes.changelog.ChangeLog;
-
 public class StockActivity extends AppCompatActivity implements StockPatternDialogFrags.StockPatternDialogList, StockPatternFragment.StockPatternFragmentList {
     private static final int READ_EXTERNAL_STORAGE_CODE = 200;
     private static final int MANAGE_EXTERNAL_STORAGE_CODE = 201;
@@ -84,11 +82,6 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         var splashScreen = SplashScreen.installSplashScreen(this);
         splashScreen.setKeepOnScreenCondition(() -> false);
         super.onCreate(savedInstanceState);
-
-        var changelog = new ChangeLog(this);
-        if (changelog.isFirstRun()) {
-            changelog.getLogDialog().show();
-        }
 
         activityStockBinding = ActivityStockBinding.inflate(getLayoutInflater());
         stockViewModel = new ViewModelProvider(this).get(StockViewModel.class);

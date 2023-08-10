@@ -16,6 +16,8 @@ import org.qp.android.R;
 import org.qp.android.databinding.FragmentNewsBinding;
 import org.qp.android.helpers.adapters.AutoScrollRunnable;
 
+import info.hannes.changelog.ChangeLog;
+
 public class NewsFragment extends Fragment {
 
     private FragmentNewsBinding newsBinding;
@@ -52,6 +54,11 @@ public class NewsFragment extends Fragment {
 
         newsBinding = FragmentNewsBinding.inflate(getLayoutInflater());
         bannerViewPager = newsBinding.bannerView;
+
+        var log = new ChangeLog(requireContext());
+        newsBinding.newsView.loadData(log.getFullLog() , "text/html" , null);
+        newsBinding.newsView.setBackgroundColor(getResources().getColor(android.R.color.darker_gray , requireActivity().getTheme()));
+
         var fragmentAdapter = new NewsAdapterFragment(requireActivity());
         bannerViewPager.setAdapter(fragmentAdapter);
         autoScrollRunnable = new AutoScrollRunnable(bannerViewPager, 3000, false);
