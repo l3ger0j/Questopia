@@ -4,7 +4,6 @@ import static org.qp.android.helpers.utils.Base64Util.decodeBase64;
 import static org.qp.android.helpers.utils.Base64Util.hasBase64;
 import static org.qp.android.helpers.utils.ColorUtil.convertRGBAToBGRA;
 import static org.qp.android.helpers.utils.ColorUtil.getHexColor;
-import static org.qp.android.helpers.utils.FileUtil.createFindDFile;
 import static org.qp.android.helpers.utils.ThreadUtil.isMainThread;
 import static org.qp.android.helpers.utils.ViewUtil.getFontStyle;
 
@@ -32,8 +31,8 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.preference.PreferenceManager;
 
+import com.anggrayudi.storage.FileWrapper;
 import com.anggrayudi.storage.file.DocumentFileCompat;
-import com.anggrayudi.storage.file.MimeType;
 
 import org.qp.android.QuestPlayerApplication;
 import org.qp.android.dto.stock.InnerGameData;
@@ -375,23 +374,28 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         public WebResourceResponse shouldInterceptRequest(WebView view ,
                                                           @NonNull WebResourceRequest request) {
             var uri = request.getUrl();
-            if (uri.getScheme().startsWith("file")) {
-                try {
-                    var relPath = uri.getPath().replace("/" , "");
-                    var rootDir = DocumentFileCompat.fromFullPath(getGameActivity() , fullPathGameDir);
-                    var fileFromDefaultCon = createFindDFile(rootDir , MimeType.UNKNOWN , relPath);
-                    var extension = fileFromDefaultCon.getName();
-                    var mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
-                    var in = getGameActivity().getContentResolver().openInputStream(fileFromDefaultCon.getUri());
-                    return new WebResourceResponse(mimeType , "utf-8" , in);
-                } catch (FileNotFoundException | NullPointerException ex) {
-                    if (getSettingsController().isUseImageDebug)
-                        getGameActivity().showErrorDialog(String.valueOf(ex));
-                    Log.e(TAG , "File not found" , ex);
-                    return null;
+            var rootDir = DocumentFileCompat.fromFullPath(getGameActivity() , fullPathGameDir);
+            if (rootDir != null && uri.getScheme() != null) {
+                if (uri.getScheme().startsWith("file")) {
+                    try {
+                        var relPath = uri.getPath();
+                        var tempRoot = new FileWrapper.Document(rootDir);
+                        var fileFromDefaultCon = DocumentFileCompat.fromFullPath(getGameActivity() ,
+                                tempRoot.getAbsolutePath(getGameActivity()) + relPath);
+                        var extension = fileFromDefaultCon.getName();
+                        var mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+                        var in = getGameActivity().getContentResolver().openInputStream(fileFromDefaultCon.getUri());
+                        return new WebResourceResponse(mimeType , null , in);
+                    } catch (FileNotFoundException | NullPointerException ex) {
+                        if (getSettingsController().isUseImageDebug)
+                            getGameActivity().showErrorDialog(String.valueOf(ex));
+                        Log.e(TAG , "File not found" , ex);
+                        return null;
+                    }
                 }
+                return super.shouldInterceptRequest(view , request);
             }
-            return super.shouldInterceptRequest(view , request);
+            return null;
         }
     }
 
