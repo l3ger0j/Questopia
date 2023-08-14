@@ -81,8 +81,8 @@
 ]]>
     </string>
     <!-- Use in activity/fragment -->
-    <!-- QuestPlayerAndroid -->
-        <string name="appName">QPlayer</string>
+    <!-- QTopia -->
+        <string name="appName">QTopia</string>
     <!-- SettingsFragment -->
         <string name="closeToApply">Закройте настройки для применения изменений</string>
         <string name="settingsEffect">Настройки вступят в силу при следующей распаковке игры</string>

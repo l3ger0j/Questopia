@@ -1,8 +1,6 @@
-# QuestPlayerAndroid
+# Questopia
 
 ![android-test](https://github.com/l3ger0j/QuestPlayerAndroid/actions/workflows/android-test.yml/badge.svg) ![android-build](https://github.com/l3ger0j/QuestPlayerAndroid/actions/workflows/android-build.yml/badge.svg)
-
-![QPA](https://user-images.githubusercontent.com/83360444/219958181-957712de-9509-42af-b39f-bf1ce19d72d9.png)
 
 Android application for launching text format games [QSP](https://github.com/seedhartha/qsp).
 
