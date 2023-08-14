@@ -1,5 +1,6 @@
 package org.qp.android.model.service;
 
+import static org.qp.android.helpers.utils.FileUtil.documentWrap;
 import static org.qp.android.helpers.utils.FileUtil.findFileOrDirectory;
 
 import android.content.Context;
@@ -8,6 +9,7 @@ import androidx.annotation.Nullable;
 import androidx.documentfile.provider.DocumentFile;
 
 import com.anggrayudi.storage.FileWrapper;
+import com.anggrayudi.storage.file.DocumentFileCompat;
 
 public class GameContentResolver {
     private DocumentFile gameDir;
@@ -22,7 +24,11 @@ public class GameContentResolver {
         if (gameDir == null) {
             throw new IllegalStateException("gameDir must not be null");
         }
-        return new FileWrapper.Document(findFileOrDirectory(gameDir , normalizeContentPath(relPath)));
+        var tempFile = findFileOrDirectory(gameDir , normalizeContentPath(relPath));
+        if (tempFile == null) {
+            tempFile = DocumentFileCompat.fromFullPath(context , documentWrap(gameDir).getAbsolutePath(context) + "/" + relPath);
+        }
+        return documentWrap(tempFile);
     }
 
     @Nullable

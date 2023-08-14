@@ -4,6 +4,7 @@ import static org.qp.android.helpers.utils.Base64Util.decodeBase64;
 import static org.qp.android.helpers.utils.Base64Util.hasBase64;
 import static org.qp.android.helpers.utils.ColorUtil.convertRGBAToBGRA;
 import static org.qp.android.helpers.utils.ColorUtil.getHexColor;
+import static org.qp.android.helpers.utils.FileUtil.documentWrap;
 import static org.qp.android.helpers.utils.ThreadUtil.isMainThread;
 import static org.qp.android.helpers.utils.ViewUtil.getFontStyle;
 
@@ -31,7 +32,6 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.preference.PreferenceManager;
 
-import com.anggrayudi.storage.FileWrapper;
 import com.anggrayudi.storage.file.DocumentFileCompat;
 
 import org.qp.android.QuestPlayerApplication;
@@ -379,7 +379,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
                 if (uri.getScheme().startsWith("file")) {
                     try {
                         var relPath = uri.getPath();
-                        var tempRoot = new FileWrapper.Document(rootDir);
+                        var tempRoot = documentWrap(rootDir);
                         var fileFromDefaultCon = DocumentFileCompat.fromFullPath(getGameActivity() ,
                                 tempRoot.getAbsolutePath(getGameActivity()) + relPath);
                         var extension = fileFromDefaultCon.getName();

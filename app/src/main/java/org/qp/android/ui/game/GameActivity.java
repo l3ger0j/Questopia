@@ -2,6 +2,7 @@ package org.qp.android.ui.game;
 
 import static org.qp.android.helpers.utils.FileUtil.createFindDFile;
 import static org.qp.android.helpers.utils.FileUtil.createFindDFolder;
+import static org.qp.android.helpers.utils.FileUtil.documentWrap;
 import static org.qp.android.helpers.utils.FileUtil.findFileOrDirectory;
 import static org.qp.android.helpers.utils.ThreadUtil.isMainThread;
 
@@ -38,7 +39,6 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 
-import com.anggrayudi.storage.FileWrapper;
 import com.anggrayudi.storage.SimpleStorageHelper;
 import com.anggrayudi.storage.file.DocumentFileCompat;
 import com.anggrayudi.storage.file.MimeType;
@@ -148,8 +148,7 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
 
         storageHelper.setOnFileSelected((integer , documentFiles) -> {
             for (DocumentFile documentFile : documentFiles) {
-                var document =
-                        new FileWrapper.Document(documentFile);
+                var document = documentWrap(documentFile);
                 switch (document.getExtension()) {
                     case "text" , "pl" , "txt" , "el" -> {
                         var stringBuilder = new StringBuilder();

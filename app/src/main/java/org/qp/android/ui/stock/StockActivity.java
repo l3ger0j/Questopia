@@ -1,6 +1,7 @@
 package org.qp.android.ui.stock;
 
 import static org.qp.android.helpers.utils.FileUtil.deleteDirectory;
+import static org.qp.android.helpers.utils.FileUtil.documentWrap;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_DIR_FILE;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_GDIR_FILE;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_IMAGE;
@@ -33,7 +34,6 @@ import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.anggrayudi.storage.FileWrapper;
 import com.anggrayudi.storage.SimpleStorageHelper;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -97,7 +97,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
                 switch (integer) {
                     case CODE_PICK_IMAGE -> {
                         for (var file : documentFiles) {
-                            var document = new FileWrapper.Document(file);
+                            var document = documentWrap(file);
                             switch (document.getExtension()) {
                                 case "png" , "jpg" , "jpeg" -> {
                                     getContentResolver().takePersistableUriPermission(document.getUri() ,
@@ -110,14 +110,14 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
                     }
                     case CODE_PICK_PATH_FILE -> {
                         for (var file : documentFiles) {
-                            var document = new FileWrapper.Document(file);
+                            var document = documentWrap(file);
                             if ("qsp".equals(document.getExtension()))
                                 stockViewModel.setTempPathFile(document.getDocumentFile());
                         }
                     }
                     case CODE_PICK_MOD_FILE -> {
                         for (var file : documentFiles) {
-                            var document = new FileWrapper.Document(file);
+                            var document = documentWrap(file);
                             if ("qsp".equals(document.getExtension()))
                                 stockViewModel.setTempModFile(document.getDocumentFile());
                         }

@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.documentfile.provider.DocumentFile;
 
+import com.anggrayudi.storage.FileWrapper;
 import com.anggrayudi.storage.file.MimeType;
 
 import org.qp.android.model.copy.CopyException;
@@ -21,6 +22,10 @@ import java.text.DecimalFormat;
 
 public final class FileUtil {
     private static final String TAG = FileUtil.class.getSimpleName();
+
+    public static FileWrapper.Document documentWrap(DocumentFile inputFile) {
+        return new FileWrapper.Document(inputFile);
+    }
 
     public static <T> boolean isWritableFile(T file) {
         if (file == null) {

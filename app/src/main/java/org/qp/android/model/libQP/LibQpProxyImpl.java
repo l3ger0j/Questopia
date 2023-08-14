@@ -1,5 +1,6 @@
 package org.qp.android.model.libQP;
 
+import static org.qp.android.helpers.utils.FileUtil.documentWrap;
 import static org.qp.android.helpers.utils.FileUtil.findFileOrDirectory;
 import static org.qp.android.helpers.utils.FileUtil.getFileContents;
 import static org.qp.android.helpers.utils.StringUtil.getStringOrEmpty;
@@ -16,8 +17,6 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.documentfile.provider.DocumentFile;
-
-import com.anggrayudi.storage.FileWrapper;
 
 import org.qp.android.dto.libQP.ActionData;
 import org.qp.android.dto.libQP.ErrorData;
@@ -91,7 +90,7 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
 
     private boolean loadGameWorld() {
         byte[] gameData;
-        var tempGameFile = new FileWrapper.Document(gameState.gameFile);
+        var tempGameFile = documentWrap(gameState.gameFile);
 
         try (var in = tempGameFile.openInputStream(context)) {
             try (var out = new ByteArrayOutputStream()) {

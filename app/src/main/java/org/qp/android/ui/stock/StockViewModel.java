@@ -8,6 +8,7 @@ import static org.qp.android.helpers.utils.FileUtil.copyFile;
 import static org.qp.android.helpers.utils.FileUtil.createFindDFile;
 import static org.qp.android.helpers.utils.FileUtil.createFindDFolder;
 import static org.qp.android.helpers.utils.FileUtil.createFindFolder;
+import static org.qp.android.helpers.utils.FileUtil.documentWrap;
 import static org.qp.android.helpers.utils.FileUtil.findFileOrDirectory;
 import static org.qp.android.helpers.utils.FileUtil.formatFileSize;
 import static org.qp.android.helpers.utils.FileUtil.isWritableDirectory;
@@ -33,7 +34,6 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import com.anggrayudi.storage.FileWrapper;
 import com.anggrayudi.storage.file.MimeType;
 import com.squareup.picasso.Picasso;
 
@@ -420,14 +420,14 @@ public class StockViewModel extends AndroidViewModel {
         var intent = new Intent(getStockActivity() , GameActivity.class);
         intent.putExtra("gameId" , tempInnerGameData.id);
         intent.putExtra("gameTitle" , tempInnerGameData.title);
-        var tempDir = new FileWrapper.Document(tempInnerGameData.gameDir);
+        var tempDir = documentWrap(tempInnerGameData.gameDir);
         intent.putExtra("gameDirUri" , tempDir.getAbsolutePath(getStockActivity()));
         var gameFileCount = tempInnerGameData.gameFiles.size();
         switch (gameFileCount) {
             case 0 -> getStockActivity()
                     .showErrorDialog("Game folder has no game files!");
             case 1 -> {
-                var tempFile = new FileWrapper.Document(tempInnerGameData.gameFiles.get(0));
+                var tempFile = documentWrap(tempInnerGameData.gameFiles.get(0));
                 intent.putExtra("gameFileUri" ,  tempFile.getAbsolutePath(getStockActivity()));
                 getStockActivity().startGameActivity(intent);
             }
@@ -445,7 +445,7 @@ public class StockViewModel extends AndroidViewModel {
                 getStockActivity()
                         .showSelectDialogFragment(dialogFragments);
                 outputIntObserver.observeForever(integer -> {
-                    var tempFile = new FileWrapper.Document(tempInnerGameData.gameFiles.get(integer));
+                    var tempFile = documentWrap(tempInnerGameData.gameFiles.get(integer));
                     intent.putExtra("gameFileUri" , tempFile.getAbsolutePath(getStockActivity()));
                     getStockActivity().startGameActivity(intent);
                 });
@@ -573,7 +573,7 @@ public class StockViewModel extends AndroidViewModel {
                     .showErrorDialog("Game data info file is not writable");
             return;
         }
-        var tempInfoFile = new FileWrapper.Document(infoFile);
+        var tempInfoFile = documentWrap(infoFile);
 
         try (var out = tempInfoFile.openOutputStream(getStockActivity() , false);
              var writer = new OutputStreamWriter(out)) {
