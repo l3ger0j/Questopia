@@ -49,7 +49,7 @@
     <string name="appDescription">
 <![CDATA[
 <h2><center>About Quest Player Android<img src=\"file:///android_res/drawable/landscape.jpg\" width=\"100%\"></center></h2>
-<h4 style="margin-left:5px;">Quest Player Android is an open-source Android port of <b>Quest Soft Player</b> (<a href=\"http://qsp.su/?option=com_content&view=article&id=64\">Russian site</a>), based on a fork from <a href=\"https://github.com/seedhartha/QuestPlayer\">seedharta</a>. The most recent version can be downloaded from <a href=\"https://github.com/l3ger0j/QuestPlayerAndroid\">GitHub</a> or in the <a href=\"https://t.me/QuestPlayer\">Telegram channel</a>.</h4>
+<h4 style="margin-left:5px;">Quest Player Android is an open-source Android port of <b>Quest Soft Player</b> (<a href=\"http://qsp.su/?option=com_content&view=article&id=64\">Russian site</a>), based on a fork from <a href=\"https://github.com/seedhartha/QuestPlayer\">seedharta</a>. The most recent version can be downloaded from <a href=\"https://github.com/l3ger0j/Questopia\">GitHub</a> or in the <a href=\"https://t.me/QuestPlayer\">Telegram channel</a>.</h4>
 ]]>
     </string>
     <string name="appCredits">
@@ -83,7 +83,7 @@
     </string>
     <!-- Use in activity/fragment -->
     <!-- QTopia -->
-        <string name="appName">QTopia</string>
+        <string name="appName">Questopia</string>
     <!-- SettingsFragment -->
         <string name="closeToApply">Close settings to apply changes</string>
         <string name="settingsEffect">The setting will take effect the next time you unpack the game</string>
@@ -138,7 +138,7 @@
         <string name="useGameLinkColorSum">Use the link color settings from the game</string>
         <string name="linkColorTitle">Custom Link Color</string>
         <string name="textBackLinkColorSum">Default value -VALUE-</string>
-        <string name="extendedName">QuestPlayerAndroid -VERSION-</string>
+        <string name="extendedName">Questopia -VERSION-</string>
         <!-- Image section -->
         <string name="imageCatTitle">Images</string>
         <string name="autoWidthTitle">Auto Width Image</string>
@@ -175,5 +175,5 @@
     <!-- Menu plugins -->
         <string name="pluginMenuTitle">Plugins</string>
     <!-- Menu news -->
-        <string name="newsMenuTitle">News QPlayer</string>
+        <string name="newsMenuTitle">News Questopia</string>
 </resources>
