@@ -33,7 +33,7 @@
         <string name="gameVersion">Version</string>
         <string name="selectFolder">Select the folder with the file</string>
         <string name="selectIcon">Select icon</string>
-        <string name="add">Copy to internal folder</string>
+        <string name="add">Copy to the root folder</string>
     <!-- Dialog GameInfo -->
         <string name="author">Author: -AUTHOR-</string>
         <string name="ported_by">Ported by: -PORTED_BY-</string>

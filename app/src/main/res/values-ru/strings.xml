@@ -6,9 +6,9 @@
     <!-- Install notification -->
         <string name="titleNotify">Установка игры</string>
     <!-- Copy notification -->
-        <string name="titleCopyNotify">Копирование каталога игры</string>
-        <string name="bodyCopyNotify">В данный момент игра копируется во внутреннее хранилище!</string>
-        <string name="bodyCopiedNotify">Игра -GAMENAME- была успешно скопирована во внутреннее хранилище!</string>
+        <string name="titleCopyNotify">Копирование папки игры</string>
+        <string name="bodyCopyNotify">Копирую папку с игрой!</string>
+        <string name="bodyCopiedNotify">Ура, скопировал папку с игрой -GAMENAME-!</string>
     <!-- Dialog LoadGamePopup -->
         <string name="loadGamePopup">Файл сохранения не был найден в gameDir. Хотите ли вы вручную указать путь к файлу сохранения?</string>
     <!-- Dialog Close -->
@@ -33,7 +33,7 @@
         <string name="gameVersion">Версия</string>
         <string name="selectFolder">Выберите папку с файлом</string>
         <string name="selectIcon">Выберите иконку</string>
-        <string name="add">Скопировать в внутреннюю папку</string>
+        <string name="add">Скопировать в корневую папку</string>
     <!-- Dialog GameInfo -->
         <string name="author">Автор: -AUTHOR-</string>
         <string name="ported_by">Портировал: -PORTED_BY-</string>
