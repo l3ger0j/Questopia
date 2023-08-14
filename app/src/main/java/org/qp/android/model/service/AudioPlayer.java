@@ -1,7 +1,7 @@
 package org.qp.android.model.service;
 
-import static org.qp.android.utils.StringUtil.isNotEmpty;
-import static org.qp.android.utils.ThreadUtil.throwIfNotMainThread;
+import static org.qp.android.helpers.utils.StringUtil.isNotEmpty;
+import static org.qp.android.helpers.utils.ThreadUtil.throwIfNotMainThread;
 import android.media.MediaPlayer;
 import android.os.Handler;
 import android.os.Looper;

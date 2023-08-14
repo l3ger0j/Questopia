@@ -2,14 +2,13 @@
 <resources>
     <!-- Use in dialog/toast/notification -->
     <!-- Notification channel -->
-        <string name="statusNameChannel">Installation status</string>
-        <string name="statusDescChannel">Channel for displaying information about the current installation status of the game</string>
-        <string name="progressNameChannel">Progress install of game</string>
-        <string name="progressDescChannel">Channel for displaying information about the progress of the game installation</string>
+        <string name="channelInstallGame">Install game</string>
     <!-- Install notification -->
         <string name="titleNotify">Game install</string>
-        <string name="textProgressNotify">Game Installation Progress</string>
-        <string name="textInstallNotify">The game -GAMENAME- has been successfully installed!</string>
+    <!-- Copy notification -->
+        <string name="titleCopyNotify">Copying the game directory</string>
+        <string name="bodyCopyNotify">The game is currently being copied to the internal storage!</string>
+        <string name="bodyCopiedNotify">The game -GAMENAME- has been successfully copied to the internal storage!</string>
     <!-- Dialog LoadGamePopup -->
         <string name="loadGamePopup">The save file was not found in gameDir. Would you like to manually specify the path to the save file?</string>
     <!-- Dialog Close -->
@@ -25,7 +24,6 @@
         <string name="downloadButton">Download game</string>
     <!-- Dialog Error -->
         <string name="error">Error</string>
-        <string name="incorrectPassword">You have entered an empty or incorrect password!</string>
         <string name="gamesDirError">Unable to create or open games directory.</string>
         <string name="installError">Could not install game -GAMENAME-.</string>
         <string name="noGameFilesError">Game files not found after installation.</string>
@@ -33,13 +31,9 @@
         <string name="gameName">Game name</string>
         <string name="gameAuthor">Author</string>
         <string name="gameVersion">Version</string>
-        <string name="archivePassword">Password for the archive</string>
-        <string name="selectArchive">Select archive</string>
         <string name="selectFolder">Select the folder with the file</string>
         <string name="selectIcon">Select icon</string>
-        <string name="buttonSelect">Select</string>
         <string name="add">Copy to internal folder</string>
-        <string name="use">Leave without copying</string>
     <!-- Dialog GameInfo -->
         <string name="author">Author: -AUTHOR-</string>
         <string name="ported_by">Ported by: -PORTED_BY-</string>
@@ -92,6 +86,7 @@
         <string name="appName">QPlayer</string>
     <!-- SettingsFragment -->
         <string name="closeToApply">Close settings to apply changes</string>
+        <string name="settingsEffect">The setting will take effect the next time you unpack the game</string>
     <!-- FragmentImageBox -->
         <string name="image">Image</string>
     <!-- Use in menu -->
@@ -112,7 +107,7 @@
         <string name="gameStockTitle">Game Stock</string>
         <string name="search">Search</string>
         <string name="settingsTitle">Settings</string>
-        <string name="refresh">Refresh</string>
+        <string name="addFolder">Add folder</string>
     <!-- Menu delete -->
         <string name="selectAllTitle">Select all</string>
         <string name="deleteGameTitle">Delete game</string>
@@ -163,6 +158,8 @@
         <string name="separatorSum">On/off separator line in game</string>
         <string name="autoscrollTitle">Autoscroll</string>
         <string name="autoscrollSum">Enable/disable autoscroll</string>
+        <string name="imageDebugTitle">Image Path Debugger</string>
+        <string name="imageDebugSum">A mode that enables the display of an error dialog if the path to the image is incorrect</string>
         <string name="execStringTitle">String executor</string>
         <string name="execStringSum">Enable/disable execution string</string>
         <!-- Extra section -->
@@ -177,4 +174,6 @@
         <string name="saveTo">To File…</string>
     <!-- Menu plugins -->
         <string name="pluginMenuTitle">Plugins</string>
+    <!-- Menu news -->
+        <string name="newsMenuTitle">News QPlayer</string>
 </resources>

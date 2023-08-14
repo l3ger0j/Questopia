@@ -1,12 +1,14 @@
 plugins {
     id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+    id 'com.google.dagger.hilt.android'
 }
 
 def viewBind = true
 def dataBind = true
 
 android {
-    compileSdkVersion 33
+    compileSdk 33
 
     defaultConfig {
         applicationId "org.qp.android"
@@ -19,7 +21,7 @@ android {
     }
 
     configurations {
-        all {
+        configureEach {
             exclude group: 'xpp3', module: 'xpp3'
             exclude group: 'androidx.lifecycle', module: 'lifecycle-viewmodel-ktx'
         }
@@ -41,6 +43,9 @@ android {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
     }
+    kotlinOptions {
+        jvmTarget = '17'
+    }
 
     buildFeatures {
         viewBinding viewBind
@@ -59,20 +64,31 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.documentfile:documentfile:1.0.1'
-    implementation 'androidx.preference:preference:1.2.0'
-    implementation 'androidx.fragment:fragment:1.5.7'
-    implementation 'androidx.navigation:navigation-fragment:2.5.3'
-    implementation 'androidx.navigation:navigation-ui:2.5.3'
+    implementation 'androidx.preference:preference:1.2.1'
+    implementation 'androidx.fragment:fragment-ktx:1.6.1'
+    implementation 'androidx.navigation:navigation-fragment-ktx:2.6.0'
+    implementation 'androidx.navigation:navigation-ui-ktx:2.6.0'
     implementation 'androidx.work:work-runtime:2.8.1'
     implementation 'com.google.android.material:material:1.9.0'
     implementation 'androidx.core:core-splashscreen:1.0.1'
 
+    implementation "androidx.core:core-ktx:$kotlin_version"
+
+    // Room
+    implementation "androidx.room:room-runtime:2.5.2"
+    annotationProcessor "androidx.room:room-compiler:2.5.2"
+
+    // DI
+    implementation "com.google.dagger:hilt-android:$rootProject.hilt_version"
+    annotationProcessor "com.google.dagger:hilt-android-compiler:$rootProject.hilt_version"
+
+    implementation 'com.github.AppDevNext:ChangeLog:3.5'
     implementation 'com.jaredrummler:colorpicker:1.1.0'
     implementation 'org.jsoup:jsoup:1.16.1'
-    implementation 'com.anggrayudi:storage:1.5.4'
+    implementation 'com.anggrayudi:storage:1.5.5'
     implementation 'org.simpleframework:simple-xml:2.7.1'
     implementation 'com.squareup.picasso:picasso:2.71828'
-    implementation project(path: ':PrettyFilePicker-android-library')
+    implementation project(path: ':PrettyFilePicker')
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test:core:1.5.0'

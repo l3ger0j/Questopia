@@ -1,13 +1,13 @@
 package org.qp.android.dto.stock;
 
-import static org.qp.android.utils.StringUtil.isNotEmpty;
+import static org.qp.android.helpers.utils.StringUtil.isNotEmpty;
 
 import androidx.annotation.NonNull;
+import androidx.documentfile.provider.DocumentFile;
 
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.Root;
 
-import java.io.File;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
@@ -16,8 +16,6 @@ import java.util.Objects;
 public class InnerGameData implements Serializable {
     @Element(name = "id", data = true)
     public String id = "";
-    @Element(name = "list_id", data = true, required = false)
-    public String listId = "";
     @Element(name = "author", data = true, required = false)
     public String author = "";
     @Element(name = "ported_by", data = true, required = false)
@@ -45,15 +43,14 @@ public class InnerGameData implements Serializable {
     @Element(name = "mod_date", data = true, required = false)
     public String modDate = "";
 
-    public File gameDir;
-    public List<File> gameFiles;
+    public DocumentFile gameDir;
+    public List<DocumentFile> gameFiles;
 
     public InnerGameData() {
     }
 
     public InnerGameData(InnerGameData other) {
         id = other.id;
-        listId = other.listId;
         author = other.author;
         portedBy = other.portedBy;
         version = other.version;
@@ -89,7 +86,6 @@ public class InnerGameData implements Serializable {
         if (o == null || getClass() != o.getClass()) return false;
         var that = (InnerGameData) o;
         return Objects.equals(id, that.id)
-                && Objects.equals(listId, that.listId)
                 && Objects.equals(author, that.author)
                 && Objects.equals(portedBy, that.portedBy)
                 && Objects.equals(version, that.version)
@@ -107,7 +103,7 @@ public class InnerGameData implements Serializable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id , listId , author , portedBy , version , title , lang , player , icon , fileUrl , fileSize , fileExt , descUrl , pubDate , modDate);
+        return Objects.hash(id , author , portedBy , version , title , lang , player , icon , fileUrl , fileSize , fileExt , descUrl , pubDate , modDate);
     }
 
     @NonNull
@@ -115,7 +111,6 @@ public class InnerGameData implements Serializable {
     public String toString() {
         return "InnerGameData{" +
                 "id='" + id + '\'' +
-                ", listId='" + listId + '\'' +
                 ", author='" + author + '\'' +
                 ", portedBy='" + portedBy + '\'' +
                 ", version='" + version + '\'' +

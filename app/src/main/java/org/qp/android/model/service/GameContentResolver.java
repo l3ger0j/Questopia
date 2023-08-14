@@ -1,29 +1,40 @@
 package org.qp.android.model.service;
 
-import static org.qp.android.utils.FileUtil.findFileRecursively;
+import static org.qp.android.helpers.utils.FileUtil.documentWrap;
+import static org.qp.android.helpers.utils.FileUtil.findFileOrDirectory;
+
+import android.content.Context;
 
 import androidx.annotation.Nullable;
+import androidx.documentfile.provider.DocumentFile;
 
-import java.io.File;
+import com.anggrayudi.storage.FileWrapper;
+import com.anggrayudi.storage.file.DocumentFileCompat;
 
 public class GameContentResolver {
-    private File gameDir;
+    private DocumentFile gameDir;
+    private Context context;
 
-    public void setGameDir(File gameDir) {
+    public void setGameDir(DocumentFile gameDir , Context context) {
         this.gameDir = gameDir;
+        this.context = context;
     }
 
-    public File getFile(String relPath) {
+    public FileWrapper.Document getFile(String relPath) {
         if (gameDir == null) {
             throw new IllegalStateException("gameDir must not be null");
         }
-        return findFileRecursively(gameDir, normalizeContentPath(relPath));
+        var tempFile = findFileOrDirectory(gameDir , normalizeContentPath(relPath));
+        if (tempFile == null) {
+            tempFile = DocumentFileCompat.fromFullPath(context , documentWrap(gameDir).getAbsolutePath(context) + "/" + relPath);
+        }
+        return documentWrap(tempFile);
     }
 
     @Nullable
     public String getAbsolutePath(String relPath) {
         var file = getFile(relPath);
-        return file != null ? file.getAbsolutePath() : null;
+        return file != null ? file.getAbsolutePath(context) : null;
     }
 
     /**

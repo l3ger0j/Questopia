@@ -1,6 +1,6 @@
 package org.qp.android;
 
-import static org.qp.android.utils.XmlUtil.xmlToObject;
+import static org.qp.android.helpers.utils.XmlUtil.xmlToObject;
 import static org.junit.Assert.assertEquals;
 
 import org.qp.android.dto.stock.InnerGameData;

@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"/>
 
@@ -20,14 +21,15 @@
         android:label="@string/appName"
         android:largeHeap="true"
         android:theme="@style/Theme.App.Starting"
-        tools:targetApi="s"
         android:allowBackup="false"
+        android:supportsRtl="true"
         android:fullBackupContent="false"
         android:requestLegacyExternalStorage="true"
-        android:dataExtractionRules="@xml/data_extraction_rules">
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        tools:targetApi="s">
 
         <activity
-            android:name=".view.stock.StockActivity"
+            android:name=".ui.stock.StockActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -36,12 +38,12 @@
         </activity>
 
         <activity
-            android:name=".view.game.GameActivity"
+            android:name=".ui.game.GameActivity"
             android:alwaysRetainTaskState="true"
             android:theme="@style/Theme.QP.Translucent.NoActionBar" />
 
         <activity
-            android:name=".view.settings.SettingsActivity"
+            android:name=".ui.settings.SettingsActivity"
             android:label="@string/settingsTitle"
             android:theme="@style/Theme.QP.Translucent" />
 

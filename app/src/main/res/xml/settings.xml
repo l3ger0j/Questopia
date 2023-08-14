@@ -3,6 +3,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <PreferenceCategory android:title="@string/generalCatTitle">
+        <Preference
+            android:title="@string/newsMenuTitle"
+            android:key="newsApp" />
         <ListPreference
             android:defaultValue="ru"
             android:entries="@array/langName"
@@ -29,6 +32,11 @@
             android:key="actsHeight"
             android:summary="@string/actsHeightSum"
             android:title="@string/actsHeightTitle" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="separator"
+            android:summary="@string/separatorSum"
+            android:title="@string/separatorTitle" />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/textCatTitle">
@@ -102,7 +110,7 @@
             android:singleLine="true"
             android:title="@string/customHeightTitle" />
         <SwitchPreferenceCompat
-            android:defaultValue="true"
+            android:defaultValue="false"
             android:key="fullScreenImage"
             android:selectAllOnFocus="true"
             android:singleLine="true"
@@ -120,15 +128,15 @@
             android:summary="@string/immersiveModeSum"
             android:title="@string/immersiveModeTitle" />
         <SwitchPreferenceCompat
-            android:defaultValue="false"
-            android:key="separator"
-            android:summary="@string/separatorSum"
-            android:title="@string/separatorTitle" />
-        <SwitchPreferenceCompat
             android:defaultValue="true"
             android:key="autoscroll"
             android:summary="@string/autoscrollSum"
             android:title="@string/autoscrollTitle" />
+        <SwitchPreferenceCompat
+            android:defaultValue="false"
+            android:key="debugImage"
+            android:summary="@string/imageDebugSum"
+            android:title="@string/imageDebugTitle" />
         <SwitchPreferenceCompat
             android:defaultValue="false"
             android:key="execString"

@@ -6,7 +6,7 @@
         <import type="android.view.View"/>
         <variable
             name="dialogFragment"
-            type="org.qp.android.view.game.fragments.dialogs.GameDialogFrags" />
+            type="org.qp.android.ui.dialogs.GameDialogFrags" />
     </data>
     <ImageView
         android:id="@+id/imageBox"

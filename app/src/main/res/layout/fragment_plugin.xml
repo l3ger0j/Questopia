@@ -7,7 +7,7 @@
 
         <variable
             name="pluginViewModel"
-            type="org.qp.android.viewModel.SettingsViewModel" />
+            type="org.qp.android.ui.settings.SettingsViewModel" />
     </data>
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/plugin_recyclerView"

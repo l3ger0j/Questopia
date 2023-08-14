@@ -1,6 +1,6 @@
 package org.qp.android.model.copy;
 
-import static org.qp.android.utils.DirUtil.dirSize;
+import static org.qp.android.helpers.utils.DirUtil.dirSize;
 
 import android.content.Context;
 import android.net.Uri;

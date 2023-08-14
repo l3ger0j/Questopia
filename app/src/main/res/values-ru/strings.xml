@@ -2,14 +2,13 @@
 <resources>
     <!-- Use in dialog/toast/notification -->
     <!-- Notification channel -->
-        <string name="statusNameChannel">Статус установки</string>
-        <string name="statusDescChannel">Канал для отображения информации о текущем статусе установки игры</string>
-        <string name="progressNameChannel">Ход установки игры</string>
-        <string name="progressDescChannel">Канал для отображения информации о прогрессе установки игры</string>
+        <string name="channelInstallGame">Установка игр</string>
     <!-- Install notification -->
         <string name="titleNotify">Установка игры</string>
-        <string name="textProgressNotify">Прогресс установки игры</string>
-        <string name="textInstallNotify">Игра -GAMENAME- была успешно установлена!</string>
+    <!-- Copy notification -->
+        <string name="titleCopyNotify">Копирование каталога игры</string>
+        <string name="bodyCopyNotify">В данный момент игра копируется во внутреннее хранилище!</string>
+        <string name="bodyCopiedNotify">Игра -GAMENAME- была успешно скопирована во внутреннее хранилище!</string>
     <!-- Dialog LoadGamePopup -->
         <string name="loadGamePopup">Файл сохранения не был найден в gameDir. Хотите ли вы вручную указать путь к файлу сохранения?</string>
     <!-- Dialog Close -->
@@ -25,7 +24,6 @@
         <string name="downloadButton">Скачать игру</string>
     <!-- Dialog Error -->
         <string name="error">Ошибка</string>
-        <string name="incorrectPassword">Вы ввели пустой или некорректный пароль!</string>
         <string name="gamesDirError">Невозможно создать или открыть папку с играми.</string>
         <string name="installError">Невозможно установить игру -GAMENAME-.</string>
         <string name="noGameFilesError">Файлы игры не найдены после установки.</string>
@@ -33,13 +31,9 @@
         <string name="gameName">Название игры</string>
         <string name="gameAuthor">Автор</string>
         <string name="gameVersion">Версия</string>
-        <string name="archivePassword">Пароль для архива</string>
-        <string name="selectArchive">Выберите архив</string>
         <string name="selectFolder">Выберите папку с файлом</string>
         <string name="selectIcon">Выберите иконку</string>
-        <string name="buttonSelect">Выбрать</string>
         <string name="add">Скопировать в внутреннюю папку</string>
-        <string name="use">Оставить без копирования</string>
     <!-- Dialog GameInfo -->
         <string name="author">Автор: -AUTHOR-</string>
         <string name="ported_by">Портировал: -PORTED_BY-</string>
@@ -91,6 +85,7 @@
         <string name="appName">QPlayer</string>
     <!-- SettingsFragment -->
         <string name="closeToApply">Закройте настройки для применения изменений</string>
+        <string name="settingsEffect">Настройки вступят в силу при следующей распаковке игры</string>
     <!-- FragmentImageBox -->
         <string name="image">Изображение</string>
     <!-- Use in menu -->
@@ -111,7 +106,7 @@
         <string name="gameStockTitle">Полка игр</string>
         <string name="search">Поиск</string>
         <string name="settingsTitle">Настройки</string>
-        <string name="refresh">Перезагрузка</string>
+        <string name="addFolder">Добавить папку</string>
     <!-- Menu delete -->
         <string name="selectAllTitle">Выбрать всё</string>
         <string name="deleteGameTitle">Удалить игру</string>
@@ -162,6 +157,8 @@
         <string name="separatorSum">Включить/выключить разделитель в игре</string>
         <string name="autoscrollTitle">Автопролистывание</string>
         <string name="autoscrollSum">Включить/выключить автопролистывание</string>
+        <string name="imageDebugTitle">Отладчик путей к картинкам</string>
+        <string name="imageDebugSum">Режим, который включает отображение диалога с ошибкой если путь к картинке неправильный</string>
         <string name="execStringTitle">Исполнитель строк</string>
         <string name="execStringSum">Включить/выключить исполнитель строк</string>
         <!-- Extra section -->
@@ -176,6 +173,8 @@
         <string name="saveTo">В файл…</string>
     <!-- Menu plugins -->
         <string name="pluginMenuTitle">Плагины</string>
+    <!-- Menu news -->
+        <string name="newsMenuTitle">Новости QPlayer</string>
 </resources>
 
 

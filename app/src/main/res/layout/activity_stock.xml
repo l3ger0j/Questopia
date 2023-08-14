@@ -9,40 +9,31 @@
 
         <variable
             name="stockVM"
-            type="org.qp.android.viewModel.StockViewModel" />
+            type="org.qp.android.ui.stock.StockViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <androidx.viewpager2.widget.ViewPager2
-            android:id="@+id/banner_view"
-            android:layout_width="match_parent"
-            android:layout_height="100dp"
-            android:background="@color/def_text_color"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
-
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/stockFAB"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/fab_margin"
-            android:layout_marginBottom="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="32dp"
+            android:contentDescription="@string/add"
             android:visibility="@{stockVM.isShowDialog ? View.GONE : View.VISIBLE}"
-            app:layout_constraintBottom_toTopOf="@+id/banner_view"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:srcCompat="@drawable/add"
-            android:contentDescription="@string/add" />
+            app:srcCompat="@drawable/add" />
 
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/stockFragHost"
             android:name="androidx.navigation.fragment.NavHostFragment"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            app:layout_constraintBottom_toTopOf="@+id/banner_view"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"

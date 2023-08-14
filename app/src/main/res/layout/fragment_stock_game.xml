@@ -8,7 +8,7 @@
 
         <variable
             name="viewModel"
-            type="org.qp.android.viewModel.StockViewModel" />
+            type="org.qp.android.ui.stock.StockViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

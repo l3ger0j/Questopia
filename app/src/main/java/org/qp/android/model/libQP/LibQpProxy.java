@@ -2,9 +2,9 @@ package org.qp.android.model.libQP;
 
 import android.net.Uri;
 
-import org.qp.android.view.game.GameInterface;
+import androidx.documentfile.provider.DocumentFile;
 
-import java.io.File;
+import org.qp.android.ui.game.GameInterface;
 
 public interface LibQpProxy {
     /**
@@ -22,7 +22,7 @@ public interface LibQpProxy {
     String getVersionQSP();
     String getCompiledDateTime();
 
-    void runGame(String id, String title, File dir, File file);
+    void runGame(String id, String title, DocumentFile dir, DocumentFile file);
     void restartGame();
     void loadGameState(Uri uri);
     void saveGameState(Uri uri);

@@ -1,6 +1,10 @@
 package org.qp.android;
 
 import android.app.Application;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
 
 import org.qp.android.dto.stock.InnerGameData;
@@ -14,6 +18,13 @@ import org.qp.android.model.service.ImageProvider;
 import java.util.ArrayList;
 
 public class QuestPlayerApplication extends Application {
+
+    public static final int INSTALL_GAME_NOTIFICATION_ID = 1800;
+
+    public static final int POST_INSTALL_GAME_NOTIFICATION_ID = 1801;
+
+    public static final String CHANNEL_INSTALL_GAME = "org.qp.android.channel.install_game";
+
     private final GameContentResolver gameContentResolver = new GameContentResolver();
     private final ImageProvider imageProvider = new ImageProvider();
     private final HtmlProcessor htmlProcessor = new HtmlProcessor(gameContentResolver, imageProvider);
@@ -22,6 +33,12 @@ public class QuestPlayerApplication extends Application {
 
     private Bundle gameSaveMap = new Bundle();
     private ArrayList<InnerGameData> gameList = new ArrayList<>();
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        createNotificationChannels();
+    }
 
     public void setGameSaveMap(Bundle gameSaveMap) {
         this.gameSaveMap = gameSaveMap;
@@ -53,5 +70,18 @@ public class QuestPlayerApplication extends Application {
 
     public LibQpProxy getLibQspProxy() {
         return libQspProxy;
+    }
+
+    public void createNotificationChannels() {
+        var notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        var importance = NotificationManager.IMPORTANCE_LOW;
+
+        var name = getString(R.string.channelInstallGame);
+        var channel =  new NotificationChannel(CHANNEL_INSTALL_GAME, name, importance);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            channel.setAllowBubbles(true);
+        }
+        notificationManager.createNotificationChannel(channel);
+
     }
 }
