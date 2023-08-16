@@ -28,7 +28,7 @@
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/gameFragHost"
-        android:name="androidx.navigation.fragment.NavHostFragment"
+        android:name="com.fragula2.FragulaNavHostFragment"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
