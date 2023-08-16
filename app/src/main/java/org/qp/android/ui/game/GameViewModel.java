@@ -517,11 +517,6 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
     }
 
     @Override
-    public void createSaveFile(String filename) {
-        getGameActivity().createSaveFile(filename);
-    }
-
-    @Override
     public void setCounterInterval(int millis) {
         counterInterval = millis;
     }

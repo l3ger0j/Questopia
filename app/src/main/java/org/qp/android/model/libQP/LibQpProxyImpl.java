@@ -1,5 +1,6 @@
 package org.qp.android.model.libQP;
 
+import static org.qp.android.helpers.utils.FileUtil.createFindDFile;
 import static org.qp.android.helpers.utils.FileUtil.documentWrap;
 import static org.qp.android.helpers.utils.FileUtil.findFileOrDirectory;
 import static org.qp.android.helpers.utils.FileUtil.getFileContents;
@@ -18,7 +19,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.documentfile.provider.DocumentFile;
 
-import com.anggrayudi.storage.file.DocumentFileCompat;
+import com.anggrayudi.storage.file.MimeType;
 
 import org.qp.android.dto.libQP.ActionData;
 import org.qp.android.dto.libQP.ErrorData;
@@ -556,12 +557,11 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
         var inter = gameInterface;
         if (inter != null) {
             if (filename != null) {
-                var saveFile = DocumentFileCompat.fromFullPath(context , filename);
+                var file = new File(filename);
+                var saveFile = createFindDFile(gameState.gameDir , MimeType.TEXT , file.getName());
                 if (saveFile != null) {
                     saveGameState(saveFile.getUri());
-                    Log.i(TAG , "File created");
                 } else {
-                    gameInterface.createSaveFile(filename);
                     Log.e(TAG , "File not created");
                 }
             } else {
