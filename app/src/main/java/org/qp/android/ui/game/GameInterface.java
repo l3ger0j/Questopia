@@ -15,6 +15,8 @@ public interface GameInterface {
     void showSaveGamePopup();
     void showWindow(WindowType type, boolean show);
 
+    void createSaveFile(String filename);
+
     /**
      * Set the counter location processing interval to <code>millis</code> milliseconds.
      */

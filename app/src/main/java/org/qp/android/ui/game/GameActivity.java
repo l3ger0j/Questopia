@@ -41,6 +41,7 @@ import androidx.navigation.fragment.NavHostFragment;
 
 import com.anggrayudi.storage.SimpleStorageHelper;
 import com.anggrayudi.storage.file.DocumentFileCompat;
+import com.anggrayudi.storage.file.FileFullPath;
 import com.anggrayudi.storage.file.MimeType;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.textfield.TextInputLayout;
@@ -58,6 +59,7 @@ import org.qp.android.ui.settings.SettingsActivity;
 import org.qp.android.ui.settings.SettingsController;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -373,6 +375,13 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
             audioPlayer.resume();
             gameViewModel.setCallback();
         }
+    }
+
+    public void createSaveFile(String path) {
+        var tempFile = new File(path);
+        var pathToGameDir = documentWrap(libQpProxy.getGameState().gameDir).getAbsolutePath(this);
+        FileFullPath wrapPath = new FileFullPath(this , pathToGameDir);
+        storageHelper.createFile(MimeType.TEXT , tempFile.getName() , wrapPath);
     }
 
     public void applySettings() {

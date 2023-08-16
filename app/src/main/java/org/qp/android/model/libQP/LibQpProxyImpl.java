@@ -18,6 +18,8 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.documentfile.provider.DocumentFile;
 
+import com.anggrayudi.storage.file.DocumentFileCompat;
+
 import org.qp.android.dto.libQP.ActionData;
 import org.qp.android.dto.libQP.ErrorData;
 import org.qp.android.dto.libQP.GetVarValuesResponse;
@@ -554,14 +556,13 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
         var inter = gameInterface;
         if (inter != null) {
             if (filename != null) {
-                var file = new File(filename);
-                try {
-                    if (file.createNewFile()) {
-                        Log.i(TAG , "File created");
-                        saveGameState(Uri.fromFile(file));
-                    }
-                } catch (IOException e) {
-                    Log.e(TAG , "Error: " , e);
+                var saveFile = DocumentFileCompat.fromFullPath(context , filename);
+                if (saveFile != null) {
+                    saveGameState(saveFile.getUri());
+                    Log.i(TAG , "File created");
+                } else {
+                    gameInterface.createSaveFile(filename);
+                    Log.e(TAG , "File not created");
                 }
             } else {
                 inter.showSaveGamePopup();
