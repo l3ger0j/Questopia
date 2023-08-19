@@ -20,6 +20,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.view.ActionMode;
@@ -181,6 +182,12 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
     }
 
     @Override
+    protected void onActivityResult(int requestCode , int resultCode , @Nullable Intent data) {
+        super.onActivityResult(requestCode , resultCode , data);
+        storageHelper.getStorage().onActivityResult(requestCode , resultCode , data);
+    }
+
+    @Override
     public void onRequestPermissionsResult(int requestCode , @NonNull String[] permissions , @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode , permissions , grantResults);
         switch (requestCode) {
@@ -209,6 +216,8 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
                 }
             }
         }
+
+        storageHelper.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     @Override
@@ -316,7 +325,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
             var mViewHolder =
                     mRecyclerView.findViewHolderForAdapterPosition(position);
             var gameData =
-                    tempList.get(Objects.requireNonNull(mViewHolder).getAdapterPosition());
+                    tempList.get(Objects.requireNonNull(mViewHolder).getBindingAdapterPosition());
             if (selectList.isEmpty() || !selectList.contains(gameData)) {
                 selectList.add(gameData);
                 var cardView = (CardView) mViewHolder.itemView.findViewWithTag("gameCardView");
