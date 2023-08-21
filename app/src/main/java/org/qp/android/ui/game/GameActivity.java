@@ -23,16 +23,13 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.os.LocaleListCompat;
-import androidx.core.view.GravityCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.documentfile.provider.DocumentFile;
-import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.MutableLiveData;
@@ -284,30 +281,15 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
     }
 
     private void initControls() {
-        setSupportActionBar(activityGameBinding.appBarGame.toolbar);
+        setSupportActionBar(activityGameBinding.toolbar);
         actionBar = getSupportActionBar();
-
-        var layout = activityGameBinding.gameDrawerLayout;
-        var toggle = new ActionBarDrawerToggle(
-                this ,
-                layout ,
-                activityGameBinding.appBarGame.toolbar ,
-                R.string.add ,
-                R.string.close
-        );
-        layout.addDrawerListener(toggle);
-        toggle.syncState();
-
-        var navigationView = activityGameBinding.navView;
-        navigationView.setFitsSystemWindows(false);
-        navigationView.setNavigationItemSelectedListener(this);
-        for (var data : gameViewModel.getGameDataList()) {
-            var menu = navigationView.getMenu();
-            for (var file : data.gameFiles) {
-                menu.add(file.getName()).setTooltipText(data.title);
-            }
-        }
     }
+
+//            for (var data : gameViewModel.getGameDataList()) {
+//            var menu = navigationView.getMenu();
+//            for (var file : data.gameFiles) {
+//                menu.add(file.getName()).setTooltipText(data.title);
+//            }
 
     private void initServices() {
         gameViewModel.startAudio();
@@ -553,13 +535,9 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
-            var drawer = (DrawerLayout) activityGameBinding.gameDrawerLayout;
-            if (drawer.isDrawerOpen(GravityCompat.START)) {
-                drawer.closeDrawer(GravityCompat.START);
-            } else {
-                promptCloseGame();
-            }
+        if (keyCode == KeyEvent.KEYCODE_BACK
+                && event.getRepeatCount() == 0) {
+            promptCloseGame();
             return true;
         }
         return super.onKeyDown(keyCode, event);
@@ -695,8 +673,8 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         if (item.getTitle() == null) {
-            var drawer = (DrawerLayout) activityGameBinding.gameDrawerLayout;
-            drawer.closeDrawer(GravityCompat.START);
+//            var drawer = (DrawerLayout) activityGameBinding.gameDrawerLayout;
+//            drawer.closeDrawer(GravityCompat.START);
             return false;
         } else if (!libQpProxy.getGameState().gameTitle.contentEquals(item.getTitle())) {
             var simpleNameForSave = libQpProxy.getGameState().gameFile.getName();
@@ -712,8 +690,8 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
                 gameViewModel.setGameSaveMap(temGameSaveMap);
             } catch (NullPointerException e) {
                 Log.d(TAG , "Error: " , e);
-                var drawer = (DrawerLayout) activityGameBinding.gameDrawerLayout;
-                drawer.closeDrawer(GravityCompat.START);
+//                var drawer = (DrawerLayout) activityGameBinding.gameDrawerLayout;
+//                drawer.closeDrawer(GravityCompat.START);
                 return false;
             }
 
@@ -736,8 +714,8 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
             }
         }
 
-        var drawer = (DrawerLayout) activityGameBinding.gameDrawerLayout;
-        drawer.closeDrawer(GravityCompat.START);
+//        var drawer = (DrawerLayout) activityGameBinding.gameDrawerLayout;
+//        drawer.closeDrawer(GravityCompat.START);
         return false;
     }
 
