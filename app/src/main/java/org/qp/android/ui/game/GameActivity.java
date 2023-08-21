@@ -21,6 +21,7 @@ import android.view.View;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
@@ -41,6 +42,7 @@ import androidx.navigation.fragment.NavHostFragment;
 
 import com.anggrayudi.storage.SimpleStorageHelper;
 import com.anggrayudi.storage.file.DocumentFileCompat;
+import com.anggrayudi.storage.file.DocumentFileType;
 import com.anggrayudi.storage.file.MimeType;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.textfield.TextInputLayout;
@@ -185,6 +187,22 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
         Log.i(TAG, "Game created");
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode ,
+                                           @NonNull String[] permissions ,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode , permissions , grantResults);
+        storageHelper.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode ,
+                                    int resultCode ,
+                                    @Nullable Intent data) {
+        super.onActivityResult(requestCode , resultCode , data);
+        storageHelper.getStorage().onActivityResult(requestCode , resultCode , data);
+    }
+
     private void postTextInDialogFrags (String text) {
         var manager = getSupportFragmentManager();
         for (Fragment fragment : manager.getFragments()) {
@@ -310,10 +328,16 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
         var gameId = intent.getStringExtra("gameId");
         var gameTitle = intent.getStringExtra("gameTitle");
         var gameDirUri = intent.getStringExtra("gameDirUri");
-        var gameDir =  DocumentFileCompat.fromFullPath(this , gameDirUri);
+        var gameDir =  DocumentFileCompat.fromFullPath(
+                this , gameDirUri ,
+                DocumentFileType.FOLDER , true
+        );
         gameViewModel.setFullPathGameDir(gameDirUri);
         var gameFileUri = intent.getStringExtra("gameFileUri");
-        var gameFile = DocumentFileCompat.fromFullPath(this , gameFileUri);
+        var gameFile = DocumentFileCompat.fromFullPath(
+                this , gameFileUri ,
+                DocumentFileType.FILE , true
+        );
         libQpProxy.runGame(gameId, gameTitle, gameDir, gameFile);
     }
 
