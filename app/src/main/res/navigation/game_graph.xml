@@ -4,15 +4,15 @@
     android:id="@+id/game_graph"
     app:startDestination="@id/gameMainFragment">
 
-    <swipeable
+    <fragment
         android:id="@+id/gameMainFragment"
         android:name="org.qp.android.ui.game.GameMainFragment"
         android:label="GameMainFragment" />
-    <swipeable
+    <fragment
         android:id="@+id/gameObjectFragment"
         android:name="org.qp.android.ui.game.GameObjectFragment"
         android:label="GameObjectFragment" />
-    <swipeable
+    <fragment
         android:id="@+id/gameVarsFragment"
         android:name="org.qp.android.ui.game.GameVarsFragment"
         android:label="GameVarsFragment" />
