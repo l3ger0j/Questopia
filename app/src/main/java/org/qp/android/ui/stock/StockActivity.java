@@ -325,7 +325,7 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
             var mViewHolder =
                     mRecyclerView.findViewHolderForAdapterPosition(position);
             var gameData =
-                    tempList.get(Objects.requireNonNull(mViewHolder).getBindingAdapterPosition());
+                    tempList.get(Objects.requireNonNull(mViewHolder).getAdapterPosition());
             if (selectList.isEmpty() || !selectList.contains(gameData)) {
                 selectList.add(gameData);
                 var cardView = (CardView) mViewHolder.itemView.findViewWithTag("gameCardView");
