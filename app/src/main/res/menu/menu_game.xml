@@ -5,17 +5,11 @@
 
     <group android:id="@+id/menuGroup_running">
         <item
-            android:id="@+id/menu_mainDesc"
-            android:contentDescription="@string/mainDescContDesc"
-            android:icon="@drawable/tab_main"
-            android:title="@string/mainDescTitle"
-            app:showAsAction="always" />
-        <item
             android:id="@+id/menu_varsDesc"
             android:contentDescription="@string/varsDescContDesc"
             android:icon="@drawable/tab_vars"
             android:title="@string/varsDescTitle"
-            app:showAsAction="ifRoom" />
+            app:showAsAction="always" />
         <item
             android:id="@+id/menu_inventory"
             android:contentDescription="@string/inventoryContDesc"

@@ -290,6 +290,9 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
     private void initControls() {
         setSupportActionBar(activityGameBinding.toolbar);
         actionBar = getSupportActionBar();
+
+        actionBar.setHomeActionContentDescription(getString(R.string.mainDescTitle));
+        actionBar.setDisplayHomeAsUpEnabled(true);
     }
 
 //            for (var data : gameViewModel.getGameDataList()) {
@@ -356,8 +359,8 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
 
     private void updateTabIcons() {
         if (mainMenu == null) return;
+        actionBar.setHomeAsUpIndicator(activeTab == TAB_MAIN_DESC_AND_ACTIONS ? R.drawable.tab_main : R.drawable.tab_main_alt);
         mainMenu.findItem(R.id.menu_inventory).setIcon(activeTab == TAB_OBJECTS ? R.drawable.tab_object : R.drawable.tab_object_alt);
-        mainMenu.findItem(R.id.menu_mainDesc).setIcon(activeTab == TAB_MAIN_DESC_AND_ACTIONS ? R.drawable.tab_main : R.drawable.tab_main_alt);
         mainMenu.findItem(R.id.menu_varsDesc).setIcon(activeTab == TAB_VARS_DESC ? R.drawable.tab_vars : R.drawable.tab_vars_alt);
     }
 
@@ -729,10 +732,11 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int i = item.getItemId();
-        if (i == R.id.menu_mainDesc) {
+        if (i == android.R.id.home) {
             setActiveTab(TAB_MAIN_DESC_AND_ACTIONS);
             return true;
-        } else if (i == R.id.menu_inventory) {
+        }
+        if (i == R.id.menu_inventory) {
             setActiveTab(TAB_OBJECTS);
             return true;
         } else if (i == R.id.menu_varsDesc) {
