@@ -175,6 +175,7 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
         if (savedInstanceState != null) {
             restartServices();
             initControls();
+            setActiveTab(savedInstanceState.getInt("savedActiveTab"));
         } else {
             initServices();
             initControls();
@@ -182,6 +183,12 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
         }
 
         Log.i(TAG, "Game created");
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt("savedActiveTab" , activeTab);
     }
 
     @Override
