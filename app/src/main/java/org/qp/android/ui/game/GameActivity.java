@@ -71,9 +71,9 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
     private final String TAG = this.getClass().getSimpleName();
 
     private static final int MAX_SAVE_SLOTS = 5;
-    private static final int TAB_MAIN_DESC_AND_ACTIONS = 0;
-    private static final int TAB_OBJECTS = 1;
-    private static final int TAB_VARS_DESC = 2;
+    public static final int TAB_MAIN_DESC_AND_ACTIONS = 0;
+    public static final int TAB_OBJECTS = 1;
+    public static final int TAB_VARS_DESC = 2;
     private static final int LOAD = 0;
     private static final int SAVE = 1;
 
@@ -362,6 +362,34 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
         actionBar.setHomeAsUpIndicator(activeTab == TAB_MAIN_DESC_AND_ACTIONS ? R.drawable.tab_main : R.drawable.tab_main_alt);
         mainMenu.findItem(R.id.menu_inventory).setIcon(activeTab == TAB_OBJECTS ? R.drawable.tab_object : R.drawable.tab_object_alt);
         mainMenu.findItem(R.id.menu_varsDesc).setIcon(activeTab == TAB_VARS_DESC ? R.drawable.tab_vars : R.drawable.tab_vars_alt);
+    }
+
+    public void warnUser(int id) {
+        if (isMainThread()) {
+            if (mainMenu == null) return;
+            var label = navController.getCurrentDestination().getLabel();
+            if (label != null) {
+                switch (id) {
+                    case TAB_MAIN_DESC_AND_ACTIONS -> {
+                        if (!label.equals("GameMainFragment")) {
+                            actionBar.setHomeAsUpIndicator(R.drawable.tab_main_warn);
+                        }
+                    }
+                    case TAB_OBJECTS -> {
+                        if (!label.equals("GameObjectFragment")) {
+                            mainMenu.findItem(R.id.menu_inventory).setIcon(R.drawable.tab_object_warn);
+                        }
+                    }
+                    case TAB_VARS_DESC -> {
+                        if (!label.equals("GameVarsFragment")) {
+                            mainMenu.findItem(R.id.menu_varsDesc).setIcon(R.drawable.tab_vars_warn);
+                        }
+                    }
+                }
+            }
+        } else {
+            runOnUiThread(() -> warnUser(id));
+        }
     }
 
     @Override

@@ -253,11 +253,17 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
 
     private void refreshMainDesc() {
         var mainDesc = getHtml(getLibQspProxy().getGameState().mainDesc);
+        if (!mainDesc.isBlank()) {
+            getGameActivity().warnUser(GameActivity.TAB_MAIN_DESC_AND_ACTIONS);
+        }
         mainDescLiveData.postValue(pageTemplate.replace("REPLACETEXT", mainDesc));
     }
 
     private void refreshVarsDesc() {
         var varsDesc = getHtml(getLibQspProxy().getGameState().varsDesc);
+        if (!varsDesc.isBlank()) {
+            getGameActivity().warnUser(GameActivity.TAB_VARS_DESC);
+        }
         varsDescLiveData.postValue(pageTemplate.replace("REPLACETEXT", varsDesc));
     }
 
@@ -274,6 +280,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
     }
 
     private void refreshObjectsRecycler() {
+        getGameActivity().warnUser(GameActivity.TAB_OBJECTS);
         var objectsRecycler = new GameItemRecycler();
         objectsRecycler.setTypeface(getSettingsController().getTypeface());
         objectsRecycler.setTextSize(getFontSize());
