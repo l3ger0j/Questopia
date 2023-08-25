@@ -327,7 +327,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
 
     public void startAudio () {
         audioPlayer = questPlayerApplication.getAudioPlayer();
-        audioPlayer.start();
+        audioPlayer.start(getGameActivity());
     }
 
     public void stopAudio () {
