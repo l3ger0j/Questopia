@@ -32,6 +32,7 @@ public class SettingsController {
     public boolean isUseGameLinkColor;
     public boolean isUseFullscreenImages;
     public boolean isUseImageDebug;
+    public boolean isUseMusicDebug;
     public String language;
 
     private static SettingsController INSTANCE;
@@ -64,6 +65,7 @@ public class SettingsController {
         settingsController.isUseAutoscroll = preferences.getBoolean("autoscroll", true);
         settingsController.isUseExecString = preferences.getBoolean("execString", false);
         settingsController.isUseImageDebug = preferences.getBoolean("debugImage", false);
+        settingsController.isUseMusicDebug = preferences.getBoolean("debugMusic", false);
         settingsController.isUseSeparator = preferences.getBoolean("separator", false);
         settingsController.isUseGameFont = preferences.getBoolean("useGameFont", false);
         settingsController.isUseImmersiveMode = preferences.getBoolean("immersiveMode", true);

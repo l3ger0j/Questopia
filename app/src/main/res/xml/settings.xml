@@ -139,6 +139,11 @@
             android:title="@string/imageDebugTitle" />
         <SwitchPreferenceCompat
             android:defaultValue="false"
+            android:key="debugMusic"
+            android:summary="@string/musicDebugSum"
+            android:title="@string/musicDebugTitle" />
+        <SwitchPreferenceCompat
+            android:defaultValue="false"
             android:key="execString"
             android:summary="@string/execStringSum"
             app:title="@string/execStringTitle"/>

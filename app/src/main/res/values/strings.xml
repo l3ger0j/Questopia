@@ -160,6 +160,8 @@
         <string name="autoscrollSum">Enable/disable autoscroll</string>
         <string name="imageDebugTitle">Image Path Debugger</string>
         <string name="imageDebugSum">A mode that enables the display of an error dialog if the path to the image is incorrect</string>
+        <string name="musicDebugTitle">Music Path Debugger</string>
+        <string name="musicDebugSum">A mode that enables the display of an error dialog if the path to the music is incorrect</string>
         <string name="execStringTitle">String executor</string>
         <string name="execStringSum">Enable/disable execution string</string>
         <!-- Extra section -->

@@ -95,6 +95,10 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
     private ActivityResultLauncher<Intent> saveResultLaunch;
     private View mDecorView;
 
+    public SettingsController getSettingsController() {
+        return settingsController;
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

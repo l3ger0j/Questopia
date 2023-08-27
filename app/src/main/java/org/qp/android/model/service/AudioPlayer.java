@@ -12,6 +12,8 @@ import android.util.Log;
 import com.anggrayudi.storage.file.DocumentFileCompat;
 import com.anggrayudi.storage.file.DocumentFileType;
 
+import org.qp.android.ui.game.GameActivity;
+
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -101,6 +103,16 @@ public class AudioPlayer {
             return;
         }
         final var normPath = sound.path.replace("\\", "/");
+        if (!DocumentFileCompat.doesExist(context , normPath)) {
+            var activity = (GameActivity) context;
+            var controller = activity.getSettingsController();
+            if (controller != null && controller.isUseMusicDebug) {
+                activity.showErrorDialog("Sound file not found: " + normPath);
+            } else {
+                Log.e(TAG,"Sound file not found: " + normPath);
+            }
+            return;
+        }
         var file = DocumentFileCompat.fromFullPath(
                 context , normPath ,
                 DocumentFileType.FILE , true
