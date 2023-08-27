@@ -10,6 +10,7 @@ import static org.qp.android.helpers.utils.ViewUtil.getFontStyle;
 
 import android.annotation.SuppressLint;
 import android.app.Application;
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -373,10 +374,14 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
                     getApplication().startActivity(viewLink);
                 }
                 case "file" -> {
-                    var tempLink = uri.getScheme().replace("file:/" , "https:");
-                    var viewLazyLink = new Intent(Intent.ACTION_VIEW , Uri.parse(tempLink));
-                    viewLazyLink.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    getApplication().startActivity(viewLazyLink);
+                    try {
+                        var tempLink = uri.getScheme().replace("file:/" , "https:");
+                        var viewLazyLink = new Intent(Intent.ACTION_VIEW , Uri.parse(tempLink));
+                        viewLazyLink.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        getApplication().startActivity(viewLazyLink);
+                    } catch (ActivityNotFoundException e) {
+                        Log.d(TAG , "Error: " , e);
+                    }
                 }
             }
             return true;
