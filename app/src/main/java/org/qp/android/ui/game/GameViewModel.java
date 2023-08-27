@@ -102,8 +102,10 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
     private final Runnable counterTask = new Runnable() {
         @Override
         public void run() {
-            libQpProxy.executeCounter();
-            counterHandler.postDelayed(this, counterInterval);
+            if (libQpProxy != null) {
+                libQpProxy.executeCounter();
+                counterHandler.postDelayed(this, counterInterval);
+            }
         }
     };
 
