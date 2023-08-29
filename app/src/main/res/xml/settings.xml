@@ -6,6 +6,9 @@
         <Preference
             android:title="@string/newsMenuTitle"
             android:key="newsApp" />
+        <Preference
+            android:title="@string/addFolder"
+            android:key="addRootFold"/>
         <ListPreference
             android:defaultValue="ru"
             android:entries="@array/langName"

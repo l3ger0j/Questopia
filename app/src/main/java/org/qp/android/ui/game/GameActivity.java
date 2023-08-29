@@ -1,5 +1,6 @@
 package org.qp.android.ui.game;
 
+import static androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener;
 import static org.qp.android.helpers.utils.FileUtil.createFindDFile;
 import static org.qp.android.helpers.utils.FileUtil.createFindDFolder;
 import static org.qp.android.helpers.utils.FileUtil.documentWrap;
@@ -123,6 +124,20 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
         if (navFragment != null) {
             navController = navFragment.getNavController();
         }
+
+        var navigationView = activityGameBinding.bottomNavigationView;
+        navigationView.setOnItemSelectedListener(item -> {
+            int itemId = item.getItemId();
+            if (itemId == R.id.menu_mainDesc) {
+                setActiveTab(TAB_MAIN_DESC_AND_ACTIONS);
+            } else if (itemId == R.id.menu_varsDesc) {
+                setActiveTab(TAB_VARS_DESC);
+            } else if (itemId == R.id.menu_inventory) {
+                setActiveTab(TAB_OBJECTS);
+            }
+            return true;
+        });
+        setOnApplyWindowInsetsListener(navigationView , null);
 
         saveResultLaunch = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
@@ -294,9 +309,6 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
     private void initControls() {
         setSupportActionBar(activityGameBinding.toolbar);
         actionBar = getSupportActionBar();
-
-        actionBar.setHomeActionContentDescription(getString(R.string.mainDescTitle));
-        actionBar.setDisplayHomeAsUpEnabled(true);
     }
 
 //            for (var data : gameViewModel.getGameDataList()) {
@@ -354,18 +366,10 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
         }
 
         activeTab = tab;
-        updateTabIcons();
     }
 
     private void setTitle(String title) {
         actionBar.setTitle(title);
-    }
-
-    private void updateTabIcons() {
-        if (mainMenu == null) return;
-        actionBar.setHomeAsUpIndicator(activeTab == TAB_MAIN_DESC_AND_ACTIONS ? R.drawable.tab_main : R.drawable.tab_main_alt);
-        mainMenu.findItem(R.id.menu_inventory).setIcon(activeTab == TAB_OBJECTS ? R.drawable.tab_object : R.drawable.tab_object_alt);
-        mainMenu.findItem(R.id.menu_varsDesc).setIcon(activeTab == TAB_VARS_DESC ? R.drawable.tab_vars : R.drawable.tab_vars_alt);
     }
 
     public void warnUser(int id) {
@@ -375,19 +379,19 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
             if (label != null) {
                 switch (id) {
                     case TAB_MAIN_DESC_AND_ACTIONS -> {
-                        if (!label.equals("GameMainFragment")) {
-                            actionBar.setHomeAsUpIndicator(R.drawable.tab_main_warn);
-                        }
+//                        if (!label.equals("GameMainFragment")) {
+////                            actionBar.setHomeAsUpIndicator(R.drawable.tab_main_warn);
+//                        }
                     }
                     case TAB_OBJECTS -> {
-                        if (!label.equals("GameObjectFragment")) {
-                            mainMenu.findItem(R.id.menu_inventory).setIcon(R.drawable.tab_object_warn);
-                        }
+//                        if (!label.equals("GameObjectFragment")) {
+////                            mainMenu.findItem(R.id.menu_inventory).setIcon(R.drawable.tab_object_warn);
+//                        }
                     }
                     case TAB_VARS_DESC -> {
-                        if (!label.equals("GameVarsFragment")) {
-                            mainMenu.findItem(R.id.menu_varsDesc).setIcon(R.drawable.tab_vars_warn);
-                        }
+//                        if (!label.equals("GameVarsFragment")) {
+////                            mainMenu.findItem(R.id.menu_varsDesc).setIcon(R.drawable.tab_vars_warn);
+//                        }
                     }
                 }
             }
@@ -588,9 +592,8 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         mainMenu = menu;
-        var inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu_game, menu);
-        updateTabIcons();
+        getMenuInflater()
+                .inflate(R.menu.menu_game , menu);
         return true;
     }
 
@@ -764,17 +767,7 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int i = item.getItemId();
-        if (i == android.R.id.home) {
-            setActiveTab(TAB_MAIN_DESC_AND_ACTIONS);
-            return true;
-        }
-        if (i == R.id.menu_inventory) {
-            setActiveTab(TAB_OBJECTS);
-            return true;
-        } else if (i == R.id.menu_varsDesc) {
-            setActiveTab(TAB_VARS_DESC);
-            return true;
-        } else if (i == R.id.menu_userInput) {
+        if (i == R.id.menu_userInput) {
             if (settingsController.isUseExecString) {
                 libQpProxy.onUseExecutorString();
             } else {

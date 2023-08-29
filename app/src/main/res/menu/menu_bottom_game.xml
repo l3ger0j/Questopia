@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/menu_mainDesc"
+        android:title="@string/mainDescTitle"
+        android:icon="@drawable/tab_main" />
+    <item
+        android:id="@+id/menu_varsDesc"
+        android:title="@string/varsDescTitle"
+        android:icon="@drawable/tab_vars" />
+    <item
+        android:id="@+id/menu_inventory"
+        android:title="@string/inventoryTitle"
+        android:icon="@drawable/tab_object" />
+</menu>

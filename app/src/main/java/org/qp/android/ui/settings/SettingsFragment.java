@@ -1,5 +1,7 @@
 package org.qp.android.ui.settings;
 
+import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_GDIR_FILE;
+
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.webkit.WebView;
@@ -15,6 +17,8 @@ import org.qp.android.QuestPlayerApplication;
 import org.qp.android.R;
 import org.qp.android.helpers.utils.ViewUtil;
 import org.qp.android.ui.dialogs.SettingsDialogFrag;
+
+import java.util.Objects;
 
 public class SettingsFragment extends PreferenceFragmentCompat
         implements SharedPreferences.OnSharedPreferenceChangeListener  {
@@ -76,6 +80,21 @@ public class SettingsFragment extends PreferenceFragmentCompat
             });
         }
 
+        var rootDir = findPreference("addRootFold");
+        if (rootDir != null) {
+            var application = (QuestPlayerApplication) requireActivity().getApplication();
+            if (application.getCustomRootDir() == null) {
+                rootDir.setSummary(getString(R.string.addFolderSum0));
+            } else {
+                rootDir.setSummary(getString(R.string.addFolderSum1));
+            }
+            rootDir.setOnPreferenceClickListener(preference -> {
+                var activity = (SettingsActivity) requireActivity();
+                activity.showDirPickerDialog(CODE_PICK_GDIR_FILE);
+                return true;
+            });
+        }
+
         var button = findPreference("showAbout");
         if (button != null) {
             button.setOnPreferenceClickListener(preference -> {
@@ -88,7 +107,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
                 var lpView =
                         new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
                                 LinearLayout.LayoutParams.WRAP_CONTENT);
-                var webView = new WebView(getContext());
+                var webView = new WebView(requireContext());
                 webView.loadDataWithBaseURL(
                         "",
                         viewModel.formationAboutDesc(requireContext()),
@@ -146,7 +165,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        if (key.equals("lang")) {
+        if (Objects.equals(key , "lang")) {
             ViewUtil.showSnackBar(getView(), getString(R.string.closeToApply));
         } else if (key.equals("binPref")) {
             ViewUtil.showSnackBar(getView(), getString(R.string.settingsEffect));

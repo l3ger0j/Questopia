@@ -3,7 +3,6 @@ package org.qp.android.ui.stock;
 import static org.qp.android.helpers.utils.FileUtil.deleteDirectory;
 import static org.qp.android.helpers.utils.FileUtil.documentWrap;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_DIR_FILE;
-import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_GDIR_FILE;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_IMAGE;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_MOD_FILE;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_PATH_FILE;
@@ -137,12 +136,9 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
 
         storageHelper.setOnFolderSelected((integer , documentFile) -> {
             if (documentFile != null) {
-                switch (integer) {
-                    case CODE_PICK_DIR_FILE -> {
-                        stockViewModel.setTempInstallDir(documentFile);
-                        stockViewModel.isSelectFolder.set(true);
-                    }
-                    case CODE_PICK_GDIR_FILE -> stockViewModel.setRootDir(documentFile);
+                if (integer == CODE_PICK_DIR_FILE) {
+                    stockViewModel.setTempInstallDir(documentFile);
+                    stockViewModel.isSelectFolder.set(true);
                 }
             }
 
@@ -528,9 +524,6 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
                     }
                 });
             }
-        } else if (itemId == R.id.action_add_folder) {
-           showDirPickerDialog(CODE_PICK_GDIR_FILE);
-           return true;
         }
         return false;
     }

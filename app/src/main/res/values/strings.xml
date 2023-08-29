@@ -87,6 +87,9 @@
     <!-- SettingsFragment -->
         <string name="closeToApply">Close settings to apply changes</string>
         <string name="settingsEffect">The setting will take effect the next time you unpack the game</string>
+        <string name="addFolder">Change the root directory</string>
+        <string name="addFolderSum0">Current root dir is internal directory of the application</string>
+        <string name="addFolderSum1">Current root dir is external directory of the device</string>
     <!-- FragmentImageBox -->
         <string name="image">Image</string>
     <!-- Use in menu -->
@@ -107,7 +110,6 @@
         <string name="gameStockTitle">Game Stock</string>
         <string name="search">Search</string>
         <string name="settingsTitle">Settings</string>
-        <string name="addFolder">Add folder</string>
     <!-- Menu delete -->
         <string name="selectAllTitle">Select all</string>
         <string name="deleteGameTitle">Delete game</string>

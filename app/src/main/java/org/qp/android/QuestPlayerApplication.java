@@ -7,6 +7,8 @@ import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
 
+import androidx.documentfile.provider.DocumentFile;
+
 import org.qp.android.dto.stock.InnerGameData;
 import org.qp.android.model.libQP.LibQpProxy;
 import org.qp.android.model.libQP.LibQpProxyImpl;
@@ -34,6 +36,8 @@ public class QuestPlayerApplication extends Application {
     private Bundle gameSaveMap = new Bundle();
     private ArrayList<InnerGameData> gameList = new ArrayList<>();
 
+    private DocumentFile customRootDir;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -46,6 +50,10 @@ public class QuestPlayerApplication extends Application {
 
     public Bundle getGameSaveMap() {
         return gameSaveMap;
+    }
+
+    public void setCustomRootDir(DocumentFile customRootDir) {
+        this.customRootDir = customRootDir;
     }
 
     public void setGameList(ArrayList<InnerGameData> gameListHashMap) {
@@ -70,6 +78,10 @@ public class QuestPlayerApplication extends Application {
 
     public LibQpProxy getLibQspProxy() {
         return libQspProxy;
+    }
+
+    public DocumentFile getCustomRootDir() {
+        return customRootDir;
     }
 
     public void createNotificationChannels() {
