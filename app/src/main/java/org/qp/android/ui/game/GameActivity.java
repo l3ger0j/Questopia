@@ -42,6 +42,7 @@ import com.anggrayudi.storage.SimpleStorageHelper;
 import com.anggrayudi.storage.file.DocumentFileCompat;
 import com.anggrayudi.storage.file.DocumentFileType;
 import com.anggrayudi.storage.file.MimeType;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.textfield.TextInputLayout;
 
@@ -84,6 +85,7 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
     private ActionBar actionBar;
     private Menu mainMenu;
     private NavController navController;
+    private BottomNavigationView navigationView;
 
     private HtmlProcessor htmlProcessor;
     private LibQpProxy libQpProxy;
@@ -125,7 +127,7 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
             navController = navFragment.getNavController();
         }
 
-        var navigationView = activityGameBinding.bottomNavigationView;
+        navigationView = activityGameBinding.bottomNavigationView;
         navigationView.setOnItemSelectedListener(item -> {
             int itemId = item.getItemId();
             if (itemId == R.id.menu_mainDesc) {
@@ -353,14 +355,20 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
         switch (tab) {
             case TAB_MAIN_DESC_AND_ACTIONS -> {
                 navController.navigate(R.id.gameMainFragment);
+                var badge = navigationView.getBadge(R.id.menu_mainDesc);
+                if (badge != null) navigationView.removeBadge(R.id.menu_mainDesc);
                 setTitle(getString(R.string.mainDescTitle));
             }
             case TAB_OBJECTS -> {
                 navController.navigate(R.id.gameObjectFragment);
+                var badge = navigationView.getBadge(R.id.menu_inventory);
+                if (badge != null) navigationView.removeBadge(R.id.menu_inventory);
                 setTitle(getString(R.string.inventoryTitle));
             }
             case TAB_VARS_DESC -> {
                 navController.navigate(R.id.gameVarsFragment);
+                var badge = navigationView.getBadge(R.id.menu_varsDesc);
+                if (badge != null) navigationView.removeBadge(R.id.menu_varsDesc);
                 setTitle(getString(R.string.varsDescTitle));
             }
         }
@@ -374,24 +382,20 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
 
     public void warnUser(int id) {
         if (isMainThread()) {
-            if (mainMenu == null) return;
             var label = navController.getCurrentDestination().getLabel();
             if (label != null) {
                 switch (id) {
                     case TAB_MAIN_DESC_AND_ACTIONS -> {
-//                        if (!label.equals("GameMainFragment")) {
-////                            actionBar.setHomeAsUpIndicator(R.drawable.tab_main_warn);
-//                        }
+                        if (!label.equals("GameMainFragment"))
+                            navigationView.getOrCreateBadge(R.id.menu_mainDesc);
                     }
                     case TAB_OBJECTS -> {
-//                        if (!label.equals("GameObjectFragment")) {
-////                            mainMenu.findItem(R.id.menu_inventory).setIcon(R.drawable.tab_object_warn);
-//                        }
+                        if (!label.equals("GameObjectFragment"))
+                            navigationView.getOrCreateBadge(R.id.menu_inventory);
                     }
                     case TAB_VARS_DESC -> {
-//                        if (!label.equals("GameVarsFragment")) {
-////                            mainMenu.findItem(R.id.menu_varsDesc).setIcon(R.drawable.tab_vars_warn);
-//                        }
+                        if (!label.equals("GameVarsFragment"))
+                            navigationView.getOrCreateBadge(R.id.menu_varsDesc);
                     }
                 }
             }
