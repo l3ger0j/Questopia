@@ -1,0 +1,4322 @@
+[
+{
+ "version": "",
+ "code": "729",
+ "date": "Fri Aug 25 22:34:59 2023 +0300",
+ "message": "fixup-Added-a-notification-to-the-user-about-changing-the-content-on-the-tab-in-the-form-of-a-color-change-at-the-menu-item"
+},
+{
+ "version": "",
+ "code": "729",
+ "date": "Fri Aug 25 22:22:58 2023 +0300",
+ "message": "Fixed-a-problem-with-saves-maybe-it-fixes-problems-with-accessing-different-files"
+},
+{
+ "version": "",
+ "code": "729",
+ "date": "Fri Aug 25 21:06:51 2023 +0300",
+ "message": "Fixed-music-playback"
+},
+{
+ "version": "",
+ "code": "729",
+ "date": "Fri Aug 25 01:32:10 2023 +0300",
+ "message": "Added-a-notification-to-the-user-about-changing-the-content-on-the-tab-in-the-form-of-a-color-change-at-the-menu-item"
+},
+{
+ "version": "",
+ "code": "729",
+ "date": "Thu Aug 24 20:55:08 2023 +0300",
+ "message": "The-button-responsible-for-switching-the-main-view-has-been-moved-to-the-left"
+},
+{
+ "version": "",
+ "code": "729",
+ "date": "Thu Aug 24 20:33:07 2023 +0300",
+ "message": "Fixed-incorrect-display-of-the-game-menu-when-the-screen-is-rotated"
+},
+{
+ "version": "",
+ "code": "729",
+ "date": "Tue Aug 22 19:15:46 2023 +0300",
+ "message": "Gradle-upgrade-to-8.1.1"
+},
+{
+ "version": "",
+ "code": "729",
+ "date": "Mon Aug 21 19:05:06 2023 +0300",
+ "message": "Remove-hamburger-menu"
+},
+{
+ "version": "",
+ "code": "729",
+ "date": "Mon Aug 21 18:41:47 2023 +0300",
+ "message": "When-creating-gameFiles-and-gameDir-objects-a-permission-request-is-now-used"
+},
+{
+ "version": "",
+ "code": "729",
+ "date": "Mon Aug 21 18:31:35 2023 +0300",
+ "message": "Revert-getAdapterPosition-getBindingAdapterPosition"
+},
+{
+ "version": "",
+ "code": "729",
+ "date": "Mon Aug 21 18:22:09 2023 +0300",
+ "message": "Revert-Add-Fragula-and-swipes-in-GameActivity"
+},
+{
+ "version": "",
+ "code": "729",
+ "date": "Sat Aug 19 21:21:40 2023 +0300",
+ "message": "Fixed-File-not-created"
+},
+{
+ "version": "",
+ "code": "729",
+ "date": "Wed Aug 16 22:37:23 2023 +0300",
+ "message": "Add-Fragula-and-swipes-in-GameActivity"
+},
+{
+ "version": "",
+ "code": "729",
+ "date": "Wed Aug 16 22:13:16 2023 +0300",
+ "message": "Added-gitlog.json"
+},
+{
+ "version": "",
+ "code": "729",
+ "date": "Wed Aug 16 19:02:49 2023 +0300",
+ "message": "Complete-correction-of-the-IOException-error-during-autosave"
+},
+{
+ "version": "",
+ "code": "729",
+ "date": "Wed Aug 16 18:57:58 2023 +0300",
+ "message": "The-first-attempt-to-save-auto-saves-from-the-IOException-error"
+},
+{
+ "version": "",
+ "code": "729",
+ "date": "Tue Aug 15 18:33:37 2023 +0300",
+ "message": "Fixed-NullPointerException-in-GameViewModel-getLibQspProxy"
+},
+{
+ "version": "",
+ "code": "729",
+ "date": "Mon Aug 14 23:26:21 2023 +0300",
+ "message": "Updating-compileSdk-to-34"
+},
+{
+ "version": "",
+ "code": "729",
+ "date": "Mon Aug 14 23:05:03 2023 +0300",
+ "message": "Correction-of-names"
+},
+{
+ "version": "",
+ "code": "729",
+ "date": "Mon Aug 14 23:00:13 2023 +0300",
+ "message": "Full-renaming"
+},
+{
+ "version": "",
+ "code": "729",
+ "date": "Mon Aug 14 22:54:39 2023 +0300",
+ "message": "Updating-project-dependencies"
+},{
+ "version": "3.17.0",
+ "code": "707",
+ "date": "Mon Aug 14 22:06:53 2023 +0300",
+ "message": "QTopia-Update-3.17.0"
+},
+{
+ "version": "3.17.0",
+ "code": "707",
+ "date": "Mon Aug 14 22:02:42 2023 +0300",
+ "message": "Rename-project"
+},
+{
+ "version": "3.17.0",
+ "code": "707",
+ "date": "Mon Aug 14 21:49:33 2023 +0300",
+ "message": "Merge-pull-request-14-from-l3ger0j-unstable"
+},
+{
+ "version": "3.17.0",
+ "code": "707",
+ "date": "Mon Aug 14 21:35:38 2023 +0300",
+ "message": "Fixup-white-screen"
+},
+{
+ "version": "3.17.0",
+ "code": "707",
+ "date": "Sun Aug 13 23:00:21 2023 +0300",
+ "message": "Fixup-NPE-in-GameViewModel"
+},
+{
+ "version": "3.17.0",
+ "code": "707",
+ "date": "Thu Aug 10 22:03:57 2023 +0300",
+ "message": "Fixed-RuntimeException"
+},
+{
+ "version": "3.17.0",
+ "code": "707",
+ "date": "Wed Aug 9 21:09:34 2023 +0300",
+ "message": "The-transition-to-the-Document-API-has-continued"
+},
+{
+ "version": "3.17.0",
+ "code": "707",
+ "date": "Wed Aug 9 21:02:38 2023 +0300",
+ "message": "Kotlinization"
+},
+{
+ "version": "3.17.0",
+ "code": "707",
+ "date": "Wed Aug 9 21:02:26 2023 +0300",
+ "message": "Rename-.java-to-.kt"
+},
+{
+ "version": "3.17.0",
+ "code": "707",
+ "date": "Wed Aug 9 20:28:36 2023 +0300",
+ "message": "Partial-transfer-to-Kotlin"
+},
+{
+ "version": "3.17.0",
+ "code": "707",
+ "date": "Wed Aug 9 20:28:21 2023 +0300",
+ "message": "Rename-.java-to-.kt"
+},
+{
+ "version": "3.17.0",
+ "code": "707",
+ "date": "Sun Aug 6 21:18:41 2023 +0300",
+ "message": "Switching-to-the-Document-API-not-stable"
+},
+{
+ "version": "3.17.0",
+ "code": "707",
+ "date": "Wed Aug 2 20:20:42 2023 +0300",
+ "message": "Added-error-ejection-if-input-is-null"
+},
+{
+ "version": "3.17.0",
+ "code": "707",
+ "date": "Wed Aug 2 20:19:59 2023 +0300",
+ "message": "Added-Kotlin-support"
+},
+{
+ "version": "3.17.0",
+ "code": "707",
+ "date": "Wed Aug 2 20:04:17 2023 +0300",
+ "message": "Added-a-library-for-displaying-changes"
+},
+{
+ "version": "3.17.0",
+ "code": "707",
+ "date": "Mon Jul 31 21:06:44 2023 +0300",
+ "message": "Replace-LocalGame-to-helpers-repository"
+},
+{
+ "version": "3.17.0",
+ "code": "707",
+ "date": "Mon Jul 31 21:03:54 2023 +0300",
+ "message": "Final-release-of-NewsFragment"
+},
+{
+ "version": "3.17.0",
+ "code": "707",
+ "date": "Thu Jul 27 18:35:25 2023 +0300",
+ "message": "Working-on-a-fragment_news"
+},
+{
+ "version": "3.17.0",
+ "code": "707",
+ "date": "Thu Jul 27 18:26:18 2023 +0300",
+ "message": "Updated-project-dependencies"
+},
+{
+ "version": "3.17.0",
+ "code": "707",
+ "date": "Thu Jul 27 18:20:23 2023 +0300",
+ "message": "Update-AGP"
+},
+{
+ "version": "3.17.0",
+ "code": "707",
+ "date": "Thu Jul 27 17:55:27 2023 +0300",
+ "message": "Improved-switch-branching-in-case-SearchView-is-null"
+},
+{
+ "version": "3.17.0",
+ "code": "707",
+ "date": "Thu Jul 27 17:48:52 2023 +0300",
+ "message": "Cleanup-code"
+},
+{
+ "version": "3.17.0",
+ "code": "707",
+ "date": "Sat Jul 22 22:11:03 2023 +0300",
+ "message": "Added-a-tab-with-news"
+},
+{
+ "version": "3.17.0",
+ "code": "707",
+ "date": "Wed Jul 19 22:14:51 2023 +0300",
+ "message": "The-meaningless-try-catch-has-been-removed"
+},
+{
+ "version": "3.17.0",
+ "code": "707",
+ "date": "Wed Jul 19 17:48:51 2023 +0300",
+ "message": "Removing-Download-Plugin-Support"
+},
+{
+ "version": "3.17.0",
+ "code": "707",
+ "date": "Wed Jul 19 17:12:42 2023 +0300",
+ "message": "Unhardcoded-string"
+},
+{
+ "version": "3.17.0",
+ "code": "707",
+ "date": "Sun Jul 16 23:18:37 2023 +0300",
+ "message": "Easter-egg-removed"
+},
+{
+ "version": "3.17.0",
+ "code": "707",
+ "date": "Sun Jul 16 23:11:32 2023 +0300",
+ "message": "Remove-use-button-and-their-references"
+},
+{
+ "version": "3.17.0",
+ "code": "707",
+ "date": "Sun Jul 16 23:08:11 2023 +0300",
+ "message": "Simplification-work-with-Notification"
+},
+{
+ "version": "3.17.0",
+ "code": "707",
+ "date": "Sun Jul 16 22:11:26 2023 +0300",
+ "message": "Check-the-null"
+},
+{
+ "version": "3.17.0",
+ "code": "707",
+ "date": "Wed Jul 12 19:07:21 2023 +0300",
+ "message": "Boring-routine-4"
+},
+{
+ "version": "3.17.0",
+ "code": "707",
+ "date": "Sat Jul 1 21:44:42 2023 +0300",
+ "message": "Renamed-the-module-to-PrettyFilePicker"
+},
+{
+ "version": "3.17.0",
+ "code": "707",
+ "date": "Sat Jul 1 21:35:34 2023 +0300",
+ "message": "Boring-routine-3"
+},
+{
+ "version": "3.17.0",
+ "code": "707",
+ "date": "Tue Jun 27 18:07:25 2023 +0300",
+ "message": "The-Great-Displacement"
+},
+{
+ "version": "3.17.0",
+ "code": "707",
+ "date": "Fri Jun 23 19:27:52 2023 +0300",
+ "message": "Boring-routine-2"
+},
+{
+ "version": "3.17.0",
+ "code": "707",
+ "date": "Wed Jun 14 18:18:56 2023 +0300",
+ "message": "Boring-routine-1"
+},
+{
+ "version": "3.17.0",
+ "code": "707",
+ "date": "Tue Jun 13 22:25:32 2023 +0300",
+ "message": "Boring-routine-0"
+},
+{
+ "version": "3.17.0",
+ "code": "707",
+ "date": "Sun Jun 11 21:33:36 2023 +0300",
+ "message": "Notification-come-back"
+},{
+ "version": "3.16.0",
+ "code": "669",
+ "date": "Thu Jun 8 21:12:10 2023 +0300",
+ "message": "QS-Fork-QPA-Update-to-3.16.0"
+},
+{
+ "version": "3.16.0",
+ "code": "669",
+ "date": "Thu Jun 8 21:06:38 2023 +0300",
+ "message": "Merge-pull-request-13-from-l3ger0j-unstable"
+},
+{
+ "version": "3.16.0",
+ "code": "669",
+ "date": "Thu Jun 8 21:00:54 2023 +0300",
+ "message": "Merge-branch-master-into-unstable"
+},
+{
+ "version": "3.16.0",
+ "code": "669",
+ "date": "Wed Jun 7 18:26:04 2023 +0300",
+ "message": "Renovation"
+},
+{
+ "version": "3.16.0",
+ "code": "669",
+ "date": "Fri Jun 2 18:06:45 2023 +0300",
+ "message": "Updated-the-file-picker-library"
+},
+{
+ "version": "3.16.0",
+ "code": "669",
+ "date": "Sat May 27 22:55:47 2023 +0300",
+ "message": "Using-a-directory-without-copying-it-2-2"
+},
+{
+ "version": "3.16.0",
+ "code": "669",
+ "date": "Thu May 25 23:43:07 2023 +0300",
+ "message": "Using-a-directory-without-copying-it-1"
+},
+{
+ "version": "3.16.0",
+ "code": "669",
+ "date": "Sun May 21 18:36:42 2023 +0300",
+ "message": "chore-4"
+},
+{
+ "version": "3.16.0",
+ "code": "669",
+ "date": "Fri May 19 22:58:50 2023 +0300",
+ "message": "chore-3-prerelease"
+},
+{
+ "version": "3.16.0",
+ "code": "669",
+ "date": "Mon May 15 00:26:36 2023 +0300",
+ "message": "Breakdown"
+},
+{
+ "version": "3.16.0",
+ "code": "669",
+ "date": "Fri May 5 20:40:19 2023 +0300",
+ "message": "Fix-stack"
+},
+{
+ "version": "3.16.0",
+ "code": "669",
+ "date": "Tue May 2 21:47:50 2023 +0300",
+ "message": "Bottle-neck"
+},{
+ "version": "3.15.0",
+ "code": "657",
+ "date": "Wed Apr 26 22:17:07 2023 +0300",
+ "message": "QS-Fork-QPA-Update-to-3.15.0"
+},
+{
+ "version": "3.15.0",
+ "code": "657",
+ "date": "Wed Apr 26 21:57:18 2023 +0300",
+ "message": "Merge-pull-request-12-from-l3ger0j-unstable"
+},
+{
+ "version": "3.15.0",
+ "code": "657",
+ "date": "Wed Apr 26 21:33:24 2023 +0300",
+ "message": "Update-android-build.yml"
+},
+{
+ "version": "3.15.0",
+ "code": "657",
+ "date": "Wed Apr 26 21:31:21 2023 +0300",
+ "message": "Update-android-test.yml"
+},
+{
+ "version": "3.15.0",
+ "code": "657",
+ "date": "Wed Apr 26 21:25:03 2023 +0300",
+ "message": "Merge-branch-master-into-unstable"
+},
+{
+ "version": "3.15.0",
+ "code": "657",
+ "date": "Mon Apr 24 21:06:11 2023 +0300",
+ "message": "chore-5"
+},
+{
+ "version": "3.15.0",
+ "code": "657",
+ "date": "Sat Apr 22 01:28:35 2023 +0300",
+ "message": "chore-4"
+},
+{
+ "version": "3.15.0",
+ "code": "657",
+ "date": "Wed Apr 12 21:45:57 2023 +0300",
+ "message": "chore-3"
+},
+{
+ "version": "3.15.0",
+ "code": "657",
+ "date": "Mon Apr 10 21:07:08 2023 +0300",
+ "message": "chore-2"
+},
+{
+ "version": "3.15.0",
+ "code": "657",
+ "date": "Sun Apr 9 22:18:16 2023 +0300",
+ "message": "chore-1"
+},
+{
+ "version": "3.15.0",
+ "code": "657",
+ "date": "Tue Apr 4 21:04:12 2023 +0300",
+ "message": "Update-0"
+},
+{
+ "version": "3.15.0",
+ "code": "657",
+ "date": "Sat Apr 1 20:52:41 2023 +0300",
+ "message": "Fixed-immersive-mode"
+},
+{
+ "version": "3.15.0",
+ "code": "657",
+ "date": "Sat Apr 1 00:29:07 2023 +0300",
+ "message": "Update-to-Sadakopokalypsis"
+},
+{
+ "version": "3.15.0",
+ "code": "657",
+ "date": "Mon Mar 27 22:05:00 2023 +0300",
+ "message": "Instead-of-a-third-party-library-the-built-in-ViewPager-is-now-used-to-provide-the-functionality-of-the-banner-with-auto-scrolling"
+},{
+ "version": "3.14.1",
+ "code": "643",
+ "date": "Tue Apr 4 21:11:36 2023 +0300",
+ "message": "QS-Fork-QPA-Update-to-3.14.1"
+},{
+ "version": "3.14.0",
+ "code": "642",
+ "date": "Fri Mar 17 21:24:56 2023 +0300",
+ "message": "QS-Fork-QPA-Update-to-3.14.0"
+},
+{
+ "version": "3.14.0",
+ "code": "642",
+ "date": "Fri Mar 17 20:26:38 2023 +0300",
+ "message": "Merge-pull-request-11-from-l3ger0j-unstable"
+},
+{
+ "version": "3.14.0",
+ "code": "642",
+ "date": "Fri Mar 17 00:09:15 2023 +0300",
+ "message": "Fixed-incorrect-behavior-when-turning-off-pictures-in-dialog"
+},
+{
+ "version": "3.14.0",
+ "code": "642",
+ "date": "Thu Mar 16 23:17:57 2023 +0300",
+ "message": "The-ability-to-unpack-archives-with-a-password-is-implemented"
+},
+{
+ "version": "3.14.0",
+ "code": "642",
+ "date": "Tue Mar 14 20:41:03 2023 +0300",
+ "message": "Introducing-the-parallel-games-component"
+},
+{
+ "version": "3.14.0",
+ "code": "642",
+ "date": "Mon Mar 13 00:13:32 2023 +0300",
+ "message": "Update-package-4"
+},
+{
+ "version": "3.14.0",
+ "code": "642",
+ "date": "Sat Mar 4 00:16:52 2023 +0300",
+ "message": "Image-magnification-by-clicking"
+},
+{
+ "version": "3.14.0",
+ "code": "642",
+ "date": "Thu Mar 2 23:46:05 2023 +0300",
+ "message": "Work-with-the-real-auto-size-images"
+},
+{
+ "version": "3.14.0",
+ "code": "642",
+ "date": "Tue Feb 28 19:34:05 2023 +0300",
+ "message": "Update-package-3"
+},
+{
+ "version": "3.14.0",
+ "code": "642",
+ "date": "Mon Feb 27 21:16:59 2023 +0300",
+ "message": "Update-package-2"
+},
+{
+ "version": "3.14.0",
+ "code": "642",
+ "date": "Mon Feb 27 01:02:36 2023 +0300",
+ "message": "Update-Package-1"
+},
+{
+ "version": "3.14.0",
+ "code": "642",
+ "date": "Thu Feb 23 22:02:07 2023 +0300",
+ "message": "Update-Package-0"
+},
+{
+ "version": "3.14.0",
+ "code": "642",
+ "date": "Tue Feb 21 19:10:49 2023 +0300",
+ "message": "A-gradual-transition-to-the-Navigation-Architecture-Component-has-begun"
+},
+{
+ "version": "3.14.0",
+ "code": "642",
+ "date": "Mon Feb 20 00:40:29 2023 +0300",
+ "message": "QS-Fork-QPA-Update-to-3.13.0"
+},{
+ "version": "3.13.0",
+ "code": "617",
+ "date": "Mon Feb 20 00:32:17 2023 +0300",
+ "message": "Merge-pull-request-10-from-l3ger0j-unstable"
+},
+{
+ "version": "3.13.0",
+ "code": "617",
+ "date": "Sun Feb 19 23:08:18 2023 +0300",
+ "message": "Update-FilePickerDialog"
+},
+{
+ "version": "3.13.0",
+ "code": "617",
+ "date": "Sun Feb 19 22:15:10 2023 +0300",
+ "message": "Deleted-template-files"
+},
+{
+ "version": "3.13.0",
+ "code": "617",
+ "date": "Sun Feb 19 19:11:59 2023 +0300",
+ "message": "Merge-remote-tracking-branch-origin-unstable-into-unstable"
+},
+{
+ "version": "3.13.0",
+ "code": "617",
+ "date": "Sun Feb 19 19:11:23 2023 +0300",
+ "message": "Now-the-color-of-the-banner-depends-on-the-color-of-the-CardView"
+},
+{
+ "version": "3.13.0",
+ "code": "617",
+ "date": "Sun Feb 19 18:37:29 2023 +0300",
+ "message": "Merge-pull-request-9-from-shirrumon-unstable"
+},
+{
+ "version": "3.13.0",
+ "code": "617",
+ "date": "Sun Feb 19 01:46:32 2023 +0100",
+ "message": "Merge-pull-request-1-from-shirrumon-add_own_filepicker_as_module"
+},
+{
+ "version": "3.13.0",
+ "code": "617",
+ "date": "Sun Feb 19 01:33:11 2023 +0100",
+ "message": "update-methods-to-pick-of-files"
+},
+{
+ "version": "3.13.0",
+ "code": "617",
+ "date": "Sun Feb 19 01:29:54 2023 +0100",
+ "message": "add-filepicker-as-module"
+},
+{
+ "version": "3.13.0",
+ "code": "617",
+ "date": "Sun Feb 12 01:16:30 2023 +0300",
+ "message": "Redesign-BannerViewPager-in-activity_stock-markup"
+},
+{
+ "version": "3.13.0",
+ "code": "617",
+ "date": "Fri Feb 10 20:02:57 2023 +0300",
+ "message": "Interaction-with-the-graphical-shell-of-the-plugin-system-will-be-frozen-indefinitely"
+},
+{
+ "version": "3.13.0",
+ "code": "617",
+ "date": "Thu Feb 9 02:17:26 2023 +0300",
+ "message": "Renaming-and-merging-the-ViewModel"
+},{
+ "version": "3.12.0",
+ "code": "616",
+ "date": "Thu Feb 2 21:06:40 2023 +0300",
+ "message": "QS-Fork-QPA-Update-to-3.12.0"
+},
+{
+ "version": "3.12.0",
+ "code": "616",
+ "date": "Thu Feb 2 21:03:49 2023 +0300",
+ "message": "Merge-pull-request-6-from-l3ger0j-unstable"
+},
+{
+ "version": "3.12.0",
+ "code": "616",
+ "date": "Thu Feb 2 20:49:39 2023 +0300",
+ "message": "Improved-translation"
+},
+{
+ "version": "3.12.0",
+ "code": "616",
+ "date": "Thu Feb 2 02:21:45 2023 +0300",
+ "message": "All-dependencies-have-been-updated"
+},
+{
+ "version": "3.12.0",
+ "code": "616",
+ "date": "Mon Jan 30 21:42:17 2023 +0300",
+ "message": "Where-possible-the-keyword-var-is-used"
+},
+{
+ "version": "3.12.0",
+ "code": "616",
+ "date": "Sat Jan 28 23:37:38 2023 +0300",
+ "message": "Added-advanced-color-setting-for-GameActivity"
+},{
+ "version": "3.11.0",
+ "code": "607",
+ "date": "Fri Jan 27 01:21:15 2023 +0300",
+ "message": "QS-Fork-QPA-Update-to-3.11.0"
+},
+{
+ "version": "3.11.0",
+ "code": "607",
+ "date": "Fri Jan 27 01:11:24 2023 +0300",
+ "message": "QS-Fork-QPA-Update-to-3.11.0"
+},
+{
+ "version": "3.11.0",
+ "code": "607",
+ "date": "Fri Jan 27 01:09:29 2023 +0300",
+ "message": "Fixed-icon-size.-Now-it-will-always-be-50x50-dp"
+},
+{
+ "version": "3.11.0",
+ "code": "607",
+ "date": "Sat Jan 21 21:48:29 2023 +0300",
+ "message": "Eliminated-unnecessary-nesting-of-ViewModels"
+},
+{
+ "version": "3.11.0",
+ "code": "607",
+ "date": "Fri Jan 20 21:48:11 2023 +0300",
+ "message": "Merge-pull-request-4-from-l3ger0j-unstable"
+},
+{
+ "version": "3.11.0",
+ "code": "607",
+ "date": "Fri Jan 20 21:41:24 2023 +0300",
+ "message": "New-language-system"
+},
+{
+ "version": "3.11.0",
+ "code": "607",
+ "date": "Wed Jan 18 22:47:28 2023 +0300",
+ "message": "QS-Fork-QPA-Update-to-3.10.0"
+},
+{
+ "version": "3.11.0",
+ "code": "607",
+ "date": "Wed Jan 18 22:43:29 2023 +0300",
+ "message": "Updated-AGP-to-7.4.0"
+},{
+ "version": "3.9.2",
+ "code": "602",
+ "date": "Fri Jan 13 18:45:20 2023 +0300",
+ "message": "Fix-incorrect-behavior-if-the-value-in-the-cache-class-is-not-initialized"
+},{
+ "version": "3.9.1",
+ "code": "601",
+ "date": "Fri Jan 13 00:57:02 2023 +0300",
+ "message": "QuickFix-of-the-settings-menu"
+},{
+ "version": "3.9.0",
+ "code": "600",
+ "date": "Thu Jan 12 22:03:15 2023 +0300",
+ "message": "QS-Fork-QPA-Update-to-3.9.0"
+},
+{
+ "version": "3.9.0",
+ "code": "600",
+ "date": "Thu Jan 12 22:01:11 2023 +0300",
+ "message": "Localization-selection-is-temporarily-frozen.-Now-the-current-localization-is-equal-to-the-system-one"
+},
+{
+ "version": "3.9.0",
+ "code": "600",
+ "date": "Thu Jan 12 02:20:10 2023 +0300",
+ "message": "Changed-the-name-of-variables-storing-the-state-of-switches-in-the-settings-menu"
+},
+{
+ "version": "3.9.0",
+ "code": "600",
+ "date": "Fri Jan 6 00:41:35 2023 +0300",
+ "message": "Fixed-and-configured-R8"
+},
+{
+ "version": "3.9.0",
+ "code": "600",
+ "date": "Sun Jan 1 23:04:24 2023 +0300",
+ "message": "The-translation-of-local-variables-to-the-keyword-var-has-been-completed"
+},
+{
+ "version": "3.9.0",
+ "code": "600",
+ "date": "Sun Jan 1 21:29:17 2023 +0300",
+ "message": "QS-Fork-QPA-Update-to-3.8.0"
+},
+{
+ "version": "3.9.0",
+ "code": "600",
+ "date": "Sun Jan 1 21:28:03 2023 +0300",
+ "message": "Added-initial-bug-reporting-functionality"
+},
+{
+ "version": "3.9.0",
+ "code": "600",
+ "date": "Fri Dec 30 20:06:37 2022 +0300",
+ "message": "Updated-the-list-of-participants"
+},
+{
+ "version": "3.9.0",
+ "code": "600",
+ "date": "Thu Dec 29 00:08:01 2022 +0300",
+ "message": "Fixed-a-crash-related-to-an-attempt-to-launch-the-game-after-calling-a-dialog-and-turning-the-screen"
+},{
+ "version": "3.7.0",
+ "code": "591",
+ "date": "Tue Dec 27 21:33:17 2022 +0300",
+ "message": "QS-Fork-QPA-Update-to-3.7.0"
+},
+{
+ "version": "3.7.0",
+ "code": "591",
+ "date": "Tue Dec 27 21:31:17 2022 +0300",
+ "message": "Added-the-functionality-of-installing-the-game-from-the-folder"
+},
+{
+ "version": "3.7.0",
+ "code": "591",
+ "date": "Tue Dec 27 02:09:48 2022 +0300",
+ "message": "QS-Fork-QPA-Update-to-3.6.0"
+},
+{
+ "version": "3.7.0",
+ "code": "591",
+ "date": "Tue Dec 27 02:08:28 2022 +0300",
+ "message": "Introducing-the-new-design-of-RecyclerView-elements"
+},
+{
+ "version": "3.7.0",
+ "code": "591",
+ "date": "Fri Dec 23 23:29:36 2022 +0300",
+ "message": "QS-Fork-QPA-Update-to-3.5.0"
+},
+{
+ "version": "3.7.0",
+ "code": "591",
+ "date": "Fri Dec 23 23:26:02 2022 +0300",
+ "message": "Added-extended-notifications-about-the-installation-status-of-the-game"
+},
+{
+ "version": "3.7.0",
+ "code": "591",
+ "date": "Sat Dec 17 02:57:12 2022 +0300",
+ "message": "Fixed-a-drop-in-the-library-stream-when-trying-to-upload-an-image"
+},
+{
+ "version": "3.7.0",
+ "code": "591",
+ "date": "Thu Dec 15 22:59:27 2022 +0300",
+ "message": "Fixed-the-disappearance-of-the-dialog-when-trying-to-select-an-archive"
+},
+{
+ "version": "3.7.0",
+ "code": "591",
+ "date": "Wed Dec 14 00:29:52 2022 +0300",
+ "message": "All-Game-DialogFragment-has-been-moved-to-a-single-builder"
+},
+{
+ "version": "3.7.0",
+ "code": "591",
+ "date": "Tue Dec 13 04:27:38 2022 +0300",
+ "message": "Now-the-pictures-should-be-displayed-most-efficiently-and-correctly"
+},
+{
+ "version": "3.7.0",
+ "code": "591",
+ "date": "Sat Dec 10 02:16:05 2022 +0300",
+ "message": "Correction-of-application-behavior-in-the-absence-of-a-prefix-in-the-link"
+},{
+ "version": "3.4.0",
+ "code": "580",
+ "date": "Sat Dec 10 01:12:54 2022 +0300",
+ "message": "QS-Fork-QPA-Update-to-3.4.0"
+},
+{
+ "version": "3.4.0",
+ "code": "580",
+ "date": "Thu Dec 1 23:30:16 2022 +0300",
+ "message": "Merge-pull-request-2-from-l3ger0j-add-license"
+},
+{
+ "version": "3.4.0",
+ "code": "580",
+ "date": "Thu Dec 1 01:50:20 2022 +0300",
+ "message": "Update-NOTICE"
+},
+{
+ "version": "3.4.0",
+ "code": "580",
+ "date": "Thu Dec 1 01:45:17 2022 +0300",
+ "message": "Create-NOTICE"
+},
+{
+ "version": "3.4.0",
+ "code": "580",
+ "date": "Thu Dec 1 01:29:44 2022 +0300",
+ "message": "Create-LICENCE"
+},{
+ "version": "3.3.0",
+ "code": "575",
+ "date": "Sat Nov 26 19:24:41 2022 +0300",
+ "message": "QS-Fork-QPA-Update-to-3.3.0"
+},
+{
+ "version": "3.3.0",
+ "code": "575",
+ "date": "Sat Nov 26 19:23:06 2022 +0300",
+ "message": "Now-Java-version-11-and-the-current-set-of-NDK-version-25.1.8937393-are-used"
+},
+{
+ "version": "3.3.0",
+ "code": "575",
+ "date": "Thu Nov 17 03:27:27 2022 +0300",
+ "message": "Updated-dependencies"
+},
+{
+ "version": "3.3.0",
+ "code": "575",
+ "date": "Sat Nov 12 03:33:06 2022 +0300",
+ "message": "Dependencies-have-been-updated"
+},{
+ "version": "3.2.0",
+ "code": "571",
+ "date": "Thu Nov 3 21:25:00 2022 +0300",
+ "message": "QS-Fork-QPA-Update-to-3.2.0"
+},
+{
+ "version": "3.2.0",
+ "code": "571",
+ "date": "Thu Nov 3 21:23:50 2022 +0300",
+ "message": "Adding-splash-screen"
+},
+{
+ "version": "3.2.0",
+ "code": "571",
+ "date": "Thu Nov 3 20:21:05 2022 +0300",
+ "message": "The-copyFileOrDirectory-method-has-been-split-and-moved-to-FileUtil"
+},
+{
+ "version": "3.2.0",
+ "code": "571",
+ "date": "Tue Nov 1 20:56:42 2022 +0300",
+ "message": "QS-Fork-QPA-Update-to-3.1.0"
+},
+{
+ "version": "3.2.0",
+ "code": "571",
+ "date": "Sun Oct 30 20:26:09 2022 +0300",
+ "message": "Updating-dependencies"
+},{
+ "version": "3.0.0",
+ "code": "566",
+ "date": "Wed Oct 26 23:16:27 2022 +0300",
+ "message": "QS-Fork-QPA-Update-to-3.0.0"
+},
+{
+ "version": "3.0.0",
+ "code": "566",
+ "date": "Wed Oct 26 22:00:29 2022 +0300",
+ "message": "The-application-icon-has-been-changed"
+},
+{
+ "version": "3.0.0",
+ "code": "566",
+ "date": "Mon Oct 24 15:07:42 2022 +0300",
+ "message": "Fixed-crash-related-to-WorkManager"
+},{
+ "version": "2.12.0",
+ "code": "563",
+ "date": "Sun Oct 23 20:02:45 2022 +0300",
+ "message": "QS-Fork-QPA-Update-to-2.12.0"
+},
+{
+ "version": "2.12.0",
+ "code": "563",
+ "date": "Sun Oct 23 19:58:11 2022 +0300",
+ "message": "Update-dependencies"
+},
+{
+ "version": "2.12.0",
+ "code": "563",
+ "date": "Fri Oct 21 21:33:19 2022 +0300",
+ "message": "Changed-the-way-classes-are-grouped-as-well-as-their-name"
+},
+{
+ "version": "2.12.0",
+ "code": "563",
+ "date": "Thu Oct 20 02:14:26 2022 +0300",
+ "message": "QS-Fork-QPA-Update-to-2.11.0"
+},
+{
+ "version": "2.12.0",
+ "code": "563",
+ "date": "Thu Oct 20 02:13:01 2022 +0300",
+ "message": "Simplification-name-classes-fragments-viewModels"
+},
+{
+ "version": "2.12.0",
+ "code": "563",
+ "date": "Wed Oct 19 04:24:32 2022 +0300",
+ "message": "Rename-FragmentLocal-to-GameStockFragment"
+},
+{
+ "version": "2.12.0",
+ "code": "563",
+ "date": "Mon Oct 17 20:14:24 2022 +0300",
+ "message": "Now-instead-of-the-setter-and-the-useOld-variable-ObservableBoolean-is-used"
+},
+{
+ "version": "2.12.0",
+ "code": "563",
+ "date": "Mon Oct 17 03:37:35 2022 +0300",
+ "message": "Fixed-the-color-selection-for-the-background"
+},{
+ "version": "2.10.1",
+ "code": "555",
+ "date": "Sat Oct 15 02:17:50 2022 +0300",
+ "message": "Fix-activity_settings"
+},
+{
+ "version": "2.10.1",
+ "code": "555",
+ "date": "Fri Oct 14 22:36:48 2022 +0300",
+ "message": "QS-Fork-QPA-Update-to-2.10.0"
+},
+{
+ "version": "2.10.1",
+ "code": "555",
+ "date": "Fri Oct 14 21:50:49 2022 +0300",
+ "message": "Remove-TextView-in-activity_settings"
+},
+{
+ "version": "2.10.1",
+ "code": "555",
+ "date": "Fri Oct 14 21:23:14 2022 +0300",
+ "message": "QS-Fork-QPA-Update-to-2.9.0"
+},
+{
+ "version": "2.10.1",
+ "code": "555",
+ "date": "Fri Oct 14 21:21:26 2022 +0300",
+ "message": "Update-Gradle-to-7.3.1"
+},
+{
+ "version": "2.10.1",
+ "code": "555",
+ "date": "Thu Oct 13 18:16:46 2022 +0300",
+ "message": "In-the-native-part-methods-related-to-working-with-the-file-system-have-been-removed"
+},
+{
+ "version": "2.10.1",
+ "code": "555",
+ "date": "Tue Oct 11 19:59:30 2022 +0300",
+ "message": "Fix-crash-and-change-language-SettingsActivity-when-rotate"
+},{
+ "version": "2.8.0",
+ "code": "548",
+ "date": "Tue Oct 11 18:04:50 2022 +0300",
+ "message": "QS-Fork-QPA-Update-to-2.8.0"
+},
+{
+ "version": "2.8.0",
+ "code": "548",
+ "date": "Tue Oct 11 02:33:32 2022 +0300",
+ "message": "Implemented-the-opening-of-internal-links-in-the-browser"
+},
+{
+ "version": "2.8.0",
+ "code": "548",
+ "date": "Tue Oct 11 01:42:20 2022 +0300",
+ "message": "To-return-stability-you-will-have-to-disable-this-bogged-down-minify"
+},
+{
+ "version": "2.8.0",
+ "code": "548",
+ "date": "Tue Oct 11 01:34:58 2022 +0300",
+ "message": "Fix-proguard-rules.pro"
+},
+{
+ "version": "2.8.0",
+ "code": "548",
+ "date": "Tue Oct 11 00:54:27 2022 +0300",
+ "message": "Trying-to-fix-load-icon-in-GameStockActivity-and-delete-MutableLiveData-in-ArchiveUtil"
+},
+{
+ "version": "2.8.0",
+ "code": "548",
+ "date": "Mon Oct 10 22:16:53 2022 +0300",
+ "message": "Remove-AppWrite-cleanup-code-enable-minify-and-edit-proguard-rules"
+},
+{
+ "version": "2.8.0",
+ "code": "548",
+ "date": "Sun Oct 9 20:34:03 2022 +0300",
+ "message": "formingInstallIntent-createInstallIntent-formingEditIntent-createEditIntent-and-fix-createEditIntent-method"
+},
+{
+ "version": "2.8.0",
+ "code": "548",
+ "date": "Sun Oct 9 19:39:49 2022 +0300",
+ "message": "Remove-getOld-method-in-ImageProvider"
+},
+{
+ "version": "2.8.0",
+ "code": "548",
+ "date": "Sun Oct 9 19:24:54 2022 +0300",
+ "message": "Fix-crash-when-trying-to-add-an-image-and-rollback-old-getGameInfo-method"
+},
+{
+ "version": "2.8.0",
+ "code": "548",
+ "date": "Sun Oct 9 04:30:52 2022 +0300",
+ "message": "Fix-build.gradle"
+},
+{
+ "version": "2.8.0",
+ "code": "548",
+ "date": "Sun Oct 9 04:08:32 2022 +0300",
+ "message": "Cleanup-and-add-a-pinch-of-analytics-alpha"
+},
+{
+ "version": "2.8.0",
+ "code": "548",
+ "date": "Sun Oct 9 03:01:35 2022 +0300",
+ "message": "Attempt-create-GameData-info-file-and-fix-method-shouldImageBeResized"
+},
+{
+ "version": "2.8.0",
+ "code": "548",
+ "date": "Sun Oct 9 02:00:54 2022 +0300",
+ "message": "Remove-Notification-rename-GameDirUtil-to-DirUtil-and-add-getOld-method-in-ImageProvider"
+},
+{
+ "version": "2.8.0",
+ "code": "548",
+ "date": "Wed Oct 5 22:23:29 2022 +0300",
+ "message": "QS-Fork-QPA-Update-to-2.7.0"
+},
+{
+ "version": "2.8.0",
+ "code": "548",
+ "date": "Wed Oct 5 22:22:35 2022 +0300",
+ "message": "If-there-are-no-save-files-in-gameDir-a-dialog-will-now-be-displayed"
+},
+{
+ "version": "2.8.0",
+ "code": "548",
+ "date": "Wed Oct 5 18:32:30 2022 +0300",
+ "message": "In-the-try-catch-of-the-shouldInterceptRequest-method-of-the-GameActivityVM-class-a-NullPointerException-was-added-to-the-catch-clause"
+},{
+ "version": "2.6.0",
+ "code": "532",
+ "date": "Tue Oct 4 20:52:44 2022 +0300",
+ "message": "QS-Fork-QPA-Update-to-2.6.0"
+},
+{
+ "version": "2.6.0",
+ "code": "532",
+ "date": "Tue Oct 4 20:50:43 2022 +0300",
+ "message": "Added-new-feature-DialogEdit-and-one-interfering-space-was-removed"
+},
+{
+ "version": "2.6.0",
+ "code": "532",
+ "date": "Mon Oct 3 20:09:37 2022 +0300",
+ "message": "Fixed-getting-Drawable-from-Bitmap-in-ImageProvider-new-workflow-file-and-cleanup-code"
+},
+{
+ "version": "2.6.0",
+ "code": "532",
+ "date": "Mon Oct 3 19:34:46 2022 +0300",
+ "message": "Update-README.md"
+},
+{
+ "version": "2.6.0",
+ "code": "532",
+ "date": "Mon Oct 3 19:30:39 2022 +0300",
+ "message": "Update-README.md"
+},
+{
+ "version": "2.6.0",
+ "code": "532",
+ "date": "Mon Oct 3 19:29:02 2022 +0300",
+ "message": "Update-android.yml-and-README.md"
+},
+{
+ "version": "2.6.0",
+ "code": "532",
+ "date": "Mon Oct 3 19:21:26 2022 +0300",
+ "message": "Update-android.yml"
+},
+{
+ "version": "2.6.0",
+ "code": "532",
+ "date": "Mon Oct 3 19:16:20 2022 +0300",
+ "message": "Update-android.yml"
+},
+{
+ "version": "2.6.0",
+ "code": "532",
+ "date": "Mon Oct 3 19:12:03 2022 +0300",
+ "message": "Update-android.yml"
+},
+{
+ "version": "2.6.0",
+ "code": "532",
+ "date": "Mon Oct 3 19:11:15 2022 +0300",
+ "message": "Update-android.yml"
+},
+{
+ "version": "2.6.0",
+ "code": "532",
+ "date": "Mon Oct 3 19:07:46 2022 +0300",
+ "message": "QS-Fork-QPA-Update-to-2.5.3"
+},
+{
+ "version": "2.6.0",
+ "code": "532",
+ "date": "Mon Oct 3 02:24:48 2022 +0300",
+ "message": "QS-Fork-QPA-Update-to-2.5.2"
+},
+{
+ "version": "2.6.0",
+ "code": "532",
+ "date": "Sat Oct 1 02:33:26 2022 +0300",
+ "message": "QS-Fork-QPA-Update-to-2.5.1"
+},
+{
+ "version": "2.6.0",
+ "code": "532",
+ "date": "Thu Sep 29 02:52:17 2022 +0300",
+ "message": "QS-Fork-QPA-Update-to-2.5.0"
+},
+{
+ "version": "2.6.0",
+ "code": "532",
+ "date": "Sun Sep 25 19:25:18 2022 +0300",
+ "message": "QS-Fork-QPA-Update-to-2.4.10"
+},
+{
+ "version": "2.6.0",
+ "code": "532",
+ "date": "Fri Sep 23 03:31:52 2022 +0300",
+ "message": "QS-Fork-QPA-Update-to-2.4.9"
+},
+{
+ "version": "2.6.0",
+ "code": "532",
+ "date": "Thu Sep 22 19:20:58 2022 +0300",
+ "message": "QS-Fork-QPA-Update-to-2.4.8"
+},
+{
+ "version": "2.6.0",
+ "code": "532",
+ "date": "Mon Sep 19 21:40:48 2022 +0300",
+ "message": "QS-Fork-QPA-Update-to-2.4.7"
+},{
+ "version": "v.2.4.6",
+ "code": "514",
+ "date": "Sat Sep 17 20:27:25 2022 +0300",
+ "message": "QS-Fork-QPA-Update-to-2.4.6"
+},
+{
+ "version": "v.2.4.6",
+ "code": "514",
+ "date": "Sat Sep 17 03:35:43 2022 +0300",
+ "message": "QS-Fork-QPA-Update-to-2.4.5"
+},
+{
+ "version": "v.2.4.6",
+ "code": "514",
+ "date": "Fri Sep 16 02:36:31 2022 +0300",
+ "message": "QS-Fork-QPA-Update-to-2.4.4"
+},
+{
+ "version": "v.2.4.6",
+ "code": "514",
+ "date": "Fri Sep 16 02:32:56 2022 +0300",
+ "message": "QS-Fork-QPA-Update-to-2.4.3"
+},
+{
+ "version": "v.2.4.6",
+ "code": "514",
+ "date": "Wed Sep 14 02:43:37 2022 +0300",
+ "message": "QS-Fork-QPA-Update-to-2.4.2"
+},
+{
+ "version": "v.2.4.6",
+ "code": "514",
+ "date": "Sun Sep 11 23:25:28 2022 +0300",
+ "message": "QS-Fork-QPA-Update-to-2.4.1"
+},{
+ "version": "v.2.4.0",
+ "code": "508",
+ "date": "Thu Sep 8 20:05:30 2022 +0300",
+ "message": "QS-Fork-QPA-Update-to-2.4.0"
+},
+{
+ "version": "v.2.4.0",
+ "code": "508",
+ "date": "Wed Aug 31 20:11:28 2022 +0300",
+ "message": "QS-Fork-QPA-Update-to-2.3.1"
+},{
+ "version": "v.2.3.0",
+ "code": "506",
+ "date": "Sat Aug 27 20:53:34 2022 +0300",
+ "message": "QS-Fork-QPA-Update-to-2.3.0"
+},
+{
+ "version": "v.2.3.0",
+ "code": "506",
+ "date": "Fri Aug 26 19:18:46 2022 +0300",
+ "message": "QS-Fork-QPA-Update-to-2.2.3"
+},
+{
+ "version": "v.2.3.0",
+ "code": "506",
+ "date": "Wed Aug 24 18:27:11 2022 +0300",
+ "message": "QS-Fork-QPA-Update-to-2.2.2"
+},
+{
+ "version": "v.2.3.0",
+ "code": "506",
+ "date": "Wed Aug 17 21:10:03 2022 +0300",
+ "message": "QS-Fork-QPA-Update-to-2.2.1"
+},{
+ "version": "v.2.2.0",
+ "code": "501",
+ "date": "Thu Aug 11 19:14:55 2022 +0300",
+ "message": "Merge-remote-tracking-branch-origin-master"
+},
+{
+ "version": "v.2.2.0",
+ "code": "501",
+ "date": "Thu Aug 11 19:13:46 2022 +0300",
+ "message": "QS-Fork-QPA-Update-to-2.2.0"
+},
+{
+ "version": "v.2.2.0",
+ "code": "501",
+ "date": "Tue Aug 9 18:15:42 2022 +0300",
+ "message": "Update-issue-templates"
+},
+{
+ "version": "v.2.2.0",
+ "code": "501",
+ "date": "Sat Aug 6 20:16:22 2022 +0300",
+ "message": "QS-Fork-QPA-Update-to-2.1.3"
+},
+{
+ "version": "v.2.2.0",
+ "code": "501",
+ "date": "Fri Aug 5 20:12:08 2022 +0300",
+ "message": "QS-Fork-QPA-Update-to-2.1.2"
+},
+{
+ "version": "v.2.2.0",
+ "code": "501",
+ "date": "Tue Jul 26 19:02:45 2022 +0300",
+ "message": "QS-Fork-QPA-Update-to-2.1.1"
+},{
+ "version": "v.2.1.0",
+ "code": "496",
+ "date": "Fri Jul 15 21:56:39 2022 +0300",
+ "message": "QS-Fork-QPA-Update-to-2.1.0"
+},{
+ "version": "2.0.1",
+ "code": "495",
+ "date": "Mon Jul 4 22:20:43 2022 +0300",
+ "message": "QS-Fork-QPA-Update-to-2.0.1"
+},{
+ "version": "2.0.0",
+ "code": "494",
+ "date": "Mon Jul 4 22:04:17 2022 +0300",
+ "message": "QS-Fork-QPA-Update-to-2.0.0"
+},{
+ "version": "1.9.0",
+ "code": "493",
+ "date": "Sat Jun 18 20:03:14 2022 +0300",
+ "message": "QS-Fork-QPA-Update-to-1.9.0"
+},{
+ "version": "1.8.1",
+ "code": "492",
+ "date": "Mon Jun 6 20:40:15 2022 +0300",
+ "message": "QS-Fork-QPA-Update-to-1.8.1"
+},
+{
+ "version": "1.8.1",
+ "code": "492",
+ "date": "Sat Jun 4 22:57:59 2022 +0300",
+ "message": "QS-Fork-QPA-UNST-Update-to-1.8.0-Don-t-Work"
+},{
+ "version": "1.7.0",
+ "code": "490",
+ "date": "Tue May 24 21:02:41 2022 +0300",
+ "message": "QS-Fork-QPA-Update-to-1.7.0"
+},{
+ "version": "1.6.1",
+ "code": "489",
+ "date": "Tue May 17 00:04:01 2022 +0300",
+ "message": "QS-Fork-QPA-PATH-Update-to-1.6.1"
+},{
+ "version": "1.6.0",
+ "code": "488",
+ "date": "Sun May 15 00:14:39 2022 +0300",
+ "message": "QS-Fork-QPA-Update-to-1.6.0"
+},
+{
+ "version": "1.6.0",
+ "code": "488",
+ "date": "Wed May 11 01:17:25 2022 +0300",
+ "message": "QS-Fork-QPA-Update-to-1.5.1"
+},{
+ "version": "1.5.0",
+ "code": "486",
+ "date": "Mon May 2 20:31:08 2022 +0300",
+ "message": "QS-Fork-QPA-Update-to-1.5.0"
+},{
+ "version": "1.4.2",
+ "code": "485",
+ "date": "Sun Apr 24 21:21:35 2022 +0300",
+ "message": "QS-Fork-QPA-Update-to-1.4.2"
+},
+{
+ "version": "1.4.2",
+ "code": "485",
+ "date": "Tue Apr 12 21:51:19 2022 +0300",
+ "message": "QS-Fork-QPA-UNSTABLE-Update-to-1.4.1"
+},{
+ "version": "1.4.0",
+ "code": "481",
+ "date": "Sat Apr 9 20:18:48 2022 +0300",
+ "message": "Merge-remote-tracking-branch-origin-master"
+},
+{
+ "version": "1.4.0",
+ "code": "481",
+ "date": "Sat Apr 9 20:16:14 2022 +0300",
+ "message": "QSP-Fork-Update-to-1.4.0"
+},
+{
+ "version": "1.4.0",
+ "code": "481",
+ "date": "Thu Apr 7 23:04:22 2022 +0300",
+ "message": "Delete-GameSerializationTest.java"
+},
+{
+ "version": "1.4.0",
+ "code": "481",
+ "date": "Thu Apr 7 22:45:41 2022 +0300",
+ "message": "Create-android.yml"
+},
+{
+ "version": "1.4.0",
+ "code": "481",
+ "date": "Thu Apr 7 22:28:57 2022 +0300",
+ "message": "QSP-Fork-Update-to-1.3.0"
+},
+{
+ "version": "1.4.0",
+ "code": "481",
+ "date": "Mon Apr 4 22:01:49 2022 +0300",
+ "message": "QSP-Fork-UNSTABLE-Update-to-1.2.1"
+},
+{
+ "version": "1.4.0",
+ "code": "481",
+ "date": "Mon Apr 4 01:22:48 2022 +0300",
+ "message": "QSP-Fork-UNSTABLE-Update-to-1.2.0"
+},
+{
+ "version": "1.4.0",
+ "code": "481",
+ "date": "Sun Apr 3 23:40:02 2022 +0300",
+ "message": "QSP-Fork-Update-to-1.1.0"
+},
+{
+ "version": "1.4.0",
+ "code": "481",
+ "date": "Sun Apr 3 02:25:21 2022 +0300",
+ "message": "QSP-Fork-Init-commit.-Update-to-1.0.0"
+},
+{
+ "version": "1.4.0",
+ "code": "481",
+ "date": "Tue Feb 22 13:15:16 2022 +0700",
+ "message": "Add-experimental-AQSP-archive-support-site-only"
+},
+{
+ "version": "1.4.0",
+ "code": "481",
+ "date": "Tue Feb 22 12:39:10 2022 +0700",
+ "message": "Run-showSaveGamePopup-on-UI-thread"
+},
+{
+ "version": "1.4.0",
+ "code": "481",
+ "date": "Tue Feb 22 11:46:32 2022 +0700",
+ "message": "Remove-setDoOutput-when-downloading"
+},
+{
+ "version": "1.4.0",
+ "code": "481",
+ "date": "Tue Feb 22 11:19:02 2022 +0700",
+ "message": "Fix-game-folder-normalization"
+},
+{
+ "version": "1.4.0",
+ "code": "481",
+ "date": "Tue Feb 22 09:47:27 2022 +0700",
+ "message": "Enable-orientation-change-stability-improvements"
+},
+{
+ "version": "1.4.0",
+ "code": "481",
+ "date": "Mon Feb 21 14:26:08 2022 +0700",
+ "message": "Do-not-display-unsupported-file-types-in-stock-activity"
+},
+{
+ "version": "1.4.0",
+ "code": "481",
+ "date": "Mon Feb 21 14:20:08 2022 +0700",
+ "message": "Display-file-type-in-stock-activity"
+},
+{
+ "version": "1.4.0",
+ "code": "481",
+ "date": "Mon Feb 21 13:40:57 2022 +0700",
+ "message": "Unify-logic-for-local-and-remote-game-installation"
+},
+{
+ "version": "1.4.0",
+ "code": "481",
+ "date": "Mon Feb 21 12:40:59 2022 +0700",
+ "message": "Cleanup-manifest"
+},
+{
+ "version": "1.4.0",
+ "code": "481",
+ "date": "Mon Feb 21 12:26:59 2022 +0700",
+ "message": "Move-all-utility-classes-to-shared"
+},
+{
+ "version": "1.4.0",
+ "code": "481",
+ "date": "Mon Feb 21 12:22:57 2022 +0700",
+ "message": "Use-SimpleXML-library-to-de-serialize-game-info"
+},
+{
+ "version": "1.4.0",
+ "code": "481",
+ "date": "Mon Feb 21 10:04:27 2022 +0700",
+ "message": "Bump-minSdkVersion-to-21"
+},
+{
+ "version": "1.4.0",
+ "code": "481",
+ "date": "Sat Feb 19 09:56:29 2022 +0700",
+ "message": "Remove-field-accessors-from-all-models-and-DTOs"
+},
+{
+ "version": "1.4.0",
+ "code": "481",
+ "date": "Sat Feb 19 09:32:12 2022 +0700",
+ "message": "Reorganize-packages"
+},
+{
+ "version": "1.4.0",
+ "code": "481",
+ "date": "Sat Feb 19 08:58:50 2022 +0700",
+ "message": "Remove-field-accessors-from-GameStockItem"
+},
+{
+ "version": "1.4.0",
+ "code": "481",
+ "date": "Tue Feb 15 08:48:04 2022 +0700",
+ "message": "Normalize-path-to-audio-files"
+},
+{
+ "version": "1.4.0",
+ "code": "481",
+ "date": "Tue Feb 15 08:43:23 2022 +0700",
+ "message": "Fix-crash-with-animated-drawables"
+},
+{
+ "version": "1.4.0",
+ "code": "481",
+ "date": "Tue Feb 15 08:42:50 2022 +0700",
+ "message": "Set-compileSdkVersion-to-31"
+},
+{
+ "version": "1.4.0",
+ "code": "481",
+ "date": "Fri Feb 11 14:02:34 2022 +0700",
+ "message": "Bump-version-code-to-248"
+},{
+ "version": "2.3.2",
+ "code": "455",
+ "date": "Fri Feb 11 13:57:51 2022 +0700",
+ "message": "Normalize-absolute-paths-in-ImageProvider"
+},
+{
+ "version": "2.3.2",
+ "code": "455",
+ "date": "Fri Feb 11 13:55:16 2022 +0700",
+ "message": "Implement-direct-install-from-RAR-archives"
+},
+{
+ "version": "2.3.2",
+ "code": "455",
+ "date": "Fri Feb 11 13:08:59 2022 +0700",
+ "message": "Refactor-ArchiveUtil"
+},
+{
+ "version": "2.3.2",
+ "code": "455",
+ "date": "Thu Feb 10 12:23:55 2022 +0700",
+ "message": "Add-experimental-support-for-RAR-archives"
+},
+{
+ "version": "2.3.2",
+ "code": "455",
+ "date": "Thu Feb 10 10:33:25 2022 +0700",
+ "message": "Update-dependencies-add-android-exported"
+},
+{
+ "version": "2.3.2",
+ "code": "455",
+ "date": "Thu Feb 10 10:26:20 2022 +0700",
+ "message": "Update-compile-and-target-SDK-versions"
+},
+{
+ "version": "2.3.2",
+ "code": "455",
+ "date": "Thu Feb 10 10:18:21 2022 +0700",
+ "message": "Update-Gradle-dependencies"
+},
+{
+ "version": "2.3.2",
+ "code": "455",
+ "date": "Wed Mar 31 08:22:32 2021 +0700",
+ "message": "Override-onConfigurationChanged-in-Activities"
+},
+{
+ "version": "2.3.2",
+ "code": "455",
+ "date": "Wed Mar 31 07:58:05 2021 +0700",
+ "message": "Add-screenSize-to-ignored-configuration-changes"
+},
+{
+ "version": "2.3.2",
+ "code": "455",
+ "date": "Sun Feb 21 11:29:32 2021 +0700",
+ "message": "Bump-application-version-code"
+},{
+ "version": "2.3.1",
+ "code": "445",
+ "date": "Sun Feb 21 11:24:38 2021 +0700",
+ "message": "Attempt-to-prevent-orientation-changes-from-portrait"
+},
+{
+ "version": "2.3.1",
+ "code": "445",
+ "date": "Sun Feb 21 11:10:13 2021 +0700",
+ "message": "Add-option-to-set-actions-list-height-as-1-4-and-1-5"
+},
+{
+ "version": "2.3.1",
+ "code": "445",
+ "date": "Sun Feb 21 11:09:56 2021 +0700",
+ "message": "Hide-actions-list-if-there-are-no-actions"
+},
+{
+ "version": "2.3.1",
+ "code": "445",
+ "date": "Thu Dec 31 15:27:40 2020 +0700",
+ "message": "Fix-typo-in-HtmlProcessor"
+},
+{
+ "version": "2.3.1",
+ "code": "445",
+ "date": "Thu Dec 31 11:18:48 2020 +0700",
+ "message": "Fix-ImageBox-accepting-an-absolute-not-relative-path"
+},
+{
+ "version": "2.3.1",
+ "code": "445",
+ "date": "Thu Dec 31 10:33:43 2020 +0700",
+ "message": "Set-next-application-version"
+},{
+ "version": "2.3.0",
+ "code": "439",
+ "date": "Thu Dec 31 10:04:14 2020 +0700",
+ "message": "Fix-interface-colors-not-being-reset"
+},
+{
+ "version": "2.3.0",
+ "code": "439",
+ "date": "Thu Dec 31 09:57:22 2020 +0700",
+ "message": "Fix-About-dialog-colors"
+},
+{
+ "version": "2.3.0",
+ "code": "439",
+ "date": "Thu Dec 31 09:54:24 2020 +0700",
+ "message": "Cleanup"
+},
+{
+ "version": "2.3.0",
+ "code": "439",
+ "date": "Thu Dec 31 09:48:58 2020 +0700",
+ "message": "Only-resize-HTML-images-larger-than-a-threshold"
+},
+{
+ "version": "2.3.0",
+ "code": "439",
+ "date": "Thu Dec 31 00:43:45 2020 +0700",
+ "message": "Cover-HtmlProcessor-with-unit-and-instrumentation-tests"
+},
+{
+ "version": "2.3.0",
+ "code": "439",
+ "date": "Wed Dec 30 23:20:20 2020 +0700",
+ "message": "Cleanup-and-refactor-activities"
+},
+{
+ "version": "2.3.0",
+ "code": "439",
+ "date": "Wed Dec 30 22:37:39 2020 +0700",
+ "message": "Refactor-interface-refreshing"
+},
+{
+ "version": "2.3.0",
+ "code": "439",
+ "date": "Wed Dec 30 21:36:00 2020 +0700",
+ "message": "Move-counter-handling-into-GameActivity"
+},
+{
+ "version": "2.3.0",
+ "code": "439",
+ "date": "Wed Dec 30 21:04:40 2020 +0700",
+ "message": "Make-LibQspProxyImpl-not-depend-on-settings"
+},
+{
+ "version": "2.3.0",
+ "code": "439",
+ "date": "Wed Dec 30 20:58:36 2020 +0700",
+ "message": "Cleanup"
+},
+{
+ "version": "2.3.0",
+ "code": "439",
+ "date": "Wed Dec 30 20:56:11 2020 +0700",
+ "message": "Change-package-structure"
+},
+{
+ "version": "2.3.0",
+ "code": "439",
+ "date": "Wed Dec 30 20:31:16 2020 +0700",
+ "message": "Cleanup"
+},
+{
+ "version": "2.3.0",
+ "code": "439",
+ "date": "Wed Dec 30 20:26:17 2020 +0700",
+ "message": "Make-sure-no-blocking-happens-on-the-main-thread"
+},
+{
+ "version": "2.3.0",
+ "code": "439",
+ "date": "Wed Dec 30 20:22:16 2020 +0700",
+ "message": "Use-ex-abbreviation-for-exceptions"
+},
+{
+ "version": "2.3.0",
+ "code": "439",
+ "date": "Wed Dec 30 20:18:24 2020 +0700",
+ "message": "Add-isSameThread-helper-method"
+},
+{
+ "version": "2.3.0",
+ "code": "439",
+ "date": "Wed Dec 30 20:16:39 2020 +0700",
+ "message": "Do-not-save-activity-context-into-a-variable"
+},
+{
+ "version": "2.3.0",
+ "code": "439",
+ "date": "Wed Dec 30 20:06:40 2020 +0700",
+ "message": "Start-and-stop-AudioPlayer-as-part-of-GameActivity-lifecycle"
+},
+{
+ "version": "2.3.0",
+ "code": "439",
+ "date": "Wed Dec 30 19:13:01 2020 +0700",
+ "message": "Move-LibQspProxy-handling-from-Application-into-Service"
+},
+{
+ "version": "2.3.0",
+ "code": "439",
+ "date": "Wed Dec 30 17:46:19 2020 +0700",
+ "message": "Optimize-imports"
+},
+{
+ "version": "2.3.0",
+ "code": "439",
+ "date": "Wed Dec 30 17:45:21 2020 +0700",
+ "message": "Improve-synchronization-between-main-libqsp-and-audio-threads"
+},
+{
+ "version": "2.3.0",
+ "code": "439",
+ "date": "Wed Dec 30 15:42:08 2020 +0700",
+ "message": "Reduce-swipe-sensitivity"
+},
+{
+ "version": "2.3.0",
+ "code": "439",
+ "date": "Wed Dec 30 15:07:12 2020 +0700",
+ "message": "Implement-configuration-of-actions-to-screen-height-ratio"
+},
+{
+ "version": "2.3.0",
+ "code": "439",
+ "date": "Wed Dec 30 14:40:26 2020 +0700",
+ "message": "Remove-Close-Application-button"
+},
+{
+ "version": "2.3.0",
+ "code": "439",
+ "date": "Sun Dec 27 20:54:34 2020 +0700",
+ "message": "Set-next-application-version"
+},
+{
+ "version": "2.3.0",
+ "code": "439",
+ "date": "Sun Dec 27 19:18:20 2020 +0700",
+ "message": "Improve-toggleMainDescAndActions"
+},
+{
+ "version": "2.3.0",
+ "code": "439",
+ "date": "Sun Dec 27 19:14:18 2020 +0700",
+ "message": "Check-what-tab-is-active-when-executing-ShowWindow"
+},
+{
+ "version": "2.3.0",
+ "code": "439",
+ "date": "Sun Dec 27 19:10:10 2020 +0700",
+ "message": "Remember-state-of-SHOWACTS"
+},
+{
+ "version": "2.3.0",
+ "code": "439",
+ "date": "Sun Dec 27 19:07:05 2020 +0700",
+ "message": "Hide-separator-when-SHOWACTS-0"
+},{
+ "version": "2.2.1",
+ "code": "411",
+ "date": "Sun Dec 27 18:16:09 2020 +0700",
+ "message": "Show-game-title-in-confirm-delete-dialog"
+},
+{
+ "version": "2.2.1",
+ "code": "411",
+ "date": "Sun Dec 27 18:10:27 2020 +0700",
+ "message": "Separate-main-description-from-actions-with-a-separator"
+},
+{
+ "version": "2.2.1",
+ "code": "411",
+ "date": "Sun Dec 27 17:56:38 2020 +0700",
+ "message": "Show-game-title-in-delete-game-dialog"
+},
+{
+ "version": "2.2.1",
+ "code": "411",
+ "date": "Sun Dec 27 17:50:14 2020 +0700",
+ "message": "Refresh-remote-games-when-deleting-a-local-game"
+},
+{
+ "version": "2.2.1",
+ "code": "411",
+ "date": "Sun Dec 27 16:42:06 2020 +0700",
+ "message": "Cleanup-GameActivity"
+},
+{
+ "version": "2.2.1",
+ "code": "411",
+ "date": "Sun Dec 27 16:40:23 2020 +0700",
+ "message": "Use-getters-setters-in-PlayerViewState"
+},
+{
+ "version": "2.2.1",
+ "code": "411",
+ "date": "Sun Dec 27 16:30:56 2020 +0700",
+ "message": "Statically-import-FileUtil-methods"
+},
+{
+ "version": "2.2.1",
+ "code": "411",
+ "date": "Sun Dec 27 16:27:13 2020 +0700",
+ "message": "Cleanup-GameActivity-layout"
+},
+{
+ "version": "2.2.1",
+ "code": "411",
+ "date": "Sun Dec 27 16:22:24 2020 +0700",
+ "message": "Cleanup-ImageProvider"
+},
+{
+ "version": "2.2.1",
+ "code": "411",
+ "date": "Sun Dec 27 16:17:00 2020 +0700",
+ "message": "Convert-documentation-comments-to-Russian"
+},
+{
+ "version": "2.2.1",
+ "code": "411",
+ "date": "Sun Dec 27 16:11:37 2020 +0700",
+ "message": "Cleanup-resources"
+},
+{
+ "version": "2.2.1",
+ "code": "411",
+ "date": "Sun Dec 27 15:55:00 2020 +0700",
+ "message": "Refactor-gamestockInfo-parsing"
+},
+{
+ "version": "2.2.1",
+ "code": "411",
+ "date": "Sun Dec 27 15:36:28 2020 +0700",
+ "message": "Use-MACRO_CASE-in-WindowType-enum"
+},
+{
+ "version": "2.2.1",
+ "code": "411",
+ "date": "Sun Dec 27 15:34:25 2020 +0700",
+ "message": "Move-HTML-processing-from-HtmlUtil-into-HtmlProcessor"
+},
+{
+ "version": "2.2.1",
+ "code": "411",
+ "date": "Sun Dec 27 15:28:49 2020 +0700",
+ "message": "Replace-JniResult-with-concrete-types"
+},
+{
+ "version": "2.2.1",
+ "code": "411",
+ "date": "Sun Dec 27 15:08:07 2020 +0700",
+ "message": "Extract-native-libqsp-methods-into-NativeMethods"
+},
+{
+ "version": "2.2.1",
+ "code": "411",
+ "date": "Sun Dec 27 14:44:06 2020 +0700",
+ "message": "Replace-Begin-End-with-region-endregion-for-code-folding"
+},
+{
+ "version": "2.2.1",
+ "code": "411",
+ "date": "Sun Dec 27 14:42:05 2020 +0700",
+ "message": "Add-LibQspCallbacks-interface"
+},
+{
+ "version": "2.2.1",
+ "code": "411",
+ "date": "Sun Dec 27 14:30:43 2020 +0700",
+ "message": "Use-application-scope-ImageProvider"
+},
+{
+ "version": "2.2.1",
+ "code": "411",
+ "date": "Sun Dec 27 14:20:35 2020 +0700",
+ "message": "Rename-ImageBoxActivity-layout-file"
+},
+{
+ "version": "2.2.1",
+ "code": "411",
+ "date": "Sun Dec 27 13:45:15 2020 +0700",
+ "message": "Rename-MainActivity-into-GameActivity"
+},
+{
+ "version": "2.2.1",
+ "code": "411",
+ "date": "Sun Dec 27 13:41:12 2020 +0700",
+ "message": "Move-LibQspProxy-into-libqsp-package"
+},
+{
+ "version": "2.2.1",
+ "code": "411",
+ "date": "Sun Dec 27 13:21:35 2020 +0700",
+ "message": "Fix-crash-when-opening-GameStockActivity-while-playing-a-game"
+},
+{
+ "version": "2.2.1",
+ "code": "411",
+ "date": "Sun Dec 27 13:16:41 2020 +0700",
+ "message": "Update-README"
+},{
+ "version": "2.2.0",
+ "code": "387",
+ "date": "Sun Dec 27 12:56:03 2020 +0700",
+ "message": "Update-application-version"
+},
+{
+ "version": "2.2.0",
+ "code": "387",
+ "date": "Sun Dec 27 12:52:37 2020 +0700",
+ "message": "Fix-hiding-actions"
+},
+{
+ "version": "2.2.0",
+ "code": "387",
+ "date": "Sun Dec 27 12:20:52 2020 +0700",
+ "message": "Redesign-main-activity-layout"
+},
+{
+ "version": "2.2.0",
+ "code": "387",
+ "date": "Sun Dec 27 11:04:32 2020 +0700",
+ "message": "Reduce-title-text-size"
+},
+{
+ "version": "2.2.0",
+ "code": "387",
+ "date": "Sun Dec 27 10:47:44 2020 +0700",
+ "message": "Use-different-icons-for-active-inactive-tabs"
+},
+{
+ "version": "2.2.0",
+ "code": "387",
+ "date": "Sat Dec 26 16:54:06 2020 +0700",
+ "message": "Replace-options-and-title-bar-with-a-single-action-bar"
+},
+{
+ "version": "2.2.0",
+ "code": "387",
+ "date": "Sat Dec 26 13:38:42 2020 +0700",
+ "message": "Add-more-swipe-event-handlers"
+},
+{
+ "version": "2.2.0",
+ "code": "387",
+ "date": "Sat Dec 26 13:36:12 2020 +0700",
+ "message": "Catch-exceptions-in-onFling"
+},
+{
+ "version": "2.2.0",
+ "code": "387",
+ "date": "Sat Dec 26 13:03:05 2020 +0700",
+ "message": "Change-active-tab-by-swapping-horizontally"
+},
+{
+ "version": "2.2.0",
+ "code": "387",
+ "date": "Sat Dec 26 11:45:56 2020 +0700",
+ "message": "Fix-debug-messages-not-being-logged"
+},
+{
+ "version": "2.2.0",
+ "code": "387",
+ "date": "Fri Dec 25 18:28:29 2020 +0700",
+ "message": "Remove-unused-imports"
+},
+{
+ "version": "2.2.0",
+ "code": "387",
+ "date": "Fri Dec 25 18:25:07 2020 +0700",
+ "message": "Extract-stream-copying-into-StreamUtil"
+},
+{
+ "version": "2.2.0",
+ "code": "387",
+ "date": "Fri Dec 25 18:00:49 2020 +0700",
+ "message": "Use-slf4j-android-revert-to-29-target-SDK-version"
+},
+{
+ "version": "2.2.0",
+ "code": "387",
+ "date": "Fri Dec 25 17:23:13 2020 +0700",
+ "message": "Update-tools-and-dependencies"
+},
+{
+ "version": "2.2.0",
+ "code": "387",
+ "date": "Fri Dec 25 16:11:33 2020 +0700",
+ "message": "Cleanup-add-support-for-unit-testing"
+},
+{
+ "version": "2.2.0",
+ "code": "387",
+ "date": "Fri Dec 25 14:44:22 2020 +0700",
+ "message": "Cleanup-use-lambdas-and-method-references-from-Java-8"
+},{
+ "version": "2.1.5",
+ "code": "371",
+ "date": "Fri Dec 25 14:02:32 2020 +0700",
+ "message": "Update-version-to-2.1.5"
+},
+{
+ "version": "2.1.5",
+ "code": "371",
+ "date": "Fri Dec 25 13:49:54 2020 +0700",
+ "message": "Fix-start-of-Komm-Susser-Tod"
+},
+{
+ "version": "2.1.5",
+ "code": "371",
+ "date": "Fri Dec 25 13:09:20 2020 +0700",
+ "message": "Do-not-show-local-games-on-remote-tab"
+},
+{
+ "version": "2.1.5",
+ "code": "371",
+ "date": "Fri Dec 25 12:12:45 2020 +0700",
+ "message": "Implement-OPENQST-and-ADDQST-refactor-file-management"
+},
+{
+ "version": "2.1.5",
+ "code": "371",
+ "date": "Thu Dec 24 22:37:28 2020 +0700",
+ "message": "Implement-updating-installed-games"
+},
+{
+ "version": "2.1.5",
+ "code": "371",
+ "date": "Thu Dec 24 17:38:13 2020 +0700",
+ "message": "Implement-cancelling-game-download"
+},
+{
+ "version": "2.1.5",
+ "code": "371",
+ "date": "Thu Dec 24 16:55:31 2020 +0700",
+ "message": "Implement-showacts-instruction"
+},
+{
+ "version": "2.1.5",
+ "code": "371",
+ "date": "Thu Dec 24 15:17:51 2020 +0700",
+ "message": "Implement-installing-games-from-folder"
+},{
+ "version": "2.1.4",
+ "code": "363",
+ "date": "Wed Jul 1 14:38:04 2020 +0700",
+ "message": "Update-version-to-2.1.4"
+},
+{
+ "version": "2.1.4",
+ "code": "363",
+ "date": "Wed Jul 1 14:35:26 2020 +0700",
+ "message": "Fix-savegame-function"
+},
+{
+ "version": "2.1.4",
+ "code": "363",
+ "date": "Wed Jul 1 14:00:24 2020 +0700",
+ "message": "Fix-GetMSCount-return-value"
+},
+{
+ "version": "2.1.4",
+ "code": "363",
+ "date": "Wed Jul 1 13:53:56 2020 +0700",
+ "message": "Replace-System.currentTimeMillis-with-SystemClock"
+},
+{
+ "version": "2.1.4",
+ "code": "363",
+ "date": "Wed Jul 1 13:50:32 2020 +0700",
+ "message": "Give-name-to-the-QSP-thread"
+},{
+ "version": "2.1.3",
+ "code": "358",
+ "date": "Sun Jun 21 13:30:35 2020 +0700",
+ "message": "Update-version-to-2.1.3"
+},
+{
+ "version": "2.1.3",
+ "code": "358",
+ "date": "Sun Jun 21 13:24:31 2020 +0700",
+ "message": "Fix-msecscount-returning-0"
+},
+{
+ "version": "2.1.3",
+ "code": "358",
+ "date": "Sun Mar 1 21:40:48 2020 +0700",
+ "message": "Update-Gradle-and-NDK-version"
+},
+{
+ "version": "2.1.3",
+ "code": "358",
+ "date": "Sun Mar 1 21:40:02 2020 +0700",
+ "message": "Update-load-menu-to-show-modified-date"
+},{
+ "version": "2.1.2",
+ "code": "354",
+ "date": "Fri Feb 21 22:32:51 2020 +0700",
+ "message": "Set-version-to-2.1.2"
+},
+{
+ "version": "2.1.2",
+ "code": "354",
+ "date": "Fri Feb 21 22:11:45 2020 +0700",
+ "message": "Fix-executable-links-in-the-game"
+},
+{
+ "version": "2.1.2",
+ "code": "354",
+ "date": "Fri Feb 21 21:37:59 2020 +0700",
+ "message": "Fix-loading-saves-from-internal-storage-on-certain-phones"
+},
+{
+ "version": "2.1.2",
+ "code": "354",
+ "date": "Thu Feb 20 16:08:38 2020 +0300",
+ "message": "Add-support-for-games-with-multiple-game-files"
+},
+{
+ "version": "2.1.2",
+ "code": "354",
+ "date": "Wed Feb 19 07:31:01 2020 +0700",
+ "message": "Change-tabs-content-description"
+},
+{
+ "version": "2.1.2",
+ "code": "354",
+ "date": "Tue Feb 18 20:54:18 2020 +0700",
+ "message": "Add-support-for-game-archives-with-game-files-in-a-subdirectory"
+},
+{
+ "version": "2.1.2",
+ "code": "354",
+ "date": "Tue Feb 18 20:47:20 2020 +0700",
+ "message": "Add-contentDescription-attribute-to-image-buttons-in-the-title-bar"
+},
+{
+ "version": "2.1.2",
+ "code": "354",
+ "date": "Tue Feb 18 20:16:56 2020 +0700",
+ "message": "Clean-up-GameStockActivity"
+},
+{
+ "version": "2.1.2",
+ "code": "354",
+ "date": "Tue Feb 18 20:51:36 2020 +0700",
+ "message": "Merge-pull-request-13-from-jineyne-fix-video"
+},
+{
+ "version": "2.1.2",
+ "code": "354",
+ "date": "Tue Feb 18 22:21:30 2020 +0900",
+ "message": "Fix-video-to-show-clearly"
+},{
+ "version": "2.1.1",
+ "code": "344",
+ "date": "Wed Feb 12 11:31:36 2020 +0700",
+ "message": "Set-version-to-2.1.1"
+},
+{
+ "version": "2.1.1",
+ "code": "344",
+ "date": "Wed Feb 12 11:29:37 2020 +0700",
+ "message": "Refactor-AudioPlayer"
+},
+{
+ "version": "2.1.1",
+ "code": "344",
+ "date": "Wed Feb 12 10:46:29 2020 +0700",
+ "message": "Start-audio-thread-lazily"
+},
+{
+ "version": "2.1.1",
+ "code": "344",
+ "date": "Wed Feb 12 10:38:09 2020 +0700",
+ "message": "Remove-option-to-resume-game-after-it-is-deleted"
+},
+{
+ "version": "2.1.1",
+ "code": "344",
+ "date": "Tue Feb 11 09:25:45 2020 +0700",
+ "message": "Sort-menu-items-by-relevance"
+},
+{
+ "version": "2.1.1",
+ "code": "344",
+ "date": "Tue Feb 11 09:15:52 2020 +0700",
+ "message": "Start-QSP-library-thread-lazily"
+},
+{
+ "version": "2.1.1",
+ "code": "344",
+ "date": "Tue Feb 11 08:59:38 2020 +0700",
+ "message": "Rename-menu_deletegames-to-menu_deletegame"
+},
+{
+ "version": "2.1.1",
+ "code": "344",
+ "date": "Tue Feb 11 08:48:44 2020 +0700",
+ "message": "Do-not-block-in-AudioPlayer-methods"
+},{
+ "version": "2.1.0",
+ "code": "336",
+ "date": "Mon Feb 10 22:35:04 2020 +0700",
+ "message": "Set-version-to-2.1.0"
+},
+{
+ "version": "2.1.0",
+ "code": "336",
+ "date": "Mon Feb 10 17:56:26 2020 +0700",
+ "message": "Refactor-MainActivity"
+},
+{
+ "version": "2.1.0",
+ "code": "336",
+ "date": "Mon Feb 10 09:02:02 2020 +0700",
+ "message": "Make-usage-of-game-font-optional"
+},{
+ "version": "2.1.0-beta-2",
+ "code": "333",
+ "date": "Sat Feb 8 10:32:42 2020 +0700",
+ "message": "Set-version-to-2.1.0-beta-2"
+},
+{
+ "version": "2.1.0-beta-2",
+ "code": "333",
+ "date": "Sat Feb 8 12:11:48 2020 +0700",
+ "message": "Fix-flashing-of-vars-description-tab-button"
+},
+{
+ "version": "2.1.0-beta-2",
+ "code": "333",
+ "date": "Sat Feb 8 12:07:28 2020 +0700",
+ "message": "Improve-exec-block-encoding-with-nested-HTML"
+},
+{
+ "version": "2.1.0-beta-2",
+ "code": "333",
+ "date": "Sat Feb 8 11:29:32 2020 +0700",
+ "message": "Htmlize-line-breaks-after-encoding-of-exec-blocks"
+},
+{
+ "version": "2.1.0-beta-2",
+ "code": "333",
+ "date": "Sat Feb 8 11:19:19 2020 +0700",
+ "message": "Fix-display-of-in-game-color-settings"
+},
+{
+ "version": "2.1.0-beta-2",
+ "code": "333",
+ "date": "Sat Feb 8 11:09:31 2020 +0700",
+ "message": "Fix-display-of-images-with-Cyrillic-names"
+},
+{
+ "version": "2.1.0-beta-2",
+ "code": "333",
+ "date": "Sat Feb 8 10:30:15 2020 +0700",
+ "message": "Use-Android-Material-Color-Picker-library"
+},
+{
+ "version": "2.1.0-beta-2",
+ "code": "333",
+ "date": "Sat Feb 8 08:48:02 2020 +0700",
+ "message": "Show-concrete-errors-on-download-validate-game-directory"
+},
+{
+ "version": "2.1.0-beta-2",
+ "code": "333",
+ "date": "Sat Feb 8 08:02:44 2020 +0700",
+ "message": "Show-separate-message-for-extracting-downloaded-game"
+},
+{
+ "version": "2.1.0-beta-2",
+ "code": "333",
+ "date": "Sat Feb 8 07:49:10 2020 +0700",
+ "message": "Remove-HTML-tags-in-message-box"
+},
+{
+ "version": "2.1.0-beta-2",
+ "code": "333",
+ "date": "Fri Feb 7 23:48:06 2020 +0700",
+ "message": "Add-margin-to-action-list"
+},
+{
+ "version": "2.1.0-beta-2",
+ "code": "333",
+ "date": "Fri Feb 7 23:42:41 2020 +0700",
+ "message": "Use-game-title-for-custom-save-filename"
+},
+{
+ "version": "2.1.0-beta-2",
+ "code": "333",
+ "date": "Fri Feb 7 23:39:41 2020 +0700",
+ "message": "Translate-about-game-dialog-to-Russian"
+},
+{
+ "version": "2.1.0-beta-2",
+ "code": "333",
+ "date": "Fri Feb 7 23:29:34 2020 +0700",
+ "message": "Rename-to"
+},
+{
+ "version": "2.1.0-beta-2",
+ "code": "333",
+ "date": "Fri Feb 7 23:28:00 2020 +0700",
+ "message": "Add-suffix-Activity-to-activities"
+},
+{
+ "version": "2.1.0-beta-2",
+ "code": "333",
+ "date": "Fri Feb 7 23:22:28 2020 +0700",
+ "message": "Move-uses-permission-tags-above-application-tag"
+},
+{
+ "version": "2.1.0-beta-2",
+ "code": "333",
+ "date": "Fri Feb 7 23:19:46 2020 +0700",
+ "message": "Implement-save-load-from-file"
+},
+{
+ "version": "2.1.0-beta-2",
+ "code": "333",
+ "date": "Fri Feb 7 22:16:15 2020 +0700",
+ "message": "Rename-stopLibraryThread-to-stopLibQspThread"
+},
+{
+ "version": "2.1.0-beta-2",
+ "code": "333",
+ "date": "Fri Feb 7 22:14:29 2020 +0700",
+ "message": "Do-not-recreate-QspPlayerStart-on-orientation-change"
+},{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Thu Feb 6 20:36:10 2020 +0700",
+ "message": "Set-version-to-2.1.0-beta-1"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Thu Feb 6 20:03:40 2020 +0700",
+ "message": "Fix-and-clean-up-locale-change"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Thu Feb 6 19:59:59 2020 +0700",
+ "message": "Rename-Open-Game-File-to-Install-Game"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Thu Feb 6 18:58:46 2020 +0700",
+ "message": "Replace-PreferenceActivity-with-PreferenceFragmentCompat"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Thu Feb 6 17:20:53 2020 +0700",
+ "message": "Remove-runtime-permission-management"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Thu Feb 6 16:56:12 2020 +0700",
+ "message": "Fix-game-unzipping-on-Google-Pixel-3A"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Thu Feb 6 16:16:21 2020 +0700",
+ "message": "Remove-duplicate-ZIP-file-extension"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Thu Feb 6 15:52:32 2020 +0700",
+ "message": "Fix-ingame-font-size-not-being-applied"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Thu Feb 6 12:53:35 2020 +0700",
+ "message": "Show-dialog-for-games-directory-and-unzip-errors"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Thu Feb 6 12:15:05 2020 +0700",
+ "message": "Show-error-dialog-on-game-list-load-failure"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Thu Feb 6 11:59:41 2020 +0700",
+ "message": "Fix-remote-games-not-being-loaded-after-failure"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Thu Feb 6 10:57:33 2020 +0700",
+ "message": "Fix-font-size-setting-not-being-applied"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Feb 5 21:59:30 2020 +0700",
+ "message": "Rename-Remote-tab-title-in-Russian"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Feb 5 21:53:41 2020 +0700",
+ "message": "Show-error-dialog-on-failed-game-download"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Feb 5 21:45:08 2020 +0700",
+ "message": "Fix-progress-dialog-not-showing-on-download"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Feb 5 21:32:02 2020 +0700",
+ "message": "Remember-active-tab-when-activity-is-recreated"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sun Feb 2 20:35:49 2020 +0700",
+ "message": "Clean-up-and-refactor-QspPlayerStart"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sun Feb 2 09:35:01 2020 +0700",
+ "message": "Clean-up-and-refactor-QspGameStock"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sun Feb 2 18:36:36 2020 +0700",
+ "message": "Clean-up-and-refactor-Settings"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sat Feb 1 21:46:15 2020 +0700",
+ "message": "Change-default-color-theme-to-match-the-classic-player"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sat Feb 1 21:41:10 2020 +0700",
+ "message": "Change-default-language-to-Russian"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sat Feb 1 12:29:42 2020 +0700",
+ "message": "Rename-GameItem-fields-to-camelCase"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sat Feb 1 11:25:56 2020 +0700",
+ "message": "Move-game-list-loading-and-parsing-to-RemoteGameRepository"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Jan 29 23:11:09 2020 +0700",
+ "message": "Replace-Thread-with-AsyncTask-for-game-downloading"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Jan 29 20:51:45 2020 +0700",
+ "message": "Replace-Thread-with-AsyncTask-for-game-list-loading"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Jan 29 19:51:48 2020 +0700",
+ "message": "Move-downloaded-games-scanning-to-LocalGameRepository"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sat Jan 25 08:11:30 2020 +0700",
+ "message": "Add-readme-file"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Jan 29 14:33:03 2020 +0700",
+ "message": "Refactor-ZIP-extraction-fix-Cyrillic-name-handling"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Mon Jan 27 23:18:52 2020 +0700",
+ "message": "Replace-TabActivity-with-ActionBar-in-QspGameStock"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Fri Jan 24 22:47:51 2020 +0700",
+ "message": "Move-classes-into-stock-game-and-settings-packages"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Jan 22 23:03:34 2020 +0700",
+ "message": "Do-not-change-orientation-when-auto-rotate-is-off"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sat Feb 1 20:54:18 2020 +0700",
+ "message": "Implement-menu-item-selection"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Jan 22 22:30:40 2020 +0700",
+ "message": "Encode-exec-blocks-using-base64"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Thu Jan 16 15:05:10 2020 +0700",
+ "message": "Implement-user-input"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Jan 15 14:55:04 2020 +0700",
+ "message": "Fix-loading-games-using-Android-emulator"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Fri Jan 10 15:45:06 2020 +0700",
+ "message": "Fix-rendering-of-line-breaks"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sat Feb 1 20:49:25 2020 +0700",
+ "message": "Use-older-version-of-QSP-library-for-compatibility"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Jan 15 08:10:50 2020 +0700",
+ "message": "Convert-tab-to-space-indents"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Jan 15 08:57:35 2020 +0700",
+ "message": "Remove-local-ColorPickerPreference-files"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Jan 22 21:02:32 2020 +0700",
+ "message": "Remove-APKs-and-test-files"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Thu Jan 23 21:17:49 2020 +0700",
+ "message": "Upgrade-Gradle-and-build-tools-to-the-latest-versions"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Fri Jan 10 15:07:26 2020 +0700",
+ "message": "Restore-project-s-build.gradle"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Fri Mar 22 15:59:06 2019 -0700",
+ "message": "Test-QSP-file"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Thu Feb 15 15:38:03 2018 -0800",
+ "message": "Version-2.2-fix"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Jan 17 12:05:05 2018 -0800",
+ "message": "Update-README.md"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Jan 17 12:04:42 2018 -0800",
+ "message": "Update-README.md"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sat Jan 13 11:46:17 2018 -0800",
+ "message": "Update-README.md"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sat Jan 13 11:44:56 2018 -0800",
+ "message": "Version-2.0.0-with-dialog-fix"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Fri Jan 12 08:48:12 2018 -0800",
+ "message": "Delete-QuestPlayer_2.0.0.apk"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Fri Jan 12 08:47:55 2018 -0800",
+ "message": "Android-5.0-Lollipop-fixed"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Fri Jan 12 08:45:20 2018 -0800",
+ "message": "Version-2.0.0-Storage-update"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Thu Jan 11 13:34:50 2018 -0800",
+ "message": "Delete-QuestPlayer_2.0.apk"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Thu Jan 11 13:34:37 2018 -0800",
+ "message": "Android-5.0-Lollipop"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Thu Jan 11 13:33:32 2018 -0800",
+ "message": "Android-4.4-KitKat"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Thu Jan 11 13:31:57 2018 -0800",
+ "message": "Version-2.0.0-Storage-update"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Thu Jan 11 13:27:39 2018 -0800",
+ "message": "Version-2.0-Storage-update"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Thu Jan 11 13:25:18 2018 -0800",
+ "message": "Version-2.0-Storage-update"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Mon Jan 8 15:14:24 2018 -0800",
+ "message": "Version-2.0-Storage-update"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Mon Jan 8 15:13:43 2018 -0800",
+ "message": "Version-2.0-Storage-update"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Mon Jan 8 15:12:16 2018 -0800",
+ "message": "Version-2.0-Storage-update"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Mon Jan 8 15:11:54 2018 -0800",
+ "message": "Version-2.0-Storage-update"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Mon Jan 8 15:11:10 2018 -0800",
+ "message": "Version-2.0-Storage-update"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Mon Jan 8 15:10:29 2018 -0800",
+ "message": "Version-2.0-Storage-update"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Mon Jan 8 15:10:01 2018 -0800",
+ "message": "Delete-QuestPlayer_1.6.9b.apk"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Mon Jan 8 15:09:49 2018 -0800",
+ "message": "Add-files-via-upload"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Mon Jan 8 15:09:15 2018 -0800",
+ "message": "Version-2.0-Storage-update"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Mon Jan 8 15:05:55 2018 -0800",
+ "message": "Version-2.0-Storage-update"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sat Dec 2 21:24:38 2017 -0800",
+ "message": "Version-1.6.9b-image-fix-language-update"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sat Dec 2 21:24:02 2017 -0800",
+ "message": "Version-1.6.9b-image-fix-language-update"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Fri Dec 1 20:20:15 2017 -0800",
+ "message": "Version-1.6.9b-Image-sizing-fix"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Fri Dec 1 20:17:38 2017 -0800",
+ "message": "Add-files-via-upload"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Fri Dec 1 20:17:21 2017 -0800",
+ "message": "Delete-QuestPlayer_1.6.9.apk"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Fri Dec 1 20:17:05 2017 -0800",
+ "message": "Version-1.6.9b-Image-sizing-fix"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Fri Dec 1 20:16:00 2017 -0800",
+ "message": "Version-1.6.9b-Image-sizing-fix"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Fri Dec 1 20:14:53 2017 -0800",
+ "message": "Version-1.6.9b-Image-sizing-fix"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Fri Dec 1 20:14:14 2017 -0800",
+ "message": "Version-1.6.9b-Image-sizing-fix"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sun Oct 29 12:44:22 2017 -0700",
+ "message": "Version-1.6.9-External-SD-Card-fix"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sun Oct 29 12:43:55 2017 -0700",
+ "message": "Version-1.6.9-External-SD-Card-fix"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sun Oct 29 12:42:53 2017 -0700",
+ "message": "Delete-QuestPlayer_1.6.8.apk"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sun Oct 29 12:42:44 2017 -0700",
+ "message": "Delete-QuestPlayer_1.6.7.apk"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sun Oct 29 12:42:30 2017 -0700",
+ "message": "Add-files-via-upload"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sun Oct 29 12:42:05 2017 -0700",
+ "message": "Version-1.6.9-External-SD-Card-fix"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sun Oct 29 12:40:34 2017 -0700",
+ "message": "Version-1.6.9-External-SD-Card-fix"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Fri Oct 27 09:11:13 2017 -0700",
+ "message": "Version-1.6.8-Open-Game-File-fix"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Fri Oct 27 09:10:53 2017 -0700",
+ "message": "Add-files-via-upload"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Fri Oct 27 09:09:38 2017 -0700",
+ "message": "Version-1.6.8-Open-Game-File-fix"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Fri Oct 27 09:06:59 2017 -0700",
+ "message": "Version-1.6.8-Open-Game-File-fix"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Fri Oct 27 09:05:54 2017 -0700",
+ "message": "Version-1.6.8-Open-Game-File-fix"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Fri Oct 27 09:04:59 2017 -0700",
+ "message": "Version-1.6.8-Open-Game-File-fix"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sun Oct 8 15:44:33 2017 -0700",
+ "message": "Delete-QuestPlayer_LVtest.apk"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sun Oct 8 15:30:02 2017 -0700",
+ "message": "Delete-QuestPlayer_1.6.6.apk"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sun Oct 8 15:29:51 2017 -0700",
+ "message": "Add-files-via-upload"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sun Oct 8 15:29:13 2017 -0700",
+ "message": "Version-1.6.7-SD-Card-bug-fix"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sun Oct 8 15:24:58 2017 -0700",
+ "message": "Version-1.6.7-SD-Card-bug-fix"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sun Oct 8 15:24:10 2017 -0700",
+ "message": "Version-1.6.7-SD-Card-bug-fix"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sun Oct 8 15:23:36 2017 -0700",
+ "message": "Version-1.6.7-SD-Card-bug-fix"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sun Oct 8 15:22:51 2017 -0700",
+ "message": "Version-1.6.7-SD-Card-bug-fix"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sun Oct 8 15:22:15 2017 -0700",
+ "message": "Version-1.6.7-SD-Card-bug-fix"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Tue Oct 3 22:42:24 2017 -0700",
+ "message": "debug-apk"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sun Oct 1 13:05:17 2017 -0700",
+ "message": "debugging-test"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sun Oct 1 12:01:41 2017 -0700",
+ "message": "Version-1.6.6-bug-fixes"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sun Oct 1 11:59:40 2017 -0700",
+ "message": "Version-1.6.6-bug-fixes"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sun Oct 1 11:59:24 2017 -0700",
+ "message": "Delete-QuestPlayer_1.6.5.apk"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sun Oct 1 11:59:10 2017 -0700",
+ "message": "Version-1.6.6-bug-fixes"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sun Oct 1 11:58:40 2017 -0700",
+ "message": "Version-1.6.6-bug-fixes"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sun Oct 1 11:57:47 2017 -0700",
+ "message": "Version-1.6.6-bug-fixes"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sun Oct 1 11:54:13 2017 -0700",
+ "message": "Version-1.6.6-bug-fixes"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sun Oct 1 11:53:35 2017 -0700",
+ "message": "Version-1.6.6-bug-fixes"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Thu Sep 28 12:50:41 2017 -0700",
+ "message": "Version-1.6.5-Auto-clear-option"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Thu Sep 28 12:49:14 2017 -0700",
+ "message": "Version-1.6.5-Auto-clear-option"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Thu Sep 28 12:48:53 2017 -0700",
+ "message": "Version-1.6.5-Auto-clear-option"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Thu Sep 28 12:46:47 2017 -0700",
+ "message": "Version-1.6.5-Auto-clear-option"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Thu Sep 28 12:45:30 2017 -0700",
+ "message": "Delete-libndkqsp.so"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Thu Sep 28 12:45:20 2017 -0700",
+ "message": "Delete-libndkqsp.so"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Thu Sep 28 12:45:10 2017 -0700",
+ "message": "Delete-libndkqsp.so"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Thu Sep 28 12:44:58 2017 -0700",
+ "message": "Delete-libndkqsp.so"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Thu Sep 28 12:44:47 2017 -0700",
+ "message": "Delete-libndkqsp.so"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Thu Sep 28 12:44:32 2017 -0700",
+ "message": "Delete-libndkqsp.so"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Thu Sep 28 12:44:19 2017 -0700",
+ "message": "Delete-libndkqsp.so"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Thu Sep 28 12:43:08 2017 -0700",
+ "message": "Version-1.6.5-Auto-clear-option"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Thu Sep 28 12:40:53 2017 -0700",
+ "message": "Version-1.6.5-Auto-clear-option"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Thu Sep 28 12:39:54 2017 -0700",
+ "message": "Version-1.6.5-Auto-clear-option"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Thu Sep 28 12:39:07 2017 -0700",
+ "message": "Version-1.6.5-Auto-clear-option"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Thu Sep 28 12:38:26 2017 -0700",
+ "message": "Version-1.6.5-Auto-clear-option"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Thu Sep 28 12:37:54 2017 -0700",
+ "message": "Version-1.6.5-Auto-clear-option"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Thu Sep 28 12:37:00 2017 -0700",
+ "message": "Version-1.6.5-Auto-clear-option"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Thu Sep 28 12:35:26 2017 -0700",
+ "message": "Delete-QuestPlayer_1.6.4.apk"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Thu Sep 28 12:34:52 2017 -0700",
+ "message": "Version-1.6.5-Auto-clear-option"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Thu Sep 28 12:34:28 2017 -0700",
+ "message": "Add-files-via-upload"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Thu Sep 28 12:34:13 2017 -0700",
+ "message": "Add-files-via-upload"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Thu Sep 28 12:33:19 2017 -0700",
+ "message": "Version-1.6.5-Auto-clear-option"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sat Sep 23 12:34:55 2017 -0700",
+ "message": "Version-1.6.4-quick-fix"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sat Sep 23 12:33:59 2017 -0700",
+ "message": "Version-1.6.4-quick-fix"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sat Sep 23 12:33:09 2017 -0700",
+ "message": "Version-1.6.4-quick-fix"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Fri Sep 22 11:40:15 2017 -0700",
+ "message": "Version-1.6.4-bug-fixes"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Fri Sep 22 11:39:33 2017 -0700",
+ "message": "Version-1.6.4-bug-fixes"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Fri Sep 22 11:38:57 2017 -0700",
+ "message": "Version-1.6.4-bug-fixes"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Fri Sep 22 11:38:39 2017 -0700",
+ "message": "Add-files-via-upload"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Fri Sep 22 11:38:21 2017 -0700",
+ "message": "Delete-QuestPlayer_1.6.3.apk"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Fri Sep 22 11:38:08 2017 -0700",
+ "message": "Version-1.6.4-bug-fixes"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Fri Sep 22 11:28:32 2017 -0700",
+ "message": "Version-1.6.4-bug-fixes"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Mon Sep 18 00:50:28 2017 -0700",
+ "message": "Version-1.6.3-Quick-Fix"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Mon Sep 18 00:49:45 2017 -0700",
+ "message": "Version-1.6.3-Quick-Fix"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Mon Sep 18 00:48:12 2017 -0700",
+ "message": "Version-1.6.3-Quick-Fix"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sun Sep 17 14:32:02 2017 -0700",
+ "message": "Version-1.6.3-Multi-files-and-image-maps"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sun Sep 17 14:31:28 2017 -0700",
+ "message": "Version-1.6.3-Multi-files-and-image-maps"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sun Sep 17 13:48:25 2017 -0700",
+ "message": "Version-1.6.3-Multi-files-and-image-maps"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sun Sep 17 13:45:30 2017 -0700",
+ "message": "Version-1.6.3-Multi-files-and-image-maps"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sun Sep 17 13:44:44 2017 -0700",
+ "message": "Version-1.6.3-Multi-files-and-image-maps"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sun Sep 17 13:44:16 2017 -0700",
+ "message": "Version-1.6.3-Multi-files-and-image-maps"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sun Sep 17 13:43:29 2017 -0700",
+ "message": "Delete-QuestPlayer_1.6.2.apk"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sun Sep 17 13:43:13 2017 -0700",
+ "message": "Version-1.6.3-Multi-files-and-image-maps"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sun Sep 17 13:42:38 2017 -0700",
+ "message": "Add-files-via-upload"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sun Sep 17 13:42:07 2017 -0700",
+ "message": "Version-1.6.3-Multi-files-and-image-maps"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Thu Sep 14 22:04:02 2017 -0700",
+ "message": "Version-1.6.2-Theme-colors-quick-fix"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Thu Sep 14 22:03:31 2017 -0700",
+ "message": "Version-1.6.2-Theme-colors-quick-fix"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Thu Sep 14 22:02:40 2017 -0700",
+ "message": "Version-1.6.2-Theme-colors-quick-fix"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Thu Sep 14 21:56:37 2017 -0700",
+ "message": "Version-1.6.2-Theme-colors-quick-fix"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Thu Sep 14 21:54:28 2017 -0700",
+ "message": "Version-1.6.2-Theme-colors-quick-fix"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Thu Sep 14 21:54:03 2017 -0700",
+ "message": "Version-1.6.2-Theme-colors-quick-fix"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Sep 13 23:45:53 2017 -0700",
+ "message": "Version-1.6.2-Theme-colors"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Sep 13 23:45:01 2017 -0700",
+ "message": "Version-1.6.2-Themed-colors"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Sep 13 23:41:14 2017 -0700",
+ "message": "Version-1.6.2-Themed-colors"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Sep 13 23:39:15 2017 -0700",
+ "message": "Version-1.6.2-Themed-colors"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Sep 13 23:36:01 2017 -0700",
+ "message": "Version-1.6.2-Themed-colors"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Sep 13 23:35:24 2017 -0700",
+ "message": "Version-1.6.2-Themed-colors"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Sep 13 23:33:56 2017 -0700",
+ "message": "Add-files-via-upload"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Sep 13 23:32:50 2017 -0700",
+ "message": "Version-1.6.2-Themed-colors"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Sep 13 23:32:27 2017 -0700",
+ "message": "Delete-QuestPlayer_1.6.1.apk"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Sep 6 12:07:16 2017 -0700",
+ "message": "Version-1.6.1-Censoring-option"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Sep 6 12:06:50 2017 -0700",
+ "message": "Version-1.6.1-Censoring-option"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Sep 6 12:06:27 2017 -0700",
+ "message": "Version-1.6.1-Censoring-option"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Sep 6 12:05:56 2017 -0700",
+ "message": "Version-1.6.1-Censoring-option"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Sep 6 12:05:28 2017 -0700",
+ "message": "Version-1.6.1-Censoring-option"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Sep 6 12:04:22 2017 -0700",
+ "message": "Version-1.6.1-Censoring-option"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Sep 6 12:02:15 2017 -0700",
+ "message": "Delete-QuestPlayer_1.6.apk"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Sep 6 12:01:54 2017 -0700",
+ "message": "Version-1.6.1-Censoring-option"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Sep 6 12:00:53 2017 -0700",
+ "message": "Version-1.6.1-Censoring-option"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Fri Sep 1 22:16:18 2017 -0700",
+ "message": "Version-1.6-Full-function"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Fri Sep 1 22:09:32 2017 -0700",
+ "message": "Version-1.6-Full-function"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Fri Sep 1 22:05:05 2017 -0700",
+ "message": "Version-1.6-Full-function"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Fri Sep 1 22:04:29 2017 -0700",
+ "message": "Version-1.6-Full-function"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Fri Sep 1 22:03:57 2017 -0700",
+ "message": "Add-files-via-upload"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Fri Sep 1 22:03:41 2017 -0700",
+ "message": "Version-1.6-Full-function"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Fri Sep 1 22:02:44 2017 -0700",
+ "message": "Add-files-via-upload"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Fri Sep 1 22:00:09 2017 -0700",
+ "message": "Delete-QuestPlayer_FireTablet.apk"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Fri Sep 1 21:59:49 2017 -0700",
+ "message": "Delete-strings_to_translate.rar"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Aug 30 22:40:05 2017 -0700",
+ "message": "Version-1.5.7-Language-Folders-and-Visibility"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Aug 30 22:38:53 2017 -0700",
+ "message": "Version-1.5.7-Language-Folders-and-Visibility"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Aug 30 22:38:14 2017 -0700",
+ "message": "Version-1.5.7-Language-Folders-and-Visibility"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Aug 30 22:37:43 2017 -0700",
+ "message": "Version-1.5.7-Language-Folders-and-Visibility"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Aug 30 22:33:07 2017 -0700",
+ "message": "Add-files-via-upload"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Aug 30 22:31:07 2017 -0700",
+ "message": "Add-files-via-upload"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Aug 30 22:30:07 2017 -0700",
+ "message": "Version-1.5.7-Language-Folders-and-Visibility"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Aug 30 22:26:57 2017 -0700",
+ "message": "Delete-QuestPlayer_FireTablet1.5.6.apk"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Aug 30 22:26:48 2017 -0700",
+ "message": "Delete-QuestPlayer_FireTablet1.5.5.apk"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Aug 30 22:26:41 2017 -0700",
+ "message": "Delete-QuestPlayer_FireTablet1.5.4.apk"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Aug 30 22:26:30 2017 -0700",
+ "message": "Delete-QuestPlayer_FireTablet1.5.3.apk"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Aug 30 22:26:23 2017 -0700",
+ "message": "Delete-QuestPlayer_FireTablet1.5.2.apk"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Aug 30 22:25:56 2017 -0700",
+ "message": "Delete-QuestPlayer_FireTablet1.5.1.apk"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Aug 30 22:25:48 2017 -0700",
+ "message": "Delete-QuestPlayer_FireTablet1.5.0.apk"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Aug 30 22:25:38 2017 -0700",
+ "message": "Delete-QuestPlayer_FireTablet1.4.apk"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Aug 30 22:25:22 2017 -0700",
+ "message": "Delete-QuestPlayer_FireTablet1.4.4.apk"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Aug 30 22:25:15 2017 -0700",
+ "message": "Delete-QuestPlayer_FireTablet1.4.3.apk"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Aug 30 22:25:06 2017 -0700",
+ "message": "Delete-QuestPlayer_FireTablet1.4.2.apk"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Aug 30 22:24:53 2017 -0700",
+ "message": "Delete-QuestPlayer_FireTablet1.4.1.apk"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Aug 30 22:23:47 2017 -0700",
+ "message": "Delete-QuestPlayer_FireTablet1.3.1.apk"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Aug 30 22:20:48 2017 -0700",
+ "message": "Update-README.md"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Fri Aug 25 23:07:28 2017 -0700",
+ "message": "Version-1.5.6-Storage-update"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Fri Aug 25 23:06:57 2017 -0700",
+ "message": "Version-1.5.6-Storage-update"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Fri Aug 25 23:06:32 2017 -0700",
+ "message": "Version-1.5.6-Storage-update"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Fri Aug 25 23:05:39 2017 -0700",
+ "message": "Version-1.5.6-Storage-update"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Fri Aug 25 23:05:00 2017 -0700",
+ "message": "Version-1.5.6-Storage-update"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Fri Aug 25 23:03:33 2017 -0700",
+ "message": "Version-1.5.6-Storage-update"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Fri Aug 25 23:02:50 2017 -0700",
+ "message": "Version-1.5.6-Storage-update"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Fri Aug 25 09:04:03 2017 -0700",
+ "message": "Version-1.5.5-bug-fixes"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Fri Aug 25 09:01:51 2017 -0700",
+ "message": "Version-1.5.5-bug-fixes"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Fri Aug 25 09:01:22 2017 -0700",
+ "message": "Version-1.5.5-bug-fixes"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Fri Aug 25 08:57:55 2017 -0700",
+ "message": "Version-1.5.5-bug-fixes"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sat Aug 19 23:00:58 2017 -0700",
+ "message": "Version-1.5.4-reupload-due-to-missed-bug"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sat Aug 19 23:00:03 2017 -0700",
+ "message": "Version-1.5.4-Rotational-glory"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sat Aug 19 22:11:12 2017 -0700",
+ "message": "Version-1.5.4-re-upload"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sat Aug 19 22:10:32 2017 -0700",
+ "message": "Version-1.5.4-re-upload-with-translations"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sat Aug 19 22:09:24 2017 -0700",
+ "message": "Version-1.5.4-re-upload-due-to-corrupted-file"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Fri Aug 18 17:25:34 2017 -0700",
+ "message": "Version-1.5.4-beta-Rotational-glory"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Fri Aug 18 17:24:43 2017 -0700",
+ "message": "Version-1.5.4-beta-Rotational-glory"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Fri Aug 18 17:23:50 2017 -0700",
+ "message": "Version-1.5.4-beta-Rotational-glory"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Fri Aug 18 17:23:27 2017 -0700",
+ "message": "Version-1.5.4-beta-Rotational-glory"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Fri Aug 18 17:23:01 2017 -0700",
+ "message": "Version-1.5.4-beta-Rotational-glory"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Fri Aug 18 17:22:30 2017 -0700",
+ "message": "Version-1.5.4-beta-Rotational-glory"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Fri Aug 18 17:21:27 2017 -0700",
+ "message": "Version-1.5.4-beta-Rotational-glory"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Fri Aug 18 17:20:44 2017 -0700",
+ "message": "Version-1.5.4-beta-Rotational-glory"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Fri Aug 18 17:20:27 2017 -0700",
+ "message": "Version-1.5.4-beta-Rotational-glory"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Mon Aug 14 15:31:26 2017 -0700",
+ "message": "Version-1.5.3-Image-sizing-and-video-autoplay"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Mon Aug 14 15:29:54 2017 -0700",
+ "message": "Version-1.5.3-Image-sizing-and-video-autoplay"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Mon Aug 14 15:28:52 2017 -0700",
+ "message": "Version-1.5.3-Image-sizing-and-video-autoplay"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Mon Aug 14 15:01:36 2017 -0700",
+ "message": "Version-1.5.3-Image-sizing-and-video-autoplay"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Mon Aug 14 14:59:34 2017 -0700",
+ "message": "Version-1.5.3-Image-sizing-and-video-autoplay"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Mon Aug 14 14:58:34 2017 -0700",
+ "message": "Version-1.5.3-Image-sizing-and-video-autoplay"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sat Aug 12 23:03:52 2017 -0700",
+ "message": "Version-1.5.2-Display-Settings-and-translations"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sat Aug 12 22:59:24 2017 -0700",
+ "message": "Version-1.5.2-Display-Settings-and-translations"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sat Aug 12 22:58:25 2017 -0700",
+ "message": "Version-1.5.2-Display-Settings-and-translations"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sat Aug 12 22:57:31 2017 -0700",
+ "message": "Version-1.5.2-Display-Settings-and-translations"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sat Aug 12 22:57:05 2017 -0700",
+ "message": "Version-1.5.2-Display-Settings-and-translations"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Mon Aug 7 12:31:51 2017 -0700",
+ "message": "Versio-1.5.1-bug-fixes"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Mon Aug 7 12:22:36 2017 -0700",
+ "message": "Version-1.5.1-more-bug-fixes"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Mon Aug 7 12:21:07 2017 -0700",
+ "message": "Version-1.5.1-bug-fixes"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Mon Aug 7 12:17:30 2017 -0700",
+ "message": "strings.xml-prefs.xml-for-translation"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Mon Aug 7 12:16:44 2017 -0700",
+ "message": "Delete-strings_to_translate.rar"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Mon Aug 7 12:02:03 2017 -0700",
+ "message": "Version-1.5.1"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Mon Aug 7 12:00:29 2017 -0700",
+ "message": "Version-1.5.1"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Mon Aug 7 12:00:00 2017 -0700",
+ "message": "Version-1.5.1"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Mon Aug 7 11:58:35 2017 -0700",
+ "message": "Version-1.5.1"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Fri Aug 4 23:15:14 2017 -0700",
+ "message": "Translations-needed"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Fri Aug 4 23:14:50 2017 -0700",
+ "message": "Version-1.5.0-Multilanguage-support"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Fri Aug 4 22:50:36 2017 -0700",
+ "message": "Version-1.5.0-Multilanguage-support"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Fri Aug 4 22:43:05 2017 -0700",
+ "message": "Version-1.5.0-Multilanguage-support"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Fri Aug 4 22:41:13 2017 -0700",
+ "message": "Version-1.5.0-Multi-language-support"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Fri Aug 4 22:14:52 2017 -0700",
+ "message": "Translations-needed"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Thu Aug 3 17:45:18 2017 -0700",
+ "message": "Version-1.4.4-corrected-gt-parsing-error"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Thu Aug 3 17:44:22 2017 -0700",
+ "message": "Version-1.4.4"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Thu Aug 3 17:42:51 2017 -0700",
+ "message": "Version-1.4.4"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Thu Aug 3 17:42:25 2017 -0700",
+ "message": "Version-1.4.4"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Thu Aug 3 17:41:56 2017 -0700",
+ "message": "Version-1.4.4"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Thu Aug 3 17:41:14 2017 -0700",
+ "message": "Version-1.4.4"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Thu Aug 3 17:40:39 2017 -0700",
+ "message": "Add-files-via-upload"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Thu Aug 3 17:40:08 2017 -0700",
+ "message": "Version-1.4.4"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Thu Aug 3 17:39:12 2017 -0700",
+ "message": "Version-1.4.4"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Aug 2 10:06:07 2017 -0700",
+ "message": "Version-1.4.3-bug-fixes"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Aug 2 10:04:09 2017 -0700",
+ "message": "Delete-QspImageBox.java"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Aug 2 10:03:55 2017 -0700",
+ "message": "Delete-QspPlayerStart.java"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Aug 2 10:03:35 2017 -0700",
+ "message": "Delete-Utility.java"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Tue Aug 1 22:03:19 2017 -0700",
+ "message": "Version-1.4.3-bug-fixes"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Tue Aug 1 22:02:20 2017 -0700",
+ "message": "Update-README.md"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sun Jul 30 14:50:12 2017 -0700",
+ "message": "Fixed-image-size-for-Android-4.4-new"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sun Jul 30 14:48:46 2017 -0700",
+ "message": "More-bug-fixes"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sun Jul 30 00:29:56 2017 -0700",
+ "message": "Fixed-image-size-for-Android-4.4"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sat Jul 29 11:17:46 2017 -0700",
+ "message": "Video-file-implementation"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sat Jul 29 11:09:56 2017 -0700",
+ "message": "Update-README.md"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sat Jul 29 11:07:47 2017 -0700",
+ "message": "Video-file-implementation"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sat Jul 29 00:53:46 2017 -0700",
+ "message": "Android-4.4-required"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sat Jul 29 00:52:47 2017 -0700",
+ "message": "Update-README.md"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sat Jul 29 00:16:21 2017 -0700",
+ "message": "Add-files-via-upload"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Mon Jul 24 16:27:12 2017 -0700",
+ "message": "As-of-version-1.3.1"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Mon Jul 24 14:17:17 2017 -0700",
+ "message": "Add-files-via-upload"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Mon Jul 24 14:16:57 2017 -0700",
+ "message": "Delete-QuestPlayer_FireTablet1.3.apk"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Mon Jul 24 14:14:45 2017 -0700",
+ "message": "Minor-bug-fixes-Rus2Eng-translation"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Mon Jul 24 14:13:42 2017 -0700",
+ "message": "Delete-Utility.java"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Mon Jul 24 14:13:30 2017 -0700",
+ "message": "Delete-QspPlayerStart.java"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Mon Jul 24 14:13:19 2017 -0700",
+ "message": "Delete-QspImageGetter.java"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Mon Jul 24 14:13:08 2017 -0700",
+ "message": "Delete-QspImageBox.java"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Mon Jul 24 14:12:45 2017 -0700",
+ "message": "Delete-QspGameStock.java"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Mon Jul 24 14:12:05 2017 -0700",
+ "message": "Add-files-via-upload"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Mon Jul 24 14:10:10 2017 -0700",
+ "message": "Update-README.md"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Mon Jul 24 11:11:36 2017 -0700",
+ "message": "Create-README.md"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sun Jul 23 12:10:08 2017 -0700",
+ "message": "Add-files-via-upload"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Sun Jul 23 11:38:27 2017 -0700",
+ "message": "Add-files-via-upload"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Mon Sep 5 04:01:26 2016 +0300",
+ "message": "1.-Big-optimization-game-perfomance"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Aug 31 05:00:31 2016 +0300",
+ "message": "SAVEGAME-and-OPENGAME-now-work-autosave-work-fine"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Aug 31 00:58:07 2016 +0300",
+ "message": "Increase-image-size-via-screen-density"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Aug 31 00:42:32 2016 +0300",
+ "message": "Support-gif-in-preview"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Aug 31 00:27:24 2016 +0300",
+ "message": "Flatter-application-icon-to-look-somewhat-more-modern-by-random_lurker"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Aug 31 00:26:36 2016 +0300",
+ "message": "Added-animated-GIF-support-to-the-main-view-panel-by-random_lurker"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Aug 31 00:16:05 2016 +0300",
+ "message": "Big-images-big-preview-clickable-images-Back-button-first-action-fix-ui"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Aug 31 00:12:08 2016 +0300",
+ "message": "Added-a-simple-game-directory-option"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Aug 31 00:11:49 2016 +0300",
+ "message": "Move-tab-names-to-strings.xml-and-make-those-a-bit-shorter"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Aug 31 00:11:09 2016 +0300",
+ "message": "Add-app-src-main-libs-to-.gitignore-because-its-auto-generated"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Aug 31 00:10:09 2016 +0300",
+ "message": "Build-native-library-with-older-APP_PLATFORM-to-ensure-compatibility"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Aug 31 00:09:33 2016 +0300",
+ "message": "Revert-Got-rid-of-non-working-Android.mk"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Aug 31 00:09:06 2016 +0300",
+ "message": "Search-for-images-case-insensitively"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Aug 31 00:08:50 2016 +0300",
+ "message": "Fix-qspLowerStr-and-qspUpperStr"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Aug 31 00:08:20 2016 +0300",
+ "message": "Use-NewGlobalRef-on-QspPlayerStart-and-don-t-crash"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Aug 31 00:07:18 2016 +0300",
+ "message": "Got-rid-of-non-working-Android.mk"
+},
+{
+ "version": "2.1.0-beta-1",
+ "code": "314",
+ "date": "Wed Aug 31 00:06:57 2016 +0300",
+ "message": "Removed-all-ACRA-BugSense-references"
+}
+]

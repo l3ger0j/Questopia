@@ -76,7 +76,6 @@ public class StockViewModel extends AndroidViewModel {
     private final LocalGame localGame = new LocalGame();
     private final HashMap<String, InnerGameData> gamesMap = new HashMap<>();
     private DocumentFile gamesDir , tempInstallDir, tempImageFile, tempPathFile, tempModFile;
-    private DocumentFile rootDir;
 
     private DialogInstallBinding installBinding;
     private InnerGameData tempInnerGameData;
@@ -135,8 +134,6 @@ public class StockViewModel extends AndroidViewModel {
     public void setGamesDir(DocumentFile gamesDir) {
         this.gamesDir = gamesDir;
     }
-
-    public void setRootDir(DocumentFile rootDir) { this.rootDir = rootDir; }
 
     public void setGameDataList(ArrayList<InnerGameData> innerGameDataArrayList) {
         gameDataList.postValue(innerGameDataArrayList);
@@ -479,7 +476,7 @@ public class StockViewModel extends AndroidViewModel {
                 sendIntent(installBinding.buttonSelectFolder));
         installBinding.buttonSelectIcon.setOnClickListener(v ->
                 sendIntent(installBinding.buttonSelectIcon));
-        installBinding.installBT.setOnClickListener(v ->
+        installBinding.copyBT.setOnClickListener(v ->
                 createInstallIntent());
         return installBinding;
     }
@@ -593,9 +590,9 @@ public class StockViewModel extends AndroidViewModel {
 
     // region Refresh
     public void refreshIntGamesDirectory() {
+        var rootDir = ((QuestPlayerApplication) getApplication()).getCustomRootDir();
         if (rootDir != null) {
-            var intFilesDir = rootDir;
-            var tempGameDir = createFindDFolder(intFilesDir, "games");
+            var tempGameDir = createFindDFolder(rootDir , "games");
             if (!isWritableDirectory(tempGameDir)) {
                 var message = "Games directory is not writable" + " " +
                         getStockActivity().getString(R.string.gamesDirError);

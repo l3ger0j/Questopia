@@ -10,6 +10,7 @@ import static org.qp.android.helpers.utils.ViewUtil.getFontStyle;
 
 import android.annotation.SuppressLint;
 import android.app.Application;
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -102,8 +103,10 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
     private final Runnable counterTask = new Runnable() {
         @Override
         public void run() {
-            libQpProxy.executeCounter();
-            counterHandler.postDelayed(this, counterInterval);
+            if (libQpProxy != null) {
+                libQpProxy.executeCounter();
+                counterHandler.postDelayed(this, counterInterval);
+            }
         }
     };
 
@@ -118,6 +121,10 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
     }
 
     public LibQpProxy getLibQspProxy() {
+        if (libQpProxy == null) {
+            libQpProxy = questPlayerApplication.getLibQspProxy();
+        }
+
         libQpProxy.setGameInterface(this);
         return libQpProxy;
     }
@@ -249,11 +256,17 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
 
     private void refreshMainDesc() {
         var mainDesc = getHtml(getLibQspProxy().getGameState().mainDesc);
+        if (!mainDesc.isBlank()) {
+            getGameActivity().warnUser(GameActivity.TAB_MAIN_DESC_AND_ACTIONS);
+        }
         mainDescLiveData.postValue(pageTemplate.replace("REPLACETEXT", mainDesc));
     }
 
     private void refreshVarsDesc() {
         var varsDesc = getHtml(getLibQspProxy().getGameState().varsDesc);
+        if (!varsDesc.isBlank()) {
+            getGameActivity().warnUser(GameActivity.TAB_VARS_DESC);
+        }
         varsDescLiveData.postValue(pageTemplate.replace("REPLACETEXT", varsDesc));
     }
 
@@ -270,6 +283,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
     }
 
     private void refreshObjectsRecycler() {
+        getGameActivity().warnUser(GameActivity.TAB_OBJECTS);
         var objectsRecycler = new GameItemRecycler();
         objectsRecycler.setTypeface(getSettingsController().getTypeface());
         objectsRecycler.setTextSize(getFontSize());
@@ -316,7 +330,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
 
     public void startAudio () {
         audioPlayer = questPlayerApplication.getAudioPlayer();
-        audioPlayer.start();
+        audioPlayer.start(getGameActivity());
     }
 
     public void stopAudio () {
@@ -360,10 +374,14 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
                     getApplication().startActivity(viewLink);
                 }
                 case "file" -> {
-                    var tempLink = uri.getScheme().replace("file:/" , "https:");
-                    var viewLazyLink = new Intent(Intent.ACTION_VIEW , Uri.parse(tempLink));
-                    viewLazyLink.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    getApplication().startActivity(viewLazyLink);
+                    try {
+                        var tempLink = uri.getScheme().replace("file:/" , "https:");
+                        var viewLazyLink = new Intent(Intent.ACTION_VIEW , Uri.parse(tempLink));
+                        viewLazyLink.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        getApplication().startActivity(viewLazyLink);
+                    } catch (ActivityNotFoundException e) {
+                        Log.d(TAG , "Error: " , e);
+                    }
                 }
             }
             return true;

@@ -6,6 +6,9 @@
         <Preference
             android:title="@string/newsMenuTitle"
             android:key="newsApp" />
+        <Preference
+            android:title="@string/addFolder"
+            android:key="addRootFold"/>
         <ListPreference
             android:defaultValue="ru"
             android:entries="@array/langName"
@@ -137,6 +140,11 @@
             android:key="debugImage"
             android:summary="@string/imageDebugSum"
             android:title="@string/imageDebugTitle" />
+        <SwitchPreferenceCompat
+            android:defaultValue="false"
+            android:key="debugMusic"
+            android:summary="@string/musicDebugSum"
+            android:title="@string/musicDebugTitle" />
         <SwitchPreferenceCompat
             android:defaultValue="false"
             android:key="execString"

@@ -33,7 +33,7 @@
         <string name="gameVersion">Version</string>
         <string name="selectFolder">Select the folder with the file</string>
         <string name="selectIcon">Select icon</string>
-        <string name="add">Copy to internal folder</string>
+        <string name="add">Copy to the root folder</string>
     <!-- Dialog GameInfo -->
         <string name="author">Author: -AUTHOR-</string>
         <string name="ported_by">Ported by: -PORTED_BY-</string>
@@ -49,7 +49,7 @@
     <string name="appDescription">
 <![CDATA[
 <h2><center>About Quest Player Android<img src=\"file:///android_res/drawable/landscape.jpg\" width=\"100%\"></center></h2>
-<h4 style="margin-left:5px;">Quest Player Android is an open-source Android port of <b>Quest Soft Player</b> (<a href=\"http://qsp.su/?option=com_content&view=article&id=64\">Russian site</a>), based on a fork from <a href=\"https://github.com/seedhartha/QuestPlayer\">seedharta</a>. The most recent version can be downloaded from <a href=\"https://github.com/l3ger0j/QuestPlayerAndroid\">GitHub</a> or in the <a href=\"https://t.me/QuestPlayer\">Telegram channel</a>.</h4>
+<h4 style="margin-left:5px;">Quest Player Android is an open-source Android port of <b>Quest Soft Player</b> (<a href=\"http://qsp.su/?option=com_content&view=article&id=64\">Russian site</a>), based on a fork from <a href=\"https://github.com/seedhartha/QuestPlayer\">seedharta</a>. The most recent version can be downloaded from <a href=\"https://github.com/l3ger0j/Questopia\">GitHub</a> or in the <a href=\"https://t.me/QuestPlayer\">Telegram channel</a>.</h4>
 ]]>
     </string>
     <string name="appCredits">
@@ -83,10 +83,13 @@
     </string>
     <!-- Use in activity/fragment -->
     <!-- QTopia -->
-        <string name="appName">QTopia</string>
+        <string name="appName">Questopia</string>
     <!-- SettingsFragment -->
         <string name="closeToApply">Close settings to apply changes</string>
         <string name="settingsEffect">The setting will take effect the next time you unpack the game</string>
+        <string name="addFolder">Change the root directory</string>
+        <string name="addFolderSum0">Current root dir is internal directory of the application</string>
+        <string name="addFolderSum1">Current root dir is external directory of the device</string>
     <!-- FragmentImageBox -->
         <string name="image">Image</string>
     <!-- Use in menu -->
@@ -107,7 +110,6 @@
         <string name="gameStockTitle">Game Stock</string>
         <string name="search">Search</string>
         <string name="settingsTitle">Settings</string>
-        <string name="addFolder">Add folder</string>
     <!-- Menu delete -->
         <string name="selectAllTitle">Select all</string>
         <string name="deleteGameTitle">Delete game</string>
@@ -138,7 +140,7 @@
         <string name="useGameLinkColorSum">Use the link color settings from the game</string>
         <string name="linkColorTitle">Custom Link Color</string>
         <string name="textBackLinkColorSum">Default value -VALUE-</string>
-        <string name="extendedName">QuestPlayerAndroid -VERSION-</string>
+        <string name="extendedName">Questopia -VERSION-</string>
         <!-- Image section -->
         <string name="imageCatTitle">Images</string>
         <string name="autoWidthTitle">Auto Width Image</string>
@@ -160,6 +162,8 @@
         <string name="autoscrollSum">Enable/disable autoscroll</string>
         <string name="imageDebugTitle">Image Path Debugger</string>
         <string name="imageDebugSum">A mode that enables the display of an error dialog if the path to the image is incorrect</string>
+        <string name="musicDebugTitle">Music Path Debugger</string>
+        <string name="musicDebugSum">A mode that enables the display of an error dialog if the path to the music is incorrect</string>
         <string name="execStringTitle">String executor</string>
         <string name="execStringSum">Enable/disable execution string</string>
         <!-- Extra section -->
@@ -175,5 +179,5 @@
     <!-- Menu plugins -->
         <string name="pluginMenuTitle">Plugins</string>
     <!-- Menu news -->
-        <string name="newsMenuTitle">News QPlayer</string>
+        <string name="newsMenuTitle">News Questopia</string>
 </resources>

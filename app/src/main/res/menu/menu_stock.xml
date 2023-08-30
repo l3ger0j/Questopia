@@ -8,11 +8,6 @@
         app:showAsAction="always|collapseActionView"
         app:actionViewClass="androidx.appcompat.widget.SearchView" />
     <item
-        android:id="@+id/action_add_folder"
-        android:icon="@drawable/add_box"
-        app:showAsAction="ifRoom"
-        android:title="@string/addFolder" />
-    <item
         android:id="@+id/menu_options"
         android:icon="@drawable/settings"
         app:showAsAction="ifRoom"

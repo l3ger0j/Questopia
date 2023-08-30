@@ -1,33 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
     <group android:id="@+id/menuGroup_running">
-        <item
-            android:id="@+id/menu_mainDesc"
-            android:contentDescription="@string/mainDescContDesc"
-            android:icon="@drawable/tab_main"
-            android:title="@string/mainDescTitle"
-            app:showAsAction="always" />
-        <item
-            android:id="@+id/menu_varsDesc"
-            android:contentDescription="@string/varsDescContDesc"
-            android:icon="@drawable/tab_vars"
-            android:title="@string/varsDescTitle"
-            app:showAsAction="ifRoom" />
-        <item
-            android:id="@+id/menu_inventory"
-            android:contentDescription="@string/inventoryContDesc"
-            android:icon="@drawable/tab_object"
-            android:title="@string/inventoryTitle"
-            app:showAsAction="always" />
-        <item
-            android:id="@+id/menu_userInput"
-            android:contentDescription="@string/userInputContDesc"
-            android:icon="@drawable/tab_input"
-            android:title="@string/userInputTitle"
-            app:showAsAction="ifRoom" />
         <item
             android:id="@+id/menu_newGame"
             android:orderInCategory="1"
@@ -40,6 +15,10 @@
             android:id="@+id/menu_saveGame"
             android:orderInCategory="3"
             android:title="@string/saveTitle" />
+        <item
+            android:id="@+id/menu_userInput"
+            android:orderInCategory="4"
+            android:title="@string/userInputTitle" />
     </group>
 
     <item

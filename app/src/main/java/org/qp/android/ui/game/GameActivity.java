@@ -1,5 +1,6 @@
 package org.qp.android.ui.game;
 
+import static androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener;
 import static org.qp.android.helpers.utils.FileUtil.createFindDFile;
 import static org.qp.android.helpers.utils.FileUtil.createFindDFolder;
 import static org.qp.android.helpers.utils.FileUtil.documentWrap;
@@ -21,17 +22,15 @@ import android.view.View;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.os.LocaleListCompat;
-import androidx.core.view.GravityCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.documentfile.provider.DocumentFile;
-import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.MutableLiveData;
@@ -41,7 +40,9 @@ import androidx.navigation.fragment.NavHostFragment;
 
 import com.anggrayudi.storage.SimpleStorageHelper;
 import com.anggrayudi.storage.file.DocumentFileCompat;
+import com.anggrayudi.storage.file.DocumentFileType;
 import com.anggrayudi.storage.file.MimeType;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.textfield.TextInputLayout;
 
@@ -72,9 +73,9 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
     private final String TAG = this.getClass().getSimpleName();
 
     private static final int MAX_SAVE_SLOTS = 5;
-    private static final int TAB_MAIN_DESC_AND_ACTIONS = 0;
-    private static final int TAB_OBJECTS = 1;
-    private static final int TAB_VARS_DESC = 2;
+    public static final int TAB_MAIN_DESC_AND_ACTIONS = 0;
+    public static final int TAB_OBJECTS = 1;
+    public static final int TAB_VARS_DESC = 2;
     private static final int LOAD = 0;
     private static final int SAVE = 1;
 
@@ -84,6 +85,7 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
     private ActionBar actionBar;
     private Menu mainMenu;
     private NavController navController;
+    private BottomNavigationView navigationView;
 
     private HtmlProcessor htmlProcessor;
     private LibQpProxy libQpProxy;
@@ -95,6 +97,10 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
     private final SimpleStorageHelper storageHelper = new SimpleStorageHelper(this);
     private ActivityResultLauncher<Intent> saveResultLaunch;
     private View mDecorView;
+
+    public SettingsController getSettingsController() {
+        return settingsController;
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -120,6 +126,20 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
         if (navFragment != null) {
             navController = navFragment.getNavController();
         }
+
+        navigationView = activityGameBinding.bottomNavigationView;
+        navigationView.setOnItemSelectedListener(item -> {
+            int itemId = item.getItemId();
+            if (itemId == R.id.menu_mainDesc) {
+                setActiveTab(TAB_MAIN_DESC_AND_ACTIONS);
+            } else if (itemId == R.id.menu_varsDesc) {
+                setActiveTab(TAB_VARS_DESC);
+            } else if (itemId == R.id.menu_inventory) {
+                setActiveTab(TAB_OBJECTS);
+            }
+            return true;
+        });
+        setOnApplyWindowInsetsListener(navigationView , null);
 
         saveResultLaunch = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
@@ -176,6 +196,7 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
         if (savedInstanceState != null) {
             restartServices();
             initControls();
+            setActiveTab(savedInstanceState.getInt("savedActiveTab"));
         } else {
             initServices();
             initControls();
@@ -183,6 +204,28 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
         }
 
         Log.i(TAG, "Game created");
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt("savedActiveTab" , activeTab);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode ,
+                                           @NonNull String[] permissions ,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode , permissions , grantResults);
+        storageHelper.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode ,
+                                    int resultCode ,
+                                    @Nullable Intent data) {
+        super.onActivityResult(requestCode , resultCode , data);
+        storageHelper.getStorage().onActivityResult(requestCode , resultCode , data);
     }
 
     private void postTextInDialogFrags (String text) {
@@ -266,30 +309,15 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
     }
 
     private void initControls() {
-        setSupportActionBar(activityGameBinding.appBarGame.toolbar);
+        setSupportActionBar(activityGameBinding.toolbar);
         actionBar = getSupportActionBar();
-
-        var layout = activityGameBinding.gameDrawerLayout;
-        var toggle = new ActionBarDrawerToggle(
-                this ,
-                layout ,
-                activityGameBinding.appBarGame.toolbar ,
-                R.string.add ,
-                R.string.close
-        );
-        layout.addDrawerListener(toggle);
-        toggle.syncState();
-
-        var navigationView = activityGameBinding.navView;
-        navigationView.setFitsSystemWindows(false);
-        navigationView.setNavigationItemSelectedListener(this);
-        for (var data : gameViewModel.getGameDataList()) {
-            var menu = navigationView.getMenu();
-            for (var file : data.gameFiles) {
-                menu.add(file.getName()).setTooltipText(data.title);
-            }
-        }
     }
+
+//            for (var data : gameViewModel.getGameDataList()) {
+//            var menu = navigationView.getMenu();
+//            for (var file : data.gameFiles) {
+//                menu.add(file.getName()).setTooltipText(data.title);
+//            }
 
     private void initServices() {
         gameViewModel.startAudio();
@@ -310,10 +338,16 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
         var gameId = intent.getStringExtra("gameId");
         var gameTitle = intent.getStringExtra("gameTitle");
         var gameDirUri = intent.getStringExtra("gameDirUri");
-        var gameDir =  DocumentFileCompat.fromFullPath(this , gameDirUri);
+        var gameDir =  DocumentFileCompat.fromFullPath(
+                this , gameDirUri ,
+                DocumentFileType.FOLDER , true
+        );
         gameViewModel.setFullPathGameDir(gameDirUri);
         var gameFileUri = intent.getStringExtra("gameFileUri");
-        var gameFile = DocumentFileCompat.fromFullPath(this , gameFileUri);
+        var gameFile = DocumentFileCompat.fromFullPath(
+                this , gameFileUri ,
+                DocumentFileType.FILE , true
+        );
         libQpProxy.runGame(gameId, gameTitle, gameDir, gameFile);
     }
 
@@ -321,31 +355,53 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
         switch (tab) {
             case TAB_MAIN_DESC_AND_ACTIONS -> {
                 navController.navigate(R.id.gameMainFragment);
+                var badge = navigationView.getBadge(R.id.menu_mainDesc);
+                if (badge != null) navigationView.removeBadge(R.id.menu_mainDesc);
                 setTitle(getString(R.string.mainDescTitle));
             }
             case TAB_OBJECTS -> {
                 navController.navigate(R.id.gameObjectFragment);
+                var badge = navigationView.getBadge(R.id.menu_inventory);
+                if (badge != null) navigationView.removeBadge(R.id.menu_inventory);
                 setTitle(getString(R.string.inventoryTitle));
             }
             case TAB_VARS_DESC -> {
                 navController.navigate(R.id.gameVarsFragment);
+                var badge = navigationView.getBadge(R.id.menu_varsDesc);
+                if (badge != null) navigationView.removeBadge(R.id.menu_varsDesc);
                 setTitle(getString(R.string.varsDescTitle));
             }
         }
 
         activeTab = tab;
-        updateTabIcons();
     }
 
     private void setTitle(String title) {
         actionBar.setTitle(title);
     }
 
-    private void updateTabIcons() {
-        if (mainMenu == null) return;
-        mainMenu.findItem(R.id.menu_inventory).setIcon(activeTab == TAB_OBJECTS ? R.drawable.tab_object : R.drawable.tab_object_alt);
-        mainMenu.findItem(R.id.menu_mainDesc).setIcon(activeTab == TAB_MAIN_DESC_AND_ACTIONS ? R.drawable.tab_main : R.drawable.tab_main_alt);
-        mainMenu.findItem(R.id.menu_varsDesc).setIcon(activeTab == TAB_VARS_DESC ? R.drawable.tab_vars : R.drawable.tab_vars_alt);
+    public void warnUser(int id) {
+        if (isMainThread()) {
+            var label = navController.getCurrentDestination().getLabel();
+            if (label != null) {
+                switch (id) {
+                    case TAB_MAIN_DESC_AND_ACTIONS -> {
+                        if (!label.equals("GameMainFragment"))
+                            navigationView.getOrCreateBadge(R.id.menu_mainDesc);
+                    }
+                    case TAB_OBJECTS -> {
+                        if (!label.equals("GameObjectFragment"))
+                            navigationView.getOrCreateBadge(R.id.menu_inventory);
+                    }
+                    case TAB_VARS_DESC -> {
+                        if (!label.equals("GameVarsFragment"))
+                            navigationView.getOrCreateBadge(R.id.menu_varsDesc);
+                    }
+                }
+            }
+        } else {
+            runOnUiThread(() -> warnUser(id));
+        }
     }
 
     @Override
@@ -529,13 +585,9 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
-            var drawer = (DrawerLayout) activityGameBinding.gameDrawerLayout;
-            if (drawer.isDrawerOpen(GravityCompat.START)) {
-                drawer.closeDrawer(GravityCompat.START);
-            } else {
-                promptCloseGame();
-            }
+        if (keyCode == KeyEvent.KEYCODE_BACK
+                && event.getRepeatCount() == 0) {
+            promptCloseGame();
             return true;
         }
         return super.onKeyDown(keyCode, event);
@@ -544,9 +596,8 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         mainMenu = menu;
-        var inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu_game, menu);
-        updateTabIcons();
+        getMenuInflater()
+                .inflate(R.menu.menu_game , menu);
         return true;
     }
 
@@ -671,8 +722,8 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         if (item.getTitle() == null) {
-            var drawer = (DrawerLayout) activityGameBinding.gameDrawerLayout;
-            drawer.closeDrawer(GravityCompat.START);
+//            var drawer = (DrawerLayout) activityGameBinding.gameDrawerLayout;
+//            drawer.closeDrawer(GravityCompat.START);
             return false;
         } else if (!libQpProxy.getGameState().gameTitle.contentEquals(item.getTitle())) {
             var simpleNameForSave = libQpProxy.getGameState().gameFile.getName();
@@ -688,8 +739,8 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
                 gameViewModel.setGameSaveMap(temGameSaveMap);
             } catch (NullPointerException e) {
                 Log.d(TAG , "Error: " , e);
-                var drawer = (DrawerLayout) activityGameBinding.gameDrawerLayout;
-                drawer.closeDrawer(GravityCompat.START);
+//                var drawer = (DrawerLayout) activityGameBinding.gameDrawerLayout;
+//                drawer.closeDrawer(GravityCompat.START);
                 return false;
             }
 
@@ -712,24 +763,15 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
             }
         }
 
-        var drawer = (DrawerLayout) activityGameBinding.gameDrawerLayout;
-        drawer.closeDrawer(GravityCompat.START);
+//        var drawer = (DrawerLayout) activityGameBinding.gameDrawerLayout;
+//        drawer.closeDrawer(GravityCompat.START);
         return false;
     }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int i = item.getItemId();
-        if (i == R.id.menu_mainDesc) {
-            setActiveTab(TAB_MAIN_DESC_AND_ACTIONS);
-            return true;
-        } else if (i == R.id.menu_inventory) {
-            setActiveTab(TAB_OBJECTS);
-            return true;
-        } else if (i == R.id.menu_varsDesc) {
-            setActiveTab(TAB_VARS_DESC);
-            return true;
-        } else if (i == R.id.menu_userInput) {
+        if (i == R.id.menu_userInput) {
             if (settingsController.isUseExecString) {
                 libQpProxy.onUseExecutorString();
             } else {

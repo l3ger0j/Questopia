@@ -52,28 +52,6 @@ public final class FileUtil {
     }
 
     @Nullable
-    public static File createFindFile(File parentDir , String name) {
-        if (!isWritableDirectory(parentDir)) {
-            return null;
-        }
-
-        var checkFile = findFileOrDirectory(parentDir , name);
-        if (checkFile == null) {
-            var file = new File(parentDir , name);
-            try {
-                if (file.createNewFile()) {
-                    Log.i(TAG , "File created");
-                    return file;
-                }
-            } catch (IOException ex) {
-                Log.e(TAG , "Error creating a file: " + name , ex);
-                return null;
-            }
-        }
-        return checkFile;
-    }
-
-    @Nullable
     public static DocumentFile createFindDFile(DocumentFile parentDir ,
                                                String mimeType ,
                                                String displayName) {
@@ -141,36 +119,6 @@ public final class FileUtil {
 
     public static DocumentFile findFileOrDirectory(DocumentFile parentDir , final String name) {
         return parentDir.findFile(name);
-    }
-
-    @Nullable
-    public static File findFileRecursively(File parentDir , String path) {
-        var idx = path.indexOf("/");
-        if (idx == -1) {
-            return findFileOrDirectory(parentDir , path);
-        }
-        var dirName = path.substring(0 , idx);
-        var dir = findFileOrDirectory(parentDir , dirName);
-        if (dir == null) return null;
-        return findFileRecursively(dir , path.substring(idx + 1));
-    }
-
-    @Nullable
-    public static String readFileAsString(File file) {
-        var result = new StringBuilder();
-        try (var in = new FileInputStream(file)) {
-            var inReader = new InputStreamReader(in);
-            try (var bufReader = new BufferedReader(inReader)) {
-                String line;
-                while ((line = bufReader.readLine()) != null) {
-                    result.append(line);
-                }
-            }
-        } catch (IOException ex) {
-            Log.e(TAG , "Error reading a file" , ex);
-            return null;
-        }
-        return result.toString();
     }
 
     @Nullable
