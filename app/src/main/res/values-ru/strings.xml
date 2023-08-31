@@ -101,7 +101,6 @@
         <string name="inventoryTitle">Инвентарь</string>
         <string name="inventoryContDesc">Перейти к инвентарю</string>
         <string name="userInputTitle">Пользовательский ввод</string>
-        <string name="userInputContDesc">Показать пользовательский ввод</string>
         <string name="restartGameTitle">Начать заново</string>
         <string name="loadTitle">Загрузить</string>
         <string name="saveTitle">Сохранить</string>

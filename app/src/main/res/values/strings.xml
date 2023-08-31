@@ -102,7 +102,6 @@
         <string name="inventoryTitle">Inventory</string>
         <string name="inventoryContDesc">Go to inventory</string>
         <string name="userInputTitle">User input</string>
-        <string name="userInputContDesc">Show user input</string>
         <string name="restartGameTitle">Restart game</string>
         <string name="loadTitle">Load</string>
         <string name="saveTitle">Save</string>

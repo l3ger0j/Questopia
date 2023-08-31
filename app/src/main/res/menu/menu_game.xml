@@ -1,24 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <group android:id="@+id/menuGroup_running">
         <item
             android:id="@+id/menu_newGame"
-            android:orderInCategory="1"
-            android:title="@string/restartGameTitle" />
+            android:icon="@drawable/restart_alt"
+            android:title="@string/restartGameTitle"
+            app:showAsAction="ifRoom"/>
+        <item
+            android:id="@+id/menu_userInput"
+            android:icon="@drawable/tab_input"
+            android:title="@string/userInputTitle"
+            app:showAsAction="always" />
         <item
             android:id="@+id/menu_loadGame"
-            android:orderInCategory="2"
+            android:orderInCategory="1"
             android:title="@string/loadTitle" />
         <item
             android:id="@+id/menu_saveGame"
-            android:orderInCategory="3"
+            android:orderInCategory="2"
             android:title="@string/saveTitle" />
-        <item
-            android:id="@+id/menu_userInput"
-            android:orderInCategory="4"
-            android:title="@string/userInputTitle" />
     </group>
 
     <item
