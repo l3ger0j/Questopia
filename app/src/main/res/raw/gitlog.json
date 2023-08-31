@@ -1,129 +1,194 @@
 [
 {
- "version": "",
- "code": "729",
+ "version": "3.18.0",
+ "code": "739",
+ "date": "Wed Aug 30 18:09:29 2023 +0300",
+ "message": "QTA-UPDATE-3.18.0"
+},
+{
+ "version": "3.18.0",
+ "code": "739",
+ "date": "Wed Aug 30 18:01:47 2023 +0300",
+ "message": "Merge-pull-request-15-from-l3ger0j-unstable"
+},
+{
+ "version": "3.18.0",
+ "code": "739",
+ "date": "Wed Aug 30 17:55:19 2023 +0300",
+ "message": "Merge-branch-master-into-unstable"
+},
+{
+ "version": "3.18.0",
+ "code": "739",
+ "date": "Tue Aug 29 23:28:50 2023 +0300",
+ "message": "Fixed-function-warnUser"
+},
+{
+ "version": "3.18.0",
+ "code": "739",
+ "date": "Tue Aug 29 22:51:41 2023 +0300",
+ "message": "Added-BottomNavigationView"
+},
+{
+ "version": "3.18.0",
+ "code": "739",
+ "date": "Sun Aug 27 22:59:43 2023 +0300",
+ "message": "Fixed-ActivityNotFoundException"
+},
+{
+ "version": "3.18.0",
+ "code": "739",
+ "date": "Sun Aug 27 22:54:36 2023 +0300",
+ "message": "Added-music-path-debugger"
+},
+{
+ "version": "3.18.0",
+ "code": "739",
+ "date": "Sun Aug 27 22:32:23 2023 +0300",
+ "message": "Fixed-NPE-in-GameViewModel"
+},
+{
+ "version": "3.18.0",
+ "code": "739",
+ "date": "Sun Aug 27 21:53:51 2023 +0300",
+ "message": "Cleanup-FileUtil"
+},
+{
+ "version": "3.18.0",
+ "code": "739",
+ "date": "Sat Aug 26 20:54:32 2023 +0300",
+ "message": "Fixed-RuntimeException-in-NewsFragment"
+},
+{
+ "version": "3.18.0",
+ "code": "739",
  "date": "Fri Aug 25 22:34:59 2023 +0300",
  "message": "fixup-Added-a-notification-to-the-user-about-changing-the-content-on-the-tab-in-the-form-of-a-color-change-at-the-menu-item"
 },
 {
- "version": "",
- "code": "729",
+ "version": "3.18.0",
+ "code": "739",
  "date": "Fri Aug 25 22:22:58 2023 +0300",
  "message": "Fixed-a-problem-with-saves-maybe-it-fixes-problems-with-accessing-different-files"
 },
 {
- "version": "",
- "code": "729",
+ "version": "3.18.0",
+ "code": "739",
  "date": "Fri Aug 25 21:06:51 2023 +0300",
  "message": "Fixed-music-playback"
 },
 {
- "version": "",
- "code": "729",
+ "version": "3.18.0",
+ "code": "739",
  "date": "Fri Aug 25 01:32:10 2023 +0300",
  "message": "Added-a-notification-to-the-user-about-changing-the-content-on-the-tab-in-the-form-of-a-color-change-at-the-menu-item"
 },
 {
- "version": "",
- "code": "729",
+ "version": "3.18.0",
+ "code": "739",
  "date": "Thu Aug 24 20:55:08 2023 +0300",
  "message": "The-button-responsible-for-switching-the-main-view-has-been-moved-to-the-left"
 },
 {
- "version": "",
- "code": "729",
+ "version": "3.18.0",
+ "code": "739",
  "date": "Thu Aug 24 20:33:07 2023 +0300",
  "message": "Fixed-incorrect-display-of-the-game-menu-when-the-screen-is-rotated"
 },
 {
- "version": "",
- "code": "729",
+ "version": "3.18.0",
+ "code": "739",
  "date": "Tue Aug 22 19:15:46 2023 +0300",
  "message": "Gradle-upgrade-to-8.1.1"
 },
 {
- "version": "",
- "code": "729",
+ "version": "3.18.0",
+ "code": "739",
  "date": "Mon Aug 21 19:05:06 2023 +0300",
  "message": "Remove-hamburger-menu"
 },
 {
- "version": "",
- "code": "729",
+ "version": "3.18.0",
+ "code": "739",
  "date": "Mon Aug 21 18:41:47 2023 +0300",
  "message": "When-creating-gameFiles-and-gameDir-objects-a-permission-request-is-now-used"
 },
 {
- "version": "",
- "code": "729",
+ "version": "3.18.0",
+ "code": "739",
  "date": "Mon Aug 21 18:31:35 2023 +0300",
  "message": "Revert-getAdapterPosition-getBindingAdapterPosition"
 },
 {
- "version": "",
- "code": "729",
+ "version": "3.18.0",
+ "code": "739",
  "date": "Mon Aug 21 18:22:09 2023 +0300",
  "message": "Revert-Add-Fragula-and-swipes-in-GameActivity"
 },
 {
- "version": "",
- "code": "729",
+ "version": "3.18.0",
+ "code": "739",
  "date": "Sat Aug 19 21:21:40 2023 +0300",
  "message": "Fixed-File-not-created"
 },
 {
- "version": "",
- "code": "729",
+ "version": "3.18.0",
+ "code": "739",
  "date": "Wed Aug 16 22:37:23 2023 +0300",
  "message": "Add-Fragula-and-swipes-in-GameActivity"
 },
 {
- "version": "",
- "code": "729",
+ "version": "3.18.0",
+ "code": "739",
  "date": "Wed Aug 16 22:13:16 2023 +0300",
  "message": "Added-gitlog.json"
 },
 {
- "version": "",
- "code": "729",
+ "version": "3.18.0",
+ "code": "739",
  "date": "Wed Aug 16 19:02:49 2023 +0300",
  "message": "Complete-correction-of-the-IOException-error-during-autosave"
 },
 {
- "version": "",
- "code": "729",
+ "version": "3.18.0",
+ "code": "739",
  "date": "Wed Aug 16 18:57:58 2023 +0300",
  "message": "The-first-attempt-to-save-auto-saves-from-the-IOException-error"
 },
 {
- "version": "",
- "code": "729",
+ "version": "3.18.0",
+ "code": "739",
  "date": "Tue Aug 15 18:33:37 2023 +0300",
  "message": "Fixed-NullPointerException-in-GameViewModel-getLibQspProxy"
 },
 {
- "version": "",
- "code": "729",
+ "version": "3.18.0",
+ "code": "739",
  "date": "Mon Aug 14 23:26:21 2023 +0300",
  "message": "Updating-compileSdk-to-34"
 },
 {
- "version": "",
- "code": "729",
+ "version": "3.18.0",
+ "code": "739",
  "date": "Mon Aug 14 23:05:03 2023 +0300",
  "message": "Correction-of-names"
 },
 {
- "version": "",
- "code": "729",
+ "version": "3.18.0",
+ "code": "739",
  "date": "Mon Aug 14 23:00:13 2023 +0300",
  "message": "Full-renaming"
 },
 {
- "version": "",
- "code": "729",
+ "version": "3.18.0",
+ "code": "739",
  "date": "Mon Aug 14 22:54:39 2023 +0300",
  "message": "Updating-project-dependencies"
+},{
+ "version": "3.17.1",
+ "code": "708",
+ "date": "Wed Aug 16 19:21:14 2023 +0300",
+ "message": "QTA-FIX-3.17.1"
 },{
  "version": "3.17.0",
  "code": "707",
