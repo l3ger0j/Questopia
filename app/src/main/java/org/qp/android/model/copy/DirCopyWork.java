@@ -15,12 +15,14 @@ import androidx.work.Data;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
+import com.anggrayudi.storage.file.DocumentFileCompat;
+
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 
 public class DirCopyWork extends Worker {
-    private final DocumentFile destDir = DocumentFile.fromTreeUri(getApplicationContext() , Uri.parse(getInputData().getString("destDir")));
-    private final DocumentFile srcDir = DocumentFile.fromTreeUri(getApplicationContext() , Uri.parse(getInputData().getString("srcDir")));
+    private final DocumentFile destDir = DocumentFileCompat.fromUri(getApplicationContext() , Uri.parse(getInputData().getString("destDir")));
+    private final DocumentFile srcDir = DocumentFileCompat.fromUri(getApplicationContext() , Uri.parse(getInputData().getString("srcDir")));
 
     public DirCopyWork(@NonNull Context context ,
                        @NonNull WorkerParameters workerParams) {
