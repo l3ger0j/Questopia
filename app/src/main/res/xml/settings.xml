@@ -123,9 +123,6 @@
 
     <PreferenceCategory android:title="@string/switchCatTitle">
         <SwitchPreferenceCompat
-            android:key="filePicker"
-            android:title="@string/filePicker"/>
-        <SwitchPreferenceCompat
             android:defaultValue="true"
             android:key="immersiveMode"
             android:summary="@string/immersiveModeSum"
