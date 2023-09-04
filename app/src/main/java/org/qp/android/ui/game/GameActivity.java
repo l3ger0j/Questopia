@@ -821,9 +821,7 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
 
     @Override
     public void onDialogNegativeClick(DialogFragment dialog) {
-        if (dialog == null) {
-            showErrorDialog("Dialog is null");
-        } else {
+        if (dialog != null) {
             if (Objects.equals(dialog.getTag() , "showMenuDialogFragment")) {
                 gameViewModel.outputIntObserver.setValue(-1);
             } else if (Objects.equals(dialog.getTag() , "inputDialogFragment") ||
@@ -835,9 +833,7 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
 
     @Override
     public void onDialogListClick(DialogFragment dialog , int which) {
-        if (dialog == null) {
-            showErrorDialog("Dialog is null");
-        } else {
+        if (dialog != null) {
             if (Objects.equals(dialog.getTag() , "showMenuDialogFragment")) {
                 gameViewModel.outputIntObserver.setValue(which);
             }
