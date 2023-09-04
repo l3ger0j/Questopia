@@ -29,7 +29,7 @@ android {
 
     externalNativeBuild {
         ndkBuild {
-            path 'src/main/jni/Android.mk'
+            path 'src/main/jni/qsp-5.7/Android.mk'
         }
     }
     buildTypes {
