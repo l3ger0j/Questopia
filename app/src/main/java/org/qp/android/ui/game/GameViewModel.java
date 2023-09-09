@@ -34,8 +34,10 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.preference.PreferenceManager;
 
 import com.anggrayudi.storage.file.DocumentFileCompat;
+import com.anggrayudi.storage.file.DocumentFileType;
 
 import org.qp.android.QuestPlayerApplication;
+import org.qp.android.R;
 import org.qp.android.dto.stock.InnerGameData;
 import org.qp.android.model.libQP.LibQpProxy;
 import org.qp.android.model.libQP.QpMenuItem;
@@ -398,15 +400,20 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
                     try {
                         var relPath = uri.getPath();
                         var tempRoot = documentWrap(rootDir);
-                        var fileFromDefaultCon = DocumentFileCompat.fromFullPath(getGameActivity() ,
-                                tempRoot.getAbsolutePath(getGameActivity()) + relPath);
+                        var fileFromDefaultCon = DocumentFileCompat.fromFullPath(
+                                getGameActivity() ,
+                                tempRoot.getAbsolutePath(getGameActivity()) + relPath ,
+                                DocumentFileType.FILE ,
+                                true
+                        );
                         var extension = fileFromDefaultCon.getName();
                         var mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
                         var in = getGameActivity().getContentResolver().openInputStream(fileFromDefaultCon.getUri());
                         return new WebResourceResponse(mimeType , null , in);
                     } catch (FileNotFoundException | NullPointerException ex) {
-                        if (getSettingsController().isUseImageDebug)
-                            getGameActivity().showErrorDialog(String.valueOf(ex));
+                        if (getSettingsController().isUseImageDebug) {
+                            getGameActivity().showErrorDialog(getGameActivity().getString(R.string.notFoundImage)+uri.getPath());
+                        }
                         Log.e(TAG , "File not found" , ex);
                         return null;
                     }

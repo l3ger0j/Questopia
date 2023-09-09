@@ -27,6 +27,8 @@
         <string name="gamesDirError">Невозможно создать или открыть папку с играми.</string>
         <string name="installError">Невозможно установить игру -GAMENAME-.</string>
         <string name="noGameFilesError">Файлы игры не найдены после установки.</string>
+        <string name="notFoundSound">Звуковой файл не найден:</string>
+        <string name="notFoundImage">Файл изображения не найден:</string>
     <!-- Dialog Install -->
         <string name="gameName">Название игры</string>
         <string name="gameAuthor">Автор</string>

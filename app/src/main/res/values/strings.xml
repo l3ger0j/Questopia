@@ -27,6 +27,8 @@
         <string name="gamesDirError">Unable to create or open games directory.</string>
         <string name="installError">Could not install game -GAMENAME-.</string>
         <string name="noGameFilesError">Game files not found after installation.</string>
+        <string name="notFoundSound">Sound file not found:</string>
+        <string name="notFoundImage">Image file not found:</string>
     <!-- Dialog Install -->
         <string name="gameName">Game name</string>
         <string name="gameAuthor">Author</string>
