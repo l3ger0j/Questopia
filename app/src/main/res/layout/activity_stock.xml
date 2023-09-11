@@ -26,7 +26,7 @@
             android:visibility="@{stockVM.isShowDialog ? View.GONE : View.VISIBLE}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:srcCompat="@drawable/add" />
+            app:srcCompat="@drawable/file_copy" />
 
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/stockFragHost"
