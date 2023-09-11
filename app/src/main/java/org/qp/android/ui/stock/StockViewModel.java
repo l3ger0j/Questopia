@@ -589,6 +589,7 @@ public class StockViewModel extends AndroidViewModel {
     // endregion Game install
 
     // region Refresh
+    // TODO: 11.09.2023 REWRITE THIS INTO WORKER!
     public void refreshIntGamesDirectory() {
         var rootDir = ((QuestPlayerApplication) getApplication()).getCustomRootDir();
         if (rootDir != null) {
