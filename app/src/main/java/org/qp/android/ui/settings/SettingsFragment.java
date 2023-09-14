@@ -1,7 +1,5 @@
 package org.qp.android.ui.settings;
 
-import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_GDIR_FILE;
-
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.webkit.WebView;
@@ -77,21 +75,6 @@ public class SettingsFragment extends PreferenceFragmentCompat
                 Navigation.findNavController(requireView())
                         .navigate(R.id.newsFragment);
                 return false;
-            });
-        }
-
-        var rootDir = findPreference("addRootFold");
-        if (rootDir != null) {
-            var application = (QuestPlayerApplication) requireActivity().getApplication();
-            if (application.getCustomRootDir() == null) {
-                rootDir.setSummary(getString(R.string.addFolderSum0));
-            } else {
-                rootDir.setSummary(getString(R.string.addFolderSum1));
-            }
-            rootDir.setOnPreferenceClickListener(preference -> {
-                var activity = (SettingsActivity) requireActivity();
-                activity.showDirPickerDialog(CODE_PICK_GDIR_FILE);
-                return true;
             });
         }
 

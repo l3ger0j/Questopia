@@ -71,6 +71,7 @@ public class StockViewModel extends AndroidViewModel {
             new ObservableField<>();
 
     public ObservableBoolean isShowDialog = new ObservableBoolean();
+    public ObservableBoolean isHideMenu = new ObservableBoolean();
     public ObservableBoolean isSelectFolder = new ObservableBoolean();
 
     private final LocalGame localGame = new LocalGame();
@@ -313,7 +314,7 @@ public class StockViewModel extends AndroidViewModel {
             }
         });
         getStockActivity()
-                .showInstallDialogFragment(dialogFragments);
+                .showDialogFragment(dialogFragments , StockDialogType.INSTALL_DIALOG);
         isShowDialog.set(true);
     }
 
@@ -331,7 +332,7 @@ public class StockViewModel extends AndroidViewModel {
             }
         });
         getStockActivity()
-                .showEditDialogFragment(dialogFragments);
+                .showDialogFragment(dialogFragments , StockDialogType.EDIT_DIALOG);
         isShowDialog.set(true);
     }
 
@@ -440,7 +441,7 @@ public class StockViewModel extends AndroidViewModel {
                 dialogFragments.setDialogType(StockDialogType.SELECT_DIALOG);
                 dialogFragments.setNames(names);
                 getStockActivity()
-                        .showSelectDialogFragment(dialogFragments);
+                        .showDialogFragment(dialogFragments , StockDialogType.SELECT_DIALOG);
                 outputIntObserver.observeForever(integer -> {
                     var tempFile = documentWrap(tempInnerGameData.gameFiles.get(integer));
                     intent.putExtra("gameFileUri" , tempFile.getAbsolutePath(getStockActivity()));
