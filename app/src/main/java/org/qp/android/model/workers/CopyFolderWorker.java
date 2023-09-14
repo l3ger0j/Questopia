@@ -1,4 +1,4 @@
-package org.qp.android.model.copy;
+package org.qp.android.model.workers;
 
 import static org.qp.android.helpers.utils.DirUtil.doesDirectoryContainGameFiles;
 import static org.qp.android.helpers.utils.DirUtil.normalizeGameDirectory;
@@ -20,12 +20,12 @@ import com.anggrayudi.storage.file.DocumentFileCompat;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 
-public class DirCopyWork extends Worker {
+public class CopyFolderWorker extends Worker {
     private final DocumentFile destDir = DocumentFileCompat.fromUri(getApplicationContext() , Uri.parse(getInputData().getString("destDir")));
     private final DocumentFile srcDir = DocumentFileCompat.fromUri(getApplicationContext() , Uri.parse(getInputData().getString("srcDir")));
 
-    public DirCopyWork(@NonNull Context context ,
-                       @NonNull WorkerParameters workerParams) {
+    public CopyFolderWorker(@NonNull Context context ,
+                            @NonNull WorkerParameters workerParams) {
         super(context , workerParams);
     }
 

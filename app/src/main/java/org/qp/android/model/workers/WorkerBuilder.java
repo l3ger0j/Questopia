@@ -1,4 +1,4 @@
-package org.qp.android.model.copy;
+package org.qp.android.model.workers;
 
 import android.content.Context;
 
@@ -10,7 +10,7 @@ import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
 
-public class CopyBuilder {
+public class WorkerBuilder {
     private final MutableLiveData<Boolean> isDone = new MutableLiveData<>();
     private final MutableLiveData<String> errorCode = new MutableLiveData<>();
 
@@ -21,7 +21,7 @@ public class CopyBuilder {
         return errorCode;
     }
 
-    public CopyBuilder(Context context) {
+    public WorkerBuilder(Context context) {
         this.context = context;
     }
 
@@ -31,7 +31,7 @@ public class CopyBuilder {
                 .putString("destDir", destDir.getUri().toString())
                 .build();
 
-        var workRequest = new OneTimeWorkRequest.Builder(DirCopyWork.class)
+        var workRequest = new OneTimeWorkRequest.Builder(CopyFolderWorker.class)
                 .setInputData(inputData)
                 .build();
 
@@ -61,7 +61,7 @@ public class CopyBuilder {
                 .putString("srcDir", srcDir.getUri().toString())
                 .build();
 
-        var workRequest = new OneTimeWorkRequest.Builder(DirSizeWork.class)
+        var workRequest = new OneTimeWorkRequest.Builder(SizeFolderWorker.class)
                 .setInputData(inputData)
                 .build();
 

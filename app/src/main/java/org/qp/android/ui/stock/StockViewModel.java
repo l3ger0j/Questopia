@@ -44,7 +44,7 @@ import org.qp.android.databinding.DialogEditBinding;
 import org.qp.android.databinding.DialogInstallBinding;
 import org.qp.android.dto.stock.InnerGameData;
 import org.qp.android.helpers.repository.LocalGame;
-import org.qp.android.model.copy.CopyBuilder;
+import org.qp.android.model.workers.WorkerBuilder;
 import org.qp.android.model.notify.NotifyBuilder;
 import org.qp.android.ui.dialogs.StockDialogFrags;
 import org.qp.android.ui.dialogs.StockDialogType;
@@ -531,7 +531,7 @@ public class StockViewModel extends AndroidViewModel {
         builder.setTextNotify(getStockActivity().getString(R.string.bodyCopyNotify));
         notificationManager.notify(INSTALL_GAME_NOTIFICATION_ID , builder.buildStandardNotification());
 
-        var installer = new CopyBuilder(getStockActivity());
+        var installer = new WorkerBuilder(getStockActivity());
         installer.getErrorCode().observeForever(error -> {
             switch (error) {
                 case "NIG" -> getStockActivity().showErrorDialog(getStockActivity()
@@ -583,7 +583,7 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     private LiveData<Long> calculateSizeDir(DocumentFile srcDir) {
-        var installer = new CopyBuilder(getStockActivity());
+        var installer = new WorkerBuilder(getStockActivity());
         return installer.calculateDirSize(srcDir);
     }
     // endregion Game install

@@ -1,4 +1,4 @@
-package org.qp.android.model.copy;
+package org.qp.android.model.workers;
 
 import static org.qp.android.helpers.utils.DirUtil.dirSize;
 
@@ -17,11 +17,11 @@ import com.anggrayudi.storage.file.DocumentFileCompat;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 
-public class DirSizeWork extends Worker {
+public class SizeFolderWorker extends Worker {
     private final DocumentFile srcDir = DocumentFileCompat.fromUri(getApplicationContext(), Uri.parse(getInputData().getString("srcDir")));
 
-    public DirSizeWork(@NonNull Context context ,
-                       @NonNull WorkerParameters workerParams) {
+    public SizeFolderWorker(@NonNull Context context ,
+                            @NonNull WorkerParameters workerParams) {
         super(context , workerParams);
     }
 

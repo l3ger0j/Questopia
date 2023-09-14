@@ -10,7 +10,7 @@ import androidx.documentfile.provider.DocumentFile;
 import com.anggrayudi.storage.FileWrapper;
 import com.anggrayudi.storage.file.MimeType;
 
-import org.qp.android.model.copy.CopyException;
+import org.qp.android.model.workers.WorkerException;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -230,7 +230,7 @@ public final class FileUtil {
                 throw new IOException();
             }
         } catch (IOException ex) {
-            throw new CopyException("CGF");
+            throw new WorkerException("CGF");
         }
     }
 }
