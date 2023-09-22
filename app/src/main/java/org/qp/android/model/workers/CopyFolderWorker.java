@@ -2,8 +2,7 @@ package org.qp.android.model.workers;
 
 import static org.qp.android.helpers.utils.DirUtil.doesDirectoryContainGameFiles;
 import static org.qp.android.helpers.utils.DirUtil.normalizeGameDirectory;
-import static org.qp.android.helpers.utils.FileUtil.copyFile;
-import static org.qp.android.helpers.utils.FileUtil.createFindDFolder;
+import static org.qp.android.helpers.utils.FileUtil.copyFileOrDirectory;
 
 import android.content.Context;
 import android.net.Uri;
@@ -43,7 +42,7 @@ public class CopyFolderWorker extends Worker {
         var service = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
         var task = service.submit(() -> {
             for (var file : srcDir.listFiles()) {
-                copyFileOrDirectory(file , destDir);
+                copyFileOrDirectory(getApplicationContext() , file , destDir);
             }
         });
 
@@ -58,16 +57,5 @@ public class CopyFolderWorker extends Worker {
             return Result.failure();
         }
         return Result.success();
-    }
-
-    private void copyFileOrDirectory(@NonNull DocumentFile srcFile , DocumentFile destDir) {
-        if (srcFile.isDirectory()) {
-            var subDestDir = createFindDFolder(destDir , srcFile.getName());
-            for (var subSrcFile : srcFile.listFiles()) {
-                copyFileOrDirectory(subSrcFile , subDestDir);
-            }
-        } else if (srcFile.isFile()) {
-            copyFile(getApplicationContext() , srcFile , destDir);
-        }
     }
 }
