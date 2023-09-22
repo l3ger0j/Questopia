@@ -126,7 +126,7 @@
         <string name="actsHeightTitle">Actions List Height</string>
         <string name="actsHeightSum">Actions List Height To Screen Height Ratio</string>
         <!-- Text section -->
-        <string name="textCatTitle">Text</string>
+        <string name="textCatTitle">Text Display Settings</string>
         <string name="fontStyleTitle">Font Style</string>
         <string name="fontSizeTitle">Font Size</string>
         <string name="useGameFontTitle">Use Game Font</string>
@@ -143,7 +143,7 @@
         <string name="textBackLinkColorSum">Default value -VALUE-</string>
         <string name="extendedName">Questopia -VERSION-</string>
         <!-- Image section -->
-        <string name="imageCatTitle">Images</string>
+        <string name="imageCatTitle">Image Display Settings</string>
         <string name="autoWidthTitle">Auto Width Image</string>
         <string name="autoWidthSum">Use an auto-detectable value for the width of the image</string>
         <string name="customWidthTitle">Custom Width Image</string>

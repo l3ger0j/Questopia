@@ -125,7 +125,7 @@
         <string name="actsHeightTitle">Высота Списка Действий</string>
         <string name="actsHeightSum">Соотношение высоты списка действий к высоте экрана</string>
         <!-- Text section -->
-        <string name="textCatTitle">Текст</string>
+        <string name="textCatTitle">Настройки отображения текста</string>
         <string name="fontStyleTitle">Стиль Шрифта</string>
         <string name="fontSizeTitle">Размер Шрифта</string>
         <string name="useGameFontTitle">Шрифт из Игры</string>
@@ -142,7 +142,7 @@
         <string name="textBackLinkColorSum">Значение по умолчанию -VALUE-</string>
         <string name="extendedName">Questopia -VERSION-</string>
         <!-- Image section -->
-        <string name="imageCatTitle">Картинки</string>
+        <string name="imageCatTitle">Настройки отображения картинок</string>
         <string name="autoWidthTitle">Авто Ширина Изображения</string>
         <string name="autoWidthSum">Использовать автоматически определяемое значение для ширины изображения</string>
         <string name="customWidthTitle">Своё Значение Ширины</string>
