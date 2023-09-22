@@ -1,5 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.preference.PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <PreferenceCategory android:title="@string/generalCatTitle">
@@ -23,14 +24,12 @@
         <CheckBoxPreference
             android:defaultValue="true"
             android:key="sound"
-            android:summary="@string/soundSum"
             android:title="@string/soundTitle" />
         <ListPreference
             android:defaultValue="1/3"
             android:entries="@array/actsHeight"
             android:entryValues="@array/actsHeight"
             android:key="actsHeight"
-            android:summary="@string/actsHeightSum"
             android:title="@string/actsHeightTitle" />
         <CheckBoxPreference
             android:defaultValue="false"
@@ -122,12 +121,10 @@
         <SwitchPreferenceCompat
             android:defaultValue="true"
             android:key="immersiveMode"
-            android:summary="@string/immersiveModeSum"
             android:title="@string/immersiveModeTitle" />
         <SwitchPreferenceCompat
             android:defaultValue="true"
             android:key="autoscroll"
-            android:summary="@string/autoscrollSum"
             android:title="@string/autoscrollTitle" />
         <SwitchPreferenceCompat
             android:defaultValue="false"
@@ -142,7 +139,6 @@
         <SwitchPreferenceCompat
             android:defaultValue="false"
             android:key="execString"
-            android:summary="@string/execStringSum"
             app:title="@string/execStringTitle"/>
     </PreferenceCategory>
 

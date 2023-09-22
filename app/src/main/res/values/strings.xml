@@ -121,10 +121,8 @@
         <string name="langSum">Choose display language</string>
         <string name="binPrefTitle">Binary prefixes</string>
         <string name="binPrefSum">Choose binary prefixes</string>
-        <string name="soundTitle">Sound</string>
-        <string name="soundSum">Play music and sounds</string>
+        <string name="soundTitle">Play sound</string>
         <string name="actsHeightTitle">Actions List Height</string>
-        <string name="actsHeightSum">Actions List Height To Screen Height Ratio</string>
         <!-- Text section -->
         <string name="textCatTitle">Text Display Settings</string>
         <string name="fontStyleTitle">Font Style</string>
@@ -156,17 +154,14 @@
         <string name="switchCatTitle">Switches</string>
         <string name="filePicker">File Picker Dialog (alpha)</string>
         <string name="immersiveModeTitle">Immersive Mode</string>
-        <string name="immersiveModeSum">Enable/disable immersive mode</string>
         <string name="separatorTitle">Separator</string>
         <string name="separatorSum">On/off separator line in game</string>
         <string name="autoscrollTitle">Autoscroll</string>
-        <string name="autoscrollSum">Enable/disable autoscroll</string>
         <string name="imageDebugTitle">Image Path Debugger</string>
         <string name="imageDebugSum">A mode that enables the display of an error dialog if the path to the image is incorrect</string>
         <string name="musicDebugTitle">Music Path Debugger</string>
         <string name="musicDebugSum">A mode that enables the display of an error dialog if the path to the music is incorrect</string>
         <string name="execStringTitle">String executor</string>
-        <string name="execStringSum">Enable/disable execution string</string>
         <!-- Extra section -->
         <string name="extraCatTitle">Extra</string>
         <string name="pluginTitle">Extension menu</string>

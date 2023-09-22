@@ -120,10 +120,8 @@
         <string name="langSum">Выберите язык интерфейса</string>
         <string name="binPrefTitle">Двоичные Префиксы</string>
         <string name="binPrefSum">Выберите двоичные префиксы</string>
-        <string name="soundTitle">Звук</string>
-        <string name="soundSum">Проигрывать звуки и музыку</string>
+        <string name="soundTitle">Воспроизводить звук</string>
         <string name="actsHeightTitle">Высота Списка Действий</string>
-        <string name="actsHeightSum">Соотношение высоты списка действий к высоте экрана</string>
         <!-- Text section -->
         <string name="textCatTitle">Настройки отображения текста</string>
         <string name="fontStyleTitle">Стиль Шрифта</string>
@@ -155,17 +153,14 @@
         <string name="switchCatTitle">Переключатели</string>
         <string name="filePicker">Диалог Выбора Файла (альфа)</string>
         <string name="immersiveModeTitle">Режим Погружения</string>
-        <string name="immersiveModeSum">Включение/выключение режима погружения</string>
         <string name="separatorTitle">Разделитель</string>
         <string name="separatorSum">Включить/выключить разделитель в игре</string>
         <string name="autoscrollTitle">Автопролистывание</string>
-        <string name="autoscrollSum">Включить/выключить автопролистывание</string>
         <string name="imageDebugTitle">Отладчик путей к картинкам</string>
         <string name="imageDebugSum">Режим, который включает отображение диалога с ошибкой если путь к картинке неправильный</string>
         <string name="musicDebugTitle">Отладчик путей к музыке</string>
-        <string name="musicDebugSum">Режим, который позволяет отображать диалоговое окно с сообщением об ошибке, если путь к музыке указан неверно</string>
+        <string name="musicDebugSum">Режим, который включает отображение диалога с ошибкой если путь к музыке указан неверно</string>
         <string name="execStringTitle">Исполнитель строк</string>
-        <string name="execStringSum">Включить/выключить исполнитель строк</string>
         <!-- Extra section -->
         <string name="extraCatTitle">Экстра</string>
         <string name="pluginTitle">Меню плагинов</string>
