@@ -366,9 +366,17 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
 
         var handler = new Handler();
         handler.postDelayed(() -> {
+            var isContains = false;
+            var fragments = getGameActivity().getSupportFragmentManager().getFragments();
+            for (var item : fragments) {
+                if (item.toString().contains("GameDialogFrags")) {
+                    isContains = true;
+                }
+            }
+
             var newSafe = mainDescLiveData.getValue();
-            if (safe.equals(newSafe)) {
-                getGameActivity().showWaitDialog("Please Wait!");
+            if (safe.equals(newSafe) && !isContains) {
+                getGameActivity().showWaitDialog();
             }
             handlerIsDone = true;
         } , interval);

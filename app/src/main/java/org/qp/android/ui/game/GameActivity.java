@@ -493,10 +493,10 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
         }
     }
 
-    public void showWaitDialog(String message) {
+    public void showWaitDialog() {
         var dialogFragment = new GameDialogFrags();
         dialogFragment.setDialogType(GameDialogType.MESSAGE_DIALOG);
-        dialogFragment.setProcessedMsg(message);
+        dialogFragment.setProcessedMsg(getString(R.string.pleaseWait));
         dialogFragment.show(getSupportFragmentManager(), "showMessageDialogFragment");
     }
 
