@@ -493,6 +493,13 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
         }
     }
 
+    public void showWaitDialog(String message) {
+        var dialogFragment = new GameDialogFrags();
+        dialogFragment.setDialogType(GameDialogType.MESSAGE_DIALOG);
+        dialogFragment.setProcessedMsg(message);
+        dialogFragment.show(getSupportFragmentManager(), "showMessageDialogFragment");
+    }
+
     public void showInputDialog (String prompt, ArrayBlockingQueue<String> inputQueue) {
         if (isMainThread()) {
             var config = libQpProxy.getGameState().interfaceConfig;

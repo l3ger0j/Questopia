@@ -120,6 +120,7 @@ public class GameMainFragment extends GamePatternFragment {
                 new RecyclerItemClickListener.OnItemClickListener() {
                     @Override
                     public void onItemClick(View view , int position) {
+                        if (viewModel.isWaitTaskDone()) viewModel.startTimer();
                         viewModel.getLibQspProxy().onActionClicked(position);
                     }
 

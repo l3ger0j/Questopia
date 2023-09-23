@@ -63,6 +63,8 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
     private AudioPlayer audioPlayer;
     private String fullPathGameDir;
 
+    private boolean handlerIsDone = true;
+
     public ObservableField<GameActivity> gameActivityObservableField =
             new ObservableField<>();
     public ObservableBoolean isActionVisible = new ObservableBoolean();
@@ -246,6 +248,10 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
 
     // endregion Getter/Setter
 
+    public boolean isWaitTaskDone() {
+        return handlerIsDone;
+    }
+
     public void updatePageTemplate() {
         var pageHeadTemplate = PAGE_HEAD_TEMPLATE
                 .replace("QSPTEXTCOLOR", getHexColor(getTextColor()))
@@ -349,6 +355,23 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         libQpProxy.stop();
         libQpProxy.setGameInterface(null);
         libQpProxy = null;
+    }
+
+    public void startTimer() {
+        var safe = mainDescLiveData.getValue();
+        if (safe == null) return;
+
+        final int interval = 3000;
+        handlerIsDone = false;
+
+        var handler = new Handler();
+        handler.postDelayed(() -> {
+            var newSafe = mainDescLiveData.getValue();
+            if (safe.equals(newSafe)) {
+                getGameActivity().showWaitDialog("Please Wait!");
+            }
+            handlerIsDone = true;
+        } , interval);
     }
 
     public class GameWebViewClient extends WebViewClient {
