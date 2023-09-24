@@ -67,8 +67,9 @@ import java.util.Objects;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CountDownLatch;
 
-public class GameActivity extends AppCompatActivity implements GamePatternFragment.GamePatternFragmentList,
+public class GameActivity extends AppCompatActivity implements
         GamePatternDialogFrags.GamePatternDialogList {
+
     private final String TAG = this.getClass().getSimpleName();
 
     private static final int MAX_SAVE_SLOTS = 5;
@@ -187,9 +188,11 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
                                 }
                             }
                         } catch (FileNotFoundException e) {
-                            showErrorDialog("File not found: " + "\n" + e);
+                            showSimpleDialog("File not found: " + "\n" + e ,
+                                    GameDialogType.ERROR_DIALOG);
                         } catch (IOException e) {
-                            showErrorDialog("Can not read file: " + "\n" + e);
+                            showSimpleDialog("Can not read file: " + "\n" + e ,
+                                    GameDialogType.ERROR_DIALOG);
                         }
                         postTextInDialogFrags(stringBuilder.toString());
                     }
@@ -446,143 +449,141 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
         dialogFragment.show(getSupportFragmentManager(), "closeGameDialogFragment");
     }
 
-    public void showErrorDialog (String message) {
-        if (isMainThread()) {
-            var dialogFragment = new GameDialogFrags();
-            dialogFragment.setDialogType(GameDialogType.ERROR_DIALOG);
-            dialogFragment.setMessage(message);
-            dialogFragment.show(getSupportFragmentManager(), "errorDialogFragment");
-        } else {
-            runOnUiThread(() -> showErrorDialog(message));
-        }
-    }
-
-    public void showPictureDialog (String pathToImg) {
-        if (isMainThread()) {
-            var dialogFragment = new GameDialogFrags();
-            dialogFragment.setDialogType(GameDialogType.IMAGE_DIALOG);
-            dialogFragment.pathToImage.set(pathToImg);
-            dialogFragment.show(getSupportFragmentManager(), "imageDialogFragment");
-        } else {
-            runOnUiThread(() -> showPictureDialog(pathToImg));
-        }
-    }
-
-    public void showMessageDialog (String message, CountDownLatch latch) {
-        if (isMainThread()) {
-            var config = libQpProxy.getGameState().interfaceConfig;
-            var processedMsg = config.useHtml ? htmlProcessor.removeHTMLTags(message) : message;
-            if (processedMsg == null) {
-                processedMsg = "";
-            }
-            if (gameViewModel.outputBooleanObserver.hasObservers()) {
-                gameViewModel.outputBooleanObserver = new MutableLiveData<>();
-            }
-            var dialogFragment = new GameDialogFrags();
-            dialogFragment.setDialogType(GameDialogType.MESSAGE_DIALOG);
-            dialogFragment.setProcessedMsg(processedMsg);
-            dialogFragment.setCancelable(false);
-            dialogFragment.show(getSupportFragmentManager(), "showMessageDialogFragment");
-            gameViewModel.outputBooleanObserver.observeForever(aBoolean -> {
-                if (aBoolean) {
-                    latch.countDown();
-                }
-            });
-        } else {
-            runOnUiThread(() -> showMessageDialog(message, latch));
-        }
-    }
-
-    public void showWaitDialog() {
-        var dialogFragment = new GameDialogFrags();
-        dialogFragment.setDialogType(GameDialogType.MESSAGE_DIALOG);
-        dialogFragment.setProcessedMsg(getString(R.string.pleaseWait));
-        dialogFragment.show(getSupportFragmentManager(), "showMessageDialogFragment");
-    }
-
-    public void showInputDialog (String prompt, ArrayBlockingQueue<String> inputQueue) {
-        if (isMainThread()) {
-            var config = libQpProxy.getGameState().interfaceConfig;
-            var message = config.useHtml ? htmlProcessor.removeHTMLTags(prompt) : prompt;
-            if (message == null) {
-                message = "";
-            }
-            if (gameViewModel.outputTextObserver.hasObservers()) {
-                gameViewModel.outputTextObserver = new MutableLiveData<>();
-            }
-            var dialogFragment = new GameDialogFrags();
-            dialogFragment.setDialogType(GameDialogType.INPUT_DIALOG);
-            if (message.equals("userInputTitle")) {
-                dialogFragment.setMessage(getString(R.string.userInputTitle));
-            } else {
-                dialogFragment.setMessage(message);
-            }
-            dialogFragment.setCancelable(false);
-            dialogFragment.show(getSupportFragmentManager(), "inputDialogFragment");
-            gameViewModel.outputTextObserver.observeForever(inputQueue::add);
-        } else {
-            runOnUiThread(() -> showInputDialog(prompt, inputQueue));
-        }
-    }
-
-    public void showExecutorDialog (String text, ArrayBlockingQueue<String> inputQueue) {
-        if (isMainThread()) {
-            var config = libQpProxy.getGameState().interfaceConfig;
-            var message = config.useHtml ? htmlProcessor.removeHTMLTags(text) : text;
-            if (message == null) {
-                message = "";
-            }
-            if (gameViewModel.outputTextObserver.hasObservers()) {
-                gameViewModel.outputTextObserver = new MutableLiveData<>();
-            }
-            var dialogFragment = new GameDialogFrags();
-            dialogFragment.setDialogType(GameDialogType.EXECUTOR_DIALOG);
-            if (message.equals("execStringTitle")) {
-                dialogFragment.setMessage(getString(R.string.execStringTitle));
-            } else {
-                dialogFragment.setMessage(message);
-            }
-            dialogFragment.setCancelable(false);
-            dialogFragment.show(getSupportFragmentManager(), "executorDialogFragment");
-            gameViewModel.outputTextObserver.observeForever(inputQueue::add);
-        } else {
-            runOnUiThread(() -> showExecutorDialog(text, inputQueue));
-        }
-    }
-
-    public void showMenuDialog (ArrayList<String> items, ArrayBlockingQueue<Integer> resultQueue) {
-        if (isMainThread()) {
-            if (gameViewModel.outputIntObserver.hasObservers()) {
-                gameViewModel.outputIntObserver = new MutableLiveData<>();
-            }
-            var dialogFragment = new GameDialogFrags();
-            dialogFragment.setDialogType(GameDialogType.MENU_DIALOG);
-            dialogFragment.setItems(items);
-            dialogFragment.setCancelable(false);
-            dialogFragment.show(getSupportFragmentManager(), "showMenuDialogFragment");
-            gameViewModel.outputIntObserver.observeForever(resultQueue::add);
-        } else {
-            runOnUiThread(() -> showMenuDialog(items, resultQueue));
-        }
-    }
-
-    public void showLoadDialog () {
-        if (isMainThread()) {
-            var dialogFragment = new GameDialogFrags();
-            dialogFragment.setDialogType(GameDialogType.LOAD_DIALOG);
-            dialogFragment.setCancelable(true);
-            dialogFragment.show(getSupportFragmentManager(), "loadGameDialogFragment");
-        } else {
-            runOnUiThread(this::showLoadDialog);
-        }
-    }
-
     public void showSavePopup() {
-        if (isMainThread()) {
-            mainMenu.performIdentifierAction(R.id.menu_saveGame , 0);
-        } else {
+        if (!isMainThread()) {
             runOnUiThread(this::showSavePopup);
         }
+
+        mainMenu.performIdentifierAction(R.id.menu_saveGame , 0);
+    }
+
+    public void showSimpleDialog(@NonNull String inputString ,
+                                 @NonNull GameDialogType dialogType) {
+        if (!isMainThread()) {
+            runOnUiThread(() -> showSimpleDialog(inputString , dialogType));
+        }
+
+        switch (dialogType) {
+            case ERROR_DIALOG -> {
+                var dialogFragment = new GameDialogFrags();
+                dialogFragment.setDialogType(GameDialogType.ERROR_DIALOG);
+                dialogFragment.setMessage(inputString);
+                dialogFragment.show(getSupportFragmentManager(), "errorDialogFragment");
+            }
+            case IMAGE_DIALOG -> {
+                var dialogFragment = new GameDialogFrags();
+                dialogFragment.setDialogType(GameDialogType.IMAGE_DIALOG);
+                dialogFragment.pathToImage.set(inputString);
+                dialogFragment.show(getSupportFragmentManager(), "imageDialogFragment");
+            }
+            case LOAD_DIALOG -> {
+                var dialogFragment = new GameDialogFrags();
+                dialogFragment.setDialogType(GameDialogType.LOAD_DIALOG);
+                dialogFragment.setCancelable(true);
+                dialogFragment.show(getSupportFragmentManager(), "loadGameDialogFragment");
+            }
+            case MESSAGE_DIALOG -> {
+                var dialogFragment = new GameDialogFrags();
+                dialogFragment.setDialogType(GameDialogType.MESSAGE_DIALOG);
+                dialogFragment.setProcessedMsg(getString(R.string.pleaseWait));
+                dialogFragment.show(getSupportFragmentManager(), "showMessageDialogFragment");
+            }
+        }
+    }
+
+    public void showMessageDialog (@Nullable String inputString ,
+                                   @NonNull CountDownLatch latch) {
+        if (!isMainThread()) {
+            runOnUiThread(() -> showMessageDialog(inputString, latch));
+        }
+
+        var config = libQpProxy.getGameState().interfaceConfig;
+        var processedMsg = config.useHtml ? htmlProcessor.removeHTMLTags(inputString) : inputString;
+        if (processedMsg == null) {
+            processedMsg = "";
+        }
+        if (gameViewModel.outputBooleanObserver.hasObservers()) {
+            gameViewModel.outputBooleanObserver = new MutableLiveData<>();
+        }
+        var dialogFragment = new GameDialogFrags();
+        dialogFragment.setDialogType(GameDialogType.MESSAGE_DIALOG);
+        dialogFragment.setProcessedMsg(processedMsg);
+        dialogFragment.setCancelable(false);
+        dialogFragment.show(getSupportFragmentManager(), "showMessageDialogFragment");
+        gameViewModel.outputBooleanObserver.observeForever(aBoolean -> {
+            if (aBoolean) {
+                latch.countDown();
+            }
+        });
+    }
+
+    public void showInputDialog (@Nullable String inputString ,
+                                 @NonNull ArrayBlockingQueue<String> inputQueue) {
+        if (!isMainThread()) {
+            runOnUiThread(() -> showInputDialog(inputString, inputQueue));
+        }
+
+        var config = libQpProxy.getGameState().interfaceConfig;
+        var message = config.useHtml ? htmlProcessor.removeHTMLTags(inputString) : inputString;
+        if (message == null) {
+            message = "";
+        }
+        if (gameViewModel.outputTextObserver.hasObservers()) {
+            gameViewModel.outputTextObserver = new MutableLiveData<>();
+        }
+        var dialogFragment = new GameDialogFrags();
+        dialogFragment.setDialogType(GameDialogType.INPUT_DIALOG);
+        if (message.equals("userInputTitle")) {
+            dialogFragment.setMessage(getString(R.string.userInputTitle));
+        } else {
+            dialogFragment.setMessage(message);
+        }
+        dialogFragment.setCancelable(false);
+        dialogFragment.show(getSupportFragmentManager(), "inputDialogFragment");
+        gameViewModel.outputTextObserver.observeForever(inputQueue::add);
+    }
+
+    public void showExecutorDialog (@Nullable String inputString ,
+                                    @NonNull ArrayBlockingQueue<String> inputQueue) {
+        if (!isMainThread()) {
+            runOnUiThread(() -> showExecutorDialog(inputString, inputQueue));
+        }
+
+        var config = libQpProxy.getGameState().interfaceConfig;
+        var message = config.useHtml ? htmlProcessor.removeHTMLTags(inputString) : inputString;
+        if (message == null) {
+            message = "";
+        }
+        if (gameViewModel.outputTextObserver.hasObservers()) {
+            gameViewModel.outputTextObserver = new MutableLiveData<>();
+        }
+        var dialogFragment = new GameDialogFrags();
+        dialogFragment.setDialogType(GameDialogType.EXECUTOR_DIALOG);
+        if (message.equals("execStringTitle")) {
+            dialogFragment.setMessage(getString(R.string.execStringTitle));
+        } else {
+            dialogFragment.setMessage(message);
+        }
+        dialogFragment.setCancelable(false);
+        dialogFragment.show(getSupportFragmentManager(), "executorDialogFragment");
+        gameViewModel.outputTextObserver.observeForever(inputQueue::add);
+    }
+
+    public void showMenuDialog (@NonNull ArrayList<String> items ,
+                                @NonNull ArrayBlockingQueue<Integer> resultQueue) {
+        if (!isMainThread()) {
+            runOnUiThread(() -> showMenuDialog(items, resultQueue));
+        }
+
+        if (gameViewModel.outputIntObserver.hasObservers()) {
+            gameViewModel.outputIntObserver = new MutableLiveData<>();
+        }
+        var dialogFragment = new GameDialogFrags();
+        dialogFragment.setDialogType(GameDialogType.MENU_DIALOG);
+        dialogFragment.setItems(items);
+        dialogFragment.setCancelable(false);
+        dialogFragment.show(getSupportFragmentManager(), "showMenuDialogFragment");
+        gameViewModel.outputIntObserver.observeForever(resultQueue::add);
     }
 
     @Override

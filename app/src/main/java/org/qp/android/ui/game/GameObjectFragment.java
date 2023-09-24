@@ -7,13 +7,15 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.qp.android.databinding.FragmentRecyclerBinding;
 import org.qp.android.helpers.adapters.RecyclerItemClickListener;
 
-public class GameObjectFragment extends GamePatternFragment {
+public class GameObjectFragment extends Fragment {
+
     private FragmentRecyclerBinding recyclerBinding;
     private GameViewModel viewModel;
     private RecyclerView recyclerView;

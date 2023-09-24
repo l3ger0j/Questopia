@@ -46,6 +46,7 @@ import org.qp.android.model.libQP.WindowType;
 import org.qp.android.model.service.AudioPlayer;
 import org.qp.android.model.service.GameContentResolver;
 import org.qp.android.model.service.HtmlProcessor;
+import org.qp.android.ui.dialogs.GameDialogType;
 import org.qp.android.ui.settings.SettingsController;
 
 import java.io.FileNotFoundException;
@@ -376,7 +377,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
 
             var newSafe = mainDescLiveData.getValue();
             if (safe.equals(newSafe) && !isContains) {
-                getGameActivity().showWaitDialog();
+                getGameActivity().showSimpleDialog("" , GameDialogType.MESSAGE_DIALOG);
             }
             handlerIsDone = true;
         } , interval);
@@ -443,7 +444,9 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
                         return new WebResourceResponse(mimeType , null , in);
                     } catch (FileNotFoundException | NullPointerException ex) {
                         if (getSettingsController().isUseImageDebug) {
-                            getGameActivity().showErrorDialog(getGameActivity().getString(R.string.notFoundImage)+uri.getPath());
+                            var errorMessage = getGameActivity()
+                                    .getString(R.string.notFoundImage)+uri.getPath();
+                            showError(errorMessage);
                         }
                         Log.e(TAG , "File not found" , ex);
                         return null;
@@ -479,12 +482,12 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
 
     @Override
     public void showError(final String message) {
-        getGameActivity().showErrorDialog(message);
+        getGameActivity().showSimpleDialog(message , GameDialogType.ERROR_DIALOG);
     }
 
     @Override
     public void showPicture(final String pathToImg) {
-        getGameActivity().showPictureDialog(pathToImg);
+        getGameActivity().showSimpleDialog(pathToImg , GameDialogType.IMAGE_DIALOG);
     }
 
     @Override
@@ -552,7 +555,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
 
     @Override
     public void showLoadGamePopup() {
-        getGameActivity().showLoadDialog();
+        getGameActivity().showSimpleDialog("" , GameDialogType.LOAD_DIALOG);
     }
 
     @Override

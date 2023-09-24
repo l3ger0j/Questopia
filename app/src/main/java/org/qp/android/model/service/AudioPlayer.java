@@ -13,6 +13,7 @@ import com.anggrayudi.storage.file.DocumentFileCompat;
 import com.anggrayudi.storage.file.DocumentFileType;
 
 import org.qp.android.R;
+import org.qp.android.ui.dialogs.GameDialogType;
 import org.qp.android.ui.game.GameActivity;
 
 import java.io.IOException;
@@ -108,7 +109,10 @@ public class AudioPlayer {
             var activity = (GameActivity) context;
             var controller = activity.getSettingsController();
             if (controller != null && controller.isUseMusicDebug) {
-                activity.showErrorDialog(context.getString(R.string.notFoundSound) + normPath);
+                activity.showSimpleDialog(
+                        context.getString(R.string.notFoundSound) + normPath ,
+                        GameDialogType.ERROR_DIALOG
+                );
             } else {
                 Log.e(TAG,"Sound file not found: " + normPath);
             }

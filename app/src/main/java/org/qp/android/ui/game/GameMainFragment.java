@@ -11,6 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
+import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -18,7 +19,8 @@ import org.qp.android.R;
 import org.qp.android.databinding.FragmentGameMainBinding;
 import org.qp.android.helpers.adapters.RecyclerItemClickListener;
 
-public class GameMainFragment extends GamePatternFragment {
+public class GameMainFragment extends Fragment {
+
     private GameViewModel viewModel;
     private ConstraintLayout layoutTop;
     private WebView mainDescView;
@@ -68,7 +70,7 @@ public class GameMainFragment extends GamePatternFragment {
         mainDescView.addJavascriptInterface(new Object() {
             @JavascriptInterface
             public void onClickImage(String src) {
-                listener.showPictureDialog(viewModel.getImageAbsolutePath(src));
+                viewModel.showPicture(viewModel.getImageAbsolutePath(src));
             }
         }, "img");
         if (viewModel.getSettingsController().isUseAutoscroll) {

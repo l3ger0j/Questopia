@@ -10,9 +10,11 @@ import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
-public class GameVarsFragment extends GamePatternFragment {
+public class GameVarsFragment extends Fragment {
+
     private WebView varsDescView;
 
     @Nullable
