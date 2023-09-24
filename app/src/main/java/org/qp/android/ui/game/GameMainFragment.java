@@ -84,6 +84,7 @@ public class GameMainFragment extends GamePatternFragment {
 
         // RecyclerView
         actionsView = gameMainBinding.actions;
+        actionsView.setOverScrollMode(View.OVER_SCROLL_NEVER);
         actionsView.setBackgroundColor(viewModel.getBackgroundColor());
         viewModel.getActionObserver().observe(getViewLifecycleOwner() , actions -> {
             actionsView.setBackgroundColor(viewModel.getBackgroundColor());
