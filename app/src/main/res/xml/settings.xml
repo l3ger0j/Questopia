@@ -3,15 +3,15 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <PreferenceCategory android:title="@string/generalCatTitle">
-        <Preference
-            android:title="@string/newsMenuTitle"
-            android:key="newsApp" />
+    <PreferenceCategory
+        android:title="@string/generalCatTitle">
+
         <ListPreference
             android:defaultValue="ru"
             android:entries="@array/langName"
             android:entryValues="@array/langValue"
             android:key="lang"
+            android:icon="@drawable/baseline_language_24"
             android:summary="@string/langSum"
             android:title="@string/langTitle" />
         <ListPreference
@@ -21,24 +21,49 @@
             android:key="binPref"
             android:summary="@string/binPrefSum"
             android:title="@string/binPrefTitle" />
-        <CheckBoxPreference
-            android:defaultValue="true"
-            android:key="sound"
-            android:title="@string/soundTitle" />
         <ListPreference
             android:defaultValue="1/3"
             android:entries="@array/actsHeight"
             android:entryValues="@array/actsHeight"
             android:key="actsHeight"
             android:title="@string/actsHeightTitle" />
-        <CheckBoxPreference
+        <SwitchPreferenceCompat
+            android:defaultValue="true"
+            android:key="sound"
+            android:icon="@drawable/baseline_music_note_24"
+            android:title="@string/soundTitle" />
+        <SwitchPreferenceCompat
             android:defaultValue="false"
             android:key="separator"
-            android:summary="@string/separatorSum"
             android:title="@string/separatorTitle" />
+        <SwitchPreferenceCompat
+            android:defaultValue="true"
+            android:key="immersiveMode"
+            android:icon="@drawable/baseline_fullscreen_24"
+            android:title="@string/immersiveModeTitle" />
+        <SwitchPreferenceCompat
+            android:defaultValue="true"
+            android:key="autoscroll"
+            android:title="@string/autoscrollTitle" />
+        <SwitchPreferenceCompat
+            android:defaultValue="false"
+            android:key="execString"
+            app:title="@string/execStringTitle"/>
+        <SwitchPreferenceCompat
+            android:defaultValue="false"
+            android:key="debugImage"
+            android:summary="@string/imageDebugSum"
+            android:title="@string/imageDebugTitle" />
+        <SwitchPreferenceCompat
+            android:defaultValue="false"
+            android:key="debugMusic"
+            android:summary="@string/musicDebugSum"
+            android:title="@string/musicDebugTitle" />
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="@string/textCatTitle">
+    <PreferenceCategory
+        android:title="@string/textCatTitle">
+
         <ListPreference
             android:defaultValue="0"
             android:entries="@array/fontName"
@@ -49,6 +74,7 @@
             android:defaultValue="16"
             android:entries="@array/fontSize"
             android:entryValues="@array/fontSize"
+            android:icon="@drawable/baseline_format_size_24"
             android:key="fontSize"
             android:title="@string/fontSizeTitle" />
         <CheckBoxPreference
@@ -85,7 +111,9 @@
             android:title="@string/linkColorTitle" />
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="@string/imageCatTitle">
+    <PreferenceCategory
+        android:title="@string/imageCatTitle">
+
         <SwitchPreferenceCompat
             android:defaultValue="true"
             android:key="autoWidth"
@@ -117,35 +145,15 @@
             android:title="@string/fullScreenImageTitle" />
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="@string/switchCatTitle">
-        <SwitchPreferenceCompat
-            android:defaultValue="true"
-            android:key="immersiveMode"
-            android:title="@string/immersiveModeTitle" />
-        <SwitchPreferenceCompat
-            android:defaultValue="true"
-            android:key="autoscroll"
-            android:title="@string/autoscrollTitle" />
-        <SwitchPreferenceCompat
-            android:defaultValue="false"
-            android:key="debugImage"
-            android:summary="@string/imageDebugSum"
-            android:title="@string/imageDebugTitle" />
-        <SwitchPreferenceCompat
-            android:defaultValue="false"
-            android:key="debugMusic"
-            android:summary="@string/musicDebugSum"
-            android:title="@string/musicDebugTitle" />
-        <SwitchPreferenceCompat
-            android:defaultValue="false"
-            android:key="execString"
-            app:title="@string/execStringTitle"/>
-    </PreferenceCategory>
+    <PreferenceCategory
+        android:title="@string/extraCatTitle">
 
-    <PreferenceCategory android:title="@string/extraCatTitle">
         <Preference
             android:title="@string/pluginTitle"
             android:key="showExtensionMenu"/>
+        <Preference
+            android:title="@string/newsMenuTitle"
+            android:key="newsApp" />
         <Preference
             android:title="@string/aboutTitle"
             android:key="showAbout" />

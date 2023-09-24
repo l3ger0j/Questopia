@@ -101,7 +101,7 @@ public class GameItemRecycler extends RecyclerView.Adapter<GameItemRecycler.View
         if (qpListItem.pathToImage != null) {
             Picasso.get()
                     .load(new File(qpListItem.pathToImage))
-                    .error(R.drawable.broken_image)
+                    .error(R.drawable.baseline_broken_image_24)
                     .fit()
                     .into(holder.listGameItemBinding.itemIcon);
         }

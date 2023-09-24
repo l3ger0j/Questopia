@@ -79,7 +79,7 @@ public class StockGamesRecycler extends RecyclerView.Adapter<StockGamesRecycler.
             Picasso.get()
                     .load(Uri.parse(gameData.icon))
                     .fit()
-                    .error(R.drawable.broken_image)
+                    .error(R.drawable.baseline_broken_image_24)
                     .into(holder.listItemGameBinding.gameIcon);
         }
 

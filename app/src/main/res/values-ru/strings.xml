@@ -152,11 +152,9 @@
         <string name="fullScreenImageSum">При нажатии на картинку, она откроется в диалоговом окне</string>
         <string name="fullScreenImageTitle">Полноэкранные изображения</string>
         <!-- Switch section -->
-        <string name="switchCatTitle">Переключатели</string>
         <string name="filePicker">Диалог Выбора Файла (альфа)</string>
         <string name="immersiveModeTitle">Режим Погружения</string>
         <string name="separatorTitle">Разделитель</string>
-        <string name="separatorSum">Включить/выключить разделитель в игре</string>
         <string name="autoscrollTitle">Автопролистывание</string>
         <string name="imageDebugTitle">Отладчик путей к картинкам</string>
         <string name="imageDebugSum">Режим, который включает отображение диалога с ошибкой если путь к картинке неправильный</string>

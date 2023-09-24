@@ -4,12 +4,12 @@
     <item
         android:id="@+id/action_search"
         android:title="@string/search"
-        android:icon="@drawable/search"
+        android:icon="@drawable/baseline_search_24"
         app:showAsAction="always|collapseActionView"
         app:actionViewClass="androidx.appcompat.widget.SearchView" />
     <item
         android:id="@+id/menu_options"
-        android:icon="@drawable/settings"
+        android:icon="@drawable/baseline_settings_24"
         app:showAsAction="ifRoom"
         android:title="@string/settingsTitle" />
 </menu>

@@ -153,11 +153,9 @@
         <string name="fullScreenImageSum">When clicked, the picture will open in the dialog</string>
         <string name="fullScreenImageTitle">Fullscreen Images</string>
         <!-- Switch section -->
-        <string name="switchCatTitle">Switches</string>
         <string name="filePicker">File Picker Dialog (alpha)</string>
         <string name="immersiveModeTitle">Immersive Mode</string>
         <string name="separatorTitle">Separator</string>
-        <string name="separatorSum">On/off separator line in game</string>
         <string name="autoscrollTitle">Autoscroll</string>
         <string name="imageDebugTitle">Image Path Debugger</string>
         <string name="imageDebugSum">A mode that enables the display of an error dialog if the path to the image is incorrect</string>

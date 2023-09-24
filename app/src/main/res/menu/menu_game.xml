@@ -6,12 +6,12 @@
     <group android:id="@+id/menuGroup_running">
         <item
             android:id="@+id/menu_newGame"
-            android:icon="@drawable/restart_alt"
+            android:icon="@drawable/baseline_restart_alt_24"
             android:title="@string/restartGameTitle"
             app:showAsAction="ifRoom"/>
         <item
             android:id="@+id/menu_userInput"
-            android:icon="@drawable/tab_input"
+            android:icon="@drawable/baseline_tab_input_24"
             android:title="@string/userInputTitle"
             app:showAsAction="always" />
         <item
