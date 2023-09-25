@@ -44,6 +44,7 @@
         <SwitchPreferenceCompat
             android:defaultValue="true"
             android:key="autoscroll"
+            android:icon="@drawable/baseline_move_down_24"
             android:title="@string/autoscrollTitle" />
         <SwitchPreferenceCompat
             android:defaultValue="false"
