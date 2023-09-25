@@ -30,6 +30,8 @@
         <string name="infoFileNotWritable">Ошибка чтения файла с информацией об игре</string>
         <string name="infoFileWriteError">Ошибка записи информации об игре в файл</string>
         <string name="installError">Я не могу скопировать папку с игрой -GAMENAME-!</string>
+        <string name="waitingError">Во время ожидания произошла ошибка</string>
+        <string name="waitingInputError">Я не смогла дождаться ввода</string>
         <string name="noGameFilesError">Я не нашла файлы игры после копирования!</string>
         <string name="notFoundSound">Звуковой файл не найден:</string>
         <string name="notFoundImage">Файл изображения не найден:</string>

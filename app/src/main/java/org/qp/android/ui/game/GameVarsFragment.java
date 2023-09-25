@@ -24,7 +24,8 @@ public class GameVarsFragment extends Fragment {
                              @Nullable Bundle savedInstanceState) {
         var viewModel = new ViewModelProvider(requireActivity()).get(GameViewModel.class);
         varsDescView = new WebView(requireContext());
-        varsDescView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+        varsDescView.setLayoutParams(new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT ,
                 ViewGroup.LayoutParams.MATCH_PARENT));
         varsDescView.setBackgroundColor(viewModel.getBackgroundColor());
         varsDescView = viewModel.getDefaultWebClient(varsDescView);
@@ -41,7 +42,8 @@ public class GameVarsFragment extends Fragment {
                         null));
         var layout = new LinearLayout(requireContext());
         layout.setOrientation(LinearLayout.VERTICAL);
-        layout.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+        layout.setLayoutParams(new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT ,
                 ViewGroup.LayoutParams.MATCH_PARENT));
         layout.setGravity(Gravity.CENTER);
         layout.addView(varsDescView);

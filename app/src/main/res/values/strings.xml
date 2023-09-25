@@ -30,6 +30,8 @@
         <string name="infoFileNotWritable">Error reading the game information file</string>
         <string name="infoFileWriteError">Error writing game information to a file</string>
         <string name="installError">I cannot copy the game folder -GAMENAME-!</string>
+        <string name="waitingError">An error occurred while waiting</string>
+        <string name="waitingInputError">I couldn\'t wait for the input</string>
         <string name="noGameFilesError">I didn\'t find the game files after copying!</string>
         <string name="notFoundSound">Sound file not found:</string>
         <string name="notFoundImage">Image file not found:</string>

@@ -30,7 +30,6 @@ public class GameObjectFragment extends Fragment {
 
         // RecyclerView
         recyclerView = recyclerBinding.shareRecyclerView;
-        recyclerView.setBackgroundColor(viewModel.getBackgroundColor());
         viewModel.getObjectsObserver().observe(getViewLifecycleOwner() , gameItemRecycler -> {
             recyclerView.setBackgroundColor(viewModel.getBackgroundColor());
             recyclerBinding.shareRecyclerView.setAdapter(gameItemRecycler);

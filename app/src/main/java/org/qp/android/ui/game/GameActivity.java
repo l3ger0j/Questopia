@@ -379,7 +379,9 @@ public class GameActivity extends AppCompatActivity implements
     }
 
     public void warnUser(int id) {
-        if (isMainThread()) {
+        if (!isMainThread()) {
+            runOnUiThread(() -> warnUser(id));
+        } else {
             var label = navController.getCurrentDestination().getLabel();
             if (label != null) {
                 switch (id) {
@@ -397,8 +399,6 @@ public class GameActivity extends AppCompatActivity implements
                     }
                 }
             }
-        } else {
-            runOnUiThread(() -> warnUser(id));
         }
     }
 
@@ -430,15 +430,15 @@ public class GameActivity extends AppCompatActivity implements
     }
 
     public void applySettings() {
-        if (isMainThread()) {
+        if (!isMainThread()) {
+            runOnUiThread(this::applySettings);
+        } else {
             if (settingsController.language.equals("ru")) {
                 AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("ru"));
             } else {
                 AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("en"));
             }
             htmlProcessor = gameViewModel.getHtmlProcessor();
-        } else {
-            runOnUiThread(this::applySettings);
         }
     }
 
@@ -708,7 +708,8 @@ public class GameActivity extends AppCompatActivity implements
             }
             case SAVE -> {
                 mIntent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
-                mIntent.putExtra(Intent.EXTRA_TITLE , libQpProxy.getGameState().gameFile + ".sav");
+                var extraValue = libQpProxy.getGameState().gameFile + ".sav";
+                mIntent.putExtra(Intent.EXTRA_TITLE , extraValue);
                 mIntent.setType("application/octet-stream");
                 this.slotAction = slotAction;
                 saveResultLaunch.launch(mIntent);

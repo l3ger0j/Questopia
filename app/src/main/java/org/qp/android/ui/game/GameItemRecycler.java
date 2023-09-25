@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class GameItemRecycler extends RecyclerView.Adapter<GameItemRecycler.ViewHolder> {
+
     private final AsyncListDiffer<QpListItem> differ =
             new AsyncListDiffer<>(this , DIFF_CALLBACK);
 
