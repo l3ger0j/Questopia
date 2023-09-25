@@ -352,7 +352,7 @@ public class StockViewModel extends AndroidViewModel {
                 }
             });
             gameData.icon = (tempImageFile == null ? null : tempImageFile.getUri().toString());
-            installGame(tempInstallDir , gameData);
+            doInstallGame(tempInstallDir , gameData);
             isSelectFolder.set(false);
             dialogFragments.dismiss();
         }
@@ -398,7 +398,8 @@ public class StockViewModel extends AndroidViewModel {
             isShowDialog.set(false);
             dialogFragments.dismiss();
         } catch (NullPointerException ex) {
-            getStockActivity().showErrorDialog("Error: " + ex);
+            var message = getStockActivity().getString(R.string.error)+": "+ex;
+            getStockActivity().showErrorDialog(message);
         }
     }
 
@@ -410,8 +411,10 @@ public class StockViewModel extends AndroidViewModel {
         intent.putExtra("gameDirUri" , tempDir.getAbsolutePath(getStockActivity()));
         var gameFileCount = tempInnerGameData.gameFiles.size();
         switch (gameFileCount) {
-            case 0 -> getStockActivity()
-                    .showErrorDialog("Game folder has no game files!");
+            case 0 -> {
+                var message = getStockActivity().getString(R.string.gameFolderEmpty);
+                getStockActivity().showErrorDialog(message);
+            }
             case 1 -> {
                 var tempFile = documentWrap(tempInnerGameData.gameFiles.get(0));
                 intent.putExtra("gameFileUri" ,  tempFile.getAbsolutePath(getStockActivity()));
@@ -492,20 +495,12 @@ public class StockViewModel extends AndroidViewModel {
     // endregion Dialog
 
     // region Game install
-    public void installGame(DocumentFile gameFile , InnerGameData innerGameData) {
-        if (!isWritableDirectory(gamesDir)) {
-            getStockActivity()
-                    .showErrorDialog("Games directory is not writable");
-            return;
-        }
-        doInstallGame(gameFile , innerGameData);
-    }
-
     @SuppressLint("MissingPermission")
     private void doInstallGame(DocumentFile gameFile , InnerGameData innerGameData) {
         var gameDir = createFindDFolder(gamesDir , normalizeFolderName(innerGameData.title));
         if (!isWritableDirectory(gameDir)) {
-            getStockActivity().showErrorDialog("Games directory is not writable");
+            var message = getStockActivity().getString(R.string.gamesFolderError);
+            getStockActivity().showErrorDialog(message);
             return;
         }
 
@@ -555,8 +550,8 @@ public class StockViewModel extends AndroidViewModel {
             infoFile = createFindDFile(gameDir , MimeType.TEXT , GAME_INFO_FILENAME);
         }
         if (!isWritableFile(infoFile)) {
-            getStockActivity()
-                    .showErrorDialog("Game data info file is not writable");
+            var message = getStockActivity().getString(R.string.infoFileNotWritable);
+            getStockActivity().showErrorDialog(message);
             return;
         }
         var tempInfoFile = documentWrap(infoFile);
@@ -565,9 +560,9 @@ public class StockViewModel extends AndroidViewModel {
              var writer = new OutputStreamWriter(out)) {
             writer.write(objectToXml(innerGameData));
         } catch (Exception ex) {
-            Log.d(TAG , "EROR: " , ex);
-            getStockActivity()
-                    .showErrorDialog("Failed to write to a innerGameData info file");
+            Log.d(TAG , "ERROR: " , ex);
+            var message = getStockActivity().getString(R.string.infoFileWriteError);
+            getStockActivity().showErrorDialog(message);
         }
     }
 
@@ -583,8 +578,7 @@ public class StockViewModel extends AndroidViewModel {
         if (rootDir != null) {
             var tempGameDir = createFindDFolder(rootDir , "games");
             if (!isWritableDirectory(tempGameDir)) {
-                var message = "Games directory is not writable" + " " +
-                        getStockActivity().getString(R.string.gamesDirError);
+                var message = getStockActivity().getString(R.string.gamesFolderError);
                 getStockActivity().showErrorDialog(message);
                 return;
             }
@@ -593,14 +587,13 @@ public class StockViewModel extends AndroidViewModel {
         } else {
             var intFilesDir = getApplication().getExternalFilesDir(null);
             if (intFilesDir == null) {
-                getStockActivity()
-                        .showErrorDialog("Internal files directory not found");
+                var message = getStockActivity().getString(R.string.interFolderError);
+                getStockActivity().showErrorDialog(message);
                 return;
             }
             var tempGameDir = createFindFolder(intFilesDir, "games");
             if (!isWritableDirectory(tempGameDir)) {
-                var message = "Games directory is not writable" + " " +
-                        getStockActivity().getString(R.string.gamesDirError);
+                var message = getStockActivity().getString(R.string.gamesFolderError);
                 getStockActivity().showErrorDialog(message);
                 return;
             }
