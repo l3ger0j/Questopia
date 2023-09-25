@@ -23,6 +23,11 @@ public class SettingsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
 
+        if (getSupportActionBar() != null ) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setDisplayShowHomeEnabled(true);
+        }
+
         var navFragment = (NavHostFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.settingsFragHost);
         if (navFragment != null) {
@@ -42,10 +47,6 @@ public class SettingsActivity extends AppCompatActivity {
         if (savedInstanceState == null) {
             navController.navigate(R.id.settingsFragment);
         }
-
-        Objects.requireNonNull(getSupportActionBar())
-                .setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
     }
 
     @Override

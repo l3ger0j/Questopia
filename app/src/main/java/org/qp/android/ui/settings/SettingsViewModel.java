@@ -14,6 +14,7 @@ import org.qp.android.R;
 import org.qp.android.ui.plugin.PluginFragment;
 
 public class SettingsViewModel extends AndroidViewModel {
+
     private static final String ABOUT_TEMPLATE =
             """
             <html><head>
@@ -26,10 +27,8 @@ public class SettingsViewModel extends AndroidViewModel {
             </style></head><body>REPLACETEXT</body></html>
             """;
 
-    public ObservableField<SettingsActivity> settingsActivityObservableField =
-            new ObservableField<>();
-    public ObservableField<PluginFragment> fragmentObservableField =
-            new ObservableField<>();
+    public ObservableField<SettingsActivity> settingsActivityObservableField = new ObservableField<>();
+    public ObservableField<PluginFragment> fragmentObservableField = new ObservableField<>();
 
     public SettingsViewModel(@NonNull Application application) {
         super(application);

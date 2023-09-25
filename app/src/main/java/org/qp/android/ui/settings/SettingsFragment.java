@@ -7,6 +7,7 @@ import android.widget.LinearLayout;
 
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
+import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 
 import org.qp.android.BuildConfig;
@@ -55,51 +56,6 @@ public class SettingsFragment extends PreferenceFragmentCompat
                     .replace("-VALUE-", "#0000ff"));
             linkColorPref.setEnabled(!viewModel.getSettingsController().isUseGameLinkColor);
         }
-
-        var pluginPref = findPreference("showExtensionMenu");
-        if (pluginPref != null) {
-            pluginPref.setOnPreferenceClickListener(preference -> {
-                Navigation.findNavController(requireView())
-                        .navigate(R.id.pluginFragment);
-                return true;
-            });
-        }
-        var newsPref = findPreference("newsApp");
-        if (newsPref != null) {
-            newsPref.setOnPreferenceClickListener(preference -> {
-                Navigation.findNavController(requireView())
-                        .navigate(R.id.newsFragment);
-                return false;
-            });
-        }
-
-        var aboutPref = findPreference("showAbout");
-        if (aboutPref != null) {
-            aboutPref.setOnPreferenceClickListener(preference -> {
-                var linearLayout = new LinearLayout(getContext());
-                linearLayout.setOrientation(LinearLayout.VERTICAL);
-                var linLayoutParam =
-                        new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
-                                LinearLayout.LayoutParams.MATCH_PARENT);
-                linearLayout.setLayoutParams(linLayoutParam);
-                var lpView =
-                        new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
-                                LinearLayout.LayoutParams.WRAP_CONTENT);
-                var webView = new WebView(requireContext());
-                webView.loadDataWithBaseURL(
-                        "",
-                        viewModel.formationAboutDesc(requireContext()),
-                        "text/html",
-                        "utf-8",
-                        "");
-                webView.setLayoutParams(lpView);
-                linearLayout.addView(webView);
-                var dialogFrag = new SettingsDialogFrag();
-                dialogFrag.setView(linearLayout);
-                dialogFrag.show(getParentFragmentManager(), "settingsDialogFragment");
-                return true;
-            });
-        }
         var versionPref = findPreference("showVersion");
         if (versionPref != null) {
             versionPref.setTitle(getString(R.string.extendedName)
@@ -116,6 +72,56 @@ public class SettingsFragment extends PreferenceFragmentCompat
                 }
             });
         }
+
+        Preference.OnPreferenceClickListener listener = preference -> {
+            switch (preference.getKey()) {
+                case "showExtensionMenu" -> {
+                    Navigation.findNavController(requireView()).navigate(R.id.pluginFragment);
+                    return true;
+                }
+                case "newsApp" -> {
+                    Navigation.findNavController(requireView()).navigate(R.id.newsFragment);
+                    return true;
+                }
+                case "showAbout" -> {
+                    var linearLayout = new LinearLayout(getContext());
+                    linearLayout.setOrientation(LinearLayout.VERTICAL);
+                    var linLayoutParam =
+                            new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+                                    LinearLayout.LayoutParams.MATCH_PARENT);
+                    linearLayout.setLayoutParams(linLayoutParam);
+                    var lpView =
+                            new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
+                                    LinearLayout.LayoutParams.WRAP_CONTENT);
+                    var webView = new WebView(requireContext());
+                    webView.loadDataWithBaseURL(
+                            "",
+                            viewModel.formationAboutDesc(requireContext()),
+                            "text/html",
+                            "utf-8",
+                            "");
+                    webView.setLayoutParams(lpView);
+                    linearLayout.addView(webView);
+                    var dialogFrag = new SettingsDialogFrag();
+                    dialogFrag.setView(linearLayout);
+                    dialogFrag.show(getParentFragmentManager(), "settingsDialogFragment");
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        var pluginPref = findPreference("showExtensionMenu");
+        if (pluginPref != null)
+            pluginPref.setOnPreferenceClickListener(listener);
+
+        var newsPref = findPreference("newsApp");
+        if (newsPref != null)
+            newsPref.setOnPreferenceClickListener(listener);
+
+        var aboutPref = findPreference("showAbout");
+        if (aboutPref != null)
+            aboutPref.setOnPreferenceClickListener(listener);
     }
 
     @Override

@@ -42,6 +42,7 @@ public class SettingsController {
         if (INSTANCE == null) {
             INSTANCE = new SettingsController();
         }
+
         return from(PreferenceManager.getDefaultSharedPreferences(context));
     }
 
