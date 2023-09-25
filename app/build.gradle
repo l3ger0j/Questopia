@@ -85,6 +85,7 @@ dependencies {
     implementation 'com.github.AppDevNext:ChangeLog:3.5'
     implementation 'com.jaredrummler:colorpicker:1.1.0'
     implementation 'org.jsoup:jsoup:1.16.1'
+    implementation 'com.github.javiersantos:AppUpdater:2.7'
     implementation 'com.anggrayudi:storage:1.5.5'
     implementation 'org.simpleframework:simple-xml:2.7.1'
     implementation 'com.squareup.picasso:picasso:2.71828'
