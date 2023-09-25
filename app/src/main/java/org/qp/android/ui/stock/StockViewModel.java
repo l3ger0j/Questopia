@@ -44,8 +44,8 @@ import org.qp.android.databinding.DialogEditBinding;
 import org.qp.android.databinding.DialogInstallBinding;
 import org.qp.android.dto.stock.InnerGameData;
 import org.qp.android.helpers.repository.LocalGame;
-import org.qp.android.model.workers.WorkerBuilder;
 import org.qp.android.model.notify.NotifyBuilder;
+import org.qp.android.model.workers.WorkerBuilder;
 import org.qp.android.ui.dialogs.StockDialogFrags;
 import org.qp.android.ui.dialogs.StockDialogType;
 import org.qp.android.ui.game.GameActivity;
@@ -56,6 +56,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
 
 public class StockViewModel extends AndroidViewModel {
 
@@ -139,17 +141,6 @@ public class StockViewModel extends AndroidViewModel {
 
     public void setGameDataList(ArrayList<InnerGameData> innerGameDataArrayList) {
         gameDataList.postValue(innerGameDataArrayList);
-    }
-
-    public void setLocalGameDataList() {
-        var gameData = getSortedGames();
-        var localGameData = new ArrayList<InnerGameData>();
-        for (var data : gameData) {
-            if (data.isInstalled()) {
-                localGameData.add(data);
-            }
-        }
-        setGameDataList(localGameData);
     }
 
     @NotNull
@@ -587,7 +578,6 @@ public class StockViewModel extends AndroidViewModel {
     // endregion Game install
 
     // region Refresh
-    // TODO: 11.09.2023 REWRITE THIS INTO WORKER!
     public void refreshIntGamesDirectory() {
         var rootDir = ((QuestPlayerApplication) getApplication()).getCustomRootDir();
         if (rootDir != null) {
@@ -621,21 +611,35 @@ public class StockViewModel extends AndroidViewModel {
 
     public void refreshGameData() {
         gamesMap.clear();
-        for (var localGameData : localGame.getGames(getStockActivity() , gamesDir)) {
-            var remoteGameData = gamesMap.get(localGameData.id);
-            if (remoteGameData != null) {
-                var aggregateGameData = new InnerGameData(remoteGameData);
-                aggregateGameData.gameDir = localGameData.gameDir;
-                aggregateGameData.gameFiles = localGameData.gameFiles;
-                gamesMap.put(localGameData.id, aggregateGameData);
-            } else {
-                gamesMap.put(localGameData.id, localGameData);
-            }
-        }
 
-        setLocalGameDataList();
+        CompletableFuture
+                .supplyAsync(() -> localGame.getGames(getStockActivity() , gamesDir) ,
+                        Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()))
+                .thenApply(innerGameData -> {
+                    for (var localGameData : innerGameData) {
+                        var remoteGameData = gamesMap.get(localGameData.id);
+                        if (remoteGameData != null) {
+                            var aggregateGameData = new InnerGameData(remoteGameData);
+                            aggregateGameData.gameDir = localGameData.gameDir;
+                            aggregateGameData.gameFiles = localGameData.gameFiles;
+                            gamesMap.put(localGameData.id, aggregateGameData);
+                        } else {
+                            gamesMap.put(localGameData.id, localGameData);
+                        }
+                    }
+                    return null;
+                })
+                .thenRunAsync(() -> {
+                    var gameData = getSortedGames();
+                    var localGameData = new ArrayList<InnerGameData>();
+                    for (var data : gameData) {
+                        if (data.isInstalled()) {
+                            localGameData.add(data);
+                        }
+                    }
+                    setGameDataList(localGameData);
+                } , Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()));
     }
-
     // endregion Refresh
 }
 
