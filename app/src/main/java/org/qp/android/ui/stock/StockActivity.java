@@ -58,7 +58,9 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Objects;
 
-public class StockActivity extends AppCompatActivity implements StockPatternDialogFrags.StockPatternDialogList, StockPatternFragment.StockPatternFragmentList {
+public class StockActivity extends AppCompatActivity implements
+        StockPatternDialogFrags.StockPatternDialogList, StockPatternFragment.StockPatternFragmentList {
+
     private static final int READ_EXTERNAL_STORAGE_CODE = 200;
     private static final int MANAGE_EXTERNAL_STORAGE_CODE = 201;
     private static final int POST_NOTIFICATION = 203;
@@ -149,9 +151,9 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
                     }
                     case CODE_PICK_GDIR_FILE -> {
                         var application = (QuestPlayerApplication) getApplication();
-                        if (application != null) application.setCustomRootDir(documentFile);
+                        if (application != null) application.setCustomRootFolder(documentFile);
                     }
-                };
+                }
             }
 
             return null;

@@ -14,7 +14,6 @@ import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
-import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
@@ -38,7 +37,6 @@ import com.anggrayudi.storage.file.DocumentFileType;
 
 import org.qp.android.QuestPlayerApplication;
 import org.qp.android.R;
-import org.qp.android.dto.stock.InnerGameData;
 import org.qp.android.model.libQP.LibQpProxy;
 import org.qp.android.model.libQP.QpMenuItem;
 import org.qp.android.model.libQP.RefreshInterfaceRequest;
@@ -317,18 +315,6 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         questPlayerApplication = getApplication();
         gameContentResolver = questPlayerApplication.getGameContentResolver();
         htmlProcessor = questPlayerApplication.getHtmlProcessor();
-    }
-
-    public void setGameSaveMap(Bundle gameSaveMap) {
-        questPlayerApplication.setGameSaveMap(gameSaveMap);
-    }
-
-    public Bundle getGameSaveMap() {
-        return questPlayerApplication.getGameSaveMap();
-    }
-
-    public ArrayList<InnerGameData> getGameDataList() {
-        return questPlayerApplication.getGameList();
     }
 
     @Override

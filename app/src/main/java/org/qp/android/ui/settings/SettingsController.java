@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.preference.PreferenceManager;
 
 public class SettingsController {
+
     public int typeface;
     public int fontSize;
     public int backColor;

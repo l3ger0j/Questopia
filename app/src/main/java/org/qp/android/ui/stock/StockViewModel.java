@@ -58,6 +58,7 @@ import java.util.HashMap;
 import java.util.Locale;
 
 public class StockViewModel extends AndroidViewModel {
+
     private final String TAG = this.getClass().getSimpleName();
     private static final String GAME_INFO_FILENAME = "gameStockInfo";
 
@@ -180,10 +181,6 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     public LiveData<ArrayList<InnerGameData>> getGameData() {
-        if (gameDataList.getValue() != null) {
-            var application = (QuestPlayerApplication) getApplication();
-            application.setGameList(gameDataList.getValue());
-        }
         return gameDataList;
     }
 
