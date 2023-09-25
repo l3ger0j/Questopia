@@ -3,8 +3,8 @@ package org.qp.android.ui.stock;
 import static org.qp.android.helpers.utils.FileUtil.deleteDirectory;
 import static org.qp.android.helpers.utils.FileUtil.documentWrap;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_DIR_FILE;
-import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_GDIR_FILE;
-import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_IMAGE;
+import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_ROOT_FOLDER;
+import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_IMAGE_FILE;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_MOD_FILE;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_PATH_FILE;
 
@@ -102,12 +102,12 @@ public class StockActivity extends AppCompatActivity implements
         var copyFAB = activityStockBinding.copyFAB;
         copyFAB.setOnClickListener(v -> stockViewModel.showDialogInstall());
         var createFAB = activityStockBinding.createFAB;
-        createFAB.setOnClickListener(view -> showDirPickerDialog(CODE_PICK_GDIR_FILE));
+        createFAB.setOnClickListener(view -> showDirPickerDialog(CODE_PICK_ROOT_FOLDER));
 
         storageHelper.setOnFileSelected((integer , documentFiles) -> {
             if (documentFiles != null) {
                 switch (integer) {
-                    case CODE_PICK_IMAGE -> {
+                    case CODE_PICK_IMAGE_FILE -> {
                         for (var file : documentFiles) {
                             var document = documentWrap(file);
                             switch (document.getExtension()) {
@@ -149,7 +149,7 @@ public class StockActivity extends AppCompatActivity implements
                         stockViewModel.setTempInstallDir(documentFile);
                         stockViewModel.isSelectFolder.set(true);
                     }
-                    case CODE_PICK_GDIR_FILE -> {
+                    case CODE_PICK_ROOT_FOLDER -> {
                         var application = (QuestPlayerApplication) getApplication();
                         if (application != null) application.setCustomRootFolder(documentFile);
                     }

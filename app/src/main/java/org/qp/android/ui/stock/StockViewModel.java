@@ -62,11 +62,11 @@ public class StockViewModel extends AndroidViewModel {
     private final String TAG = this.getClass().getSimpleName();
     private static final String GAME_INFO_FILENAME = "gameStockInfo";
 
-    public static final int CODE_PICK_IMAGE = 300;
+    public static final int CODE_PICK_IMAGE_FILE = 300;
     public static final int CODE_PICK_PATH_FILE = 301;
     public static final int CODE_PICK_MOD_FILE = 302;
     public static final int CODE_PICK_DIR_FILE = 303;
-    public static final int CODE_PICK_GDIR_FILE = 304;
+    public static final int CODE_PICK_ROOT_FOLDER = 304;
 
     public ObservableField<StockActivity> activityObservableField =
             new ObservableField<>();
@@ -455,7 +455,7 @@ public class StockViewModel extends AndroidViewModel {
                     .showDirPickerDialog(CODE_PICK_DIR_FILE);
         } else if (id == R.id.buttonSelectIcon) {
             getStockActivity()
-                    .showFilePickerActivity(CODE_PICK_IMAGE , new String[]{"image/png" , "image/jpeg"});
+                    .showFilePickerActivity(CODE_PICK_IMAGE_FILE , new String[]{"image/png" , "image/jpeg"});
         } else if (id == R.id.buttonSelectPath) {
             getStockActivity()
                     .showFilePickerActivity(CODE_PICK_PATH_FILE , new String[]{"application/octet-stream"});
