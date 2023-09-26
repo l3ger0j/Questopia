@@ -89,8 +89,6 @@
 </ul>
 ]]>
     </string>
-    <!-- Dialog Wait -->
-        <string name="pleaseWait">Please wait. Im not stuck, Im just loading the location!</string>
     <!-- Use in activity/fragment -->
     <!-- QTopia -->
         <string name="appName">Questopia</string>

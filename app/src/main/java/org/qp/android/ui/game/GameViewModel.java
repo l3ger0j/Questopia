@@ -346,31 +346,6 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         libQpProxy = null;
     }
 
-    public void startTimer() {
-        var safe = mainDescLiveData.getValue();
-        if (safe == null) return;
-
-        final int interval = 3000;
-        handlerIsDone = false;
-
-        var handler = new Handler();
-        handler.postDelayed(() -> {
-            var isContains = false;
-            var fragments = getGameActivity().getSupportFragmentManager().getFragments();
-            for (var item : fragments) {
-                if (item.toString().contains("GameDialogFrags")) {
-                    isContains = true;
-                }
-            }
-
-            var newSafe = mainDescLiveData.getValue();
-            if (safe.equals(newSafe) && !isContains) {
-                getGameActivity().showSimpleDialog("" , GameDialogType.MESSAGE_DIALOG);
-            }
-            handlerIsDone = true;
-        } , interval);
-    }
-
     public class GameWebViewClient extends WebViewClient {
         @Override
         public boolean shouldOverrideUrlLoading(WebView view , WebResourceRequest request) {
