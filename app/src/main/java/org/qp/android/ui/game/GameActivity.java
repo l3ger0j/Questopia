@@ -7,6 +7,7 @@ import static org.qp.android.helpers.utils.FileUtil.documentWrap;
 import static org.qp.android.helpers.utils.FileUtil.findFileOrDirectory;
 import static org.qp.android.helpers.utils.ThreadUtil.isMainThread;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.net.Uri;
@@ -717,69 +718,76 @@ public class GameActivity extends AppCompatActivity implements
         return (slot + 1) + ".sav";
     }
 
+    @SuppressLint("NonConstantResourceId")
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        int i = item.getItemId();
-        if (i == R.id.menu_userInput) {
-            if (settingsController.isUseExecString) {
-                libQpProxy.onUseExecutorString();
-            } else {
-                libQpProxy.onInputAreaClicked();
+        int itemId = item.getItemId();
+        switch (itemId) {
+            case R.id.menu_userInput -> {
+                if (settingsController.isUseExecString) {
+                    libQpProxy.onUseExecutorString();
+                } else {
+                    libQpProxy.onInputAreaClicked();
+                }
+                return true;
             }
-            return true;
-        } else if (i == R.id.menu_gameStock) {
-            promptCloseGame();
-            return true;
-        } else if (i == R.id.menu_options) {
-            startActivity(new Intent().setClass(this , SettingsActivity.class));
-            return true;
-        } else if (i == R.id.menu_newGame) {
-            libQpProxy.restartGame();
-            setActiveTab(TAB_MAIN_DESC_AND_ACTIONS);
-            return true;
-        } else return i == R.id.menu_loadGame || i == R.id.menu_saveGame;
+            case R.id.menu_gameStock -> {
+                promptCloseGame();
+                return true;
+            }
+            case R.id.menu_options -> {
+                startActivity(new Intent().setClass(this , SettingsActivity.class));
+                return true;
+            }
+            case R.id.menu_newGame -> {
+                libQpProxy.restartGame();
+                setActiveTab(TAB_MAIN_DESC_AND_ACTIONS);
+                return true;
+            }
+            default -> {
+                return itemId == R.id.menu_loadGame || itemId == R.id.menu_saveGame;
+            }
+        }
     }
 
     @Override
     public void onDialogPositiveClick(@NonNull DialogFragment dialog) {
-        if (dialog.getTag() == null) {
-            return;
-        }
-
-        switch (dialog.getTag()) {
-            case "closeGameDialogFragment" -> {
-                gameViewModel.stopAudio();
-                gameViewModel.stopLibQsp();
-                gameViewModel.removeCallback();
-                finish();
-            }
-            case "inputDialogFragment" , "executorDialogFragment" -> {
-                var inputBox = dialog.requireDialog().getWindow().findViewById(R.id.inputBox_edit);
-                if (inputBox != null) {
-                    var editText = (TextInputLayout) inputBox;
-                    if (editText.getEditText() != null) {
-                        var outputText = editText.getEditText().getText().toString();
-                        if (Objects.equals(outputText , "")) {
-                            gameViewModel.outputTextObserver.setValue("");
-                        } else {
-                            gameViewModel.outputTextObserver.setValue(outputText);
+        if (dialog.getTag() != null) {
+            switch (dialog.getTag()) {
+                case "closeGameDialogFragment" -> {
+                    gameViewModel.stopAudio();
+                    gameViewModel.stopLibQsp();
+                    gameViewModel.removeCallback();
+                    finish();
+                }
+                case "inputDialogFragment" , "executorDialogFragment" -> {
+                    var inputBox = dialog.requireDialog().getWindow().findViewById(R.id.inputBox_edit);
+                    if (inputBox != null) {
+                        var editText = (TextInputLayout) inputBox;
+                        if (editText.getEditText() != null) {
+                            var outputText = editText.getEditText().getText().toString();
+                            if (Objects.equals(outputText , "")) {
+                                gameViewModel.outputTextObserver.setValue("");
+                            } else {
+                                gameViewModel.outputTextObserver.setValue(outputText);
+                            }
                         }
                     }
                 }
+                case "loadGameDialogFragment" -> startReadOrWriteSave(LOAD);
+                case "showMessageDialogFragment" -> gameViewModel.outputBooleanObserver.setValue(true);
             }
-            case "loadGameDialogFragment" -> startReadOrWriteSave(LOAD);
-            case "showMessageDialogFragment" -> gameViewModel.outputBooleanObserver.setValue(true);
         }
     }
 
     @Override
     public void onDialogNegativeClick(DialogFragment dialog) {
-        if (dialog != null) {
-            if (Objects.equals(dialog.getTag() , "showMenuDialogFragment")) {
-                gameViewModel.outputIntObserver.setValue(-1);
-            } else if (Objects.equals(dialog.getTag() , "inputDialogFragment") ||
-                    Objects.equals(dialog.getTag() , "executorDialogFragment")) {
-                storageHelper.openFilePicker("text/plain");
+        if (dialog.getTag() != null) {
+            switch (dialog.getTag()) {
+                case "showMenuDialogFragment" ->
+                        gameViewModel.outputIntObserver.setValue(-1);
+                case "inputDialogFragment" , "executorDialogFragment" ->
+                        storageHelper.openFilePicker("text/plain");
             }
         }
     }
