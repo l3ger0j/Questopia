@@ -122,7 +122,6 @@ public class GameMainFragment extends Fragment {
                 new RecyclerItemClickListener.OnItemClickListener() {
                     @Override
                     public void onItemClick(View view , int position) {
-                        if (viewModel.isWaitTaskDone()) viewModel.startTimer();
                         viewModel.getLibQspProxy().onActionClicked(position);
                     }
 

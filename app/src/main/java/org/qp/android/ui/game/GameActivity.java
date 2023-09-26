@@ -481,12 +481,6 @@ public class GameActivity extends AppCompatActivity implements
                     dialogFragment.setCancelable(true);
                     dialogFragment.show(getSupportFragmentManager(), "loadGameDialogFragment");
                 }
-                case MESSAGE_DIALOG -> {
-                    var dialogFragment = new GameDialogFrags();
-                    dialogFragment.setDialogType(GameDialogType.MESSAGE_DIALOG);
-                    dialogFragment.setProcessedMsg(getString(R.string.pleaseWait));
-                    dialogFragment.show(getSupportFragmentManager(), "showMessageDialogFragment");
-                }
             }
         }
     }

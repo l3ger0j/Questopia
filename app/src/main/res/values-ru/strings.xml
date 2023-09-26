@@ -88,8 +88,6 @@
 </ul>
 ]]>
     </string>
-    <!-- Dialog Wait -->
-        <string name="pleaseWait">Пожалуйста, подождите. Я не завис, я просто подгружаю локацию!</string>
     <!-- Use in activity/fragment -->
     <!-- QTopia -->
         <string name="appName">Questopia</string>
