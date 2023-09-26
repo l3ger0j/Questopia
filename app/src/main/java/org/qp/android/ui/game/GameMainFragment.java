@@ -13,6 +13,8 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.qp.android.R;
@@ -86,6 +88,11 @@ public class GameMainFragment extends Fragment {
 
         // RecyclerView
         actionsView = gameMainBinding.actions;
+        var manager = (LinearLayoutManager) actionsView.getLayoutManager();
+        var dividerItemDecoration = new DividerItemDecoration(
+                actionsView.getContext() ,
+                manager.getOrientation());
+        actionsView.addItemDecoration(dividerItemDecoration);
         actionsView.setOverScrollMode(View.OVER_SCROLL_NEVER);
         viewModel.getActionObserver().observe(getViewLifecycleOwner() , actions -> {
             actionsView.setBackgroundColor(viewModel.getBackgroundColor());

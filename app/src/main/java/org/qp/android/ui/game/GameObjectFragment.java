@@ -9,6 +9,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.qp.android.databinding.FragmentRecyclerBinding;
@@ -18,7 +20,7 @@ public class GameObjectFragment extends Fragment {
 
     private FragmentRecyclerBinding recyclerBinding;
     private GameViewModel viewModel;
-    private RecyclerView recyclerView;
+    private RecyclerView objectView;
 
     @Nullable
     @Override
@@ -29,15 +31,21 @@ public class GameObjectFragment extends Fragment {
         viewModel = new ViewModelProvider(requireActivity()).get(GameViewModel.class);
 
         // RecyclerView
-        recyclerView = recyclerBinding.shareRecyclerView;
+        objectView = recyclerBinding.shareRecyclerView;
+        var manager = (LinearLayoutManager) objectView.getLayoutManager();
+        var dividerItemDecoration = new DividerItemDecoration(
+                objectView.getContext() ,
+                manager.getOrientation());
+        objectView.addItemDecoration(dividerItemDecoration);
+        objectView.setOverScrollMode(View.OVER_SCROLL_NEVER);
         viewModel.getObjectsObserver().observe(getViewLifecycleOwner() , gameItemRecycler -> {
-            recyclerView.setBackgroundColor(viewModel.getBackgroundColor());
+            objectView.setBackgroundColor(viewModel.getBackgroundColor());
             recyclerBinding.shareRecyclerView.setAdapter(gameItemRecycler);
         });
 
         // Settings
         viewModel.getControllerObserver().observe(getViewLifecycleOwner() , settingsController -> {
-            recyclerView.setBackgroundColor(viewModel.getBackgroundColor());
+            objectView.setBackgroundColor(viewModel.getBackgroundColor());
             recyclerBinding.getRoot().refreshDrawableState();
         });
         return recyclerBinding.getRoot();
@@ -45,9 +53,9 @@ public class GameObjectFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view , @Nullable Bundle savedInstanceState) {
-        recyclerView.addOnItemTouchListener(new RecyclerItemClickListener(
+        objectView.addOnItemTouchListener(new RecyclerItemClickListener(
                 requireContext() ,
-                recyclerView ,
+                objectView ,
                 new RecyclerItemClickListener.OnItemClickListener() {
                     @Override
                     public void onItemClick(View view , int position) {
