@@ -3,12 +3,13 @@ package org.qp.android.ui.stock;
 import static org.qp.android.helpers.utils.FileUtil.deleteDirectory;
 import static org.qp.android.helpers.utils.FileUtil.documentWrap;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_DIR_FILE;
-import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_ROOT_FOLDER;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_IMAGE_FILE;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_MOD_FILE;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_PATH_FILE;
+import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_ROOT_FOLDER;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -59,6 +60,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
 
 public class StockActivity extends AppCompatActivity implements
         StockPatternDialogFrags.StockPatternDialogList, StockPatternFragment.StockPatternFragmentList {
@@ -100,7 +103,7 @@ public class StockActivity extends AppCompatActivity implements
         gamesMap = stockViewModel.getGamesMap();
 
         mFAB = activityStockBinding.stockFAB;
-        mFAB.setOnClickListener(view -> stockViewModel.isHideMenu.set(!stockViewModel.isHideMenu.get()));
+        mFAB.setOnClickListener(view -> stockViewModel.isHideFABMenu.set(!stockViewModel.isHideFABMenu.get()));
         var copyFAB = activityStockBinding.copyFAB;
         copyFAB.setOnClickListener(v -> stockViewModel.showDialogInstall());
         var createFAB = activityStockBinding.createFAB;
@@ -253,6 +256,7 @@ public class StockActivity extends AppCompatActivity implements
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(false);
         }
+        stockViewModel.isHideFAB.set(false);
         navController.popBackStack();
         return true;
     }
@@ -267,6 +271,7 @@ public class StockActivity extends AppCompatActivity implements
                     , "StockRecyclerFragment")) {
                 super.onBackPressed();
             } else {
+                stockViewModel.isHideFAB.set(false);
                 navController.popBackStack();
             }
         } else {
@@ -357,13 +362,14 @@ public class StockActivity extends AppCompatActivity implements
                         .setTempGameData(stockViewModel.getGamesMap()
                         .get(stockViewModel.getGameIdByPosition(position)));
                 navController.navigate(R.id.stockGameFragment);
+                stockViewModel.isHideFAB.set(true);
             }
         }
     }
 
     @Override
     public void onDialogDestroy(DialogFragment dialog) {
-        stockViewModel.isShowDialog.set(false);
+        stockViewModel.isHideFAB.set(false);
     }
 
     @Override
@@ -403,37 +409,46 @@ public class StockActivity extends AppCompatActivity implements
     }
 
     public void onLongItemClick() {
-        if (!isEnable) {
-            var callback = new ActionMode.Callback() {
-                @Override
-                public boolean onCreateActionMode(ActionMode mode , Menu menu) {
-                    mode.getMenuInflater().inflate(R.menu.menu_delete, menu);
-                    return true;
-                }
+        if (isEnable) {
+            return;
+        }
+        var callback = new ActionMode.Callback() {
+            @Override
+            public boolean onCreateActionMode(ActionMode mode , Menu menu) {
+                mode.getMenuInflater().inflate(R.menu.menu_delete, menu);
+                return true;
+            }
 
-                @Override
-                public boolean onPrepareActionMode(ActionMode mode , Menu menu) {
-                    tempList = stockViewModel.getSortedGames();
-                    isEnable = true;
-                    return true;
-                }
+            @Override
+            public boolean onPrepareActionMode(ActionMode mode , Menu menu) {
+                tempList = stockViewModel.getSortedGames();
+                isEnable = true;
+                return true;
+            }
 
-                @Override
-                public boolean onActionItemClicked(ActionMode mode , MenuItem item) {
-                    int itemId = item.getItemId();
-                    if (itemId == R.id.delete_game) {
+            @SuppressLint("NonConstantResourceId")
+            @Override
+            public boolean onActionItemClicked(ActionMode mode , MenuItem item) {
+                int itemId = item.getItemId();
+                switch (itemId) {
+                    case R.id.delete_game -> {
+                        var service = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
                         for (var data : selectList) {
-                            tempList.remove(data);
-                            try {
-                                deleteDirectory(data.gameDir);
-                            } catch (NullPointerException e) {
-                                showErrorDialog("Error: "+"\n"+e);
-                            }
-                            stockViewModel.refreshGameData();
+                            CompletableFuture
+                                    .runAsync(() -> deleteDirectory(data.gameDir) , service)
+                                    .thenRun(() -> {
+                                        tempList.remove(data);
+                                        stockViewModel.refreshGameData();
+                                    })
+                                    .exceptionally(ex -> {
+                                        showErrorDialog("Error: " + "\n" + ex);
+                                        return null;
+                                    });
                         }
                         actionMode.finish();
-                    } else if (itemId == R.id.select_all) {
-                        if(selectList.size() == tempList.size()) {
+                    }
+                    case R.id.select_all -> {
+                        if (selectList.size() == tempList.size()) {
                             selectList.clear();
                             for (int childCount = mRecyclerView.getChildCount(), i = 0; i < childCount; ++i) {
                                 final var holder =
@@ -452,29 +467,30 @@ public class StockActivity extends AppCompatActivity implements
                             }
                         }
                     }
-                    return true;
                 }
+                return true;
+            }
 
-                @Override
-                public void onDestroyActionMode(ActionMode mode) {
-                    for (int childCount = mRecyclerView.getChildCount(), i = 0; i < childCount; ++i) {
-                        final var holder =
-                                mRecyclerView.getChildViewHolder(mRecyclerView.getChildAt(i));
-                        var cardView = (CardView) holder.itemView.findViewWithTag("gameCardView");
-                        cardView.setCardBackgroundColor(Color.DKGRAY);
-                    }
-                    actionMode = null;
-                    isEnable = false;
-                    tempList.clear();
-                    selectList.clear();
-                    stockViewModel.isHideMenu.set(false);
-                    mFAB.show();
+            @Override
+            public void onDestroyActionMode(ActionMode mode) {
+                for (int childCount = mRecyclerView.getChildCount(), i = 0; i < childCount; ++i) {
+                    final var holder =
+                            mRecyclerView.getChildViewHolder(mRecyclerView.getChildAt(i));
+                    var cardView = (CardView) holder.itemView.findViewWithTag("gameCardView");
+                    cardView.setCardBackgroundColor(Color.DKGRAY);
                 }
-            };
-            stockViewModel.isHideMenu.set(true);
-            mFAB.hide();
-            actionMode = startSupportActionMode(callback);
-        }
+                actionMode = null;
+                isEnable = false;
+                tempList.clear();
+                selectList.clear();
+                stockViewModel.isHideFABMenu.set(false);
+                mFAB.show();
+            }
+        };
+
+        stockViewModel.isHideFABMenu.set(true);
+        mFAB.hide();
+        actionMode = startSupportActionMode(callback);
     }
 
     @Override

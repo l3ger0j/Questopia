@@ -73,8 +73,8 @@ public class StockViewModel extends AndroidViewModel {
     public ObservableField<StockActivity> activityObservableField =
             new ObservableField<>();
 
-    public ObservableBoolean isShowDialog = new ObservableBoolean();
-    public ObservableBoolean isHideMenu = new ObservableBoolean();
+    public ObservableBoolean isHideFAB = new ObservableBoolean();
+    public ObservableBoolean isHideFABMenu = new ObservableBoolean();
     public ObservableBoolean isSelectFolder = new ObservableBoolean();
 
     private final LocalGame localGame = new LocalGame();
@@ -294,7 +294,7 @@ public class StockViewModel extends AndroidViewModel {
         dialogFragments.onCancel(new DialogInterface() {
             @Override
             public void cancel() {
-                isShowDialog.set(false);
+                isHideFAB.set(false);
             }
 
             @Override
@@ -303,7 +303,7 @@ public class StockViewModel extends AndroidViewModel {
         });
         getStockActivity()
                 .showDialogFragment(dialogFragments , StockDialogType.INSTALL_DIALOG);
-        isShowDialog.set(true);
+        isHideFAB.set(true);
     }
 
     public void showDialogEdit() {
@@ -313,7 +313,7 @@ public class StockViewModel extends AndroidViewModel {
         dialogFragments.onCancel(new DialogInterface() {
             @Override
             public void cancel() {
-                isShowDialog.set(false);
+                isHideFAB.set(false);
             }
             @Override
             public void dismiss() {
@@ -321,7 +321,7 @@ public class StockViewModel extends AndroidViewModel {
         });
         getStockActivity()
                 .showDialogFragment(dialogFragments , StockDialogType.EDIT_DIALOG);
-        isShowDialog.set(true);
+        isHideFAB.set(true);
     }
 
     public void createInstallIntent() {
@@ -395,7 +395,7 @@ public class StockViewModel extends AndroidViewModel {
                         findFileOrDirectory(tempInnerGameData.gameDir , "mods"));
             }
             refreshIntGamesDirectory();
-            isShowDialog.set(false);
+            isHideFAB.set(false);
             dialogFragments.dismiss();
         } catch (NullPointerException ex) {
             var message = getStockActivity().getString(R.string.error)+": "+ex;
@@ -509,7 +509,7 @@ public class StockViewModel extends AndroidViewModel {
         var notificationManager =
                 NotificationManagerCompat.from(getStockActivity());
 
-        isShowDialog.set(false);
+        isHideFAB.set(false);
 
         builder.setTitleNotify(getStockActivity().getString(R.string.titleCopyNotify));
         builder.setTextNotify(getStockActivity().getString(R.string.bodyCopyNotify));
