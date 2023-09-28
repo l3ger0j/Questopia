@@ -3,9 +3,9 @@
     <item
         android:id="@+id/select_all"
         android:title="@string/selectAllTitle"
-        android:icon="@drawable/select_all"/>
+        android:icon="@drawable/baseline_select_all_24"/>
     <item
         android:id="@+id/delete_game"
         android:title="@string/deleteGameTitle"
-        android:icon="@drawable/delete"/>
+        android:icon="@drawable/baseline_delete_24"/>
 </menu>

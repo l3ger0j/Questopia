@@ -22,11 +22,39 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="16dp"
             android:layout_marginBottom="32dp"
-            android:contentDescription="@string/add"
+            android:contentDescription=""
             android:visibility="@{stockVM.isShowDialog ? View.GONE : View.VISIBLE}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:srcCompat="@drawable/add" />
+            app:srcCompat="@drawable/baseline_add_24" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/copyFAB"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="24dp"
+            android:layout_marginBottom="16dp"
+            android:clickable="true"
+            app:fabSize="mini"
+            android:contentDescription=""
+            android:visibility="@{stockVM.isShowDialog || stockVM.isHideMenu ? View.GONE : View.VISIBLE}"
+            app:layout_constraintBottom_toTopOf="@+id/stockFAB"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:srcCompat="@drawable/baseline_folder_copy_24" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/createFAB"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="24dp"
+            android:layout_marginBottom="16dp"
+            android:clickable="true"
+            app:fabSize="mini"
+            android:contentDescription=""
+            android:visibility="@{stockVM.isShowDialog || stockVM.isHideMenu ? View.GONE : View.VISIBLE}"
+            app:layout_constraintBottom_toTopOf="@+id/copyFAB"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:srcCompat="@drawable/baseline_create_new_folder_24" />
 
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/stockFragHost"

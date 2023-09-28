@@ -44,8 +44,8 @@ import org.qp.android.databinding.DialogEditBinding;
 import org.qp.android.databinding.DialogInstallBinding;
 import org.qp.android.dto.stock.InnerGameData;
 import org.qp.android.helpers.repository.LocalGame;
-import org.qp.android.model.copy.CopyBuilder;
 import org.qp.android.model.notify.NotifyBuilder;
+import org.qp.android.model.workers.WorkerBuilder;
 import org.qp.android.ui.dialogs.StockDialogFrags;
 import org.qp.android.ui.dialogs.StockDialogType;
 import org.qp.android.ui.game.GameActivity;
@@ -56,21 +56,25 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
 
 public class StockViewModel extends AndroidViewModel {
+
     private final String TAG = this.getClass().getSimpleName();
     private static final String GAME_INFO_FILENAME = "gameStockInfo";
 
-    public static final int CODE_PICK_IMAGE = 300;
+    public static final int CODE_PICK_IMAGE_FILE = 300;
     public static final int CODE_PICK_PATH_FILE = 301;
     public static final int CODE_PICK_MOD_FILE = 302;
     public static final int CODE_PICK_DIR_FILE = 303;
-    public static final int CODE_PICK_GDIR_FILE = 304;
+    public static final int CODE_PICK_ROOT_FOLDER = 304;
 
     public ObservableField<StockActivity> activityObservableField =
             new ObservableField<>();
 
     public ObservableBoolean isShowDialog = new ObservableBoolean();
+    public ObservableBoolean isHideMenu = new ObservableBoolean();
     public ObservableBoolean isSelectFolder = new ObservableBoolean();
 
     private final LocalGame localGame = new LocalGame();
@@ -139,17 +143,6 @@ public class StockViewModel extends AndroidViewModel {
         gameDataList.postValue(innerGameDataArrayList);
     }
 
-    public void setLocalGameDataList() {
-        var gameData = getSortedGames();
-        var localGameData = new ArrayList<InnerGameData>();
-        for (var data : gameData) {
-            if (data.isInstalled()) {
-                localGameData.add(data);
-            }
-        }
-        setGameDataList(localGameData);
-    }
-
     @NotNull
     private StockActivity getStockActivity() {
         var tempStockActivity = activityObservableField.get();
@@ -179,10 +172,6 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     public LiveData<ArrayList<InnerGameData>> getGameData() {
-        if (gameDataList.getValue() != null) {
-            var application = (QuestPlayerApplication) getApplication();
-            application.setGameList(gameDataList.getValue());
-        }
         return gameDataList;
     }
 
@@ -313,7 +302,7 @@ public class StockViewModel extends AndroidViewModel {
             }
         });
         getStockActivity()
-                .showInstallDialogFragment(dialogFragments);
+                .showDialogFragment(dialogFragments , StockDialogType.INSTALL_DIALOG);
         isShowDialog.set(true);
     }
 
@@ -331,7 +320,7 @@ public class StockViewModel extends AndroidViewModel {
             }
         });
         getStockActivity()
-                .showEditDialogFragment(dialogFragments);
+                .showDialogFragment(dialogFragments , StockDialogType.EDIT_DIALOG);
         isShowDialog.set(true);
     }
 
@@ -363,7 +352,7 @@ public class StockViewModel extends AndroidViewModel {
                 }
             });
             gameData.icon = (tempImageFile == null ? null : tempImageFile.getUri().toString());
-            installGame(tempInstallDir , gameData);
+            doInstallGame(tempInstallDir , gameData);
             isSelectFolder.set(false);
             dialogFragments.dismiss();
         }
@@ -409,7 +398,8 @@ public class StockViewModel extends AndroidViewModel {
             isShowDialog.set(false);
             dialogFragments.dismiss();
         } catch (NullPointerException ex) {
-            getStockActivity().showErrorDialog("Error: " + ex);
+            var message = getStockActivity().getString(R.string.error)+": "+ex;
+            getStockActivity().showErrorDialog(message);
         }
     }
 
@@ -421,8 +411,10 @@ public class StockViewModel extends AndroidViewModel {
         intent.putExtra("gameDirUri" , tempDir.getAbsolutePath(getStockActivity()));
         var gameFileCount = tempInnerGameData.gameFiles.size();
         switch (gameFileCount) {
-            case 0 -> getStockActivity()
-                    .showErrorDialog("Game folder has no game files!");
+            case 0 -> {
+                var message = getStockActivity().getString(R.string.gameFolderEmpty);
+                getStockActivity().showErrorDialog(message);
+            }
             case 1 -> {
                 var tempFile = documentWrap(tempInnerGameData.gameFiles.get(0));
                 intent.putExtra("gameFileUri" ,  tempFile.getAbsolutePath(getStockActivity()));
@@ -440,7 +432,7 @@ public class StockViewModel extends AndroidViewModel {
                 dialogFragments.setDialogType(StockDialogType.SELECT_DIALOG);
                 dialogFragments.setNames(names);
                 getStockActivity()
-                        .showSelectDialogFragment(dialogFragments);
+                        .showDialogFragment(dialogFragments , StockDialogType.SELECT_DIALOG);
                 outputIntObserver.observeForever(integer -> {
                     var tempFile = documentWrap(tempInnerGameData.gameFiles.get(integer));
                     intent.putExtra("gameFileUri" , tempFile.getAbsolutePath(getStockActivity()));
@@ -457,7 +449,7 @@ public class StockViewModel extends AndroidViewModel {
                     .showDirPickerDialog(CODE_PICK_DIR_FILE);
         } else if (id == R.id.buttonSelectIcon) {
             getStockActivity()
-                    .showFilePickerActivity(CODE_PICK_IMAGE , new String[]{"image/png" , "image/jpeg"});
+                    .showFilePickerActivity(CODE_PICK_IMAGE_FILE , new String[]{"image/png" , "image/jpeg"});
         } else if (id == R.id.buttonSelectPath) {
             getStockActivity()
                     .showFilePickerActivity(CODE_PICK_PATH_FILE , new String[]{"application/octet-stream"});
@@ -503,20 +495,12 @@ public class StockViewModel extends AndroidViewModel {
     // endregion Dialog
 
     // region Game install
-    public void installGame(DocumentFile gameFile , InnerGameData innerGameData) {
-        if (!isWritableDirectory(gamesDir)) {
-            getStockActivity()
-                    .showErrorDialog("Games directory is not writable");
-            return;
-        }
-        doInstallGame(gameFile , innerGameData);
-    }
-
     @SuppressLint("MissingPermission")
     private void doInstallGame(DocumentFile gameFile , InnerGameData innerGameData) {
         var gameDir = createFindDFolder(gamesDir , normalizeFolderName(innerGameData.title));
         if (!isWritableDirectory(gameDir)) {
-            getStockActivity().showErrorDialog("Games directory is not writable");
+            var message = getStockActivity().getString(R.string.gamesFolderError);
+            getStockActivity().showErrorDialog(message);
             return;
         }
 
@@ -531,7 +515,7 @@ public class StockViewModel extends AndroidViewModel {
         builder.setTextNotify(getStockActivity().getString(R.string.bodyCopyNotify));
         notificationManager.notify(INSTALL_GAME_NOTIFICATION_ID , builder.buildStandardNotification());
 
-        var installer = new CopyBuilder(getStockActivity());
+        var installer = new WorkerBuilder(getStockActivity());
         installer.getErrorCode().observeForever(error -> {
             switch (error) {
                 case "NIG" -> getStockActivity().showErrorDialog(getStockActivity()
@@ -566,8 +550,8 @@ public class StockViewModel extends AndroidViewModel {
             infoFile = createFindDFile(gameDir , MimeType.TEXT , GAME_INFO_FILENAME);
         }
         if (!isWritableFile(infoFile)) {
-            getStockActivity()
-                    .showErrorDialog("Game data info file is not writable");
+            var message = getStockActivity().getString(R.string.infoFileNotWritable);
+            getStockActivity().showErrorDialog(message);
             return;
         }
         var tempInfoFile = documentWrap(infoFile);
@@ -576,14 +560,14 @@ public class StockViewModel extends AndroidViewModel {
              var writer = new OutputStreamWriter(out)) {
             writer.write(objectToXml(innerGameData));
         } catch (Exception ex) {
-            Log.d(TAG , "EROR: " , ex);
-            getStockActivity()
-                    .showErrorDialog("Failed to write to a innerGameData info file");
+            Log.d(TAG , "ERROR: " , ex);
+            var message = getStockActivity().getString(R.string.infoFileWriteError);
+            getStockActivity().showErrorDialog(message);
         }
     }
 
     private LiveData<Long> calculateSizeDir(DocumentFile srcDir) {
-        var installer = new CopyBuilder(getStockActivity());
+        var installer = new WorkerBuilder(getStockActivity());
         return installer.calculateDirSize(srcDir);
     }
     // endregion Game install
@@ -594,8 +578,7 @@ public class StockViewModel extends AndroidViewModel {
         if (rootDir != null) {
             var tempGameDir = createFindDFolder(rootDir , "games");
             if (!isWritableDirectory(tempGameDir)) {
-                var message = "Games directory is not writable" + " " +
-                        getStockActivity().getString(R.string.gamesDirError);
+                var message = getStockActivity().getString(R.string.gamesFolderError);
                 getStockActivity().showErrorDialog(message);
                 return;
             }
@@ -604,14 +587,13 @@ public class StockViewModel extends AndroidViewModel {
         } else {
             var intFilesDir = getApplication().getExternalFilesDir(null);
             if (intFilesDir == null) {
-                getStockActivity()
-                        .showErrorDialog("Internal files directory not found");
+                var message = getStockActivity().getString(R.string.interFolderError);
+                getStockActivity().showErrorDialog(message);
                 return;
             }
             var tempGameDir = createFindFolder(intFilesDir, "games");
             if (!isWritableDirectory(tempGameDir)) {
-                var message = "Games directory is not writable" + " " +
-                        getStockActivity().getString(R.string.gamesDirError);
+                var message = getStockActivity().getString(R.string.gamesFolderError);
                 getStockActivity().showErrorDialog(message);
                 return;
             }
@@ -622,21 +604,35 @@ public class StockViewModel extends AndroidViewModel {
 
     public void refreshGameData() {
         gamesMap.clear();
-        for (var localGameData : localGame.getGames(getStockActivity() , gamesDir)) {
-            var remoteGameData = gamesMap.get(localGameData.id);
-            if (remoteGameData != null) {
-                var aggregateGameData = new InnerGameData(remoteGameData);
-                aggregateGameData.gameDir = localGameData.gameDir;
-                aggregateGameData.gameFiles = localGameData.gameFiles;
-                gamesMap.put(localGameData.id, aggregateGameData);
-            } else {
-                gamesMap.put(localGameData.id, localGameData);
-            }
-        }
 
-        setLocalGameDataList();
+        CompletableFuture
+                .supplyAsync(() -> localGame.getGames(getStockActivity() , gamesDir) ,
+                        Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()))
+                .thenApply(innerGameData -> {
+                    for (var localGameData : innerGameData) {
+                        var remoteGameData = gamesMap.get(localGameData.id);
+                        if (remoteGameData != null) {
+                            var aggregateGameData = new InnerGameData(remoteGameData);
+                            aggregateGameData.gameDir = localGameData.gameDir;
+                            aggregateGameData.gameFiles = localGameData.gameFiles;
+                            gamesMap.put(localGameData.id, aggregateGameData);
+                        } else {
+                            gamesMap.put(localGameData.id, localGameData);
+                        }
+                    }
+                    return null;
+                })
+                .thenRunAsync(() -> {
+                    var gameData = getSortedGames();
+                    var localGameData = new ArrayList<InnerGameData>();
+                    for (var data : gameData) {
+                        if (data.isInstalled()) {
+                            localGameData.add(data);
+                        }
+                    }
+                    setGameDataList(localGameData);
+                } , Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()));
     }
-
     // endregion Refresh
 }
 

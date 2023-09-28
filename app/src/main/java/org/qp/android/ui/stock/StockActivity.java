@@ -3,7 +3,8 @@ package org.qp.android.ui.stock;
 import static org.qp.android.helpers.utils.FileUtil.deleteDirectory;
 import static org.qp.android.helpers.utils.FileUtil.documentWrap;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_DIR_FILE;
-import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_IMAGE;
+import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_ROOT_FOLDER;
+import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_IMAGE_FILE;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_MOD_FILE;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_PATH_FILE;
 
@@ -38,9 +39,12 @@ import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.anggrayudi.storage.SimpleStorageHelper;
+import com.github.javiersantos.appupdater.AppUpdater;
+import com.github.javiersantos.appupdater.enums.UpdateFrom;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import org.qp.android.BuildConfig;
+import org.qp.android.QuestPlayerApplication;
 import org.qp.android.R;
 import org.qp.android.databinding.ActivityStockBinding;
 import org.qp.android.dto.stock.InnerGameData;
@@ -56,7 +60,9 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Objects;
 
-public class StockActivity extends AppCompatActivity implements StockPatternDialogFrags.StockPatternDialogList, StockPatternFragment.StockPatternFragmentList {
+public class StockActivity extends AppCompatActivity implements
+        StockPatternDialogFrags.StockPatternDialogList, StockPatternFragment.StockPatternFragmentList {
+
     private static final int READ_EXTERNAL_STORAGE_CODE = 200;
     private static final int MANAGE_EXTERNAL_STORAGE_CODE = 201;
     private static final int POST_NOTIFICATION = 203;
@@ -94,12 +100,16 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         gamesMap = stockViewModel.getGamesMap();
 
         mFAB = activityStockBinding.stockFAB;
-        mFAB.setOnClickListener(v -> stockViewModel.showDialogInstall());
+        mFAB.setOnClickListener(view -> stockViewModel.isHideMenu.set(!stockViewModel.isHideMenu.get()));
+        var copyFAB = activityStockBinding.copyFAB;
+        copyFAB.setOnClickListener(v -> stockViewModel.showDialogInstall());
+        var createFAB = activityStockBinding.createFAB;
+        createFAB.setOnClickListener(view -> showDirPickerDialog(CODE_PICK_ROOT_FOLDER));
 
         storageHelper.setOnFileSelected((integer , documentFiles) -> {
             if (documentFiles != null) {
                 switch (integer) {
-                    case CODE_PICK_IMAGE -> {
+                    case CODE_PICK_IMAGE_FILE -> {
                         for (var file : documentFiles) {
                             var document = documentWrap(file);
                             switch (document.getExtension()) {
@@ -136,9 +146,15 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
 
         storageHelper.setOnFolderSelected((integer , documentFile) -> {
             if (documentFile != null) {
-                if (integer == CODE_PICK_DIR_FILE) {
-                    stockViewModel.setTempInstallDir(documentFile);
-                    stockViewModel.isSelectFolder.set(true);
+                switch (integer) {
+                    case CODE_PICK_DIR_FILE -> {
+                        stockViewModel.setTempInstallDir(documentFile);
+                        stockViewModel.isSelectFolder.set(true);
+                    }
+                    case CODE_PICK_ROOT_FOLDER -> {
+                        var application = (QuestPlayerApplication) getApplication();
+                        if (application != null) application.setCustomRootFolder(documentFile);
+                    }
                 }
             }
 
@@ -186,6 +202,11 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         if (savedInstanceState == null) {
             navController.navigate(R.id.stockRecyclerFragment);
         }
+
+        new AppUpdater(this)
+                .setUpdateFrom(UpdateFrom.GITHUB)
+                .setGitHubUserAndRepo("l3ger0j", "Questopia")
+                .start();
     }
 
     @Override
@@ -281,33 +302,20 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
         }
     }
 
-    public void showEditDialogFragment (DialogFragment editDialog) {
+    public void showDialogFragment (DialogFragment dialogFragment , StockDialogType dialogType) {
         var fragment = getSupportFragmentManager()
-                .findFragmentByTag("editDialogFragment");
+                .findFragmentByTag(dialogFragment.getTag());
         if (fragment != null && fragment.isAdded()) {
             fragment.onDestroy();
         } else {
-            editDialog.show(getSupportFragmentManager() , "editDialogFragment");
-        }
-    }
-
-    public void showInstallDialogFragment (DialogFragment installDialog) {
-        var fragment = getSupportFragmentManager()
-                .findFragmentByTag("installDialogFragment");
-        if (fragment != null && fragment.isAdded()) {
-            fragment.onDestroy();
-        } else {
-            installDialog.show(getSupportFragmentManager() , "installDialogFragment");
-        }
-    }
-
-    public void showSelectDialogFragment (DialogFragment selectDialog) {
-        var fragment = getSupportFragmentManager()
-                .findFragmentByTag("selectDialogFragment");
-        if (fragment != null && fragment.isAdded()) {
-            fragment.onDestroy();
-        } else {
-            selectDialog.show(getSupportFragmentManager() , "selectDialogFragment");
+            switch (dialogType) {
+                case EDIT_DIALOG ->
+                        dialogFragment.show(getSupportFragmentManager() , "editDialogFragment");
+                case INSTALL_DIALOG ->
+                        dialogFragment.show(getSupportFragmentManager() , "installDialogFragment");
+                case SELECT_DIALOG ->
+                        dialogFragment.show(getSupportFragmentManager() , "selectDialogFragment");
+            }
         }
     }
 
@@ -373,6 +381,13 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
     }
 
     @Override
+    public void onDialogListClick(DialogFragment dialog, int which) {
+        if (Objects.equals(dialog.getTag() , "selectDialogFragment")) {
+            stockViewModel.outputIntObserver.setValue(which);
+        }
+    }
+
+    @Override
     public void onClickEditButton() {
         stockViewModel.showDialogEdit();
     }
@@ -385,13 +400,6 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
     @Override
     public void onClickDownloadButton() {
         // TODO: 19.07.2023 Release this
-    }
-
-    @Override
-    public void onDialogListClick(DialogFragment dialog, int which) {
-        if (Objects.equals(dialog.getTag() , "selectDialogFragment")) {
-            stockViewModel.outputIntObserver.setValue(which);
-        }
     }
 
     public void onLongItemClick() {
@@ -459,9 +467,11 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
                     isEnable = false;
                     tempList.clear();
                     selectList.clear();
+                    stockViewModel.isHideMenu.set(false);
                     mFAB.show();
                 }
             };
+            stockViewModel.isHideMenu.set(true);
             mFAB.hide();
             actionMode = startSupportActionMode(callback);
         }
@@ -469,12 +479,24 @@ public class StockActivity extends AppCompatActivity implements StockPatternDial
 
     @Override
     public void onScrolled(RecyclerView recyclerView , int dx , int dy) {
-        if (dy > 0 || dy < 0 && mFAB.isShown()) mFAB.hide();
+        // TODO: 14.09.2023 NEED TO REWORK
+//        if (!isEnable) {
+//            if (dy > 0 || dy < 0 && mFAB.isShown()) {
+//                stockViewModel.isHideMenu.set(true);
+//                mFAB.hide();
+//            }
+//        }
     }
 
     @Override
     public void onScrollStateChanged(RecyclerView recyclerView , int newState) {
-        if (newState == RecyclerView.SCROLL_STATE_IDLE) mFAB.show();
+        // TODO: 14.09.2023 NEED TO REWORK
+//        if (!isEnable) {
+//            if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+//                stockViewModel.isHideMenu.set(false);
+//                mFAB.show();
+//            }
+//        }
     }
 
     @Override

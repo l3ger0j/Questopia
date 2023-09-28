@@ -1,7 +1,5 @@
 package org.qp.android.ui.settings;
 
-import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_GDIR_FILE;
-
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
@@ -12,9 +10,6 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 
-import com.anggrayudi.storage.SimpleStorageHelper;
-
-import org.qp.android.QuestPlayerApplication;
 import org.qp.android.R;
 
 import java.util.Objects;
@@ -22,12 +17,16 @@ import java.util.Objects;
 public class SettingsActivity extends AppCompatActivity {
 
     private NavController navController;
-    private final SimpleStorageHelper storageHelper = new SimpleStorageHelper(this);
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
+
+        if (getSupportActionBar() != null ) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setDisplayShowHomeEnabled(true);
+        }
 
         var navFragment = (NavHostFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.settingsFragHost);
@@ -48,25 +47,6 @@ public class SettingsActivity extends AppCompatActivity {
         if (savedInstanceState == null) {
             navController.navigate(R.id.settingsFragment);
         }
-
-        storageHelper.setOnFolderSelected((integer , documentFile) -> {
-            if (documentFile != null) {
-                if (integer == CODE_PICK_GDIR_FILE) {
-                    var application = (QuestPlayerApplication) getApplication();
-                    if (application != null) application.setCustomRootDir(documentFile);
-                }
-            }
-
-            return null;
-        });
-
-        Objects.requireNonNull(getSupportActionBar())
-                .setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
-    }
-
-    public void showDirPickerDialog(int requestCode) {
-        storageHelper.openFolderPicker(requestCode);
     }
 
     @Override

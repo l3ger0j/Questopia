@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.preference.PreferenceManager;
 
 public class SettingsController {
+
     public int typeface;
     public int fontSize;
     public int backColor;
@@ -23,7 +24,6 @@ public class SettingsController {
     public boolean isUseAutoHeight;
     public boolean isUseSeparator;
     public boolean isUseGameFont;
-    public boolean isUseNewFilePicker;
     public boolean isUseAutoscroll;
     public boolean isUseExecString;
     public boolean isUseImmersiveMode;
@@ -42,6 +42,7 @@ public class SettingsController {
         if (INSTANCE == null) {
             INSTANCE = new SettingsController();
         }
+
         return from(PreferenceManager.getDefaultSharedPreferences(context));
     }
 
@@ -61,7 +62,6 @@ public class SettingsController {
         settingsController.fontSize = Integer.parseInt(preferences.getString("fontSize", "16"));
         settingsController.binaryPrefixes = Integer.parseInt(preferences.getString("binPref","1000"));
         settingsController.actionsHeightRatio = parseActionsHeightRatio(preferences.getString("actsHeight", "1/3"));
-        settingsController.isUseNewFilePicker = preferences.getBoolean("filePicker", false);
         settingsController.isUseAutoscroll = preferences.getBoolean("autoscroll", true);
         settingsController.isUseExecString = preferences.getBoolean("execString", false);
         settingsController.isUseImageDebug = preferences.getBoolean("debugImage", false);

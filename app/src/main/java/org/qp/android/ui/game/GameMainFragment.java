@@ -11,6 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
+import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -18,7 +19,8 @@ import org.qp.android.R;
 import org.qp.android.databinding.FragmentGameMainBinding;
 import org.qp.android.helpers.adapters.RecyclerItemClickListener;
 
-public class GameMainFragment extends GamePatternFragment {
+public class GameMainFragment extends Fragment {
+
     private GameViewModel viewModel;
     private ConstraintLayout layoutTop;
     private WebView mainDescView;
@@ -30,8 +32,8 @@ public class GameMainFragment extends GamePatternFragment {
         public void run() {
             if (mainDescView.getContentHeight()
                     * getResources().getDisplayMetrics().density
-                    >= mainDescView.getScrollY() ){
-                mainDescView.scrollBy(0, mainDescView.getHeight());
+                    >= mainDescView.getScrollY()) {
+                mainDescView.scrollBy(0 , mainDescView.getHeight());
             }
         }
     };
@@ -68,23 +70,23 @@ public class GameMainFragment extends GamePatternFragment {
         mainDescView.addJavascriptInterface(new Object() {
             @JavascriptInterface
             public void onClickImage(String src) {
-                listener.showPictureDialog(viewModel.getImageAbsolutePath(src));
+                viewModel.showPicture(viewModel.getImageAbsolutePath(src));
             }
-        }, "img");
+        } , "img");
         if (viewModel.getSettingsController().isUseAutoscroll) {
-            mainDescView.postDelayed(onScroll, 300);
+            mainDescView.postDelayed(onScroll , 300);
         }
         viewModel.getMainDescObserver().observe(getViewLifecycleOwner() , desc ->
                 mainDescView.loadDataWithBaseURL(
-                        "file:///",
-                        desc,
-                        "text/html",
-                        "UTF-8",
+                        "file:///" ,
+                        desc ,
+                        "text/html" ,
+                        "UTF-8" ,
                         null));
 
         // RecyclerView
         actionsView = gameMainBinding.actions;
-        actionsView.setBackgroundColor(viewModel.getBackgroundColor());
+        actionsView.setOverScrollMode(View.OVER_SCROLL_NEVER);
         viewModel.getActionObserver().observe(getViewLifecycleOwner() , actions -> {
             actionsView.setBackgroundColor(viewModel.getBackgroundColor());
             actionsView.setAdapter(actions);
@@ -120,6 +122,7 @@ public class GameMainFragment extends GamePatternFragment {
                 new RecyclerItemClickListener.OnItemClickListener() {
                     @Override
                     public void onItemClick(View view , int position) {
+                        if (viewModel.isWaitTaskDone()) viewModel.startTimer();
                         viewModel.getLibQspProxy().onActionClicked(position);
                     }
 

@@ -8,7 +8,7 @@
     <!-- Copy notification -->
         <string name="titleCopyNotify">Копирование папки игры</string>
         <string name="bodyCopyNotify">Копирую папку с игрой!</string>
-        <string name="bodyCopiedNotify">Ура, скопировал папку с игрой -GAMENAME-!</string>
+        <string name="bodyCopiedNotify">Ура! Я скопировала папку с игрой -GAMENAME-!</string>
     <!-- Dialog LoadGamePopup -->
         <string name="loadGamePopup">Файл сохранения не был найден в gameDir. Хотите ли вы вручную указать путь к файлу сохранения?</string>
     <!-- Dialog Close -->
@@ -24,9 +24,17 @@
         <string name="downloadButton">Скачать игру</string>
     <!-- Dialog Error -->
         <string name="error">Ошибка</string>
-        <string name="gamesDirError">Невозможно создать или открыть папку с играми.</string>
-        <string name="installError">Невозможно установить игру -GAMENAME-.</string>
-        <string name="noGameFilesError">Файлы игры не найдены после установки.</string>
+        <string name="interFolderError">Ошибка чтения внутренней папки приложения</string>
+        <string name="gamesFolderError">Ошибка чтения и/или создания папки с играми</string>
+        <string name="gameFolderEmpty">Я не нашла в папке с игрой файла в формате .qsp или .gam!</string>
+        <string name="infoFileNotWritable">Ошибка чтения файла с информацией об игре</string>
+        <string name="infoFileWriteError">Ошибка записи информации об игре в файл</string>
+        <string name="installError">Я не могу скопировать папку с игрой -GAMENAME-!</string>
+        <string name="waitingError">Во время ожидания произошла ошибка</string>
+        <string name="waitingInputError">Я не смогла дождаться ввода</string>
+        <string name="noGameFilesError">Я не нашла файлы игры после копирования!</string>
+        <string name="notFoundSound">Звуковой файл не найден:</string>
+        <string name="notFoundImage">Файл изображения не найден:</string>
     <!-- Dialog Install -->
         <string name="gameName">Название игры</string>
         <string name="gameAuthor">Автор</string>
@@ -48,7 +56,7 @@
     <!-- Dialog Credits -->
     <string name="appDescription">
 <![CDATA[
-<h2><center>О Quest Player Android<img src=\"file:///android_res/drawable/landscape.jpg\" width=\"100%\"></center></h2>
+<h2><center>О Questopia<img src=\"file:///android_res/drawable/landscape.jpg\" width=\"100%\"></center></h2>
 <h4 style="margin-left:5px;">Quest Player Android это Android-порт с открытым исходным кодом оригинальной <b>Quest Soft Player</b> (<a href=\"http://qsp.su/?option=com_content&view=article&id=64\">русскоязычный сайт</a>), основанный на форке от <a href=\"https://github.com/seedhartha/QuestPlayer\">seedharta</a>. Вы можете скачать актуальную версию приложения на <a href=\"https://github.com/l3ger0j/Questopia\">GitHub</a> или в <a href=\"https://t.me/QuestPlayer\">Телеграм канале</a>.</h4>
 ]]>
     </string>
@@ -80,6 +88,8 @@
 </ul>
 ]]>
     </string>
+    <!-- Dialog Wait -->
+        <string name="pleaseWait">Пожалуйста, подождите. Я не завис, я просто подгружаю локацию!</string>
     <!-- Use in activity/fragment -->
     <!-- QTopia -->
         <string name="appName">Questopia</string>
@@ -101,7 +111,6 @@
         <string name="inventoryTitle">Инвентарь</string>
         <string name="inventoryContDesc">Перейти к инвентарю</string>
         <string name="userInputTitle">Пользовательский ввод</string>
-        <string name="userInputContDesc">Показать пользовательский ввод</string>
         <string name="restartGameTitle">Начать заново</string>
         <string name="loadTitle">Загрузить</string>
         <string name="saveTitle">Сохранить</string>
@@ -119,12 +128,10 @@
         <string name="langSum">Выберите язык интерфейса</string>
         <string name="binPrefTitle">Двоичные Префиксы</string>
         <string name="binPrefSum">Выберите двоичные префиксы</string>
-        <string name="soundTitle">Звук</string>
-        <string name="soundSum">Проигрывать звуки и музыку</string>
+        <string name="soundTitle">Воспроизводить звук</string>
         <string name="actsHeightTitle">Высота Списка Действий</string>
-        <string name="actsHeightSum">Соотношение высоты списка действий к высоте экрана</string>
         <!-- Text section -->
-        <string name="textCatTitle">Текст</string>
+        <string name="textCatTitle">Настройки отображения текста</string>
         <string name="fontStyleTitle">Стиль Шрифта</string>
         <string name="fontSizeTitle">Размер Шрифта</string>
         <string name="useGameFontTitle">Шрифт из Игры</string>
@@ -141,7 +148,7 @@
         <string name="textBackLinkColorSum">Значение по умолчанию -VALUE-</string>
         <string name="extendedName">Questopia -VERSION-</string>
         <!-- Image section -->
-        <string name="imageCatTitle">Картинки</string>
+        <string name="imageCatTitle">Настройки отображения картинок</string>
         <string name="autoWidthTitle">Авто Ширина Изображения</string>
         <string name="autoWidthSum">Использовать автоматически определяемое значение для ширины изображения</string>
         <string name="customWidthTitle">Своё Значение Ширины</string>
@@ -151,20 +158,15 @@
         <string name="fullScreenImageSum">При нажатии на картинку, она откроется в диалоговом окне</string>
         <string name="fullScreenImageTitle">Полноэкранные изображения</string>
         <!-- Switch section -->
-        <string name="switchCatTitle">Переключатели</string>
         <string name="filePicker">Диалог Выбора Файла (альфа)</string>
         <string name="immersiveModeTitle">Режим Погружения</string>
-        <string name="immersiveModeSum">Включение/выключение режима погружения</string>
         <string name="separatorTitle">Разделитель</string>
-        <string name="separatorSum">Включить/выключить разделитель в игре</string>
         <string name="autoscrollTitle">Автопролистывание</string>
-        <string name="autoscrollSum">Включить/выключить автопролистывание</string>
         <string name="imageDebugTitle">Отладчик путей к картинкам</string>
         <string name="imageDebugSum">Режим, который включает отображение диалога с ошибкой если путь к картинке неправильный</string>
         <string name="musicDebugTitle">Отладчик путей к музыке</string>
-        <string name="musicDebugSum">Режим, который позволяет отображать диалоговое окно с сообщением об ошибке, если путь к музыке указан неверно</string>
+        <string name="musicDebugSum">Режим, который включает отображение диалога с ошибкой если путь к музыке указан неверно</string>
         <string name="execStringTitle">Исполнитель строк</string>
-        <string name="execStringSum">Включить/выключить исполнитель строк</string>
         <!-- Extra section -->
         <string name="extraCatTitle">Экстра</string>
         <string name="pluginTitle">Меню плагинов</string>

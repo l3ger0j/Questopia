@@ -10,7 +10,7 @@ import androidx.documentfile.provider.DocumentFile;
 import com.anggrayudi.storage.FileWrapper;
 import com.anggrayudi.storage.file.MimeType;
 
-import org.qp.android.model.copy.CopyException;
+import org.qp.android.model.workers.WorkerException;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -215,6 +215,19 @@ public final class FileUtil {
                 + " " + units[digitGroups];
     }
 
+    public static void copyFileOrDirectory(Context context ,
+                                           @NonNull DocumentFile srcFile ,
+                                           DocumentFile destDir) {
+        if (srcFile.isDirectory()) {
+            var subDestDir = createFindDFolder(destDir , srcFile.getName());
+            for (var subSrcFile : srcFile.listFiles()) {
+                copyFileOrDirectory(context , subSrcFile , subDestDir);
+            }
+        } else if (srcFile.isFile()) {
+            copyFile(context , srcFile , destDir);
+        }
+    }
+
     public static void copyFile(Context context ,
                                 @NonNull DocumentFile srcFile ,
                                 @NonNull DocumentFile destDir) {
@@ -230,7 +243,7 @@ public final class FileUtil {
                 throw new IOException();
             }
         } catch (IOException ex) {
-            throw new CopyException("CGF");
+            throw new WorkerException("CGF");
         }
     }
 }

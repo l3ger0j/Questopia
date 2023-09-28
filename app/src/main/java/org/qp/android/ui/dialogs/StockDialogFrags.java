@@ -74,7 +74,7 @@ public class StockDialogFrags extends StockPatternDialogFrags {
             }
         }
         switch (dialogType) {
-            case EDIT_DIALOG:
+            case EDIT_DIALOG -> {
                 if (editBinding != null) {
                     builder.setView(editBinding.getRoot());
                     return builder.create();
@@ -82,12 +82,15 @@ public class StockDialogFrags extends StockPatternDialogFrags {
                     dismissAllowingStateLoss();
                     return super.onCreateDialog(savedInstanceState);
                 }
-            case ERROR_DIALOG:
+            }
+            case ERROR_DIALOG -> {
                 builder.setTitle(R.string.error);
                 builder.setMessage(message);
-                builder.setPositiveButton(android.R.string.ok, (dialog, which) -> {});
+                builder.setPositiveButton(android.R.string.ok , (dialog , which) -> {
+                });
                 return builder.create();
-            case INSTALL_DIALOG:
+            }
+            case INSTALL_DIALOG -> {
                 if (installBinding != null) {
                     builder.setView(installBinding.getRoot());
                     return builder.create();
@@ -95,27 +98,30 @@ public class StockDialogFrags extends StockPatternDialogFrags {
                     dismissAllowingStateLoss();
                     return super.onCreateDialog(savedInstanceState);
                 }
-            case INFO_DIALOG:
+            }
+            case INFO_DIALOG -> {
                 builder.setMessage(message);
                 builder.setTitle(title);
                 builder.setIcon(R.mipmap.ic_launcher_round);
-                builder.setNegativeButton(getString(R.string.close), (dialog, which) -> dialog.cancel());
+                builder.setNegativeButton(getString(R.string.close) , (dialog , which) -> dialog.cancel());
                 if (isInstalled) {
-                    builder.setNeutralButton(getString(R.string.play), (dialog, which) ->
+                    builder.setNeutralButton(getString(R.string.play) , (dialog , which) ->
                             listener.onDialogNeutralClick(this));
-                    builder.setPositiveButton(getString(R.string.editButton), (dialog, which) ->
+                    builder.setPositiveButton(getString(R.string.editButton) , (dialog , which) ->
                             listener.onDialogPositiveClick(this));
                 }
                 return builder.create();
-            case SELECT_DIALOG:
+            }
+            case SELECT_DIALOG -> {
                 builder.setTitle(requireContext().getString(R.string.selectGameFile));
-                builder.setItems(names.toArray(new String[0]), (dialog, which) ->
-                        listener.onDialogListClick(this, which));
+                builder.setItems(names.toArray(new String[0]) , (dialog , which) ->
+                        listener.onDialogListClick(this , which));
                 return builder.create();
-
-            default:
+            }
+            default -> {
                 dismissAllowingStateLoss();
                 return super.onCreateDialog(savedInstanceState);
+            }
         }
     }
 

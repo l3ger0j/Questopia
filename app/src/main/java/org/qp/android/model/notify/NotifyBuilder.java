@@ -30,7 +30,7 @@ public class NotifyBuilder {
 
     public Notification buildStandardNotification() {
         return new NotificationCompat.Builder(context, CHANNEL_ID)
-                .setSmallIcon(R.drawable.add)
+                .setSmallIcon(R.drawable.baseline_add_24)
                 .setContentTitle(titleNotify)
                 .setContentText(textNotify)
                 .setOngoing(false)

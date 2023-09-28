@@ -5,7 +5,7 @@ import static org.qp.android.helpers.utils.Base64Util.hasBase64;
 import static org.qp.android.helpers.utils.ColorUtil.convertRGBAToBGRA;
 import static org.qp.android.helpers.utils.ColorUtil.getHexColor;
 import static org.qp.android.helpers.utils.FileUtil.documentWrap;
-import static org.qp.android.helpers.utils.ThreadUtil.isMainThread;
+import static org.qp.android.helpers.utils.ThreadUtil.assertNonUiThread;
 import static org.qp.android.helpers.utils.ViewUtil.getFontStyle;
 
 import android.annotation.SuppressLint;
@@ -14,7 +14,6 @@ import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
-import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
@@ -34,16 +33,17 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.preference.PreferenceManager;
 
 import com.anggrayudi.storage.file.DocumentFileCompat;
+import com.anggrayudi.storage.file.DocumentFileType;
 
 import org.qp.android.QuestPlayerApplication;
-import org.qp.android.dto.stock.InnerGameData;
+import org.qp.android.R;
 import org.qp.android.model.libQP.LibQpProxy;
-import org.qp.android.model.libQP.QpMenuItem;
 import org.qp.android.model.libQP.RefreshInterfaceRequest;
 import org.qp.android.model.libQP.WindowType;
 import org.qp.android.model.service.AudioPlayer;
 import org.qp.android.model.service.GameContentResolver;
 import org.qp.android.model.service.HtmlProcessor;
+import org.qp.android.ui.dialogs.GameDialogType;
 import org.qp.android.ui.settings.SettingsController;
 
 import java.io.FileNotFoundException;
@@ -52,6 +52,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CountDownLatch;
 
 public class GameViewModel extends AndroidViewModel implements GameInterface {
+
     private final String TAG = this.getClass().getSimpleName();
 
     private final QuestPlayerApplication questPlayerApplication;
@@ -60,6 +61,8 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
     private LibQpProxy libQpProxy;
     private AudioPlayer audioPlayer;
     private String fullPathGameDir;
+
+    private boolean handlerIsDone = true;
 
     public ObservableField<GameActivity> gameActivityObservableField =
             new ObservableField<>();
@@ -244,6 +247,10 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
 
     // endregion Getter/Setter
 
+    public boolean isWaitTaskDone() {
+        return handlerIsDone;
+    }
+
     public void updatePageTemplate() {
         var pageHeadTemplate = PAGE_HEAD_TEMPLATE
                 .replace("QSPTEXTCOLOR", getHexColor(getTextColor()))
@@ -276,6 +283,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         actionsRecycler.setTextSize(getFontSize());
         actionsRecycler.setTextColor(getTextColor());
         actionsRecycler.setLinkTextColor(getLinkColor());
+        actionsRecycler.setBackgroundColor(getBackgroundColor());
         actionsRecycler.submitList(libQpProxy.getGameState().actions);
         actionLiveData.postValue(actionsRecycler);
         int count = actionsRecycler.getItemCount();
@@ -289,6 +297,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         objectsRecycler.setTextSize(getFontSize());
         objectsRecycler.setTextColor(getTextColor());
         objectsRecycler.setLinkTextColor(getLinkColor());
+        objectsRecycler.setBackgroundColor(getBackgroundColor());
         objectsRecycler.submitList(libQpProxy.getGameState().objects);
         objectLiveData.postValue(objectsRecycler);
     }
@@ -308,18 +317,6 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         questPlayerApplication = getApplication();
         gameContentResolver = questPlayerApplication.getGameContentResolver();
         htmlProcessor = questPlayerApplication.getHtmlProcessor();
-    }
-
-    public void setGameSaveMap(Bundle gameSaveMap) {
-        questPlayerApplication.setGameSaveMap(gameSaveMap);
-    }
-
-    public Bundle getGameSaveMap() {
-        return questPlayerApplication.getGameSaveMap();
-    }
-
-    public ArrayList<InnerGameData> getGameDataList() {
-        return questPlayerApplication.getGameList();
     }
 
     @Override
@@ -347,6 +344,31 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         libQpProxy.stop();
         libQpProxy.setGameInterface(null);
         libQpProxy = null;
+    }
+
+    public void startTimer() {
+        var safe = mainDescLiveData.getValue();
+        if (safe == null) return;
+
+        final int interval = 3000;
+        handlerIsDone = false;
+
+        var handler = new Handler();
+        handler.postDelayed(() -> {
+            var isContains = false;
+            var fragments = getGameActivity().getSupportFragmentManager().getFragments();
+            for (var item : fragments) {
+                if (item.toString().contains("GameDialogFrags")) {
+                    isContains = true;
+                }
+            }
+
+            var newSafe = mainDescLiveData.getValue();
+            if (safe.equals(newSafe) && !isContains) {
+                getGameActivity().showSimpleDialog("" , GameDialogType.MESSAGE_DIALOG);
+            }
+            handlerIsDone = true;
+        } , interval);
     }
 
     public class GameWebViewClient extends WebViewClient {
@@ -398,15 +420,22 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
                     try {
                         var relPath = uri.getPath();
                         var tempRoot = documentWrap(rootDir);
-                        var fileFromDefaultCon = DocumentFileCompat.fromFullPath(getGameActivity() ,
-                                tempRoot.getAbsolutePath(getGameActivity()) + relPath);
+                        var fileFromDefaultCon = DocumentFileCompat.fromFullPath(
+                                getGameActivity() ,
+                                tempRoot.getAbsolutePath(getGameActivity()) + relPath ,
+                                DocumentFileType.FILE ,
+                                true
+                        );
                         var extension = fileFromDefaultCon.getName();
                         var mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
                         var in = getGameActivity().getContentResolver().openInputStream(fileFromDefaultCon.getUri());
                         return new WebResourceResponse(mimeType , null , in);
                     } catch (FileNotFoundException | NullPointerException ex) {
-                        if (getSettingsController().isUseImageDebug)
-                            getGameActivity().showErrorDialog(String.valueOf(ex));
+                        if (getSettingsController().isUseImageDebug) {
+                            var errorMessage = getGameActivity()
+                                    .getString(R.string.notFoundImage)+uri.getPath();
+                            showError(errorMessage);
+                        }
                         Log.e(TAG , "File not found" , ex);
                         return null;
                     }
@@ -441,80 +470,81 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
 
     @Override
     public void showError(final String message) {
-        getGameActivity().showErrorDialog(message);
+        getGameActivity().showSimpleDialog(message , GameDialogType.ERROR_DIALOG);
     }
 
     @Override
     public void showPicture(final String pathToImg) {
-        getGameActivity().showPictureDialog(pathToImg);
+        getGameActivity().showSimpleDialog(pathToImg , GameDialogType.IMAGE_DIALOG);
     }
 
     @Override
     public void showMessage(final String message) {
-        if (isMainThread()) {
-            throw new RuntimeException("Must not be called on the main thread");
-        }
+        assertNonUiThread();
+
         final var latch = new CountDownLatch(1);
         getGameActivity().showMessageDialog(message, latch);
         try {
             latch.await();
         } catch (InterruptedException ex) {
-            showError("Wait failed"+"\n"+ex);
+            var errorMessage = getGameActivity().getString(R.string.waitingError);
+            showError(errorMessage+"\n"+ex);
         }
     }
 
     @Override
     public String showInputDialog(final String prompt) {
-        if (isMainThread()) {
-            throw new RuntimeException("Must not be called on the main thread");
-        }
-        final ArrayBlockingQueue<String> inputQueue = new ArrayBlockingQueue<>(1);
+        assertNonUiThread();
+
+        final var inputQueue = new ArrayBlockingQueue<String>(1);
         getGameActivity().showInputDialog(prompt, inputQueue);
         try {
             return inputQueue.take();
         } catch (InterruptedException ex) {
-            showError("Wait for input failed"+"\n"+ex);
+            var errorMessage = getGameActivity().getString(R.string.waitingInputError);
+            showError(errorMessage+"\n"+ex);
             return "";
         }
     }
 
     @Override
     public String showExecutorDialog(final String text) {
-        if (isMainThread()) {
-            throw new RuntimeException("Must not be called on the main thread");
-        }
-        final ArrayBlockingQueue<String> inputQueue = new ArrayBlockingQueue<>(1);
+        assertNonUiThread();
+
+        final var inputQueue = new ArrayBlockingQueue<String>(1);
         getGameActivity().showExecutorDialog(text, inputQueue);
         try {
             return inputQueue.take();
         } catch (InterruptedException ex) {
-            showError("Wait for input failed"+ex);
+            var errorMessage = getGameActivity().getString(R.string.waitingInputError);
+            showError(errorMessage+ex);
             return "";
         }
     }
 
     @Override
     public int showMenu() {
-        if (isMainThread()) {
-            throw new RuntimeException("Must not be called on the main thread");
-        }
+        assertNonUiThread();
+
         final var resultQueue = new ArrayBlockingQueue<Integer>(1);
-        final var items = new ArrayList<String>();
-        for (QpMenuItem item : libQpProxy.getGameState().menuItems) {
-            items.add(item.name);
+        final var currentItems = libQpProxy.getGameState().menuItems;
+        final var newItems = new ArrayList<String>();
+        for (var item : currentItems) {
+            newItems.add(item.name);
         }
-        getGameActivity().showMenuDialog(items, resultQueue);
+        getGameActivity().showMenuDialog(newItems, resultQueue);
         try {
             return resultQueue.take();
         } catch (InterruptedException ex) {
-            showError("Wait failed"+"\n"+ex);
+            var errorMessage = getGameActivity().getString(R.string.waitingError);
+            showError(errorMessage+"\n"+ex);
             return -1;
         }
     }
 
     @Override
     public void showLoadGamePopup() {
-        getGameActivity().showLoadDialog();
+        getGameActivity().showSimpleDialog("" , GameDialogType.LOAD_DIALOG);
     }
 
     @Override
@@ -541,6 +571,5 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         runnable.run();
         counterHandler.postDelayed(counterTask, counterInterval);
     }
-
     // endregion GameInterface
 }

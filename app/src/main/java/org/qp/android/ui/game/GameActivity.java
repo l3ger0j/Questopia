@@ -18,6 +18,7 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -43,7 +44,6 @@ import com.anggrayudi.storage.file.DocumentFileCompat;
 import com.anggrayudi.storage.file.DocumentFileType;
 import com.anggrayudi.storage.file.MimeType;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.textfield.TextInputLayout;
 
 import org.jetbrains.annotations.Contract;
@@ -66,10 +66,10 @@ import java.util.ArrayList;
 import java.util.Objects;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ThreadLocalRandom;
 
-public class GameActivity extends AppCompatActivity implements GamePatternFragment.GamePatternFragmentList,
-        GamePatternDialogFrags.GamePatternDialogList, NavigationView.OnNavigationItemSelectedListener {
+public class GameActivity extends AppCompatActivity implements
+        GamePatternDialogFrags.GamePatternDialogList {
+
     private final String TAG = this.getClass().getSimpleName();
 
     private static final int MAX_SAVE_SLOTS = 5;
@@ -110,6 +110,12 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
         gameViewModel = new ViewModelProvider(this).get(GameViewModel.class);
         gameViewModel.gameActivityObservableField.set(this);
         settingsController = gameViewModel.getSettingsController();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            // Prevent jumping of the player on devices with cutout
+            getWindow().getAttributes().layoutInDisplayCutoutMode =
+                    WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+        }
 
         mDecorView = getWindow().getDecorView();
         if (settingsController.isUseImmersiveMode) {
@@ -182,9 +188,11 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
                                 }
                             }
                         } catch (FileNotFoundException e) {
-                            showErrorDialog("File not found: " + "\n" + e);
+                            showSimpleDialog("File not found: " + "\n" + e ,
+                                    GameDialogType.ERROR_DIALOG);
                         } catch (IOException e) {
-                            showErrorDialog("Can not read file: " + "\n" + e);
+                            showSimpleDialog("Can not read file: " + "\n" + e ,
+                                    GameDialogType.ERROR_DIALOG);
                         }
                         postTextInDialogFrags(stringBuilder.toString());
                     }
@@ -243,11 +251,10 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
     private void hideSystemUI() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             var windowInsetsController =
-                    WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
+                    WindowCompat.getInsetsController(getWindow() , activityGameBinding.getRoot());
             windowInsetsController.setSystemBarsBehavior(
-                    WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-            );
-            getWindow().getDecorView().setOnApplyWindowInsetsListener((view, windowInsets) -> {
+                    WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+            mDecorView.setOnApplyWindowInsetsListener((view, windowInsets) -> {
                 if (windowInsets.isVisible(WindowInsetsCompat.Type.navigationBars())
                         || windowInsets.isVisible(WindowInsetsCompat.Type.statusBars())) {
                     windowInsetsController.hide(WindowInsetsCompat.Type.systemBars());
@@ -267,12 +274,11 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
 
     private void showSystemUI() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            WindowInsetsControllerCompat windowInsetsController =
-                    WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
+            var windowInsetsController =
+                    WindowCompat.getInsetsController(getWindow() , activityGameBinding.getRoot());
             windowInsetsController.setSystemBarsBehavior(
-                    WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-            );
-            getWindow().getDecorView().setOnApplyWindowInsetsListener((view, windowInsets) -> {
+                    WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+            mDecorView.setOnApplyWindowInsetsListener((view, windowInsets) -> {
                 if (!windowInsets.isVisible(WindowInsetsCompat.Type.navigationBars())
                         || !windowInsets.isVisible(WindowInsetsCompat.Type.statusBars())) {
                     windowInsetsController.show(WindowInsetsCompat.Type.systemBars());
@@ -290,8 +296,8 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
-        if (settingsController.isUseImmersiveMode) {
-            if (hasFocus) {
+        if (hasFocus) {
+            if (settingsController.isUseImmersiveMode) {
                 mDecorView.setSystemUiVisibility(
                         View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                                 | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
@@ -299,9 +305,7 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
                                 | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                                 | View.SYSTEM_UI_FLAG_FULLSCREEN
                                 | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
-            }
-        } else {
-            if (hasFocus) {
+            } else {
                 mDecorView.setSystemUiVisibility(
                         View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
             }
@@ -312,12 +316,6 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
         setSupportActionBar(activityGameBinding.toolbar);
         actionBar = getSupportActionBar();
     }
-
-//            for (var data : gameViewModel.getGameDataList()) {
-//            var menu = navigationView.getMenu();
-//            for (var file : data.gameFiles) {
-//                menu.add(file.getName()).setTooltipText(data.title);
-//            }
 
     private void initServices() {
         gameViewModel.startAudio();
@@ -381,7 +379,9 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
     }
 
     public void warnUser(int id) {
-        if (isMainThread()) {
+        if (!isMainThread()) {
+            runOnUiThread(() -> warnUser(id));
+        } else {
             var label = navController.getCurrentDestination().getLabel();
             if (label != null) {
                 switch (id) {
@@ -399,8 +399,6 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
                     }
                 }
             }
-        } else {
-            runOnUiThread(() -> warnUser(id));
         }
     }
 
@@ -432,15 +430,15 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
     }
 
     public void applySettings() {
-        if (isMainThread()) {
+        if (!isMainThread()) {
+            runOnUiThread(this::applySettings);
+        } else {
             if (settingsController.language.equals("ru")) {
                 AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("ru"));
             } else {
                 AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("en"));
             }
             htmlProcessor = gameViewModel.getHtmlProcessor();
-        } else {
-            runOnUiThread(this::applySettings);
         }
     }
 
@@ -451,32 +449,55 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
         dialogFragment.show(getSupportFragmentManager(), "closeGameDialogFragment");
     }
 
-    public void showErrorDialog (String message) {
-        if (isMainThread()) {
-            var dialogFragment = new GameDialogFrags();
-            dialogFragment.setDialogType(GameDialogType.ERROR_DIALOG);
-            dialogFragment.setMessage(message);
-            dialogFragment.show(getSupportFragmentManager(), "errorDialogFragment");
+    public void showSavePopup() {
+        if (!isMainThread()) {
+            runOnUiThread(this::showSavePopup);
+        }
+
+        mainMenu.performIdentifierAction(R.id.menu_saveGame , 0);
+    }
+
+    public void showSimpleDialog(@NonNull String inputString ,
+                                 @NonNull GameDialogType dialogType) {
+        if (!isMainThread()) {
+            runOnUiThread(() -> showSimpleDialog(inputString , dialogType));
         } else {
-            runOnUiThread(() -> showErrorDialog(message));
+            switch (dialogType) {
+                case ERROR_DIALOG -> {
+                    var dialogFragment = new GameDialogFrags();
+                    dialogFragment.setDialogType(GameDialogType.ERROR_DIALOG);
+                    dialogFragment.setMessage(inputString);
+                    dialogFragment.show(getSupportFragmentManager(), "errorDialogFragment");
+                }
+                case IMAGE_DIALOG -> {
+                    var dialogFragment = new GameDialogFrags();
+                    dialogFragment.setDialogType(GameDialogType.IMAGE_DIALOG);
+                    dialogFragment.pathToImage.set(inputString);
+                    dialogFragment.show(getSupportFragmentManager(), "imageDialogFragment");
+                }
+                case LOAD_DIALOG -> {
+                    var dialogFragment = new GameDialogFrags();
+                    dialogFragment.setDialogType(GameDialogType.LOAD_DIALOG);
+                    dialogFragment.setCancelable(true);
+                    dialogFragment.show(getSupportFragmentManager(), "loadGameDialogFragment");
+                }
+                case MESSAGE_DIALOG -> {
+                    var dialogFragment = new GameDialogFrags();
+                    dialogFragment.setDialogType(GameDialogType.MESSAGE_DIALOG);
+                    dialogFragment.setProcessedMsg(getString(R.string.pleaseWait));
+                    dialogFragment.show(getSupportFragmentManager(), "showMessageDialogFragment");
+                }
+            }
         }
     }
 
-    public void showPictureDialog (String pathToImg) {
-        if (isMainThread()) {
-            var dialogFragment = new GameDialogFrags();
-            dialogFragment.setDialogType(GameDialogType.IMAGE_DIALOG);
-            dialogFragment.pathToImage.set(pathToImg);
-            dialogFragment.show(getSupportFragmentManager(), "imageDialogFragment");
+    public void showMessageDialog (@Nullable String inputString ,
+                                   @NonNull CountDownLatch latch) {
+        if (!isMainThread()) {
+            runOnUiThread(() -> showMessageDialog(inputString, latch));
         } else {
-            runOnUiThread(() -> showPictureDialog(pathToImg));
-        }
-    }
-
-    public void showMessageDialog (String message, CountDownLatch latch) {
-        if (isMainThread()) {
             var config = libQpProxy.getGameState().interfaceConfig;
-            var processedMsg = config.useHtml ? htmlProcessor.removeHTMLTags(message) : message;
+            var processedMsg = config.useHtml ? htmlProcessor.removeHTMLTags(inputString) : inputString;
             if (processedMsg == null) {
                 processedMsg = "";
             }
@@ -493,15 +514,16 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
                     latch.countDown();
                 }
             });
-        } else {
-            runOnUiThread(() -> showMessageDialog(message, latch));
         }
     }
 
-    public void showInputDialog (String prompt, ArrayBlockingQueue<String> inputQueue) {
-        if (isMainThread()) {
+    public void showInputDialog (@Nullable String inputString ,
+                                 @NonNull ArrayBlockingQueue<String> inputQueue) {
+        if (!isMainThread()) {
+            runOnUiThread(() -> showInputDialog(inputString, inputQueue));
+        } else {
             var config = libQpProxy.getGameState().interfaceConfig;
-            var message = config.useHtml ? htmlProcessor.removeHTMLTags(prompt) : prompt;
+            var message = config.useHtml ? htmlProcessor.removeHTMLTags(inputString) : inputString;
             if (message == null) {
                 message = "";
             }
@@ -518,15 +540,16 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
             dialogFragment.setCancelable(false);
             dialogFragment.show(getSupportFragmentManager(), "inputDialogFragment");
             gameViewModel.outputTextObserver.observeForever(inputQueue::add);
-        } else {
-            runOnUiThread(() -> showInputDialog(prompt, inputQueue));
         }
     }
 
-    public void showExecutorDialog (String text, ArrayBlockingQueue<String> inputQueue) {
-        if (isMainThread()) {
+    public void showExecutorDialog (@Nullable String inputString ,
+                                    @NonNull ArrayBlockingQueue<String> inputQueue) {
+        if (!isMainThread()) {
+            runOnUiThread(() -> showExecutorDialog(inputString, inputQueue));
+        } else {
             var config = libQpProxy.getGameState().interfaceConfig;
-            var message = config.useHtml ? htmlProcessor.removeHTMLTags(text) : text;
+            var message = config.useHtml ? htmlProcessor.removeHTMLTags(inputString) : inputString;
             if (message == null) {
                 message = "";
             }
@@ -543,13 +566,14 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
             dialogFragment.setCancelable(false);
             dialogFragment.show(getSupportFragmentManager(), "executorDialogFragment");
             gameViewModel.outputTextObserver.observeForever(inputQueue::add);
-        } else {
-            runOnUiThread(() -> showExecutorDialog(text, inputQueue));
         }
     }
 
-    public void showMenuDialog (ArrayList<String> items, ArrayBlockingQueue<Integer> resultQueue) {
-        if (isMainThread()) {
+    public void showMenuDialog (@NonNull ArrayList<String> items ,
+                                @NonNull ArrayBlockingQueue<Integer> resultQueue) {
+        if (!isMainThread()) {
+            runOnUiThread(() -> showMenuDialog(items, resultQueue));
+        } else {
             if (gameViewModel.outputIntObserver.hasObservers()) {
                 gameViewModel.outputIntObserver = new MutableLiveData<>();
             }
@@ -559,27 +583,6 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
             dialogFragment.setCancelable(false);
             dialogFragment.show(getSupportFragmentManager(), "showMenuDialogFragment");
             gameViewModel.outputIntObserver.observeForever(resultQueue::add);
-        } else {
-            runOnUiThread(() -> showMenuDialog(items, resultQueue));
-        }
-    }
-
-    public void showLoadDialog () {
-        if (isMainThread()) {
-            var dialogFragment = new GameDialogFrags();
-            dialogFragment.setDialogType(GameDialogType.LOAD_DIALOG);
-            dialogFragment.setCancelable(true);
-            dialogFragment.show(getSupportFragmentManager(), "loadGameDialogFragment");
-        } else {
-            runOnUiThread(this::showLoadDialog);
-        }
-    }
-
-    public void showSavePopup() {
-        if (isMainThread()) {
-            mainMenu.performIdentifierAction(R.id.menu_saveGame , 0);
-        } else {
-            runOnUiThread(this::showSavePopup);
         }
     }
 
@@ -705,7 +708,8 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
             }
             case SAVE -> {
                 mIntent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
-                mIntent.putExtra(Intent.EXTRA_TITLE , libQpProxy.getGameState().gameFile + ".sav");
+                var extraValue = libQpProxy.getGameState().gameFile + ".sav";
+                mIntent.putExtra(Intent.EXTRA_TITLE , extraValue);
                 mIntent.setType("application/octet-stream");
                 this.slotAction = slotAction;
                 saveResultLaunch.launch(mIntent);
@@ -717,55 +721,6 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
     @Contract(pure = true)
     private String getSaveSlotFilename(int slot) {
         return (slot + 1) + ".sav";
-    }
-
-    @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        if (item.getTitle() == null) {
-//            var drawer = (DrawerLayout) activityGameBinding.gameDrawerLayout;
-//            drawer.closeDrawer(GravityCompat.START);
-            return false;
-        } else if (!libQpProxy.getGameState().gameTitle.contentEquals(item.getTitle())) {
-            var simpleNameForSave = libQpProxy.getGameState().gameFile.getName();
-            var hardNameForSave = simpleNameForSave+"#"+ThreadLocalRandom.current().nextInt();
-            var currentGameDir = DocumentFileCompat.fromFullPath(this , getIntent().getStringExtra("gameDirUri"));
-
-            var temGameSaveMap = gameViewModel.getGameSaveMap();
-            final var savesDir = createFindDFolder(currentGameDir , "tempSaves");
-            var tempSaveFile = createFindDFile(savesDir , MimeType.TEXT , hardNameForSave);
-            try {
-                libQpProxy.saveGameState(tempSaveFile.getUri());
-                temGameSaveMap.putParcelable(simpleNameForSave , tempSaveFile.getUri());
-                gameViewModel.setGameSaveMap(temGameSaveMap);
-            } catch (NullPointerException e) {
-                Log.d(TAG , "Error: " , e);
-//                var drawer = (DrawerLayout) activityGameBinding.gameDrawerLayout;
-//                drawer.closeDrawer(GravityCompat.START);
-                return false;
-            }
-
-            for (var data : gameViewModel.getGameDataList()) {
-                for (var file : data.gameFiles) {
-                    if (file != null && item.getTitle() != null) {
-                        if (file.getName().contentEquals(item.getTitle())) {
-                            var gameId = data.id;
-                            var gameTitle = data.title;
-                            var gameDir = data.gameDir;
-                            libQpProxy.runGame(gameId , gameTitle , gameDir , file);
-                            if (gameViewModel.getGameSaveMap().containsKey(file.getName())) {
-                                var save = (Uri) gameViewModel.getGameSaveMap().getParcelable(file.getName());
-                                gameViewModel.doWithCounterDisabled(() ->
-                                        libQpProxy.loadGameState(save));
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-//        var drawer = (DrawerLayout) activityGameBinding.gameDrawerLayout;
-//        drawer.closeDrawer(GravityCompat.START);
-        return false;
     }
 
     @Override
@@ -793,37 +748,39 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
 
     @Override
     public void onDialogPositiveClick(@NonNull DialogFragment dialog) {
-        if (Objects.equals(dialog.getTag() , "closeGameDialogFragment")) {
-            gameViewModel.stopAudio();
-            gameViewModel.stopLibQsp();
-            gameViewModel.removeCallback();
-            finish();
-        } else if (Objects.equals(dialog.getTag() , "inputDialogFragment") ||
-                Objects.equals(dialog.getTag() , "executorDialogFragment")) {
-            if (dialog.requireDialog().getWindow().findViewById(R.id.inputBox_edit) != null) {
-                TextInputLayout editText = dialog.requireDialog().getWindow()
-                        .findViewById(R.id.inputBox_edit);
-                if (editText.getEditText() != null) {
-                    var outputText = editText.getEditText().getText().toString();
-                    if (Objects.equals(outputText , "")) {
-                        gameViewModel.outputTextObserver.setValue("");
-                    } else {
-                        gameViewModel.outputTextObserver.setValue(outputText);
+        if (dialog.getTag() == null) {
+            return;
+        }
+
+        switch (dialog.getTag()) {
+            case "closeGameDialogFragment" -> {
+                gameViewModel.stopAudio();
+                gameViewModel.stopLibQsp();
+                gameViewModel.removeCallback();
+                finish();
+            }
+            case "inputDialogFragment" , "executorDialogFragment" -> {
+                var inputBox = dialog.requireDialog().getWindow().findViewById(R.id.inputBox_edit);
+                if (inputBox != null) {
+                    var editText = (TextInputLayout) inputBox;
+                    if (editText.getEditText() != null) {
+                        var outputText = editText.getEditText().getText().toString();
+                        if (Objects.equals(outputText , "")) {
+                            gameViewModel.outputTextObserver.setValue("");
+                        } else {
+                            gameViewModel.outputTextObserver.setValue(outputText);
+                        }
                     }
                 }
             }
-        } else if (Objects.equals(dialog.getTag() , "loadGameDialogFragment")) {
-            startReadOrWriteSave(LOAD);
-        } else if (Objects.equals(dialog.getTag() , "showMessageDialogFragment")) {
-            gameViewModel.outputBooleanObserver.setValue(true);
+            case "loadGameDialogFragment" -> startReadOrWriteSave(LOAD);
+            case "showMessageDialogFragment" -> gameViewModel.outputBooleanObserver.setValue(true);
         }
     }
 
     @Override
     public void onDialogNegativeClick(DialogFragment dialog) {
-        if (dialog == null) {
-            showErrorDialog("Dialog is null");
-        } else {
+        if (dialog != null) {
             if (Objects.equals(dialog.getTag() , "showMenuDialogFragment")) {
                 gameViewModel.outputIntObserver.setValue(-1);
             } else if (Objects.equals(dialog.getTag() , "inputDialogFragment") ||
@@ -835,9 +792,7 @@ public class GameActivity extends AppCompatActivity implements GamePatternFragme
 
     @Override
     public void onDialogListClick(DialogFragment dialog , int which) {
-        if (dialog == null) {
-            showErrorDialog("Dialog is null");
-        } else {
+        if (dialog != null) {
             if (Objects.equals(dialog.getTag() , "showMenuDialogFragment")) {
                 gameViewModel.outputIntObserver.setValue(which);
             }

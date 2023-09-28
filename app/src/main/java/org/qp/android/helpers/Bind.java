@@ -41,7 +41,7 @@ public class Bind {
         } else {
             var drawable = ResourcesCompat.getDrawable(
                     view.getContext().getResources() ,
-                    R.drawable.broken_image , null
+                    R.drawable.baseline_broken_image_24 , null
             );
             view.setImageDrawable(drawable);
         }

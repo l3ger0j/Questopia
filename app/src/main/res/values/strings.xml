@@ -7,8 +7,8 @@
         <string name="titleNotify">Game install</string>
     <!-- Copy notification -->
         <string name="titleCopyNotify">Copying the game directory</string>
-        <string name="bodyCopyNotify">The game is currently being copied to the internal storage!</string>
-        <string name="bodyCopiedNotify">The game -GAMENAME- has been successfully copied to the internal storage!</string>
+        <string name="bodyCopyNotify">I am copying the game folder!</string>
+        <string name="bodyCopiedNotify">Hurray! I copied the folder with the game -GAMENAME-!</string>
     <!-- Dialog LoadGamePopup -->
         <string name="loadGamePopup">The save file was not found in gameDir. Would you like to manually specify the path to the save file?</string>
     <!-- Dialog Close -->
@@ -24,9 +24,17 @@
         <string name="downloadButton">Download game</string>
     <!-- Dialog Error -->
         <string name="error">Error</string>
-        <string name="gamesDirError">Unable to create or open games directory.</string>
-        <string name="installError">Could not install game -GAMENAME-.</string>
-        <string name="noGameFilesError">Game files not found after installation.</string>
+        <string name="interFolderError">Error reading the internal folder of the application</string>
+        <string name="gamesFolderError">Error reading and/or creating a folder with games</string>
+        <string name="gameFolderEmpty">I didn\'t find a file in the format in the folder with the game .qsp or .gam!</string>
+        <string name="infoFileNotWritable">Error reading the game information file</string>
+        <string name="infoFileWriteError">Error writing game information to a file</string>
+        <string name="installError">I cannot copy the game folder -GAMENAME-!</string>
+        <string name="waitingError">An error occurred while waiting</string>
+        <string name="waitingInputError">I couldn\'t wait for the input</string>
+        <string name="noGameFilesError">I didn\'t find the game files after copying!</string>
+        <string name="notFoundSound">Sound file not found:</string>
+        <string name="notFoundImage">Image file not found:</string>
     <!-- Dialog Install -->
         <string name="gameName">Game name</string>
         <string name="gameAuthor">Author</string>
@@ -48,7 +56,7 @@
     <!-- Dialog Credits -->
     <string name="appDescription">
 <![CDATA[
-<h2><center>About Quest Player Android<img src=\"file:///android_res/drawable/landscape.jpg\" width=\"100%\"></center></h2>
+<h2><center>About Questopia<img src=\"file:///android_res/drawable/landscape.jpg\" width=\"100%\"></center></h2>
 <h4 style="margin-left:5px;">Quest Player Android is an open-source Android port of <b>Quest Soft Player</b> (<a href=\"http://qsp.su/?option=com_content&view=article&id=64\">Russian site</a>), based on a fork from <a href=\"https://github.com/seedhartha/QuestPlayer\">seedharta</a>. The most recent version can be downloaded from <a href=\"https://github.com/l3ger0j/Questopia\">GitHub</a> or in the <a href=\"https://t.me/QuestPlayer\">Telegram channel</a>.</h4>
 ]]>
     </string>
@@ -81,6 +89,8 @@
 </ul>
 ]]>
     </string>
+    <!-- Dialog Wait -->
+        <string name="pleaseWait">Please wait. Im not stuck, Im just loading the location!</string>
     <!-- Use in activity/fragment -->
     <!-- QTopia -->
         <string name="appName">Questopia</string>
@@ -102,7 +112,6 @@
         <string name="inventoryTitle">Inventory</string>
         <string name="inventoryContDesc">Go to inventory</string>
         <string name="userInputTitle">User input</string>
-        <string name="userInputContDesc">Show user input</string>
         <string name="restartGameTitle">Restart game</string>
         <string name="loadTitle">Load</string>
         <string name="saveTitle">Save</string>
@@ -120,12 +129,10 @@
         <string name="langSum">Choose display language</string>
         <string name="binPrefTitle">Binary prefixes</string>
         <string name="binPrefSum">Choose binary prefixes</string>
-        <string name="soundTitle">Sound</string>
-        <string name="soundSum">Play music and sounds</string>
+        <string name="soundTitle">Play sound</string>
         <string name="actsHeightTitle">Actions List Height</string>
-        <string name="actsHeightSum">Actions List Height To Screen Height Ratio</string>
         <!-- Text section -->
-        <string name="textCatTitle">Text</string>
+        <string name="textCatTitle">Text Display Settings</string>
         <string name="fontStyleTitle">Font Style</string>
         <string name="fontSizeTitle">Font Size</string>
         <string name="useGameFontTitle">Use Game Font</string>
@@ -142,7 +149,7 @@
         <string name="textBackLinkColorSum">Default value -VALUE-</string>
         <string name="extendedName">Questopia -VERSION-</string>
         <!-- Image section -->
-        <string name="imageCatTitle">Images</string>
+        <string name="imageCatTitle">Image Display Settings</string>
         <string name="autoWidthTitle">Auto Width Image</string>
         <string name="autoWidthSum">Use an auto-detectable value for the width of the image</string>
         <string name="customWidthTitle">Custom Width Image</string>
@@ -152,20 +159,15 @@
         <string name="fullScreenImageSum">When clicked, the picture will open in the dialog</string>
         <string name="fullScreenImageTitle">Fullscreen Images</string>
         <!-- Switch section -->
-        <string name="switchCatTitle">Switches</string>
         <string name="filePicker">File Picker Dialog (alpha)</string>
         <string name="immersiveModeTitle">Immersive Mode</string>
-        <string name="immersiveModeSum">Enable/disable immersive mode</string>
         <string name="separatorTitle">Separator</string>
-        <string name="separatorSum">On/off separator line in game</string>
         <string name="autoscrollTitle">Autoscroll</string>
-        <string name="autoscrollSum">Enable/disable autoscroll</string>
         <string name="imageDebugTitle">Image Path Debugger</string>
         <string name="imageDebugSum">A mode that enables the display of an error dialog if the path to the image is incorrect</string>
         <string name="musicDebugTitle">Music Path Debugger</string>
         <string name="musicDebugSum">A mode that enables the display of an error dialog if the path to the music is incorrect</string>
         <string name="execStringTitle">String executor</string>
-        <string name="execStringSum">Enable/disable execution string</string>
         <!-- Extra section -->
         <string name="extraCatTitle">Extra</string>
         <string name="pluginTitle">Extension menu</string>

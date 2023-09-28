@@ -29,7 +29,7 @@ android {
 
     externalNativeBuild {
         ndkBuild {
-            path 'src/main/jni/Android.mk'
+            path 'src/main/jni/qsp-5.7/Android.mk'
         }
     }
     buildTypes {
@@ -66,8 +66,8 @@ dependencies {
     implementation 'androidx.documentfile:documentfile:1.0.1'
     implementation 'androidx.preference:preference-ktx:1.2.1'
     implementation 'androidx.fragment:fragment-ktx:1.6.1'
-    implementation 'androidx.navigation:navigation-fragment-ktx:2.7.1'
-    implementation 'androidx.navigation:navigation-ui-ktx:2.7.1'
+    implementation 'androidx.navigation:navigation-fragment:2.7.3'
+    implementation 'androidx.navigation:navigation-ui:2.7.3'
     implementation 'androidx.work:work-runtime:2.8.1'
     implementation 'com.google.android.material:material:1.9.0'
     implementation 'androidx.core:core-splashscreen:1.0.1'
@@ -85,10 +85,10 @@ dependencies {
     implementation 'com.github.AppDevNext:ChangeLog:3.5'
     implementation 'com.jaredrummler:colorpicker:1.1.0'
     implementation 'org.jsoup:jsoup:1.16.1'
+    implementation 'com.github.javiersantos:AppUpdater:2.7'
     implementation 'com.anggrayudi:storage:1.5.5'
     implementation 'org.simpleframework:simple-xml:2.7.1'
     implementation 'com.squareup.picasso:picasso:2.71828'
-    implementation project(path: ':PrettyFilePicker')
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test:core:1.5.0'

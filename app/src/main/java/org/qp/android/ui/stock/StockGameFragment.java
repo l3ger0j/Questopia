@@ -13,6 +13,7 @@ import androidx.lifecycle.ViewModelProvider;
 import org.qp.android.databinding.FragmentStockGameBinding;
 
 public class StockGameFragment extends StockPatternFragment {
+
     private FragmentStockGameBinding fragmentStockGameBinding;
     private StockViewModel stockViewModel;
 
