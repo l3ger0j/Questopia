@@ -18,15 +18,16 @@ import org.qp.android.ui.game.GameActivity;
 
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class AudioPlayer {
     private final String TAG = this.getClass().getSimpleName();
 
     private final ConcurrentHashMap<String, Sound> sounds = new ConcurrentHashMap<>();
-
-    private Thread audioThread;
+    private ExecutorService audioService;
     private volatile Handler audioHandler;
-    private volatile boolean isAudioThreadInit;
+    private volatile boolean isAudioServiceInit;
     private boolean soundEnabled;
     private boolean paused;
     private Context context;
@@ -34,33 +35,29 @@ public class AudioPlayer {
     public void start(Context context) {
         throwIfNotMainThread();
         this.context = context;
-        audioThread = new Thread(() -> {
-            try {
-                Looper.prepare();
-                audioHandler = new Handler();
-                isAudioThreadInit = true;
-                Looper.loop();
-            } catch (Throwable t) {
-                Log.e(TAG,"Audio thread has stopped exceptionally", t);
-            }
-        } , "audioThread");
-        audioThread.start();
+        audioService = Executors.newSingleThreadExecutor();
+        audioService.submit(() -> {
+            Looper.prepare();
+            audioHandler = new Handler();
+            isAudioServiceInit = true;
+            Looper.loop();
+        });
     }
 
     public void stop() {
         throwIfNotMainThread();
         pause();
-        if (audioThread == null) return;
-        if (isAudioThreadInit) {
+        if (audioService == null) return;
+        if (isAudioServiceInit) {
             var handler = audioHandler;
             if (handler != null) {
                 handler.getLooper().quitSafely();
             }
-            isAudioThreadInit = false;
+            isAudioServiceInit = false;
         } else {
             Log.w(TAG,"Audio thread has been started, but not initialized");
         }
-        audioThread = null;
+        audioService = null;
     }
 
     public void playFile(final String path, final int volume) {
@@ -81,12 +78,12 @@ public class AudioPlayer {
     }
 
     private void runOnAudioThread(final Runnable runnable) {
-        if (audioThread == null) {
-            Log.w(TAG,"Audio thread has not been started");
+        if (audioService == null) {
+            Log.w(TAG,"Audio service has not been started");
             return;
         }
-        if (!isAudioThreadInit) {
-            Log.w(TAG,"Audio thread has not been initialized");
+        if (!isAudioServiceInit) {
+            Log.w(TAG,"Audio service has not been initialized");
             return;
         }
         var handler = audioHandler;

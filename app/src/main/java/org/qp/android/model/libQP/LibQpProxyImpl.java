@@ -36,6 +36,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Locale;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
@@ -45,9 +47,9 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
     private final GameState gameState = new GameState();
     private final NativeMethods nativeMethods = new NativeMethods(this);
 
-    private Thread libQspThread;
+    private ExecutorService libQspService;
     private volatile Handler libQspHandler;
-    private volatile boolean libQspThreadInit;
+    private volatile boolean libQspServiceInit;
     private volatile long gameStartTime;
     private volatile long lastMsCountCallTime;
     private GameInterface gameInterface;
@@ -70,12 +72,12 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
 
     private void runOnQspThread(final Runnable runnable) {
         throwIfNotMainThread();
-        if (libQspThread == null) {
-            Log.w(TAG ,"Lib thread has not been started!");
+        if (libQspService == null) {
+            Log.w(TAG ,"Lib service has not been started!");
             return;
         }
-        if (!libQspThreadInit) {
-            Log.w(TAG ,"Lib thread has been started, but not initialized!");
+        if (!libQspServiceInit) {
+            Log.w(TAG ,"Lib service has been started, but not initialized!");
             return;
         }
         var handler = libQspHandler;
@@ -219,37 +221,30 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
     // region LibQpProxy
 
     public synchronized void start() {
-        libQspThread = new Thread(() -> {
-            while (!Thread.currentThread().isInterrupted()) {
-                try {
-                    nativeMethods.QSPInit();
-                    Looper.prepare();
-                    libQspHandler = new Handler();
-                    libQspThreadInit = true;
-                    Looper.loop();
-                    nativeMethods.QSPDeInit();
-                } catch (Throwable t) {
-                    Thread.currentThread().interrupt();
-                    Log.e(TAG , "libQSP thread has stopped exceptionally" , t);
-                }
-            }
-        } , "libQSP");
-        libQspThread.start();
+        libQspService = Executors.newSingleThreadExecutor();
+        libQspService.submit(() -> {
+            nativeMethods.QSPInit();
+            Looper.prepare();
+            libQspHandler = new Handler();
+            libQspServiceInit = true;
+            Looper.loop();
+            nativeMethods.QSPDeInit();
+        });
     }
 
     public void stop() {
         throwIfNotMainThread();
-        if (libQspThread == null) return;
-        if (libQspThreadInit) {
+        if (libQspService == null) return;
+        if (libQspServiceInit) {
             var handler = libQspHandler;
             if (handler != null) {
                 handler.getLooper().quitSafely();
             }
-            libQspThreadInit = false;
+            libQspServiceInit = false;
         } else {
-            Log.w(TAG,"libqsp thread has been started, but not initialized");
+            Log.w(TAG,"Lib service has been started, but not initialized");
         }
-        libQspThread.interrupt();
+        libQspService.shutdown();
     }
 
     public void enableDebugMode (boolean isDebug) {
