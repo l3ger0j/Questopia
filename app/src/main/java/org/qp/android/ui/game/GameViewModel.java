@@ -62,8 +62,6 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
     private AudioPlayer audioPlayer;
     private String fullPathGameDir;
 
-    private boolean handlerIsDone = true;
-
     public ObservableField<GameActivity> gameActivityObservableField =
             new ObservableField<>();
     public ObservableBoolean isActionVisible = new ObservableBoolean();
@@ -246,10 +244,6 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
     }
 
     // endregion Getter/Setter
-
-    public boolean isWaitTaskDone() {
-        return handlerIsDone;
-    }
 
     public void updatePageTemplate() {
         var pageHeadTemplate = PAGE_HEAD_TEMPLATE
