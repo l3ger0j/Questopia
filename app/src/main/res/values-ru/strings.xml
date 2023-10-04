@@ -15,8 +15,6 @@
         <string name="promptCloseGame">Вы уверены, что хотите закрыть игру?</string>
     <!-- Dialog Select -->
         <string name="selectGameFile">Выберите файл игры для запуска</string>
-    <!-- Dialog Executor -->
-        <string name="selectTemplateFile">Выберите файл</string>
     <!-- Dialog Edit -->
         <string name="selectPathFile">Выберите патч-файл в формате .qsp</string>
         <string name="selectModFile">Выберите файл мода в формате .qsp</string>

@@ -15,8 +15,6 @@
         <string name="promptCloseGame">Are you sure you want to close the game?</string>
     <!-- Dialog Select -->
         <string name="selectGameFile">Select a game file to run</string>
-    <!-- Dialog Executor -->
-        <string name="selectTemplateFile">Select File</string>
     <!-- Dialog Edit -->
         <string name="selectPathFile">Select the patch file in the format .qsp</string>
         <string name="selectModFile">Select the mod file in the format .qsp</string>

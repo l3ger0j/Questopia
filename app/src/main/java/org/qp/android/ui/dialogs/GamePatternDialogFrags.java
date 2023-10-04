@@ -9,6 +9,7 @@ public abstract class GamePatternDialogFrags extends DialogFragment {
     public interface GamePatternDialogList {
         void onDialogPositiveClick(DialogFragment dialog);
         void onDialogNegativeClick(DialogFragment dialog);
+        void onDialogNeutralClick(DialogFragment dialog);
         void onDialogListClick(DialogFragment dialog, int which);
     }
 

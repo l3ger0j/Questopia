@@ -7,6 +7,7 @@ import android.widget.Button;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.ContextCompat;
 import androidx.databinding.ObservableField;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -74,8 +75,9 @@ public class GameDialogFrags extends GamePatternDialogFrags {
                 builder.setView(executorView);
                 builder.setPositiveButton(android.R.string.ok ,
                         (dialog , which) -> listener.onDialogPositiveClick(this));
-                builder.setNegativeButton(requireContext().getString(R.string.selectTemplateFile) ,
-                        (dialog , which) -> {});
+                builder.setNeutralButton(null , (dialog , which) -> {});
+                builder.setNeutralButtonIcon(ContextCompat.getDrawable(requireContext() ,
+                        R.drawable.baseline_file_upload_24));
                 return builder.create();
             }
             case ERROR_DIALOG -> {
@@ -131,15 +133,15 @@ public class GameDialogFrags extends GamePatternDialogFrags {
             template = getArguments().getString("template");
         }
         final var dialog = (AlertDialog) getDialog();
-        if (dialogType.equals(GameDialogType.EXECUTOR_DIALOG) ||
-                dialogType.equals(GameDialogType.INPUT_DIALOG)) {
-            if (dialog != null) {
+        if (dialog != null) {
+            if (dialogType.equals(GameDialogType.EXECUTOR_DIALOG) ||
+                    dialogType.equals(GameDialogType.INPUT_DIALOG)) {
                 var textInputLayout = (TextInputLayout) dialog.findViewById(R.id.inputBox_edit);
                 if (textInputLayout != null && textInputLayout.getEditText() != null) {
                     textInputLayout.getEditText().setText(template);
                 }
-                var negativeButton = (Button) dialog.getButton(Dialog.BUTTON_NEGATIVE);
-                negativeButton.setOnClickListener(v -> listener.onDialogNegativeClick(this));
+                var neutralButton = (Button) dialog.getButton(Dialog.BUTTON_NEUTRAL);
+                neutralButton.setOnClickListener(v -> listener.onDialogNeutralClick(this));
             }
         }
     }
