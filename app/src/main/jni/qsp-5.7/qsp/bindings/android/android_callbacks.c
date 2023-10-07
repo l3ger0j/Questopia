@@ -15,17 +15,17 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#include "qsp/declarations.h"
+#include "../../declarations.h"
 
 #ifdef _ANDROID
 
-#include <qsp/callbacks.h>
-#include <qsp/actions.h>
-#include <qsp/coding.h>
-#include <qsp/common.h>
-#include <qsp/errors.h>
-#include <qsp/objects.h>
-#include <qsp/text.h>
+#include "../../callbacks.h"
+#include "../../actions.h"
+#include "../../coding.h"
+#include "../../common.h"
+#include "../../errors.h"
+#include "../../objects.h"
+#include "../../text.h"
 
 void qspInitCallBacks()
 {

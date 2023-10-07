@@ -28,8 +28,8 @@ android {
     }
 
     externalNativeBuild {
-        ndkBuild {
-            path 'src/main/jni/qsp-5.7/Android.mk'
+        cmake {
+            path "src/main/jni/CMakeLists.txt"
         }
     }
     buildTypes {

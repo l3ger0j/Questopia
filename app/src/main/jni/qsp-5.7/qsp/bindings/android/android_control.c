@@ -15,25 +15,25 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#include "qsp/declarations.h"
+#include "../../declarations.h"
 
 #ifdef _ANDROID
 
-#include "qsp/actions.h"
-#include "qsp/callbacks.h"
-#include "qsp/coding.h"
-#include "qsp/common.h"
-#include "qsp/errors.h"
-#include "qsp/game.h"
-#include "qsp/locations.h"
-#include "qsp/mathops.h"
-#include "qsp/menu.h"
-#include "qsp/objects.h"
-#include "qsp/statements.h"
-#include "qsp/text.h"
-#include "qsp/time.h"
-#include "qsp/variables.h"
-#include "qsp/variant.h"
+#include "../../actions.h"
+#include "../../callbacks.h"
+#include "../../coding.h"
+#include "../../common.h"
+#include "../../errors.h"
+#include "../../game.h"
+#include "../../locations.h"
+#include "../../mathops.h"
+#include "../../menu.h"
+#include "../../objects.h"
+#include "../../statements.h"
+#include "../../text.h"
+#include "../../time.h"
+#include "../../variables.h"
+#include "../../variant.h"
 
 /* ------------------------------------------------------------ */
 QSP_BOOL QSPIsInCallBack()

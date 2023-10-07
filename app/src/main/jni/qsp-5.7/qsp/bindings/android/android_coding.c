@@ -15,11 +15,11 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#include <qsp/declarations.h>
+#include "../../declarations.h"
 
 #ifdef _ANDROID
 
-#include <qsp/text.h>
+#include "../../text.h"
 
 #include <jni.h>
 #include <string.h>
