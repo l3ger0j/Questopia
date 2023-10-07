@@ -66,10 +66,10 @@ dependencies {
     implementation 'androidx.documentfile:documentfile:1.0.1'
     implementation 'androidx.preference:preference-ktx:1.2.1'
     implementation 'androidx.fragment:fragment-ktx:1.6.1'
-    implementation 'androidx.navigation:navigation-fragment:2.7.3'
-    implementation 'androidx.navigation:navigation-ui:2.7.3'
+    implementation 'androidx.navigation:navigation-fragment:2.7.4'
+    implementation 'androidx.navigation:navigation-ui:2.7.4'
     implementation 'androidx.work:work-runtime:2.8.1'
-    implementation 'com.google.android.material:material:1.9.0'
+    implementation 'com.google.android.material:material:1.10.0'
     implementation 'androidx.core:core-splashscreen:1.0.1'
 
     implementation "androidx.core:core-ktx:$kotlin_version"
