@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include "android/log.h"
 #include "jni.h"
-#include "qsp/bindings/android/android.h"
+#include "src/bindings/android/android.h"
 
 JNIEnv *qspJniEnv;
 jobject qspCallbacksObj;
