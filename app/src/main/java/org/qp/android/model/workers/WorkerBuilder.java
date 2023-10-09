@@ -6,6 +6,7 @@ import androidx.documentfile.provider.DocumentFile;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.work.Data;
+import androidx.work.ExistingWorkPolicy;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
@@ -35,7 +36,10 @@ public class WorkerBuilder {
                 .setInputData(inputData)
                 .build();
 
-        WorkManager.getInstance(context).enqueue(workRequest);
+        WorkManager.getInstance(context)
+                .beginUniqueWork("copyDirToAnotherDir" ,
+                        ExistingWorkPolicy.REPLACE , workRequest)
+                .enqueue();
 
         WorkManager.getInstance(context)
                 .getWorkInfoByIdLiveData(workRequest.getId()).observeForever(workInfo -> {
