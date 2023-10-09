@@ -620,6 +620,7 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
         }
     }
 
+    // TODO: 09.10.2023 NEEED TO ADD ERROR CATCHER
     @Override
     public byte[] GetFileContents(String path) {
         return getFileContents(path);
