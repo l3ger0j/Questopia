@@ -184,7 +184,8 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     public String getGameAuthor() {
-        if (tempInnerGameData.author.length() > 0) {
+        if (tempInnerGameData != null
+                && tempInnerGameData.author.length() > 0) {
             return getStockActivity()
                     .getString(R.string.author)
                     .replace("-AUTHOR-" , tempInnerGameData.author);
@@ -194,7 +195,8 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     public String getGamePortBy() {
-        if (tempInnerGameData.portedBy.length() > 0) {
+        if (tempInnerGameData != null
+                && tempInnerGameData.portedBy.length() > 0) {
             return getStockActivity()
                     .getString(R.string.ported_by)
                     .replace("-PORTED_BY-" , tempInnerGameData.portedBy);
@@ -204,7 +206,8 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     public String getGameVersion() {
-        if (tempInnerGameData.version.length() > 0) {
+        if (tempInnerGameData != null
+                && tempInnerGameData.version.length() > 0) {
             return getStockActivity()
                     .getString(R.string.version)
                     .replace("-VERSION-" , tempInnerGameData.version);
@@ -214,7 +217,8 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     public String getGameType() {
-        if (tempInnerGameData.fileExt.length() > 0) {
+        if (tempInnerGameData != null
+                && tempInnerGameData.fileExt.length() > 0) {
             if (tempInnerGameData.fileExt.equals("aqsp")) {
                 return getStockActivity()
                         .getString(R.string.fileType)
@@ -240,7 +244,8 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     public String getGamePubData() {
-        if (tempInnerGameData.pubDate.length() > 0) {
+        if (tempInnerGameData != null &&
+                tempInnerGameData.pubDate.length() > 0) {
             return getStockActivity()
                     .getString(R.string.pub_data)
                     .replace("-PUB_DATA-" , tempInnerGameData.pubDate);
@@ -250,7 +255,8 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     public String getGameModData() {
-        if (tempInnerGameData.modDate.length() > 0) {
+        if (tempInnerGameData != null
+                && tempInnerGameData.modDate.length() > 0) {
             return getStockActivity()
                     .getString(R.string.mod_data)
                     .replace("-MOD_DATA-" , tempInnerGameData.pubDate);
