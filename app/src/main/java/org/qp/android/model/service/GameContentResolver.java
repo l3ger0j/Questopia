@@ -4,7 +4,9 @@ import static org.qp.android.helpers.utils.FileUtil.documentWrap;
 import static org.qp.android.helpers.utils.FileUtil.findFileOrDirectory;
 
 import android.content.Context;
+import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.documentfile.provider.DocumentFile;
 
@@ -15,20 +17,27 @@ public class GameContentResolver {
     private DocumentFile gameDir;
     private Context context;
 
-    public void setGameDir(DocumentFile gameDir , Context context) {
+    public void setGameDir(@NonNull DocumentFile gameDir ,
+                           @NonNull Context context) {
         this.gameDir = gameDir;
         this.context = context;
     }
 
+    @Nullable
     public FileWrapper.Document getFile(String relPath) {
-        if (gameDir == null) {
-            throw new IllegalStateException("gameDir must not be null");
-        }
         var tempFile = findFileOrDirectory(gameDir , normalizeContentPath(relPath));
         if (tempFile == null) {
-            tempFile = DocumentFileCompat.fromFullPath(context , documentWrap(gameDir).getAbsolutePath(context) + "/" + relPath);
+            var fullPathToGameDir = documentWrap(gameDir).getAbsolutePath(context);
+            tempFile = DocumentFileCompat.fromFullPath(
+                    context , fullPathToGameDir  + "/" + relPath);
         }
-        return documentWrap(tempFile);
+
+        try {
+            return documentWrap(tempFile);
+        } catch (NullPointerException e) {
+            Log.d(this.getClass().getSimpleName() , "Error: " , e);
+            return null;
+        }
     }
 
     @Nullable
