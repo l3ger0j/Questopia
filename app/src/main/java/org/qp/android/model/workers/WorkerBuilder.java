@@ -26,6 +26,7 @@ public class WorkerBuilder {
         this.context = context;
     }
 
+    @Deprecated
     public LiveData<Boolean> copyDirToAnotherDir(DocumentFile srcDir, DocumentFile destDir) {
         var inputData = new Data.Builder()
                 .putString("srcDir", srcDir.getUri().toString())
