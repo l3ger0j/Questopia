@@ -13,7 +13,6 @@ import static org.qp.android.helpers.utils.FileUtil.findFileOrDirectory;
 import static org.qp.android.helpers.utils.FileUtil.formatFileSize;
 import static org.qp.android.helpers.utils.FileUtil.isWritableDirectory;
 import static org.qp.android.helpers.utils.FileUtil.isWritableFile;
-import static org.qp.android.helpers.utils.PathUtil.normalizeFolderName;
 import static org.qp.android.helpers.utils.PathUtil.removeExtension;
 import static org.qp.android.helpers.utils.XmlUtil.objectToXml;
 
@@ -505,36 +504,41 @@ public class StockViewModel extends AndroidViewModel {
     // region Game install
     @SuppressLint("MissingPermission")
     private void doInstallGame(DocumentFile gameFile , InnerGameData innerGameData) {
-        var gameDir = createFindDFolder(gamesDir , normalizeFolderName(innerGameData.title));
-        if (!isWritableDirectory(gameDir)) {
-            var message = getStockActivity().getString(R.string.gamesFolderError);
-            getStockActivity().showErrorDialog(message);
-            return;
-        }
-
         var builder =
                 new NotifyBuilder(getStockActivity() , CHANNEL_INSTALL_GAME);
         var notificationManager =
                 NotificationManagerCompat.from(getStockActivity());
-
-        isHideFAB.set(false);
-
         builder.setTitleNotify(getStockActivity().getString(R.string.titleCopyNotify));
         builder.setTextNotify(getStockActivity().getString(R.string.bodyCopyNotify));
         notificationManager.notify(INSTALL_GAME_NOTIFICATION_ID , builder.buildStandardNotification());
 
-        var installer = new WorkerBuilder(getStockActivity());
-        installer.getErrorCode().observeForever(error -> {
-            switch (error) {
-                case "NIG" -> getStockActivity().showErrorDialog(getStockActivity()
-                        .getString(R.string.installError)
-                        .replace("-GAMENAME-" , innerGameData.title));
-                case "NFE" -> getStockActivity().showErrorDialog(getStockActivity()
-                        .getString(R.string.noGameFilesError));
-            }
-        });
+        isHideFAB.set(false);
+        isHideFABMenu.set(false);
 
         var folderCallback = new FolderCallback() {
+            @Override
+            public void onFailed(ErrorCode errorCode) {
+                super.onFailed(errorCode);
+                switch (errorCode) {
+                    case CANNOT_CREATE_FILE_IN_TARGET -> {
+                        var errorMessage = getStockActivity().getString(R.string.noGameFilesError);
+                        getStockActivity().showErrorDialog(errorMessage);
+                    }
+                    case STORAGE_PERMISSION_DENIED -> {
+                        var errorMessage = getStockActivity().getString(R.string.gamesFolderError);
+                        getStockActivity().showErrorDialog(errorMessage);
+                    }
+                    case SOURCE_FOLDER_NOT_FOUND , SOURCE_FILE_NOT_FOUND , INVALID_TARGET_FOLDER ,
+                            UNKNOWN_IO_ERROR , CANCELED ,
+                            TARGET_FOLDER_CANNOT_HAVE_SAME_PATH_WITH_SOURCE_FOLDER ,
+                            NO_SPACE_LEFT_ON_TARGET_PATH -> {
+                        var errorMessage = getStockActivity().getString(R.string.installError);
+                        var editErrorMessage = errorMessage.replace("-GAMENAME-" , innerGameData.title);
+                        getStockActivity().showErrorDialog(editErrorMessage);
+                    }
+                }
+            }
+
             @Override
             public void onCompleted(Result result) {
                 super.onCompleted(result);
