@@ -224,6 +224,9 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
         libQspService = Executors.newSingleThreadExecutor();
         libQspService.submit(() -> {
             nativeMethods.QSPInit();
+            if (Looper.myLooper() != null) {
+                Looper.myLooper().quitSafely();
+            }
             Looper.prepare();
             libQspHandler = new Handler();
             libQspServiceInit = true;
