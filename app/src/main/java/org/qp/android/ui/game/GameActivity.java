@@ -444,18 +444,22 @@ public class GameActivity extends AppCompatActivity implements
     }
 
     private void promptCloseGame() {
-        var dialogFragment = new GameDialogFrags();
-        dialogFragment.setDialogType(GameDialogType.CLOSE_DIALOG);
-        dialogFragment.setCancelable(false);
-        dialogFragment.show(getSupportFragmentManager(), "closeGameDialogFragment");
+        if (!isMainThread()) {
+            runOnUiThread(this::promptCloseGame);
+        } else {
+            var dialogFragment = new GameDialogFrags();
+            dialogFragment.setDialogType(GameDialogType.CLOSE_DIALOG);
+            dialogFragment.setCancelable(false);
+            dialogFragment.show(getSupportFragmentManager(), "closeGameDialogFragment");
+        }
     }
 
     public void showSavePopup() {
         if (!isMainThread()) {
             runOnUiThread(this::showSavePopup);
+        } else {
+            mainMenu.performIdentifierAction(R.id.menu_saveGame , 0);
         }
-
-        mainMenu.performIdentifierAction(R.id.menu_saveGame , 0);
     }
 
     public void showSimpleDialog(@NonNull String inputString ,
