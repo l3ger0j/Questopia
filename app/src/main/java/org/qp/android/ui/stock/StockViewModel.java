@@ -34,6 +34,8 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.anggrayudi.storage.callback.FolderCallback;
+import com.anggrayudi.storage.file.DocumentFileUtils;
 import com.anggrayudi.storage.file.MimeType;
 import com.squareup.picasso.Picasso;
 
@@ -532,8 +534,10 @@ public class StockViewModel extends AndroidViewModel {
             }
         });
 
-        installer.copyDirToAnotherDir(gameFile , gameDir).observeForever(aBoolean -> {
-            if (aBoolean) {
+        var folderCallback = new FolderCallback() {
+            @Override
+            public void onCompleted(Result result) {
+                super.onCompleted(result);
                 notificationManager.cancel(INSTALL_GAME_NOTIFICATION_ID);
                 builder.setTitleNotify(getStockActivity().getString(R.string.titleNotify));
                 var gameName = getStockActivity()
@@ -544,10 +548,16 @@ public class StockViewModel extends AndroidViewModel {
                         POST_INSTALL_GAME_NOTIFICATION_ID ,
                         builder.buildStandardNotification()
                 );
-                writeGameInfo(innerGameData , gameDir);
+                writeGameInfo(innerGameData , result.getFolder());
                 refreshGameData();
             }
-        });
+        };
+
+        CompletableFuture.runAsync(() ->
+                        DocumentFileUtils.copyFolderTo(
+                                gameFile , getApplication() , gamesDir ,
+                                false , null , folderCallback) ,
+                Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()));
     }
 
     public void writeGameInfo(InnerGameData innerGameData , DocumentFile gameDir) {
