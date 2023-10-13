@@ -2,6 +2,7 @@ package org.qp.android.model.workers;
 
 import android.content.Context;
 
+import androidx.annotation.NonNull;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -26,8 +27,9 @@ public class WorkerBuilder {
         this.context = context;
     }
 
-    @Deprecated
-    public LiveData<Boolean> copyDirToAnotherDir(DocumentFile srcDir, DocumentFile destDir) {
+    // TODO: 13.10.2023 USE FOREGROUND + DOCUMENTUTILS?
+    public LiveData<Boolean> copyDirToAnotherDir(@NonNull DocumentFile srcDir ,
+                                                 @NonNull DocumentFile destDir) {
         var inputData = new Data.Builder()
                 .putString("srcDir", srcDir.getUri().toString())
                 .putString("destDir", destDir.getUri().toString())
@@ -58,6 +60,7 @@ public class WorkerBuilder {
                         }
                     }
                 });
+
         return isDone;
     }
 
@@ -82,6 +85,7 @@ public class WorkerBuilder {
                         }
                     }
                 });
+
         return dirSize;
     }
 }

@@ -1,8 +1,5 @@
 package org.qp.android.ui.stock;
 
-import static org.qp.android.QuestPlayerApplication.CHANNEL_INSTALL_GAME;
-import static org.qp.android.QuestPlayerApplication.INSTALL_GAME_NOTIFICATION_ID;
-import static org.qp.android.QuestPlayerApplication.POST_INSTALL_GAME_NOTIFICATION_ID;
 import static org.qp.android.helpers.utils.DirUtil.doesDirectoryContainGameFiles;
 import static org.qp.android.helpers.utils.FileUtil.copyFile;
 import static org.qp.android.helpers.utils.FileUtil.createFindDFile;
@@ -25,7 +22,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 
 import androidx.annotation.NonNull;
-import androidx.core.app.NotificationManagerCompat;
 import androidx.databinding.ObservableBoolean;
 import androidx.databinding.ObservableField;
 import androidx.documentfile.provider.DocumentFile;
@@ -33,8 +29,6 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import com.anggrayudi.storage.callback.FolderCallback;
-import com.anggrayudi.storage.file.DocumentFileUtils;
 import com.anggrayudi.storage.file.MimeType;
 import com.squareup.picasso.Picasso;
 
@@ -45,7 +39,6 @@ import org.qp.android.databinding.DialogEditBinding;
 import org.qp.android.databinding.DialogInstallBinding;
 import org.qp.android.dto.stock.InnerGameData;
 import org.qp.android.helpers.repository.LocalGame;
-import org.qp.android.model.notify.NotifyBuilder;
 import org.qp.android.model.workers.WorkerBuilder;
 import org.qp.android.ui.dialogs.StockDialogFrags;
 import org.qp.android.ui.dialogs.StockDialogType;
@@ -504,64 +497,7 @@ public class StockViewModel extends AndroidViewModel {
     // region Game install
     @SuppressLint("MissingPermission")
     private void doInstallGame(DocumentFile gameFile , InnerGameData innerGameData) {
-        var builder =
-                new NotifyBuilder(getStockActivity() , CHANNEL_INSTALL_GAME);
-        var notificationManager =
-                NotificationManagerCompat.from(getStockActivity());
-        builder.setTitleNotify(getStockActivity().getString(R.string.titleCopyNotify));
-        builder.setTextNotify(getStockActivity().getString(R.string.bodyCopyNotify));
-        notificationManager.notify(INSTALL_GAME_NOTIFICATION_ID , builder.buildStandardNotification());
-
-        isHideFAB.set(false);
-        isHideFABMenu.set(false);
-
-        var folderCallback = new FolderCallback() {
-            @Override
-            public void onFailed(ErrorCode errorCode) {
-                super.onFailed(errorCode);
-                switch (errorCode) {
-                    case CANNOT_CREATE_FILE_IN_TARGET -> {
-                        var errorMessage = getStockActivity().getString(R.string.noGameFilesError);
-                        getStockActivity().showErrorDialog(errorMessage);
-                    }
-                    case STORAGE_PERMISSION_DENIED -> {
-                        var errorMessage = getStockActivity().getString(R.string.gamesFolderError);
-                        getStockActivity().showErrorDialog(errorMessage);
-                    }
-                    case SOURCE_FOLDER_NOT_FOUND , SOURCE_FILE_NOT_FOUND , INVALID_TARGET_FOLDER ,
-                            UNKNOWN_IO_ERROR , CANCELED ,
-                            TARGET_FOLDER_CANNOT_HAVE_SAME_PATH_WITH_SOURCE_FOLDER ,
-                            NO_SPACE_LEFT_ON_TARGET_PATH -> {
-                        var errorMessage = getStockActivity().getString(R.string.installError);
-                        var editErrorMessage = errorMessage.replace("-GAMENAME-" , innerGameData.title);
-                        getStockActivity().showErrorDialog(editErrorMessage);
-                    }
-                }
-            }
-
-            @Override
-            public void onCompleted(Result result) {
-                super.onCompleted(result);
-                notificationManager.cancel(INSTALL_GAME_NOTIFICATION_ID);
-                builder.setTitleNotify(getStockActivity().getString(R.string.titleNotify));
-                var gameName = getStockActivity()
-                        .getString(R.string.bodyCopiedNotify)
-                        .replace("-GAMENAME-" , innerGameData.title);
-                builder.setTextNotify(gameName);
-                notificationManager.notify(
-                        POST_INSTALL_GAME_NOTIFICATION_ID ,
-                        builder.buildStandardNotification()
-                );
-                writeGameInfo(innerGameData , result.getFolder());
-                refreshGameData();
-            }
-        };
-
-        CompletableFuture.runAsync(() ->
-                        DocumentFileUtils.copyFolderTo(
-                                gameFile , getApplication() , gamesDir ,
-                                false , null , folderCallback) ,
-                Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()));
+        // TODO: 13.10.2023 NEED TO REWORK
     }
 
     public void writeGameInfo(InnerGameData innerGameData , DocumentFile gameDir) {
