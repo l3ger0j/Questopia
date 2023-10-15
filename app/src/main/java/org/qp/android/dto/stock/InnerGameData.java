@@ -73,6 +73,7 @@ public class InnerGameData implements Serializable {
     }
 
     public boolean hasRemoteUrl() {
+        if (fileUrl == null) return false;
         return isNotEmpty(fileUrl);
     }
 
