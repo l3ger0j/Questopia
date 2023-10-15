@@ -756,8 +756,9 @@ public class GameActivity extends AppCompatActivity implements
 
     @Override
     public void onDialogPositiveClick(@NonNull DialogFragment dialog) {
-        if (dialog.getTag() != null) {
-            switch (dialog.getTag()) {
+        var dialogTag = dialog.getTag();
+        if (dialogTag != null) {
+            switch (dialogTag) {
                 case "closeGameDialogFragment" -> {
                     gameViewModel.stopAudio();
                     gameViewModel.stopLibQsp();
