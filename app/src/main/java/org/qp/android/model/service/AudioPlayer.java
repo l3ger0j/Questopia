@@ -29,7 +29,7 @@ public class AudioPlayer {
     private volatile Handler audioHandler;
     private volatile boolean isAudioServiceInit;
     private boolean soundEnabled;
-    private boolean paused;
+    private boolean isPaused = false;
     private Context context;
 
     public void start(Context context) {
@@ -71,7 +71,7 @@ public class AudioPlayer {
                 sound.volume = volume;
                 sounds.put(path, sound);
             }
-            if (soundEnabled && !paused) {
+            if (soundEnabled && !isPaused) {
                 doPlay(sound);
             }
         });
@@ -166,8 +166,8 @@ public class AudioPlayer {
     }
 
     public void pause() {
-        if (paused) return;
-        paused = true;
+        if (isPaused) return;
+        isPaused = true;
         runOnAudioThread(() -> {
             for (var sound : sounds.values()) {
                 if (sound.player != null && sound.player.isPlaying()) {
@@ -178,8 +178,8 @@ public class AudioPlayer {
     }
 
     public void resume() {
-        if (!paused) return;
-        paused = false;
+        if (!isPaused) return;
+        isPaused = false;
         if (!soundEnabled) return;
         runOnAudioThread(() -> {
             for (var sound : sounds.values()) {
