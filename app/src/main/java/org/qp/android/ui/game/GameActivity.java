@@ -34,7 +34,7 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.DialogFragment;
-import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
@@ -101,6 +101,16 @@ public class GameActivity extends AppCompatActivity implements
 
     public SettingsController getSettingsController() {
         return settingsController;
+    }
+
+    @Nullable
+    private FragmentManager getFragManager() {
+        var fragmentManager = getSupportFragmentManager();
+        if (fragmentManager.isDestroyed()) {
+            return null;
+        } else {
+            return fragmentManager;
+        }
     }
 
     @Override
@@ -238,13 +248,15 @@ public class GameActivity extends AppCompatActivity implements
     }
 
     private void postTextInDialogFrags (String text) {
-        var manager = getSupportFragmentManager();
-        for (Fragment fragment : manager.getFragments()) {
-            if (Objects.equals(fragment.getTag() , "executorDialogFragment")
-                    || Objects.equals(fragment.getTag() , "inputDialogFragment")) {
-                var bundle = new Bundle();
-                bundle.putString("template", text);
-                Objects.requireNonNull(fragment).setArguments(bundle);
+        var manager = getFragManager();
+        if (manager != null) {
+            for (var fragment : manager.getFragments()) {
+                if (Objects.equals(fragment.getTag() , "executorDialogFragment")
+                        || Objects.equals(fragment.getTag() , "inputDialogFragment")) {
+                    var bundle = new Bundle();
+                    bundle.putString("template" , text);
+                    fragment.setArguments(bundle);
+                }
             }
         }
     }
@@ -450,7 +462,9 @@ public class GameActivity extends AppCompatActivity implements
             var dialogFragment = new GameDialogFrags();
             dialogFragment.setDialogType(GameDialogType.CLOSE_DIALOG);
             dialogFragment.setCancelable(false);
-            dialogFragment.show(getSupportFragmentManager(), "closeGameDialogFragment");
+            var manager = getFragManager();
+            if (manager == null) return;
+            dialogFragment.show(manager , "closeGameDialogFragment");
         }
     }
 
@@ -467,24 +481,27 @@ public class GameActivity extends AppCompatActivity implements
         if (!isMainThread()) {
             runOnUiThread(() -> showSimpleDialog(inputString , dialogType));
         } else {
+            var manager = getFragManager();
+            if (manager == null) return;
+
             switch (dialogType) {
                 case ERROR_DIALOG -> {
                     var dialogFragment = new GameDialogFrags();
                     dialogFragment.setDialogType(GameDialogType.ERROR_DIALOG);
                     dialogFragment.setMessage(inputString);
-                    dialogFragment.show(getSupportFragmentManager(), "errorDialogFragment");
+                    dialogFragment.show(manager , "errorDialogFragment");
                 }
                 case IMAGE_DIALOG -> {
                     var dialogFragment = new GameDialogFrags();
                     dialogFragment.setDialogType(GameDialogType.IMAGE_DIALOG);
                     dialogFragment.pathToImage.set(inputString);
-                    dialogFragment.show(getSupportFragmentManager(), "imageDialogFragment");
+                    dialogFragment.show(manager , "imageDialogFragment");
                 }
                 case LOAD_DIALOG -> {
                     var dialogFragment = new GameDialogFrags();
                     dialogFragment.setDialogType(GameDialogType.LOAD_DIALOG);
                     dialogFragment.setCancelable(true);
-                    dialogFragment.show(getSupportFragmentManager(), "loadGameDialogFragment");
+                    dialogFragment.show(manager , "loadGameDialogFragment");
                 }
             }
         }
@@ -495,6 +512,9 @@ public class GameActivity extends AppCompatActivity implements
         if (!isMainThread()) {
             runOnUiThread(() -> showMessageDialog(inputString, latch));
         } else {
+            var manager = getFragManager();
+            if (manager == null) return;
+
             var config = libQpProxy.getGameState().interfaceConfig;
             var processedMsg = config.useHtml ? htmlProcessor.removeHTMLTags(inputString) : inputString;
             if (processedMsg == null) {
@@ -507,7 +527,7 @@ public class GameActivity extends AppCompatActivity implements
             dialogFragment.setDialogType(GameDialogType.MESSAGE_DIALOG);
             dialogFragment.setProcessedMsg(processedMsg);
             dialogFragment.setCancelable(false);
-            dialogFragment.show(getSupportFragmentManager(), "showMessageDialogFragment");
+            dialogFragment.show(manager , "showMessageDialogFragment");
             gameViewModel.outputBooleanObserver.observeForever(aBoolean -> {
                 if (aBoolean) {
                     latch.countDown();
@@ -521,6 +541,9 @@ public class GameActivity extends AppCompatActivity implements
         if (!isMainThread()) {
             runOnUiThread(() -> showInputDialog(inputString, inputQueue));
         } else {
+            var manager = getFragManager();
+            if (manager == null) return;
+
             var config = libQpProxy.getGameState().interfaceConfig;
             var message = config.useHtml ? htmlProcessor.removeHTMLTags(inputString) : inputString;
             if (message == null) {
@@ -537,7 +560,7 @@ public class GameActivity extends AppCompatActivity implements
                 dialogFragment.setMessage(message);
             }
             dialogFragment.setCancelable(false);
-            dialogFragment.show(getSupportFragmentManager(), "inputDialogFragment");
+            dialogFragment.show(manager , "inputDialogFragment");
             gameViewModel.outputTextObserver.observeForever(inputQueue::add);
         }
     }
@@ -547,6 +570,9 @@ public class GameActivity extends AppCompatActivity implements
         if (!isMainThread()) {
             runOnUiThread(() -> showExecutorDialog(inputString, inputQueue));
         } else {
+            var manager = getFragManager();
+            if (manager == null) return;
+
             var config = libQpProxy.getGameState().interfaceConfig;
             var message = config.useHtml ? htmlProcessor.removeHTMLTags(inputString) : inputString;
             if (message == null) {
@@ -563,7 +589,7 @@ public class GameActivity extends AppCompatActivity implements
                 dialogFragment.setMessage(message);
             }
             dialogFragment.setCancelable(false);
-            dialogFragment.show(getSupportFragmentManager(), "executorDialogFragment");
+            dialogFragment.show(manager , "executorDialogFragment");
             gameViewModel.outputTextObserver.observeForever(inputQueue::add);
         }
     }
@@ -573,6 +599,9 @@ public class GameActivity extends AppCompatActivity implements
         if (!isMainThread()) {
             runOnUiThread(() -> showMenuDialog(items, resultQueue));
         } else {
+            var manager = getFragManager();
+            if (manager == null) return;
+
             if (gameViewModel.outputIntObserver.hasObservers()) {
                 gameViewModel.outputIntObserver = new MutableLiveData<>();
             }
@@ -580,7 +609,7 @@ public class GameActivity extends AppCompatActivity implements
             dialogFragment.setDialogType(GameDialogType.MENU_DIALOG);
             dialogFragment.setItems(items);
             dialogFragment.setCancelable(false);
-            dialogFragment.show(getSupportFragmentManager(), "showMenuDialogFragment");
+            dialogFragment.show(manager , "showMenuDialogFragment");
             gameViewModel.outputIntObserver.observeForever(resultQueue::add);
         }
     }
