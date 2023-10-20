@@ -16,19 +16,19 @@
 */
 
 #ifndef QSP_BINDINGSCONFIG
-	#define QSP_BINDINGSCONFIG
+#define QSP_BINDINGSCONFIG
 
-	/* Android binding */
-	#ifdef _ANDROID
-		#define QSP_BINDING
-		#include "android/android.h"
-	#endif
+/* Android binding */
+#ifdef _ANDROID
+#define QSP_BINDING
+#include "android/android.h"
+#endif
 
-	/* Place your bindings here */
-	#ifndef QSP_BINDING
-		#define QSP_BINDING
-		#define _DEFAULT_BINDING
-		#include "default/qsp_default.h"
-	#endif
+/* Place your bindings here */
+#ifndef QSP_BINDING
+#define QSP_BINDING
+#define _DEFAULT_BINDING
+#include "default/qsp_default.h"
+#endif
 
 #endif
