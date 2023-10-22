@@ -635,7 +635,7 @@ jbyteArray Java_org_qp_android_model_libQP_NativeMethods_QSPSaveGameAsData(JNIEn
 	return result;
 }
 
-///* Загрузка состояния из файла */
+///* Loading status from a file */
 jboolean Java_org_qp_android_model_libQP_NativeMethods_QSPOpenSavedGame(JNIEnv* env, jobject this,
 		jstring fileName,
 		jboolean isRefresh)
