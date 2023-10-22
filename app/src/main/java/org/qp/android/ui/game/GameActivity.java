@@ -784,7 +784,8 @@ public class GameActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onDialogPositiveClick(@NonNull DialogFragment dialog) {
+    public void onDialogPositiveClick(DialogFragment dialog) {
+        if (dialog == null) return;
         var dialogTag = dialog.getTag();
         if (dialogTag != null) {
             switch (dialogTag) {
