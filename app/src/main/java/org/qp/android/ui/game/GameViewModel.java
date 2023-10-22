@@ -143,18 +143,15 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         refreshObjectsRecycler();
     };
 
-    public WebViewClient getWebViewClient() {
-        return new GameWebViewClient();
-    }
-
     @SuppressLint("SetJavaScriptEnabled")
     public WebView getDefaultWebClient(WebView view) {
+        var webViewClient = new GameWebViewClient();
         var webClientSettings = view.getSettings();
         webClientSettings.setAllowFileAccess(true);
         webClientSettings.setJavaScriptEnabled(true);
         webClientSettings.setUseWideViewPort(true);
         view.setOverScrollMode(View.OVER_SCROLL_NEVER);
-        view.setWebViewClient(getWebViewClient());
+        view.setWebViewClient(webViewClient);
         return view;
     }
 

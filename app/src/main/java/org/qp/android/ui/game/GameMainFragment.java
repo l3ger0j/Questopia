@@ -67,7 +67,7 @@ public class GameMainFragment extends Fragment {
         }
 
         // WebView
-        mainDescView = gameMainBinding.mainDesc;
+        mainDescView = viewModel.getDefaultWebClient(gameMainBinding.mainDesc);
         mainDescView.setBackgroundColor(viewModel.getBackgroundColor());
         mainDescView.addJavascriptInterface(new Object() {
             @JavascriptInterface
