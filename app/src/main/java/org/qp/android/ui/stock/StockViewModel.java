@@ -562,7 +562,7 @@ public class StockViewModel extends AndroidViewModel {
         gamesMap.clear();
 
         CompletableFuture
-                .supplyAsync(() -> localGame.getGames(getStockActivity() , gamesDir) ,
+                .supplyAsync(() -> localGame.extractGameDataFromFolder(getStockActivity() , gamesDir) ,
                         Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()))
                 .thenApply(innerGameData -> {
                     for (var localGameData : innerGameData) {
