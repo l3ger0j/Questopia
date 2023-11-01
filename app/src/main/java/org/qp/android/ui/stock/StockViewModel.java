@@ -13,7 +13,6 @@ import static org.qp.android.helpers.utils.FileUtil.isWritableFile;
 import static org.qp.android.helpers.utils.PathUtil.removeExtension;
 import static org.qp.android.helpers.utils.XmlUtil.objectToXml;
 
-import android.annotation.SuppressLint;
 import android.app.Application;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -495,7 +494,6 @@ public class StockViewModel extends AndroidViewModel {
     // endregion Dialog
 
     // region Game install
-    @SuppressLint("MissingPermission")
     private void doInstallGame(DocumentFile gameFile , InnerGameData innerGameData) {
         // TODO: 13.10.2023 NEED TO REWORK
     }

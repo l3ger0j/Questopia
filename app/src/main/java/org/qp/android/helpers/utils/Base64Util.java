@@ -28,7 +28,7 @@ public final class Base64Util {
         return new String(Base64.decode(base64, DEFAULT));
     }
 
-    public static boolean hasBase64 (String input) {
+    public static boolean isBase64(String input) {
         var matcher = pattern.matcher(input);
         return matcher.find();
     }

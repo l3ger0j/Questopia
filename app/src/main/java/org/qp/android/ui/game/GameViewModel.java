@@ -1,7 +1,7 @@
 package org.qp.android.ui.game;
 
 import static org.qp.android.helpers.utils.Base64Util.decodeBase64;
-import static org.qp.android.helpers.utils.Base64Util.hasBase64;
+import static org.qp.android.helpers.utils.Base64Util.isBase64;
 import static org.qp.android.helpers.utils.ColorUtil.convertRGBAToBGRA;
 import static org.qp.android.helpers.utils.ColorUtil.getHexColor;
 import static org.qp.android.helpers.utils.FileUtil.documentWrap;
@@ -345,7 +345,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
             switch (uri.getScheme()) {
                 case "exec" -> {
                     var tempUriDecode = uriDecode.substring(5);
-                    if (hasBase64(tempUriDecode)) {
+                    if (isBase64(tempUriDecode)) {
                         tempUriDecode = decodeBase64(uriDecode.substring(5));
                     } else {
                         tempUriDecode = uriDecode.substring(5);
