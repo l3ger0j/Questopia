@@ -2,21 +2,17 @@ package org.qp.android.ui.stock;
 
 import static org.qp.android.helpers.utils.DirUtil.doesDirectoryContainGameFiles;
 import static org.qp.android.helpers.utils.FileUtil.copyFile;
-import static org.qp.android.helpers.utils.FileUtil.createFindDFile;
 import static org.qp.android.helpers.utils.FileUtil.createFindDFolder;
 import static org.qp.android.helpers.utils.FileUtil.createFindFolder;
 import static org.qp.android.helpers.utils.FileUtil.documentWrap;
 import static org.qp.android.helpers.utils.FileUtil.findFileOrDirectory;
 import static org.qp.android.helpers.utils.FileUtil.formatFileSize;
 import static org.qp.android.helpers.utils.FileUtil.isWritableDirectory;
-import static org.qp.android.helpers.utils.FileUtil.isWritableFile;
 import static org.qp.android.helpers.utils.PathUtil.removeExtension;
-import static org.qp.android.helpers.utils.XmlUtil.objectToXml;
 
 import android.app.Application;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 
@@ -28,7 +24,6 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import com.anggrayudi.storage.file.MimeType;
 import com.squareup.picasso.Picasso;
 
 import org.jetbrains.annotations.NotNull;
@@ -44,7 +39,6 @@ import org.qp.android.ui.dialogs.StockDialogType;
 import org.qp.android.ui.game.GameActivity;
 import org.qp.android.ui.settings.SettingsController;
 
-import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -385,7 +379,7 @@ public class StockViewModel extends AndroidViewModel {
                     }
                 });
             }
-            writeGameInfo(tempInnerGameData , tempInnerGameData.gameDir);
+            localGame.formDataFileIntoFolder(getApplication() , tempInnerGameData , tempInnerGameData.gameDir);
             if (tempPathFile != null) {
                 copyFile(getStockActivity() , tempPathFile , tempInnerGameData.gameDir);
             }
@@ -496,28 +490,6 @@ public class StockViewModel extends AndroidViewModel {
     // region Game install
     private void doInstallGame(DocumentFile gameFile , InnerGameData innerGameData) {
         // TODO: 13.10.2023 NEED TO REWORK
-    }
-
-    public void writeGameInfo(InnerGameData innerGameData , DocumentFile gameDir) {
-        var infoFile = findFileOrDirectory(gameDir , GAME_INFO_FILENAME);
-        if (infoFile == null) {
-            infoFile = createFindDFile(gameDir , MimeType.TEXT , GAME_INFO_FILENAME);
-        }
-        if (!isWritableFile(infoFile)) {
-            var message = getStockActivity().getString(R.string.infoFileNotWritable);
-            getStockActivity().showErrorDialog(message);
-            return;
-        }
-        var tempInfoFile = documentWrap(infoFile);
-
-        try (var out = tempInfoFile.openOutputStream(getStockActivity() , false);
-             var writer = new OutputStreamWriter(out)) {
-            writer.write(objectToXml(innerGameData));
-        } catch (Exception ex) {
-            Log.d(TAG , "ERROR: " , ex);
-            var message = getStockActivity().getString(R.string.infoFileWriteError);
-            getStockActivity().showErrorDialog(message);
-        }
     }
 
     private LiveData<Long> calculateSizeDir(DocumentFile srcDir) {

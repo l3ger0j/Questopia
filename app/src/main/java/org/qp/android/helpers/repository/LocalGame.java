@@ -1,7 +1,11 @@
 package org.qp.android.helpers.repository;
 
+import static org.qp.android.helpers.utils.FileUtil.createFindDFile;
+import static org.qp.android.helpers.utils.FileUtil.documentWrap;
 import static org.qp.android.helpers.utils.FileUtil.findFileOrDirectory;
+import static org.qp.android.helpers.utils.FileUtil.isWritableFile;
 import static org.qp.android.helpers.utils.FileUtil.readFileAsString;
+import static org.qp.android.helpers.utils.XmlUtil.objectToXml;
 import static org.qp.android.helpers.utils.XmlUtil.xmlToObject;
 
 import android.content.Context;
@@ -11,8 +15,11 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.documentfile.provider.DocumentFile;
 
+import com.anggrayudi.storage.file.MimeType;
+
 import org.qp.android.dto.stock.InnerGameData;
 
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -72,6 +79,26 @@ public class LocalGame {
         return readFileAsString(context , gameInfoFiles);
     }
 
+    public void formDataFileIntoFolder(@NonNull Context context ,
+                                       InnerGameData innerGameData ,
+                                       DocumentFile gameDir) {
+        var infoFile = findFileOrDirectory(gameDir , GAME_INFO_FILENAME);
+        if (infoFile == null) {
+            infoFile = createFindDFile(gameDir , MimeType.TEXT , GAME_INFO_FILENAME);
+        }
+        if (!isWritableFile(infoFile)) {
+            return;
+        }
+        var tempInfoFile = documentWrap(infoFile);
+
+        try (var out = tempInfoFile.openOutputStream(context , false);
+             var writer = new OutputStreamWriter(out)) {
+            writer.write(objectToXml(innerGameData));
+        } catch (Exception ex) {
+            Log.d(TAG , "ERROR: " , ex);
+        }
+    }
+
     public List<InnerGameData> extractGameDataFromFolder(Context context , DocumentFile gameFolder) {
         if (gameFolder == null) {
             return Collections.emptyList();
@@ -103,15 +130,19 @@ public class LocalGame {
                 var name = folder.dir.getName();
                 if (name == null) return Collections.emptyList();
                 item = new InnerGameData();
-
                 item.id = name;
                 item.title = name;
+                item.gameDir = folder.dir;
+                item.gameFiles = folder.gameFiles;
+                formDataFileIntoFolder(context , item , folder.dir);
+
+                itemsGamesDirs.add(item);
+            } else {
+                item.gameDir = folder.dir;
+                item.gameFiles = folder.gameFiles;
+
+                itemsGamesDirs.add(item);
             }
-
-            item.gameDir = folder.dir;
-            item.gameFiles = folder.gameFiles;
-
-            itemsGamesDirs.add(item);
         }
 
         return itemsGamesDirs;
