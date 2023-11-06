@@ -301,15 +301,6 @@ public class StockViewModel extends AndroidViewModel {
         dialogFragments = new StockDialogFrags();
         dialogFragments.setDialogType(StockDialogType.EDIT_DIALOG);
         dialogFragments.setEditBinding(formingEditView());
-        dialogFragments.onCancel(new DialogInterface() {
-            @Override
-            public void cancel() {
-                isHideFAB.set(false);
-            }
-            @Override
-            public void dismiss() {
-            }
-        });
         getStockActivity()
                 .showDialogFragment(dialogFragments , StockDialogType.EDIT_DIALOG);
         isHideFAB.set(true);
@@ -385,7 +376,6 @@ public class StockViewModel extends AndroidViewModel {
                         findFileOrDirectory(tempInnerGameData.gameDir , "mods"));
             }
             refreshIntGamesDirectory();
-            isHideFAB.set(false);
             dialogFragments.dismiss();
         } catch (NullPointerException ex) {
             var message = getStockActivity().getString(R.string.error)+": "+ex;

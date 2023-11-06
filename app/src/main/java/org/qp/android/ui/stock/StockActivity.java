@@ -363,7 +363,9 @@ public class StockActivity extends AppCompatActivity implements
 
     @Override
     public void onDialogDestroy(DialogFragment dialog) {
-        stockViewModel.isHideFAB.set(false);
+        if (!Objects.equals(dialog.getTag() , "editDialogFragment")) {
+            stockViewModel.isHideFAB.set(false);
+        }
     }
 
     @Override
