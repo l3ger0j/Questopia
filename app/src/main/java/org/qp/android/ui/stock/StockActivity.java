@@ -42,7 +42,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.anggrayudi.storage.SimpleStorageHelper;
 import com.github.javiersantos.appupdater.AppUpdater;
 import com.github.javiersantos.appupdater.enums.UpdateFrom;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 
 import org.qp.android.BuildConfig;
 import org.qp.android.QuestPlayerApplication;
@@ -79,7 +79,7 @@ public class StockActivity extends AppCompatActivity implements
     private ActionMode actionMode;
     protected ActivityStockBinding activityStockBinding;
     private boolean isEnable = false;
-    private FloatingActionButton mFAB;
+    private ExtendedFloatingActionButton mFAB;
     private RecyclerView mRecyclerView;
     private ArrayList<InnerGameData> tempList;
     private final ArrayList<InnerGameData> selectList = new ArrayList<>();
@@ -103,11 +103,7 @@ public class StockActivity extends AppCompatActivity implements
         gamesMap = stockViewModel.getGamesMap();
 
         mFAB = activityStockBinding.stockFAB;
-        mFAB.setOnClickListener(view -> stockViewModel.isHideFABMenu.set(!stockViewModel.isHideFABMenu.get()));
-        var copyFAB = activityStockBinding.copyFAB;
-        copyFAB.setOnClickListener(v -> stockViewModel.showDialogInstall());
-        var createFAB = activityStockBinding.createFAB;
-        createFAB.setOnClickListener(view -> showDirPickerDialog(CODE_PICK_ROOT_FOLDER));
+        mFAB.setOnClickListener(view -> showDirPickerDialog(CODE_PICK_ROOT_FOLDER));
 
         storageHelper.setOnFileSelected((integer , documentFiles) -> {
             if (documentFiles != null) {
@@ -150,10 +146,8 @@ public class StockActivity extends AppCompatActivity implements
         storageHelper.setOnFolderSelected((integer , documentFile) -> {
             if (documentFile != null) {
                 switch (integer) {
-                    case CODE_PICK_DIR_FILE -> {
-                        stockViewModel.setTempInstallDir(documentFile);
-                        stockViewModel.isSelectFolder.set(true);
-                    }
+                    case CODE_PICK_DIR_FILE ->
+                            stockViewModel.setTempInstallDir(documentFile);
                     case CODE_PICK_ROOT_FOLDER -> {
                         var application = (QuestPlayerApplication) getApplication();
                         if (application != null) application.setCustomRootFolder(documentFile);
@@ -483,12 +477,10 @@ public class StockActivity extends AppCompatActivity implements
                 isEnable = false;
                 tempList.clear();
                 selectList.clear();
-                stockViewModel.isHideFABMenu.set(false);
                 mFAB.show();
             }
         };
 
-        stockViewModel.isHideFABMenu.set(true);
         mFAB.hide();
         actionMode = startSupportActionMode(callback);
     }

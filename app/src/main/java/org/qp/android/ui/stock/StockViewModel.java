@@ -61,8 +61,6 @@ public class StockViewModel extends AndroidViewModel {
             new ObservableField<>();
 
     public ObservableBoolean isHideFAB = new ObservableBoolean();
-    public ObservableBoolean isHideFABMenu = new ObservableBoolean();
-    public ObservableBoolean isSelectFolder = new ObservableBoolean();
 
     private final LocalGame localGame = new LocalGame();
     private final HashMap<String, InnerGameData> gamesMap = new HashMap<>();
@@ -346,7 +344,6 @@ public class StockViewModel extends AndroidViewModel {
             });
             gameData.icon = (tempImageFile == null ? null : tempImageFile.getUri().toString());
             doInstallGame(tempInstallDir , gameData);
-            isSelectFolder.set(false);
             dialogFragments.dismiss();
         }
     }
