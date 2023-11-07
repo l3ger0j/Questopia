@@ -23,6 +23,7 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -204,6 +205,26 @@ public class StockActivity extends AppCompatActivity implements
                 .setUpdateFrom(UpdateFrom.GITHUB)
                 .setGitHubUserAndRepo("l3ger0j", "Questopia")
                 .start();
+
+        getOnBackPressedDispatcher().addCallback(this , new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                if (getSupportActionBar() != null) {
+                    getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+                }
+                var currDestination = navController.getCurrentDestination();
+                if (currDestination != null) {
+                    if (Objects.equals(currDestination.getLabel() , "StockRecyclerFragment")) {
+                        finish();
+                    } else {
+                        stockViewModel.isHideFAB.set(false);
+                        navController.popBackStack();
+                    }
+                } else {
+                    finish();
+                }
+            }
+        });
     }
 
     @Override
@@ -253,24 +274,6 @@ public class StockActivity extends AppCompatActivity implements
         stockViewModel.isHideFAB.set(false);
         navController.popBackStack();
         return true;
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(false);
-        }
-        if (navController.getCurrentDestination() != null) {
-            if (Objects.equals(navController.getCurrentDestination().getLabel()
-                    , "StockRecyclerFragment")) {
-                super.onBackPressed();
-            } else {
-                stockViewModel.isHideFAB.set(false);
-                navController.popBackStack();
-            }
-        } else {
-            super.onBackPressed();
-        }
     }
 
     private void loadSettings() {
