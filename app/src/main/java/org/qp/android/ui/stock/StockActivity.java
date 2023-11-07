@@ -491,28 +491,6 @@ public class StockActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onScrolled(RecyclerView recyclerView , int dx , int dy) {
-        // TODO: 14.09.2023 NEED TO REWORK
-//        if (!isEnable) {
-//            if (dy > 0 || dy < 0 && mFAB.isShown()) {
-//                stockViewModel.isHideMenu.set(true);
-//                mFAB.hide();
-//            }
-//        }
-    }
-
-    @Override
-    public void onScrollStateChanged(RecyclerView recyclerView , int newState) {
-        // TODO: 14.09.2023 NEED TO REWORK
-//        if (!isEnable) {
-//            if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-//                stockViewModel.isHideMenu.set(false);
-//                mFAB.show();
-//            }
-//        }
-    }
-
-    @Override
     protected void onDestroy() {
         super.onDestroy();
         Log.i(TAG , "Stock Activity destroyed");

@@ -47,16 +47,6 @@ public class StockRecyclerFragment extends StockPatternFragment {
 
     @Override
     public void onViewCreated(@NonNull View view , @Nullable Bundle savedInstanceState) {
-        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrolled(@NonNull RecyclerView recyclerView , int dx , int dy) {
-                listener.onScrolled(recyclerView, dx, dy);
-            }
-            @Override
-            public void onScrollStateChanged(@NonNull RecyclerView recyclerView , int newState) {
-                listener.onScrollStateChanged(recyclerView, newState);
-            }
-        });
         mRecyclerView.addOnItemTouchListener(new RecyclerItemClickListener(
                 requireContext() ,
                 mRecyclerView ,
