@@ -489,13 +489,12 @@ public class StockViewModel extends AndroidViewModel {
     public void refreshIntGamesDirectory() {
         var rootDir = ((QuestPlayerApplication) getApplication()).getCustomRootDir();
         if (rootDir != null) {
-            var tempGameDir = createFindDFolder(rootDir , "games");
-            if (!isWritableDirectory(tempGameDir)) {
+            if (!isWritableDirectory(rootDir)) {
                 var message = getStockActivity().getString(R.string.gamesFolderError);
                 getStockActivity().showErrorDialog(message);
                 return;
             }
-            setGamesDir(tempGameDir);
+            setGamesDir(rootDir);
             refreshGameData();
         } else {
             var intFilesDir = getApplication().getExternalFilesDir(null);
@@ -504,13 +503,12 @@ public class StockViewModel extends AndroidViewModel {
                 getStockActivity().showErrorDialog(message);
                 return;
             }
-            var tempGameDir = createFindFolder(intFilesDir, "games");
-            if (!isWritableDirectory(tempGameDir)) {
+            if (!isWritableDirectory(intFilesDir)) {
                 var message = getStockActivity().getString(R.string.gamesFolderError);
                 getStockActivity().showErrorDialog(message);
                 return;
             }
-            setGamesDir(DocumentFile.fromFile(tempGameDir));
+            setGamesDir(DocumentFile.fromFile(intFilesDir));
             refreshGameData();
         }
     }
