@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <ListPreference
+        android:defaultValue="ru"
+        android:entries="@array/langName"
+        android:entryValues="@array/langValue"
+        android:key="lang"
+        android:icon="@drawable/baseline_language_24"
+        android:summary="@string/langSum"
+        android:title="@string/langTitle" />
+    <ListPreference
+        android:defaultValue="1000"
+        android:entries="@array/binPrefName"
+        android:entryValues="@array/binPrefValue"
+        android:key="binPref"
+        android:summary="@string/binPrefSum"
+        android:title="@string/binPrefTitle" />
+    <ListPreference
+        android:defaultValue="1/3"
+        android:entries="@array/actsHeight"
+        android:entryValues="@array/actsHeight"
+        android:key="actsHeight"
+        android:title="@string/actsHeightTitle" />
+    <SwitchPreferenceCompat
+        android:defaultValue="true"
+        android:key="sound"
+        android:icon="@drawable/baseline_music_note_24"
+        android:title="@string/soundTitle" />
+    <SwitchPreferenceCompat
+        android:defaultValue="false"
+        android:key="separator"
+        android:title="@string/separatorTitle" />
+    <SwitchPreferenceCompat
+        android:defaultValue="true"
+        android:key="immersiveMode"
+        android:icon="@drawable/baseline_fullscreen_24"
+        android:title="@string/immersiveModeTitle" />
+    <SwitchPreferenceCompat
+        android:defaultValue="true"
+        android:key="autoscroll"
+        android:icon="@drawable/baseline_move_down_24"
+        android:title="@string/autoscrollTitle" />
+    <SwitchPreferenceCompat
+        android:defaultValue="false"
+        android:key="execString"
+        android:title="@string/execStringTitle"/>
+    <SwitchPreferenceCompat
+        android:defaultValue="false"
+        android:key="debugImage"
+        android:summary="@string/imageDebugSum"
+        android:title="@string/imageDebugTitle" />
+    <SwitchPreferenceCompat
+        android:defaultValue="false"
+        android:key="debugMusic"
+        android:summary="@string/musicDebugSum"
+        android:title="@string/musicDebugTitle" />
+
+</PreferenceScreen>
