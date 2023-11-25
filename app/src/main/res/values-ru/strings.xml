@@ -119,7 +119,7 @@
         <string name="deleteGameTitle">Удалить игру</string>
     <!-- Menu settings fragment -->
         <!-- General section -->
-        <string name="generalCatTitle">Главное</string>
+        <string name="generalCatTitle">Основные настройки приложения</string>
         <string name="langTitle">Язык</string>
         <string name="langSum">Выберите язык интерфейса</string>
         <string name="binPrefTitle">Двоичные Префиксы</string>
@@ -164,7 +164,6 @@
         <string name="musicDebugSum">Режим, который включает отображение диалога с ошибкой если путь к музыке указан неверно</string>
         <string name="execStringTitle">Исполнитель строк</string>
         <!-- Extra section -->
-        <string name="extraCatTitle">Экстра</string>
         <string name="pluginTitle">Меню плагинов</string>
         <string name="aboutTitle">О программе</string>
     <!-- Menu save and load -->

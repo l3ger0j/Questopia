@@ -120,7 +120,7 @@
         <string name="deleteGameTitle">Delete game</string>
     <!-- Menu settings fragment -->
         <!-- General section -->
-        <string name="generalCatTitle">General</string>
+        <string name="generalCatTitle">Basic Application Settings</string>
         <string name="langTitle">Language</string>
         <string name="langSum">Choose display language</string>
         <string name="binPrefTitle">Binary prefixes</string>
@@ -165,7 +165,6 @@
         <string name="musicDebugSum">A mode that enables the display of an error dialog if the path to the music is incorrect</string>
         <string name="execStringTitle">String executor</string>
         <!-- Extra section -->
-        <string name="extraCatTitle">Extra</string>
         <string name="pluginTitle">Extension menu</string>
         <string name="aboutTitle">About Quest Player</string>
     <!-- Menu save and load -->
