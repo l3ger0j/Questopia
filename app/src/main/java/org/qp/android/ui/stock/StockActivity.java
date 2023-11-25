@@ -41,6 +41,7 @@ import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.anggrayudi.storage.SimpleStorageHelper;
+import com.anggrayudi.storage.file.DocumentFileCompat;
 import com.github.javiersantos.appupdater.AppUpdater;
 import com.github.javiersantos.appupdater.enums.UpdateFrom;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
@@ -96,6 +97,8 @@ public class StockActivity extends AppCompatActivity implements
         var splashScreen = SplashScreen.installSplashScreen(this);
         splashScreen.setKeepOnScreenCondition(() -> false);
         super.onCreate(savedInstanceState);
+
+        restoreRootDirFromPrefs();
 
         activityStockBinding = ActivityStockBinding.inflate(getLayoutInflater());
         stockViewModel = new ViewModelProvider(this).get(StockViewModel.class);
@@ -225,6 +228,28 @@ public class StockActivity extends AppCompatActivity implements
                 }
             }
         });
+    }
+
+    public void saveRootDirIntoPrefs() {
+        var application = (QuestPlayerApplication) getApplication();
+        var rootDir = application.getCustomRootDir();
+        if (rootDir == null) return;
+        var rootStringUri = rootDir.getUri().toString();
+        var preferences = getPreferences(MODE_PRIVATE);
+        preferences
+                .edit()
+                .putString("rootFolder" , rootStringUri)
+                .apply();
+    }
+
+    public void restoreRootDirFromPrefs() {
+        var application = (QuestPlayerApplication) getApplication();
+        var preferences = getPreferences(MODE_PRIVATE);
+        var rootFolderUri = preferences.getString("rootFolder" , null);
+        if (rootFolderUri != null) {
+            var rootFile = DocumentFileCompat.fromUri(this , Uri.parse(rootFolderUri));
+            application.setCustomRootFolder(rootFile);
+        }
     }
 
     @Override
@@ -488,6 +513,12 @@ public class StockActivity extends AppCompatActivity implements
 
         mFAB.hide();
         actionMode = startSupportActionMode(callback);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        saveRootDirIntoPrefs();
     }
 
     @Override
