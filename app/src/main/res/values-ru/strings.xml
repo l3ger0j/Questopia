@@ -92,7 +92,7 @@
     <!-- SettingsFragment -->
         <string name="closeToApply">Закройте настройки для применения изменений</string>
         <string name="settingsEffect">Настройки вступят в силу при следующей распаковке игры</string>
-        <string name="addFolder">Изменить корневую папку</string>
+        <string name="addFolder">Выбрать папку для игр</string>
         <string name="addFolderSum0">Текущий корневой каталог это внутренняя директория приложения</string>
         <string name="addFolderSum1">Текущий корневая директория это внешняя директория устройства</string>
     <!-- FragmentImageBox -->
