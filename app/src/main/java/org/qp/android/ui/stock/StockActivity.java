@@ -210,16 +210,16 @@ public class StockActivity extends AppCompatActivity implements
                 if (getSupportActionBar() != null) {
                     getSupportActionBar().setDisplayHomeAsUpEnabled(false);
                 }
-                var currDestination = navController.getCurrentDestination();
-                if (currDestination != null) {
-                    if (Objects.equals(currDestination.getLabel() , "StockRecyclerFragment")) {
-                        finish();
+                if (navController.getCurrentDestination() != null) {
+                    if (Objects.equals(navController.getCurrentDestination().getLabel()
+                            , "StockRecyclerFragment")) {
+                        getOnBackPressedDispatcher().onBackPressed();
                     } else {
                         stockViewModel.isHideFAB.set(false);
                         navController.popBackStack();
                     }
                 } else {
-                    finish();
+                    getOnBackPressedDispatcher().onBackPressed();
                 }
             }
         });
