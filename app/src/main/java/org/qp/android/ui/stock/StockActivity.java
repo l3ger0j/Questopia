@@ -2,7 +2,6 @@ package org.qp.android.ui.stock;
 
 import static org.qp.android.helpers.utils.FileUtil.deleteDirectory;
 import static org.qp.android.helpers.utils.FileUtil.documentWrap;
-import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_DIR_FILE;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_IMAGE_FILE;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_MOD_FILE;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_PATH_FILE;
@@ -149,13 +148,9 @@ public class StockActivity extends AppCompatActivity implements
 
         storageHelper.setOnFolderSelected((integer , documentFile) -> {
             if (documentFile != null) {
-                switch (integer) {
-                    case CODE_PICK_DIR_FILE ->
-                            stockViewModel.setTempInstallDir(documentFile);
-                    case CODE_PICK_ROOT_FOLDER -> {
-                        var application = (QuestPlayerApplication) getApplication();
-                        if (application != null) application.setCustomRootFolder(documentFile);
-                    }
+                if (integer == CODE_PICK_ROOT_FOLDER) {
+                    var application = (QuestPlayerApplication) getApplication();
+                    if (application != null) application.setCustomRootFolder(documentFile);
                 }
             }
 
@@ -338,8 +333,6 @@ public class StockActivity extends AppCompatActivity implements
             switch (dialogType) {
                 case EDIT_DIALOG ->
                         dialogFragment.show(getSupportFragmentManager() , "editDialogFragment");
-                case INSTALL_DIALOG ->
-                        dialogFragment.show(getSupportFragmentManager() , "installDialogFragment");
                 case SELECT_DIALOG ->
                         dialogFragment.show(getSupportFragmentManager() , "selectDialogFragment");
             }

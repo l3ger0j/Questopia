@@ -2,8 +2,6 @@ package org.qp.android.ui.stock;
 
 import static org.qp.android.helpers.utils.DirUtil.doesDirectoryContainGameFiles;
 import static org.qp.android.helpers.utils.FileUtil.copyFile;
-import static org.qp.android.helpers.utils.FileUtil.createFindDFolder;
-import static org.qp.android.helpers.utils.FileUtil.createFindFolder;
 import static org.qp.android.helpers.utils.FileUtil.documentWrap;
 import static org.qp.android.helpers.utils.FileUtil.findFileOrDirectory;
 import static org.qp.android.helpers.utils.FileUtil.formatFileSize;
@@ -11,11 +9,7 @@ import static org.qp.android.helpers.utils.FileUtil.isWritableDirectory;
 import static org.qp.android.helpers.utils.PathUtil.removeExtension;
 
 import android.app.Application;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.net.Uri;
-import android.os.PersistableBundle;
 import android.view.LayoutInflater;
 import android.view.View;
 
@@ -26,17 +20,13 @@ import androidx.documentfile.provider.DocumentFile;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.preference.PreferenceManager;
 
-import com.anggrayudi.storage.file.DocumentFileCompat;
-import com.anggrayudi.storage.file.DocumentFileUtils;
 import com.squareup.picasso.Picasso;
 
 import org.jetbrains.annotations.NotNull;
 import org.qp.android.QuestPlayerApplication;
 import org.qp.android.R;
 import org.qp.android.databinding.DialogEditBinding;
-import org.qp.android.databinding.DialogInstallBinding;
 import org.qp.android.dto.stock.InnerGameData;
 import org.qp.android.helpers.repository.LocalGame;
 import org.qp.android.model.workers.WorkerBuilder;
@@ -60,8 +50,7 @@ public class StockViewModel extends AndroidViewModel {
     public static final int CODE_PICK_IMAGE_FILE = 300;
     public static final int CODE_PICK_PATH_FILE = 301;
     public static final int CODE_PICK_MOD_FILE = 302;
-    public static final int CODE_PICK_DIR_FILE = 303;
-    public static final int CODE_PICK_ROOT_FOLDER = 304;
+    public static final int CODE_PICK_ROOT_FOLDER = 303;
 
     public ObservableField<StockActivity> activityObservableField =
             new ObservableField<>();
@@ -70,9 +59,9 @@ public class StockViewModel extends AndroidViewModel {
 
     private final LocalGame localGame = new LocalGame();
     private final HashMap<String, InnerGameData> gamesMap = new HashMap<>();
-    private DocumentFile gamesDir , tempInstallDir, tempImageFile, tempPathFile, tempModFile;
+    private DocumentFile gamesDir;
+    private DocumentFile tempImageFile, tempPathFile, tempModFile;
 
-    private DialogInstallBinding installBinding;
     private InnerGameData tempInnerGameData;
     private DialogEditBinding editBinding;
     private SettingsController controller;
@@ -102,21 +91,8 @@ public class StockViewModel extends AndroidViewModel {
         editBinding.buttonSelectMod.setText(tempModFile.getName());
     }
 
-    public void setTempInstallDir(@NonNull DocumentFile tempInstallDir) {
-        this.tempInstallDir = tempInstallDir;
-        if (installBinding == null) return;
-        installBinding.buttonSelectFolder.setText(tempInstallDir.getName());
-    }
-
     public void setTempImageFile(@NonNull DocumentFile tempImageFile) {
         this.tempImageFile = tempImageFile;
-        if (installBinding != null) {
-            installBinding.buttonSelectIcon.setText(tempImageFile.getName());
-            Picasso.get()
-                    .load(tempImageFile.getUri())
-                    .fit()
-                    .into(installBinding.imageView);
-        }
         if (editBinding != null) {
             editBinding.buttonSelectIcon.setText(tempImageFile.getName());
             Picasso.get()
@@ -285,24 +261,6 @@ public class StockViewModel extends AndroidViewModel {
     // region Dialog
     private StockDialogFrags dialogFragments = new StockDialogFrags();
 
-    public void showDialogInstall() {
-        dialogFragments.setDialogType(StockDialogType.INSTALL_DIALOG);
-        dialogFragments.setInstallBinding(formingInstallView());
-        dialogFragments.onCancel(new DialogInterface() {
-            @Override
-            public void cancel() {
-                isHideFAB.set(false);
-            }
-
-            @Override
-            public void dismiss() {
-            }
-        });
-        getStockActivity()
-                .showDialogFragment(dialogFragments , StockDialogType.INSTALL_DIALOG);
-        isHideFAB.set(true);
-    }
-
     public void showDialogEdit() {
         dialogFragments = new StockDialogFrags();
         dialogFragments.setDialogType(StockDialogType.EDIT_DIALOG);
@@ -312,37 +270,24 @@ public class StockViewModel extends AndroidViewModel {
         isHideFAB.set(true);
     }
 
-    public void createInstallIntent() {
-        if (tempInstallDir != null && tempInstallDir.getName() != null) {
-            var gameData = new InnerGameData();
-            gameData.id = removeExtension(tempInstallDir.getName());
-            var installTextTitle = installBinding.ET0.getEditText();
-            if (installTextTitle != null) {
-                gameData.title = installTextTitle.getText().toString().isEmpty()
-                        ? removeExtension(tempInstallDir.getName())
-                        : installTextTitle.getText().toString();
-            }
-            var installTextAuthor = installBinding.ET1.getEditText();
-            if (installTextAuthor != null) {
-                gameData.author = installTextAuthor.getText().toString().isEmpty()
-                        ? null
-                        : installTextAuthor.getText().toString();
-            }
-            var installTextVersion = installBinding.ET2.getEditText();
-            if (installTextVersion != null) {
-                gameData.version = installTextVersion.getText().toString().isEmpty()
-                        ? null
-                        : installTextVersion.getText().toString();
-            }
-            calculateSizeDir(tempInstallDir).observeForever(aLong -> {
-                if (aLong != null) {
-                    gameData.fileSize = formatFileSize(aLong , controller.binaryPrefixes);
-                }
-            });
-            gameData.icon = (tempImageFile == null ? null : tempImageFile.getUri().toString());
-            doInstallGame(tempInstallDir , gameData);
-            dialogFragments.dismiss();
+    @NonNull
+    private DialogEditBinding formingEditView() {
+        editBinding =
+                DialogEditBinding.inflate(LayoutInflater.from(getStockActivity()));
+        editBinding.setStockVM(this);
+
+        if (!tempInnerGameData.icon.isEmpty()) {
+            Picasso.get()
+                    .load(tempInnerGameData.icon)
+                    .fit()
+                    .into(editBinding.imageView);
         }
+
+        editBinding.buttonSelectPath.setOnClickListener(this::sendIntent);
+        editBinding.buttonSelectMod.setOnClickListener(this::sendIntent);
+        editBinding.buttonSelectIcon.setOnClickListener(this::sendIntent);
+        editBinding.editBT.setOnClickListener(v -> createEditIntent());
+        return editBinding;
     }
 
     public void createEditIntent() {
@@ -389,6 +334,11 @@ public class StockViewModel extends AndroidViewModel {
         }
     }
 
+    private LiveData<Long> calculateSizeDir(DocumentFile srcDir) {
+        var installer = new WorkerBuilder(getStockActivity());
+        return installer.calculateDirSize(srcDir);
+    }
+
     public void playGame() {
         var intent = new Intent(getStockActivity() , GameActivity.class);
         intent.putExtra("gameId" , tempInnerGameData.id);
@@ -430,10 +380,7 @@ public class StockViewModel extends AndroidViewModel {
 
     public void sendIntent(@NonNull View view) {
         int id = view.getId();
-        if (id == R.id.buttonSelectFolder) {
-            getStockActivity()
-                    .showDirPickerDialog(CODE_PICK_DIR_FILE);
-        } else if (id == R.id.buttonSelectIcon) {
+        if (id == R.id.buttonSelectIcon) {
             getStockActivity()
                     .showFilePickerActivity(CODE_PICK_IMAGE_FILE , new String[]{"image/png" , "image/jpeg"});
         } else if (id == R.id.buttonSelectPath) {
@@ -444,52 +391,7 @@ public class StockViewModel extends AndroidViewModel {
                     .showFilePickerActivity(CODE_PICK_MOD_FILE , new String[]{"application/octet-stream"});
         }
     }
-
-    @NonNull
-    private DialogInstallBinding formingInstallView() {
-        installBinding =
-                DialogInstallBinding.inflate(LayoutInflater.from(getStockActivity()));
-        installBinding.setStockVM(this);
-        installBinding.buttonSelectFolder.setOnClickListener(v ->
-                sendIntent(installBinding.buttonSelectFolder));
-        installBinding.buttonSelectIcon.setOnClickListener(v ->
-                sendIntent(installBinding.buttonSelectIcon));
-        installBinding.copyBT.setOnClickListener(v ->
-                createInstallIntent());
-        return installBinding;
-    }
-
-    @NonNull
-    private DialogEditBinding formingEditView() {
-        editBinding =
-                DialogEditBinding.inflate(LayoutInflater.from(getStockActivity()));
-        editBinding.setStockVM(this);
-
-        if (!tempInnerGameData.icon.isEmpty()) {
-            Picasso.get()
-                    .load(tempInnerGameData.icon)
-                    .fit()
-                    .into(editBinding.imageView);
-        }
-
-        editBinding.buttonSelectPath.setOnClickListener(this::sendIntent);
-        editBinding.buttonSelectMod.setOnClickListener(this::sendIntent);
-        editBinding.buttonSelectIcon.setOnClickListener(this::sendIntent);
-        editBinding.editBT.setOnClickListener(v -> createEditIntent());
-        return editBinding;
-    }
     // endregion Dialog
-
-    // region Game install
-    private void doInstallGame(DocumentFile gameFile , InnerGameData innerGameData) {
-        // TODO: 13.10.2023 NEED TO REWORK
-    }
-
-    private LiveData<Long> calculateSizeDir(DocumentFile srcDir) {
-        var installer = new WorkerBuilder(getStockActivity());
-        return installer.calculateDirSize(srcDir);
-    }
-    // endregion Game install
 
     // region Refresh
     public void refreshIntGamesDirectory() {

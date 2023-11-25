@@ -10,12 +10,10 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import org.qp.android.R;
 import org.qp.android.databinding.DialogEditBinding;
-import org.qp.android.databinding.DialogInstallBinding;
 
 import java.util.ArrayList;
 
 public class StockDialogFrags extends StockPatternDialogFrags {
-    private DialogInstallBinding installBinding;
     private DialogEditBinding editBinding;
     private StockDialogType dialogType;
     private ArrayList<String> names;
@@ -26,10 +24,6 @@ public class StockDialogFrags extends StockPatternDialogFrags {
 
     public void setDialogType(StockDialogType dialogType) {
         this.dialogType = dialogType;
-    }
-
-    public void setInstallBinding(DialogInstallBinding installBinding) {
-        this.installBinding = installBinding;
     }
 
     public void setEditBinding(DialogEditBinding editBinding) {
@@ -90,15 +84,6 @@ public class StockDialogFrags extends StockPatternDialogFrags {
                 });
                 return builder.create();
             }
-            case INSTALL_DIALOG -> {
-                if (installBinding != null) {
-                    builder.setView(installBinding.getRoot());
-                    return builder.create();
-                } else {
-                    dismissAllowingStateLoss();
-                    return super.onCreateDialog(savedInstanceState);
-                }
-            }
             case INFO_DIALOG -> {
                 builder.setMessage(message);
                 builder.setTitle(title);
@@ -145,9 +130,6 @@ public class StockDialogFrags extends StockPatternDialogFrags {
     public void onDestroy() {
         super.onDestroy();
         listener.onDialogDestroy(this);
-        if (installBinding != null) {
-            installBinding = null;
-        }
         if (editBinding != null) {
             editBinding = null;
         }
