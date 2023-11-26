@@ -10,6 +10,7 @@ import static org.qp.android.helpers.utils.PathUtil.removeExtension;
 
 import android.app.Application;
 import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 
@@ -50,7 +51,6 @@ public class StockViewModel extends AndroidViewModel {
     public static final int CODE_PICK_IMAGE_FILE = 300;
     public static final int CODE_PICK_PATH_FILE = 301;
     public static final int CODE_PICK_MOD_FILE = 302;
-    public static final int CODE_PICK_ROOT_FOLDER = 303;
 
     public ObservableField<StockActivity> activityObservableField =
             new ObservableField<>();

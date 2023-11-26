@@ -23,7 +23,7 @@
     <!-- Dialog Error -->
         <string name="error">Error</string>
         <string name="interFolderError">Error reading the internal folder of the application</string>
-        <string name="gamesFolderError">Error reading and/or creating a folder with games</string>
+        <string name="gamesFolderError">Error reading and/or creating a folder with games. Please select another folder with games</string>
         <string name="gameFolderEmpty">I didn\'t find a file in the format in the folder with the game .qsp or .gam!</string>
         <string name="infoFileNotWritable">Error reading the game information file</string>
         <string name="infoFileWriteError">Error writing game information to a file</string>
