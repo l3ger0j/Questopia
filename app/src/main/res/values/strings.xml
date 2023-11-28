@@ -92,7 +92,7 @@
         <string name="appName">Questopia</string>
     <!-- SettingsFragment -->
         <string name="closeToApply">Close settings to apply changes</string>
-        <string name="settingsEffect">The setting will take effect the next time you unpack the game</string>
+        <string name="settingsEffect">The settings will take effect after changing the description of the game</string>
         <string name="addFolder">Select a folder for games</string>
         <string name="addFolderSum0">Current root dir is internal directory of the application</string>
         <string name="addFolderSum1">Current root dir is external directory of the device</string>
