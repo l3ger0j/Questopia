@@ -157,6 +157,7 @@
         <string name="filePicker">Диалог Выбора Файла (альфа)</string>
         <string name="immersiveModeTitle">Режим Погружения</string>
         <string name="separatorTitle">Разделитель</string>
+        <string name="separatorSum">Изменяет видимость разделителя между списком действий и текстом локации</string>
         <string name="autoscrollTitle">Автопролистывание</string>
         <string name="imageDebugTitle">Отладчик путей к картинкам</string>
         <string name="imageDebugSum">Режим, который включает отображение диалога с ошибкой если путь к картинке неправильный</string>

@@ -31,6 +31,7 @@
     <SwitchPreferenceCompat
         android:defaultValue="false"
         android:key="separator"
+        android:summary="@string/separatorSum"
         android:title="@string/separatorTitle" />
     <SwitchPreferenceCompat
         android:defaultValue="true"
