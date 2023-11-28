@@ -165,6 +165,7 @@
         <string name="musicDebugTitle">Music Path Debugger</string>
         <string name="musicDebugSum">A mode that enables the display of an error dialog if the path to the music is incorrect</string>
         <string name="execStringTitle">String executor</string>
+        <string name="execStringSum">Changes the visibility of a special dialog that can be used for debugging or cheating</string>
         <!-- Extra section -->
         <string name="pluginTitle">Extension menu</string>
         <string name="aboutTitle">About Quest Player</string>

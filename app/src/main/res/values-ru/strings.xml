@@ -164,6 +164,7 @@
         <string name="musicDebugTitle">Отладчик путей к музыке</string>
         <string name="musicDebugSum">Режим, который включает отображение диалога с ошибкой если путь к музыке указан неверно</string>
         <string name="execStringTitle">Исполнитель строк</string>
+        <string name="execStringSum">Изменяет видимость специального диалога, который можно использовать для отладки или читерства</string>
         <!-- Extra section -->
         <string name="pluginTitle">Меню плагинов</string>
         <string name="aboutTitle">О программе</string>

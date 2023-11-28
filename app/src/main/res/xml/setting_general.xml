@@ -46,7 +46,8 @@
     <SwitchPreferenceCompat
         android:defaultValue="false"
         android:key="execString"
-        android:title="@string/execStringTitle"/>
+        android:summary="@string/execStringSum"
+        android:title="@string/execStringTitle" />
     <SwitchPreferenceCompat
         android:defaultValue="false"
         android:key="debugImage"
