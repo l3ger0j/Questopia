@@ -227,13 +227,13 @@ public class StockActivity extends AppCompatActivity implements
                 if (navController.getCurrentDestination() != null) {
                     if (Objects.equals(navController.getCurrentDestination().getLabel()
                             , "StockRecyclerFragment")) {
-                        getOnBackPressedDispatcher().onBackPressed();
+                        finish();
                     } else {
                         stockViewModel.isHideFAB.set(false);
                         navController.popBackStack();
                     }
                 } else {
-                    getOnBackPressedDispatcher().onBackPressed();
+                    finish();
                 }
             }
         });
