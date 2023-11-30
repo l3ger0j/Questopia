@@ -1,165 +1,32 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <androidx.preference.PreferenceScreen
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <PreferenceCategory
-        android:title="@string/generalCatTitle">
+    <Preference
+        android:title="@string/generalCatTitle"
+        android:key="generalPref" />
 
-        <ListPreference
-            android:defaultValue="ru"
-            android:entries="@array/langName"
-            android:entryValues="@array/langValue"
-            android:key="lang"
-            android:icon="@drawable/baseline_language_24"
-            android:summary="@string/langSum"
-            android:title="@string/langTitle" />
-        <ListPreference
-            android:defaultValue="1000"
-            android:entries="@array/binPrefName"
-            android:entryValues="@array/binPrefValue"
-            android:key="binPref"
-            android:summary="@string/binPrefSum"
-            android:title="@string/binPrefTitle" />
-        <ListPreference
-            android:defaultValue="1/3"
-            android:entries="@array/actsHeight"
-            android:entryValues="@array/actsHeight"
-            android:key="actsHeight"
-            android:title="@string/actsHeightTitle" />
-        <SwitchPreferenceCompat
-            android:defaultValue="true"
-            android:key="sound"
-            android:icon="@drawable/baseline_music_note_24"
-            android:title="@string/soundTitle" />
-        <SwitchPreferenceCompat
-            android:defaultValue="false"
-            android:key="separator"
-            android:title="@string/separatorTitle" />
-        <SwitchPreferenceCompat
-            android:defaultValue="true"
-            android:key="immersiveMode"
-            android:icon="@drawable/baseline_fullscreen_24"
-            android:title="@string/immersiveModeTitle" />
-        <SwitchPreferenceCompat
-            android:defaultValue="true"
-            android:key="autoscroll"
-            android:icon="@drawable/baseline_move_down_24"
-            android:title="@string/autoscrollTitle" />
-        <SwitchPreferenceCompat
-            android:defaultValue="false"
-            android:key="execString"
-            app:title="@string/execStringTitle"/>
-        <SwitchPreferenceCompat
-            android:defaultValue="false"
-            android:key="debugImage"
-            android:summary="@string/imageDebugSum"
-            android:title="@string/imageDebugTitle" />
-        <SwitchPreferenceCompat
-            android:defaultValue="false"
-            android:key="debugMusic"
-            android:summary="@string/musicDebugSum"
-            android:title="@string/musicDebugTitle" />
-    </PreferenceCategory>
+    <Preference
+        android:title="@string/textCatTitle"
+        android:key="textPref" />
 
-    <PreferenceCategory
-        android:title="@string/textCatTitle">
+    <Preference
+        android:title="@string/imageCatTitle"
+        android:key="imagePref" />
 
-        <ListPreference
-            android:defaultValue="0"
-            android:entries="@array/fontName"
-            android:entryValues="@array/fontValue"
-            android:key="typeface"
-            android:title="@string/fontStyleTitle" />
-        <ListPreference
-            android:defaultValue="16"
-            android:entries="@array/fontSize"
-            android:entryValues="@array/fontSize"
-            android:icon="@drawable/baseline_format_size_24"
-            android:key="fontSize"
-            android:title="@string/fontSizeTitle" />
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:key="useGameFont"
-            android:summary="@string/useGameFontSum"
-            android:title="@string/useGameFontTitle" />
-        <SwitchPreferenceCompat
-            android:defaultValue="true"
-            android:key="useGameTextColor"
-            android:summary="@string/useGameTextColorSum"
-            android:title="@string/useGameTextColorTitle" />
-        <com.jaredrummler.android.colorpicker.ColorPreferenceCompat
-            android:defaultValue="@color/def_text_color"
-            android:key="textColor"
-            android:title="@string/textColorTitle" />
-        <SwitchPreferenceCompat
-            android:defaultValue="true"
-            android:key="useGameBackgroundColor"
-            android:summary="@string/useGameBackgroundColorSum"
-            android:title="@string/useGameBackgroundColorTitle" />
-        <com.jaredrummler.android.colorpicker.ColorPreferenceCompat
-            android:defaultValue="@color/def_back_color"
-            android:key="backColor"
-            android:title="@string/backColorTitle" />
-        <SwitchPreferenceCompat
-            android:defaultValue="true"
-            android:key="useGameLinkColor"
-            android:summary="@string/useGameLinkColorSum"
-            android:title="@string/useGameLinkColorTitle" />
-        <com.jaredrummler.android.colorpicker.ColorPreferenceCompat
-            android:defaultValue="@color/def_link_color"
-            android:key="linkColor"
-            android:title="@string/linkColorTitle" />
-    </PreferenceCategory>
+    <Preference
+        android:title="@string/pluginTitle"
+        android:key="showExtensionMenu"/>
 
-    <PreferenceCategory
-        android:title="@string/imageCatTitle">
+    <Preference
+        android:title="@string/newsMenuTitle"
+        android:key="newsApp" />
 
-        <SwitchPreferenceCompat
-            android:defaultValue="true"
-            android:key="autoWidth"
-            android:summary="@string/autoWidthSum"
-            android:title="@string/autoWidthTitle" />
-        <EditTextPreference
-            android:defaultValue="400"
-            android:key="customWidth"
-            android:selectAllOnFocus="true"
-            android:singleLine="true"
-            android:title="@string/customWidthTitle" />
-        <SwitchPreferenceCompat
-            android:defaultValue="true"
-            android:key="autoHeight"
-            android:summary="@string/autoHeightSum"
-            android:title="@string/autoHeightTitle" />
-        <EditTextPreference
-            android:defaultValue="400"
-            android:key="customHeight"
-            android:selectAllOnFocus="true"
-            android:singleLine="true"
-            android:title="@string/customHeightTitle" />
-        <SwitchPreferenceCompat
-            android:defaultValue="false"
-            android:key="fullScreenImage"
-            android:selectAllOnFocus="true"
-            android:singleLine="true"
-            android:summary="@string/fullScreenImageSum"
-            android:title="@string/fullScreenImageTitle" />
-    </PreferenceCategory>
+    <Preference
+        android:title="@string/aboutTitle"
+        android:key="showAbout" />
 
-    <PreferenceCategory
-        android:title="@string/extraCatTitle">
-
-        <Preference
-            android:title="@string/pluginTitle"
-            android:key="showExtensionMenu"/>
-        <Preference
-            android:title="@string/newsMenuTitle"
-            android:key="newsApp" />
-        <Preference
-            android:title="@string/aboutTitle"
-            android:key="showAbout" />
-        <Preference
-            android:key="showVersion" />
-    </PreferenceCategory>
+    <Preference
+        android:key="showVersion" />
 
 </androidx.preference.PreferenceScreen>

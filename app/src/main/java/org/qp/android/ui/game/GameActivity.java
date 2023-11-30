@@ -784,7 +784,8 @@ public class GameActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onDialogPositiveClick(@NonNull DialogFragment dialog) {
+    public void onDialogPositiveClick(DialogFragment dialog) {
+        if (dialog == null) return;
         var dialogTag = dialog.getTag();
         if (dialogTag != null) {
             switch (dialogTag) {
@@ -817,11 +818,18 @@ public class GameActivity extends AppCompatActivity implements
     @Override
     public void onDialogNegativeClick(DialogFragment dialog) {
         if (dialog.getTag() != null) {
-            switch (dialog.getTag()) {
-                case "showMenuDialogFragment" ->
-                        gameViewModel.outputIntObserver.setValue(-1);
-                case "inputDialogFragment" , "executorDialogFragment" ->
-                        storageHelper.openFilePicker("text/plain");
+            if (dialog.getTag().equals("showMenuDialogFragment")) {
+                gameViewModel.outputIntObserver.setValue(-1);
+            }
+        }
+    }
+
+    @Override
+    public void onDialogNeutralClick(DialogFragment dialog) {
+        if (dialog.getTag() != null) {
+            if (dialog.getTag().equals("inputDialogFragment")
+                    || dialog.getTag().equals("executorDialogFragment")) {
+                storageHelper.openFilePicker("text/plain");
             }
         }
     }

@@ -1,6 +1,5 @@
 plugins {
     id 'com.android.application'
-    id 'org.jetbrains.kotlin.android'
     id 'com.google.dagger.hilt.android'
 }
 
@@ -23,15 +22,15 @@ android {
     configurations {
         configureEach {
             exclude group: 'xpp3', module: 'xpp3'
-            exclude group: 'androidx.lifecycle', module: 'lifecycle-viewmodel-ktx'
         }
     }
 
     externalNativeBuild {
-        ndkBuild {
-            path 'src/main/jni/qsp-5.7/Android.mk'
+        cmake {
+            path "src/main/jni/CMakeLists.txt"
         }
     }
+
     buildTypes {
         release {
             minifyEnabled true
@@ -39,12 +38,11 @@ android {
             proguardFiles fileTree('proguard').asList().toArray()
         }
     }
+
     compileOptions {
+        coreLibraryDesugaringEnabled = true
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
-    }
-    kotlinOptions {
-        jvmTarget = '17'
     }
 
     buildFeatures {
@@ -53,30 +51,32 @@ android {
         aidl true
     }
 
-    ndkVersion = '25.2.9519653'
+    ndkVersion = '26.1.10909125'
     lint {
         abortOnError false
     }
+
     namespace 'org.qp.android'
 }
 
 dependencies {
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
+
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.documentfile:documentfile:1.0.1'
-    implementation 'androidx.preference:preference-ktx:1.2.1'
-    implementation 'androidx.fragment:fragment-ktx:1.6.1'
-    implementation 'androidx.navigation:navigation-fragment:2.7.4'
-    implementation 'androidx.navigation:navigation-ui:2.7.4'
+    implementation 'androidx.preference:preference:1.2.1'
+    implementation 'androidx.fragment:fragment:1.6.2'
+    implementation 'androidx.webkit:webkit:1.8.0'
+    implementation 'androidx.navigation:navigation-fragment:2.7.5'
+    implementation 'androidx.navigation:navigation-ui:2.7.5'
     implementation 'androidx.work:work-runtime:2.8.1'
     implementation 'com.google.android.material:material:1.10.0'
     implementation 'androidx.core:core-splashscreen:1.0.1'
 
-    implementation "androidx.core:core-ktx:$kotlin_version"
-
     // Room
-    implementation "androidx.room:room-runtime:2.5.2"
-    annotationProcessor "androidx.room:room-compiler:2.5.2"
+    implementation "androidx.room:room-runtime:2.6.0"
+    annotationProcessor "androidx.room:room-compiler:2.6.0"
 
     // DI
     implementation "com.google.dagger:hilt-android:$rootProject.hilt_version"

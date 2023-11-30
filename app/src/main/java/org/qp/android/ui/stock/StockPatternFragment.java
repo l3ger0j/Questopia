@@ -4,7 +4,6 @@ import android.content.Context;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.RecyclerView;
 
 public abstract class StockPatternFragment extends Fragment {
 
@@ -14,8 +13,6 @@ public abstract class StockPatternFragment extends Fragment {
         void onClickDownloadButton();
         void onItemClick(int position);
         void onLongItemClick();
-        void onScrolled(RecyclerView recyclerView , int dx , int dy);
-        void onScrollStateChanged(RecyclerView recyclerView , int newState);
     }
 
     public StockPatternFragment.StockPatternFragmentList listener;

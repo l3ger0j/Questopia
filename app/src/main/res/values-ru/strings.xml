@@ -15,8 +15,6 @@
         <string name="promptCloseGame">Вы уверены, что хотите закрыть игру?</string>
     <!-- Dialog Select -->
         <string name="selectGameFile">Выберите файл игры для запуска</string>
-    <!-- Dialog Executor -->
-        <string name="selectTemplateFile">Выберите файл</string>
     <!-- Dialog Edit -->
         <string name="selectPathFile">Выберите патч-файл в формате .qsp</string>
         <string name="selectModFile">Выберите файл мода в формате .qsp</string>
@@ -25,7 +23,7 @@
     <!-- Dialog Error -->
         <string name="error">Ошибка</string>
         <string name="interFolderError">Ошибка чтения внутренней папки приложения</string>
-        <string name="gamesFolderError">Ошибка чтения и/или создания папки с играми</string>
+        <string name="gamesFolderError">Ошибка чтения и/или создания папки с играми. Пожалуйста, выберите другую папку с играми</string>
         <string name="gameFolderEmpty">Я не нашла в папке с игрой файла в формате .qsp или .gam!</string>
         <string name="infoFileNotWritable">Ошибка чтения файла с информацией об игре</string>
         <string name="infoFileWriteError">Ошибка записи информации об игре в файл</string>
@@ -93,8 +91,8 @@
         <string name="appName">Questopia</string>
     <!-- SettingsFragment -->
         <string name="closeToApply">Закройте настройки для применения изменений</string>
-        <string name="settingsEffect">Настройки вступят в силу при следующей распаковке игры</string>
-        <string name="addFolder">Изменить корневую директорию</string>
+        <string name="settingsEffect">Настройки вступят в силу после изменения описания к игре</string>
+        <string name="addFolder">Выбрать папку для игр</string>
         <string name="addFolderSum0">Текущий корневой каталог это внутренняя директория приложения</string>
         <string name="addFolderSum1">Текущий корневая директория это внешняя директория устройства</string>
     <!-- FragmentImageBox -->
@@ -121,7 +119,7 @@
         <string name="deleteGameTitle">Удалить игру</string>
     <!-- Menu settings fragment -->
         <!-- General section -->
-        <string name="generalCatTitle">Главное</string>
+        <string name="generalCatTitle">Основные настройки приложения</string>
         <string name="langTitle">Язык</string>
         <string name="langSum">Выберите язык интерфейса</string>
         <string name="binPrefTitle">Двоичные Префиксы</string>
@@ -159,14 +157,15 @@
         <string name="filePicker">Диалог Выбора Файла (альфа)</string>
         <string name="immersiveModeTitle">Режим Погружения</string>
         <string name="separatorTitle">Разделитель</string>
+        <string name="separatorSum">Изменяет видимость разделителя между списком действий и текстом локации</string>
         <string name="autoscrollTitle">Автопролистывание</string>
         <string name="imageDebugTitle">Отладчик путей к картинкам</string>
         <string name="imageDebugSum">Режим, который включает отображение диалога с ошибкой если путь к картинке неправильный</string>
         <string name="musicDebugTitle">Отладчик путей к музыке</string>
         <string name="musicDebugSum">Режим, который включает отображение диалога с ошибкой если путь к музыке указан неверно</string>
         <string name="execStringTitle">Исполнитель строк</string>
+        <string name="execStringSum">Изменяет видимость специального диалога, который можно использовать для отладки или читерства</string>
         <!-- Extra section -->
-        <string name="extraCatTitle">Экстра</string>
         <string name="pluginTitle">Меню плагинов</string>
         <string name="aboutTitle">О программе</string>
     <!-- Menu save and load -->

@@ -2,14 +2,13 @@ package org.qp.android.ui.stock;
 
 import static org.qp.android.helpers.utils.FileUtil.deleteDirectory;
 import static org.qp.android.helpers.utils.FileUtil.documentWrap;
-import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_DIR_FILE;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_IMAGE_FILE;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_MOD_FILE;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_PATH_FILE;
-import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_ROOT_FOLDER;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -17,12 +16,16 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.storage.StorageManager;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import androidx.activity.OnBackPressedCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -32,6 +35,7 @@ import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.os.LocaleListCompat;
 import androidx.core.splashscreen.SplashScreen;
+import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.ViewModelProvider;
@@ -40,9 +44,10 @@ import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.anggrayudi.storage.SimpleStorageHelper;
+import com.anggrayudi.storage.file.DocumentFileCompat;
 import com.github.javiersantos.appupdater.AppUpdater;
 import com.github.javiersantos.appupdater.enums.UpdateFrom;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 
 import org.qp.android.BuildConfig;
 import org.qp.android.QuestPlayerApplication;
@@ -79,11 +84,12 @@ public class StockActivity extends AppCompatActivity implements
     private ActionMode actionMode;
     protected ActivityStockBinding activityStockBinding;
     private boolean isEnable = false;
-    private FloatingActionButton mFAB;
+    private ExtendedFloatingActionButton mFAB;
     private RecyclerView mRecyclerView;
     private ArrayList<InnerGameData> tempList;
     private final ArrayList<InnerGameData> selectList = new ArrayList<>();
 
+    private ActivityResultLauncher<Intent> rootFolderLauncher;
     private final SimpleStorageHelper storageHelper = new SimpleStorageHelper(this);
 
     public void setRecyclerView(RecyclerView mRecyclerView) {
@@ -103,11 +109,7 @@ public class StockActivity extends AppCompatActivity implements
         gamesMap = stockViewModel.getGamesMap();
 
         mFAB = activityStockBinding.stockFAB;
-        mFAB.setOnClickListener(view -> stockViewModel.isHideFABMenu.set(!stockViewModel.isHideFABMenu.get()));
-        var copyFAB = activityStockBinding.copyFAB;
-        copyFAB.setOnClickListener(v -> stockViewModel.showDialogInstall());
-        var createFAB = activityStockBinding.createFAB;
-        createFAB.setOnClickListener(view -> showDirPickerDialog(CODE_PICK_ROOT_FOLDER));
+        mFAB.setOnClickListener(view -> showDirPickerDialog());
 
         storageHelper.setOnFileSelected((integer , documentFiles) -> {
             if (documentFiles != null) {
@@ -147,27 +149,32 @@ public class StockActivity extends AppCompatActivity implements
             return null;
         });
 
-        storageHelper.setOnFolderSelected((integer , documentFile) -> {
-            if (documentFile != null) {
-                switch (integer) {
-                    case CODE_PICK_DIR_FILE -> {
-                        stockViewModel.setTempInstallDir(documentFile);
-                        stockViewModel.isSelectFolder.set(true);
-                    }
-                    case CODE_PICK_ROOT_FOLDER -> {
-                        var application = (QuestPlayerApplication) getApplication();
-                        if (application != null) application.setCustomRootFolder(documentFile);
-                    }
-                }
-            }
+        rootFolderLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult() , result -> {
+            if (result.getResultCode() == Activity.RESULT_OK) {
+                var data = result.getData();
+                if (data == null) return;
+                var uri = data.getData();
+                if (uri == null) return;
 
-            return null;
+                grantUriPermission(getPackageName() ,
+                        uri ,
+                        Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
+                                | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+                getContentResolver().takePersistableUriPermission(uri ,
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION
+                                | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+
+                var rootFolder = DocumentFileCompat.fromUri(this , uri);
+                var application = (QuestPlayerApplication) getApplication();
+                if (application != null) application.setCustomRootFolder(rootFolder);
+            }
         });
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ActivityCompat.checkSelfPermission(this , Manifest.permission.POST_NOTIFICATIONS)
                     != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this , new String[]{ Manifest.permission.POST_NOTIFICATIONS } , POST_NOTIFICATION);
+                ActivityCompat.requestPermissions(this , new String[]{Manifest.permission.POST_NOTIFICATIONS} , POST_NOTIFICATION);
             }
         }
 
@@ -176,25 +183,25 @@ public class StockActivity extends AppCompatActivity implements
             if (!Environment.isExternalStorageManager()) {
                 try {
                     Uri uri = Uri.parse("package:" + BuildConfig.APPLICATION_ID);
-                    Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, uri);
+                    Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION , uri);
                     startActivity(intent);
-                } catch (Exception ex){
+                } catch (Exception ex) {
                     Intent intent = new Intent();
                     intent.setAction(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
                     startActivity(intent);
                 }
             }
         } else {
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
-                    && ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                var permission = new String[]{ Manifest.permission.READ_EXTERNAL_STORAGE , Manifest.permission.WRITE_EXTERNAL_STORAGE};
-                ActivityCompat.requestPermissions(this, permission , READ_EXTERNAL_STORAGE_CODE);
+            if (ActivityCompat.checkSelfPermission(this , Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
+                    && ActivityCompat.checkSelfPermission(this , Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                var permission = new String[]{Manifest.permission.READ_EXTERNAL_STORAGE , Manifest.permission.WRITE_EXTERNAL_STORAGE};
+                ActivityCompat.requestPermissions(this , permission , READ_EXTERNAL_STORAGE_CODE);
             }
         }
 
         loadSettings();
 
-        Log.i(TAG,"Stock Activity created");
+        Log.i(TAG , "Stock Activity created");
 
         setContentView(activityStockBinding.getRoot());
 
@@ -208,8 +215,52 @@ public class StockActivity extends AppCompatActivity implements
 
         new AppUpdater(this)
                 .setUpdateFrom(UpdateFrom.GITHUB)
-                .setGitHubUserAndRepo("l3ger0j", "Questopia")
+                .setGitHubUserAndRepo("l3ger0j" , "Questopia")
                 .start();
+
+        getOnBackPressedDispatcher().addCallback(this , new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                if (getSupportActionBar() != null) {
+                    getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+                }
+                if (navController.getCurrentDestination() != null) {
+                    if (Objects.equals(navController.getCurrentDestination().getLabel()
+                            , "StockRecyclerFragment")) {
+                        finish();
+                    } else {
+                        stockViewModel.isHideFAB.set(false);
+                        navController.popBackStack();
+                    }
+                } else {
+                    finish();
+                }
+            }
+        });
+    }
+
+    public void saveRootDirIntoPrefs() {
+        var application = (QuestPlayerApplication) getApplication();
+        var rootDir = application.getCustomRootDir();
+        if (rootDir == null) return;
+        var rootStringUri = rootDir.getUri().toString();
+        var preferences = getPreferences(MODE_PRIVATE);
+        preferences
+                .edit()
+                .putString("rootFolder" , rootStringUri)
+                .apply();
+    }
+
+    public void restoreRootDirFromPrefs() {
+        var application = (QuestPlayerApplication) getApplication();
+        var preferences = getPreferences(MODE_PRIVATE);
+        var rootFolderUri = preferences.getString("rootFolder" , null);
+        if (rootFolderUri != null) {
+            var decodeRootFolderUri = Uri.parse(Uri.decode(rootFolderUri));
+            var rootFile = DocumentFile.fromTreeUri(this , decodeRootFolderUri);
+            if (rootFile != null && rootFile.exists())
+                application.setCustomRootFolder(rootFile);
+        }
     }
 
     @Override
@@ -248,7 +299,7 @@ public class StockActivity extends AppCompatActivity implements
             }
         }
 
-        storageHelper.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        storageHelper.onRequestPermissionsResult(requestCode , permissions , grantResults);
     }
 
     @Override
@@ -261,25 +312,9 @@ public class StockActivity extends AppCompatActivity implements
         return true;
     }
 
-    @Override
-    public void onBackPressed() {
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(false);
-        }
-        if (navController.getCurrentDestination() != null) {
-            if (Objects.equals(navController.getCurrentDestination().getLabel()
-                    , "StockRecyclerFragment")) {
-                super.onBackPressed();
-            } else {
-                stockViewModel.isHideFAB.set(false);
-                navController.popBackStack();
-            }
-        } else {
-            super.onBackPressed();
-        }
-    }
-
     private void loadSettings() {
+        restoreRootDirFromPrefs();
+
         settingsController = stockViewModel.getSettingsController();
         stockViewModel.setController(settingsController);
         if (settingsController.binaryPrefixes <= 1000) {
@@ -307,7 +342,7 @@ public class StockActivity extends AppCompatActivity implements
         }
     }
 
-    public void showDialogFragment (DialogFragment dialogFragment , StockDialogType dialogType) {
+    public void showDialogFragment(DialogFragment dialogFragment , StockDialogType dialogType) {
         var fragment = getSupportFragmentManager()
                 .findFragmentByTag(dialogFragment.getTag());
         if (fragment != null && fragment.isAdded()) {
@@ -316,8 +351,6 @@ public class StockActivity extends AppCompatActivity implements
             switch (dialogType) {
                 case EDIT_DIALOG ->
                         dialogFragment.show(getSupportFragmentManager() , "editDialogFragment");
-                case INSTALL_DIALOG ->
-                        dialogFragment.show(getSupportFragmentManager() , "installDialogFragment");
                 case SELECT_DIALOG ->
                         dialogFragment.show(getSupportFragmentManager() , "selectDialogFragment");
             }
@@ -332,8 +365,23 @@ public class StockActivity extends AppCompatActivity implements
         startActivity(intent);
     }
 
-    public void showDirPickerDialog(int requestCode) {
-        storageHelper.openFolderPicker(requestCode);
+    public void showDirPickerDialog() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            var intentQ = new Intent();
+            var sm = (StorageManager) getSystemService(Activity.STORAGE_SERVICE);
+            var sv = sm.getPrimaryStorageVolume();
+            intentQ = sv.createOpenDocumentTreeIntent();
+            intentQ.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+            intentQ.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            rootFolderLauncher.launch(intentQ);
+        } else {
+            var intentLQ = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+            var flags = Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
+                    | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                    | Intent.FLAG_GRANT_READ_URI_PERMISSION;
+            intentLQ.addFlags(flags);
+            rootFolderLauncher.launch(intentLQ);
+        }
     }
 
     public void onItemClick(int position) {
@@ -360,7 +408,7 @@ public class StockActivity extends AppCompatActivity implements
                 new ViewModelProvider(this)
                         .get(StockViewModel.class)
                         .setTempGameData(stockViewModel.getGamesMap()
-                        .get(stockViewModel.getGameIdByPosition(position)));
+                                .get(stockViewModel.getGameIdByPosition(position)));
                 navController.navigate(R.id.stockGameFragment);
                 stockViewModel.isHideFAB.set(true);
             }
@@ -369,7 +417,9 @@ public class StockActivity extends AppCompatActivity implements
 
     @Override
     public void onDialogDestroy(DialogFragment dialog) {
-        stockViewModel.isHideFAB.set(false);
+        if (!Objects.equals(dialog.getTag() , "editDialogFragment")) {
+            stockViewModel.isHideFAB.set(false);
+        }
     }
 
     @Override
@@ -387,7 +437,7 @@ public class StockActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onDialogListClick(DialogFragment dialog, int which) {
+    public void onDialogListClick(DialogFragment dialog , int which) {
         if (Objects.equals(dialog.getTag() , "selectDialogFragment")) {
             stockViewModel.outputIntObserver.setValue(which);
         }
@@ -415,7 +465,7 @@ public class StockActivity extends AppCompatActivity implements
         var callback = new ActionMode.Callback() {
             @Override
             public boolean onCreateActionMode(ActionMode mode , Menu menu) {
-                mode.getMenuInflater().inflate(R.menu.menu_delete, menu);
+                mode.getMenuInflater().inflate(R.menu.menu_delete , menu);
                 return true;
             }
 
@@ -483,36 +533,18 @@ public class StockActivity extends AppCompatActivity implements
                 isEnable = false;
                 tempList.clear();
                 selectList.clear();
-                stockViewModel.isHideFABMenu.set(false);
                 mFAB.show();
             }
         };
 
-        stockViewModel.isHideFABMenu.set(true);
         mFAB.hide();
         actionMode = startSupportActionMode(callback);
     }
 
     @Override
-    public void onScrolled(RecyclerView recyclerView , int dx , int dy) {
-        // TODO: 14.09.2023 NEED TO REWORK
-//        if (!isEnable) {
-//            if (dy > 0 || dy < 0 && mFAB.isShown()) {
-//                stockViewModel.isHideMenu.set(true);
-//                mFAB.hide();
-//            }
-//        }
-    }
-
-    @Override
-    public void onScrollStateChanged(RecyclerView recyclerView , int newState) {
-        // TODO: 14.09.2023 NEED TO REWORK
-//        if (!isEnable) {
-//            if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-//                stockViewModel.isHideMenu.set(false);
-//                mFAB.show();
-//            }
-//        }
+    protected void onPause() {
+        super.onPause();
+        saveRootDirIntoPrefs();
     }
 
     @Override
@@ -537,7 +569,7 @@ public class StockActivity extends AppCompatActivity implements
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         var inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu_stock, menu);
+        inflater.inflate(R.menu.menu_stock , menu);
         return true;
     }
 
@@ -568,16 +600,16 @@ public class StockActivity extends AppCompatActivity implements
     }
 
     private void showSettings() {
-        var intent = new Intent(this, SettingsActivity.class);
+        var intent = new Intent(this , SettingsActivity.class);
         startActivity(intent);
     }
 
     @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        return super.onKeyDown(keyCode, event);
+    public boolean onKeyDown(int keyCode , KeyEvent event) {
+        return super.onKeyDown(keyCode , event);
     }
 
-    private void filter(String text){
+    private void filter(String text) {
         var gameData = stockViewModel.getSortedGames();
         var filteredList = new ArrayList<InnerGameData>();
         for (var item : gameData) {

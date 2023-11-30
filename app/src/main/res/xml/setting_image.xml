@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <SwitchPreferenceCompat
+        android:defaultValue="true"
+        android:key="autoWidth"
+        android:summary="@string/autoWidthSum"
+        android:title="@string/autoWidthTitle" />
+    <EditTextPreference
+        android:defaultValue="400"
+        android:key="customWidth"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="@string/customWidthTitle" />
+    <SwitchPreferenceCompat
+        android:defaultValue="true"
+        android:key="autoHeight"
+        android:summary="@string/autoHeightSum"
+        android:title="@string/autoHeightTitle" />
+    <EditTextPreference
+        android:defaultValue="400"
+        android:key="customHeight"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="@string/customHeightTitle" />
+    <SwitchPreferenceCompat
+        android:defaultValue="false"
+        android:key="fullScreenImage"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:summary="@string/fullScreenImageSum"
+        android:title="@string/fullScreenImageTitle" />
+
+</PreferenceScreen>

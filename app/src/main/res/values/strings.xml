@@ -15,8 +15,6 @@
         <string name="promptCloseGame">Are you sure you want to close the game?</string>
     <!-- Dialog Select -->
         <string name="selectGameFile">Select a game file to run</string>
-    <!-- Dialog Executor -->
-        <string name="selectTemplateFile">Select File</string>
     <!-- Dialog Edit -->
         <string name="selectPathFile">Select the patch file in the format .qsp</string>
         <string name="selectModFile">Select the mod file in the format .qsp</string>
@@ -25,7 +23,7 @@
     <!-- Dialog Error -->
         <string name="error">Error</string>
         <string name="interFolderError">Error reading the internal folder of the application</string>
-        <string name="gamesFolderError">Error reading and/or creating a folder with games</string>
+        <string name="gamesFolderError">Error reading and/or creating a folder with games. Please select another folder with games</string>
         <string name="gameFolderEmpty">I didn\'t find a file in the format in the folder with the game .qsp or .gam!</string>
         <string name="infoFileNotWritable">Error reading the game information file</string>
         <string name="infoFileWriteError">Error writing game information to a file</string>
@@ -94,8 +92,8 @@
         <string name="appName">Questopia</string>
     <!-- SettingsFragment -->
         <string name="closeToApply">Close settings to apply changes</string>
-        <string name="settingsEffect">The setting will take effect the next time you unpack the game</string>
-        <string name="addFolder">Change the root directory</string>
+        <string name="settingsEffect">The settings will take effect after changing the description of the game</string>
+        <string name="addFolder">Select a folder for games</string>
         <string name="addFolderSum0">Current root dir is internal directory of the application</string>
         <string name="addFolderSum1">Current root dir is external directory of the device</string>
     <!-- FragmentImageBox -->
@@ -122,7 +120,7 @@
         <string name="deleteGameTitle">Delete game</string>
     <!-- Menu settings fragment -->
         <!-- General section -->
-        <string name="generalCatTitle">General</string>
+        <string name="generalCatTitle">Basic Application Settings</string>
         <string name="langTitle">Language</string>
         <string name="langSum">Choose display language</string>
         <string name="binPrefTitle">Binary prefixes</string>
@@ -160,14 +158,15 @@
         <string name="filePicker">File Picker Dialog (alpha)</string>
         <string name="immersiveModeTitle">Immersive Mode</string>
         <string name="separatorTitle">Separator</string>
+        <string name="separatorSum">Changes the visibility of the separator between the list of actions and the text of the location</string>
         <string name="autoscrollTitle">Autoscroll</string>
         <string name="imageDebugTitle">Image Path Debugger</string>
         <string name="imageDebugSum">A mode that enables the display of an error dialog if the path to the image is incorrect</string>
         <string name="musicDebugTitle">Music Path Debugger</string>
         <string name="musicDebugSum">A mode that enables the display of an error dialog if the path to the music is incorrect</string>
         <string name="execStringTitle">String executor</string>
+        <string name="execStringSum">Changes the visibility of a special dialog that can be used for debugging or cheating</string>
         <!-- Extra section -->
-        <string name="extraCatTitle">Extra</string>
         <string name="pluginTitle">Extension menu</string>
         <string name="aboutTitle">About Quest Player</string>
     <!-- Menu save and load -->

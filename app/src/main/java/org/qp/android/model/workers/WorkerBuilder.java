@@ -2,10 +2,12 @@ package org.qp.android.model.workers;
 
 import android.content.Context;
 
+import androidx.annotation.NonNull;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.work.Data;
+import androidx.work.ExistingWorkPolicy;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
@@ -25,7 +27,9 @@ public class WorkerBuilder {
         this.context = context;
     }
 
-    public LiveData<Boolean> copyDirToAnotherDir(DocumentFile srcDir, DocumentFile destDir) {
+    // TODO: 13.10.2023 USE FOREGROUND + DOCUMENTUTILS?
+    public LiveData<Boolean> copyDirToAnotherDir(@NonNull DocumentFile srcDir ,
+                                                 @NonNull DocumentFile destDir) {
         var inputData = new Data.Builder()
                 .putString("srcDir", srcDir.getUri().toString())
                 .putString("destDir", destDir.getUri().toString())
@@ -35,7 +39,10 @@ public class WorkerBuilder {
                 .setInputData(inputData)
                 .build();
 
-        WorkManager.getInstance(context).enqueue(workRequest);
+        WorkManager.getInstance(context)
+                .beginUniqueWork("copyDirToAnotherDir" ,
+                        ExistingWorkPolicy.REPLACE , workRequest)
+                .enqueue();
 
         WorkManager.getInstance(context)
                 .getWorkInfoByIdLiveData(workRequest.getId()).observeForever(workInfo -> {
@@ -53,6 +60,7 @@ public class WorkerBuilder {
                         }
                     }
                 });
+
         return isDone;
     }
 
@@ -77,6 +85,7 @@ public class WorkerBuilder {
                         }
                     }
                 });
+
         return dirSize;
     }
 }

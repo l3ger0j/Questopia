@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <ListPreference
+        android:defaultValue="0"
+        android:entries="@array/fontName"
+        android:entryValues="@array/fontValue"
+        android:key="typeface"
+        android:title="@string/fontStyleTitle" />
+    <ListPreference
+        android:defaultValue="16"
+        android:entries="@array/fontSize"
+        android:entryValues="@array/fontSize"
+        android:icon="@drawable/baseline_format_size_24"
+        android:key="fontSize"
+        android:title="@string/fontSizeTitle" />
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:key="useGameFont"
+        android:summary="@string/useGameFontSum"
+        android:title="@string/useGameFontTitle" />
+    <SwitchPreferenceCompat
+        android:defaultValue="true"
+        android:key="useGameTextColor"
+        android:summary="@string/useGameTextColorSum"
+        android:title="@string/useGameTextColorTitle" />
+    <com.jaredrummler.android.colorpicker.ColorPreferenceCompat
+        android:defaultValue="@color/def_text_color"
+        android:key="textColor"
+        android:title="@string/textColorTitle" />
+    <SwitchPreferenceCompat
+        android:defaultValue="true"
+        android:key="useGameBackgroundColor"
+        android:summary="@string/useGameBackgroundColorSum"
+        android:title="@string/useGameBackgroundColorTitle" />
+    <com.jaredrummler.android.colorpicker.ColorPreferenceCompat
+        android:defaultValue="@color/def_back_color"
+        android:key="backColor"
+        android:title="@string/backColorTitle" />
+    <SwitchPreferenceCompat
+        android:defaultValue="true"
+        android:key="useGameLinkColor"
+        android:summary="@string/useGameLinkColorSum"
+        android:title="@string/useGameLinkColorTitle" />
+    <com.jaredrummler.android.colorpicker.ColorPreferenceCompat
+        android:defaultValue="@color/def_link_color"
+        android:key="linkColor"
+        android:title="@string/linkColorTitle" />
+
+</PreferenceScreen>

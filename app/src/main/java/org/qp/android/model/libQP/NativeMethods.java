@@ -61,8 +61,11 @@ public class NativeMethods {
     public native Object QSPGetLastErrorData();
     public native String QSPGetErrorDesc(int errorNum);
     /* Game */
+    public native boolean QSPLoadGameWorld(String fileName);
     public native boolean QSPLoadGameWorldFromData(byte[] data , int dataSize, String fileName);
+    public native boolean QSPSaveGame(String fileName, boolean isRefresh);
     public native byte[] QSPSaveGameAsData(boolean isRefresh);
+    public native boolean QSPOpenSavedGame(String fileName, boolean isRefresh);
     public native boolean QSPOpenSavedGameFromData(byte[] data , int dataSize, boolean isRefresh);
     public native boolean QSPRestartGame(boolean isRefresh);
     public native void QSPSelectMenuItem(int index);

@@ -22,13 +22,11 @@
             android:background="@color/web_background"
             android:textColor="@color/web_text"
             android:textSize="16sp"
-            android:overScrollMode="never"
             app:layout_constraintBottom_toTopOf="@id/separator"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_weight="0.67"
-            app:setWebViewClient="@{gameViewModel.webViewClient}" />
+            app:layout_constraintVertical_weight="0.67" />
 
         <View
             android:id="@+id/separator"

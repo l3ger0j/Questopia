@@ -16,5 +16,17 @@
         android:id="@+id/newsFragment"
         android:name="org.qp.android.ui.news.NewsFragment"
         android:label="NewsFragment" />
+    <fragment
+        android:id="@+id/settingGeneralFragment"
+        android:name="org.qp.android.ui.settings.SettingGeneralFragment"
+        android:label="SettingGeneralFragment" />
+    <fragment
+        android:id="@+id/settingTextFragment"
+        android:name="org.qp.android.ui.settings.SettingTextFragment"
+        android:label="SettingTextFragment" />
+    <fragment
+        android:id="@+id/settingImageFragment"
+        android:name="org.qp.android.ui.settings.SettingImageFragment"
+        android:label="SettingImageFragment" />
 
 </navigation>
