@@ -454,4 +454,3 @@ public class StockViewModel extends AndroidViewModel {
     }
     // endregion Refresh
 }
-
