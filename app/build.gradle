@@ -65,18 +65,11 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.documentfile:documentfile:1.0.1'
-<<<<<<< HEAD
     implementation 'androidx.preference:preference:1.2.1'
     implementation 'androidx.fragment:fragment:1.6.2'
     implementation 'androidx.webkit:webkit:1.8.0'
     implementation 'androidx.navigation:navigation-fragment:2.7.5'
     implementation 'androidx.navigation:navigation-ui:2.7.5'
-=======
-    implementation 'androidx.preference:preference-ktx:1.2.1'
-    implementation 'androidx.fragment:fragment-ktx:1.6.1'
-    implementation 'androidx.navigation:navigation-fragment:2.7.4'
-    implementation 'androidx.navigation:navigation-ui:2.7.4'
->>>>>>> master
     implementation 'androidx.work:work-runtime:2.8.1'
     implementation 'com.google.android.material:material:1.10.0'
     implementation 'androidx.core:core-splashscreen:1.0.1'
