@@ -15,9 +15,7 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.storage.StorageManager;
-import android.provider.Settings;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -49,7 +47,6 @@ import com.github.javiersantos.appupdater.AppUpdater;
 import com.github.javiersantos.appupdater.enums.UpdateFrom;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 
-import org.qp.android.BuildConfig;
 import org.qp.android.QuestPlayerApplication;
 import org.qp.android.R;
 import org.qp.android.databinding.ActivityStockBinding;
@@ -156,11 +153,6 @@ public class StockActivity extends AppCompatActivity implements
                 var uri = data.getData();
                 if (uri == null) return;
 
-                grantUriPermission(getPackageName() ,
-                        uri ,
-                        Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
-                                | Intent.FLAG_GRANT_READ_URI_PERMISSION);
-
                 getContentResolver().takePersistableUriPermission(uri ,
                         Intent.FLAG_GRANT_READ_URI_PERMISSION
                                 | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
@@ -175,27 +167,6 @@ public class StockActivity extends AppCompatActivity implements
             if (ActivityCompat.checkSelfPermission(this , Manifest.permission.POST_NOTIFICATIONS)
                     != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(this , new String[]{Manifest.permission.POST_NOTIFICATIONS} , POST_NOTIFICATION);
-            }
-        }
-
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            if (!Environment.isExternalStorageManager()) {
-                try {
-                    Uri uri = Uri.parse("package:" + BuildConfig.APPLICATION_ID);
-                    Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION , uri);
-                    startActivity(intent);
-                } catch (Exception ex) {
-                    Intent intent = new Intent();
-                    intent.setAction(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
-                    startActivity(intent);
-                }
-            }
-        } else {
-            if (ActivityCompat.checkSelfPermission(this , Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
-                    && ActivityCompat.checkSelfPermission(this , Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                var permission = new String[]{Manifest.permission.READ_EXTERNAL_STORAGE , Manifest.permission.WRITE_EXTERNAL_STORAGE};
-                ActivityCompat.requestPermissions(this , permission , READ_EXTERNAL_STORAGE_CODE);
             }
         }
 
@@ -256,10 +227,25 @@ public class StockActivity extends AppCompatActivity implements
         var preferences = getPreferences(MODE_PRIVATE);
         var rootFolderUri = preferences.getString("rootFolder" , null);
         if (rootFolderUri != null) {
-            var decodeRootFolderUri = Uri.parse(Uri.decode(rootFolderUri));
-            var rootFile = DocumentFile.fromTreeUri(this , decodeRootFolderUri);
+            var validRootFolderUri = Uri.parse(rootFolderUri);
+            var rootFile = DocumentFile.fromTreeUri(this , validRootFolderUri);
             if (rootFile != null && rootFile.exists())
                 application.setCustomRootFolder(rootFile);
+        }
+    }
+
+    public void purgeRootDirFromPrefs() {
+        var application = (QuestPlayerApplication) getApplication();
+        var preferences = getPreferences(MODE_PRIVATE);
+        var rootFolderUri = preferences.getString("rootFolder" , null);
+        if (rootFolderUri != null) {
+            var validRootFolderUri = Uri.parse(rootFolderUri);
+            getContentResolver().releasePersistableUriPermission(
+                    validRootFolderUri ,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION
+                            | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+            );
+            preferences.edit().remove("rootFolder").apply();
         }
     }
 
