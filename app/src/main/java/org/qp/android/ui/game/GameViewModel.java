@@ -4,7 +4,6 @@ import static org.qp.android.helpers.utils.Base64Util.decodeBase64;
 import static org.qp.android.helpers.utils.Base64Util.isBase64;
 import static org.qp.android.helpers.utils.ColorUtil.convertRGBAToBGRA;
 import static org.qp.android.helpers.utils.ColorUtil.getHexColor;
-import static org.qp.android.helpers.utils.FileUtil.documentWrap;
 import static org.qp.android.helpers.utils.ThreadUtil.assertNonUiThread;
 import static org.qp.android.helpers.utils.ViewUtil.getFontStyle;
 
@@ -33,7 +32,6 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.preference.PreferenceManager;
 
 import com.anggrayudi.storage.file.DocumentFileCompat;
-import com.anggrayudi.storage.file.DocumentFileType;
 
 import org.qp.android.QuestPlayerApplication;
 import org.qp.android.R;
@@ -60,7 +58,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
     private final HtmlProcessor htmlProcessor;
     private LibQpProxy libQpProxy;
     private AudioPlayer audioPlayer;
-    private String fullPathGameDir;
+    private Uri fullPathGameDir;
 
     public ObservableField<GameActivity> gameActivityObservableField =
             new ObservableField<>();
@@ -236,7 +234,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         }
     }
 
-    public void setFullPathGameDir(String fullPathGameDir) {
+    public void setUriGameDir(Uri fullPathGameDir) {
         this.fullPathGameDir = fullPathGameDir;
     }
 
@@ -380,21 +378,27 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         public WebResourceResponse shouldInterceptRequest(WebView view ,
                                                           @NonNull WebResourceRequest request) {
             var uri = request.getUrl();
-            var rootDir = DocumentFileCompat.fromFullPath(getGameActivity() , fullPathGameDir);
+            var rootDir = DocumentFileCompat.fromUri(getGameActivity() , fullPathGameDir);
             if (rootDir != null && uri.getScheme() != null) {
                 if (uri.getScheme().startsWith("file")) {
                     try {
-                        var relPath = uri.getPath();
-                        var tempRoot = documentWrap(rootDir);
-                        var fileFromDefaultCon = DocumentFileCompat.fromFullPath(
-                                getGameActivity() ,
-                                tempRoot.getAbsolutePath(getGameActivity()) + relPath ,
-                                DocumentFileType.FILE ,
-                                true
-                        );
-                        var extension = fileFromDefaultCon.getName();
+                        if (uri.getPath() == null) throw new NullPointerException();
+
+                        var pathToImageSegments = uri.getPath().split("/");
+                        var imageFile = rootDir;
+                        for (var segment : pathToImageSegments) {
+                            if (segment.isEmpty()) {
+                                continue;
+                            }
+                            imageFile = imageFile.findFile(segment);
+                            if (imageFile == null) {
+                                break;
+                            }
+                        }
+
+                        var extension = imageFile.getName();
                         var mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
-                        var in = getGameActivity().getContentResolver().openInputStream(fileFromDefaultCon.getUri());
+                        var in = getGameActivity().getContentResolver().openInputStream(imageFile.getUri());
                         return new WebResourceResponse(mimeType , null , in);
                     } catch (FileNotFoundException | NullPointerException ex) {
                         if (getSettingsController().isUseImageDebug) {

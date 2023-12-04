@@ -2,7 +2,6 @@ package org.qp.android.ui.stock;
 
 import static org.qp.android.helpers.utils.DirUtil.doesDirectoryContainGameFiles;
 import static org.qp.android.helpers.utils.FileUtil.copyFile;
-import static org.qp.android.helpers.utils.FileUtil.documentWrap;
 import static org.qp.android.helpers.utils.FileUtil.findFileOrDirectory;
 import static org.qp.android.helpers.utils.FileUtil.formatFileSize;
 import static org.qp.android.helpers.utils.FileUtil.isWritableDirectory;
@@ -10,7 +9,6 @@ import static org.qp.android.helpers.utils.PathUtil.removeExtension;
 
 import android.app.Application;
 import android.content.Intent;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 
@@ -340,20 +338,22 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     public void playGame() {
+        var gameDir = tempInnerGameData.gameDir;
+        var gameFileCount = tempInnerGameData.gameFiles.size();
         var intent = new Intent(getStockActivity() , GameActivity.class);
+
         intent.putExtra("gameId" , tempInnerGameData.id);
         intent.putExtra("gameTitle" , tempInnerGameData.title);
-        var tempDir = documentWrap(tempInnerGameData.gameDir);
-        intent.putExtra("gameDirUri" , tempDir.getAbsolutePath(getStockActivity()));
-        var gameFileCount = tempInnerGameData.gameFiles.size();
+        intent.putExtra("gameDirUri" , String.valueOf(gameDir.getUri()));
+
         switch (gameFileCount) {
             case 0 -> {
                 var message = getStockActivity().getString(R.string.gameFolderEmpty);
                 getStockActivity().showErrorDialog(message);
             }
             case 1 -> {
-                var tempFile = documentWrap(tempInnerGameData.gameFiles.get(0));
-                intent.putExtra("gameFileUri" ,  tempFile.getAbsolutePath(getStockActivity()));
+                var chosenGameFile = tempInnerGameData.gameFiles.get(0);
+                intent.putExtra("gameFileUri" ,  String.valueOf(chosenGameFile.getUri()));
                 getStockActivity().startGameActivity(intent);
             }
             default -> {
@@ -370,8 +370,8 @@ public class StockViewModel extends AndroidViewModel {
                 getStockActivity()
                         .showDialogFragment(dialogFragments , StockDialogType.SELECT_DIALOG);
                 outputIntObserver.observeForever(integer -> {
-                    var tempFile = documentWrap(tempInnerGameData.gameFiles.get(integer));
-                    intent.putExtra("gameFileUri" , tempFile.getAbsolutePath(getStockActivity()));
+                    var chosenGameFile = tempInnerGameData.gameFiles.get(integer);
+                    intent.putExtra("gameFileUri" , String.valueOf(chosenGameFile.getUri()));
                     getStockActivity().startGameActivity(intent);
                 });
             }
@@ -400,6 +400,7 @@ public class StockViewModel extends AndroidViewModel {
             if (!isWritableDirectory(rootDir)) {
                 var message = getStockActivity().getString(R.string.gamesFolderError);
                 getStockActivity().showErrorDialog(message);
+                getStockActivity().purgeRootDirFromPrefs();
                 return;
             }
             setGamesDir(rootDir);

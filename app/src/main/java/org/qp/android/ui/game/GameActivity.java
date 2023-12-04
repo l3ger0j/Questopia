@@ -42,7 +42,6 @@ import androidx.navigation.fragment.NavHostFragment;
 
 import com.anggrayudi.storage.SimpleStorageHelper;
 import com.anggrayudi.storage.file.DocumentFileCompat;
-import com.anggrayudi.storage.file.DocumentFileType;
 import com.anggrayudi.storage.file.MimeType;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.textfield.TextInputLayout;
@@ -348,17 +347,12 @@ public class GameActivity extends AppCompatActivity implements
         var intent = getIntent();
         var gameId = intent.getStringExtra("gameId");
         var gameTitle = intent.getStringExtra("gameTitle");
-        var gameDirUri = intent.getStringExtra("gameDirUri");
-        var gameDir =  DocumentFileCompat.fromFullPath(
-                this , gameDirUri ,
-                DocumentFileType.FOLDER , true
-        );
-        gameViewModel.setFullPathGameDir(gameDirUri);
-        var gameFileUri = intent.getStringExtra("gameFileUri");
-        var gameFile = DocumentFileCompat.fromFullPath(
-                this , gameFileUri ,
-                DocumentFileType.FILE , true
-        );
+        var gameDirUri = Uri.parse(intent.getStringExtra("gameDirUri"));
+        var gameDir =  DocumentFileCompat.fromUri(this , gameDirUri);
+        var gameFileUri = Uri.parse(intent.getStringExtra("gameFileUri"));
+        var gameFile = DocumentFileCompat.fromUri(this , gameFileUri);
+
+        gameViewModel.setUriGameDir(gameDirUri);
         libQpProxy.runGame(gameId, gameTitle, gameDir, gameFile);
     }
 
