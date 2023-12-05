@@ -342,6 +342,9 @@ public class StockViewModel extends AndroidViewModel {
         var gameFileCount = tempInnerGameData.gameFiles.size();
         var intent = new Intent(getStockActivity() , GameActivity.class);
 
+        var application = (QuestPlayerApplication) getApplication();
+        application.setCurrentGameDir(gameDir);
+
         intent.putExtra("gameId" , tempInnerGameData.id);
         intent.putExtra("gameTitle" , tempInnerGameData.title);
         intent.putExtra("gameDirUri" , String.valueOf(gameDir.getUri()));
