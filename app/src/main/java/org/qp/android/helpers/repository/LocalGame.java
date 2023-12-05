@@ -158,6 +158,5 @@ public class LocalGame {
         }
     }
 
-    private record GameFolder(DocumentFile dir , List<DocumentFile> gameFiles) {
-    }
+    private record GameFolder(DocumentFile dir , List<DocumentFile> gameFiles) {}
 }
