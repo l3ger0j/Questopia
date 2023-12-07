@@ -9,9 +9,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
-import com.anggrayudi.storage.file.DocumentFileCompat;
-import com.anggrayudi.storage.file.DocumentFileType;
-
+import org.qp.android.QuestPlayerApplication;
 import org.qp.android.R;
 import org.qp.android.ui.dialogs.GameDialogType;
 import org.qp.android.ui.game.GameActivity;
@@ -31,6 +29,12 @@ public class AudioPlayer {
     private boolean soundEnabled;
     private boolean isPaused = false;
     private Context context;
+
+    private String nameGameDir;
+
+    public void setNameGameDir(String nameGameDir) {
+        this.nameGameDir = nameGameDir;
+    }
 
     public void start(Context context) {
         throwIfNotMainThread();
@@ -94,6 +98,7 @@ public class AudioPlayer {
 
     private void doPlay(final Sound sound) {
         var sysVolume = getSystemVolume(sound.volume);
+
         if (sound.player != null) {
             sound.player.setVolume(sysVolume, sysVolume);
             if (!sound.player.isPlaying()) {
@@ -101,8 +106,12 @@ public class AudioPlayer {
             }
             return;
         }
-        final var normPath = sound.path.replace("\\", "/");
-        if (!DocumentFileCompat.doesExist(context , normPath)) {
+
+        var normPath = sound.path.replace("\\", "/");
+        var application = (QuestPlayerApplication) context.getApplicationContext();
+        var soundFile = application.fromFullPath(normPath);
+
+        if (soundFile == null) {
             var activity = (GameActivity) context;
             var controller = activity.getSettingsController();
             if (controller != null && controller.isUseMusicDebug) {
@@ -115,13 +124,10 @@ public class AudioPlayer {
             }
             return;
         }
-        var file = DocumentFileCompat.fromFullPath(
-                context , normPath ,
-                DocumentFileType.FILE , true
-        );
+
         var player = new MediaPlayer();
         try {
-            player.setDataSource(context , file.getUri());
+            player.setDataSource(context , soundFile.getUri());
             player.prepare();
         } catch (IOException ex) {
             Log.e(TAG,"Failed to initialize media player", ex);

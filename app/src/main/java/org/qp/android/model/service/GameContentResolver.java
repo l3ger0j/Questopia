@@ -14,17 +14,11 @@ import com.anggrayudi.storage.FileWrapper;
 import com.anggrayudi.storage.file.DocumentFileCompat;
 
 public class GameContentResolver {
-    private DocumentFile gameDir;
-    private Context context;
-
-    public void setGameDir(@NonNull DocumentFile gameDir ,
-                           @NonNull Context context) {
-        this.gameDir = gameDir;
-        this.context = context;
-    }
 
     @Nullable
-    public FileWrapper.Document getFile(String relPath) {
+    public FileWrapper.Document getFile(@NonNull Context context ,
+                                        @NonNull DocumentFile gameDir ,
+                                        String relPath) {
         var tempFile = findFileOrDirectory(gameDir , normalizeContentPath(relPath));
         if (tempFile == null) {
             var fullPathToGameDir = documentWrap(gameDir).getAbsolutePath(context);
@@ -42,8 +36,7 @@ public class GameContentResolver {
 
     @Nullable
     public String getAbsolutePath(String relPath) {
-        var file = getFile(relPath);
-        return file != null ? file.getAbsolutePath(context) : null;
+        return null;
     }
 
     /**

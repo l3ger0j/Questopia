@@ -197,9 +197,11 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
                 getHtmlProcessor().convertQspStringToWebViewHtml(str);
     }
 
-    public String getImageAbsolutePath(String src) {
+    public Uri getImageUri(String src) {
         var relPath = Uri.decode(src.substring(8));
-        return gameContentResolver.getFile(relPath).getAbsolutePath(getGameActivity());
+        var app = (QuestPlayerApplication) getApplication();
+        var imageFile = app.fromRelativePath(relPath);
+        return imageFile.getUri();
     }
 
     public LiveData<String> getMainDescObserver() {

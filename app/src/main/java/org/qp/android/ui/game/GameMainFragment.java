@@ -72,7 +72,8 @@ public class GameMainFragment extends Fragment {
         mainDescView.addJavascriptInterface(new Object() {
             @JavascriptInterface
             public void onClickImage(String src) {
-                viewModel.showPicture(viewModel.getImageAbsolutePath(src));
+                var imageUri = viewModel.getImageUri(src);
+                viewModel.showPicture(String.valueOf(imageUri));
             }
         } , "img");
         if (viewModel.getSettingsController().isUseAutoscroll) {

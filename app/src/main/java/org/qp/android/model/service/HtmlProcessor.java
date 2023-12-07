@@ -4,6 +4,7 @@ import static org.qp.android.helpers.utils.Base64Util.encodeBase64;
 import static org.qp.android.helpers.utils.StringUtil.isNotEmpty;
 import static org.qp.android.helpers.utils.StringUtil.isNullOrEmpty;
 
+import android.content.Context;
 import android.content.res.Resources;
 import android.util.Base64;
 import android.util.Log;
@@ -12,6 +13,7 @@ import androidx.annotation.NonNull;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
+import org.qp.android.QuestPlayerApplication;
 import org.qp.android.ui.settings.SettingsController;
 
 import java.util.ArrayList;
@@ -26,9 +28,18 @@ public class HtmlProcessor {
     private static final String HTML_PATTERN = "<(\"[^\"]*\"|'[^']*'|[^'\">])*>";
     private final Pattern pattern = Pattern.compile(HTML_PATTERN);
     private SettingsController controller;
+    private Context context;
 
     public void setController(SettingsController controller) {
         this.controller = controller;
+    }
+
+    public void setContext(Context context) {
+        this.context = context;
+    }
+
+    private QuestPlayerApplication getApplication() {
+        return (QuestPlayerApplication) context;
     }
 
     public HtmlProcessor(GameContentResolver gameContentResolver, ImageProvider imageProvider) {
@@ -112,8 +123,8 @@ public class HtmlProcessor {
 
     private boolean shouldChangeWidth(Element img) {
         var relPath = img.attr("src");
-        var absPath = gameContentResolver.getAbsolutePath(relPath);
-        var drawable = imageProvider.get(absPath);
+        var imageFile = getApplication().fromRelativePath(relPath);
+        var drawable = imageProvider.get(imageFile.getUri());
         if (drawable == null) return false;
         return drawable.getIntrinsicWidth() < Resources.getSystem()
                 .getDisplayMetrics().widthPixels;
@@ -121,8 +132,8 @@ public class HtmlProcessor {
 
     private boolean shouldChangeHeight(Element img) {
         var relPath = img.attr("src");
-        var absPath = gameContentResolver.getAbsolutePath(relPath);
-        var drawable = imageProvider.get(absPath);
+        var imageFile = getApplication().fromRelativePath(relPath);
+        var drawable = imageProvider.get(imageFile.getUri());
         if (drawable == null) return false;
         return drawable.getIntrinsicHeight() < Resources.getSystem()
                 .getDisplayMetrics().heightPixels;
