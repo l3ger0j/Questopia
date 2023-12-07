@@ -9,15 +9,13 @@ import com.squareup.picasso.Picasso;
 
 import org.qp.android.R;
 
-import java.io.File;
-
 public class Bind {
     @BindingAdapter({"imageUrl"})
     public static void loadImage(ImageView view, String imageUrl) {
         if (imageUrl != null && !imageUrl.isEmpty()) {
             if (view.getId() == R.id.imageBox) {
                 Picasso.get()
-                        .load(new File(imageUrl))
+                        .load(imageUrl)
                         .into(view);
             } else {
                 Picasso.get()

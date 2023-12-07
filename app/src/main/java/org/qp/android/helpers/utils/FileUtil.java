@@ -1,6 +1,7 @@
 package org.qp.android.helpers.utils;
 
 import android.content.Context;
+import android.net.Uri;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -15,7 +16,6 @@ import org.qp.android.model.workers.WorkerException;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.text.DecimalFormat;
@@ -184,15 +184,16 @@ public final class FileUtil {
     }
 
     @Nullable
-    public static byte[] getFileContents(String path) {
-        var file = new File(path);
-        try (var in = new FileInputStream(file)) {
+    public static byte[] getFileContents(@NonNull Context context ,
+                                         @NonNull Uri uriContent) {
+        var resolver = context.getContentResolver();
+        try (var in = resolver.openInputStream(uriContent)) {
             try (var out = new ByteArrayOutputStream()) {
                 StreamUtil.copy(in , out);
                 return out.toByteArray();
             }
         } catch (IOException ex) {
-            Log.e(TAG , "Error reading file: " + path , ex);
+            Log.e(TAG , "Error reading file: " + uriContent , ex);
             return null;
         }
     }

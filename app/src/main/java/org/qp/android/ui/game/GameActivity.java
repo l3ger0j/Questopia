@@ -47,6 +47,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.textfield.TextInputLayout;
 
 import org.jetbrains.annotations.Contract;
+import org.qp.android.QuestPlayerApplication;
 import org.qp.android.R;
 import org.qp.android.databinding.ActivityGameBinding;
 import org.qp.android.model.libQP.LibQpProxy;
@@ -645,7 +646,8 @@ public class GameActivity extends AppCompatActivity implements
         }
 
         final var proxy = libQpProxy;
-        final var savesDir = createFindDFolder(libQpProxy.getGameState().gameDir , "saves");
+        final var application = (QuestPlayerApplication) getApplication();
+        final var savesDir = createFindDFolder(application.getCurrentGameDir() , "saves");
         if (savesDir == null) return;
 
         var id = parent.getItemId();

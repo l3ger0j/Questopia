@@ -5,7 +5,9 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.os.Build;
+import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.documentfile.provider.DocumentFile;
 
 import org.qp.android.model.libQP.LibQpProxy;
@@ -30,11 +32,16 @@ public class QuestPlayerApplication extends Application {
     private final LibQpProxyImpl libQspProxy = new LibQpProxyImpl(this, gameContentResolver, htmlProcessor, audioPlayer);
 
     private DocumentFile customRootDir;
+    private DocumentFile currentGameDir;
 
     @Override
     public void onCreate() {
         super.onCreate();
         createNotificationChannels();
+    }
+
+    public void setCurrentGameDir(DocumentFile currentGameDir) {
+        this.currentGameDir = currentGameDir;
     }
 
     public void setCustomRootFolder(DocumentFile customRootDir) {
@@ -46,6 +53,7 @@ public class QuestPlayerApplication extends Application {
     }
 
     public HtmlProcessor getHtmlProcessor() {
+        htmlProcessor.setContext(this);
         return htmlProcessor;
     }
 
@@ -61,6 +69,10 @@ public class QuestPlayerApplication extends Application {
         return customRootDir;
     }
 
+    public DocumentFile getCurrentGameDir() {
+        return currentGameDir;
+    }
+
     public void createNotificationChannels() {
         var notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         var importance = NotificationManager.IMPORTANCE_LOW;
@@ -72,5 +84,45 @@ public class QuestPlayerApplication extends Application {
         }
         notificationManager.createNotificationChannel(channel);
 
+    }
+
+    public DocumentFile fromFullPath(@NonNull String fullPath) {
+        var findDir = getCustomRootDir();
+        var nameGameDir = currentGameDir.getName();
+
+        var index = fullPath.lastIndexOf(nameGameDir);
+        var simplePath = fullPath.substring(index);
+        var pathToSoundSegments = simplePath.split("/");
+
+        for (var segment : pathToSoundSegments) {
+            if (segment.isEmpty()) {
+                continue;
+            }
+            findDir = findDir.findFile(segment);
+            if (findDir == null) {
+                break;
+            }
+        }
+
+        return findDir;
+    }
+
+    public DocumentFile fromRelativePath(@NonNull String relPath) {
+        var pathToFileSegments = relPath.split("/");
+        var relFile = currentGameDir;
+
+        for (var segment : pathToFileSegments) {
+            if (segment.isEmpty()) {
+                continue;
+            }
+            relFile = relFile.findFile(segment);
+            if (relFile == null) {
+                break;
+            }
+        }
+
+        Log.d(this.getClass().getSimpleName() , relPath);
+
+        return relFile;
     }
 }
