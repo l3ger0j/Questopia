@@ -5,9 +5,7 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.os.Build;
-import android.util.Log;
 
-import androidx.annotation.NonNull;
 import androidx.documentfile.provider.DocumentFile;
 
 import org.qp.android.model.libQP.LibQpProxy;
@@ -83,46 +81,6 @@ public class QuestPlayerApplication extends Application {
             channel.setAllowBubbles(true);
         }
         notificationManager.createNotificationChannel(channel);
-
     }
 
-    public DocumentFile fromFullPath(@NonNull String fullPath) {
-        var findDir = getCustomRootDir();
-        var nameGameDir = currentGameDir.getName();
-
-        var index = fullPath.lastIndexOf(nameGameDir);
-        var simplePath = fullPath.substring(index);
-        var pathToSoundSegments = simplePath.split("/");
-
-        for (var segment : pathToSoundSegments) {
-            if (segment.isEmpty()) {
-                continue;
-            }
-            findDir = findDir.findFile(segment);
-            if (findDir == null) {
-                break;
-            }
-        }
-
-        return findDir;
-    }
-
-    public DocumentFile fromRelativePath(@NonNull String relPath) {
-        var pathToFileSegments = relPath.split("/");
-        var relFile = currentGameDir;
-
-        for (var segment : pathToFileSegments) {
-            if (segment.isEmpty()) {
-                continue;
-            }
-            relFile = relFile.findFile(segment);
-            if (relFile == null) {
-                break;
-            }
-        }
-
-        Log.d(this.getClass().getSimpleName() , relPath);
-
-        return relFile;
-    }
 }

@@ -1,5 +1,6 @@
 package org.qp.android.model.service;
 
+import static org.qp.android.helpers.utils.FileUtil.fromFullPath;
 import static org.qp.android.helpers.utils.StringUtil.isNotEmpty;
 import static org.qp.android.helpers.utils.ThreadUtil.throwIfNotMainThread;
 
@@ -109,7 +110,7 @@ public class AudioPlayer {
 
         var normPath = sound.path.replace("\\", "/");
         var application = (QuestPlayerApplication) context.getApplicationContext();
-        var soundFile = application.fromFullPath(normPath);
+        var soundFile = fromFullPath(normPath , application.getCustomRootDir());
 
         if (soundFile == null) {
             var activity = (GameActivity) context;

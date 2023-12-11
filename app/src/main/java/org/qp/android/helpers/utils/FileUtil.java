@@ -23,6 +23,21 @@ import java.text.DecimalFormat;
 public final class FileUtil {
     private static final String TAG = FileUtil.class.getSimpleName();
 
+    @Nullable
+    public static byte[] getFileContents(@NonNull Context context ,
+                                         @NonNull Uri uriContent) {
+        var resolver = context.getContentResolver();
+        try (var in = resolver.openInputStream(uriContent)) {
+            try (var out = new ByteArrayOutputStream()) {
+                StreamUtil.copy(in , out);
+                return out.toByteArray();
+            }
+        } catch (IOException ex) {
+            Log.e(TAG , "Error reading file: " + uriContent , ex);
+            return null;
+        }
+    }
+
     public static FileWrapper.Document documentWrap(DocumentFile inputFile) {
         return new FileWrapper.Document(inputFile);
     }
@@ -117,8 +132,49 @@ public final class FileUtil {
         return files[0];
     }
 
-    public static DocumentFile findFileOrDirectory(DocumentFile parentDir , final String name) {
+    public static DocumentFile findFileOrDirectory(DocumentFile parentDir ,
+                                                   final String name) {
         return parentDir.findFile(name);
+    }
+
+    public static DocumentFile fromFullPath(@NonNull String fullPath ,
+                                            @NonNull DocumentFile rootDir) {
+        var findDir = rootDir;
+        var nameGameDir = rootDir.getName();
+
+        var index = fullPath.lastIndexOf(nameGameDir);
+        var simplePath = fullPath.substring(index);
+        var pathToFileSegments = simplePath.split("/");
+
+        for (var segment : pathToFileSegments) {
+            if (segment.isEmpty()) {
+                continue;
+            }
+            findDir = findDir.findFile(segment);
+            if (findDir == null) {
+                break;
+            }
+        }
+
+        return findDir;
+    }
+
+    public static DocumentFile fromRelPath(@NonNull String relPath ,
+                                         @NonNull DocumentFile rootDir) {
+        var pathToFileSegments = relPath.split("/");
+        var relFile = rootDir;
+
+        for (var segment : pathToFileSegments) {
+            if (segment.isEmpty()) {
+                continue;
+            }
+            relFile = relFile.findFile(segment);
+            if (relFile == null) {
+                break;
+            }
+        }
+
+        return relFile;
     }
 
     @Nullable
@@ -183,21 +239,6 @@ public final class FileUtil {
         }
     }
 
-    @Nullable
-    public static byte[] getFileContents(@NonNull Context context ,
-                                         @NonNull Uri uriContent) {
-        var resolver = context.getContentResolver();
-        try (var in = resolver.openInputStream(uriContent)) {
-            try (var out = new ByteArrayOutputStream()) {
-                StreamUtil.copy(in , out);
-                return out.toByteArray();
-            }
-        } catch (IOException ex) {
-            Log.e(TAG , "Error reading file: " + uriContent , ex);
-            return null;
-        }
-    }
-
     @NonNull
     public static String formatFileSize(long size ,
                                         int numCountInfo) {
@@ -225,13 +266,13 @@ public final class FileUtil {
                 copyFileOrDirectory(context , subSrcFile , subDestDir);
             }
         } else if (srcFile.isFile()) {
-            copyFile(context , srcFile , destDir);
+            copyFileToDir(context , srcFile , destDir);
         }
     }
 
-    public static void copyFile(Context context ,
-                                @NonNull DocumentFile srcFile ,
-                                @NonNull DocumentFile destDir) {
+    public static void copyFileToDir(Context context ,
+                                     @NonNull DocumentFile srcFile ,
+                                     @NonNull DocumentFile destDir) {
         var destFile = createFindDFile(destDir , MimeType.UNKNOWN , srcFile.getName());
         if (destFile == null) {
             return;

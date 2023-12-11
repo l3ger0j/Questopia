@@ -2,6 +2,7 @@ package org.qp.android.model.service;
 
 import static org.qp.android.helpers.utils.FileUtil.documentWrap;
 import static org.qp.android.helpers.utils.FileUtil.findFileOrDirectory;
+import static org.qp.android.helpers.utils.PathUtil.normalizeContentPath;
 
 import android.content.Context;
 import android.util.Log;
@@ -34,22 +35,4 @@ public class GameContentResolver {
         }
     }
 
-    @Nullable
-    public String getAbsolutePath(String relPath) {
-        return null;
-    }
-
-    /**
-     * Leads to the normal form of the path to the game resource (melodies, images).
-     *
-     * @implNote Removes "./" from the beginning of the path, replaces all occurrences of "\" with "/".
-     */
-    public static String normalizeContentPath(String path) {
-        if (path == null) return null;
-        var result = path;
-        if (result.startsWith("./")) {
-            result = result.substring(2);
-        }
-        return result.replace("\\", "/");
-    }
 }

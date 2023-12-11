@@ -1,6 +1,7 @@
 package org.qp.android.model.service;
 
 import static org.qp.android.helpers.utils.Base64Util.encodeBase64;
+import static org.qp.android.helpers.utils.FileUtil.fromRelPath;
 import static org.qp.android.helpers.utils.StringUtil.isNotEmpty;
 import static org.qp.android.helpers.utils.StringUtil.isNullOrEmpty;
 
@@ -123,7 +124,8 @@ public class HtmlProcessor {
 
     private boolean shouldChangeWidth(Element img) {
         var relPath = img.attr("src");
-        var imageFile = getApplication().fromRelativePath(relPath);
+        var curGameDir = getApplication().getCurrentGameDir();
+        var imageFile = fromRelPath(relPath , curGameDir);
         var drawable = imageProvider.get(imageFile.getUri());
         if (drawable == null) return false;
         return drawable.getIntrinsicWidth() < Resources.getSystem()
@@ -132,7 +134,8 @@ public class HtmlProcessor {
 
     private boolean shouldChangeHeight(Element img) {
         var relPath = img.attr("src");
-        var imageFile = getApplication().fromRelativePath(relPath);
+        var curGameDir = getApplication().getCurrentGameDir();
+        var imageFile = fromRelPath(relPath , curGameDir);
         var drawable = imageProvider.get(imageFile.getUri());
         if (drawable == null) return false;
         return drawable.getIntrinsicHeight() < Resources.getSystem()

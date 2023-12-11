@@ -3,6 +3,7 @@ package org.qp.android.model.libQP;
 import static org.qp.android.helpers.utils.FileUtil.createFindDFile;
 import static org.qp.android.helpers.utils.FileUtil.documentWrap;
 import static org.qp.android.helpers.utils.FileUtil.findFileOrDirectory;
+import static org.qp.android.helpers.utils.FileUtil.fromFullPath;
 import static org.qp.android.helpers.utils.FileUtil.getFileContents;
 import static org.qp.android.helpers.utils.StringUtil.getStringOrEmpty;
 import static org.qp.android.helpers.utils.StringUtil.isNotEmpty;
@@ -550,7 +551,7 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
         if (inter == null) return;
         if (filename != null) {
             try {
-                var uri = getApplication().fromFullPath(filename).getUri();
+                var uri = fromFullPath(filename , getCurGameDir()).getUri();
                 inter.doWithCounterDisabled(() -> loadGameState(uri));
             } catch (Exception e) {
                 Log.e(TAG , "Error: ", e);
@@ -641,13 +642,13 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
     public byte[] GetFileContents(String path) {
         var name = gameState.gameDir.getName();
         if (name == null) return null;
-        var targetFileUri = getApplication().fromFullPath(path).getUri();
+        var targetFileUri = fromFullPath(path , getCurGameDir()).getUri();
         return getFileContents(context , targetFileUri);
     }
 
     @Override
     public void ChangeQuestPath(String path) {
-        var newGameDir = getApplication().fromFullPath(path);
+        var newGameDir = fromFullPath(path , getCurGameDir());
         if (!newGameDir.exists()) {
             Log.e(TAG,"Game directory not found: " + path);
             return;

@@ -4,6 +4,7 @@ import static org.qp.android.helpers.utils.Base64Util.decodeBase64;
 import static org.qp.android.helpers.utils.Base64Util.isBase64;
 import static org.qp.android.helpers.utils.ColorUtil.convertRGBAToBGRA;
 import static org.qp.android.helpers.utils.ColorUtil.getHexColor;
+import static org.qp.android.helpers.utils.FileUtil.fromRelPath;
 import static org.qp.android.helpers.utils.ThreadUtil.assertNonUiThread;
 import static org.qp.android.helpers.utils.ViewUtil.getFontStyle;
 
@@ -200,7 +201,8 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
     public Uri getImageUri(String src) {
         var relPath = Uri.decode(src.substring(8));
         var app = (QuestPlayerApplication) getApplication();
-        var imageFile = app.fromRelativePath(relPath);
+        var curGameDir = app.getCurrentGameDir();
+        var imageFile = fromRelPath(relPath , curGameDir);
         return imageFile.getUri();
     }
 

@@ -1,7 +1,7 @@
 package org.qp.android.ui.stock;
 
 import static org.qp.android.helpers.utils.DirUtil.doesDirectoryContainGameFiles;
-import static org.qp.android.helpers.utils.FileUtil.copyFile;
+import static org.qp.android.helpers.utils.FileUtil.copyFileToDir;
 import static org.qp.android.helpers.utils.FileUtil.findFileOrDirectory;
 import static org.qp.android.helpers.utils.FileUtil.formatFileSize;
 import static org.qp.android.helpers.utils.FileUtil.isWritableDirectory;
@@ -318,10 +318,10 @@ public class StockViewModel extends AndroidViewModel {
             }
             localGame.formDataFileIntoFolder(getApplication() , tempInnerGameData , tempInnerGameData.gameDir);
             if (tempPathFile != null) {
-                copyFile(getStockActivity() , tempPathFile , tempInnerGameData.gameDir);
+                copyFileToDir(getStockActivity() , tempPathFile , tempInnerGameData.gameDir);
             }
             if (tempModFile != null) {
-                copyFile(getStockActivity() , tempModFile ,
+                copyFileToDir(getStockActivity() , tempModFile ,
                         findFileOrDirectory(tempInnerGameData.gameDir , "mods"));
             }
             refreshIntGamesDirectory();

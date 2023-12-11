@@ -3,6 +3,7 @@ package org.qp.android.helpers.utils;
 import android.content.Context;
 import android.util.Log;
 
+import androidx.annotation.WorkerThread;
 import androidx.documentfile.provider.DocumentFile;
 
 import java.io.File;
@@ -16,7 +17,6 @@ public final class DirUtil {
      * recursively expands the folder until either there is nothing left,
      * or there will be a folder in which there will be something other than one subfolder.
      */
-    @SuppressWarnings("ConstantConditions")
     public static <T> void normalizeGameDirectory(Context context , T dir) {
         if (dir == null) {
             return;
@@ -62,7 +62,6 @@ public final class DirUtil {
         }
     }
 
-    @SuppressWarnings("ConstantConditions")
     public static <T> boolean doesDirectoryContainGameFiles(T dir) {
         if (dir == null) {
             return false;
@@ -93,6 +92,7 @@ public final class DirUtil {
         return false;
     }
 
+    @WorkerThread
     public static long dirSize(DocumentFile dir) {
         if (dir.exists()) {
             long result = 0;
@@ -108,4 +108,5 @@ public final class DirUtil {
         }
         return 0;
     }
+
 }
