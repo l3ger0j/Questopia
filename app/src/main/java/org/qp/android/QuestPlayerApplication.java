@@ -19,17 +19,14 @@ public class QuestPlayerApplication extends Application {
 
     public static final int INSTALL_GAME_NOTIFICATION_ID = 1800;
 
-    public static final int POST_INSTALL_GAME_NOTIFICATION_ID = 1801;
-
     public static final String CHANNEL_INSTALL_GAME = "org.qp.android.channel.install_game";
 
     private final GameContentResolver gameContentResolver = new GameContentResolver();
     private final ImageProvider imageProvider = new ImageProvider();
-    private final HtmlProcessor htmlProcessor = new HtmlProcessor(gameContentResolver, imageProvider);
+    private final HtmlProcessor htmlProcessor = new HtmlProcessor(gameContentResolver , imageProvider);
     private final AudioPlayer audioPlayer = new AudioPlayer();
-    private final LibQpProxyImpl libQspProxy = new LibQpProxyImpl(this, gameContentResolver, htmlProcessor, audioPlayer);
+    private final LibQpProxyImpl libQspProxy = new LibQpProxyImpl(this , htmlProcessor , audioPlayer);
 
-    private DocumentFile customRootDir;
     private DocumentFile currentGameDir;
 
     @Override
@@ -40,10 +37,6 @@ public class QuestPlayerApplication extends Application {
 
     public void setCurrentGameDir(DocumentFile currentGameDir) {
         this.currentGameDir = currentGameDir;
-    }
-
-    public void setCustomRootFolder(DocumentFile customRootDir) {
-        this.customRootDir = customRootDir;
     }
 
     public GameContentResolver getGameContentResolver() {
@@ -63,10 +56,6 @@ public class QuestPlayerApplication extends Application {
         return libQspProxy;
     }
 
-    public DocumentFile getCustomRootDir() {
-        return customRootDir;
-    }
-
     public DocumentFile getCurrentGameDir() {
         return currentGameDir;
     }
@@ -76,7 +65,7 @@ public class QuestPlayerApplication extends Application {
         var importance = NotificationManager.IMPORTANCE_LOW;
 
         var name = getString(R.string.channelInstallGame);
-        var channel =  new NotificationChannel(CHANNEL_INSTALL_GAME, name, importance);
+        var channel = new NotificationChannel(CHANNEL_INSTALL_GAME , name , importance);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             channel.setAllowBubbles(true);
         }

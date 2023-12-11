@@ -57,7 +57,7 @@ public class StockViewModel extends AndroidViewModel {
 
     private final LocalGame localGame = new LocalGame();
     private final HashMap<String, InnerGameData> gamesMap = new HashMap<>();
-    private DocumentFile gamesDir;
+    private ArrayList<DocumentFile> listGamesDir;
     private DocumentFile tempImageFile, tempPathFile, tempModFile;
 
     private InnerGameData tempInnerGameData;
@@ -100,8 +100,8 @@ public class StockViewModel extends AndroidViewModel {
         }
     }
 
-    public void setGamesDir(DocumentFile gamesDir) {
-        this.gamesDir = gamesDir;
+    public void setListGamesDir(ArrayList<DocumentFile> gameDir) {
+        listGamesDir = gameDir;
     }
 
     public void setGameDataList(ArrayList<InnerGameData> innerGameDataArrayList) {
@@ -208,30 +208,12 @@ public class StockViewModel extends AndroidViewModel {
         }
     }
 
-    public String getGamePubData() {
-        if (tempInnerGameData != null &&
-                tempInnerGameData.pubDate.length() > 0) {
-            return getStockActivity()
-                    .getString(R.string.pub_data)
-                    .replace("-PUB_DATA-" , tempInnerGameData.pubDate);
-        } else {
-            return "";
-        }
-    }
-
-    public String getGameModData() {
-        if (tempInnerGameData != null
-                && tempInnerGameData.modDate.length() > 0) {
-            return getStockActivity()
-                    .getString(R.string.mod_data)
-                    .replace("-MOD_DATA-" , tempInnerGameData.pubDate);
-        } else {
-            return "";
-        }
-    }
-
     public SettingsController getSettingsController() {
         return SettingsController.newInstance(getApplication());
+    }
+
+    public ArrayList<DocumentFile> getListGamesDir() {
+        return listGamesDir;
     }
 
     public boolean isGamePossiblyDownload() {
@@ -251,9 +233,14 @@ public class StockViewModel extends AndroidViewModel {
     }
     // endregion Getter/Setter
 
+    public void putGameDirToList(DocumentFile gameDir) {
+        listGamesDir.add(gameDir);
+    }
+
     public StockViewModel(@NonNull Application application) {
         super(application);
         gameDataList = new MutableLiveData<>();
+        listGamesDir = new ArrayList<>();
     }
 
     // region Dialog
@@ -398,7 +385,7 @@ public class StockViewModel extends AndroidViewModel {
 
     // region Refresh
     public void refreshIntGamesDirectory() {
-        var rootDir = ((QuestPlayerApplication) getApplication()).getCustomRootDir();
+        var rootDir = ((QuestPlayerApplication) getApplication()).getCurrentGameDir();
         if (rootDir != null) {
             if (!isWritableDirectory(rootDir)) {
                 var message = getStockActivity().getString(R.string.gamesFolderError);
@@ -406,21 +393,7 @@ public class StockViewModel extends AndroidViewModel {
                 getStockActivity().purgeRootDirFromPrefs();
                 return;
             }
-            setGamesDir(rootDir);
-            refreshGameData();
-        } else {
-            var intFilesDir = getApplication().getExternalFilesDir(null);
-            if (intFilesDir == null) {
-                var message = getStockActivity().getString(R.string.interFolderError);
-                getStockActivity().showErrorDialog(message);
-                return;
-            }
-            if (!isWritableDirectory(intFilesDir)) {
-                var message = getStockActivity().getString(R.string.gamesFolderError);
-                getStockActivity().showErrorDialog(message);
-                return;
-            }
-            setGamesDir(DocumentFile.fromFile(intFilesDir));
+            putGameDirToList(rootDir);
             refreshGameData();
         }
     }
@@ -429,7 +402,7 @@ public class StockViewModel extends AndroidViewModel {
         gamesMap.clear();
 
         CompletableFuture
-                .supplyAsync(() -> localGame.extractGameDataFromFolder(getStockActivity() , gamesDir) ,
+                .supplyAsync(() -> localGame.extractGameDataFromList(getStockActivity() , listGamesDir) ,
                         Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()))
                 .thenApply(innerGameData -> {
                     for (var localGameData : innerGameData) {

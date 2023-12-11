@@ -29,7 +29,6 @@ import org.qp.android.dto.libQP.GetVarValuesResponse;
 import org.qp.android.dto.libQP.ObjectData;
 import org.qp.android.helpers.utils.StreamUtil;
 import org.qp.android.model.service.AudioPlayer;
-import org.qp.android.model.service.GameContentResolver;
 import org.qp.android.model.service.HtmlProcessor;
 import org.qp.android.ui.game.GameInterface;
 
@@ -56,7 +55,6 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
     private GameInterface gameInterface;
 
     private final Context context;
-    private final GameContentResolver gameContentResolver;
     private final HtmlProcessor htmlProcessor;
     private final AudioPlayer audioPlayer;
 
@@ -70,11 +68,9 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
 
     public LibQpProxyImpl(
             Context context,
-            GameContentResolver gameContentResolver,
             HtmlProcessor htmlProcessor,
             AudioPlayer audioPlayer) {
         this.context = context;
-        this.gameContentResolver = gameContentResolver;
         this.htmlProcessor = htmlProcessor;
         this.audioPlayer = audioPlayer;
     }
@@ -326,6 +322,7 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
         }
         final byte[] gameData;
         var resolver = context.getContentResolver();
+
         try (var in = resolver.openInputStream(uri);
              var out = new ByteArrayOutputStream()) {
             if (in != null) {
@@ -338,7 +335,7 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
             Log.e(TAG,"Failed to load game state", ex);
             return;
         }
-        Log.d(TAG , String.valueOf(gameData.length));
+
         if (!nativeMethods.QSPOpenSavedGameFromData(gameData, gameData.length, true)) {
             showLastQspError();
         }

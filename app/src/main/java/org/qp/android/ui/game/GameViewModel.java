@@ -40,7 +40,6 @@ import org.qp.android.model.libQP.LibQpProxy;
 import org.qp.android.model.libQP.RefreshInterfaceRequest;
 import org.qp.android.model.libQP.WindowType;
 import org.qp.android.model.service.AudioPlayer;
-import org.qp.android.model.service.GameContentResolver;
 import org.qp.android.model.service.HtmlProcessor;
 import org.qp.android.ui.dialogs.GameDialogType;
 import org.qp.android.ui.settings.SettingsController;
@@ -55,11 +54,10 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
     private final String TAG = this.getClass().getSimpleName();
 
     private final QuestPlayerApplication questPlayerApplication;
-    private final GameContentResolver gameContentResolver;
     private final HtmlProcessor htmlProcessor;
     private LibQpProxy libQpProxy;
     private AudioPlayer audioPlayer;
-    private Uri fullPathGameDir;
+    private final Uri fullPathGameDir;
 
     public ObservableField<GameActivity> gameActivityObservableField =
             new ObservableField<>();
@@ -238,10 +236,6 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         }
     }
 
-    public void setUriGameDir(Uri fullPathGameDir) {
-        this.fullPathGameDir = fullPathGameDir;
-    }
-
     // endregion Getter/Setter
 
     public void updatePageTemplate() {
@@ -308,7 +302,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         preferences = PreferenceManager.getDefaultSharedPreferences(application);
         preferences.registerOnSharedPreferenceChangeListener(preferenceChangeListener);
         questPlayerApplication = getApplication();
-        gameContentResolver = questPlayerApplication.getGameContentResolver();
+        fullPathGameDir = questPlayerApplication.getCurrentGameDir().getUri();
         htmlProcessor = questPlayerApplication.getHtmlProcessor();
     }
 

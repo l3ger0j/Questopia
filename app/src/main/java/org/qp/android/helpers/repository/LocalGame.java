@@ -99,24 +99,15 @@ public class LocalGame {
         }
     }
 
-    public List<InnerGameData> extractGameDataFromFolder(Context context , DocumentFile gameFolder) {
-        if (gameFolder == null) {
-            return Collections.emptyList();
-        }
-
-        var gamesDirs = getGameDirectories(gameFolder);
-        if (gamesDirs == null) {
-            Log.d(TAG , "game dir is null");
-            return Collections.emptyList();
-        }
-        if (gamesDirs.isEmpty()) {
+    public List<InnerGameData> extractGameDataFromList(Context context , List<DocumentFile> fileList) {
+        if (fileList.isEmpty()) {
             return Collections.emptyList();
         }
 
         this.context = context;
 
         var itemsGamesDirs = new ArrayList<InnerGameData>();
-        var formatGamesDirs = getGamesFolders(gamesDirs);
+        var formatGamesDirs = getGamesFolders(fileList);
 
         for (var folder : formatGamesDirs) {
             var item = (InnerGameData) null;

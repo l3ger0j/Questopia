@@ -58,6 +58,12 @@ import org.qp.android.ui.dialogs.StockPatternDialogFrags;
 import org.qp.android.ui.settings.SettingsActivity;
 import org.qp.android.ui.settings.SettingsController;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
@@ -159,7 +165,7 @@ public class StockActivity extends AppCompatActivity implements
 
                 var rootFolder = DocumentFileCompat.fromUri(this , uri);
                 var application = (QuestPlayerApplication) getApplication();
-                if (application != null) application.setCustomRootFolder(rootFolder);
+                if (application != null) application.setCurrentGameDir(rootFolder);
             }
         });
 
@@ -211,42 +217,61 @@ public class StockActivity extends AppCompatActivity implements
     }
 
     public void saveRootDirIntoPrefs() {
-        var application = (QuestPlayerApplication) getApplication();
-        var rootDir = application.getCustomRootDir();
-        if (rootDir == null) return;
-        var rootStringUri = rootDir.getUri().toString();
-        var preferences = getPreferences(MODE_PRIVATE);
-        preferences
-                .edit()
-                .putString("rootFolder" , rootStringUri)
-                .apply();
+        var listFiles = stockViewModel.getListGamesDir();
+        var mapFiles = new HashMap<String , String>();
+        var cache = getExternalCacheDir();
+
+        for (var file : listFiles) {
+            if (file.getName() == null) continue;
+            mapFiles.put(file.getName() , String.valueOf(file.getUri()));
+        }
+
+        try {
+            var tempFile = new File(cache , "tempListDir");
+            try (var out = new FileOutputStream(tempFile , false);
+                 var objStream = new ObjectOutputStream(out)) {
+                objStream.writeObject(mapFiles);
+                objStream.flush();
+            }
+        } catch (IOException e) {
+            Log.e(TAG , "Error: " , e);
+        }
     }
 
     public void restoreRootDirFromPrefs() {
-        var application = (QuestPlayerApplication) getApplication();
-        var preferences = getPreferences(MODE_PRIVATE);
-        var rootFolderUri = preferences.getString("rootFolder" , null);
-        if (rootFolderUri != null) {
-            var validRootFolderUri = Uri.parse(rootFolderUri);
-            var rootFile = DocumentFile.fromTreeUri(this , validRootFolderUri);
-            if (rootFile != null && rootFile.exists())
-                application.setCustomRootFolder(rootFile);
+        try {
+            var cache = getExternalCacheDir();
+            var tempFile = new File(cache , "tempListDir");
+            try (var in = new FileInputStream(tempFile);
+                 var objStream = new ObjectInputStream(in)) {
+                var mapFiles = (HashMap<String , String>) objStream.readObject();
+                var listFile = new ArrayList<DocumentFile>();
+                for (var value : mapFiles.values()) {
+                    var uri = Uri.parse(value);
+                    var file = DocumentFileCompat.fromUri(this , uri);
+                    listFile.add(file);
+                }
+                stockViewModel.setListGamesDir(listFile);
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        } catch (IOException e) {
+            Log.e(TAG , "Error: " , e);
         }
     }
 
     public void purgeRootDirFromPrefs() {
-        var application = (QuestPlayerApplication) getApplication();
-        var preferences = getPreferences(MODE_PRIVATE);
-        var rootFolderUri = preferences.getString("rootFolder" , null);
-        if (rootFolderUri != null) {
-            var validRootFolderUri = Uri.parse(rootFolderUri);
-            getContentResolver().releasePersistableUriPermission(
-                    validRootFolderUri ,
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION
-                            | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-            );
-            preferences.edit().remove("rootFolder").apply();
-        }
+//        var preferences = getPreferences(MODE_PRIVATE);
+//        var rootFolderUri = preferences.getString("rootFolder" , null);
+//        if (rootFolderUri != null) {
+//            var validRootFolderUri = Uri.parse(rootFolderUri);
+//            getContentResolver().releasePersistableUriPermission(
+//                    validRootFolderUri ,
+//                    Intent.FLAG_GRANT_READ_URI_PERMISSION
+//                            | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+//            );
+//            preferences.edit().remove("rootFolder").apply();
+//        }
     }
 
     @Override
