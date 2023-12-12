@@ -2,7 +2,6 @@ package org.qp.android.ui.stock;
 
 import static org.qp.android.helpers.utils.DirUtil.doesDirectoryContainGameFiles;
 import static org.qp.android.helpers.utils.FileUtil.copyFileToDir;
-import static org.qp.android.helpers.utils.FileUtil.findFileOrDirectory;
 import static org.qp.android.helpers.utils.FileUtil.formatFileSize;
 import static org.qp.android.helpers.utils.FileUtil.isWritableDirectory;
 import static org.qp.android.helpers.utils.PathUtil.removeExtension;
@@ -229,7 +228,8 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     public boolean isModsDirExist() {
-        return findFileOrDirectory(tempInnerGameData.gameDir , "mods") != null;
+        var modDir = tempInnerGameData.gameDir.findFile("mods");
+        return modDir != null;
     }
     // endregion Getter/Setter
 
@@ -308,8 +308,8 @@ public class StockViewModel extends AndroidViewModel {
                 copyFileToDir(getStockActivity() , tempPathFile , tempInnerGameData.gameDir);
             }
             if (tempModFile != null) {
-                copyFileToDir(getStockActivity() , tempModFile ,
-                        findFileOrDirectory(tempInnerGameData.gameDir , "mods"));
+                var modDir = tempInnerGameData.gameDir.findFile("mods");
+                copyFileToDir(getStockActivity() , tempModFile , modDir);
             }
             refreshIntGamesDirectory();
             dialogFragments.dismiss();

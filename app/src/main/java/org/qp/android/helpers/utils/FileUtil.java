@@ -86,33 +86,13 @@ public final class FileUtil {
     }
 
     @Nullable
-    public static File createFindFolder(File parentDir , String name) {
-        if (!isWritableDirectory(parentDir)) {
-            return null;
-        }
-
-        var checkDir = findFileOrDirectory(parentDir , name);
-        if (checkDir == null) {
-            var newDir = new File(parentDir , name);
-            if (newDir.mkdir()) {
-                Log.i(TAG , "Directory created");
-                return newDir;
-            } else {
-                Log.i(TAG , "Directory not created");
-                return null;
-            }
-        }
-        return checkDir;
-    }
-
-    @Nullable
     public static DocumentFile createFindDFolder(DocumentFile parentDir ,
                                                  String displayName) {
         if (!isWritableDirectory(parentDir)) {
             return null;
         }
 
-        var checkDir = findFileOrDirectory(parentDir , displayName);
+        var checkDir = parentDir.findFile(displayName);
         if (checkDir == null) {
             var tempDir = parentDir.createDirectory(displayName);
             if (isWritableDirectory(tempDir)) {
@@ -125,13 +105,6 @@ public final class FileUtil {
         return checkDir;
     }
 
-    @Nullable
-    public static File findFileOrDirectory(File parentDir , final String name) {
-        var files = parentDir.listFiles((dir , filename) -> filename.equalsIgnoreCase(name));
-        if (files == null || files.length == 0) return null;
-        return files[0];
-    }
-
     public static DocumentFile findFileOrDirectory(DocumentFile parentDir ,
                                                    final String name) {
         return parentDir.findFile(name);
@@ -142,9 +115,10 @@ public final class FileUtil {
         var findDir = rootDir;
         var nameGameDir = rootDir.getName();
 
-        var index = fullPath.lastIndexOf(nameGameDir);
-        var simplePath = fullPath.substring(index);
-        var pathToFileSegments = simplePath.split("/");
+        var index = fullPath.indexOf(nameGameDir);
+        var subString = fullPath.substring(index);
+        var splitString = subString.replace(nameGameDir + "/" , "");
+        var pathToFileSegments = splitString.split("/");
 
         for (var segment : pathToFileSegments) {
             if (segment.isEmpty()) {
@@ -160,7 +134,7 @@ public final class FileUtil {
     }
 
     public static DocumentFile fromRelPath(@NonNull String relPath ,
-                                         @NonNull DocumentFile rootDir) {
+                                           @NonNull DocumentFile rootDir) {
         var pathToFileSegments = relPath.split("/");
         var relFile = rootDir;
 
@@ -195,47 +169,26 @@ public final class FileUtil {
         return result.toString();
     }
 
-    public static <T> void deleteDirectory(T dir) {
-        if (dir instanceof File delDir) {
-            if (delDir.listFiles() != null) {
-                for (var file : delDir.listFiles()) {
-                    if (file.isDirectory()) {
-                        deleteDirectory(file);
+    public static void deleteDirectory(@NonNull DocumentFile delDir) {
+        try {
+            for (var file : delDir.listFiles()) {
+                if (file.isDirectory()) {
+                    deleteDirectory(file);
+                } else {
+                    if (file.delete()) {
+                        Log.i(TAG , "File delete");
                     } else {
-                        if (file.delete()) {
-                            Log.i(TAG , "File delete");
-                        } else {
-                            Log.e(TAG , "File not delete");
-                        }
+                        Log.e(TAG , "File not delete");
                     }
                 }
-                if (delDir.delete()) {
-                    Log.i(TAG , "Directory delete");
-                } else {
-                    Log.e(TAG , "Directory not delete");
-                }
             }
-        } else if (dir instanceof DocumentFile delDir) {
-            try {
-                for (var file : delDir.listFiles()) {
-                    if (file.isDirectory()) {
-                        deleteDirectory(file);
-                    } else {
-                        if (file.delete()) {
-                            Log.i(TAG , "File delete");
-                        } else {
-                            Log.e(TAG , "File not delete");
-                        }
-                    }
-                }
-                if (delDir.delete()) {
-                    Log.i(TAG , "Directory delete");
-                } else {
-                    Log.e(TAG , "Directory not delete");
-                }
-            } catch (UnsupportedOperationException e) {
-                Log.e(TAG , "Error: " , e);
+            if (delDir.delete()) {
+                Log.i(TAG , "Directory delete");
+            } else {
+                Log.e(TAG , "Directory not delete");
             }
+        } catch (UnsupportedOperationException e) {
+            Log.e(TAG , "Error: " , e);
         }
     }
 
@@ -288,4 +241,5 @@ public final class FileUtil {
             throw new WorkerException("CGF");
         }
     }
+
 }

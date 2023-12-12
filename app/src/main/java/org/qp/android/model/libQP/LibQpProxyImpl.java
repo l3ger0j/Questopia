@@ -2,7 +2,6 @@ package org.qp.android.model.libQP;
 
 import static org.qp.android.helpers.utils.FileUtil.createFindDFile;
 import static org.qp.android.helpers.utils.FileUtil.documentWrap;
-import static org.qp.android.helpers.utils.FileUtil.findFileOrDirectory;
 import static org.qp.android.helpers.utils.FileUtil.fromFullPath;
 import static org.qp.android.helpers.utils.FileUtil.getFileContents;
 import static org.qp.android.helpers.utils.StringUtil.getStringOrEmpty;
@@ -204,14 +203,18 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
         ArrayList<QpListItem> objects = new ArrayList<>();
         var count = nativeMethods.QSPGetObjectsCount();
         for (int i = 0; i < count; i++) {
-            var objectResult = (ObjectData) nativeMethods.QSPGetObjectData(i);
             var object = new QpListItem();
+            var objectResult = (ObjectData) nativeMethods.QSPGetObjectData(i);
+            var curGameDir = getCurGameDir();
+
             if (objectResult.name.contains("<img")) {
                 if (htmlProcessor.hasHTMLTags(objectResult.name)) {
                     var tempPath = htmlProcessor.getSrcDir(objectResult.name);
-                    object.pathToImage = String.valueOf(findFileOrDirectory(gameState.gameDir , tempPath));
+                    var fileFromPath = curGameDir.findFile(tempPath);
+                    object.pathToImage = String.valueOf(fileFromPath);
                 } else {
-                    object.pathToImage = String.valueOf(findFileOrDirectory(gameState.gameDir , objectResult.name));
+                    var fileFromPath = curGameDir.findFile(objectResult.name);
+                    object.pathToImage = String.valueOf(fileFromPath);
                 }
             } else {
                 object.pathToImage = objectResult.image;

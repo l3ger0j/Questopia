@@ -2,7 +2,6 @@ package org.qp.android.helpers.repository;
 
 import static org.qp.android.helpers.utils.FileUtil.createFindDFile;
 import static org.qp.android.helpers.utils.FileUtil.documentWrap;
-import static org.qp.android.helpers.utils.FileUtil.findFileOrDirectory;
 import static org.qp.android.helpers.utils.FileUtil.isWritableFile;
 import static org.qp.android.helpers.utils.FileUtil.readFileAsString;
 import static org.qp.android.helpers.utils.XmlUtil.objectToXml;
@@ -28,8 +27,6 @@ import java.util.Locale;
 public class LocalGame {
     private final String TAG = this.getClass().getSimpleName();
     private static final String GAME_INFO_FILENAME = "gameStockInfo";
-
-    private Context context;
 
     @Nullable
     private ArrayList<DocumentFile> getGameDirectories(DocumentFile gamesDir) {
@@ -70,19 +67,19 @@ public class LocalGame {
     }
 
     @Nullable
-    private String getGameInfo(@NonNull GameFolder game) {
-        var gameInfoFiles = findFileOrDirectory(game.dir , GAME_INFO_FILENAME);
-        if (gameInfoFiles == null || gameInfoFiles.length() == 0) {
-            Log.w(TAG , "InnerGameData info file not found in " + game.dir.getName());
+    private DocumentFile getGameInfoFile(@NonNull DocumentFile gameFolder) {
+        var findGameInfoFile = gameFolder.findFile(GAME_INFO_FILENAME);
+        if (findGameInfoFile == null) {
+            Log.w(TAG , "InnerGameData info file not found in " + gameFolder.getName());
             return null;
         }
-        return readFileAsString(context , gameInfoFiles);
+        return findGameInfoFile;
     }
 
     public void formDataFileIntoFolder(@NonNull Context context ,
                                        InnerGameData innerGameData ,
                                        DocumentFile gameDir) {
-        var infoFile = findFileOrDirectory(gameDir , GAME_INFO_FILENAME);
+        var infoFile = getGameInfoFile(gameDir);
         if (infoFile == null) {
             infoFile = createFindDFile(gameDir , MimeType.TEXT , GAME_INFO_FILENAME);
         }
@@ -104,17 +101,16 @@ public class LocalGame {
             return Collections.emptyList();
         }
 
-        this.context = context;
-
         var itemsGamesDirs = new ArrayList<InnerGameData>();
         var formatGamesDirs = getGamesFolders(fileList);
 
         for (var folder : formatGamesDirs) {
             var item = (InnerGameData) null;
-            var info = getGameInfo(folder);
+            var infoFile = getGameInfoFile(folder.dir());
+            var infoFileCont = readFileAsString(context , infoFile);
 
-            if (info != null) {
-                item = parseGameInfo(info);
+            if (infoFileCont != null) {
+                item = parseGameInfo(infoFileCont);
             }
 
             if (item == null) {
