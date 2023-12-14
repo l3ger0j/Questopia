@@ -107,7 +107,7 @@ public class LocalGame {
         for (var folder : formatGamesDirs) {
             var item = (InnerGameData) null;
             var infoFile = getGameInfoFile(folder.dir());
-            var infoFileCont = readFileAsString(context , infoFile);
+            var infoFileCont = readFileAsString(context , infoFile.getUri());
 
             if (infoFileCont != null) {
                 item = parseGameInfo(infoFileCont);

@@ -27,12 +27,11 @@ public final class FileUtil {
     public static byte[] getFileContents(@NonNull Context context ,
                                          @NonNull Uri uriContent) {
         var resolver = context.getContentResolver();
-        try (var in = resolver.openInputStream(uriContent)) {
-            try (var out = new ByteArrayOutputStream()) {
-                StreamUtil.copy(in , out);
-                return out.toByteArray();
-            }
-        } catch (IOException ex) {
+        try (var in = resolver.openInputStream(uriContent);
+             var out = new ByteArrayOutputStream()) {
+            StreamUtil.copy(in , out);
+            return out.toByteArray();
+        } catch (Exception ex) {
             Log.e(TAG , "Error reading file: " + uriContent , ex);
             return null;
         }
@@ -110,24 +109,29 @@ public final class FileUtil {
         return parentDir.findFile(name);
     }
 
+    @Nullable
     public static DocumentFile fromFullPath(@NonNull String fullPath ,
                                             @NonNull DocumentFile rootDir) {
         var findDir = rootDir;
         var nameGameDir = rootDir.getName();
 
-        var index = fullPath.indexOf(nameGameDir);
-        var subString = fullPath.substring(index);
-        var splitString = subString.replace(nameGameDir + "/" , "");
-        var pathToFileSegments = splitString.split("/");
+        try {
+            var index = fullPath.indexOf(nameGameDir);
+            var subString = fullPath.substring(index);
+            var splitString = subString.replace(nameGameDir + "/" , "");
+            var pathToFileSegments = splitString.split("/");
 
-        for (var segment : pathToFileSegments) {
-            if (segment.isEmpty()) {
-                continue;
+            for (var segment : pathToFileSegments) {
+                if (segment.isEmpty()) {
+                    continue;
+                }
+                findDir = findDir.findFile(segment);
+                if (findDir == null) {
+                    break;
+                }
             }
-            findDir = findDir.findFile(segment);
-            if (findDir == null) {
-                break;
-            }
+        } catch (NullPointerException i) {
+            return null;
         }
 
         return findDir;
@@ -152,9 +156,9 @@ public final class FileUtil {
     }
 
     @Nullable
-    public static String readFileAsString(Context context , DocumentFile file) {
+    public static String readFileAsString(Context context , Uri fileUri) {
         var result = new StringBuilder();
-        try (var in = context.getContentResolver().openInputStream(file.getUri())) {
+        try (var in = context.getContentResolver().openInputStream(fileUri)) {
             var inReader = new InputStreamReader(in);
             try (var bufReader = new BufferedReader(inReader)) {
                 String line;

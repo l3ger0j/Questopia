@@ -147,6 +147,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         webClientSettings.setAllowFileAccess(true);
         webClientSettings.setJavaScriptEnabled(true);
         webClientSettings.setUseWideViewPort(true);
+        webClientSettings.setDomStorageEnabled(true);
         view.setOverScrollMode(View.OVER_SCROLL_NEVER);
         view.setWebViewClient(webViewClient);
         return view;
@@ -381,19 +382,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
                 if (uri.getScheme().startsWith("file")) {
                     try {
                         if (uri.getPath() == null) throw new NullPointerException();
-
-                        var pathToImageSegments = uri.getPath().split("/");
-                        var imageFile = rootDir;
-                        for (var segment : pathToImageSegments) {
-                            if (segment.isEmpty()) {
-                                continue;
-                            }
-                            imageFile = imageFile.findFile(segment);
-                            if (imageFile == null) {
-                                break;
-                            }
-                        }
-
+                        var imageFile = fromRelPath(uri.getPath() , rootDir);
                         var extension = imageFile.getName();
                         var mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
                         var in = getGameActivity().getContentResolver().openInputStream(imageFile.getUri());

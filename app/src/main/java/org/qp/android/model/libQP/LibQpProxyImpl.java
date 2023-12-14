@@ -26,12 +26,10 @@ import org.qp.android.dto.libQP.ActionData;
 import org.qp.android.dto.libQP.ErrorData;
 import org.qp.android.dto.libQP.GetVarValuesResponse;
 import org.qp.android.dto.libQP.ObjectData;
-import org.qp.android.helpers.utils.StreamUtil;
 import org.qp.android.model.service.AudioPlayer;
 import org.qp.android.model.service.HtmlProcessor;
 import org.qp.android.ui.game.GameInterface;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -98,25 +96,11 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
     }
 
     private boolean loadGameWorld() {
-        byte[] gameData;
-        var tempGameFile = documentWrap(gameState.gameFile);
-
-        try (var in = tempGameFile.openInputStream(context)) {
-            try (var out = new ByteArrayOutputStream()) {
-                if (in != null) {
-                    StreamUtil.copy(in, out);
-                    gameData = out.toByteArray();
-                } else {
-                    throw new IOException();
-                }
-            }
-        } catch (IOException ex) {
-            Log.e(TAG ,"Failed to load the game world", ex);
-            return false;
-        }
-
-        var fileName = tempGameFile.getAbsolutePath(context);
-        if (!nativeMethods.QSPLoadGameWorldFromData(gameData, gameData.length, fileName)) {
+        var gameFileUri = gameState.gameFile.getUri();
+        var gameFileFullPath = documentWrap(gameState.gameFile).getAbsolutePath(context);
+        final byte[] gameData = getFileContents(context , gameFileUri);
+        if (gameData == null) return false;
+        if (!nativeMethods.QSPLoadGameWorldFromData(gameData, gameData.length, gameFileFullPath)) {
             showLastQspError();
             return false;
         }
@@ -323,22 +307,8 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
             runOnQspThread(() -> loadGameState(uri));
             return;
         }
-        final byte[] gameData;
-        var resolver = context.getContentResolver();
-
-        try (var in = resolver.openInputStream(uri);
-             var out = new ByteArrayOutputStream()) {
-            if (in != null) {
-                StreamUtil.copy(in, out);
-                gameData = out.toByteArray();
-            } else {
-                throw new IOException("Input is NULL!");
-            }
-        } catch (IOException ex) {
-            Log.e(TAG,"Failed to load game state", ex);
-            return;
-        }
-
+        final byte[] gameData = getFileContents(context , uri);
+        if (gameData == null) return;
         if (!nativeMethods.QSPOpenSavedGameFromData(gameData, gameData.length, true)) {
             showLastQspError();
         }
@@ -505,8 +475,10 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
     @Override
     public void ShowPicture(String path) {
         var inter = gameInterface;
-        if (inter != null && isNotEmpty(path)) {
-            inter.showPicture(path);
+        var imageFile = fromFullPath(path , getCurGameDir());
+        if (inter != null && isNotEmpty(path) && imageFile != null) {
+            var imageFileUri = imageFile.getUri();
+            inter.showPicture(String.valueOf(imageFileUri));
         }
     }
 
@@ -553,8 +525,10 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
         if (inter == null) return;
         if (filename != null) {
             try {
-                var uri = fromFullPath(filename , getCurGameDir()).getUri();
-                inter.doWithCounterDisabled(() -> loadGameState(uri));
+                var gameFile = fromFullPath(filename , getCurGameDir());
+                if (gameFile == null) throw new NullPointerException();
+                var gameFileUri = gameFile.getUri();
+                inter.doWithCounterDisabled(() -> loadGameState(gameFileUri));
             } catch (Exception e) {
                 Log.e(TAG , "Error: ", e);
             }
@@ -642,16 +616,16 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
     // TODO: 09.10.2023 NEEED TO ADD ERROR CATCHER
     @Override
     public byte[] GetFileContents(String path) {
-        var name = gameState.gameDir.getName();
-        if (name == null) return null;
-        var targetFileUri = fromFullPath(path , getCurGameDir()).getUri();
+        var targetFile = fromFullPath(path , getCurGameDir());
+        if (targetFile == null) return null;
+        var targetFileUri = targetFile.getUri();
         return getFileContents(context , targetFileUri);
     }
 
     @Override
     public void ChangeQuestPath(String path) {
         var newGameDir = fromFullPath(path , getCurGameDir());
-        if (!newGameDir.exists()) {
+        if (newGameDir == null || !newGameDir.exists()) {
             Log.e(TAG,"Game directory not found: " + path);
             return;
         }
