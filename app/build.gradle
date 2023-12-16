@@ -48,6 +48,7 @@ android {
     buildFeatures {
         viewBinding viewBind
         dataBinding dataBind
+        buildConfig true
         aidl true
     }
 
