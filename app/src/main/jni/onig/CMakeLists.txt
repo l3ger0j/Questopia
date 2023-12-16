@@ -1,21 +1,58 @@
 
 project(onig)
 
-set( ONIG_SOURCES
-	    regcomp.c
-        regenc.c
-        regerror.c
-        regexec.c
-        regparse.c
-        regsyntax.c
-        regtrav.c
-        regversion.c
-        st.c
-        enc/ascii.c
-        enc/cp1251.c
-        enc/koi8_r.c
-        enc/unicode.c
-        enc/utf16_le.c
-        enc/utf32_le.c )
+set(ONIG_SOURCES
+		regint.h
+		regparse.h
+		regenc.h
+		st.h
+		regerror.c
+		regparse.c
+		regext.c
+		regcomp.c
+		regexec.c
+		reggnu.c
+		regenc.c
+		regsyntax.c
+		regtrav.c
+		regversion.c
+		st.c
+		onig_init.c
+		unicode.c
+		ascii.c
+		utf8.c
+		utf16_be.c
+		utf16_le.c
+		utf32_be.c
+		utf32_le.c
+		euc_jp.c
+		sjis.c
+		iso8859_1.c
+		iso8859_2.c
+		iso8859_3.c
+		iso8859_4.c
+		iso8859_5.c
+		iso8859_6.c
+		iso8859_7.c
+		iso8859_8.c
+		iso8859_9.c
+		iso8859_10.c
+		iso8859_11.c
+		iso8859_13.c
+		iso8859_14.c
+		iso8859_15.c
+		iso8859_16.c
+		euc_tw.c
+		euc_kr.c
+		big5.c
+		gb18030.c
+		koi8_r.c
+		cp1251.c
+		euc_jp_prop.c
+		sjis_prop.c
+		unicode_unfold_key.c
+		unicode_fold1_key.c
+		unicode_fold2_key.c
+		unicode_fold3_key.c)
 
 add_library( onig SHARED ${ONIG_SOURCES} )

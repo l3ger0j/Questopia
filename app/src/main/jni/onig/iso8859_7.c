@@ -1,8 +1,8 @@
 /**********************************************************************
-  koi8_r.c -  Oniguruma (regular expression library)
+  iso8859_7.c -  Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2007  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2020  K.Kosako
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,13 +27,13 @@
  * SUCH DAMAGE.
  */
 
-#include "../regenc.h"
+#include "regenc.h"
 
-#define ENC_KOI8_R_TO_LOWER_CASE(c) EncKOI8_R_ToLowerCaseTable[c]
-#define ENC_IS_KOI8_R_CTYPE(code,ctype) \
-  ((EncKOI8_R_CtypeTable[code] & CTYPE_TO_BIT(ctype)) != 0)
+#define ENC_ISO_8859_7_TO_LOWER_CASE(c) EncISO_8859_7_ToLowerCaseTable[c]
+#define ENC_IS_ISO_8859_7_CTYPE(code,ctype) \
+  ((EncISO_8859_7_CtypeTable[code] & CTYPE_TO_BIT(ctype)) != 0)
 
-static const UChar EncKOI8_R_ToLowerCaseTable[256] = {
+static const UChar EncISO_8859_7_ToLowerCaseTable[256] = {
   '\000', '\001', '\002', '\003', '\004', '\005', '\006', '\007',
   '\010', '\011', '\012', '\013', '\014', '\015', '\016', '\017',
   '\020', '\021', '\022', '\023', '\024', '\025', '\026', '\027',
@@ -56,19 +56,19 @@ static const UChar EncKOI8_R_ToLowerCaseTable[256] = {
   '\230', '\231', '\232', '\233', '\234', '\235', '\236', '\237',
   '\240', '\241', '\242', '\243', '\244', '\245', '\246', '\247',
   '\250', '\251', '\252', '\253', '\254', '\255', '\256', '\257',
-  '\260', '\261', '\262', '\243', '\264', '\265', '\266', '\267',
-  '\270', '\271', '\272', '\273', '\274', '\275', '\276', '\277',
-  '\300', '\301', '\302', '\303', '\304', '\305', '\306', '\307',
-  '\310', '\311', '\312', '\313', '\314', '\315', '\316', '\317',
-  '\320', '\321', '\322', '\323', '\324', '\325', '\326', '\327',
-  '\330', '\331', '\332', '\333', '\334', '\335', '\336', '\337',
-  '\300', '\301', '\302', '\303', '\304', '\305', '\306', '\307',
-  '\310', '\311', '\312', '\313', '\314', '\315', '\316', '\317',
-  '\320', '\321', '\322', '\323', '\324', '\325', '\326', '\327',
-  '\330', '\331', '\332', '\333', '\334', '\335', '\336', '\337'
+  '\260', '\261', '\262', '\263', '\264', '\265', '\334', '\267',
+  '\335', '\336', '\337', '\273', '\374', '\275', '\375', '\376',
+  '\300', '\341', '\342', '\343', '\344', '\345', '\346', '\347',
+  '\350', '\351', '\352', '\353', '\354', '\355', '\356', '\357',
+  '\360', '\361', '\322', '\363', '\364', '\365', '\366', '\367',
+  '\370', '\371', '\372', '\373', '\334', '\335', '\336', '\337',
+  '\340', '\341', '\342', '\343', '\344', '\345', '\346', '\347',
+  '\350', '\351', '\352', '\353', '\354', '\355', '\356', '\357',
+  '\360', '\361', '\362', '\363', '\364', '\365', '\366', '\367',
+  '\370', '\371', '\372', '\373', '\374', '\375', '\376', '\377'
 };
 
-static const unsigned short EncKOI8_R_CtypeTable[256] = {
+static const unsigned short EncISO_8859_7_CtypeTable[256] = {
   0x4008, 0x4008, 0x4008, 0x4008, 0x4008, 0x4008, 0x4008, 0x4008,
   0x4008, 0x420c, 0x4209, 0x4208, 0x4208, 0x4208, 0x4008, 0x4008,
   0x4008, 0x4008, 0x4008, 0x4008, 0x4008, 0x4008, 0x4008, 0x4008,
@@ -85,98 +85,90 @@ static const unsigned short EncKOI8_R_CtypeTable[256] = {
   0x70e2, 0x70e2, 0x70e2, 0x70e2, 0x70e2, 0x70e2, 0x70e2, 0x70e2,
   0x70e2, 0x70e2, 0x70e2, 0x70e2, 0x70e2, 0x70e2, 0x70e2, 0x70e2,
   0x70e2, 0x70e2, 0x70e2, 0x41a0, 0x41a0, 0x41a0, 0x41a0, 0x4008,
-  0x00a0, 0x00a0, 0x00a0, 0x00a0, 0x00a0, 0x00a0, 0x00a0, 0x00a0,
-  0x00a0, 0x00a0, 0x00a0, 0x00a0, 0x00a0, 0x00a0, 0x00a0, 0x00a0,
-  0x00a0, 0x00a0, 0x00a0, 0x00a0, 0x00a0, 0x00a0, 0x00a0, 0x00a0,
-  0x00a0, 0x00a0, 0x0284, 0x00a0, 0x00a0, 0x10a0, 0x01a0, 0x00a0,
-  0x00a0, 0x00a0, 0x00a0, 0x30e2, 0x00a0, 0x00a0, 0x00a0, 0x00a0,
-  0x00a0, 0x00a0, 0x00a0, 0x00a0, 0x00a0, 0x00a0, 0x00a0, 0x00a0,
-  0x00a0, 0x00a0, 0x00a0, 0x34a2, 0x00a0, 0x00a0, 0x00a0, 0x00a0,
-  0x00a0, 0x00a0, 0x00a0, 0x00a0, 0x00a0, 0x00a0, 0x00a0, 0x00a0,
-  0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x30e2,
-  0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x30e2,
-  0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x30e2,
-  0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x30e2,
+  0x0008, 0x0008, 0x0008, 0x0008, 0x0008, 0x0008, 0x0008, 0x0008,
+  0x0008, 0x0008, 0x0008, 0x0008, 0x0008, 0x0008, 0x0008, 0x0008,
+  0x0008, 0x0008, 0x0008, 0x0008, 0x0008, 0x0008, 0x0008, 0x0008,
+  0x0008, 0x0008, 0x0008, 0x0008, 0x0008, 0x0008, 0x0008, 0x0008,
+  0x0284, 0x01a0, 0x01a0, 0x00a0, 0x0000, 0x0000, 0x00a0, 0x00a0,
+  0x00a0, 0x00a0, 0x0000, 0x01a0, 0x00a0, 0x01a0, 0x0000, 0x01a0,
+  0x00a0, 0x00a0, 0x10a0, 0x10a0, 0x00a0, 0x00a0, 0x34a2, 0x01a0,
+  0x34a2, 0x34a2, 0x34a2, 0x01a0, 0x34a2, 0x10a0, 0x34a2, 0x34a2,
+  0x30e2, 0x34a2, 0x34a2, 0x34a2, 0x34a2, 0x34a2, 0x34a2, 0x34a2,
   0x34a2, 0x34a2, 0x34a2, 0x34a2, 0x34a2, 0x34a2, 0x34a2, 0x34a2,
-  0x34a2, 0x34a2, 0x34a2, 0x34a2, 0x34a2, 0x34a2, 0x34a2, 0x34a2,
-  0x34a2, 0x34a2, 0x34a2, 0x34a2, 0x34a2, 0x34a2, 0x34a2, 0x34a2,
-  0x34a2, 0x34a2, 0x34a2, 0x34a2, 0x34a2, 0x34a2, 0x34a2, 0x34a2
+  0x34a2, 0x34a2, 0x0000, 0x34a2, 0x34a2, 0x34a2, 0x34a2, 0x34a2,
+  0x34a2, 0x34a2, 0x34a2, 0x34a2, 0x30e2, 0x30e2, 0x30e2, 0x30e2,
+  0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x30e2,
+  0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x30e2,
+  0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x30e2,
+  0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x30e2, 0x0000
 };
 
 static int
-koi8_r_mbc_case_fold(OnigCaseFoldType flag ARG_UNUSED,
-             const UChar** pp, const UChar* end ARG_UNUSED, UChar* lower)
+mbc_case_fold(OnigCaseFoldType flag,
+              const UChar** pp, const UChar* end ARG_UNUSED, UChar* lower)
 {
   const UChar* p = *pp;
 
-  *lower = ENC_KOI8_R_TO_LOWER_CASE(*p);
+  if (CASE_FOLD_IS_NOT_ASCII_ONLY(flag) || ONIGENC_IS_ASCII_CODE(*p))
+    *lower = ENC_ISO_8859_7_TO_LOWER_CASE(*p);
+  else
+    *lower = *p;
+
   (*pp)++;
   return 1;
 }
 
-#if 0
 static int
-koi8_r_is_mbc_ambiguous(OnigCaseFoldType flag, const UChar** pp, const UChar* end)
-{
-  int v;
-  const UChar* p = *pp;
-
-  (*pp)++;
-  v = (EncKOI8_R_CtypeTable[*p] & (BIT_CTYPE_UPPER | BIT_CTYPE_LOWER));
-  return (v != 0 ? TRUE : FALSE);
-}
-#endif
-
-static int
-koi8_r_is_code_ctype(OnigCodePoint code, unsigned int ctype)
+is_code_ctype(OnigCodePoint code, unsigned int ctype)
 {
   if (code < 256)
-    return ENC_IS_KOI8_R_CTYPE(code, ctype);
+    return ENC_IS_ISO_8859_7_CTYPE(code, ctype);
   else
     return FALSE;
 }
 
 static const OnigPairCaseFoldCodes CaseFoldMap[] = {
-  { 0xa3, 0xb3 },
+ { 0xb6, 0xdc },
+ { 0xb8, 0xdd },
+ { 0xb9, 0xde },
+ { 0xba, 0xdf },
+ { 0xbc, 0xfc },
+ { 0xbe, 0xfd },
+ { 0xbf, 0xfe },
 
-  { 0xc0, 0xe0 },
-  { 0xc1, 0xe1 },
-  { 0xc2, 0xe2 },
-  { 0xc3, 0xe3 },
-  { 0xc4, 0xe4 },
-  { 0xc5, 0xe5 },
-  { 0xc6, 0xe6 },
-  { 0xc7, 0xe7 },
-  { 0xc8, 0xe8 },
-  { 0xc9, 0xe9 },
-  { 0xca, 0xea },
-  { 0xcb, 0xeb },
-  { 0xcc, 0xec },
-  { 0xcd, 0xed },
-  { 0xce, 0xee },
-  { 0xcf, 0xef },
+ { 0xc1, 0xe1 },
+ { 0xc2, 0xe2 },
+ { 0xc3, 0xe3 },
+ { 0xc4, 0xe4 },
+ { 0xc5, 0xe5 },
+ { 0xc6, 0xe6 },
+ { 0xc7, 0xe7 },
+ { 0xc8, 0xe8 },
+ { 0xc9, 0xe9 },
+ { 0xca, 0xea },
+ { 0xcb, 0xeb },
+ { 0xcc, 0xec },
+ { 0xcd, 0xed },
+ { 0xce, 0xee },
+ { 0xcf, 0xef },
 
-  { 0xd0, 0xf0 },
-  { 0xd1, 0xf1 },
-  { 0xd2, 0xf2 },
-  { 0xd3, 0xf3 },
-  { 0xd4, 0xf4 },
-  { 0xd5, 0xf5 },
-  { 0xd6, 0xf6 },
-  { 0xd7, 0xf7 },
-  { 0xd8, 0xf8 },
-  { 0xd9, 0xf9 },
-  { 0xda, 0xfa },
-  { 0xdb, 0xfb },
-  { 0xdc, 0xfc },
-  { 0xdd, 0xfd },
-  { 0xde, 0xfe },
-  { 0xdf, 0xff }
+ { 0xd0, 0xf0 },
+ { 0xd1, 0xf1 },
+ { 0xd2, 0xf2 },
+ { 0xd3, 0xf3 },
+ { 0xd4, 0xf4 },
+ { 0xd5, 0xf5 },
+ { 0xd6, 0xf6 },
+ { 0xd7, 0xf7 },
+ { 0xd8, 0xf8 },
+ { 0xd9, 0xf9 },
+ { 0xda, 0xfa },
+ { 0xdb, 0xfb }
 };
 
 static int
-koi8_r_apply_all_case_fold(OnigCaseFoldType flag,
-			       OnigApplyAllCaseFoldFunc f, void* arg)
+apply_all_case_fold(OnigCaseFoldType flag,
+                    OnigApplyAllCaseFoldFunc f, void* arg)
 {
   return onigenc_apply_all_case_fold_with_map(
              sizeof(CaseFoldMap)/sizeof(OnigPairCaseFoldCodes), CaseFoldMap, 0,
@@ -184,29 +176,35 @@ koi8_r_apply_all_case_fold(OnigCaseFoldType flag,
 }
 
 static int
-koi8_r_get_case_fold_codes_by_str(OnigCaseFoldType flag,
-    const OnigUChar* p, const OnigUChar* end, OnigCaseFoldCodeItem items[])
+get_case_fold_codes_by_str(OnigCaseFoldType flag,
+   const OnigUChar* p, const OnigUChar* end, OnigCaseFoldCodeItem items[])
 {
   return onigenc_get_case_fold_codes_by_str_with_map(
-	     sizeof(CaseFoldMap)/sizeof(OnigPairCaseFoldCodes), CaseFoldMap, 0,
-	     flag, p, end, items);
+                 sizeof(CaseFoldMap)/sizeof(OnigPairCaseFoldCodes), CaseFoldMap, 0,
+                 flag, p, end, items);
 }
 
-OnigEncodingType OnigEncodingKOI8_R = {
+
+OnigEncodingType OnigEncodingISO_8859_7 = {
   onigenc_single_byte_mbc_enc_len,
-  "KOI8-R",       /* name */
+  "ISO-8859-7",  /* name */
   1,             /* max enc length */
   1,             /* min enc length */
   onigenc_is_mbc_newline_0x0a,
   onigenc_single_byte_mbc_to_code,
   onigenc_single_byte_code_to_mbclen,
   onigenc_single_byte_code_to_mbc,
-  koi8_r_mbc_case_fold,
-  koi8_r_apply_all_case_fold,
-  koi8_r_get_case_fold_codes_by_str,
+  mbc_case_fold,
+  apply_all_case_fold,
+  get_case_fold_codes_by_str,
   onigenc_minimum_property_name_to_ctype,
-  koi8_r_is_code_ctype,
+  is_code_ctype,
   onigenc_not_support_get_ctype_code_range,
   onigenc_single_byte_left_adjust_char_head,
-  onigenc_always_true_is_allowed_reverse_match
+  onigenc_always_true_is_allowed_reverse_match,
+  NULL, /* init */
+  NULL, /* is_initialized */
+  onigenc_always_true_is_valid_mbc_string,
+  ENC_FLAG_ASCII_COMPATIBLE|ENC_FLAG_SKIP_OFFSET_1,
+  0, 0
 };
