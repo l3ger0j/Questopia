@@ -158,13 +158,11 @@ public final class FileUtil {
     @Nullable
     public static String readFileAsString(Context context , Uri fileUri) {
         var result = new StringBuilder();
-        try (var in = context.getContentResolver().openInputStream(fileUri)) {
-            var inReader = new InputStreamReader(in);
-            try (var bufReader = new BufferedReader(inReader)) {
-                String line;
-                while ((line = bufReader.readLine()) != null) {
-                    result.append(line);
-                }
+        try (var in = context.getContentResolver().openInputStream(fileUri);
+             var bufReader = new BufferedReader(new InputStreamReader(in))) {
+            String line;
+            while ((line = bufReader.readLine()) != null) {
+                result.append(line);
             }
         } catch (IOException ex) {
             Log.e(TAG , "Error reading a file" , ex);
