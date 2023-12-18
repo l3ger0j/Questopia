@@ -27,22 +27,8 @@ import java.util.Locale;
 public class LocalGame {
     private final String TAG = this.getClass().getSimpleName();
     private static final String GAME_INFO_FILENAME = "gameStockInfo";
-
-    @Nullable
-    private ArrayList<DocumentFile> getGameDirectories(DocumentFile gamesDir) {
-        try {
-            var dirs = new ArrayList<DocumentFile>();
-            for (var f : gamesDir.listFiles()) {
-                if (f.isDirectory()) {
-                    dirs.add(f);
-                }
-            }
-            return dirs;
-        } catch (NullPointerException e) {
-            Log.d(TAG , "Error: " , e);
-            return null;
-        }
-    }
+    private static final String NOMEDIA_FILENAME = ".nomedia";
+    private static final String NOSEARCH_FILENAME = ".nosearch";
 
     @NonNull
     private List<GameFolder> getGamesFolders(@NonNull List<DocumentFile> dirs) {
@@ -76,6 +62,20 @@ public class LocalGame {
         return findGameInfoFile;
     }
 
+    private void createNoMediaFile(@NonNull DocumentFile gameDir) {
+        var findNoMediaFile = gameDir.findFile(NOMEDIA_FILENAME);
+        if (findNoMediaFile == null || !findNoMediaFile.exists()) {
+            createFindDFile(gameDir , MimeType.TEXT , NOMEDIA_FILENAME);
+        }
+    }
+
+    private void createNoSearchFile(@NonNull DocumentFile gameDir) {
+        var findNoSearchFile = gameDir.findFile(NOSEARCH_FILENAME);
+        if (findNoSearchFile == null || !findNoSearchFile.exists()) {
+            createFindDFile(gameDir , MimeType.TEXT , NOSEARCH_FILENAME);
+        }
+    }
+
     public void formDataFileIntoFolder(@NonNull Context context ,
                                        InnerGameData innerGameData ,
                                        DocumentFile gameDir) {
@@ -104,9 +104,9 @@ public class LocalGame {
         var itemsGamesDirs = new ArrayList<InnerGameData>();
         var formatGamesDirs = getGamesFolders(fileList);
 
-        for (var folder : formatGamesDirs) {
+        for (var gameFolder : formatGamesDirs) {
             var item = (InnerGameData) null;
-            var infoFile = getGameInfoFile(folder.dir());
+            var infoFile = getGameInfoFile(gameFolder.dir);
             var infoFileCont = readFileAsString(context , infoFile.getUri());
 
             if (infoFileCont != null) {
@@ -114,22 +114,25 @@ public class LocalGame {
             }
 
             if (item == null) {
-                var name = folder.dir.getName();
+                var name = gameFolder.dir.getName();
                 if (name == null) return Collections.emptyList();
                 item = new InnerGameData();
                 item.id = name;
                 item.title = name;
-                item.gameDir = folder.dir;
-                item.gameFiles = folder.gameFiles;
-                formDataFileIntoFolder(context , item , folder.dir);
+                item.gameDir = gameFolder.dir;
+                item.gameFiles = gameFolder.gameFiles;
+                formDataFileIntoFolder(context , item , gameFolder.dir);
 
                 itemsGamesDirs.add(item);
             } else {
-                item.gameDir = folder.dir;
-                item.gameFiles = folder.gameFiles;
+                item.gameDir = gameFolder.dir;
+                item.gameFiles = gameFolder.gameFiles;
 
                 itemsGamesDirs.add(item);
             }
+
+            createNoMediaFile(gameFolder.dir);
+            createNoSearchFile(gameFolder.dir);
         }
 
         return itemsGamesDirs;

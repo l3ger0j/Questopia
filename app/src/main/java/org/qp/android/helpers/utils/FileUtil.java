@@ -29,7 +29,11 @@ public final class FileUtil {
         var resolver = context.getContentResolver();
         try (var in = resolver.openInputStream(uriContent);
              var out = new ByteArrayOutputStream()) {
-            StreamUtil.copy(in , out);
+            if (in != null) {
+                StreamUtil.copy(in , out);
+            } else {
+                throw new NullPointerException();
+            }
             return out.toByteArray();
         } catch (Exception ex) {
             Log.e(TAG , "Error reading file: " + uriContent , ex);
@@ -74,7 +78,7 @@ public final class FileUtil {
         }
 
         var checkFile = parentDir.findFile(displayName);
-        if (checkFile == null) {
+        if (checkFile == null || !checkFile.exists()) {
             var tempFile = parentDir.createFile(mimeType , displayName);
             if (isWritableFile(tempFile)) {
                 Log.i(TAG , "File created");
