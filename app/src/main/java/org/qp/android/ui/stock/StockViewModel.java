@@ -303,7 +303,7 @@ public class StockViewModel extends AndroidViewModel {
                     }
                 });
             }
-            localGame.formDataFileIntoFolder(getApplication() , tempInnerGameData , tempInnerGameData.gameDir);
+            localGame.createDataFileIntoFolder(getApplication() , tempInnerGameData , tempInnerGameData.gameDir);
             if (tempPathFile != null) {
                 copyFileToDir(getStockActivity() , tempPathFile , tempInnerGameData.gameDir);
             }

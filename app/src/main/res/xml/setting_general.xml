@@ -17,6 +17,14 @@
         android:key="binPref"
         android:summary="@string/binPrefSum"
         android:title="@string/binPrefTitle" />
+    <CheckBoxPreference
+        android:defaultValue="true"
+        android:key="createNoMedia"
+        android:title="Create .nomedia file" />
+    <CheckBoxPreference
+        android:defaultValue="true"
+        android:key="createNoSearch"
+        android:title="Create .nosearch file" />
     <ListPreference
         android:defaultValue="1/3"
         android:entries="@array/actsHeight"

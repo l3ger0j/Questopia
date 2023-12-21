@@ -17,6 +17,7 @@ import androidx.documentfile.provider.DocumentFile;
 import com.anggrayudi.storage.file.MimeType;
 
 import org.qp.android.dto.stock.InnerGameData;
+import org.qp.android.ui.settings.SettingsController;
 
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
@@ -25,7 +26,9 @@ import java.util.List;
 import java.util.Locale;
 
 public class LocalGame {
+
     private final String TAG = this.getClass().getSimpleName();
+
     private static final String GAME_INFO_FILENAME = "gameStockInfo";
     private static final String NOMEDIA_FILENAME = ".nomedia";
     private static final String NOSEARCH_FILENAME = ".nosearch";
@@ -76,9 +79,9 @@ public class LocalGame {
         }
     }
 
-    public void formDataFileIntoFolder(@NonNull Context context ,
-                                       InnerGameData innerGameData ,
-                                       DocumentFile gameDir) {
+    public void createDataFileIntoFolder(Context context ,
+                                         InnerGameData innerGameData ,
+                                         DocumentFile gameDir) {
         var infoFile = getGameInfoFile(gameDir);
         if (infoFile == null) {
             infoFile = createFindDFile(gameDir , MimeType.TEXT , GAME_INFO_FILENAME);
@@ -101,19 +104,15 @@ public class LocalGame {
             return Collections.emptyList();
         }
 
+        var controller = SettingsController.newInstance(context);
         var itemsGamesDirs = new ArrayList<InnerGameData>();
         var formatGamesDirs = getGamesFolders(fileList);
 
         for (var gameFolder : formatGamesDirs) {
             var item = (InnerGameData) null;
             var infoFile = getGameInfoFile(gameFolder.dir);
-            var infoFileCont = readFileAsString(context , infoFile.getUri());
 
-            if (infoFileCont != null) {
-                item = parseGameInfo(infoFileCont);
-            }
-
-            if (item == null) {
+            if (infoFile == null) {
                 var name = gameFolder.dir.getName();
                 if (name == null) return Collections.emptyList();
                 item = new InnerGameData();
@@ -121,18 +120,35 @@ public class LocalGame {
                 item.title = name;
                 item.gameDir = gameFolder.dir;
                 item.gameFiles = gameFolder.gameFiles;
-                formDataFileIntoFolder(context , item , gameFolder.dir);
+                createDataFileIntoFolder(context , item , gameFolder.dir);
 
                 itemsGamesDirs.add(item);
             } else {
-                item.gameDir = gameFolder.dir;
-                item.gameFiles = gameFolder.gameFiles;
+                var infoFileCont = readFileAsString(context , infoFile.getUri());
 
-                itemsGamesDirs.add(item);
+                if (infoFileCont != null) {
+                    item = parseGameInfo(infoFileCont);
+                }
+
+                if (item == null) {
+                    var name = gameFolder.dir.getName();
+                    if (name == null) return Collections.emptyList();
+                    item = new InnerGameData();
+                    item.id = name;
+                    item.title = name;
+                    item.gameDir = gameFolder.dir;
+                    item.gameFiles = gameFolder.gameFiles;
+                    createDataFileIntoFolder(context , item , gameFolder.dir);
+                    itemsGamesDirs.add(item);
+                } else {
+                    item.gameDir = gameFolder.dir;
+                    item.gameFiles = gameFolder.gameFiles;
+                    itemsGamesDirs.add(item);
+                }
             }
 
-            createNoMediaFile(gameFolder.dir);
-            createNoSearchFile(gameFolder.dir);
+            if (controller.isCreateNoMedia) createNoMediaFile(gameFolder.dir);
+            if (controller.isCreateNoSearch) createNoSearchFile(gameFolder.dir);
         }
 
         return itemsGamesDirs;
