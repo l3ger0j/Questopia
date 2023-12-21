@@ -160,9 +160,14 @@ public final class FileUtil {
     }
 
     @Nullable
-    public static String readFileAsString(Context context , Uri fileUri) {
+    public static String readFileAsString(Context context ,
+                                          @Nullable Uri fileUri) {
+        if (fileUri == null) return null;
+
         var result = new StringBuilder();
-        try (var in = context.getContentResolver().openInputStream(fileUri);
+        var resolver = context.getContentResolver();
+
+        try (var in = resolver.openInputStream(fileUri);
              var bufReader = new BufferedReader(new InputStreamReader(in))) {
             String line;
             while ((line = bufReader.readLine()) != null) {
