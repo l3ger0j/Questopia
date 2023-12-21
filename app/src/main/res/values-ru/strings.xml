@@ -23,7 +23,7 @@
     <!-- Dialog Error -->
         <string name="error">Ошибка</string>
         <string name="interFolderError">Ошибка чтения внутренней папки приложения</string>
-        <string name="gamesFolderError">Ошибка чтения и/или создания папки с играми. Пожалуйста, выберите другую папку с играми</string>
+        <string name="gamesFolderError">Ошибка чтения папки с игрой</string>
         <string name="gameFolderEmpty">Я не нашла в папке с игрой файла в формате .qsp или .gam!</string>
         <string name="infoFileNotWritable">Ошибка чтения файла с информацией об игре</string>
         <string name="infoFileWriteError">Ошибка записи информации об игре в файл</string>

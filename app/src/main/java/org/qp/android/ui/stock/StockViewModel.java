@@ -37,13 +37,13 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 
 public class StockViewModel extends AndroidViewModel {
 
     private final String TAG = this.getClass().getSimpleName();
-    private static final String GAME_INFO_FILENAME = "gameStockInfo";
 
     public static final int CODE_PICK_IMAGE_FILE = 300;
     public static final int CODE_PICK_PATH_FILE = 301;
@@ -388,13 +388,14 @@ public class StockViewModel extends AndroidViewModel {
         var rootDir = ((QuestPlayerApplication) getApplication()).getCurrentGameDir();
         if (rootDir != null) {
             if (!isWritableDirectory(rootDir)) {
+                var dirName = Optional.ofNullable(rootDir.getName());
                 var message = getStockActivity().getString(R.string.gamesFolderError);
                 getStockActivity().showErrorDialog(message);
-                getStockActivity().purgeRootDirFromPrefs();
-                return;
+                dirName.ifPresent(s -> getStockActivity().removeDirFromListDirsFile(s));
+            } else {
+                putGameDirToList(rootDir);
+                refreshGameData();
             }
-            putGameDirToList(rootDir);
-            refreshGameData();
         }
     }
 

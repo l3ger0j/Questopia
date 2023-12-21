@@ -43,6 +43,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.anggrayudi.storage.SimpleStorageHelper;
 import com.anggrayudi.storage.file.DocumentFileCompat;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javiersantos.appupdater.AppUpdater;
 import com.github.javiersantos.appupdater.enums.UpdateFrom;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
@@ -59,10 +61,8 @@ import org.qp.android.ui.settings.SettingsActivity;
 import org.qp.android.ui.settings.SettingsController;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -74,8 +74,6 @@ import java.util.concurrent.Executors;
 public class StockActivity extends AppCompatActivity implements
         StockPatternDialogFrags.StockPatternDialogList, StockPatternFragment.StockPatternFragmentList {
 
-    private static final int READ_EXTERNAL_STORAGE_CODE = 200;
-    private static final int MANAGE_EXTERNAL_STORAGE_CODE = 201;
     private static final int POST_NOTIFICATION = 203;
     private final String TAG = this.getClass().getSimpleName();
     private HashMap<String, InnerGameData> gamesMap = new HashMap<>();
@@ -94,6 +92,8 @@ public class StockActivity extends AppCompatActivity implements
 
     private ActivityResultLauncher<Intent> rootFolderLauncher;
     private final SimpleStorageHelper storageHelper = new SimpleStorageHelper(this);
+
+    private File listDirsFile;
 
     public void setRecyclerView(RecyclerView mRecyclerView) {
         this.mRecyclerView = mRecyclerView;
@@ -178,6 +178,8 @@ public class StockActivity extends AppCompatActivity implements
 
         loadSettings();
 
+        Log.d(TAG , String.valueOf(DocumentFileCompat.getAccessibleUris(this)));
+
         Log.i(TAG , "Stock Activity created");
 
         setContentView(activityStockBinding.getRoot());
@@ -216,100 +218,101 @@ public class StockActivity extends AppCompatActivity implements
         });
     }
 
-    public void saveRootDirIntoPrefs() {
+    public void saveListDirsIntoFile() {
         var listFiles = stockViewModel.getListGamesDir();
         var mapFiles = new HashMap<String , String>();
-        var cache = getExternalCacheDir();
 
         for (var file : listFiles) {
             if (file.getName() == null) continue;
-            mapFiles.put(file.getName() , String.valueOf(file.getUri()));
+            var packedUri = String.valueOf(file.getUri());
+            mapFiles.put(file.getName() , packedUri);
         }
 
         try {
-            var tempFile = new File(cache , "tempListDir");
-            try (var out = new FileOutputStream(tempFile , false);
-                 var objStream = new ObjectOutputStream(out)) {
-                objStream.writeObject(mapFiles);
-                objStream.flush();
-            }
+            var objectMapper = new ObjectMapper();
+            objectMapper.writeValue(listDirsFile , mapFiles);
         } catch (IOException e) {
             Log.e(TAG , "Error: " , e);
         }
     }
 
-    public void restoreRootDirFromPrefs() {
+    public void restoreListDirsFromFile() {
         try {
-            var cache = getExternalCacheDir();
-            var tempFile = new File(cache , "tempListDir");
-            try (var in = new FileInputStream(tempFile);
-                 var objStream = new ObjectInputStream(in)) {
-                var mapFiles = (HashMap<String , String>) objStream.readObject();
-                var listFile = new ArrayList<DocumentFile>();
-                for (var value : mapFiles.values()) {
-                    var uri = Uri.parse(value);
-                    var file = DocumentFileCompat.fromUri(this , uri);
-                    listFile.add(file);
+            var objectMapper = new ObjectMapper();
+            var typeRef = new TypeReference<HashMap<String, String>>() {};
+            var mapFiles = objectMapper.readValue(listDirsFile , typeRef);
+            var listFile = new ArrayList<DocumentFile>();
+            for (var value : mapFiles.values()) {
+                var uri = Uri.parse(value);
+                var file = DocumentFileCompat.fromUri(this , uri);
+                listFile.add(file);
+            }
+            stockViewModel.setListGamesDir(listFile);
+        } catch (IOException e) {
+            Log.e(TAG , "Error: ", e);
+        }
+    }
+
+    public void dropPersistable(Uri folderUri) {
+        try {
+            getContentResolver().releasePersistableUriPermission(
+                    folderUri ,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION
+                            | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+            );
+        } catch (SecurityException ignored) {
+
+        }
+    }
+
+    public void removeDirFromListDirsFile(String folderName) {
+        try {
+            var objectMapper = new ObjectMapper();
+            var typeRef = new TypeReference<HashMap<String, String>>() {};
+            var mapFiles = new HashMap<String , String>();
+            mapFiles = objectMapper.readValue(listDirsFile , typeRef);
+
+            if (mapFiles.isEmpty()) {
+                var newList = stockViewModel.getListGamesDir();
+                newList
+                        .removeIf(documentFile -> documentFile.getName().equalsIgnoreCase(folderName));
+                stockViewModel.setListGamesDir(newList);
+            } else {
+                mapFiles
+                        .entrySet()
+                        .removeIf(stringStringEntry -> stringStringEntry.getKey().equalsIgnoreCase(folderName));
+                try (var objOut = new ObjectOutputStream(new FileOutputStream(listDirsFile , false))) {
+                    objOut.writeObject(mapFiles);
+                    objOut.flush();
                 }
-                stockViewModel.setListGamesDir(listFile);
-            } catch (ClassNotFoundException e) {
-                throw new RuntimeException(e);
             }
+            ((QuestPlayerApplication) getApplication()).setCurrentGameDir(null);
         } catch (IOException e) {
-            Log.e(TAG , "Error: " , e);
+            Log.e(TAG , "Error: ", e);
         }
-    }
-
-    public void purgeRootDirFromPrefs() {
-//        var preferences = getPreferences(MODE_PRIVATE);
-//        var rootFolderUri = preferences.getString("rootFolder" , null);
-//        if (rootFolderUri != null) {
-//            var validRootFolderUri = Uri.parse(rootFolderUri);
-//            getContentResolver().releasePersistableUriPermission(
-//                    validRootFolderUri ,
-//                    Intent.FLAG_GRANT_READ_URI_PERMISSION
-//                            | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-//            );
-//            preferences.edit().remove("rootFolder").apply();
-//        }
     }
 
     @Override
-    protected void onActivityResult(int requestCode , int resultCode , @Nullable Intent data) {
+    protected void onActivityResult(int requestCode ,
+                                    int resultCode ,
+                                    @Nullable Intent data) {
         super.onActivityResult(requestCode , resultCode , data);
         storageHelper.getStorage().onActivityResult(requestCode , resultCode , data);
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode , @NonNull String[] permissions , @NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode ,
+                                           @NonNull String[] permissions ,
+                                           @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode , permissions , grantResults);
-        switch (requestCode) {
-            case READ_EXTERNAL_STORAGE_CODE -> {
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    ViewUtil.showSnackBar(findViewById(android.R.id.content) , "Success");
-                } else {
-                    ViewUtil.showSnackBar(findViewById(android.R.id.content) , "Permission denied to read your External storage");
-                }
-            }
-            case MANAGE_EXTERNAL_STORAGE_CODE -> {
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    ViewUtil.showSnackBar(findViewById(android.R.id.content) , "Success");
-                } else {
-                    ViewUtil.showSnackBar(findViewById(android.R.id.content) , "Permission denied to manage your External storage");
-                }
-            }
-            case POST_NOTIFICATION -> {
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    ViewUtil.showSnackBar(findViewById(android.R.id.content) , "Success");
-                } else {
-                    ViewUtil.showSnackBar(findViewById(android.R.id.content) , "Permission denied to post notification");
-                }
+        if (requestCode == POST_NOTIFICATION) {
+            if (grantResults.length > 0
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                ViewUtil.showSnackBar(findViewById(android.R.id.content) , "Success");
+            } else {
+                ViewUtil.showSnackBar(findViewById(android.R.id.content) , "Permission denied to post notification");
             }
         }
-
         storageHelper.onRequestPermissionsResult(requestCode , permissions , grantResults);
     }
 
@@ -324,7 +327,12 @@ public class StockActivity extends AppCompatActivity implements
     }
 
     private void loadSettings() {
-        restoreRootDirFromPrefs();
+        var cache = getExternalCacheDir();
+        listDirsFile = new File(cache , "tempListDir");
+
+        if (listDirsFile.exists()) {
+            restoreListDirsFromFile();
+        }
 
         settingsController = stockViewModel.getSettingsController();
         stockViewModel.setController(settingsController);
@@ -495,6 +503,8 @@ public class StockActivity extends AppCompatActivity implements
                     case R.id.delete_game -> {
                         var service = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
                         for (var data : selectList) {
+                            dropPersistable(data.gameDir.getUri());
+                            removeDirFromListDirsFile(data.gameDir.getName());
                             CompletableFuture
                                     .runAsync(() -> deleteDirectory(data.gameDir) , service)
                                     .thenRun(() -> {
@@ -555,7 +565,7 @@ public class StockActivity extends AppCompatActivity implements
     @Override
     protected void onPause() {
         super.onPause();
-        saveRootDirIntoPrefs();
+        saveListDirsIntoFile();
     }
 
     @Override
