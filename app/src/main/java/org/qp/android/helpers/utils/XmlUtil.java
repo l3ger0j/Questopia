@@ -1,23 +1,19 @@
 package org.qp.android.helpers.utils;
 
-import androidx.annotation.NonNull;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
-import org.simpleframework.xml.core.Persister;
-
-import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
 
 public final class XmlUtil {
-    private static final Persister PERSISTER = new Persister();
 
-    @NonNull
-    public static String objectToXml(Object o) throws Exception {
-        try (var byteArrayOutputStream = new ByteArrayOutputStream()) {
-            PERSISTER.write(o, byteArrayOutputStream);
-            return byteArrayOutputStream.toString();
-        }
+    public static void objectToXml(OutputStream out , Object o) throws Exception {
+        new XmlMapper()
+                .enable(SerializationFeature.INDENT_OUTPUT)
+                .writeValue(out , o);
     }
 
     public static <T> T xmlToObject(String xml, Class<T> clazz) throws Exception {
-        return PERSISTER.read(clazz, xml);
+        return new XmlMapper().readValue(xml , clazz);
     }
 }

@@ -15,7 +15,7 @@ import com.squareup.picasso.Picasso;
 
 import org.qp.android.R;
 import org.qp.android.databinding.ListItemGameBinding;
-import org.qp.android.dto.stock.InnerGameData;
+import org.qp.android.dto.stock.GameData;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,14 +23,14 @@ import java.util.List;
 public class StockGamesRecycler extends RecyclerView.Adapter<StockGamesRecycler.ViewHolder> {
 
     private final Context context;
-    private final AsyncListDiffer<InnerGameData> differ =
+    private final AsyncListDiffer<GameData> differ =
             new AsyncListDiffer<>(this , DIFF_CALLBACK);
 
-    public InnerGameData getItem(int position) {
+    public GameData getItem(int position) {
         return differ.getCurrentList().get(position);
     }
 
-    public List<InnerGameData> getGameData() {
+    public List<GameData> getGameData() {
         return differ.getCurrentList();
     }
 
@@ -39,21 +39,21 @@ public class StockGamesRecycler extends RecyclerView.Adapter<StockGamesRecycler.
         return differ.getCurrentList().size();
     }
 
-    private static final DiffUtil.ItemCallback<InnerGameData> DIFF_CALLBACK =
+    private static final DiffUtil.ItemCallback<GameData> DIFF_CALLBACK =
             new DiffUtil.ItemCallback<>() {
                 @Override
-                public boolean areItemsTheSame(@NonNull InnerGameData oldItem , @NonNull InnerGameData newItem) {
+                public boolean areItemsTheSame(@NonNull GameData oldItem , @NonNull GameData newItem) {
                     return oldItem.id.equals(newItem.id);
                 }
 
                 @Override
-                public boolean areContentsTheSame(@NonNull InnerGameData oldItem , @NonNull InnerGameData newItem) {
+                public boolean areContentsTheSame(@NonNull GameData oldItem , @NonNull GameData newItem) {
                     return oldItem.equals(newItem);
                 }
             };
 
-    public void submitList(ArrayList<InnerGameData> innerGameData){
-        differ.submitList(innerGameData);
+    public void submitList(ArrayList<GameData> gameData){
+        differ.submitList(gameData);
     }
 
     public StockGamesRecycler(Context context) {
@@ -98,8 +98,8 @@ public class StockGamesRecycler extends RecyclerView.Adapter<StockGamesRecycler.
             this.listItemGameBinding = listItemGameBinding;
         }
 
-        public void listItemGameBinding(InnerGameData innerGameData) {
-            listItemGameBinding.setInnerGameData(innerGameData);
+        public void listItemGameBinding(GameData gameData) {
+            listItemGameBinding.setGameData(gameData);
             listItemGameBinding.executePendingBindings();
         }
     }

@@ -10,18 +10,18 @@ import java.util.Objects;
 @Root(name = "game_list", strict = false)
 public class GameList {
     @ElementList(name = "game", inline = true)
-    public List<InnerGameData> innerGameDataList = new ArrayList<>();
+    public List<GameData> gameDataList = new ArrayList<>();
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         var that = (GameList) o;
-        return Objects.equals(innerGameDataList , that.innerGameDataList);
+        return Objects.equals(gameDataList , that.gameDataList);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(innerGameDataList);
+        return Objects.hash(gameDataList);
     }
 }

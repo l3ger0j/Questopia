@@ -16,10 +16,9 @@ import androidx.documentfile.provider.DocumentFile;
 
 import com.anggrayudi.storage.file.MimeType;
 
-import org.qp.android.dto.stock.InnerGameData;
+import org.qp.android.dto.stock.GameData;
 import org.qp.android.ui.settings.SettingsController;
 
-import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -29,7 +28,7 @@ public class LocalGame {
 
     private final String TAG = this.getClass().getSimpleName();
 
-    private static final String GAME_INFO_FILENAME = "gameStockInfo";
+    private static final String GAME_INFO_FILENAME = ".gameInfo";
     private static final String NOMEDIA_FILENAME = ".nomedia";
     private static final String NOSEARCH_FILENAME = ".nosearch";
 
@@ -59,7 +58,7 @@ public class LocalGame {
     private DocumentFile getGameInfoFile(@NonNull DocumentFile gameFolder) {
         var findGameInfoFile = gameFolder.findFile(GAME_INFO_FILENAME);
         if (findGameInfoFile == null) {
-            Log.w(TAG , "InnerGameData info file not found in " + gameFolder.getName());
+            Log.w(TAG , "GameData info file not found in " + gameFolder.getName());
             return null;
         }
         return findGameInfoFile;
@@ -80,7 +79,7 @@ public class LocalGame {
     }
 
     public void createDataFileIntoFolder(Context context ,
-                                         InnerGameData innerGameData ,
+                                         GameData gameData ,
                                          DocumentFile gameDir) {
         var infoFile = getGameInfoFile(gameDir);
         if (infoFile == null) {
@@ -91,31 +90,30 @@ public class LocalGame {
         }
         var tempInfoFile = documentWrap(infoFile);
 
-        try (var out = tempInfoFile.openOutputStream(context , false);
-             var writer = new OutputStreamWriter(out)) {
-            writer.write(objectToXml(innerGameData));
+        try (var out = tempInfoFile.openOutputStream(context , false)) {
+            objectToXml(out , gameData);
         } catch (Exception ex) {
-            Log.d(TAG , "ERROR: " , ex);
+            Log.e(TAG , "ERROR: " , ex);
         }
     }
 
-    public List<InnerGameData> extractGameDataFromList(Context context , List<DocumentFile> fileList) {
+    public List<GameData> extractGameDataFromList(Context context , List<DocumentFile> fileList) {
         if (fileList.isEmpty()) {
             return Collections.emptyList();
         }
 
         var controller = SettingsController.newInstance(context);
-        var itemsGamesDirs = new ArrayList<InnerGameData>();
+        var itemsGamesDirs = new ArrayList<GameData>();
         var formatGamesDirs = getGamesFolders(fileList);
 
         for (var gameFolder : formatGamesDirs) {
-            var item = (InnerGameData) null;
+            var item = (GameData) null;
             var infoFile = getGameInfoFile(gameFolder.dir);
 
             if (infoFile == null) {
                 var name = gameFolder.dir.getName();
                 if (name == null) return Collections.emptyList();
-                item = new InnerGameData();
+                item = new GameData();
                 item.id = name;
                 item.title = name;
                 item.gameDir = gameFolder.dir;
@@ -133,7 +131,7 @@ public class LocalGame {
                 if (item == null) {
                     var name = gameFolder.dir.getName();
                     if (name == null) return Collections.emptyList();
-                    item = new InnerGameData();
+                    item = new GameData();
                     item.id = name;
                     item.title = name;
                     item.gameDir = gameFolder.dir;
@@ -155,9 +153,10 @@ public class LocalGame {
     }
 
     @Nullable
-    private InnerGameData parseGameInfo(String xml) {
+    private GameData parseGameInfo(String xml) {
         try {
-            return xmlToObject(xml , InnerGameData.class);
+            Log.d(TAG , xml);
+            return xmlToObject(xml , GameData.class);
         } catch (Exception ex) {
             Log.e(TAG , "Failed to parse game info file" , ex);
             return null;

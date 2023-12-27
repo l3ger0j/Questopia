@@ -52,7 +52,7 @@ import com.google.android.material.floatingactionbutton.ExtendedFloatingActionBu
 import org.qp.android.QuestPlayerApplication;
 import org.qp.android.R;
 import org.qp.android.databinding.ActivityStockBinding;
-import org.qp.android.dto.stock.InnerGameData;
+import org.qp.android.dto.stock.GameData;
 import org.qp.android.helpers.utils.ViewUtil;
 import org.qp.android.ui.dialogs.StockDialogFrags;
 import org.qp.android.ui.dialogs.StockDialogType;
@@ -76,7 +76,7 @@ public class StockActivity extends AppCompatActivity implements
 
     private static final int POST_NOTIFICATION = 203;
     private final String TAG = this.getClass().getSimpleName();
-    private HashMap<String, InnerGameData> gamesMap = new HashMap<>();
+    private HashMap<String, GameData> gamesMap = new HashMap<>();
     public SettingsController settingsController;
     private StockViewModel stockViewModel;
 
@@ -87,8 +87,8 @@ public class StockActivity extends AppCompatActivity implements
     private boolean isEnable = false;
     private ExtendedFloatingActionButton mFAB;
     private RecyclerView mRecyclerView;
-    private ArrayList<InnerGameData> tempList;
-    private final ArrayList<InnerGameData> selectList = new ArrayList<>();
+    private ArrayList<GameData> tempList;
+    private final ArrayList<GameData> selectList = new ArrayList<>();
 
     private ActivityResultLauncher<Intent> rootFolderLauncher;
     private final SimpleStorageHelper storageHelper = new SimpleStorageHelper(this);
@@ -405,9 +405,9 @@ public class StockActivity extends AppCompatActivity implements
 
     public void onItemClick(int position) {
         if (isEnable) {
-            for (InnerGameData innerGameData : gamesMap.values()) {
-                if (!innerGameData.isInstalled()) continue;
-                tempList.add(innerGameData);
+            for (var gameData : gamesMap.values()) {
+                if (!gameData.isFileInstalled()) continue;
+                tempList.add(gameData);
             }
             var mViewHolder =
                     mRecyclerView.findViewHolderForAdapterPosition(position);
@@ -632,7 +632,7 @@ public class StockActivity extends AppCompatActivity implements
 
     private void filter(String text) {
         var gameData = stockViewModel.getSortedGames();
-        var filteredList = new ArrayList<InnerGameData>();
+        var filteredList = new ArrayList<GameData>();
         for (var item : gameData) {
             if (item.title.toLowerCase(Locale.getDefault())
                     .contains(text.toLowerCase(Locale.getDefault()))) {

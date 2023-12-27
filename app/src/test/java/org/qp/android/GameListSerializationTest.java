@@ -1,11 +1,11 @@
 package org.qp.android;
 
-import static org.qp.android.helpers.utils.XmlUtil.xmlToObject;
 import static org.junit.Assert.assertEquals;
+import static org.qp.android.helpers.utils.XmlUtil.xmlToObject;
 
-import org.qp.android.dto.stock.InnerGameData;
-import org.qp.android.dto.stock.GameList;
 import org.junit.Test;
+import org.qp.android.dto.stock.GameData;
+import org.qp.android.dto.stock.GameList;
 
 import java.util.ArrayList;
 
@@ -24,16 +24,16 @@ public class GameListSerializationTest {
                 "</game_list>";
 
         GameList expected = new GameList();
-        expected.innerGameDataList = new ArrayList<>();
-        expected.innerGameDataList.add(newGame("1"));
-        expected.innerGameDataList.add(newGame("2"));
+        expected.gameDataList = new ArrayList<>();
+        expected.gameDataList.add(newGame("1"));
+        expected.gameDataList.add(newGame("2"));
         GameList actual = xmlToObject(xml, GameList.class);
         assertEquals(expected, actual);
     }
 
-    private InnerGameData newGame(String id) {
-        InnerGameData innerGameData = new InnerGameData();
-        innerGameData.id = id;
-        return innerGameData;
+    private GameData newGame(String id) {
+        GameData gameData = new GameData();
+        gameData.id = id;
+        return gameData;
     }
 }
