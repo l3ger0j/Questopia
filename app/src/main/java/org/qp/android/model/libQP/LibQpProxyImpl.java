@@ -4,6 +4,7 @@ import static org.qp.android.helpers.utils.FileUtil.createFindDFile;
 import static org.qp.android.helpers.utils.FileUtil.documentWrap;
 import static org.qp.android.helpers.utils.FileUtil.fromFullPath;
 import static org.qp.android.helpers.utils.FileUtil.getFileContents;
+import static org.qp.android.helpers.utils.FileUtil.writeFileContents;
 import static org.qp.android.helpers.utils.StringUtil.getStringOrEmpty;
 import static org.qp.android.helpers.utils.StringUtil.isNotEmpty;
 import static org.qp.android.helpers.utils.ThreadUtil.isSameThread;
@@ -31,7 +32,6 @@ import org.qp.android.model.service.HtmlProcessor;
 import org.qp.android.ui.game.GameInterface;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Objects;
@@ -322,16 +322,7 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
         }
         byte[] gameData = nativeMethods.QSPSaveGameAsData(false);
         if (gameData == null) return;
-        var resolver = context.getContentResolver();
-        try (var out = resolver.openOutputStream(uri, "w")) {
-            if (out != null) {
-                out.write(gameData);
-            } else {
-                throw new IOException("Input is NULL!");
-            }
-        } catch (IOException ex) {
-            Log.e(TAG,"Failed to save the game state", ex);
-        }
+        writeFileContents(context , uri , gameData);
     }
 
     @Override

@@ -41,6 +41,22 @@ public final class FileUtil {
         }
     }
 
+    public static void writeFileContents(@NonNull Context context ,
+                                         @NonNull Uri uriContent ,
+                                         byte[] dataToWrite) {
+        var resolver = context.getContentResolver();
+        try (var out = resolver.openOutputStream(uriContent , "w")) {
+            if (out != null) {
+                out.write(dataToWrite);
+            } else {
+                throw new IOException("Input is NULL!");
+            }
+        } catch (IOException ex) {
+            Log.e(TAG,"Failed to save the game state", ex);
+        }
+
+    }
+
     public static FileWrapper.Document documentWrap(DocumentFile inputFile) {
         return new FileWrapper.Document(inputFile);
     }
