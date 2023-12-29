@@ -1,15 +1,14 @@
 package org.qp.android.dto.stock;
 
-import org.simpleframework.xml.ElementList;
-import org.simpleframework.xml.Root;
+import com.fasterxml.jackson.annotation.JsonRootName;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-@Root(name = "game_list", strict = false)
+@JsonRootName(value = "game_list")
 public class GameList {
-    @ElementList(name = "game", inline = true)
+
     public List<GameData> gameDataList = new ArrayList<>();
 
     @Override
