@@ -155,7 +155,6 @@ public class LocalGame {
     @Nullable
     private GameData parseGameInfo(String xml) {
         try {
-            Log.d(TAG , xml);
             return xmlToObject(xml , GameData.class);
         } catch (Exception ex) {
             Log.e(TAG , "Failed to parse game info file" , ex);
