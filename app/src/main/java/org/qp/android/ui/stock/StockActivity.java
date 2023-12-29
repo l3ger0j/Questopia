@@ -178,8 +178,6 @@ public class StockActivity extends AppCompatActivity implements
 
         loadSettings();
 
-        Log.d(TAG , String.valueOf(DocumentFileCompat.getAccessibleUris(this)));
-
         Log.i(TAG , "Stock Activity created");
 
         setContentView(activityStockBinding.getRoot());
