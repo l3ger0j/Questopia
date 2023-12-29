@@ -12,6 +12,7 @@ import org.qp.android.model.service.ImageProvider;
 
 @RunWith(AndroidJUnit4.class)
 public class HtmlProcessorAndroidTest {
+
     private final GameContentResolver gameContentResolver = new GameContentResolver();
     private final ImageProvider imageProvider = new ImageProvider();
     private final HtmlProcessor sut = new HtmlProcessor(gameContentResolver, imageProvider);
