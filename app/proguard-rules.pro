@@ -12,19 +12,14 @@
    public *;
 }
 
+# NDK
 -keep class org.qp.android.dto.libQP.** { *; }
 -keep class org.qp.android.model.libQP.** { *; }
 
--keep class net.sf.sevenzipjbinding.** { *; }
-
--dontwarn org.simpleframework.xml.stream.**
--keep class org.simpleframework.xml.**{ *; }
--keepclassmembers, allowobfuscation class * {
-    @org.simpleframework.xml.* <fields>;
-    @org.simpleframework.xml.* <init>(...);
-}
-
+# AppDevNext
 -keep class info.hannes.** { *; }
+
+# GSON
 -keep class com.google.gson.reflect.TypeToken
 -keep class * extends com.google.gson.reflect.TypeToken
 -keep public class * implements java.lang.reflect.Type

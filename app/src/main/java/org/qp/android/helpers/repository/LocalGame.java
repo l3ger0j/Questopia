@@ -86,6 +86,7 @@ public class LocalGame {
             infoFile = createFindDFile(gameDir , MimeType.TEXT , GAME_INFO_FILENAME);
         }
         if (!isWritableFile(infoFile)) {
+            Log.e(TAG , "ERROR");
             return;
         }
         var tempInfoFile = documentWrap(infoFile);
