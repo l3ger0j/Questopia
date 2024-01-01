@@ -5,13 +5,11 @@ import static org.qp.android.helpers.utils.StringUtil.isNotEmpty;
 import androidx.documentfile.provider.DocumentFile;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonRootName;
 
 import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 
-@JsonRootName(value = "game")
 public class GameData implements Serializable {
 
     public String id = "";
@@ -23,7 +21,7 @@ public class GameData implements Serializable {
     public String player = "";
     public String icon = "";
     public String fileUrl = "";
-    public String fileSize;
+    public String fileSize = "";
     public String fileExt = "";
     public String descUrl = "";
     public String pubDate = "";

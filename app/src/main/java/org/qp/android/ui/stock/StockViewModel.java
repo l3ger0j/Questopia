@@ -1,5 +1,6 @@
 package org.qp.android.ui.stock;
 
+import static org.qp.android.helpers.utils.DirUtil.dirSize;
 import static org.qp.android.helpers.utils.DirUtil.doesDirectoryContainGameFiles;
 import static org.qp.android.helpers.utils.FileUtil.copyFileToDir;
 import static org.qp.android.helpers.utils.FileUtil.formatFileSize;
@@ -207,6 +208,28 @@ public class StockViewModel extends AndroidViewModel {
         }
     }
 
+    public String getGamePubData() {
+        if (tempGameData != null &&
+                tempGameData.pubDate.length() > 0) {
+            return getStockActivity()
+                    .getString(R.string.pub_data)
+                    .replace("-PUB_DATA-" , tempGameData.pubDate);
+        } else {
+            return "";
+        }
+    }
+
+    public String getGameModData() {
+        if (tempGameData != null
+                && tempGameData.modDate.length() > 0) {
+            return getStockActivity()
+                    .getString(R.string.mod_data)
+                    .replace("-MOD_DATA-" , tempGameData.pubDate);
+        } else {
+            return "";
+        }
+    }
+
     public SettingsController getSettingsController() {
         return SettingsController.newInstance(getApplication());
     }
@@ -297,13 +320,14 @@ public class StockViewModel extends AndroidViewModel {
             }
             if (tempImageFile != null) tempGameData.icon = tempImageFile.getUri().toString();
             if (tempGameData.fileSize == null || tempGameData.fileSize.isEmpty()) {
-                calculateSizeDir(tempGameData.gameDir).observeForever(aLong -> {
-                    if (aLong != null) {
-                        tempGameData.fileSize = formatFileSize(aLong , controller.binaryPrefixes);
-                    }
-                });
+                CompletableFuture
+                        .supplyAsync(() -> dirSize(tempGameData.gameDir))
+                        .thenApply(aLong -> {
+                            tempGameData.fileSize = formatFileSize(aLong , controller.binaryPrefixes);
+                            return null;
+                        });
             }
-            localGame.createDataFileIntoFolder(getApplication() , tempGameData , tempGameData.gameDir);
+            localGame.createDataIntoFolder(getApplication() , tempGameData , tempGameData.gameDir);
             if (tempPathFile != null) {
                 copyFileToDir(getStockActivity() , tempPathFile , tempGameData.gameDir);
             }

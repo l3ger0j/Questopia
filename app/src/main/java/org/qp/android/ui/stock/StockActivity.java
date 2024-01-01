@@ -2,6 +2,7 @@ package org.qp.android.ui.stock;
 
 import static org.qp.android.helpers.utils.FileUtil.deleteDirectory;
 import static org.qp.android.helpers.utils.FileUtil.documentWrap;
+import static org.qp.android.helpers.utils.JsonUtil.jsonToObject;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_IMAGE_FILE;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_MOD_FILE;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_PATH_FILE;
@@ -43,7 +44,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.anggrayudi.storage.SimpleStorageHelper;
 import com.anggrayudi.storage.file.DocumentFileCompat;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javiersantos.appupdater.AppUpdater;
 import com.github.javiersantos.appupdater.enums.UpdateFrom;
@@ -236,9 +236,7 @@ public class StockActivity extends AppCompatActivity implements
 
     public void restoreListDirsFromFile() {
         try {
-            var objectMapper = new ObjectMapper();
-            var typeRef = new TypeReference<HashMap<String, String>>() {};
-            var mapFiles = objectMapper.readValue(listDirsFile , typeRef);
+            var mapFiles = (HashMap<String , String>) jsonToObject(listDirsFile , HashMap.class);
             var listFile = new ArrayList<DocumentFile>();
             for (var value : mapFiles.values()) {
                 var uri = Uri.parse(value);
@@ -258,17 +256,12 @@ public class StockActivity extends AppCompatActivity implements
                     Intent.FLAG_GRANT_READ_URI_PERMISSION
                             | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
             );
-        } catch (SecurityException ignored) {
-
-        }
+        } catch (SecurityException ignored) {}
     }
 
     public void removeDirFromListDirsFile(String folderName) {
         try {
-            var objectMapper = new ObjectMapper();
-            var typeRef = new TypeReference<HashMap<String, String>>() {};
-            var mapFiles = new HashMap<String , String>();
-            mapFiles = objectMapper.readValue(listDirsFile , typeRef);
+            var mapFiles = (HashMap<String , String>) jsonToObject(listDirsFile , HashMap.class);
 
             if (mapFiles.isEmpty()) {
                 var newList = stockViewModel.getListGamesDir();

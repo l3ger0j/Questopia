@@ -4,8 +4,8 @@ import static org.qp.android.helpers.utils.FileUtil.createFindDFile;
 import static org.qp.android.helpers.utils.FileUtil.documentWrap;
 import static org.qp.android.helpers.utils.FileUtil.isWritableFile;
 import static org.qp.android.helpers.utils.FileUtil.readFileAsString;
-import static org.qp.android.helpers.utils.XmlUtil.objectToXml;
-import static org.qp.android.helpers.utils.XmlUtil.xmlToObject;
+import static org.qp.android.helpers.utils.JsonUtil.jsonToObject;
+import static org.qp.android.helpers.utils.JsonUtil.objectToJson;
 
 import android.content.Context;
 import android.util.Log;
@@ -78,9 +78,9 @@ public class LocalGame {
         }
     }
 
-    public void createDataFileIntoFolder(Context context ,
-                                         GameData gameData ,
-                                         DocumentFile gameDir) {
+    public void createDataIntoFolder(Context context ,
+                                     GameData gameData ,
+                                     DocumentFile gameDir) {
         var infoFile = getGameInfoFile(gameDir);
         if (infoFile == null) {
             infoFile = createFindDFile(gameDir , MimeType.TEXT , GAME_INFO_FILENAME);
@@ -92,7 +92,7 @@ public class LocalGame {
         var tempInfoFile = documentWrap(infoFile);
 
         try (var out = tempInfoFile.openOutputStream(context , false)) {
-            objectToXml(out , gameData);
+            objectToJson(out , gameData);
         } catch (Exception ex) {
             Log.e(TAG , "ERROR: " , ex);
         }
@@ -119,7 +119,7 @@ public class LocalGame {
                 item.title = name;
                 item.gameDir = gameFolder.dir;
                 item.gameFiles = gameFolder.gameFiles;
-                createDataFileIntoFolder(context , item , gameFolder.dir);
+                createDataIntoFolder(context , item , gameFolder.dir);
 
                 itemsGamesDirs.add(item);
             } else {
@@ -137,7 +137,7 @@ public class LocalGame {
                     item.title = name;
                     item.gameDir = gameFolder.dir;
                     item.gameFiles = gameFolder.gameFiles;
-                    createDataFileIntoFolder(context , item , gameFolder.dir);
+                    createDataIntoFolder(context , item , gameFolder.dir);
                     itemsGamesDirs.add(item);
                 } else {
                     item.gameDir = gameFolder.dir;
@@ -154,9 +154,9 @@ public class LocalGame {
     }
 
     @Nullable
-    private GameData parseGameInfo(String xml) {
+    private GameData parseGameInfo(String json) {
         try {
-            return xmlToObject(xml , GameData.class);
+            return jsonToObject(json , GameData.class);
         } catch (Exception ex) {
             Log.e(TAG , "Failed to parse game info file" , ex);
             return null;

@@ -129,7 +129,7 @@
             android:visibility="@{viewModel.isGameInstalled() ? View.VISIBLE : View.GONE}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tableLayout">
+            app:layout_constraintTop_toBottomOf="@+id/linearLayout5">
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/editButton"
@@ -148,6 +148,36 @@
                 android:text="@string/play"
                 android:textColor="@color/def_back_color"
                 app:cornerRadius="10dp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linearLayout5"
+            android:layout_width="409dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="24dp"
+            android:layout_marginEnd="16dp"
+            android:orientation="horizontal"
+            android:visibility="@{viewModel.hasRemoteUrl ? View.VISIBLE : View.GONE}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tableLayout">
+
+            <TextView
+                android:id="@+id/gamePubDataTV"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.5"
+                android:text="@{viewModel.getGamePubData}"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/gameModDataTV"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.5"
+                android:text="@{viewModel.getGameModData}"
+                android:textSize="16sp" />
         </LinearLayout>
 
         <com.google.android.material.button.MaterialButton

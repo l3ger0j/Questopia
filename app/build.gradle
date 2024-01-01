@@ -82,12 +82,9 @@ dependencies {
     implementation 'com.anggrayudi:storage:1.5.5'
     implementation 'com.squareup.picasso:picasso:2.71828'
 
-    implementation 'javax.xml.stream:stax-api:1.0-2'
-    implementation 'com.fasterxml.woodstox:woodstox-core:6.5.1'
     implementation 'com.fasterxml.jackson.core:jackson-core:2.16.1'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.16.1'
     implementation 'com.fasterxml.jackson.core:jackson-annotations:2.16.1'
-    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.16.1'
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test:core:1.5.0'
