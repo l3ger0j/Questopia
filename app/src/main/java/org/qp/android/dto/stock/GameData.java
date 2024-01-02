@@ -4,6 +4,7 @@ import static org.qp.android.helpers.utils.StringUtil.isNotEmpty;
 
 import androidx.documentfile.provider.DocumentFile;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.io.Serializable;
@@ -21,7 +22,7 @@ public class GameData implements Serializable {
     public String player = "";
     public String icon = "";
     public String fileUrl = "";
-    public String fileSize = "";
+    public String fileSize;
     public String fileExt = "";
     public String descUrl = "";
     public String pubDate = "";
@@ -32,7 +33,7 @@ public class GameData implements Serializable {
     @JsonIgnore
     public List<DocumentFile> gameFiles;
 
-    @JsonIgnore
+    @JsonGetter
     public String getFileSize() {
         return (fileSize != null) ? fileSize : "";
     }

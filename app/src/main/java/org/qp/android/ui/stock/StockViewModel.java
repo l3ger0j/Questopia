@@ -324,10 +324,10 @@ public class StockViewModel extends AndroidViewModel {
                         .supplyAsync(() -> dirSize(tempGameData.gameDir))
                         .thenApply(aLong -> {
                             tempGameData.fileSize = formatFileSize(aLong , controller.binaryPrefixes);
+                            localGame.createDataIntoFolder(getApplication() , tempGameData , tempGameData.gameDir);
                             return null;
                         });
             }
-            localGame.createDataIntoFolder(getApplication() , tempGameData , tempGameData.gameDir);
             if (tempPathFile != null) {
                 copyFileToDir(getStockActivity() , tempPathFile , tempGameData.gameDir);
             }
