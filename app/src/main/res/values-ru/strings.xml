@@ -51,41 +51,6 @@
         <string name="pub_data">Опубликовано: -PUB_DATA-</string>
         <string name="close">Закрыть</string>
         <string name="play">Играть</string>
-    <!-- Dialog Credits -->
-    <string name="appDescription">
-<![CDATA[
-<h2><center>О Questopia<img src=\"file:///android_res/drawable/landscape.jpg\" width=\"100%\"></center></h2>
-<h4 style="margin-left:5px;">Quest Player Android это Android-порт с открытым исходным кодом оригинальной <b>Quest Soft Player</b> (<a href=\"http://qsp.su/?option=com_content&view=article&id=64\">русскоязычный сайт</a>), основанный на форке от <a href=\"https://github.com/seedhartha/QuestPlayer\">seedharta</a>. Вы можете скачать актуальную версию приложения на <a href=\"https://github.com/l3ger0j/Questopia\">GitHub</a> или в <a href=\"https://t.me/QuestPlayer\">Телеграм канале</a>.</h4>
-]]>
-    </string>
-    <string name="appCredits">
-<![CDATA[
-<center><h3>В ролях</h3></center>
-<ul>
-    <li><b>Разработка:</b></li>
-    <ul style="list-style-type:none">
-        <li><a href=\"https://github.com/l3ger0j/\">l3ger0j</a></li>
-        <li><a href=\"https://github.com/shirrumon/\">shirrumon</a></li>
-    </ul>
-</ul>
-<center><h3>Люди, принимавшие участие в разработке оригинального форка от seedharta</h3></center>
-<ul>
-    <li><b>Разработка:</b></li>
-    <ul style="list-style-type:none">
-        <li>Nex (~v1.0.201)</li>
-        <li>BOOMik (v1.3)</li>
-        <li>MrBoboFace (v1.4+)</li>
-        <li>seedhartha (v2.1+)</li>
-    </ul>
-    <li><b>Перевод:</b></li>
-    <ul style="list-style-type:none">
-        <li>Illume (Китайский упрощенный / Китайский традиционный/Английский~v1.3)</li>
-        <li>Unregistred (Русский)</li>
-    <li><b>Особое спасибо:</b> Kevin Smarts и всему <a href=\"https://tfgamessite.com/\">TFGamesSite сообществу</a></li>
-    <li><i>Изображения Пятого Мира</i> созданы Noah Bradley (Творческие Сообщества; изображения уменьшены и обрезаны)</li>
-</ul>
-]]>
-    </string>
     <!-- Use in activity/fragment -->
     <!-- QTopia -->
         <string name="appName">Questopia</string>
