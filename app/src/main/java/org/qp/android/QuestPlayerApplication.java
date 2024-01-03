@@ -11,7 +11,6 @@ import androidx.documentfile.provider.DocumentFile;
 import org.qp.android.model.libQP.LibQpProxy;
 import org.qp.android.model.libQP.LibQpProxyImpl;
 import org.qp.android.model.service.AudioPlayer;
-import org.qp.android.model.service.GameContentResolver;
 import org.qp.android.model.service.HtmlProcessor;
 import org.qp.android.model.service.ImageProvider;
 
@@ -21,9 +20,8 @@ public class QuestPlayerApplication extends Application {
 
     public static final String CHANNEL_INSTALL_GAME = "org.qp.android.channel.install_game";
 
-    private final GameContentResolver gameContentResolver = new GameContentResolver();
     private final ImageProvider imageProvider = new ImageProvider();
-    private final HtmlProcessor htmlProcessor = new HtmlProcessor(gameContentResolver , imageProvider);
+    private final HtmlProcessor htmlProcessor = new HtmlProcessor(imageProvider);
     private final AudioPlayer audioPlayer = new AudioPlayer();
     private final LibQpProxyImpl libQspProxy = new LibQpProxyImpl(this , htmlProcessor , audioPlayer);
 
@@ -37,10 +35,6 @@ public class QuestPlayerApplication extends Application {
 
     public void setCurrentGameDir(DocumentFile currentGameDir) {
         this.currentGameDir = currentGameDir;
-    }
-
-    public GameContentResolver getGameContentResolver() {
-        return gameContentResolver;
     }
 
     public HtmlProcessor getHtmlProcessor() {

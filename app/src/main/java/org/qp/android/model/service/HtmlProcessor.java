@@ -22,9 +22,10 @@ import java.util.Objects;
 import java.util.regex.Pattern;
 
 public class HtmlProcessor {
+
     private final String TAG = this.getClass().getSimpleName();
+
     private static final Pattern execPattern = Pattern.compile("href=\"exec:([\\s\\S]*?)\"", Pattern.CASE_INSENSITIVE);
-    private final GameContentResolver gameContentResolver;
     private final ImageProvider imageProvider;
     private static final String HTML_PATTERN = "<(\"[^\"]*\"|'[^']*'|[^'\">])*>";
     private final Pattern pattern = Pattern.compile(HTML_PATTERN);
@@ -43,8 +44,7 @@ public class HtmlProcessor {
         return (QuestPlayerApplication) context;
     }
 
-    public HtmlProcessor(GameContentResolver gameContentResolver, ImageProvider imageProvider) {
-        this.gameContentResolver = gameContentResolver;
+    public HtmlProcessor(ImageProvider imageProvider) {
         this.imageProvider = imageProvider;
     }
 
