@@ -9,6 +9,7 @@ import androidx.annotation.Nullable;
 import androidx.documentfile.provider.DocumentFile;
 
 import com.anggrayudi.storage.FileWrapper;
+import com.anggrayudi.storage.file.DocumentFileUtils;
 import com.anggrayudi.storage.file.MimeType;
 
 import org.qp.android.model.workers.WorkerException;
@@ -124,9 +125,10 @@ public final class FileUtil {
         return checkDir;
     }
 
-    public static DocumentFile findFileOrDirectory(DocumentFile parentDir ,
+    public static DocumentFile findFileOrDirectory(Context context ,
+                                                   DocumentFile parentDir ,
                                                    final String name) {
-        return parentDir.findFile(name);
+        return DocumentFileUtils.child(parentDir , context , name);
     }
 
     @Nullable
@@ -184,6 +186,25 @@ public final class FileUtil {
         var resolver = context.getContentResolver();
 
         try (var in = resolver.openInputStream(fileUri);
+             var bufReader = new BufferedReader(new InputStreamReader(in))) {
+            String line;
+            while ((line = bufReader.readLine()) != null) {
+                result.append(line);
+            }
+        } catch (IOException ex) {
+            Log.e(TAG , "Error reading a file" , ex);
+            return null;
+        }
+        return result.toString();
+    }
+
+    @Nullable
+    public static String readAssetFileAsString(Context context ,
+                                               String fileName) {
+        var result = new StringBuilder();
+        var assetManager = context.getAssets();
+
+        try (var in = assetManager.open(fileName);
              var bufReader = new BufferedReader(new InputStreamReader(in))) {
             String line;
             while ((line = bufReader.readLine()) != null) {
