@@ -1,13 +1,19 @@
 package org.qp.android.ui.settings;
 
 import android.os.Bundle;
+import android.view.View;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.LinearLayout;
 
+import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
+import androidx.webkit.WebViewAssetLoader;
 
 import org.qp.android.BuildConfig;
 import org.qp.android.QuestPlayerApplication;
@@ -16,25 +22,27 @@ import org.qp.android.ui.dialogs.SettingsDialogFrag;
 
 public class SettingsFragment extends PreferenceFragmentCompat {
 
+    private SettingsViewModel viewModel;
+
     @Override
-    public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+    public void onCreatePreferences(Bundle savedInstanceState , String rootKey) {
         requireActivity().setTitle(R.string.settingsTitle);
         addPreferencesFromResource(R.xml.settings);
 
-        var viewModel =
+        viewModel =
                 new ViewModelProvider(requireActivity()).get(SettingsViewModel.class);
 
         var versionPref = findPreference("showVersion");
         if (versionPref != null) {
             versionPref.setTitle(getString(R.string.extendedName)
-                    .replace("-VERSION-", BuildConfig.VERSION_NAME));
+                    .replace("-VERSION-" , BuildConfig.VERSION_NAME));
             versionPref.setSummaryProvider(preference -> {
                 var application = (QuestPlayerApplication) requireActivity().getApplication();
                 var libQspProxy = application.getLibQspProxy();
                 try {
                     var compileDateTime = libQspProxy.getCompiledDateTime();
                     var versionQSP = libQspProxy.getVersionQSP();
-                    return compileDateTime+"\n"+versionQSP;
+                    return compileDateTime + "\n" + versionQSP;
                 } catch (NullPointerException ex) {
                     return null;
                 }
@@ -64,27 +72,7 @@ public class SettingsFragment extends PreferenceFragmentCompat {
                     return true;
                 }
                 case "showAbout" -> {
-                    var linearLayout = new LinearLayout(getContext());
-                    linearLayout.setOrientation(LinearLayout.VERTICAL);
-                    var linLayoutParam =
-                            new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
-                                    LinearLayout.LayoutParams.MATCH_PARENT);
-                    linearLayout.setLayoutParams(linLayoutParam);
-                    var lpView =
-                            new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
-                                    LinearLayout.LayoutParams.WRAP_CONTENT);
-                    var webView = new WebView(requireContext());
-                    webView.loadDataWithBaseURL(
-                            "",
-                            viewModel.formationAboutDesc(requireContext()),
-                            "text/html",
-                            "utf-8",
-                            "");
-                    webView.setLayoutParams(lpView);
-                    linearLayout.addView(webView);
-                    var dialogFrag = new SettingsDialogFrag();
-                    dialogFrag.setView(linearLayout);
-                    dialogFrag.show(getParentFragmentManager(), "settingsDialogFragment");
+                    createCustomView();
                     return true;
                 }
             }
@@ -114,5 +102,44 @@ public class SettingsFragment extends PreferenceFragmentCompat {
         var aboutPref = findPreference("showAbout");
         if (aboutPref != null)
             aboutPref.setOnPreferenceClickListener(listener);
+    }
+
+    private void createCustomView() {
+        final WebViewAssetLoader assetLoader = new WebViewAssetLoader.Builder()
+                .addPathHandler("/assets/", new WebViewAssetLoader.AssetsPathHandler(requireContext()))
+                .addPathHandler("/res/", new WebViewAssetLoader.ResourcesPathHandler(requireContext()))
+                .build();
+
+        var linearLayout = new LinearLayout(getContext());
+        linearLayout.setOrientation(LinearLayout.VERTICAL);
+        var linLayoutParam =
+                new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT ,
+                        LinearLayout.LayoutParams.MATCH_PARENT);
+        linearLayout.setLayoutParams(linLayoutParam);
+        var lpView =
+                new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT ,
+                        LinearLayout.LayoutParams.WRAP_CONTENT);
+
+        var webView = new WebView(requireContext());
+        webView.setOverScrollMode(View.OVER_SCROLL_NEVER);
+        webView.setWebViewClient(new WebViewClient() {
+            @Nullable
+            @Override
+            public WebResourceResponse shouldInterceptRequest(WebView view ,
+                                                              WebResourceRequest request) {
+                return assetLoader.shouldInterceptRequest(request.getUrl());
+            }
+        });
+        webView.loadDataWithBaseURL(
+                null ,
+                viewModel.formationAboutDesc(requireContext()) ,
+                null ,
+                "utf-8" ,
+                null);
+        webView.setLayoutParams(lpView);
+        linearLayout.addView(webView);
+        var dialogFrag = new SettingsDialogFrag();
+        dialogFrag.setView(linearLayout);
+        dialogFrag.show(getParentFragmentManager() , "settingsDialogFragment");
     }
 }
