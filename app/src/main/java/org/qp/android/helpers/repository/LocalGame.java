@@ -117,8 +117,6 @@ public class LocalGame {
                 item = new GameData();
                 item.id = name;
                 item.title = name;
-                item.gameDir = gameFolder.dir;
-                item.gameFiles = gameFolder.gameFiles;
                 createDataIntoFolder(context , item , gameFolder.dir);
 
                 itemsGamesDirs.add(item);
@@ -135,8 +133,6 @@ public class LocalGame {
                     item = new GameData();
                     item.id = name;
                     item.title = name;
-                    item.gameDir = gameFolder.dir;
-                    item.gameFiles = gameFolder.gameFiles;
                     createDataIntoFolder(context , item , gameFolder.dir);
                     itemsGamesDirs.add(item);
                 } else {
