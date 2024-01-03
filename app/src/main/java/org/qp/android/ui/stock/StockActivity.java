@@ -382,6 +382,7 @@ public class StockActivity extends AppCompatActivity implements
             var sv = sm.getPrimaryStorageVolume();
             intentQ = sv.createOpenDocumentTreeIntent();
             intentQ.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+            intentQ.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
             intentQ.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             rootFolderLauncher.launch(intentQ);
         } else {
