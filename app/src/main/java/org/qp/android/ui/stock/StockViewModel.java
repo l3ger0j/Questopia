@@ -3,6 +3,7 @@ package org.qp.android.ui.stock;
 import static org.qp.android.helpers.utils.DirUtil.dirSize;
 import static org.qp.android.helpers.utils.DirUtil.doesDirectoryContainGameFiles;
 import static org.qp.android.helpers.utils.FileUtil.copyFileToDir;
+import static org.qp.android.helpers.utils.FileUtil.findFileOrDirectory;
 import static org.qp.android.helpers.utils.FileUtil.formatFileSize;
 import static org.qp.android.helpers.utils.FileUtil.isWritableDirectory;
 import static org.qp.android.helpers.utils.PathUtil.removeExtension;
@@ -28,7 +29,6 @@ import org.qp.android.R;
 import org.qp.android.databinding.DialogEditBinding;
 import org.qp.android.dto.stock.GameData;
 import org.qp.android.helpers.repository.LocalGame;
-import org.qp.android.model.workers.WorkerBuilder;
 import org.qp.android.ui.dialogs.StockDialogFrags;
 import org.qp.android.ui.dialogs.StockDialogType;
 import org.qp.android.ui.game.GameActivity;
@@ -320,21 +320,17 @@ public class StockViewModel extends AndroidViewModel {
             }
             if (tempImageFile != null) tempGameData.icon = tempImageFile.getUri().toString();
             if (tempGameData.fileSize == null || tempGameData.fileSize.isEmpty()) {
-                CompletableFuture
-                        .supplyAsync(() -> dirSize(tempGameData.gameDir))
-                        .thenApply(aLong -> {
-                            tempGameData.fileSize = formatFileSize(aLong , controller.binaryPrefixes);
-                            localGame.createDataIntoFolder(getApplication() , tempGameData , tempGameData.gameDir);
-                            return null;
-                        });
+                calculateSizeDir(tempGameData);
             }
             if (tempPathFile != null) {
                 copyFileToDir(getStockActivity() , tempPathFile , tempGameData.gameDir);
             }
             if (tempModFile != null) {
-                var modDir = tempGameData.gameDir.findFile("mods");
+                var modDir = findFileOrDirectory(getStockActivity() , tempGameData.gameDir , "mods");
                 copyFileToDir(getStockActivity() , tempModFile , modDir);
             }
+
+            localGame.createDataIntoFolder(getApplication() , tempGameData , tempGameData.gameDir);
             refreshIntGamesDirectory();
             dialogFragments.dismiss();
         } catch (NullPointerException ex) {
@@ -343,9 +339,16 @@ public class StockViewModel extends AndroidViewModel {
         }
     }
 
-    private LiveData<Long> calculateSizeDir(DocumentFile srcDir) {
-        var installer = new WorkerBuilder(getStockActivity());
-        return installer.calculateDirSize(srcDir);
+    private void calculateSizeDir(GameData gameData) {
+        var gameDir = gameData.gameDir;
+
+        CompletableFuture
+                .supplyAsync(() -> dirSize(gameDir))
+                .thenApply(aLong -> {
+                    gameData.fileSize = formatFileSize(aLong , controller.binaryPrefixes);
+                    localGame.createDataIntoFolder(getApplication() , gameData , gameData.gameDir);
+                    return null;
+                });
     }
 
     public void playGame() {
@@ -432,6 +435,10 @@ public class StockViewModel extends AndroidViewModel {
                 .thenApply(innerGameData -> {
                     for (var localGameData : innerGameData) {
                         var remoteGameData = gamesMap.get(localGameData.id);
+                        if (localGameData.fileSize == null
+                                || localGameData.fileSize.isEmpty()) {
+                            calculateSizeDir(localGameData);
+                        }
                         if (remoteGameData != null) {
                             var aggregateGameData = new GameData(remoteGameData);
                             aggregateGameData.gameDir = localGameData.gameDir;
