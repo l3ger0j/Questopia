@@ -44,6 +44,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.anggrayudi.storage.SimpleStorageHelper;
 import com.anggrayudi.storage.file.DocumentFileCompat;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javiersantos.appupdater.AppUpdater;
 import com.github.javiersantos.appupdater.enums.UpdateFrom;
@@ -236,7 +237,8 @@ public class StockActivity extends AppCompatActivity implements
 
     public void restoreListDirsFromFile() {
         try {
-            var mapFiles = (HashMap<String , String>) jsonToObject(listDirsFile , HashMap.class);
+            var ref = new TypeReference<HashMap<String , String>>() {};
+            var mapFiles = jsonToObject(listDirsFile , ref);
             var listFile = new ArrayList<DocumentFile>();
             for (var value : mapFiles.values()) {
                 var uri = Uri.parse(value);
@@ -261,7 +263,8 @@ public class StockActivity extends AppCompatActivity implements
 
     public void removeDirFromListDirsFile(String folderName) {
         try {
-            var mapFiles = (HashMap<String , String>) jsonToObject(listDirsFile , HashMap.class);
+            var ref = new TypeReference<HashMap<String , String>>(){};
+            var mapFiles = jsonToObject(listDirsFile , ref);
 
             if (mapFiles.isEmpty()) {
                 var newList = stockViewModel.getListGamesDir();

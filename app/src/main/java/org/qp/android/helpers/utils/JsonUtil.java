@@ -1,5 +1,6 @@
 package org.qp.android.helpers.utils;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
@@ -21,5 +22,9 @@ public class JsonUtil {
 
     public static <T> T jsonToObject(File file, Class<T> clazz) throws IOException {
         return new ObjectMapper().readValue(file , clazz);
+    }
+
+    public static <T> T jsonToObject(File file, TypeReference<T> ref) throws IOException {
+        return new ObjectMapper().readValue(file , ref);
     }
 }
