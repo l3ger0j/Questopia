@@ -1,7 +1,10 @@
 package org.qp.android.helpers.utils;
 
+import static org.qp.android.helpers.utils.FileUtil.documentWrap;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.documentfile.provider.DocumentFile;
 
 public final class PathUtil {
 
@@ -15,6 +18,11 @@ public final class PathUtil {
     public static String getExtension(@NonNull String path) {
         var idx = path.lastIndexOf('.');
         return idx == -1 ? null : path.substring(idx + 1);
+    }
+
+    @NonNull
+    public static String getExtension(DocumentFile documentFile) {
+        return documentWrap(documentFile).getExtension();
     }
 
     /**

@@ -307,7 +307,7 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
             runOnQspThread(() -> loadGameState(uri));
             return;
         }
-        final byte[] gameData = getFileContents(context , uri);
+        var gameData = getFileContents(context , uri);
         if (gameData == null) return;
         if (!nativeMethods.QSPOpenSavedGameFromData(gameData, gameData.length, true)) {
             showLastQspError();
@@ -516,6 +516,7 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
         if (inter == null) return;
         if (filename != null) {
             try {
+                Log.d(TAG , filename);
                 var gameFile = fromFullPath(filename , getCurGameDir());
                 if (gameFile == null) throw new NullPointerException();
                 var gameFileUri = gameFile.getUri();

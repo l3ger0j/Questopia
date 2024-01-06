@@ -8,8 +8,10 @@ import androidx.documentfile.provider.DocumentFile;
 
 import java.io.File;
 import java.util.Locale;
+import java.util.Optional;
 
 public final class DirUtil {
+
     private static final String TAG = DirUtil.class.getSimpleName();
 
     /**
@@ -62,44 +64,31 @@ public final class DirUtil {
         }
     }
 
-    public static <T> boolean doesDirectoryContainGameFiles(T dir) {
+    public static boolean isDirContainsGameFile(DocumentFile dir) {
         if (dir == null) {
             return false;
         }
-        if (dir instanceof File tempDir) {
-            if (tempDir.listFiles() == null) {
-                return false;
-            } else {
-                for (var file : tempDir.listFiles()) {
-                    var name = file.getName();
-                    var lcName = name.toLowerCase(Locale.ROOT);
-                    if (lcName.endsWith(".qsp") || lcName.endsWith(".gam"))
-                        return true;
-                }
-            }
-        } else if (dir instanceof DocumentFile tempDir) {
-            if (tempDir.listFiles() == null) {
-                return false;
-            } else {
-                for (var file : tempDir.listFiles()) {
-                    var name = file.getName();
-                    var lcName = name.toLowerCase(Locale.ROOT);
-                    if (lcName.endsWith(".qsp") || lcName.endsWith(".gam"))
-                        return true;
-                }
+
+        for (var file : dir.listFiles()) {
+            var dirName = Optional.ofNullable(file.getName());
+            if (dirName.isPresent()) {
+                var lcName = dirName.get().toLowerCase(Locale.ROOT);
+                if (lcName.endsWith(".qsp") || lcName.endsWith(".gam"))
+                    return true;
             }
         }
+
         return false;
     }
 
     @WorkerThread
-    public static long dirSize(DocumentFile dir) {
+    public static long calculateDirSize(DocumentFile dir) {
         if (dir.exists()) {
             long result = 0;
             var fileList = dir.listFiles();
             for (var file : fileList) {
                 if (file.isDirectory()) {
-                    result += dirSize(file);
+                    result += calculateDirSize(file);
                 } else {
                     result += file.length();
                 }

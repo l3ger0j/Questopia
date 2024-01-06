@@ -10,6 +10,7 @@ import com.google.android.material.snackbar.Snackbar;
 import org.jetbrains.annotations.Contract;
 
 public final class ViewUtil {
+
     public static void showSnackBar(View view, String text) {
         Snackbar.make(view, text, Snackbar.LENGTH_SHORT).show();
     }

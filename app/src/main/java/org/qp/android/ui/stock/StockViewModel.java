@@ -1,7 +1,7 @@
 package org.qp.android.ui.stock;
 
-import static org.qp.android.helpers.utils.DirUtil.dirSize;
-import static org.qp.android.helpers.utils.DirUtil.doesDirectoryContainGameFiles;
+import static org.qp.android.helpers.utils.DirUtil.calculateDirSize;
+import static org.qp.android.helpers.utils.DirUtil.isDirContainsGameFile;
 import static org.qp.android.helpers.utils.FileUtil.copyFileToDir;
 import static org.qp.android.helpers.utils.FileUtil.findFileOrDirectory;
 import static org.qp.android.helpers.utils.FileUtil.formatFileSize;
@@ -243,7 +243,7 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     public boolean isGameInstalled() {
-        return tempGameData.isFileInstalled() && doesDirectoryContainGameFiles(tempGameData.gameDir);
+        return tempGameData.isFileInstalled() && isDirContainsGameFile(tempGameData.gameDir);
     }
 
     public boolean isHasRemoteUrl() {
@@ -343,7 +343,7 @@ public class StockViewModel extends AndroidViewModel {
         var gameDir = gameData.gameDir;
 
         CompletableFuture
-                .supplyAsync(() -> dirSize(gameDir))
+                .supplyAsync(() -> calculateDirSize(gameDir))
                 .thenApply(aLong -> {
                     gameData.fileSize = formatFileSize(aLong , controller.binaryPrefixes);
                     localGame.createDataIntoFolder(getApplication() , gameData , gameData.gameDir);
