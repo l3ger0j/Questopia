@@ -40,7 +40,7 @@ public class PluginRecycler extends RecyclerView.Adapter<PluginRecycler.ViewHold
             new DiffUtil.ItemCallback<>() {
                 @Override
                 public boolean areItemsTheSame(@NonNull PluginInfo oldItem , @NonNull PluginInfo newItem) {
-                    return Objects.equals(oldItem.version , newItem.version);
+                    return Objects.equals(oldItem.version() , newItem.version());
                 }
 
                 @Override
@@ -72,10 +72,10 @@ public class PluginRecycler extends RecyclerView.Adapter<PluginRecycler.ViewHold
         var pluginInfo = getItem(position);
 
         // pluginAuthor
-        if (pluginInfo.author != null && pluginInfo.author.length() > 0) {
-            holder.listItemPluginBinding.pluginAuthor
-                    .setText(context.getString(R.string.author)
-                            .replace("-AUTHOR-", pluginInfo.author));
+        if (pluginInfo.author() != null && pluginInfo.author().length() > 0) {
+            var authorText = context.getString(R.string.author)
+                    .replace("-AUTHOR-", pluginInfo.author());
+            holder.listItemPluginBinding.pluginAuthor.setText(authorText);
         } else {
             holder.listItemPluginBinding.pluginAuthor.setText("");
         }

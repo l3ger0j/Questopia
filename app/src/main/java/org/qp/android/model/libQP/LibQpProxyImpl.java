@@ -110,15 +110,15 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
 
     private void showLastQspError() {
         var errorData = (ErrorData) nativeMethods.QSPGetLastErrorData();
-        var locName = getStringOrEmpty(errorData.locName);
-        var desc = getStringOrEmpty(nativeMethods.QSPGetErrorDesc(errorData.errorNum));
+        var locName = getStringOrEmpty(errorData.locName());
+        var desc = getStringOrEmpty(nativeMethods.QSPGetErrorDesc(errorData.errorNum()));
         final var message = String.format(
                 Locale.getDefault(),
                 "Location: %s\nAction: %d\nLine: %d\nError number: %d\nDescription: %s",
                 locName,
-                errorData.index,
-                errorData.line,
-                errorData.errorNum,
+                errorData.index(),
+                errorData.line(),
+                errorData.errorNum(),
                 desc);
         Log.e(TAG,message);
         if (gameInterface != null) {
@@ -136,31 +136,31 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
         boolean changed = false;
 
         var htmlResult = (GetVarValuesResponse) nativeMethods.QSPGetVarValues("USEHTML", 0);
-        if (htmlResult.isSuccess) {
-            boolean useHtml = htmlResult.intValue != 0;
+        if (htmlResult.isSuccess()) {
+            boolean useHtml = htmlResult.intValue() != 0;
             if (config.useHtml != useHtml) {
                 config.useHtml = useHtml;
                 changed = true;
             }
         }
         var fSizeResult = (GetVarValuesResponse) nativeMethods.QSPGetVarValues("FSIZE", 0);
-        if (fSizeResult.isSuccess && config.fontSize != fSizeResult.intValue) {
-            config.fontSize = fSizeResult.intValue;
+        if (fSizeResult.isSuccess() && config.fontSize != fSizeResult.intValue()) {
+            config.fontSize = fSizeResult.intValue();
             changed = true;
         }
         var bColorResult = (GetVarValuesResponse) nativeMethods.QSPGetVarValues("BCOLOR", 0);
-        if (bColorResult.isSuccess && config.backColor != bColorResult.intValue) {
-            config.backColor = bColorResult.intValue;
+        if (bColorResult.isSuccess() && config.backColor != bColorResult.intValue()) {
+            config.backColor = bColorResult.intValue();
             changed = true;
         }
         var fColorResult = (GetVarValuesResponse) nativeMethods.QSPGetVarValues("FCOLOR", 0);
-        if (fColorResult.isSuccess && config.fontColor != fColorResult.intValue) {
-            config.fontColor = fColorResult.intValue;
+        if (fColorResult.isSuccess() && config.fontColor != fColorResult.intValue()) {
+            config.fontColor = fColorResult.intValue();
             changed = true;
         }
         var lColorResult = (GetVarValuesResponse) nativeMethods.QSPGetVarValues("LCOLOR", 0);
-        if (lColorResult.isSuccess && config.linkColor != lColorResult.intValue) {
-            config.linkColor = lColorResult.intValue;
+        if (lColorResult.isSuccess() && config.linkColor != lColorResult.intValue()) {
+            config.linkColor = lColorResult.intValue();
             changed = true;
         }
 
@@ -174,9 +174,10 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
         for (int i = 0; i < count; ++i) {
             var actionData = (ActionData) nativeMethods.QSPGetActionData(i);
             var action = new QpListItem();
-            action.pathToImage = actionData.image;
+            action.pathToImage = actionData.image();
             action.text = gameState.interfaceConfig.useHtml ?
-                    htmlProcessor.removeHTMLTags(actionData.name) : actionData.name;
+                    htmlProcessor.removeHTMLTags(actionData.name())
+                    : actionData.name();
             actions.add(action);
         }
         return actions;
@@ -191,19 +192,20 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
             var objectResult = (ObjectData) nativeMethods.QSPGetObjectData(i);
             var curGameDir = getCurGameDir();
 
-            if (objectResult.name.contains("<img")) {
-                if (htmlProcessor.hasHTMLTags(objectResult.name)) {
-                    var tempPath = htmlProcessor.getSrcDir(objectResult.name);
+            if (objectResult.name().contains("<img")) {
+                if (htmlProcessor.hasHTMLTags(objectResult.name())) {
+                    var tempPath = htmlProcessor.getSrcDir(objectResult.name());
                     var fileFromPath = curGameDir.findFile(tempPath);
                     object.pathToImage = String.valueOf(fileFromPath);
                 } else {
-                    var fileFromPath = curGameDir.findFile(objectResult.name);
+                    var fileFromPath = curGameDir.findFile(objectResult.name());
                     object.pathToImage = String.valueOf(fileFromPath);
                 }
             } else {
-                object.pathToImage = objectResult.image;
+                object.pathToImage = objectResult.image();
                 object.text = gameState.interfaceConfig.useHtml ?
-                        htmlProcessor.removeHTMLTags(objectResult.name) : objectResult.name;
+                        htmlProcessor.removeHTMLTags(objectResult.name())
+                        : objectResult.name();
             }
             objects.add(object);
         }

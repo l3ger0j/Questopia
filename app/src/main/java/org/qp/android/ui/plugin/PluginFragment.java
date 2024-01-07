@@ -73,7 +73,6 @@ public class PluginFragment extends Fragment {
     }
 
     public void refreshPluginInfo() {
-        var pluginInfo = new PluginInfo();
         var pluginClient = new PluginClient();
 
         fillPluginList(pluginClient);
@@ -83,13 +82,14 @@ public class PluginFragment extends Fragment {
             new Handler().postDelayed(() -> {
                 try {
                     questPlugin = pluginClient.getQuestPlugin();
-                    pluginInfo.title = questPlugin.titlePlugin();
-                    pluginInfo.version = questPlugin.versionPlugin();
-                    pluginInfo.author = questPlugin.authorPlugin();
+                    var pluginInfo = new PluginInfo(
+                            questPlugin.titlePlugin() ,
+                            questPlugin.versionPlugin() ,
+                            questPlugin.authorPlugin()
+                    );
                     var arrayList = new ArrayList<PluginInfo>();
                     arrayList.add(pluginInfo);
-                    var adapter =
-                            new PluginRecycler(requireActivity());
+                    var adapter = new PluginRecycler(requireActivity());
                     adapter.submitList(arrayList);
                     recyclerView.setAdapter(adapter);
                 } catch (RemoteException e) {
