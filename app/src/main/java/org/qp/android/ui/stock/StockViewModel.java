@@ -40,7 +40,6 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executors;
 
 public class StockViewModel extends AndroidViewModel {
 
@@ -344,10 +343,9 @@ public class StockViewModel extends AndroidViewModel {
 
         CompletableFuture
                 .supplyAsync(() -> calculateDirSize(gameDir))
-                .thenApply(aLong -> {
+                .thenAccept(aLong -> {
                     gameData.fileSize = formatFileSize(aLong , controller.binaryPrefixes);
                     localGame.createDataIntoFolder(getApplication() , gameData , gameData.gameDir);
-                    return null;
                 });
     }
 
@@ -430,9 +428,8 @@ public class StockViewModel extends AndroidViewModel {
         gamesMap.clear();
 
         CompletableFuture
-                .supplyAsync(() -> localGame.extractGameDataFromList(getStockActivity() , listGamesDir) ,
-                        Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()))
-                .thenApply(innerGameData -> {
+                .supplyAsync(() -> localGame.extractGameDataFromList(getStockActivity() , listGamesDir))
+                .thenAccept(innerGameData -> {
                     for (var localGameData : innerGameData) {
                         var remoteGameData = gamesMap.get(localGameData.id);
                         if (localGameData.fileSize == null
@@ -448,7 +445,6 @@ public class StockViewModel extends AndroidViewModel {
                             gamesMap.put(localGameData.id, localGameData);
                         }
                     }
-                    return null;
                 })
                 .thenRunAsync(() -> {
                     var gameData = getSortedGames();
@@ -459,7 +455,7 @@ public class StockViewModel extends AndroidViewModel {
                         }
                     }
                     setGameDataList(localGameData);
-                } , Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()));
+                });
     }
     // endregion Refresh
 }
