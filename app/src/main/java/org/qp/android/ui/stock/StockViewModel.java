@@ -40,6 +40,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
 
 public class StockViewModel extends AndroidViewModel {
 
@@ -341,8 +342,9 @@ public class StockViewModel extends AndroidViewModel {
     private void calculateSizeDir(GameData gameData) {
         var gameDir = gameData.gameDir;
 
+        var executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
         CompletableFuture
-                .supplyAsync(() -> calculateDirSize(gameDir))
+                .supplyAsync(() -> calculateDirSize(gameDir) , executor)
                 .thenAccept(aLong -> {
                     gameData.fileSize = formatFileSize(aLong , controller.binaryPrefixes);
                     localGame.createDataIntoFolder(getApplication() , gameData , gameData.gameDir);
@@ -427,15 +429,12 @@ public class StockViewModel extends AndroidViewModel {
     public void refreshGameData() {
         gamesMap.clear();
 
+        var executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
         CompletableFuture
-                .supplyAsync(() -> localGame.extractGameDataFromList(getStockActivity() , listGamesDir))
+                .supplyAsync(() -> localGame.extractGameDataFromList(getStockActivity() , listGamesDir) , executor)
                 .thenAccept(innerGameData -> {
                     for (var localGameData : innerGameData) {
                         var remoteGameData = gamesMap.get(localGameData.id);
-                        if (localGameData.fileSize == null
-                                || localGameData.fileSize.isEmpty()) {
-                            calculateSizeDir(localGameData);
-                        }
                         if (remoteGameData != null) {
                             var aggregateGameData = new GameData(remoteGameData);
                             aggregateGameData.gameDir = localGameData.gameDir;
@@ -451,11 +450,14 @@ public class StockViewModel extends AndroidViewModel {
                     var localGameData = new ArrayList<GameData>();
                     for (var data : gameData) {
                         if (data.isFileInstalled()) {
+                            if (data.fileSize == null || data.fileSize.isEmpty()) {
+                                calculateSizeDir(data);
+                            }
                             localGameData.add(data);
                         }
                     }
                     setGameDataList(localGameData);
-                });
+                } , executor);
     }
     // endregion Refresh
 }
