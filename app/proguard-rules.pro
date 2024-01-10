@@ -12,22 +12,30 @@
    public *;
 }
 
+# NDK
 -keep class org.qp.android.dto.libQP.** { *; }
 -keep class org.qp.android.model.libQP.** { *; }
 
--keep class net.sf.sevenzipjbinding.** { *; }
-
--dontwarn org.simpleframework.xml.stream.**
--keep class org.simpleframework.xml.**{ *; }
--keepclassmembers, allowobfuscation class * {
-    @org.simpleframework.xml.* <fields>;
-    @org.simpleframework.xml.* <init>(...);
-}
-
+# AppDevNext
 -keep class info.hannes.** { *; }
 -keep class com.google.gson.reflect.TypeToken
 -keep class * extends com.google.gson.reflect.TypeToken
 -keep public class * implements java.lang.reflect.Type
+
+# Proguard configuration for Jackson 2.x
+-keep class * implements com.fasterxml.jackson.core.type.TypeReference
+-keep class com.fasterxml.jackson.databind.ObjectMapper {
+    public <methods>;
+    protected <methods>;
+}
+-keepclassmembers class * {
+    @com.fasterxml.jackson.annotation.* *;
+}
+-keep class com.fasterxml.jackson.databind.ObjectWriter {
+    public ** writeValueAsString(**);
+}
+-keepnames class com.fasterxml.jackson.** { *; }
+-dontwarn com.fasterxml.jackson.databind.**
 
 # JSR 305 annotations are for embedding nullability information.
 -dontwarn javax.annotation.**

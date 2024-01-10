@@ -7,8 +7,8 @@
         <import type="android.text.TextUtils"/>
 
         <variable
-            name="innerGameData"
-            type="org.qp.android.dto.stock.InnerGameData" />
+            name="gameData"
+            type="org.qp.android.dto.stock.GameData" />
     </data>
 
     <androidx.cardview.widget.CardView
@@ -51,8 +51,8 @@
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="16dp"
                 android:padding="5dp"
-                android:text="@{innerGameData.title}"
-                android:textColor="@{innerGameData.isInstalled ? 0xFFE0E0E0 : 0xFFFFD700}"
+                android:text="@{gameData.title}"
+                android:textColor="@{gameData.fileInstalled ? 0xFFE0E0E0 : 0xFFFFD700}"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 app:layout_constraintEnd_toEndOf="parent"

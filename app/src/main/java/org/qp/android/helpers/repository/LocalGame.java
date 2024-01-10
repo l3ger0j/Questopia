@@ -2,11 +2,10 @@ package org.qp.android.helpers.repository;
 
 import static org.qp.android.helpers.utils.FileUtil.createFindDFile;
 import static org.qp.android.helpers.utils.FileUtil.documentWrap;
-import static org.qp.android.helpers.utils.FileUtil.findFileOrDirectory;
 import static org.qp.android.helpers.utils.FileUtil.isWritableFile;
 import static org.qp.android.helpers.utils.FileUtil.readFileAsString;
-import static org.qp.android.helpers.utils.XmlUtil.objectToXml;
-import static org.qp.android.helpers.utils.XmlUtil.xmlToObject;
+import static org.qp.android.helpers.utils.JsonUtil.jsonToObject;
+import static org.qp.android.helpers.utils.JsonUtil.objectToJson;
 
 import android.content.Context;
 import android.util.Log;
@@ -17,35 +16,21 @@ import androidx.documentfile.provider.DocumentFile;
 
 import com.anggrayudi.storage.file.MimeType;
 
-import org.qp.android.dto.stock.InnerGameData;
+import org.qp.android.dto.stock.GameData;
+import org.qp.android.ui.settings.SettingsController;
 
-import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
 public class LocalGame {
+
     private final String TAG = this.getClass().getSimpleName();
-    private static final String GAME_INFO_FILENAME = "gameStockInfo";
 
-    private Context context;
-
-    @Nullable
-    private ArrayList<DocumentFile> getGameDirectories(DocumentFile gamesDir) {
-        try {
-            var dirs = new ArrayList<DocumentFile>();
-            for (var f : gamesDir.listFiles()) {
-                if (f.isDirectory()) {
-                    dirs.add(f);
-                }
-            }
-            return dirs;
-        } catch (NullPointerException e) {
-            Log.d(TAG , "Error: " , e);
-            return null;
-        }
-    }
+    private static final String GAME_INFO_FILENAME = ".gameInfo";
+    private static final String NOMEDIA_FILENAME = ".nomedia";
+    private static final String NOSEARCH_FILENAME = ".nosearch";
 
     @NonNull
     private List<GameFolder> getGamesFolders(@NonNull List<DocumentFile> dirs) {
@@ -70,94 +55,113 @@ public class LocalGame {
     }
 
     @Nullable
-    private String getGameInfo(@NonNull GameFolder game) {
-        var gameInfoFiles = findFileOrDirectory(game.dir , GAME_INFO_FILENAME);
-        if (gameInfoFiles == null || gameInfoFiles.length() == 0) {
-            Log.w(TAG , "InnerGameData info file not found in " + game.dir.getName());
+    private DocumentFile getGameInfoFile(@NonNull DocumentFile gameFolder) {
+        var findGameInfoFile = gameFolder.findFile(GAME_INFO_FILENAME);
+        if (findGameInfoFile == null) {
+            Log.w(TAG , "GameData info file not found in " + gameFolder.getName());
             return null;
         }
-        return readFileAsString(context , gameInfoFiles);
+        return findGameInfoFile;
     }
 
-    public void formDataFileIntoFolder(@NonNull Context context ,
-                                       InnerGameData innerGameData ,
-                                       DocumentFile gameDir) {
-        var infoFile = findFileOrDirectory(gameDir , GAME_INFO_FILENAME);
+    private void createNoMediaFile(@NonNull DocumentFile gameDir) {
+        var findNoMediaFile = gameDir.findFile(NOMEDIA_FILENAME);
+        if (findNoMediaFile == null || !findNoMediaFile.exists()) {
+            createFindDFile(gameDir , MimeType.TEXT , NOMEDIA_FILENAME);
+        }
+    }
+
+    private void createNoSearchFile(@NonNull DocumentFile gameDir) {
+        var findNoSearchFile = gameDir.findFile(NOSEARCH_FILENAME);
+        if (findNoSearchFile == null || !findNoSearchFile.exists()) {
+            createFindDFile(gameDir , MimeType.TEXT , NOSEARCH_FILENAME);
+        }
+    }
+
+    public void createDataIntoFolder(Context context ,
+                                     GameData gameData ,
+                                     DocumentFile gameDir) {
+        var infoFile = getGameInfoFile(gameDir);
         if (infoFile == null) {
             infoFile = createFindDFile(gameDir , MimeType.TEXT , GAME_INFO_FILENAME);
         }
         if (!isWritableFile(infoFile)) {
+            Log.e(TAG , "ERROR");
             return;
         }
         var tempInfoFile = documentWrap(infoFile);
 
-        try (var out = tempInfoFile.openOutputStream(context , false);
-             var writer = new OutputStreamWriter(out)) {
-            writer.write(objectToXml(innerGameData));
+        try (var out = tempInfoFile.openOutputStream(context , false)) {
+            objectToJson(out , gameData);
         } catch (Exception ex) {
-            Log.d(TAG , "ERROR: " , ex);
+            Log.e(TAG , "ERROR: " , ex);
         }
     }
 
-    public List<InnerGameData> extractGameDataFromFolder(Context context , DocumentFile gameFolder) {
-        if (gameFolder == null) {
+    public List<GameData> extractGameDataFromList(Context context , List<DocumentFile> fileList) {
+        if (fileList.isEmpty()) {
             return Collections.emptyList();
         }
 
-        var gamesDirs = getGameDirectories(gameFolder);
-        if (gamesDirs == null) {
-            Log.d(TAG , "game dir is null");
-            return Collections.emptyList();
-        }
-        if (gamesDirs.isEmpty()) {
-            return Collections.emptyList();
-        }
+        var controller = SettingsController.newInstance(context);
+        var itemsGamesDirs = new ArrayList<GameData>();
+        var formatGamesDirs = getGamesFolders(fileList);
 
-        this.context = context;
+        for (var gameFolder : formatGamesDirs) {
+            var item = (GameData) null;
+            var infoFile = getGameInfoFile(gameFolder.dir);
 
-        var itemsGamesDirs = new ArrayList<InnerGameData>();
-        var formatGamesDirs = getGamesFolders(gamesDirs);
-
-        for (var folder : formatGamesDirs) {
-            var item = (InnerGameData) null;
-            var info = getGameInfo(folder);
-
-            if (info != null) {
-                item = parseGameInfo(info);
-            }
-
-            if (item == null) {
-                var name = folder.dir.getName();
+            if (infoFile == null) {
+                var name = gameFolder.dir.getName();
                 if (name == null) return Collections.emptyList();
-                item = new InnerGameData();
+                item = new GameData();
                 item.id = name;
                 item.title = name;
-                item.gameDir = folder.dir;
-                item.gameFiles = folder.gameFiles;
-                formDataFileIntoFolder(context , item , folder.dir);
+                item.gameDir = gameFolder.dir;
+                item.gameFiles = gameFolder.gameFiles;
+                createDataIntoFolder(context , item , gameFolder.dir);
 
                 itemsGamesDirs.add(item);
             } else {
-                item.gameDir = folder.dir;
-                item.gameFiles = folder.gameFiles;
+                var infoFileCont = readFileAsString(context , infoFile.getUri());
 
-                itemsGamesDirs.add(item);
+                if (infoFileCont != null) {
+                    item = parseGameInfo(infoFileCont);
+                }
+
+                if (item == null) {
+                    var name = gameFolder.dir.getName();
+                    if (name == null) return Collections.emptyList();
+                    item = new GameData();
+                    item.id = name;
+                    item.title = name;
+                    item.gameDir = gameFolder.dir;
+                    item.gameFiles = gameFolder.gameFiles;
+                    createDataIntoFolder(context , item , gameFolder.dir);
+                    itemsGamesDirs.add(item);
+                } else {
+                    item.gameDir = gameFolder.dir;
+                    item.gameFiles = gameFolder.gameFiles;
+                    itemsGamesDirs.add(item);
+                }
             }
+
+            if (controller.isCreateNoMedia) createNoMediaFile(gameFolder.dir);
+            if (controller.isCreateNoSearch) createNoSearchFile(gameFolder.dir);
         }
 
         return itemsGamesDirs;
     }
 
     @Nullable
-    private InnerGameData parseGameInfo(String xml) {
+    private GameData parseGameInfo(String json) {
         try {
-            return xmlToObject(xml , InnerGameData.class);
+            return jsonToObject(json , GameData.class);
         } catch (Exception ex) {
             Log.e(TAG , "Failed to parse game info file" , ex);
             return null;
         }
     }
 
-    private record GameFolder(DocumentFile dir , List<DocumentFile> gameFiles) {
-    }
+    private record GameFolder(DocumentFile dir , List<DocumentFile> gameFiles) {}
 }

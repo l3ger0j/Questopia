@@ -4,7 +4,6 @@ import static androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener;
 import static org.qp.android.helpers.utils.FileUtil.createFindDFile;
 import static org.qp.android.helpers.utils.FileUtil.createFindDFolder;
 import static org.qp.android.helpers.utils.FileUtil.documentWrap;
-import static org.qp.android.helpers.utils.FileUtil.findFileOrDirectory;
 import static org.qp.android.helpers.utils.ThreadUtil.isMainThread;
 
 import android.annotation.SuppressLint;
@@ -353,7 +352,6 @@ public class GameActivity extends AppCompatActivity implements
         var gameFileUri = Uri.parse(intent.getStringExtra("gameFileUri"));
         var gameFile = DocumentFileCompat.fromUri(this , gameFileUri);
 
-        gameViewModel.setUriGameDir(gameDirUri);
         libQpProxy.runGame(gameId, gameTitle, gameDir, gameFile);
     }
 
@@ -665,7 +663,7 @@ public class GameActivity extends AppCompatActivity implements
         MenuItem item;
         for (int i = 0; i <= MAX_SAVE_SLOTS; i++) {
             final var filename = getSaveSlotFilename(i);
-            final var loadFile = findFileOrDirectory(savesDir, filename);
+            final var loadFile = savesDir.findFile(filename);
             var title = "";
 
             if (loadFile != null) {

@@ -2,19 +2,9 @@ package org.qp.android.helpers.adapters;
 
 import androidx.viewpager2.widget.ViewPager2;
 
-public class AutoScrollRunnable implements Runnable {
-    private final ViewPager2 viewPager;
-    private final int delayMillis;
-    private final boolean reverse;
-
-    public AutoScrollRunnable(ViewPager2 viewPager,
-                              int delayMillis,
-                              boolean reverse) {
-        this.viewPager = viewPager;
-        this.delayMillis = delayMillis;
-        this.reverse = reverse;
-    }
-
+public record AutoScrollRunnable(ViewPager2 viewPager ,
+                                 int delayMillis ,
+                                 boolean reverse) implements Runnable {
     @Override
     public void run() {
         int currentItem = viewPager.getCurrentItem();

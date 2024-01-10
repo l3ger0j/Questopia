@@ -11,6 +11,7 @@ import org.jetbrains.annotations.Contract;
 import java.util.regex.Pattern;
 
 public final class Base64Util {
+
     private static final String BASE64_PATTERN = "^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$";
     private static final Pattern pattern = Pattern.compile(BASE64_PATTERN);
 

@@ -6,15 +6,14 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.qp.android.model.service.GameContentResolver;
 import org.qp.android.model.service.HtmlProcessor;
 import org.qp.android.model.service.ImageProvider;
 
 @RunWith(AndroidJUnit4.class)
 public class HtmlProcessorAndroidTest {
-    private final GameContentResolver gameContentResolver = new GameContentResolver();
+
     private final ImageProvider imageProvider = new ImageProvider();
-    private final HtmlProcessor sut = new HtmlProcessor(gameContentResolver, imageProvider);
+    private final HtmlProcessor sut = new HtmlProcessor(imageProvider);
 
     @Test
     public void convertQspHtmlToWebViewHtml_execBlocks() {

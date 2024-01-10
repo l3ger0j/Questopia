@@ -1,5 +1,7 @@
 package org.qp.android.model.service;
 
+import static org.qp.android.helpers.utils.FileUtil.fromFullPath;
+import static org.qp.android.helpers.utils.PathUtil.normalizeContentPath;
 import static org.qp.android.helpers.utils.StringUtil.isNotEmpty;
 import static org.qp.android.helpers.utils.ThreadUtil.throwIfNotMainThread;
 
@@ -20,6 +22,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class AudioPlayer {
+
     private final String TAG = this.getClass().getSimpleName();
 
     private final ConcurrentHashMap<String, Sound> sounds = new ConcurrentHashMap<>();
@@ -30,10 +33,12 @@ public class AudioPlayer {
     private boolean isPaused = false;
     private Context context;
 
-    private String nameGameDir;
+    private QuestPlayerApplication getApplication() {
+        return (QuestPlayerApplication) context.getApplicationContext();
+    }
 
-    public void setNameGameDir(String nameGameDir) {
-        this.nameGameDir = nameGameDir;
+    private GameActivity getAcitvity() {
+        return (GameActivity) context;
     }
 
     public void start(Context context) {
@@ -107,16 +112,17 @@ public class AudioPlayer {
             return;
         }
 
-        var normPath = sound.path.replace("\\", "/");
+        var normPath = normalizeContentPath(sound.path);
         var application = (QuestPlayerApplication) context.getApplicationContext();
-        var soundFile = application.fromFullPath(normPath);
+        var curGameDir = application.getCurrentGameDir();
+        var soundFile = fromFullPath(normPath , curGameDir);
 
         if (soundFile == null) {
-            var activity = (GameActivity) context;
-            var controller = activity.getSettingsController();
+            var controller = getAcitvity().getSettingsController();
             if (controller != null && controller.isUseMusicDebug) {
-                activity.showSimpleDialog(
-                        context.getString(R.string.notFoundSound) + normPath ,
+                var localizedStr = getAcitvity().getString(R.string.notFoundSound) + normPath;
+                getAcitvity().showSimpleDialog(
+                        localizedStr,
                         GameDialogType.ERROR_DIALOG
                 );
             } else {

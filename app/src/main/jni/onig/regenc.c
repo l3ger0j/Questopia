@@ -2,7 +2,7 @@
   regenc.c -  Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2007  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2020  K.Kosako
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,11 +29,106 @@
 
 #include "regint.h"
 
+#define LARGE_S   0x53
+#define SMALL_S   0x73
+
 OnigEncoding OnigEncDefaultCharEncoding = ONIG_ENCODING_INIT_DEFAULT;
+
+#define INITED_LIST_SIZE  20
+
+static int InitedListNum;
+
+static struct {
+  OnigEncoding enc;
+  int          inited;
+} InitedList[INITED_LIST_SIZE];
+
+static int
+enc_inited_entry(OnigEncoding enc)
+{
+  int i;
+
+  for (i = 0; i < InitedListNum; i++) {
+    if (InitedList[i].enc == enc) {
+      InitedList[i].inited = 1;
+      return i;
+    }
+  }
+
+  i = InitedListNum;
+  if (i < INITED_LIST_SIZE - 1) {
+    InitedList[i].enc    = enc;
+    InitedList[i].inited = 1;
+    InitedListNum++;
+    return i;
+  }
+
+  return -1;
+}
+
+static int
+enc_is_inited(OnigEncoding enc)
+{
+  int i;
+
+  for (i = 0; i < InitedListNum; i++) {
+    if (InitedList[i].enc == enc) {
+      return InitedList[i].inited;
+    }
+  }
+
+  return 0;
+}
+
+static int OnigEncInited;
 
 extern int
 onigenc_init(void)
 {
+  if (OnigEncInited != 0) return 0;
+
+  OnigEncInited = 1;
+  return 0;
+}
+
+extern int
+onigenc_end(void)
+{
+  int i;
+
+  for (i = 0; i < InitedListNum; i++) {
+    InitedList[i].enc    = 0;
+    InitedList[i].inited = 0;
+  }
+  InitedListNum = 0;
+
+  OnigEncInited = 0;
+  return ONIG_NORMAL;
+}
+
+extern int
+onig_initialize_encoding(OnigEncoding enc)
+{
+  int r;
+
+  if (enc != ONIG_ENCODING_ASCII &&
+      ONIGENC_IS_ASCII_COMPATIBLE_ENCODING(enc)) {
+    OnigEncoding ascii = ONIG_ENCODING_ASCII;
+    if (ascii->init != 0 && enc_is_inited(ascii) == 0) {
+      r = ascii->init();
+      if (r != ONIG_NORMAL) return r;
+      enc_inited_entry(ascii);
+    }
+  }
+
+  if (enc->init != 0 &&
+      enc_is_inited(enc) == 0) {
+    r = (enc->init)();
+    if (r == ONIG_NORMAL)
+      enc_inited_entry(enc);
+    return r;
+  }
+
   return 0;
 }
 
@@ -51,6 +146,25 @@ onigenc_set_default_encoding(OnigEncoding enc)
 }
 
 extern UChar*
+onigenc_strdup(OnigEncoding enc, const UChar* s, const UChar* end)
+{
+  int slen, term_len, i;
+  UChar *r;
+
+  slen = (int )(end - s);
+  term_len = ONIGENC_MBC_MINLEN(enc);
+
+  r = (UChar* )xmalloc(slen + term_len);
+  CHECK_NULL_RETURN(r);
+  xmemcpy(r, s, slen);
+
+  for (i = 0; i < term_len; i++)
+    r[slen + i] = (UChar )0;
+
+  return r;
+}
+
+extern UChar*
 onigenc_get_right_adjust_char_head(OnigEncoding enc, const UChar* start, const UChar* s)
 {
   UChar* p = ONIGENC_LEFT_ADJUST_CHAR_HEAD(enc, start, s);
@@ -62,7 +176,7 @@ onigenc_get_right_adjust_char_head(OnigEncoding enc, const UChar* start, const U
 
 extern UChar*
 onigenc_get_right_adjust_char_head_with_prev(OnigEncoding enc,
-				   const UChar* start, const UChar* s, const UChar** prev)
+            const UChar* start, const UChar* s, const UChar** prev)
 {
   UChar* p = ONIGENC_LEFT_ADJUST_CHAR_HEAD(enc, start, s);
 
@@ -71,7 +185,8 @@ onigenc_get_right_adjust_char_head_with_prev(OnigEncoding enc,
     p += enclen(enc, p);
   }
   else {
-    if (prev) *prev = (const UChar* )NULL; /* Sorry */
+    if (prev)
+      *prev = onigenc_get_prev_char_head(enc, start, p);
   }
   return p;
 }
@@ -112,7 +227,7 @@ onigenc_strlen(OnigEncoding enc, const UChar* p, const UChar* end)
 {
   int n = 0;
   UChar* q = (UChar* )p;
-  
+
   while (q < end) {
     q += ONIGENC_MBC_ENC_LEN(enc, q);
     n++;
@@ -125,7 +240,7 @@ onigenc_strlen_null(OnigEncoding enc, const UChar* s)
 {
   int n = 0;
   UChar* p = (UChar* )s;
-  
+
   while (1) {
     if (*p == '\0') {
       UChar* q;
@@ -148,12 +263,12 @@ onigenc_strlen_null(OnigEncoding enc, const UChar* s)
 extern int
 onigenc_str_bytelen_null(OnigEncoding enc, const UChar* s)
 {
-  UChar* start = (UChar* )s;
-  UChar* p = (UChar* )s;
+  const UChar* start = s;
+  const UChar* p = s;
 
   while (1) {
     if (*p == '\0') {
-      UChar* q;
+      const UChar* q;
       int len = ONIGENC_MBC_MINLEN(enc);
 
       if (len == 1) return (int )(p - start);
@@ -392,7 +507,7 @@ const OnigPairCaseFoldCodes OnigAsciiLowerMap[] = {
 
 extern int
 onigenc_ascii_apply_all_case_fold(OnigCaseFoldType flag ARG_UNUSED,
-				  OnigApplyAllCaseFoldFunc f, void* arg)
+                                  OnigApplyAllCaseFoldFunc f, void* arg)
 {
   OnigCodePoint code;
   int i, r;
@@ -414,8 +529,8 @@ onigenc_ascii_apply_all_case_fold(OnigCaseFoldType flag ARG_UNUSED,
 
 extern int
 onigenc_ascii_get_case_fold_codes_by_str(OnigCaseFoldType flag ARG_UNUSED,
-	 const OnigUChar* p, const OnigUChar* end ARG_UNUSED,
-	 OnigCaseFoldCodeItem items[])
+    const OnigUChar* p, const OnigUChar* end ARG_UNUSED,
+    OnigCaseFoldCodeItem items[])
 {
   if (0x41 <= *p && *p <= 0x5a) {
     items[0].byte_len = 1;
@@ -435,9 +550,9 @@ onigenc_ascii_get_case_fold_codes_by_str(OnigCaseFoldType flag ARG_UNUSED,
 
 static int
 ss_apply_all_case_fold(OnigCaseFoldType flag ARG_UNUSED,
-		       OnigApplyAllCaseFoldFunc f, void* arg)
+                       OnigApplyAllCaseFoldFunc f, void* arg)
 {
-  static OnigCodePoint ss[] = { 0x73, 0x73 };
+  static OnigCodePoint ss[] = { SMALL_S, SMALL_S };
 
   return (*f)((OnigCodePoint )0xdf, ss, 2, arg);
 }
@@ -453,6 +568,9 @@ onigenc_apply_all_case_fold_with_map(int map_size,
 
   r = onigenc_ascii_apply_all_case_fold(flag, f, arg);
   if (r != 0) return r;
+
+  if (CASE_FOLD_IS_ASCII_ONLY(flag))
+    return 0;
 
   for (i = 0; i < map_size; i++) {
     code = map[i].to;
@@ -473,40 +591,56 @@ onigenc_apply_all_case_fold_with_map(int map_size,
 extern int
 onigenc_get_case_fold_codes_by_str_with_map(int map_size,
     const OnigPairCaseFoldCodes map[],
-    int ess_tsett_flag, OnigCaseFoldType flag ARG_UNUSED,
+    int ess_tsett_flag, OnigCaseFoldType flag,
     const OnigUChar* p, const OnigUChar* end, OnigCaseFoldCodeItem items[])
 {
-  if (0x41 <= *p && *p <= 0x5a) {
+  int i, j, n;
+  static OnigUChar sa[] = { LARGE_S, SMALL_S };
+
+  if (0x41 <= *p && *p <= 0x5a) { /* A - Z */
+    if (*p == LARGE_S && ess_tsett_flag != 0 && end > p + 1
+        && (*(p+1) == LARGE_S || *(p+1) == SMALL_S) /* SS */
+        && CASE_FOLD_IS_NOT_ASCII_ONLY(flag)) {
+    ss_combination:
+      items[0].byte_len = 2;
+      items[0].code_len = 1;
+      items[0].code[0] = (OnigCodePoint )0xdf;
+
+      n = 1;
+      for (i = 0; i < 2; i++) {
+        for (j = 0; j < 2; j++) {
+          if (sa[i] == *p && sa[j] == *(p+1))
+            continue;
+
+          items[n].byte_len = 2;
+          items[n].code_len = 2;
+          items[n].code[0] = (OnigCodePoint )sa[i];
+          items[n].code[1] = (OnigCodePoint )sa[j];
+          n++;
+        }
+      }
+      return 4;
+    }
+
     items[0].byte_len = 1;
     items[0].code_len = 1;
     items[0].code[0] = (OnigCodePoint )(*p + 0x20);
-    if (*p == 0x53 && ess_tsett_flag != 0 && end > p + 1
-	&& (*(p+1) == 0x53 || *(p+1) == 0x73)) {
-      /* SS */
-      items[1].byte_len = 2;
-      items[1].code_len = 1;
-      items[1].code[0] = (OnigCodePoint )0xdf;
-      return 2;
-    }
-    else
-      return 1;
+    return 1;
   }
-  else if (0x61 <= *p && *p <= 0x7a) {
+  else if (0x61 <= *p && *p <= 0x7a) { /* a - z */
+    if (*p == SMALL_S && ess_tsett_flag != 0 && end > p + 1
+        && (*(p+1) == SMALL_S || *(p+1) == LARGE_S)
+        && CASE_FOLD_IS_NOT_ASCII_ONLY(flag)) {
+      goto ss_combination;
+    }
+
     items[0].byte_len = 1;
     items[0].code_len = 1;
     items[0].code[0] = (OnigCodePoint )(*p - 0x20);
-    if (*p == 0x73 && ess_tsett_flag != 0 && end > p + 1
-	&& (*(p+1) == 0x73 || *(p+1) == 0x53)) {
-      /* ss */
-      items[1].byte_len = 2;
-      items[1].code_len = 1;
-      items[1].code[0] = (OnigCodePoint )0xdf;
-      return 2;
-    }
-    else
-      return 1;
+    return 1;
   }
-  else if (*p == 0xdf && ess_tsett_flag != 0) {
+  else if (*p == 0xdf && ess_tsett_flag != 0
+           && CASE_FOLD_IS_NOT_ASCII_ONLY(flag)) {
     items[0].byte_len = 1;
     items[0].code_len = 2;
     items[0].code[0] = (OnigCodePoint )'s';
@@ -532,18 +666,21 @@ onigenc_get_case_fold_codes_by_str_with_map(int map_size,
   else {
     int i;
 
+    if (CASE_FOLD_IS_ASCII_ONLY(flag))
+      return 0;
+
     for (i = 0; i < map_size; i++) {
       if (*p == map[i].from) {
-	items[0].byte_len = 1;
-	items[0].code_len = 1;
-	items[0].code[0] = map[i].to;
-	return 1;
+        items[0].byte_len = 1;
+        items[0].code_len = 1;
+        items[0].code[0] = map[i].to;
+        return 1;
       }
       else if (*p == map[i].to) {
-	items[0].byte_len = 1;
-	items[0].code_len = 1;
-	items[0].code[0] = map[i].from;
-	return 1;
+        items[0].byte_len = 1;
+        items[0].code_len = 1;
+        items[0].code[0] = map[i].from;
+        return 1;
       }
     }
   }
@@ -554,8 +691,8 @@ onigenc_get_case_fold_codes_by_str_with_map(int map_size,
 
 extern int
 onigenc_not_support_get_ctype_code_range(OnigCtype ctype ARG_UNUSED,
-	 OnigCodePoint* sb_out ARG_UNUSED,
-	 const OnigCodePoint* ranges[] ARG_UNUSED)
+                                         OnigCodePoint* sb_out ARG_UNUSED,
+                                         const OnigCodePoint* ranges[] ARG_UNUSED)
 {
   return ONIG_NO_SUPPORT_CONFIG;
 }
@@ -564,7 +701,7 @@ extern int
 onigenc_is_mbc_newline_0x0a(const UChar* p, const UChar* end)
 {
   if (p < end) {
-    if (*p == 0x0a) return 1;
+    if (*p == NEWLINE_CODE) return 1;
   }
   return 0;
 }
@@ -572,25 +709,13 @@ onigenc_is_mbc_newline_0x0a(const UChar* p, const UChar* end)
 /* for single byte encodings */
 extern int
 onigenc_ascii_mbc_case_fold(OnigCaseFoldType flag ARG_UNUSED, const UChar** p,
-	    const UChar*end ARG_UNUSED, UChar* lower)
+                            const UChar*end ARG_UNUSED, UChar* lower)
 {
   *lower = ONIGENC_ASCII_CODE_TO_LOWER_CASE(**p);
 
   (*p)++;
   return 1; /* return byte length of converted char to lower */
 }
-
-#if 0
-extern int
-onigenc_ascii_is_mbc_ambiguous(OnigCaseFoldType flag,
-			       const UChar** pp, const UChar* end)
-{
-  const UChar* p = *pp;
-
-  (*pp)++;
-  return ONIGENC_IS_ASCII_CODE_CASE_AMBIG(*p);
-}
-#endif
 
 extern int
 onigenc_single_byte_mbc_enc_len(const UChar* p ARG_UNUSED)
@@ -619,23 +744,50 @@ onigenc_single_byte_code_to_mbc(OnigCodePoint code, UChar *buf)
 
 extern UChar*
 onigenc_single_byte_left_adjust_char_head(const UChar* start ARG_UNUSED,
-					  const UChar* s)
+                                          const UChar* s)
 {
   return (UChar* )s;
 }
 
 extern int
 onigenc_always_true_is_allowed_reverse_match(const UChar* s   ARG_UNUSED,
-					     const UChar* end ARG_UNUSED)
+                                             const UChar* end ARG_UNUSED)
 {
   return TRUE;
 }
 
 extern int
 onigenc_always_false_is_allowed_reverse_match(const UChar* s   ARG_UNUSED,
-					      const UChar* end ARG_UNUSED)
+                                              const UChar* end ARG_UNUSED)
 {
   return FALSE;
+}
+
+extern int
+onigenc_always_true_is_valid_mbc_string(const UChar* s   ARG_UNUSED,
+                                        const UChar* end ARG_UNUSED)
+{
+  return TRUE;
+}
+
+extern int
+onigenc_length_check_is_valid_mbc_string(OnigEncoding enc,
+                                         const UChar* p, const UChar* end)
+{
+  while (p < end) {
+    p += enclen(enc, p);
+  }
+
+  if (p != end)
+    return FALSE;
+  else
+    return TRUE;
+}
+
+extern int
+onigenc_is_valid_mbc_string(OnigEncoding enc, const UChar* s, const UChar* end)
+{
+  return ONIGENC_IS_VALID_MBC_STRING(enc, s, end);
 }
 
 extern OnigCodePoint
@@ -659,7 +811,7 @@ onigenc_mbn_mbc_to_code(OnigEncoding enc, const UChar* p, const UChar* end)
 extern int
 onigenc_mbn_mbc_case_fold(OnigEncoding enc, OnigCaseFoldType flag ARG_UNUSED,
                           const UChar** pp, const UChar* end ARG_UNUSED,
-			  UChar* lower)
+                          UChar* lower)
 {
   int len;
   const UChar *p = *pp;
@@ -681,39 +833,6 @@ onigenc_mbn_mbc_case_fold(OnigEncoding enc, OnigCaseFoldType flag ARG_UNUSED,
   }
 }
 
-#if 0
-extern int
-onigenc_mbn_is_mbc_ambiguous(OnigEncoding enc, OnigCaseFoldType flag,
-                             const UChar** pp, const UChar* end)
-{
-  const UChar* p = *pp;
-
-  if (ONIGENC_IS_MBC_ASCII(p)) {
-    (*pp)++;
-    return ONIGENC_IS_ASCII_CODE_CASE_AMBIG(*p);
-  }
-
-  (*pp) += enclen(enc, p);
-  return FALSE;
-}
-#endif
-
-extern int
-onigenc_mb2_code_to_mbclen(OnigCodePoint code)
-{
-  if ((code & 0xff00) != 0) return 2;
-  else return 1;
-}
-
-extern int
-onigenc_mb4_code_to_mbclen(OnigCodePoint code)
-{
-       if ((code & 0xff000000) != 0) return 4;
-  else if ((code & 0xff0000) != 0) return 3;
-  else if ((code & 0xff00) != 0) return 2;
-  else return 1;
-}
-
 extern int
 onigenc_mb2_code_to_mbc(OnigEncoding enc, OnigCodePoint code, UChar *buf)
 {
@@ -728,7 +847,7 @@ onigenc_mb2_code_to_mbc(OnigEncoding enc, OnigCodePoint code, UChar *buf)
   if (enclen(enc, buf) != (p - buf))
     return ONIGERR_INVALID_CODE_POINT_VALUE;
 #endif
-  return p - buf;
+  return (int )(p - buf);
 }
 
 extern int
@@ -751,7 +870,7 @@ onigenc_mb4_code_to_mbc(OnigEncoding enc, OnigCodePoint code, UChar *buf)
   if (enclen(enc, buf) != (p - buf))
     return ONIGERR_INVALID_CODE_POINT_VALUE;
 #endif
-  return p - buf;
+  return (int )(p - buf);
 }
 
 extern int
@@ -789,8 +908,18 @@ onigenc_minimum_property_name_to_ctype(OnigEncoding enc, UChar* p, UChar* end)
 }
 
 extern int
+onigenc_is_mbc_word_ascii(OnigEncoding enc, UChar* s, const UChar* end)
+{
+  OnigCodePoint code = ONIGENC_MBC_TO_CODE(enc, s, end);
+
+  if (code > ASCII_LIMIT) return 0;
+
+  return ONIGENC_IS_ASCII_CODE_WORD(code);
+}
+
+extern int
 onigenc_mb2_is_code_ctype(OnigEncoding enc, OnigCodePoint code,
-			  unsigned int ctype)
+                          unsigned int ctype)
 {
   if (code < 128)
     return ONIGENC_IS_ASCII_CODE_CTYPE(code, ctype);
@@ -805,7 +934,7 @@ onigenc_mb2_is_code_ctype(OnigEncoding enc, OnigCodePoint code,
 
 extern int
 onigenc_mb4_is_code_ctype(OnigEncoding enc, OnigCodePoint code,
-			  unsigned int ctype)
+                          unsigned int ctype)
 {
   if (code < 128)
     return ONIGENC_IS_ASCII_CODE_CTYPE(code, ctype);
@@ -837,66 +966,29 @@ onigenc_with_ascii_strncmp(OnigEncoding enc, const UChar* p, const UChar* end,
   return 0;
 }
 
-/* Property management */
-static int
-resize_property_list(int new_size, const OnigCodePoint*** plist, int* psize)
+extern int
+onig_codes_cmp(OnigCodePoint a[], OnigCodePoint b[], int n)
 {
-  int size;
-  const OnigCodePoint **list = *plist;
+  int i;
 
-  size = sizeof(OnigCodePoint*) * new_size;
-  if (IS_NULL(list)) {
-    list = (const OnigCodePoint** )xmalloc(size);
+  for (i = 0; i < n; i++) {
+    if (a[i] != b[i])
+      return -1;
   }
-  else {
-    list = (const OnigCodePoint** )xrealloc((void* )list, size);
-  }
-
-  if (IS_NULL(list)) return ONIGERR_MEMORY;
-
-  *plist = list;
-  *psize = new_size;
 
   return 0;
 }
 
 extern int
-onigenc_property_list_add_property(UChar* name, const OnigCodePoint* prop,
-     hash_table_type **table, const OnigCodePoint*** plist, int *pnum,
-     int *psize)
+onig_codes_byte_at(OnigCodePoint codes[], int at)
 {
-#define PROP_INIT_SIZE     16
+  int index;
+  int b;
+  OnigCodePoint code;
 
-  int r;
+  index = at / 3;
+  b     = at % 3;
+  code = codes[index];
 
-  if (*psize <= *pnum) {
-    int new_size = (*psize == 0 ? PROP_INIT_SIZE : *psize * 2);
-    r = resize_property_list(new_size, plist, psize);
-    if (r != 0) return r;
-  }
-
-  (*plist)[*pnum] = prop;
-
-  if (ONIG_IS_NULL(*table)) {
-    *table = onig_st_init_strend_table_with_size(PROP_INIT_SIZE);
-    if (ONIG_IS_NULL(*table)) return ONIGERR_MEMORY;
-  }
-
-  *pnum = *pnum + 1;
-  onig_st_insert_strend(*table, name, name + strlen((char* )name),
-			(hash_data_type )(*pnum + ONIGENC_MAX_STD_CTYPE));
-  return 0;
-}
-
-extern int
-onigenc_property_list_init(int (*f)(void))
-{
-  int r;
-
-  THREAD_ATOMIC_START;
-
-  r = f();
-
-  THREAD_ATOMIC_END;
-  return r;
+  return ((code >> ((2 - b) * 8)) & 0xff);
 }

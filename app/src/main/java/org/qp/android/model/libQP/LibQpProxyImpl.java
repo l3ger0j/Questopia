@@ -2,8 +2,9 @@ package org.qp.android.model.libQP;
 
 import static org.qp.android.helpers.utils.FileUtil.createFindDFile;
 import static org.qp.android.helpers.utils.FileUtil.documentWrap;
-import static org.qp.android.helpers.utils.FileUtil.findFileOrDirectory;
+import static org.qp.android.helpers.utils.FileUtil.fromFullPath;
 import static org.qp.android.helpers.utils.FileUtil.getFileContents;
+import static org.qp.android.helpers.utils.FileUtil.writeFileContents;
 import static org.qp.android.helpers.utils.StringUtil.getStringOrEmpty;
 import static org.qp.android.helpers.utils.StringUtil.isNotEmpty;
 import static org.qp.android.helpers.utils.ThreadUtil.isSameThread;
@@ -26,20 +27,15 @@ import org.qp.android.dto.libQP.ActionData;
 import org.qp.android.dto.libQP.ErrorData;
 import org.qp.android.dto.libQP.GetVarValuesResponse;
 import org.qp.android.dto.libQP.ObjectData;
-import org.qp.android.helpers.utils.StreamUtil;
 import org.qp.android.model.service.AudioPlayer;
-import org.qp.android.model.service.GameContentResolver;
 import org.qp.android.model.service.HtmlProcessor;
 import org.qp.android.ui.game.GameInterface;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.Objects;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
@@ -49,15 +45,14 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
     private final GameState gameState = new GameState();
     private final NativeMethods nativeMethods = new NativeMethods(this);
 
-    private ExecutorService libQspService;
+    private Thread libQspThread;
     private volatile Handler libQspHandler;
-    private volatile boolean libQspServiceInit;
+    private volatile boolean libQspThreadInit;
     private volatile long gameStartTime;
     private volatile long lastMsCountCallTime;
     private GameInterface gameInterface;
 
     private final Context context;
-    private final GameContentResolver gameContentResolver;
     private final HtmlProcessor htmlProcessor;
     private final AudioPlayer audioPlayer;
 
@@ -71,23 +66,21 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
 
     public LibQpProxyImpl(
             Context context,
-            GameContentResolver gameContentResolver,
             HtmlProcessor htmlProcessor,
             AudioPlayer audioPlayer) {
         this.context = context;
-        this.gameContentResolver = gameContentResolver;
         this.htmlProcessor = htmlProcessor;
         this.audioPlayer = audioPlayer;
     }
 
     private void runOnQspThread(final Runnable runnable) {
         throwIfNotMainThread();
-        if (libQspService == null) {
-            Log.w(TAG ,"Lib service has not been started!");
+        if (libQspThread == null) {
+            Log.w(TAG ,"Lib thread has not been started!");
             return;
         }
-        if (!libQspServiceInit) {
-            Log.w(TAG ,"Lib service has been started, but not initialized!");
+        if (!libQspThreadInit) {
+            Log.w(TAG ,"Lib thread has been started, but not initialized!");
             return;
         }
         var handler = libQspHandler;
@@ -104,25 +97,11 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
     }
 
     private boolean loadGameWorld() {
-        byte[] gameData;
-        var tempGameFile = documentWrap(gameState.gameFile);
-
-        try (var in = tempGameFile.openInputStream(context)) {
-            try (var out = new ByteArrayOutputStream()) {
-                if (in != null) {
-                    StreamUtil.copy(in, out);
-                    gameData = out.toByteArray();
-                } else {
-                    throw new IOException();
-                }
-            }
-        } catch (IOException ex) {
-            Log.e(TAG ,"Failed to load the game world", ex);
-            return false;
-        }
-
-        var fileName = tempGameFile.getAbsolutePath(context);
-        if (!nativeMethods.QSPLoadGameWorldFromData(gameData, gameData.length, fileName)) {
+        var gameFileUri = gameState.gameFile.getUri();
+        var gameFileFullPath = documentWrap(gameState.gameFile).getAbsolutePath(context);
+        final byte[] gameData = getFileContents(context , gameFileUri);
+        if (gameData == null) return false;
+        if (!nativeMethods.QSPLoadGameWorldFromData(gameData, gameData.length, gameFileFullPath)) {
             showLastQspError();
             return false;
         }
@@ -132,15 +111,15 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
 
     private void showLastQspError() {
         var errorData = (ErrorData) nativeMethods.QSPGetLastErrorData();
-        var locName = getStringOrEmpty(errorData.locName);
-        var desc = getStringOrEmpty(nativeMethods.QSPGetErrorDesc(errorData.errorNum));
+        var locName = getStringOrEmpty(errorData.locName());
+        var desc = getStringOrEmpty(nativeMethods.QSPGetErrorDesc(errorData.errorNum()));
         final var message = String.format(
                 Locale.getDefault(),
                 "Location: %s\nAction: %d\nLine: %d\nError number: %d\nDescription: %s",
                 locName,
-                errorData.index,
-                errorData.line,
-                errorData.errorNum,
+                errorData.index(),
+                errorData.line(),
+                errorData.errorNum(),
                 desc);
         Log.e(TAG,message);
         if (gameInterface != null) {
@@ -158,31 +137,31 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
         boolean changed = false;
 
         var htmlResult = (GetVarValuesResponse) nativeMethods.QSPGetVarValues("USEHTML", 0);
-        if (htmlResult.isSuccess) {
-            boolean useHtml = htmlResult.intValue != 0;
+        if (htmlResult.isSuccess()) {
+            boolean useHtml = htmlResult.intValue() != 0;
             if (config.useHtml != useHtml) {
                 config.useHtml = useHtml;
                 changed = true;
             }
         }
         var fSizeResult = (GetVarValuesResponse) nativeMethods.QSPGetVarValues("FSIZE", 0);
-        if (fSizeResult.isSuccess && config.fontSize != fSizeResult.intValue) {
-            config.fontSize = fSizeResult.intValue;
+        if (fSizeResult.isSuccess() && config.fontSize != fSizeResult.intValue()) {
+            config.fontSize = fSizeResult.intValue();
             changed = true;
         }
         var bColorResult = (GetVarValuesResponse) nativeMethods.QSPGetVarValues("BCOLOR", 0);
-        if (bColorResult.isSuccess && config.backColor != bColorResult.intValue) {
-            config.backColor = bColorResult.intValue;
+        if (bColorResult.isSuccess() && config.backColor != bColorResult.intValue()) {
+            config.backColor = bColorResult.intValue();
             changed = true;
         }
         var fColorResult = (GetVarValuesResponse) nativeMethods.QSPGetVarValues("FCOLOR", 0);
-        if (fColorResult.isSuccess && config.fontColor != fColorResult.intValue) {
-            config.fontColor = fColorResult.intValue;
+        if (fColorResult.isSuccess() && config.fontColor != fColorResult.intValue()) {
+            config.fontColor = fColorResult.intValue();
             changed = true;
         }
         var lColorResult = (GetVarValuesResponse) nativeMethods.QSPGetVarValues("LCOLOR", 0);
-        if (lColorResult.isSuccess && config.linkColor != lColorResult.intValue) {
-            config.linkColor = lColorResult.intValue;
+        if (lColorResult.isSuccess() && config.linkColor != lColorResult.intValue()) {
+            config.linkColor = lColorResult.intValue();
             changed = true;
         }
 
@@ -196,9 +175,10 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
         for (int i = 0; i < count; ++i) {
             var actionData = (ActionData) nativeMethods.QSPGetActionData(i);
             var action = new QpListItem();
-            action.pathToImage = actionData.image;
+            action.pathToImage = actionData.image();
             action.text = gameState.interfaceConfig.useHtml ?
-                    htmlProcessor.removeHTMLTags(actionData.name) : actionData.name;
+                    htmlProcessor.removeHTMLTags(actionData.name())
+                    : actionData.name();
             actions.add(action);
         }
         return actions;
@@ -209,19 +189,24 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
         ArrayList<QpListItem> objects = new ArrayList<>();
         var count = nativeMethods.QSPGetObjectsCount();
         for (int i = 0; i < count; i++) {
-            var objectResult = (ObjectData) nativeMethods.QSPGetObjectData(i);
             var object = new QpListItem();
-            if (objectResult.name.contains("<img")) {
-                if (htmlProcessor.hasHTMLTags(objectResult.name)) {
-                    var tempPath = htmlProcessor.getSrcDir(objectResult.name);
-                    object.pathToImage = String.valueOf(findFileOrDirectory(gameState.gameDir , tempPath));
+            var objectResult = (ObjectData) nativeMethods.QSPGetObjectData(i);
+            var curGameDir = getCurGameDir();
+
+            if (objectResult.name().contains("<img")) {
+                if (htmlProcessor.hasHTMLTags(objectResult.name())) {
+                    var tempPath = htmlProcessor.getSrcDir(objectResult.name());
+                    var fileFromPath = curGameDir.findFile(tempPath);
+                    object.pathToImage = String.valueOf(fileFromPath);
                 } else {
-                    object.pathToImage = String.valueOf(findFileOrDirectory(gameState.gameDir , objectResult.name));
+                    var fileFromPath = curGameDir.findFile(objectResult.name());
+                    object.pathToImage = String.valueOf(fileFromPath);
                 }
             } else {
-                object.pathToImage = objectResult.image;
+                object.pathToImage = objectResult.image();
                 object.text = gameState.interfaceConfig.useHtml ?
-                        htmlProcessor.removeHTMLTags(objectResult.name) : objectResult.name;
+                        htmlProcessor.removeHTMLTags(objectResult.name())
+                        : objectResult.name();
             }
             objects.add(object);
         }
@@ -231,33 +216,37 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
     // region LibQpProxy
 
     public synchronized void start() {
-        libQspService = Executors.newSingleThreadExecutor();
-        libQspService.submit(() -> {
-            nativeMethods.QSPInit();
-            if (Looper.myLooper() != null) {
-                Looper.myLooper().quitSafely();
+        libQspThread = new Thread(() -> {
+            while (!Thread.currentThread().isInterrupted()) {
+                try {
+                    nativeMethods.QSPInit();
+                    Looper.prepare();
+                    libQspHandler = new Handler();
+                    libQspThreadInit = true;
+                    Looper.loop();
+                    nativeMethods.QSPDeInit();
+                } catch (Throwable t) {
+                    Thread.currentThread().interrupt();
+                    Log.e(TAG , "libQSP thread has stopped exceptionally" , t);
+                }
             }
-            Looper.prepare();
-            libQspHandler = new Handler();
-            libQspServiceInit = true;
-            Looper.loop();
-            nativeMethods.QSPDeInit();
-        });
+        } , "libQSP");
+        libQspThread.start();
     }
 
     public void stop() {
         throwIfNotMainThread();
-        if (libQspService == null) return;
-        if (libQspServiceInit) {
+        if (libQspThread == null) return;
+        if (libQspThreadInit) {
             var handler = libQspHandler;
             if (handler != null) {
                 handler.getLooper().quitSafely();
             }
-            libQspServiceInit = false;
+            libQspThreadInit = false;
         } else {
-            Log.w(TAG,"Lib service has been started, but not initialized");
+            Log.w(TAG,"libqsp thread has been started, but not initialized");
         }
-        libQspService.shutdown();
+        libQspThread.interrupt();
     }
 
     public void enableDebugMode (boolean isDebug) {
@@ -321,21 +310,8 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
             runOnQspThread(() -> loadGameState(uri));
             return;
         }
-        final byte[] gameData;
-        var resolver = context.getContentResolver();
-        try (var in = resolver.openInputStream(uri);
-             var out = new ByteArrayOutputStream()) {
-            if (in != null) {
-                StreamUtil.copy(in, out);
-                gameData = out.toByteArray();
-            } else {
-                throw new IOException("Input is NULL!");
-            }
-        } catch (IOException ex) {
-            Log.e(TAG,"Failed to load game state", ex);
-            return;
-        }
-        Log.d(TAG , String.valueOf(gameData.length));
+        var gameData = getFileContents(context , uri);
+        if (gameData == null) return;
         if (!nativeMethods.QSPOpenSavedGameFromData(gameData, gameData.length, true)) {
             showLastQspError();
         }
@@ -349,16 +325,7 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
         }
         byte[] gameData = nativeMethods.QSPSaveGameAsData(false);
         if (gameData == null) return;
-        var resolver = context.getContentResolver();
-        try (var out = resolver.openOutputStream(uri, "w")) {
-            if (out != null) {
-                out.write(gameData);
-            } else {
-                throw new IOException("Input is NULL!");
-            }
-        } catch (IOException ex) {
-            Log.e(TAG,"Failed to save the game state", ex);
-        }
+        writeFileContents(context , uri , gameData);
     }
 
     @Override
@@ -502,8 +469,10 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
     @Override
     public void ShowPicture(String path) {
         var inter = gameInterface;
-        if (inter != null && isNotEmpty(path)) {
-            inter.showPicture(path);
+        var imageFile = fromFullPath(path , getCurGameDir());
+        if (inter != null && isNotEmpty(path) && imageFile != null) {
+            var imageFileUri = imageFile.getUri();
+            inter.showPicture(String.valueOf(imageFileUri));
         }
     }
 
@@ -550,8 +519,11 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
         if (inter == null) return;
         if (filename != null) {
             try {
-                var uri = getApplication().fromFullPath(filename).getUri();
-                inter.doWithCounterDisabled(() -> loadGameState(uri));
+                Log.d(TAG , filename);
+                var gameFile = fromFullPath(filename , getCurGameDir());
+                if (gameFile == null) throw new NullPointerException();
+                var gameFileUri = gameFile.getUri();
+                inter.doWithCounterDisabled(() -> loadGameState(gameFileUri));
             } catch (Exception e) {
                 Log.e(TAG , "Error: ", e);
             }
@@ -639,16 +611,16 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
     // TODO: 09.10.2023 NEEED TO ADD ERROR CATCHER
     @Override
     public byte[] GetFileContents(String path) {
-        var name = gameState.gameDir.getName();
-        if (name == null) return null;
-        var targetFileUri = getApplication().fromFullPath(path).getUri();
+        var targetFile = fromFullPath(path , getCurGameDir());
+        if (targetFile == null) return null;
+        var targetFileUri = targetFile.getUri();
         return getFileContents(context , targetFileUri);
     }
 
     @Override
     public void ChangeQuestPath(String path) {
-        var newGameDir = getApplication().fromFullPath(path);
-        if (!newGameDir.exists()) {
+        var newGameDir = fromFullPath(path , getCurGameDir());
+        if (newGameDir == null || !newGameDir.exists()) {
             Log.e(TAG,"Game directory not found: " + path);
             return;
         }

@@ -3,6 +3,7 @@ package org.qp.android.helpers.utils;
 import android.os.Looper;
 
 public final class ThreadUtil {
+
     /**
      * @return <code>true</code> if the current thread is <code>thread</code>, otherwise <code>false</code>
      */

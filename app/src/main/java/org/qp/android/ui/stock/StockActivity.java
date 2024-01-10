@@ -2,6 +2,8 @@ package org.qp.android.ui.stock;
 
 import static org.qp.android.helpers.utils.FileUtil.deleteDirectory;
 import static org.qp.android.helpers.utils.FileUtil.documentWrap;
+import static org.qp.android.helpers.utils.JsonUtil.jsonToObject;
+import static org.qp.android.helpers.utils.JsonUtil.objectToJson;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_IMAGE_FILE;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_MOD_FILE;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_PATH_FILE;
@@ -43,6 +45,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.anggrayudi.storage.SimpleStorageHelper;
 import com.anggrayudi.storage.file.DocumentFileCompat;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.github.javiersantos.appupdater.AppUpdater;
 import com.github.javiersantos.appupdater.enums.UpdateFrom;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
@@ -50,7 +53,7 @@ import com.google.android.material.floatingactionbutton.ExtendedFloatingActionBu
 import org.qp.android.QuestPlayerApplication;
 import org.qp.android.R;
 import org.qp.android.databinding.ActivityStockBinding;
-import org.qp.android.dto.stock.InnerGameData;
+import org.qp.android.dto.stock.GameData;
 import org.qp.android.helpers.utils.ViewUtil;
 import org.qp.android.ui.dialogs.StockDialogFrags;
 import org.qp.android.ui.dialogs.StockDialogType;
@@ -58,6 +61,8 @@ import org.qp.android.ui.dialogs.StockPatternDialogFrags;
 import org.qp.android.ui.settings.SettingsActivity;
 import org.qp.android.ui.settings.SettingsController;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
@@ -68,11 +73,9 @@ import java.util.concurrent.Executors;
 public class StockActivity extends AppCompatActivity implements
         StockPatternDialogFrags.StockPatternDialogList, StockPatternFragment.StockPatternFragmentList {
 
-    private static final int READ_EXTERNAL_STORAGE_CODE = 200;
-    private static final int MANAGE_EXTERNAL_STORAGE_CODE = 201;
     private static final int POST_NOTIFICATION = 203;
     private final String TAG = this.getClass().getSimpleName();
-    private HashMap<String, InnerGameData> gamesMap = new HashMap<>();
+    private HashMap<String, GameData> gamesMap = new HashMap<>();
     public SettingsController settingsController;
     private StockViewModel stockViewModel;
 
@@ -83,11 +86,13 @@ public class StockActivity extends AppCompatActivity implements
     private boolean isEnable = false;
     private ExtendedFloatingActionButton mFAB;
     private RecyclerView mRecyclerView;
-    private ArrayList<InnerGameData> tempList;
-    private final ArrayList<InnerGameData> selectList = new ArrayList<>();
+    private ArrayList<GameData> tempList;
+    private final ArrayList<GameData> selectList = new ArrayList<>();
 
     private ActivityResultLauncher<Intent> rootFolderLauncher;
     private final SimpleStorageHelper storageHelper = new SimpleStorageHelper(this);
+
+    private File listDirsFile;
 
     public void setRecyclerView(RecyclerView mRecyclerView) {
         this.mRecyclerView = mRecyclerView;
@@ -159,7 +164,7 @@ public class StockActivity extends AppCompatActivity implements
 
                 var rootFolder = DocumentFileCompat.fromUri(this , uri);
                 var application = (QuestPlayerApplication) getApplication();
-                if (application != null) application.setCustomRootFolder(rootFolder);
+                if (application != null) application.setCurrentGameDir(rootFolder);
             }
         });
 
@@ -210,81 +215,93 @@ public class StockActivity extends AppCompatActivity implements
         });
     }
 
-    public void saveRootDirIntoPrefs() {
-        var application = (QuestPlayerApplication) getApplication();
-        var rootDir = application.getCustomRootDir();
-        if (rootDir == null) return;
-        var rootStringUri = rootDir.getUri().toString();
-        var preferences = getPreferences(MODE_PRIVATE);
-        preferences
-                .edit()
-                .putString("rootFolder" , rootStringUri)
-                .apply();
-    }
+    public void saveListDirsIntoFile() {
+        var listFiles = stockViewModel.getListGamesDir();
+        var mapFiles = new HashMap<String , String>();
 
-    public void restoreRootDirFromPrefs() {
-        var application = (QuestPlayerApplication) getApplication();
-        var preferences = getPreferences(MODE_PRIVATE);
-        var rootFolderUri = preferences.getString("rootFolder" , null);
-        if (rootFolderUri != null) {
-            var validRootFolderUri = Uri.parse(rootFolderUri);
-            var rootFile = DocumentFile.fromTreeUri(this , validRootFolderUri);
-            if (rootFile != null && rootFile.exists())
-                application.setCustomRootFolder(rootFile);
+        for (var file : listFiles) {
+            if (file.getName() == null) continue;
+            var packedUri = String.valueOf(file.getUri());
+            mapFiles.put(file.getName() , packedUri);
+        }
+
+        try {
+            objectToJson(listDirsFile , mapFiles);
+        } catch (IOException e) {
+            Log.e(TAG , "Error: " , e);
         }
     }
 
-    public void purgeRootDirFromPrefs() {
-        var application = (QuestPlayerApplication) getApplication();
-        var preferences = getPreferences(MODE_PRIVATE);
-        var rootFolderUri = preferences.getString("rootFolder" , null);
-        if (rootFolderUri != null) {
-            var validRootFolderUri = Uri.parse(rootFolderUri);
+    public void restoreListDirsFromFile() {
+        try {
+            var ref = new TypeReference<HashMap<String , String>>() {};
+            var mapFiles = jsonToObject(listDirsFile , ref);
+            var listFile = new ArrayList<DocumentFile>();
+            for (var value : mapFiles.values()) {
+                var uri = Uri.parse(value);
+                var file = DocumentFileCompat.fromUri(this , uri);
+                listFile.add(file);
+            }
+            stockViewModel.setListGamesDir(listFile);
+        } catch (IOException e) {
+            Log.e(TAG , "Error: ", e);
+        }
+    }
+
+    public void dropPersistable(Uri folderUri) {
+        try {
             getContentResolver().releasePersistableUriPermission(
-                    validRootFolderUri ,
+                    folderUri ,
                     Intent.FLAG_GRANT_READ_URI_PERMISSION
                             | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
             );
-            preferences.edit().remove("rootFolder").apply();
+        } catch (SecurityException ignored) {}
+    }
+
+    public void removeDirFromListDirsFile(String folderName) {
+        try {
+            var ref = new TypeReference<HashMap<String , String>>(){};
+            var mapFiles = jsonToObject(listDirsFile , ref);
+
+            if (!mapFiles.isEmpty()) {
+                mapFiles
+                        .entrySet()
+                        .removeIf(stringStringEntry -> stringStringEntry.getKey().equalsIgnoreCase(folderName));
+                objectToJson(listDirsFile , mapFiles);
+            }
+
+            var newList = stockViewModel.getListGamesDir();
+            newList
+                    .removeIf(documentFile -> documentFile.getName().equalsIgnoreCase(folderName));
+            stockViewModel.setListGamesDir(newList);
+
+            ((QuestPlayerApplication) getApplication()).setCurrentGameDir(null);
+        } catch (IOException e) {
+            Log.e(TAG , "Error: ", e);
         }
     }
 
     @Override
-    protected void onActivityResult(int requestCode , int resultCode , @Nullable Intent data) {
+    protected void onActivityResult(int requestCode ,
+                                    int resultCode ,
+                                    @Nullable Intent data) {
         super.onActivityResult(requestCode , resultCode , data);
         storageHelper.getStorage().onActivityResult(requestCode , resultCode , data);
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode , @NonNull String[] permissions , @NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode ,
+                                           @NonNull String[] permissions ,
+                                           @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode , permissions , grantResults);
-        switch (requestCode) {
-            case READ_EXTERNAL_STORAGE_CODE -> {
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    ViewUtil.showSnackBar(findViewById(android.R.id.content) , "Success");
-                } else {
-                    ViewUtil.showSnackBar(findViewById(android.R.id.content) , "Permission denied to read your External storage");
-                }
-            }
-            case MANAGE_EXTERNAL_STORAGE_CODE -> {
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    ViewUtil.showSnackBar(findViewById(android.R.id.content) , "Success");
-                } else {
-                    ViewUtil.showSnackBar(findViewById(android.R.id.content) , "Permission denied to manage your External storage");
-                }
-            }
-            case POST_NOTIFICATION -> {
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    ViewUtil.showSnackBar(findViewById(android.R.id.content) , "Success");
-                } else {
-                    ViewUtil.showSnackBar(findViewById(android.R.id.content) , "Permission denied to post notification");
-                }
+        if (requestCode == POST_NOTIFICATION) {
+            if (grantResults.length > 0
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                ViewUtil.showSnackBar(findViewById(android.R.id.content) , "Success");
+            } else {
+                ViewUtil.showSnackBar(findViewById(android.R.id.content) , "Permission denied to post notification");
             }
         }
-
         storageHelper.onRequestPermissionsResult(requestCode , permissions , grantResults);
     }
 
@@ -299,7 +316,12 @@ public class StockActivity extends AppCompatActivity implements
     }
 
     private void loadSettings() {
-        restoreRootDirFromPrefs();
+        var cache = getExternalCacheDir();
+        listDirsFile = new File(cache , "tempListDir");
+
+        if (listDirsFile.exists()) {
+            restoreListDirsFromFile();
+        }
 
         settingsController = stockViewModel.getSettingsController();
         stockViewModel.setController(settingsController);
@@ -358,6 +380,7 @@ public class StockActivity extends AppCompatActivity implements
             var sv = sm.getPrimaryStorageVolume();
             intentQ = sv.createOpenDocumentTreeIntent();
             intentQ.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+            intentQ.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
             intentQ.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             rootFolderLauncher.launch(intentQ);
         } else {
@@ -372,9 +395,9 @@ public class StockActivity extends AppCompatActivity implements
 
     public void onItemClick(int position) {
         if (isEnable) {
-            for (InnerGameData innerGameData : gamesMap.values()) {
-                if (!innerGameData.isInstalled()) continue;
-                tempList.add(innerGameData);
+            for (var gameData : gamesMap.values()) {
+                if (!gameData.isFileInstalled()) continue;
+                tempList.add(gameData);
             }
             var mViewHolder =
                     mRecyclerView.findViewHolderForAdapterPosition(position);
@@ -470,6 +493,8 @@ public class StockActivity extends AppCompatActivity implements
                     case R.id.delete_game -> {
                         var service = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
                         for (var data : selectList) {
+                            dropPersistable(data.gameDir.getUri());
+                            removeDirFromListDirsFile(data.gameDir.getName());
                             CompletableFuture
                                     .runAsync(() -> deleteDirectory(data.gameDir) , service)
                                     .thenRun(() -> {
@@ -530,7 +555,7 @@ public class StockActivity extends AppCompatActivity implements
     @Override
     protected void onPause() {
         super.onPause();
-        saveRootDirIntoPrefs();
+        saveListDirsIntoFile();
     }
 
     @Override
@@ -597,7 +622,7 @@ public class StockActivity extends AppCompatActivity implements
 
     private void filter(String text) {
         var gameData = stockViewModel.getSortedGames();
-        var filteredList = new ArrayList<InnerGameData>();
+        var filteredList = new ArrayList<GameData>();
         for (var item : gameData) {
             if (item.title.toLowerCase(Locale.getDefault())
                     .contains(text.toLowerCase(Locale.getDefault()))) {
