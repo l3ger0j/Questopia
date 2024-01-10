@@ -1,5 +1,1183 @@
 [
 {
+ "version": "",
+ "code": "938",
+ "date": "Wed Jan 10 23:43:18 2024 +0300",
+ "message": "Bump-to-3.21.0"
+},
+{
+ "version": "",
+ "code": "938",
+ "date": "Wed Jan 10 23:38:55 2024 +0300",
+ "message": "Merge-pull-request-23-from-l3ger0j-unstable"
+},
+{
+ "version": "",
+ "code": "938",
+ "date": "Wed Jan 10 23:33:28 2024 +0300",
+ "message": "Fixed-merger-bug"
+},
+{
+ "version": "",
+ "code": "938",
+ "date": "Wed Jan 10 23:29:26 2024 +0300",
+ "message": "Merge-branch-master-into-unstable"
+},
+{
+ "version": "",
+ "code": "938",
+ "date": "Wed Jan 10 23:16:45 2024 +0300",
+ "message": "Fixed-file-display"
+},
+{
+ "version": "",
+ "code": "938",
+ "date": "Wed Jan 10 23:07:49 2024 +0300",
+ "message": "Improved-CompletableFuture"
+},
+{
+ "version": "",
+ "code": "938",
+ "date": "Wed Jan 10 23:07:24 2024 +0300",
+ "message": "Fixed-bug-not-loading-games-for-adding"
+},
+{
+ "version": "",
+ "code": "938",
+ "date": "Wed Jan 10 23:05:58 2024 +0300",
+ "message": "Fixed-removeDirFromListDirsFile"
+},
+{
+ "version": "",
+ "code": "938",
+ "date": "Wed Jan 10 23:04:15 2024 +0300",
+ "message": "Added-new-wrapper-without-indent-output"
+},
+{
+ "version": "",
+ "code": "938",
+ "date": "Sun Jan 7 22:33:41 2024 +0300",
+ "message": "Converted-to-record"
+},
+{
+ "version": "",
+ "code": "938",
+ "date": "Sat Jan 6 21:34:05 2024 +0300",
+ "message": "Refactored-utils"
+},
+{
+ "version": "",
+ "code": "938",
+ "date": "Sat Jan 6 21:32:57 2024 +0300",
+ "message": "Converted-to-record"
+},
+{
+ "version": "",
+ "code": "938",
+ "date": "Sat Jan 6 21:32:33 2024 +0300",
+ "message": "Removed-workers"
+},
+{
+ "version": "",
+ "code": "938",
+ "date": "Sat Jan 6 19:05:32 2024 +0300",
+ "message": "Formatted-html-files"
+},
+{
+ "version": "",
+ "code": "938",
+ "date": "Sat Jan 6 19:04:50 2024 +0300",
+ "message": "Returned-TypeReference"
+},
+{
+ "version": "",
+ "code": "938",
+ "date": "Fri Jan 5 22:52:51 2024 +0300",
+ "message": "Update-AGP-to-8.2.1"
+},
+{
+ "version": "",
+ "code": "938",
+ "date": "Thu Jan 4 01:51:01 2024 +0300",
+ "message": "Removed-shrinkResources"
+},
+{
+ "version": "",
+ "code": "938",
+ "date": "Thu Jan 4 01:49:03 2024 +0300",
+ "message": "Moved-creation-custom-view-into-method"
+},
+{
+ "version": "",
+ "code": "938",
+ "date": "Thu Jan 4 01:47:42 2024 +0300",
+ "message": "Added-permission-to-read-the-file"
+},
+{
+ "version": "",
+ "code": "938",
+ "date": "Thu Jan 4 01:46:36 2024 +0300",
+ "message": "Moved-dialog-credits-into-html-file"
+},
+{
+ "version": "",
+ "code": "938",
+ "date": "Thu Jan 4 01:45:47 2024 +0300",
+ "message": "Moved-CompletableFuture-into-method"
+},
+{
+ "version": "",
+ "code": "938",
+ "date": "Thu Jan 4 01:44:52 2024 +0300",
+ "message": "Removed-the-creation-of-useless-parameters"
+},
+{
+ "version": "",
+ "code": "938",
+ "date": "Thu Jan 4 01:43:29 2024 +0300",
+ "message": "Added-method-for-read-asset-file"
+},
+{
+ "version": "",
+ "code": "938",
+ "date": "Thu Jan 4 01:42:28 2024 +0300",
+ "message": "Improved-proguard-rules"
+},
+{
+ "version": "",
+ "code": "938",
+ "date": "Thu Jan 4 01:41:48 2024 +0300",
+ "message": "Removed-GameContentResolver"
+},
+{
+ "version": "",
+ "code": "938",
+ "date": "Wed Jan 3 00:23:55 2024 +0300",
+ "message": "Fixed-field-fileSize"
+},
+{
+ "version": "",
+ "code": "938",
+ "date": "Mon Jan 1 20:44:51 2024 +0300",
+ "message": "Removed-XML"
+},
+{
+ "version": "",
+ "code": "938",
+ "date": "Sat Dec 30 21:18:24 2023 +0300",
+ "message": "Added-check-in-createDataFileIntoFolder"
+},
+{
+ "version": "",
+ "code": "938",
+ "date": "Fri Dec 29 22:59:45 2023 +0300",
+ "message": "Exception-IOException"
+},
+{
+ "version": "",
+ "code": "938",
+ "date": "Fri Dec 29 22:59:16 2023 +0300",
+ "message": "Removed-debug-value"
+},
+{
+ "version": "",
+ "code": "938",
+ "date": "Fri Dec 29 22:59:04 2023 +0300",
+ "message": "Added-tab-into-HtmlProcessorAndroidTest"
+},
+{
+ "version": "",
+ "code": "938",
+ "date": "Fri Dec 29 22:58:43 2023 +0300",
+ "message": "Renamed-GameList-to-GameDataList"
+},
+{
+ "version": "",
+ "code": "938",
+ "date": "Fri Dec 29 22:57:49 2023 +0300",
+ "message": "Repaired-GameListSerializationTest"
+},
+{
+ "version": "",
+ "code": "938",
+ "date": "Fri Dec 29 22:01:00 2023 +0300",
+ "message": "Removed-debug-value"
+},
+{
+ "version": "",
+ "code": "938",
+ "date": "Fri Dec 29 22:00:06 2023 +0300",
+ "message": "Fixed-javax.xml.stream.XMLStreamReader-not-found"
+},
+{
+ "version": "",
+ "code": "938",
+ "date": "Fri Dec 29 21:42:25 2023 +0300",
+ "message": "Residual-removal-for-addiction-org.simpleframework.xml"
+},
+{
+ "version": "",
+ "code": "938",
+ "date": "Wed Dec 27 19:42:44 2023 +0300",
+ "message": "Renamed-InnerGameData-GameData"
+},
+{
+ "version": "",
+ "code": "938",
+ "date": "Wed Dec 27 19:42:08 2023 +0300",
+ "message": "Removed-simpleframework"
+},
+{
+ "version": "",
+ "code": "938",
+ "date": "Wed Dec 27 17:36:45 2023 +0300",
+ "message": "Removed-not-used-dependencies"
+},
+{
+ "version": "",
+ "code": "938",
+ "date": "Wed Dec 27 17:27:59 2023 +0300",
+ "message": "Created-new-method-writeFileContents"
+},
+{
+ "version": "",
+ "code": "938",
+ "date": "Wed Dec 27 17:27:19 2023 +0300",
+ "message": "Updated-project-dependencies"
+},
+{
+ "version": "",
+ "code": "938",
+ "date": "Fri Dec 22 00:42:31 2023 +0300",
+ "message": "Added-Jackson"
+},
+{
+ "version": "",
+ "code": "938",
+ "date": "Thu Dec 21 20:22:10 2023 +0300",
+ "message": "Improved-extractGameDataFromList"
+},
+{
+ "version": "",
+ "code": "938",
+ "date": "Thu Dec 21 20:17:43 2023 +0300",
+ "message": "Simplifying-the-way-out-of-the-method"
+},
+{
+ "version": "",
+ "code": "938",
+ "date": "Thu Dec 21 20:16:25 2023 +0300",
+ "message": "Update-project-dependencies"
+},
+{
+ "version": "",
+ "code": "938",
+ "date": "Mon Dec 18 19:55:20 2023 +0300",
+ "message": "Renamed-string-addFolder"
+},
+{
+ "version": "",
+ "code": "938",
+ "date": "Mon Dec 18 19:19:32 2023 +0300",
+ "message": "Improved-LocalGame"
+},
+{
+ "version": "",
+ "code": "938",
+ "date": "Sat Dec 16 21:26:56 2023 +0300",
+ "message": "Updated-library-Onig-to-v.6.9.9"
+},
+{
+ "version": "",
+ "code": "938",
+ "date": "Sat Dec 16 20:54:42 2023 +0300",
+ "message": "Improved-method-readFileAsString"
+},
+{
+ "version": "",
+ "code": "938",
+ "date": "Sat Dec 16 20:53:39 2023 +0300",
+ "message": "Migrate-BuildConfig-to-Gradle-Build-Files"
+},
+{
+ "version": "",
+ "code": "938",
+ "date": "Thu Dec 14 23:23:45 2023 +0300",
+ "message": "Removed-additional-try-catch-section"
+},
+{
+ "version": "",
+ "code": "938",
+ "date": "Tue Dec 12 22:01:41 2023 +0300",
+ "message": "Improved-code"
+},
+{
+ "version": "",
+ "code": "938",
+ "date": "Tue Dec 12 00:00:04 2023 +0300",
+ "message": "The-choice-of-one-folder-is-implemented"
+},
+{
+ "version": "",
+ "code": "938",
+ "date": "Mon Dec 11 23:55:03 2023 +0300",
+ "message": "Fallback-to-Thread"
+},
+{
+ "version": "",
+ "code": "938",
+ "date": "Mon Dec 11 18:53:08 2023 +0300",
+ "message": "Transferred-methods-from-Application-to-FileUtil"
+},
+{
+ "version": "",
+ "code": "938",
+ "date": "Thu Dec 7 18:39:42 2023 +0300",
+ "message": "Merge-remote-tracking-branch-origin-unstable-into-unstable"
+},
+{
+ "version": "",
+ "code": "938",
+ "date": "Thu Dec 7 18:38:08 2023 +0300",
+ "message": "Upgrade-project-dependencies"
+},
+{
+ "version": "",
+ "code": "938",
+ "date": "Thu Dec 7 18:31:39 2023 +0300",
+ "message": "Fixed-errors-related-to-accessing-resources"
+},
+{
+ "version": "",
+ "code": "938",
+ "date": "Tue Dec 5 23:54:17 2023 +0300",
+ "message": "Fixed-NPE-isHasRemoteUrl"
+},
+{
+ "version": "",
+ "code": "938",
+ "date": "Tue Dec 5 17:31:27 2023 +0300",
+ "message": "Format-code-in-LocalGame"
+},{
+ "version": "3.20.2",
+ "code": "877",
+ "date": "Thu Dec 7 18:43:05 2023 +0300",
+ "message": "Bump-to-3.20.2"
+},
+{
+ "version": "3.20.2",
+ "code": "877",
+ "date": "Thu Dec 7 18:31:39 2023 +0300",
+ "message": "Fixed-errors-related-to-accessing-resources"
+},
+{
+ "version": "3.20.2",
+ "code": "877",
+ "date": "Tue Dec 5 23:54:17 2023 +0300",
+ "message": "Fixed-NPE-isHasRemoteUrl"
+},{
+ "version": "3.20.1",
+ "code": "874",
+ "date": "Tue Dec 5 00:33:32 2023 +0300",
+ "message": "Bump-to-3.20.1"
+},
+{
+ "version": "3.20.1",
+ "code": "874",
+ "date": "Tue Dec 5 00:30:01 2023 +0300",
+ "message": "Merge-pull-request-18-from-l3ger0j-unstable"
+},
+{
+ "version": "3.20.1",
+ "code": "874",
+ "date": "Tue Dec 5 00:23:26 2023 +0300",
+ "message": "Merge-branch-master-into-unstable"
+},
+{
+ "version": "3.20.1",
+ "code": "874",
+ "date": "Tue Dec 5 00:20:05 2023 +0300",
+ "message": "Merge-remote-tracking-branch-origin-unstable-into-unstable"
+},
+{
+ "version": "3.20.1",
+ "code": "874",
+ "date": "Mon Dec 4 22:22:15 2023 +0300",
+ "message": "Fixed-work-with-persistable-permission"
+},{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Thu Nov 30 18:41:50 2023 +0300",
+ "message": "Bump-to-3.20.0"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Thu Nov 30 18:15:24 2023 +0300",
+ "message": "Merge-pull-request-17-from-l3ger0j-unstable"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Thu Nov 30 18:10:57 2023 +0300",
+ "message": "Fixed-Unexpected-input"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Thu Nov 30 18:06:50 2023 +0300",
+ "message": "Resolved-merge-conflict-by-incorporating-both-suggestions"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Tue Nov 28 21:18:20 2023 +0300",
+ "message": "Added-summary-for-executor"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Tue Nov 28 21:07:16 2023 +0300",
+ "message": "Added-summary-for-separator"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Tue Nov 28 21:01:44 2023 +0300",
+ "message": "Will-take-effect-install-Will-take-effect-descr"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Tue Nov 28 20:51:00 2023 +0300",
+ "message": "Fixed-StackOverflowError"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Sun Nov 26 23:24:51 2023 +0300",
+ "message": "Fixed-a-bug-that-caused-the-games-directory-not-to-be-saved-after-restarting"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Sat Nov 25 22:55:25 2023 +0300",
+ "message": "Added-handleOnBackPressed-removed-debug-value"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Sat Nov 25 22:52:42 2023 +0300",
+ "message": "General-Basic-Application-Settings"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Sat Nov 25 22:52:17 2023 +0300",
+ "message": "The-settings-were-divided-into-separate-fragments"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Sat Nov 25 21:18:31 2023 +0300",
+ "message": "Added-links-to-official-communities"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Sat Nov 25 21:07:23 2023 +0300",
+ "message": "onBackPressed-getDispatcher-.onBackPressed"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Sat Nov 25 20:54:27 2023 +0300",
+ "message": "Removed-dialog_install-and-their-dependencies"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Sat Nov 25 20:32:14 2023 +0300",
+ "message": "Change-the-root-directory-Select-a-folder-for-games"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Sat Nov 25 20:31:18 2023 +0300",
+ "message": "Added-saving-the-selection-of-the-directory-with-games"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Fri Nov 24 17:54:28 2023 +0300",
+ "message": "Removed-the-creation-of-the-games-folder"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Fri Nov 24 17:31:41 2023 +0300",
+ "message": "Updated-project-dependencies"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Fri Nov 24 17:28:09 2023 +0300",
+ "message": "Updated-Android-Gradle-Plugin-to-8.1.4"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Wed Nov 8 18:30:12 2023 +0300",
+ "message": "Upgrade-Gradle-to-3.1.3"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Wed Nov 8 18:27:41 2023 +0300",
+ "message": "Cleanup-activity_stock"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Tue Nov 7 18:17:55 2023 +0300",
+ "message": "Implemented-a-beautiful-FAB-hiding"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Tue Nov 7 17:40:55 2023 +0300",
+ "message": "onBackPressed-getOnBackPressedDispatcher"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Mon Nov 6 22:15:38 2023 +0300",
+ "message": "Improved-fragment_stock_game"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Mon Nov 6 21:54:15 2023 +0300",
+ "message": "Corrected-translate"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Mon Nov 6 21:51:36 2023 +0300",
+ "message": "Removed-FAB-menu"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Sat Nov 4 19:29:23 2023 +0300",
+ "message": "Added-formDataFileIntoFolder-into-LocalGame"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Wed Nov 1 20:16:36 2023 +0300",
+ "message": "hasBase64-isBase64"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Wed Nov 1 02:01:42 2023 +0300",
+ "message": "Improved-LocalGame"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Tue Oct 31 22:24:57 2023 +0300",
+ "message": "DeKotlinization-need-a-clearer-plan"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Sun Oct 22 20:07:37 2023 +0300",
+ "message": "Possibly-fixed-NullPointerException-in-GameActivity"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Sun Oct 22 20:00:51 2023 +0300",
+ "message": "Corrected-translate-into-androidqspwrapper.c"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Sun Oct 22 19:56:32 2023 +0300",
+ "message": "Formatting-GameViewModel"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Sun Oct 22 19:45:45 2023 +0300",
+ "message": "Removed-ktx-and-add-androidx.webkit"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Sun Oct 22 19:45:05 2023 +0300",
+ "message": "Removed-setWebViewClient"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Fri Oct 20 22:03:44 2023 +0300",
+ "message": "RU-EN-android_control.c"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Fri Oct 20 21:52:03 2023 +0300",
+ "message": "Formatting-and-returning-remote-functionality"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Thu Oct 19 20:50:24 2023 +0300",
+ "message": "Fixed-IllegalStateException-in-GameActivity"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Mon Oct 16 18:24:31 2023 +0300",
+ "message": "Possible-fix-for-RuntimeException-in-AudioPlayer"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Sun Oct 15 18:31:11 2023 +0300",
+ "message": "Fixed-NPE-in-InnerGameData"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Sun Oct 15 18:26:02 2023 +0300",
+ "message": "Possible-NPE-solution-in-GameActivity"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Fri Oct 13 21:27:46 2023 +0300",
+ "message": "The-folder-copying-functionality-was-removed-due-to-its-inefficiency-and-problems-arising-on-different-devices"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Fri Oct 13 19:59:00 2023 +0300",
+ "message": "Update-NDK-to-26.1.10909125"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Thu Oct 12 21:10:23 2023 +0300",
+ "message": "Update-Hilt-to-2.48.1"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Wed Oct 11 20:16:39 2023 +0300",
+ "message": "Fixed-Only-one-Looper-may-be-created-per-thread-in-LibQpProxy"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Wed Oct 11 19:57:00 2023 +0300",
+ "message": "Fixed-CalledFromWrongThreadException-in-GameActivity"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Wed Oct 11 19:36:24 2023 +0300",
+ "message": "Improved-FolderCallback"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Tue Oct 10 22:25:34 2023 +0300",
+ "message": "WorkerManager-SimpleStorageHelper"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Mon Oct 9 22:49:06 2023 +0300",
+ "message": "WorkerBuilder-enqueue-into-beginUniqueWork"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Mon Oct 9 21:59:06 2023 +0300",
+ "message": "Fixed-NullPointerException-in-StockActivity.relativeLayout"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Mon Oct 9 21:52:22 2023 +0300",
+ "message": "Fixed-error-Parameter-specified-as-non-null-is-null"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Mon Oct 9 21:40:14 2023 +0300",
+ "message": "ADDED-TODO-INTO-LibQpProxyImpl"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Sun Oct 8 20:37:51 2023 +0300",
+ "message": "Renamed-qsp-src"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Sun Oct 8 18:56:39 2023 +0300",
+ "message": "Removed-cmake_minimum_required"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Sat Oct 7 21:17:28 2023 +0300",
+ "message": "Updating-project-dependencies"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Sat Oct 7 20:18:05 2023 +0300",
+ "message": "Switching-to-a-different-build-system"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Sat Oct 7 18:51:23 2023 +0300",
+ "message": "Removed-CFLAGS-fshort-wchar"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Wed Oct 4 19:50:47 2023 +0300",
+ "message": "Added-an-icon-for-the-file-selection-button-for-the-input-executor-dialog"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Sun Oct 1 19:53:25 2023 +0300",
+ "message": "Upgrade-AGP-to-8.1.2"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Fri Sep 29 22:15:08 2023 +0300",
+ "message": "UPDATE-MASTER"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Fri Sep 29 22:12:26 2023 +0300",
+ "message": "Merge-remote-tracking-branch-origin-unstable-into-unstable"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Fri Sep 29 22:10:50 2023 +0300",
+ "message": "Added-coreLibraryDesugaring"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Fri Sep 29 21:59:20 2023 +0300",
+ "message": "Thread-ExecutorService"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Fri Sep 29 19:16:21 2023 +0300",
+ "message": "Cleanup-class-GameViewModel"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Wed Sep 27 19:12:37 2023 +0300",
+ "message": "Reworked-deleting-folder-with-game"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Tue Sep 26 21:37:29 2023 +0300",
+ "message": "Added-item-divider-into-action-and-object-RecyclerView"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Tue Sep 26 21:22:55 2023 +0300",
+ "message": "Cleanup-code-in-game-layout-and-GameActivity-class"
+},
+{
+ "version": "3.20.0",
+ "code": "869",
+ "date": "Tue Sep 26 21:03:15 2023 +0300",
+ "message": "Revert-Improved-wait-functional"
+},{
+ "version": "3.19.4",
+ "code": "800",
+ "date": "Thu Oct 19 22:16:01 2023 +0300",
+ "message": "QTA-FIX-3.19.4"
+},
+{
+ "version": "3.19.4",
+ "code": "800",
+ "date": "Thu Oct 19 20:50:24 2023 +0300",
+ "message": "Fixed-IllegalStateException-in-GameActivity"
+},
+{
+ "version": "3.19.4",
+ "code": "800",
+ "date": "Mon Oct 16 18:24:31 2023 +0300",
+ "message": "Possible-fix-for-RuntimeException-in-AudioPlayer"
+},
+{
+ "version": "3.19.4",
+ "code": "800",
+ "date": "Sun Oct 15 18:31:11 2023 +0300",
+ "message": "Fixed-NPE-in-InnerGameData"
+},
+{
+ "version": "3.19.4",
+ "code": "800",
+ "date": "Sun Oct 15 18:26:02 2023 +0300",
+ "message": "Possible-NPE-solution-in-GameActivity"
+},{
+ "version": "3.19.3",
+ "code": "795",
+ "date": "Wed Oct 11 20:17:48 2023 +0300",
+ "message": "QTA-FIX-3.19.3"
+},
+{
+ "version": "3.19.3",
+ "code": "795",
+ "date": "Wed Oct 11 20:16:39 2023 +0300",
+ "message": "Fixed-Only-one-Looper-may-be-created-per-thread-in-LibQpProxy"
+},
+{
+ "version": "3.19.3",
+ "code": "795",
+ "date": "Fri Sep 29 21:59:20 2023 +0300",
+ "message": "Thread-ExecutorService"
+},
+{
+ "version": "3.19.3",
+ "code": "795",
+ "date": "Wed Oct 11 19:57:00 2023 +0300",
+ "message": "Fixed-CalledFromWrongThreadException-in-GameActivity"
+},
+{
+ "version": "3.19.3",
+ "code": "795",
+ "date": "Wed Oct 11 19:46:48 2023 +0300",
+ "message": "Fixed-error-ExecutionException-in-CopyFolderWorker"
+},{
+ "version": "3.19.2",
+ "code": "790",
+ "date": "Mon Oct 9 22:50:47 2023 +0300",
+ "message": "QTA-FIX-3.19.2"
+},
+{
+ "version": "3.19.2",
+ "code": "790",
+ "date": "Sat Oct 7 21:17:28 2023 +0300",
+ "message": "Updating-project-dependencies"
+},
+{
+ "version": "3.19.2",
+ "code": "790",
+ "date": "Sun Oct 1 19:53:25 2023 +0300",
+ "message": "Upgrade-AGP-to-8.1.2"
+},
+{
+ "version": "3.19.2",
+ "code": "790",
+ "date": "Mon Oct 9 21:59:06 2023 +0300",
+ "message": "Fixed-NullPointerException-in-StockActivity.relativeLayout"
+},
+{
+ "version": "3.19.2",
+ "code": "790",
+ "date": "Mon Oct 9 21:52:22 2023 +0300",
+ "message": "Fixed-error-Parameter-specified-as-non-null-is-null"
+},{
+ "version": "3.19.1",
+ "code": "785",
+ "date": "Thu Sep 28 20:29:21 2023 +0300",
+ "message": "QTA-FIX-3.19.1"
+},
+{
+ "version": "3.19.1",
+ "code": "785",
+ "date": "Wed Sep 27 19:12:37 2023 +0300",
+ "message": "Reworked-deleting-folder-with-game"
+},
+{
+ "version": "3.19.1",
+ "code": "785",
+ "date": "Tue Sep 26 21:22:55 2023 +0300",
+ "message": "Cleanup-code-in-game-layout-and-GameActivity-class"
+},
+{
+ "version": "3.19.1",
+ "code": "785",
+ "date": "Tue Sep 26 21:03:15 2023 +0300",
+ "message": "Revert-Improved-wait-functional"
+},{
+ "version": "3.19.0",
+ "code": "781",
+ "date": "Thu Sep 28 19:39:35 2023 +0300",
+ "message": "QTA-UPDATE-3.19.0"
+},
+{
+ "version": "3.19.0",
+ "code": "781",
+ "date": "Thu Sep 28 19:32:44 2023 +0300",
+ "message": "Merge-pull-request-16-from-l3ger0j-unstable"
+},
+{
+ "version": "3.19.0",
+ "code": "781",
+ "date": "Thu Sep 28 19:26:54 2023 +0300",
+ "message": "Merge-branch-master-into-unstable"
+},
+{
+ "version": "3.19.0",
+ "code": "781",
+ "date": "Tue Sep 26 00:37:42 2023 +0300",
+ "message": "Added-autoscroll-icon"
+},
+{
+ "version": "3.19.0",
+ "code": "781",
+ "date": "Tue Sep 26 00:00:55 2023 +0300",
+ "message": "Cleanup-code-in-game-package"
+},
+{
+ "version": "3.19.0",
+ "code": "781",
+ "date": "Mon Sep 25 22:59:03 2023 +0300",
+ "message": "Cleanup-code-in-settings-package"
+},
+{
+ "version": "3.19.0",
+ "code": "781",
+ "date": "Mon Sep 25 21:03:39 2023 +0300",
+ "message": "Implemented-update-application-functional"
+},
+{
+ "version": "3.19.0",
+ "code": "781",
+ "date": "Mon Sep 25 20:50:22 2023 +0300",
+ "message": "Translated-and-corrected-strings-in-StockViewModel"
+},
+{
+ "version": "3.19.0",
+ "code": "781",
+ "date": "Mon Sep 25 19:41:21 2023 +0300",
+ "message": "Improved-game-refresh-functional-in-StockViewModel"
+},
+{
+ "version": "3.19.0",
+ "code": "781",
+ "date": "Mon Sep 25 18:22:36 2023 +0300",
+ "message": "Constant-values-have-been-renamed"
+},
+{
+ "version": "3.19.0",
+ "code": "781",
+ "date": "Mon Sep 25 18:20:19 2023 +0300",
+ "message": "Cleanup-code"
+},
+{
+ "version": "3.19.0",
+ "code": "781",
+ "date": "Sun Sep 24 19:21:22 2023 +0300",
+ "message": "Fixed-notMainThread-bug"
+},
+{
+ "version": "3.19.0",
+ "code": "781",
+ "date": "Sun Sep 24 19:14:12 2023 +0300",
+ "message": "Cleanup-code"
+},
+{
+ "version": "3.19.0",
+ "code": "781",
+ "date": "Sun Sep 24 18:27:40 2023 +0300",
+ "message": "Improved-settings-and-renaming-icons"
+},
+{
+ "version": "3.19.0",
+ "code": "781",
+ "date": "Sun Sep 24 17:41:07 2023 +0300",
+ "message": "Disabling-overscroll-for-RecyclerView-to-avoid-bugs"
+},
+{
+ "version": "3.19.0",
+ "code": "781",
+ "date": "Sat Sep 23 22:25:06 2023 +0300",
+ "message": "Improved-wait-functional"
+},
+{
+ "version": "3.19.0",
+ "code": "781",
+ "date": "Sat Sep 23 19:43:24 2023 +0300",
+ "message": "Implemented-wait-functional"
+},
+{
+ "version": "3.19.0",
+ "code": "781",
+ "date": "Fri Sep 22 21:35:19 2023 +0300",
+ "message": "Working-on-settings"
+},
+{
+ "version": "3.19.0",
+ "code": "781",
+ "date": "Fri Sep 22 20:00:06 2023 +0300",
+ "message": "Renamed-textCatTitle-and-imageCatTitle"
+},
+{
+ "version": "3.19.0",
+ "code": "781",
+ "date": "Fri Sep 22 19:34:55 2023 +0300",
+ "message": "Moved-method-copyFileOrDirectory-into-FileUtil"
+},
+{
+ "version": "3.19.0",
+ "code": "781",
+ "date": "Thu Sep 21 20:07:42 2023 +0300",
+ "message": "Upgrade-project-dependencies"
+},
+{
+ "version": "3.19.0",
+ "code": "781",
+ "date": "Thu Sep 14 22:29:09 2023 +0300",
+ "message": "Now-the-root-directory-is-selected-by-means-of-a-small-button"
+},
+{
+ "version": "3.19.0",
+ "code": "781",
+ "date": "Thu Sep 14 21:10:13 2023 +0300",
+ "message": "Renamed-copy-dir-and-their-classes-into-worker"
+},
+{
+ "version": "3.19.0",
+ "code": "781",
+ "date": "Tue Sep 12 22:35:33 2023 +0300",
+ "message": "Improved-immersive-mode"
+},
+{
+ "version": "3.19.0",
+ "code": "781",
+ "date": "Mon Sep 11 20:41:33 2023 +0300",
+ "message": "Added-TODO-REWRITE-THIS-INTO-WORKER"
+},
+{
+ "version": "3.19.0",
+ "code": "781",
+ "date": "Mon Sep 11 19:18:29 2023 +0300",
+ "message": "Replased-add-icon-to-file-copy"
+},
+{
+ "version": "3.19.0",
+ "code": "781",
+ "date": "Sat Sep 9 20:11:58 2023 +0300",
+ "message": "Improved-sound-and-image-debuggers"
+},
+{
+ "version": "3.19.0",
+ "code": "781",
+ "date": "Fri Sep 8 21:26:00 2023 +0300",
+ "message": "Updated-project-dependencies"
+},
+{
+ "version": "3.19.0",
+ "code": "781",
+ "date": "Tue Sep 5 18:33:14 2023 +0300",
+ "message": "A-synchronized-method-was-created-to-replace-the-synchronized-code-block"
+},
+{
+ "version": "3.19.0",
+ "code": "781",
+ "date": "Mon Sep 4 22:48:08 2023 +0300",
+ "message": "Simplification-cleanup-code"
+},
+{
+ "version": "3.19.0",
+ "code": "781",
+ "date": "Mon Sep 4 21:57:51 2023 +0300",
+ "message": "Removed-qsp-5.8"
+},
+{
+ "version": "3.19.0",
+ "code": "781",
+ "date": "Mon Sep 4 19:15:24 2023 +0300",
+ "message": "Removed-module-PrettyFilePicker"
+},
+{
+ "version": "3.19.0",
+ "code": "781",
+ "date": "Fri Sep 1 21:04:04 2023 +0300",
+ "message": "DocumentFile.fromTreeUri-DocumentFileCompat.fromUri"
+},
+{
+ "version": "3.19.0",
+ "code": "781",
+ "date": "Thu Aug 31 19:47:09 2023 +0300",
+ "message": "Fixed-authorities"
+},
+{
+ "version": "3.19.0",
+ "code": "781",
+ "date": "Thu Aug 31 19:00:19 2023 +0300",
+ "message": "Added-an-icon-for-the-Restart-menu-item"
+},
+{
+ "version": "3.19.0",
+ "code": "781",
+ "date": "Thu Aug 31 18:49:30 2023 +0300",
+ "message": "Expanded-permission-request-for-Android-10-and-below"
+},
+{
+ "version": "3.19.0",
+ "code": "781",
+ "date": "Thu Aug 31 18:47:00 2023 +0300",
+ "message": "Update-gitlog.json"
+},
+{
+ "version": "3.19.0",
+ "code": "781",
+ "date": "Thu Aug 31 18:46:16 2023 +0300",
+ "message": "QTA-UPDATE-3.18.0"
+},{
+ "version": "3.18.1",
+ "code": "743",
+ "date": "Fri Sep 1 19:29:44 2023 +0300",
+ "message": "QTA-FIX-3.18.1"
+},
+{
+ "version": "3.18.1",
+ "code": "743",
+ "date": "Thu Aug 31 19:47:09 2023 +0300",
+ "message": "Fixed-authorities"
+},
+{
+ "version": "3.18.1",
+ "code": "743",
+ "date": "Thu Aug 31 18:49:30 2023 +0300",
+ "message": "Expanded-permission-request-for-Android-10-and-below"
+},
+{
+ "version": "3.18.1",
+ "code": "743",
+ "date": "Thu Aug 31 18:47:00 2023 +0300",
+ "message": "Update-gitlog.json"
+},{
  "version": "3.18.0",
  "code": "739",
  "date": "Wed Aug 30 18:09:29 2023 +0300",
