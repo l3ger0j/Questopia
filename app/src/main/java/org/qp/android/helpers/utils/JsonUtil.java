@@ -16,6 +16,11 @@ public class JsonUtil {
                 .writeValue(out , o);
     }
 
+    public static void objectToJson(File file , Object o) throws IOException {
+        new ObjectMapper()
+                .writeValue(file , o);
+    }
+
     public static <T> T jsonToObject(String json, Class<T> clazz) throws IOException {
         return new ObjectMapper().readValue(json , clazz);
     }
