@@ -5,7 +5,9 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.os.Build;
+import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.documentfile.provider.DocumentFile;
 
 import org.qp.android.model.libQP.LibQpProxy;
@@ -26,11 +28,16 @@ public class QuestPlayerApplication extends Application {
     private final LibQpProxyImpl libQspProxy = new LibQpProxyImpl(this , htmlProcessor , audioPlayer);
 
     private DocumentFile currentGameDir;
+    private DocumentFile currentGameDir;
 
     @Override
     public void onCreate() {
         super.onCreate();
         createNotificationChannels();
+    }
+
+    public void setCurrentGameDir(DocumentFile currentGameDir) {
+        this.currentGameDir = currentGameDir;
     }
 
     public void setCurrentGameDir(DocumentFile currentGameDir) {
@@ -48,6 +55,10 @@ public class QuestPlayerApplication extends Application {
 
     public LibQpProxy getLibQspProxy() {
         return libQspProxy;
+    }
+
+    public DocumentFile getCurrentGameDir() {
+        return currentGameDir;
     }
 
     public DocumentFile getCurrentGameDir() {
