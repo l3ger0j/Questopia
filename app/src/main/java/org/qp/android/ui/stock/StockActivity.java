@@ -3,6 +3,7 @@ package org.qp.android.ui.stock;
 import static org.qp.android.helpers.utils.FileUtil.deleteDirectory;
 import static org.qp.android.helpers.utils.FileUtil.documentWrap;
 import static org.qp.android.helpers.utils.JsonUtil.jsonToObject;
+import static org.qp.android.helpers.utils.JsonUtil.objectToJson;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_IMAGE_FILE;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_MOD_FILE;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_PATH_FILE;
@@ -45,7 +46,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.anggrayudi.storage.SimpleStorageHelper;
 import com.anggrayudi.storage.file.DocumentFileCompat;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javiersantos.appupdater.AppUpdater;
 import com.github.javiersantos.appupdater.enums.UpdateFrom;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
@@ -62,9 +62,7 @@ import org.qp.android.ui.settings.SettingsActivity;
 import org.qp.android.ui.settings.SettingsController;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
@@ -228,8 +226,7 @@ public class StockActivity extends AppCompatActivity implements
         }
 
         try {
-            var objectMapper = new ObjectMapper();
-            objectMapper.writeValue(listDirsFile , mapFiles);
+            objectToJson(listDirsFile , mapFiles);
         } catch (IOException e) {
             Log.e(TAG , "Error: " , e);
         }
@@ -266,20 +263,18 @@ public class StockActivity extends AppCompatActivity implements
             var ref = new TypeReference<HashMap<String , String>>(){};
             var mapFiles = jsonToObject(listDirsFile , ref);
 
-            if (mapFiles.isEmpty()) {
-                var newList = stockViewModel.getListGamesDir();
-                newList
-                        .removeIf(documentFile -> documentFile.getName().equalsIgnoreCase(folderName));
-                stockViewModel.setListGamesDir(newList);
-            } else {
+            if (!mapFiles.isEmpty()) {
                 mapFiles
                         .entrySet()
                         .removeIf(stringStringEntry -> stringStringEntry.getKey().equalsIgnoreCase(folderName));
-                try (var objOut = new ObjectOutputStream(new FileOutputStream(listDirsFile , false))) {
-                    objOut.writeObject(mapFiles);
-                    objOut.flush();
-                }
+                objectToJson(listDirsFile , mapFiles);
             }
+
+            var newList = stockViewModel.getListGamesDir();
+            newList
+                    .removeIf(documentFile -> documentFile.getName().equalsIgnoreCase(folderName));
+            stockViewModel.setListGamesDir(newList);
+
             ((QuestPlayerApplication) getApplication()).setCurrentGameDir(null);
         } catch (IOException e) {
             Log.e(TAG , "Error: ", e);
