@@ -2,6 +2,7 @@ package org.qp.android.ui.stock;
 
 import static org.qp.android.helpers.utils.FileUtil.deleteDirectory;
 import static org.qp.android.helpers.utils.FileUtil.documentWrap;
+import static org.qp.android.helpers.utils.JsonUtil.jsonToObject;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_IMAGE_FILE;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_MOD_FILE;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_PATH_FILE;
@@ -33,6 +34,7 @@ import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.os.LocaleListCompat;
 import androidx.core.splashscreen.SplashScreen;
+import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.ViewModelProvider;
@@ -42,6 +44,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.anggrayudi.storage.SimpleStorageHelper;
 import com.anggrayudi.storage.file.DocumentFileCompat;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.github.javiersantos.appupdater.AppUpdater;
 import com.github.javiersantos.appupdater.enums.UpdateFrom;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
@@ -58,6 +61,7 @@ import org.qp.android.ui.settings.SettingsActivity;
 import org.qp.android.ui.settings.SettingsController;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
@@ -214,6 +218,22 @@ public class StockActivity extends AppCompatActivity implements
         });
     }
 
+    public void restoreListDirsFromFile() {
+        try {
+            var ref = new TypeReference<HashMap<String , String>>() {};
+            var mapFiles = jsonToObject(listDirsFile , ref);
+            var listFile = new ArrayList<DocumentFile>();
+            for (var value : mapFiles.values()) {
+                var uri = Uri.parse(value);
+                var file = DocumentFileCompat.fromUri(this , uri);
+                listFile.add(file);
+            }
+            stockViewModel.setListGamesDir(listFile);
+        } catch (IOException e) {
+            Log.e(TAG , "Error: ", e);
+        }
+    }
+
     public void dropPersistable(Uri folderUri) {
         try {
             getContentResolver().releasePersistableUriPermission(
@@ -263,7 +283,7 @@ public class StockActivity extends AppCompatActivity implements
         listDirsFile = new File(cache , "tempListDir");
 
         if (listDirsFile.exists()) {
-            stockViewModel.restoreListDirsFromFile(listDirsFile);
+            restoreListDirsFromFile();
         }
 
         settingsController = stockViewModel.getSettingsController();
