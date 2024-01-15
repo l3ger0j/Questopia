@@ -2,8 +2,6 @@ package org.qp.android.ui.stock;
 
 import static org.qp.android.helpers.utils.FileUtil.deleteDirectory;
 import static org.qp.android.helpers.utils.FileUtil.documentWrap;
-import static org.qp.android.helpers.utils.JsonUtil.jsonToObject;
-import static org.qp.android.helpers.utils.JsonUtil.objectToJson;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_IMAGE_FILE;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_MOD_FILE;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_PATH_FILE;
@@ -35,7 +33,6 @@ import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.os.LocaleListCompat;
 import androidx.core.splashscreen.SplashScreen;
-import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.ViewModelProvider;
@@ -45,7 +42,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.anggrayudi.storage.SimpleStorageHelper;
 import com.anggrayudi.storage.file.DocumentFileCompat;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.github.javiersantos.appupdater.AppUpdater;
 import com.github.javiersantos.appupdater.enums.UpdateFrom;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
@@ -62,7 +58,6 @@ import org.qp.android.ui.settings.SettingsActivity;
 import org.qp.android.ui.settings.SettingsController;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
@@ -93,6 +88,10 @@ public class StockActivity extends AppCompatActivity implements
     private final SimpleStorageHelper storageHelper = new SimpleStorageHelper(this);
 
     private File listDirsFile;
+
+    public File getListDirsFile() {
+        return listDirsFile;
+    }
 
     public void setRecyclerView(RecyclerView mRecyclerView) {
         this.mRecyclerView = mRecyclerView;
@@ -215,39 +214,6 @@ public class StockActivity extends AppCompatActivity implements
         });
     }
 
-    public void saveListDirsIntoFile() {
-        var listFiles = stockViewModel.getListGamesDir();
-        var mapFiles = new HashMap<String , String>();
-
-        for (var file : listFiles) {
-            if (file.getName() == null) continue;
-            var packedUri = String.valueOf(file.getUri());
-            mapFiles.put(file.getName() , packedUri);
-        }
-
-        try {
-            objectToJson(listDirsFile , mapFiles);
-        } catch (IOException e) {
-            Log.e(TAG , "Error: " , e);
-        }
-    }
-
-    public void restoreListDirsFromFile() {
-        try {
-            var ref = new TypeReference<HashMap<String , String>>() {};
-            var mapFiles = jsonToObject(listDirsFile , ref);
-            var listFile = new ArrayList<DocumentFile>();
-            for (var value : mapFiles.values()) {
-                var uri = Uri.parse(value);
-                var file = DocumentFileCompat.fromUri(this , uri);
-                listFile.add(file);
-            }
-            stockViewModel.setListGamesDir(listFile);
-        } catch (IOException e) {
-            Log.e(TAG , "Error: ", e);
-        }
-    }
-
     public void dropPersistable(Uri folderUri) {
         try {
             getContentResolver().releasePersistableUriPermission(
@@ -256,29 +222,6 @@ public class StockActivity extends AppCompatActivity implements
                             | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
             );
         } catch (SecurityException ignored) {}
-    }
-
-    public void removeDirFromListDirsFile(String folderName) {
-        try {
-            var ref = new TypeReference<HashMap<String , String>>(){};
-            var mapFiles = jsonToObject(listDirsFile , ref);
-
-            if (!mapFiles.isEmpty()) {
-                mapFiles
-                        .entrySet()
-                        .removeIf(stringStringEntry -> stringStringEntry.getKey().equalsIgnoreCase(folderName));
-                objectToJson(listDirsFile , mapFiles);
-            }
-
-            var newList = stockViewModel.getListGamesDir();
-            newList
-                    .removeIf(documentFile -> documentFile.getName().equalsIgnoreCase(folderName));
-            stockViewModel.setListGamesDir(newList);
-
-            ((QuestPlayerApplication) getApplication()).setCurrentGameDir(null);
-        } catch (IOException e) {
-            Log.e(TAG , "Error: ", e);
-        }
     }
 
     @Override
@@ -320,7 +263,7 @@ public class StockActivity extends AppCompatActivity implements
         listDirsFile = new File(cache , "tempListDir");
 
         if (listDirsFile.exists()) {
-            restoreListDirsFromFile();
+            stockViewModel.restoreListDirsFromFile(listDirsFile);
         }
 
         settingsController = stockViewModel.getSettingsController();
@@ -494,7 +437,7 @@ public class StockActivity extends AppCompatActivity implements
                         var service = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
                         for (var data : selectList) {
                             dropPersistable(data.gameDir.getUri());
-                            removeDirFromListDirsFile(data.gameDir.getName());
+                            stockViewModel.removeDirFromListDirsFile(listDirsFile , data.gameDir.getName());
                             CompletableFuture
                                     .runAsync(() -> deleteDirectory(data.gameDir) , service)
                                     .thenRun(() -> {
@@ -555,7 +498,7 @@ public class StockActivity extends AppCompatActivity implements
     @Override
     protected void onPause() {
         super.onPause();
-        saveListDirsIntoFile();
+        stockViewModel.saveListDirsIntoFile(listDirsFile);
     }
 
     @Override
