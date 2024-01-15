@@ -35,7 +35,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.Objects;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
@@ -519,7 +518,6 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
         if (inter == null) return;
         if (filename != null) {
             try {
-                Log.d(TAG , filename);
                 var gameFile = fromFullPath(filename , getCurGameDir());
                 if (gameFile == null) throw new NullPointerException();
                 var gameFileUri = gameFile.getUri();

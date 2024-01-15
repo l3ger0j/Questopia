@@ -6,10 +6,14 @@ import static org.qp.android.helpers.utils.FileUtil.copyFileToDir;
 import static org.qp.android.helpers.utils.FileUtil.findFileOrDirectory;
 import static org.qp.android.helpers.utils.FileUtil.formatFileSize;
 import static org.qp.android.helpers.utils.FileUtil.isWritableDirectory;
+import static org.qp.android.helpers.utils.JsonUtil.jsonToObject;
+import static org.qp.android.helpers.utils.JsonUtil.objectToJson;
 import static org.qp.android.helpers.utils.PathUtil.removeExtension;
 
 import android.app.Application;
 import android.content.Intent;
+import android.net.Uri;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 
@@ -21,6 +25,8 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.anggrayudi.storage.file.DocumentFileCompat;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.squareup.picasso.Picasso;
 
 import org.jetbrains.annotations.NotNull;
@@ -34,6 +40,8 @@ import org.qp.android.ui.dialogs.StockDialogType;
 import org.qp.android.ui.game.GameActivity;
 import org.qp.android.ui.settings.SettingsController;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -418,7 +426,8 @@ public class StockViewModel extends AndroidViewModel {
                 var dirName = Optional.ofNullable(rootDir.getName());
                 var message = getStockActivity().getString(R.string.gamesFolderError);
                 getStockActivity().showErrorDialog(message);
-                dirName.ifPresent(s -> getStockActivity().removeDirFromListDirsFile(s));
+                var saveDir = getStockActivity().getListDirsFile();
+                dirName.ifPresent(s -> removeDirFromListDirsFile(saveDir , s));
             } else {
                 putGameDirToList(rootDir);
                 refreshGameData();
@@ -460,4 +469,96 @@ public class StockViewModel extends AndroidViewModel {
                 } , executor);
     }
     // endregion Refresh
+
+    // region Game list dir
+    public void saveListDirsIntoFile(File listDirsFile) {
+        var listFiles = getListGamesDir();
+        var mapFiles = new HashMap<String , String>();
+
+        var executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+        CompletableFuture
+                .runAsync(() -> {
+                    for (var file : listFiles) {
+                        if (file.getName() == null) continue;
+                        var packedUri = String.valueOf(file.getUri());
+                        mapFiles.put(file.getName() , packedUri);
+                    }
+                } , executor)
+                .thenRunAsync(() -> {
+                    try {
+                        objectToJson(listDirsFile , mapFiles);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                } , executor)
+                .exceptionally(throwable -> {
+                    Log.e(TAG , "Error: " , throwable);
+                    return null;
+                });
+    }
+
+    public void restoreListDirsFromFile(File listDirsFile) {
+        var ref = new TypeReference<HashMap<String , String>>() {};
+
+        var executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+        CompletableFuture
+                .supplyAsync(() -> {
+                    try {
+                        return jsonToObject(listDirsFile , ref);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                } , executor)
+                .thenAcceptAsync(stringStringHashMap -> {
+                    var listFile = new ArrayList<DocumentFile>();
+                    for (var value : stringStringHashMap.values()) {
+                        var uri = Uri.parse(value);
+                        var file = DocumentFileCompat.fromUri(getStockActivity() , uri);
+                        listFile.add(file);
+                    }
+                    setListGamesDir(listFile);
+                } , executor)
+                .exceptionally(throwable -> {
+                    Log.e(TAG , "Error: ", throwable);
+                    return null;
+                });
+    }
+
+    public void removeDirFromListDirsFile(File listDirsFile , String folderName) {
+        var ref = new TypeReference<HashMap<String , String>>(){};
+
+        var executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+        CompletableFuture
+                .supplyAsync(() -> {
+                    try {
+                        return jsonToObject(listDirsFile , ref);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                } , executor)
+                .thenAcceptAsync(mapFiles -> {
+                    if (!mapFiles.isEmpty()) {
+                        mapFiles
+                                .entrySet()
+                                .removeIf(stringStringEntry -> stringStringEntry.getKey().equalsIgnoreCase(folderName));
+                        try {
+                            objectToJson(listDirsFile , mapFiles);
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                } , executor)
+                .thenRunAsync(() -> {
+                    var newList = getListGamesDir();
+                    newList.removeIf(documentFile -> documentFile.getName().equalsIgnoreCase(folderName));
+                    setListGamesDir(newList);
+                    ((QuestPlayerApplication) getApplication()).setCurrentGameDir(null);
+                } , executor)
+                .exceptionally(throwable -> {
+                    Log.e(TAG , "Error: ", throwable);
+                    return null;
+                });
+    }
+
+    // endregion Game list dir
 }
