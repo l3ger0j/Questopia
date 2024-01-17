@@ -205,7 +205,8 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     public String getGameSize() {
-        if (tempGameData.getFileSize() != null) {
+        if (tempGameData != null
+                && tempGameData.getFileSize() != null) {
             return getStockActivity()
                     .getString(R.string.fileSize)
                     .replace("-SIZE-" , tempGameData.getFileSize());
