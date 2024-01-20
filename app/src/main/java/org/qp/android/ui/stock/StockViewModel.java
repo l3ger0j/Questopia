@@ -250,6 +250,7 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     public boolean isGameInstalled() {
+        if (tempGameData == null) return false;
         return tempGameData.isFileInstalled() && isDirContainsGameFile(tempGameData.gameDir);
     }
 
