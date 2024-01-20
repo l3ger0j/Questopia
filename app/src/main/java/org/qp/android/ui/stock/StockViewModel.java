@@ -12,7 +12,6 @@ import static org.qp.android.helpers.utils.PathUtil.removeExtension;
 
 import android.app.Application;
 import android.content.Intent;
-import android.net.Uri;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,7 +24,6 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import com.anggrayudi.storage.file.DocumentFileCompat;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.squareup.picasso.Picasso;
 
@@ -207,7 +205,8 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     public String getGameSize() {
-        if (tempGameData.getFileSize() != null) {
+        if (tempGameData != null
+                && tempGameData.getFileSize() != null) {
             return getStockActivity()
                     .getString(R.string.fileSize)
                     .replace("-SIZE-" , tempGameData.getFileSize());
@@ -493,33 +492,6 @@ public class StockViewModel extends AndroidViewModel {
                 } , executor)
                 .exceptionally(throwable -> {
                     Log.e(TAG , "Error: " , throwable);
-                    return null;
-                });
-    }
-
-    public void restoreListDirsFromFile(File listDirsFile) {
-        var ref = new TypeReference<HashMap<String , String>>() {};
-
-        var executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-        CompletableFuture
-                .supplyAsync(() -> {
-                    try {
-                        return jsonToObject(listDirsFile , ref);
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                } , executor)
-                .thenAcceptAsync(stringStringHashMap -> {
-                    var listFile = new ArrayList<DocumentFile>();
-                    for (var value : stringStringHashMap.values()) {
-                        var uri = Uri.parse(value);
-                        var file = DocumentFileCompat.fromUri(getStockActivity() , uri);
-                        listFile.add(file);
-                    }
-                    setListGamesDir(listFile);
-                } , executor)
-                .exceptionally(throwable -> {
-                    Log.e(TAG , "Error: ", throwable);
                     return null;
                 });
     }

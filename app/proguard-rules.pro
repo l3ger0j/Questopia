@@ -12,6 +12,9 @@
    public *;
 }
 
+# DTO
+-keep class org.qp.android.dto.stock.** { *; }
+
 # NDK
 -keep class org.qp.android.dto.libQP.** { *; }
 -keep class org.qp.android.model.libQP.** { *; }
