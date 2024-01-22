@@ -1,5 +1,6 @@
 package org.qp.android.ui.stock;
 
+import static androidx.recyclerview.widget.RecyclerView.NO_POSITION;
 import static org.qp.android.helpers.utils.FileUtil.deleteDirectory;
 import static org.qp.android.helpers.utils.FileUtil.documentWrap;
 import static org.qp.android.helpers.utils.JsonUtil.jsonToObject;
@@ -362,10 +363,11 @@ public class StockActivity extends AppCompatActivity implements
                 if (!gameData.isFileInstalled()) continue;
                 tempList.add(gameData);
             }
-            var mViewHolder =
-                    mRecyclerView.findViewHolderForAdapterPosition(position);
-            var gameData =
-                    tempList.get(Objects.requireNonNull(mViewHolder).getAdapterPosition());
+            var mViewHolder = mRecyclerView.findViewHolderForAdapterPosition(position);
+            if (mViewHolder == null) return;
+            var adapterPosition = mViewHolder.getAdapterPosition();
+            if (adapterPosition == NO_POSITION) return;
+            var gameData = tempList.get(adapterPosition);
             if (selectList.isEmpty() || !selectList.contains(gameData)) {
                 selectList.add(gameData);
                 var cardView = (CardView) mViewHolder.itemView.findViewWithTag("gameCardView");
