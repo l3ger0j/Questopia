@@ -593,7 +593,7 @@ public class StockViewModel extends AndroidViewModel {
                     newList.removeIf(documentFile -> documentFile.getName().equalsIgnoreCase(folderName));
                     setListGamesDir(newList);
                     ((QuestPlayerApplication) getApplication()).setCurrentGameDir(null);
-                } , executor)
+                })
                 .exceptionally(throwable -> {
                     Log.e(TAG , "Error: ", throwable);
                     return null;
