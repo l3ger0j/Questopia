@@ -81,6 +81,8 @@ dependencies {
     implementation 'com.anggrayudi:storage:1.5.5'
     implementation 'com.squareup.picasso:picasso:2.71828'
 
+    implementation 'io.reactivex.rxjava3:rxandroid:3.0.2'
+
     implementation 'com.fasterxml.jackson.core:jackson-core:2.16.1'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.16.1'
     implementation 'com.fasterxml.jackson.core:jackson-annotations:2.16.1'

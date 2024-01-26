@@ -111,7 +111,7 @@ public class StockActivity extends AppCompatActivity implements
         activityStockBinding = ActivityStockBinding.inflate(getLayoutInflater());
         stockViewModel = new ViewModelProvider(this).get(StockViewModel.class);
         activityStockBinding.setStockVM(stockViewModel);
-        stockViewModel.activityObservableField.set(this);
+        stockViewModel.activityObserver.setValue(this);
         gamesMap = stockViewModel.getGamesMap();
 
         mFAB = activityStockBinding.stockFAB;

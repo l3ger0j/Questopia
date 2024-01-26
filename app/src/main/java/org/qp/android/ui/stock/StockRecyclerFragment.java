@@ -16,7 +16,6 @@ import org.qp.android.dto.stock.GameData;
 import org.qp.android.helpers.adapters.RecyclerItemClickListener;
 
 import java.util.ArrayList;
-import java.util.Objects;
 
 public class StockRecyclerFragment extends StockPatternFragment {
 
@@ -40,8 +39,8 @@ public class StockRecyclerFragment extends StockPatternFragment {
         stockViewModel = new ViewModelProvider(requireActivity())
                 .get(StockViewModel.class);
         stockViewModel.getGameData().observe(getViewLifecycleOwner(), gameData);
-        Objects.requireNonNull(stockViewModel.activityObservableField.get())
-                .setRecyclerView(mRecyclerView);
+        stockViewModel.activityObserver.observe(getViewLifecycleOwner() , stockActivity ->
+                stockActivity.setRecyclerView(mRecyclerView));
         return recyclerBinding.getRoot();
     }
 

@@ -67,6 +67,8 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
     public MutableLiveData<Integer> outputIntObserver = new MutableLiveData<>();
     public MutableLiveData<Boolean> outputBooleanObserver = new MutableLiveData<>(false);
 
+    public MutableLiveData<GameActivity> activityObserver = new MutableLiveData<>();
+
     private final MutableLiveData<SettingsController> controllerObserver = new MutableLiveData<>();
     private final MutableLiveData<String> mainDescLiveData = new MutableLiveData<>();
     private final MutableLiveData<String> varsDescLiveData = new MutableLiveData<>();
@@ -229,11 +231,11 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
 
     @NonNull
     private GameActivity getGameActivity() {
-        var tempGameActivity = gameActivityObservableField.get();
-        if (tempGameActivity != null) {
-            return tempGameActivity;
+        var activity = activityObserver.getValue();
+        if (activity != null) {
+            return activity;
         } else {
-            throw new NullPointerException();
+            throw new NullPointerException("Activity is null");
         }
     }
 
@@ -315,7 +317,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
 
     public void startAudio() {
         audioPlayer = questPlayerApplication.getAudioPlayer();
-        audioPlayer.start(getGameActivity());
+        audioPlayer.start(getApplication());
     }
 
     public void stopAudio() {
@@ -377,7 +379,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         public WebResourceResponse shouldInterceptRequest(WebView view ,
                                                           @NonNull WebResourceRequest request) {
             var uri = request.getUrl();
-            var rootDir = DocumentFileCompat.fromUri(getGameActivity() , fullPathGameDir);
+            var rootDir = DocumentFileCompat.fromUri(getApplication() , fullPathGameDir);
             if (rootDir != null && uri.getScheme() != null) {
                 if (uri.getScheme().startsWith("file")) {
                     try {
@@ -385,7 +387,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
                         var imageFile = fromRelPath(uri.getPath() , rootDir);
                         var extension = imageFile.getName();
                         var mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
-                        var in = getGameActivity().getContentResolver().openInputStream(imageFile.getUri());
+                        var in = getApplication().getContentResolver().openInputStream(imageFile.getUri());
                         return new WebResourceResponse(mimeType , null , in);
                     } catch (FileNotFoundException | NullPointerException ex) {
                         if (getSettingsController().isUseImageDebug) {

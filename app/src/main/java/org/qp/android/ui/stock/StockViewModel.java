@@ -18,7 +18,6 @@ import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.databinding.ObservableBoolean;
-import androidx.databinding.ObservableField;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
@@ -57,8 +56,7 @@ public class StockViewModel extends AndroidViewModel {
     public static final int CODE_PICK_PATH_FILE = 301;
     public static final int CODE_PICK_MOD_FILE = 302;
 
-    public ObservableField<StockActivity> activityObservableField =
-            new ObservableField<>();
+    public MutableLiveData<StockActivity> activityObserver = new MutableLiveData<>();
 
     public ObservableBoolean isHideFAB = new ObservableBoolean();
 
@@ -117,7 +115,7 @@ public class StockViewModel extends AndroidViewModel {
 
     @NotNull
     private StockActivity getStockActivity() {
-        var tempStockActivity = activityObservableField.get();
+        var tempStockActivity = activityObserver.getValue();
         if (tempStockActivity != null) {
             return tempStockActivity;
         } else {
@@ -355,8 +353,7 @@ public class StockViewModel extends AndroidViewModel {
 
     @NonNull
     private DialogEditBinding formingEditView() {
-        editBinding =
-                DialogEditBinding.inflate(LayoutInflater.from(getStockActivity()));
+        editBinding = DialogEditBinding.inflate(LayoutInflater.from(getApplication()));
         editBinding.setStockVM(this);
 
         if (!tempGameData.icon.isEmpty()) {
@@ -398,11 +395,11 @@ public class StockViewModel extends AndroidViewModel {
                 calculateSizeDir(tempGameData);
             }
             if (tempPathFile != null) {
-                copyFileToDir(getStockActivity() , tempPathFile , tempGameData.gameDir);
+                copyFileToDir(getApplication() , tempPathFile , tempGameData.gameDir);
             }
             if (tempModFile != null) {
                 var modDir = findFileOrDirectory(getStockActivity() , tempGameData.gameDir , "mods");
-                copyFileToDir(getStockActivity() , tempModFile , modDir);
+                copyFileToDir(getApplication() , tempModFile , modDir);
             }
 
             localGame.createDataIntoFolder(getApplication() , tempGameData , tempGameData.gameDir);
@@ -429,7 +426,7 @@ public class StockViewModel extends AndroidViewModel {
     public void playGame() {
         var gameDir = tempGameData.gameDir;
         var gameFileCount = tempGameData.gameFiles.size();
-        var intent = new Intent(getStockActivity() , GameActivity.class);
+        var intent = new Intent(getApplication() , GameActivity.class);
 
         var application = (QuestPlayerApplication) getApplication();
         application.setCurrentGameDir(gameDir);
