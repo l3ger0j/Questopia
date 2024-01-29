@@ -25,21 +25,18 @@ int qspRealCurLoc = -1;
 int qspRealLine = 0;
 int qspRealActIndex = -1;
 
-void qspSetError(int num)
-{
-	if (!qspErrorNum)
-	{
-		qspErrorNum = num;
-		qspErrorLoc = qspRealCurLoc;
-		qspErrorActIndex = qspRealActIndex;
-		qspErrorLine = qspRealLine;
-	}
+void qspSetError(int num) {
+  if (!qspErrorNum) {
+	qspErrorNum = num;
+	qspErrorLoc = qspRealCurLoc;
+	qspErrorActIndex = qspRealActIndex;
+	qspErrorLine = qspRealLine;
+  }
 }
 
-void qspResetError()
-{
-	qspErrorNum = 0;
-	qspErrorLoc = -1;
-	qspErrorActIndex = -1;
-	qspErrorLine = 0;
+void qspResetError() {
+  qspErrorNum = 0;
+  qspErrorLoc = -1;
+  qspErrorActIndex = -1;
+  qspErrorLine = 0;
 }

@@ -20,96 +20,93 @@
 #include "variant.h"
 
 #ifndef QSP_STATSDEFINES
-	#define QSP_STATSDEFINES
+#define QSP_STATSDEFINES
 
-	#define QSP_STATSLEVELS 3
-	#define QSP_MAXSTATSNAMES 100
-	#define QSP_STATMAXARGS 10
-	#define QSP_STATELSE QSP_FMT("ELSE")
+#define QSP_STATSLEVELS 3
+#define QSP_MAXSTATSNAMES 100
+#define QSP_STATMAXARGS 10
+#define QSP_STATELSE QSP_FMT("ELSE")
 
-	typedef QSP_BOOL (*QSP_STATEMENT)(QSPVariant *, int, QSP_CHAR **, int);
+typedef QSP_BOOL (*QSP_STATEMENT)(QSPVariant *, int, QSP_CHAR **, int);
 
-	typedef struct
-	{
-		int Code;
-		QSP_CHAR *Name;
-		int NameLen;
-	} QSPStatName;
+typedef struct {
+  int Code;
+  QSP_CHAR *Name;
+  int NameLen;
+} QSPStatName;
 
-	typedef struct
-	{
-		int MinArgsCount;
-		int MaxArgsCount;
-		int ArgsTypes[QSP_STATMAXARGS];
-		int ExtArg;
-		QSP_STATEMENT Func;
-	} QSPStatement;
+typedef struct {
+  int MinArgsCount;
+  int MaxArgsCount;
+  int ArgsTypes[QSP_STATMAXARGS];
+  int ExtArg;
+  QSP_STATEMENT Func;
+} QSPStatement;
 
-	enum
-	{
-		qspStatUnknown,
-		qspStatLabel,
-		qspStatComment,
-		qspStatAct,
-		qspStatIf,
-		qspStatElseIf,
-		qspStatElse,
-		qspStatEnd,
-		qspStatAddObj,
-		qspStatAddQst,
-		qspStatClA,
-		qspStatClear,
-		qspStatCloseAll,
-		qspStatClose,
-		qspStatClS,
-		qspStatCmdClear,
-		qspStatCopyArr,
-		qspStatDelAct,
-		qspStatDelObj,
-		qspStatDynamic,
-		qspStatExec,
-		qspStatExit,
-		qspStatGoSub,
-		qspStatGoTo,
-		qspStatJump,
-		qspStatKillAll,
-		qspStatKillObj,
-		qspStatKillQst,
-		qspStatKillVar,
-		qspStatMClear,
-		qspStatMenu,
-		qspStatMNL,
-		qspStatMPL,
-		qspStatMP,
-		qspStatMsg,
-		qspStatNL,
-		qspStatOpenGame,
-		qspStatOpenQst,
-		qspStatPlay,
-		qspStatPL,
-		qspStatP,
-		qspStatRefInt,
-		qspStatSaveGame,
-		qspStatSetTimer,
-		qspStatSet,
-		qspStatShowActs,
-		qspStatShowInput,
-		qspStatShowObjs,
-		qspStatShowVars,
-		qspStatUnSelect,
-		qspStatView,
-		qspStatWait,
-		qspStatXGoTo,
+enum {
+  qspStatUnknown,
+  qspStatLabel,
+  qspStatComment,
+  qspStatAct,
+  qspStatIf,
+  qspStatElseIf,
+  qspStatElse,
+  qspStatEnd,
+  qspStatAddObj,
+  qspStatAddQst,
+  qspStatClA,
+  qspStatClear,
+  qspStatCloseAll,
+  qspStatClose,
+  qspStatClS,
+  qspStatCmdClear,
+  qspStatCopyArr,
+  qspStatDelAct,
+  qspStatDelObj,
+  qspStatDynamic,
+  qspStatExec,
+  qspStatExit,
+  qspStatGoSub,
+  qspStatGoTo,
+  qspStatJump,
+  qspStatKillAll,
+  qspStatKillObj,
+  qspStatKillQst,
+  qspStatKillVar,
+  qspStatMClear,
+  qspStatMenu,
+  qspStatMNL,
+  qspStatMPL,
+  qspStatMP,
+  qspStatMsg,
+  qspStatNL,
+  qspStatOpenGame,
+  qspStatOpenQst,
+  qspStatPlay,
+  qspStatPL,
+  qspStatP,
+  qspStatRefInt,
+  qspStatSaveGame,
+  qspStatSetTimer,
+  qspStatSet,
+  qspStatShowActs,
+  qspStatShowInput,
+  qspStatShowObjs,
+  qspStatShowVars,
+  qspStatUnSelect,
+  qspStatView,
+  qspStatWait,
+  qspStatXGoTo,
 
-		qspStatLast_Statement
-	};
+  qspStatLast_Statement
+};
 
-	/* External functions */
-	void qspInitStats();
-	int qspGetStatArgs(QSP_CHAR *, int, QSPVariant *);
-	QSP_BOOL qspExecCode(QSPLineOfCode *, int, int, int, QSP_CHAR **);
-	void qspExecStringAsCodeWithArgs(QSP_CHAR *, QSPVariant *, int);
-	QSP_CHAR *qspGetLineLabel(QSP_CHAR *);
-	void qspInitLineOfCode(QSPLineOfCode *, QSP_CHAR *, int);
+/* External functions */
+void qspInitStats();
+int qspGetStatArgs(QSP_CHAR *, int, QSPVariant *);
+QSP_BOOL qspExecCode(QSPLineOfCode *, int, int, int, QSP_CHAR **);
+void qspExecStringAsCodeWithArgs(QSP_CHAR *, QSPVariant *, int);
+QSP_CHAR *qspGetLineLabel(QSP_CHAR *);
+void qspInitLineOfCode(QSPLineOfCode *, QSP_CHAR *, int);
 
 #endif

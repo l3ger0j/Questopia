@@ -18,49 +18,48 @@
 #include "declarations.h"
 
 #ifndef QSP_CALLSDEFINES
-	#define QSP_CALLSDEFINES
+#define QSP_CALLSDEFINES
 
-	typedef struct
-	{
-		QSP_BOOL IsInCallBack;
-		QSP_BOOL IsDisableCodeExec;
-		QSP_BOOL IsExitOnError;
-		QSP_BOOL IsMainDescChanged;
-		QSP_BOOL IsVarsDescChanged;
-		QSP_BOOL IsObjectsChanged;
-		QSP_BOOL IsActionsChanged;
-	} QSPCallState;
+typedef struct {
+  QSP_BOOL IsInCallBack;
+  QSP_BOOL IsDisableCodeExec;
+  QSP_BOOL IsExitOnError;
+  QSP_BOOL IsMainDescChanged;
+  QSP_BOOL IsVarsDescChanged;
+  QSP_BOOL IsObjectsChanged;
+  QSP_BOOL IsActionsChanged;
+} QSPCallState;
 
-	extern QSP_CALLBACK qspCallBacks[QSP_CALL_DUMMY];
-	extern QSP_BOOL qspIsInCallBack;
-	extern QSP_BOOL qspIsDisableCodeExec;
-	extern QSP_BOOL qspIsExitOnError;
+extern QSP_CALLBACK qspCallBacks[QSP_CALL_DUMMY];
+extern QSP_BOOL qspIsInCallBack;
+extern QSP_BOOL qspIsDisableCodeExec;
+extern QSP_BOOL qspIsExitOnError;
 
-	/* External functions */
-	void qspSaveCallState(QSPCallState *, QSP_BOOL, QSP_BOOL);
-	void qspRestoreCallState(QSPCallState *);
-	void qspInitCallBacks();
-	void qspSetCallBack(int, QSP_CALLBACK);
-	void qspCallDebug(QSP_CHAR *);
-	void qspCallSetTimer(int);
-	void qspCallRefreshInt(QSP_BOOL);
-	void qspCallSetInputStrText(QSP_CHAR *);
-	void qspCallAddMenuItem(QSP_CHAR *, QSP_CHAR *);
-	void qspCallSystem(QSP_CHAR *);
-	void qspCallOpenGame(QSP_CHAR *);
-	void qspCallSaveGame(QSP_CHAR *);
-	void qspCallShowMessage(QSP_CHAR *);
-	void qspCallShowMenu();
-	void qspCallShowPicture(QSP_CHAR *);
-	void qspCallShowWindow(int, QSP_BOOL);
-	void qspCallPlayFile(QSP_CHAR *, int);
-	QSP_BOOL qspCallIsPlayingFile(QSP_CHAR *);
-	void qspCallSleep(int);
-	int qspCallGetMSCount();
-	void qspCallCloseFile(QSP_CHAR *);
-	void qspCallDeleteMenu();
-	QSP_CHAR *qspCallInputBox(QSP_CHAR *);
-	char *qspCallGetFileContents(QSP_CHAR *, int *);
-	void qspCallChangeQuestPath(QSP_CHAR *);
+/* External functions */
+void qspSaveCallState(QSPCallState *, QSP_BOOL, QSP_BOOL);
+void qspRestoreCallState(QSPCallState *);
+void qspInitCallBacks();
+void qspSetCallBack(int, QSP_CALLBACK);
+void qspCallDebug(QSP_CHAR *);
+void qspCallSetTimer(int);
+void qspCallRefreshInt(QSP_BOOL);
+void qspCallSetInputStrText(QSP_CHAR *);
+void qspCallAddMenuItem(QSP_CHAR *, QSP_CHAR *);
+void qspCallSystem(QSP_CHAR *);
+void qspCallOpenGame(QSP_CHAR *);
+void qspCallSaveGame(QSP_CHAR *);
+void qspCallShowMessage(QSP_CHAR *);
+void qspCallShowMenu();
+void qspCallShowPicture(QSP_CHAR *);
+void qspCallShowWindow(int, QSP_BOOL);
+void qspCallPlayFile(QSP_CHAR *, int);
+QSP_BOOL qspCallIsPlayingFile(QSP_CHAR *);
+void qspCallSleep(int);
+int qspCallGetMSCount();
+void qspCallCloseFile(QSP_CHAR *);
+void qspCallDeleteMenu();
+QSP_CHAR *qspCallInputBox(QSP_CHAR *);
+char *qspCallGetFileContents(QSP_CHAR *, int *);
+void qspCallChangeQuestPath(QSP_CHAR *);
 
 #endif

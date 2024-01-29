@@ -18,52 +18,52 @@
 #include "declarations.h"
 
 #ifndef QSP_TEXTDEFINES
-	#define QSP_TEXTDEFINES
+#define QSP_TEXTDEFINES
 
-	#define QSP_STRSDELIM QSP_FMT("\r\n")
-	#define QSP_LSUBEX QSP_FMT("<<")
-	#define QSP_RSUBEX QSP_FMT(">>")
+#define QSP_STRSDELIM QSP_FMT("\r\n")
+#define QSP_LSUBEX QSP_FMT("<<")
+#define QSP_RSUBEX QSP_FMT(">>")
 
-	/* Helpers */
-	#define QSP_LEN(x) (sizeof(x) / sizeof(QSP_CHAR) - 1)
+/* Helpers */
+#define QSP_LEN(x) (sizeof(x) / sizeof(QSP_CHAR) - 1)
 
-	/* External functions */
-	int qspAddText(QSP_CHAR **, QSP_CHAR *, int, int, QSP_BOOL);
-	QSP_CHAR *qspGetNewText(QSP_CHAR *, int);
-	QSP_CHAR *qspGetAddText(QSP_CHAR *, QSP_CHAR *, int, int);
-	QSP_BOOL qspClearText(void **, int *);
-	QSP_BOOL qspIsInList(QSP_CHAR *, QSP_CHAR);
-	QSP_BOOL qspIsInListEOL(QSP_CHAR *, QSP_CHAR);
-	QSP_BOOL qspIsDigit(QSP_CHAR);
-	QSP_CHAR *qspSkipSpaces(QSP_CHAR *);
-	QSP_CHAR *qspStrEnd(QSP_CHAR *);
-	QSP_CHAR *qspDelSpc(QSP_CHAR *);
-	QSP_CHAR *qspDelSpcCanRetSelf(QSP_CHAR *);
-	QSP_BOOL qspIsAnyString(QSP_CHAR *);
-	void qspLowerStr(QSP_CHAR *);
-	void qspUpperStr(QSP_CHAR *);
-	int qspStrsNComp(QSP_CHAR *, QSP_CHAR *, int);
-	int qspStrsComp(QSP_CHAR *, QSP_CHAR *);
-	QSP_CHAR *qspStrCopy(QSP_CHAR *, QSP_CHAR *);
-	QSP_CHAR *qspStrChar(QSP_CHAR *, QSP_CHAR);
-	QSP_CHAR *qspStrNCopy(QSP_CHAR *, QSP_CHAR *, int);
-	int qspStrLen(QSP_CHAR *);
-	QSP_CHAR *qspStrStr(QSP_CHAR *, QSP_CHAR *);
-	QSP_CHAR *qspStrPBrk(QSP_CHAR *, QSP_CHAR *);
-	QSP_CHAR *qspInStrRChars(QSP_CHAR *, QSP_CHAR *, QSP_CHAR *);
-	QSP_CHAR *qspJoinStrs(QSP_CHAR **, int, QSP_CHAR *);
-	int qspSplitStr(QSP_CHAR *, QSP_CHAR *, QSP_CHAR ***);
-	void qspCopyStrs(QSP_CHAR ***, QSP_CHAR **, int, int);
-	void qspFreeStrs(void **, int);
-	int qspStrToNum(QSP_CHAR *, QSP_CHAR **);
-	QSP_CHAR *qspNumToStr(QSP_CHAR *, int);
-	QSP_CHAR *qspStrPos(QSP_CHAR *, QSP_CHAR *, QSP_BOOL);
-	QSP_CHAR *qspReplaceText(QSP_CHAR *, QSP_CHAR *, QSP_CHAR *);
-	QSP_CHAR *qspFormatText(QSP_CHAR *, QSP_BOOL);
+/* External functions */
+int qspAddText(QSP_CHAR **, QSP_CHAR *, int, int, QSP_BOOL);
+QSP_CHAR *qspGetNewText(QSP_CHAR *, int);
+QSP_CHAR *qspGetAddText(QSP_CHAR *, QSP_CHAR *, int, int);
+QSP_BOOL qspClearText(void **, int *);
+QSP_BOOL qspIsInList(QSP_CHAR *, QSP_CHAR);
+QSP_BOOL qspIsInListEOL(QSP_CHAR *, QSP_CHAR);
+QSP_BOOL qspIsDigit(QSP_CHAR);
+QSP_CHAR *qspSkipSpaces(QSP_CHAR *);
+QSP_CHAR *qspStrEnd(QSP_CHAR *);
+QSP_CHAR *qspDelSpc(QSP_CHAR *);
+QSP_CHAR *qspDelSpcCanRetSelf(QSP_CHAR *);
+QSP_BOOL qspIsAnyString(QSP_CHAR *);
+void qspLowerStr(QSP_CHAR *);
+void qspUpperStr(QSP_CHAR *);
+int qspStrsNComp(QSP_CHAR *, QSP_CHAR *, int);
+int qspStrsComp(QSP_CHAR *, QSP_CHAR *);
+QSP_CHAR *qspStrCopy(QSP_CHAR *, QSP_CHAR *);
+QSP_CHAR *qspStrChar(QSP_CHAR *, QSP_CHAR);
+QSP_CHAR *qspStrNCopy(QSP_CHAR *, QSP_CHAR *, int);
+int qspStrLen(QSP_CHAR *);
+QSP_CHAR *qspStrStr(QSP_CHAR *, QSP_CHAR *);
+QSP_CHAR *qspStrPBrk(QSP_CHAR *, QSP_CHAR *);
+QSP_CHAR *qspInStrRChars(QSP_CHAR *, QSP_CHAR *, QSP_CHAR *);
+QSP_CHAR *qspJoinStrs(QSP_CHAR **, int, QSP_CHAR *);
+int qspSplitStr(QSP_CHAR *, QSP_CHAR *, QSP_CHAR ***);
+void qspCopyStrs(QSP_CHAR ***, QSP_CHAR **, int, int);
+void qspFreeStrs(void **, int);
+int qspStrToNum(QSP_CHAR *, QSP_CHAR **);
+QSP_CHAR *qspNumToStr(QSP_CHAR *, int);
+QSP_CHAR *qspStrPos(QSP_CHAR *, QSP_CHAR *, QSP_BOOL);
+QSP_CHAR *qspReplaceText(QSP_CHAR *, QSP_CHAR *, QSP_CHAR *);
+QSP_CHAR *qspFormatText(QSP_CHAR *, QSP_BOOL);
 
-	#ifdef _UNICODE
-		int qspToWLower(int);
-		int qspToWUpper(int);
-	#endif
+#ifdef _UNICODE
+int qspToWLower(int);
+int qspToWUpper(int);
+#endif
 
 #endif
