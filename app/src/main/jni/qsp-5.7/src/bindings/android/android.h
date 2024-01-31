@@ -22,7 +22,7 @@
 	#define QSP_ANDROIDDEFINES
 
 	#ifdef _UNICODE
-		typedef unsigned int QSP_CHAR;
+		typedef unsigned short QSP_CHAR;
 	#endif
 
 	char *qspW2C(QSP_CHAR *);
