@@ -33,7 +33,7 @@ set(QSP_SOURCES
         src/bindings/android/android_control.c
 )
 
-add_definitions( -D_ANDROID -D_UNICODE -DNOT_RUBY -DEXPORT -w )
+add_definitions( -fshort-wchar -D_ANDROID -D_UNICODE -DNOT_RUBY -DEXPORT -w )
 
 add_library( ndkqsp SHARED ${QSP_SOURCES} )
 
