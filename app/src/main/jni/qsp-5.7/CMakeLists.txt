@@ -7,7 +7,7 @@ include_directories( ../onig )
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 set(QSP_SOURCES
-        androidqspwrapper.c
+        androidqpwrapper.c
         src/actions.c
         src/callbacks.c
         src/codetools.c
