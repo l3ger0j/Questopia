@@ -25,8 +25,8 @@
 typedef unsigned short QSP_CHAR;
 #endif
 
-QSP_EXTERN char *qspW2C(QSP_CHAR *);
-QSP_EXTERN QSP_CHAR *qspC2W(char *);
+char *qspW2C(QSP_CHAR *);
+QSP_CHAR *qspC2W(char *);
 
 QSP_EXTERN JNIEnv *qspJniEnv;
 QSP_EXTERN jobject qspCallbacksObj;
