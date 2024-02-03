@@ -3,6 +3,8 @@ project(ndkqsp)
 
 include_directories( ../onig )
 
+set_property(TARGET ${TARGET_NAME} PROPERTY C_STANDARD 17)
+
 # -fPIC
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
