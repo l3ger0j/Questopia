@@ -286,7 +286,7 @@ void qspInitMath() {
 
 static int qspGetNumber(QSP_CHAR **expr) {
   int i = 0;
-  QSP_CHAR buf[11], *pos = *expr;
+  QSP_CHAR buf[11] = {0}, *pos = *expr;
   while (qspIsDigit(*pos)) {
 	if (i < QSP_LEN(buf)) buf[i] = *pos;
 	++i;
@@ -389,7 +389,7 @@ static QSPVariant qspValue(int itemsCount,
 						   int *compOpCodes,
 						   int *compArgsCounts) {
   int type;
-  QSPVariant stack[QSP_STACKSIZE], args[QSP_OPMAXARGS], tos;
+  QSPVariant stack[QSP_STACKSIZE] = {0, 0}, args[QSP_OPMAXARGS] = {0, 0}, tos = {0, 0};
   int i, j, oldRefreshCount, opCode, argsCount, len, sp = -1, index = 0;
   tos.IsStr = QSP_FALSE;
   QSP_NUM(tos) = 0;
