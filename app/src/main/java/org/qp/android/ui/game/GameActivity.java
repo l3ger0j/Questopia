@@ -126,6 +126,7 @@ public class GameActivity extends AppCompatActivity implements
             getWindow().getAttributes().layoutInDisplayCutoutMode =
                     WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
         }
+        WindowCompat.setDecorFitsSystemWindows(getWindow() , false);
 
         mDecorView = getWindow().getDecorView();
         if (settingsController.isUseImmersiveMode) {
@@ -261,67 +262,17 @@ public class GameActivity extends AppCompatActivity implements
     }
 
     private void hideSystemUI() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            var windowInsetsController =
-                    WindowCompat.getInsetsController(getWindow() , activityGameBinding.getRoot());
-            windowInsetsController.setSystemBarsBehavior(
-                    WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
-            mDecorView.setOnApplyWindowInsetsListener((view, windowInsets) -> {
-                if (windowInsets.isVisible(WindowInsetsCompat.Type.navigationBars())
-                        || windowInsets.isVisible(WindowInsetsCompat.Type.statusBars())) {
-                    windowInsetsController.hide(WindowInsetsCompat.Type.systemBars());
-                }
-                return view.onApplyWindowInsets(windowInsets);
-            });
-        } else {
-            mDecorView.setSystemUiVisibility(
-                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                            | View.SYSTEM_UI_FLAG_FULLSCREEN
-                            | View.SYSTEM_UI_FLAG_IMMERSIVE);
-        }
+        var windowInsetsController =
+                WindowCompat.getInsetsController(getWindow() , activityGameBinding.getRoot());
+       windowInsetsController.hide(WindowInsetsCompat.Type.systemBars());
+       windowInsetsController.setSystemBarsBehavior(
+                WindowInsetsControllerCompat.BEHAVIOR_SHOW_BARS_BY_SWIPE);
     }
 
     private void showSystemUI() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            var windowInsetsController =
-                    WindowCompat.getInsetsController(getWindow() , activityGameBinding.getRoot());
-            windowInsetsController.setSystemBarsBehavior(
-                    WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
-            mDecorView.setOnApplyWindowInsetsListener((view, windowInsets) -> {
-                if (!windowInsets.isVisible(WindowInsetsCompat.Type.navigationBars())
-                        || !windowInsets.isVisible(WindowInsetsCompat.Type.statusBars())) {
-                    windowInsetsController.show(WindowInsetsCompat.Type.systemBars());
-                }
-                return view.onApplyWindowInsets(windowInsets);
-            });
-        } else {
-            mDecorView.setSystemUiVisibility(
-                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
-        }
-    }
-
-    @Override
-    public void onWindowFocusChanged(boolean hasFocus) {
-        super.onWindowFocusChanged(hasFocus);
-        if (hasFocus) {
-            if (settingsController.isUseImmersiveMode) {
-                mDecorView.setSystemUiVisibility(
-                        View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                                | View.SYSTEM_UI_FLAG_FULLSCREEN
-                                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
-            } else {
-                mDecorView.setSystemUiVisibility(
-                        View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
-            }
-        }
+        WindowCompat
+                .getInsetsController(getWindow() , activityGameBinding.getRoot())
+                .show(WindowInsetsCompat.Type.systemBars());
     }
 
     private void initControls() {
