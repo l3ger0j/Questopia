@@ -227,8 +227,8 @@ public class GameActivity extends AppCompatActivity implements
 
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
-        super.onSaveInstanceState(outState);
         outState.putInt("savedActiveTab" , activeTab);
+        super.onSaveInstanceState(outState);
     }
 
     @Override
