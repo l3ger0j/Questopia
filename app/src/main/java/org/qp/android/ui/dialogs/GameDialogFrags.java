@@ -9,22 +9,27 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 import androidx.databinding.ObservableField;
+import androidx.fragment.app.DialogFragment;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputLayout;
 
 import org.qp.android.R;
 import org.qp.android.databinding.DialogImageBinding;
+import org.qp.android.ui.game.GameViewModel;
 
 import java.util.ArrayList;
 
-public class GameDialogFrags extends GamePatternDialogFrags {
+public class GameDialogFrags extends DialogFragment {
     private ArrayList<String> items;
     private GameDialogType dialogType;
     private DialogImageBinding imageBinding;
     private String processedMsg;
     private String message;
     private String template;
+
+    private GameViewModel gameViewModel;
 
     public ObservableField<String> pathToImage = new ObservableField<>();
 
@@ -42,6 +47,12 @@ public class GameDialogFrags extends GamePatternDialogFrags {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        gameViewModel = new ViewModelProvider(requireActivity()).get(GameViewModel.class);
     }
 
     @NonNull
@@ -74,7 +85,7 @@ public class GameDialogFrags extends GamePatternDialogFrags {
                 textInputLayout.setHelperText(message);
                 builder.setView(executorView);
                 builder.setPositiveButton(android.R.string.ok ,
-                        (dialog , which) -> listener.onDialogPositiveClick(this));
+                        (dialog , which) -> gameViewModel.doDialogPositiveClick(this));
                 builder.setNeutralButton(null , (dialog , which) -> {});
                 builder.setNeutralButtonIcon(ContextCompat.getDrawable(requireContext() ,
                         R.drawable.baseline_file_upload_24));
@@ -90,7 +101,7 @@ public class GameDialogFrags extends GamePatternDialogFrags {
             case CLOSE_DIALOG -> {
                 builder.setMessage(requireContext().getString(R.string.promptCloseGame));
                 builder.setPositiveButton(android.R.string.ok ,
-                        (dialog , which) -> listener.onDialogPositiveClick(this));
+                        (dialog , which) -> gameViewModel.doDialogPositiveClick(this));
                 builder.setNegativeButton(android.R.string.cancel ,
                         (dialog , which) -> {});
                 return builder.create();
@@ -105,21 +116,21 @@ public class GameDialogFrags extends GamePatternDialogFrags {
             case LOAD_DIALOG -> {
                 builder.setMessage(requireContext().getString(R.string.loadGamePopup));
                 builder.setPositiveButton(android.R.string.ok ,
-                        (dialog , which) -> listener.onDialogPositiveClick(this));
+                        (dialog , which) -> gameViewModel.doDialogPositiveClick(this));
                 builder.setNegativeButton(android.R.string.no ,
                         (dialog , which) -> {});
                 return builder.create();
             }
             case MENU_DIALOG -> {
                 builder.setItems(items.toArray(new CharSequence[0]) ,
-                        (dialog , which) -> listener.onDialogListClick(this , which));
-                builder.setOnCancelListener(dialog -> listener.onDialogNegativeClick(this));
+                        (dialog , which) -> gameViewModel.doDialogListClick(this , which));
+                builder.setOnCancelListener(dialog -> gameViewModel.doDialogNegativeClick(this));
                 return builder.create();
             }
             case MESSAGE_DIALOG -> {
                 builder.setMessage(processedMsg);
                 builder.setPositiveButton(android.R.string.ok ,
-                        (dialog , which) -> listener.onDialogPositiveClick(this));
+                        (dialog , which) -> gameViewModel.doDialogPositiveClick(this));
                 return builder.create();
             }
         }
@@ -141,7 +152,7 @@ public class GameDialogFrags extends GamePatternDialogFrags {
                     textInputLayout.getEditText().setText(template);
                 }
                 var neutralButton = (Button) dialog.getButton(Dialog.BUTTON_NEUTRAL);
-                neutralButton.setOnClickListener(v -> listener.onDialogNeutralClick(this));
+                neutralButton.setOnClickListener(v -> gameViewModel.doDialogNeutralClick(this));
             }
         }
     }

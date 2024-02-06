@@ -19,6 +19,7 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.databinding.ObservableBoolean;
 import androidx.documentfile.provider.DocumentFile;
+import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -31,7 +32,9 @@ import org.qp.android.QuestPlayerApplication;
 import org.qp.android.R;
 import org.qp.android.databinding.DialogEditBinding;
 import org.qp.android.dto.stock.GameData;
+import org.qp.android.helpers.bus.EventEmitter;
 import org.qp.android.helpers.repository.LocalGame;
+import org.qp.android.ui.dialogs.DialogNavigation;
 import org.qp.android.ui.dialogs.StockDialogFrags;
 import org.qp.android.ui.dialogs.StockDialogType;
 import org.qp.android.ui.game.GameActivity;
@@ -72,6 +75,8 @@ public class StockViewModel extends AndroidViewModel {
     private final MutableLiveData<ArrayList<GameData>> gameDataList;
 
     public MutableLiveData<Integer> outputIntObserver = new MutableLiveData<>();
+
+    public EventEmitter emitter = new EventEmitter();
 
     // region Getter/Setter
     public void setController(SettingsController controller) {
@@ -333,6 +338,34 @@ public class StockViewModel extends AndroidViewModel {
         listGamesDir.add(gameDir);
     }
 
+    public void doOnShowErrorDialog(String errorMessage) {
+        emitter.waitAndExecute(new StockFragmentNavigation.ShowErrorDialog(errorMessage));
+    }
+
+    public void doOnShowGameFragment(int position) {
+        emitter.emitAndExecute(new StockFragmentNavigation.ShowGameFragment(position));
+    }
+
+    public void doOnShowActionMode() {
+        emitter.emitAndExecute(new StockFragmentNavigation.ShowActionMode());
+    }
+
+    public void doDialogPositiveClick(DialogFragment fragment) {
+        emitter.emitAndExecute(new DialogNavigation.DialogPositiveClick(fragment));
+    }
+
+    public void doDialogNeutralClick(DialogFragment fragment) {
+        emitter.emitAndExecute(new DialogNavigation.DialogNeutralClick(fragment));
+    }
+
+    public void doDialogListClick(DialogFragment fragment , int which) {
+        emitter.emitAndExecute(new DialogNavigation.DialogListClick(fragment , which));
+    }
+
+    public void doDialogOnDestroy(DialogFragment fragment) {
+        emitter.emitAndExecute(new DialogNavigation.DialogOnDestroy(fragment));
+    }
+
     public StockViewModel(@NonNull Application application) {
         super(application);
         gameDataList = new MutableLiveData<>();
@@ -349,6 +382,14 @@ public class StockViewModel extends AndroidViewModel {
         getStockActivity()
                 .showDialogFragment(dialogFragments , StockDialogType.EDIT_DIALOG);
         isHideFAB.set(true);
+    }
+
+    public StockDialogFrags getDialogEdit() {
+        isHideFAB.set(true);
+        dialogFragments = new StockDialogFrags();
+        dialogFragments.setDialogType(StockDialogType.EDIT_DIALOG);
+        dialogFragments.setEditBinding(formingEditView());
+        return dialogFragments;
     }
 
     @NonNull
@@ -421,6 +462,41 @@ public class StockViewModel extends AndroidViewModel {
                     gameData.fileSize = formatFileSize(aLong , controller.binaryPrefixes);
                     localGame.createDataIntoFolder(getApplication() , gameData , gameData.gameDir);
                 });
+    }
+
+    public Intent createPlayGameIntent() {
+        var gameDir = tempGameData.gameDir;
+        var intent = new Intent(getApplication() , GameActivity.class);
+
+        var application = (QuestPlayerApplication) getApplication();
+        application.setCurrentGameDir(gameDir);
+
+        intent.putExtra("gameId" , tempGameData.id);
+        intent.putExtra("gameTitle" , tempGameData.title);
+        intent.putExtra("gameDirUri" , String.valueOf(gameDir.getUri()));
+
+        return intent;
+    }
+
+    public int getCountGameFiles() {
+        return tempGameData.gameFiles.size();
+    }
+
+    public DocumentFile getGameFile(int index) {
+        return tempGameData.gameFiles.get(index);
+    }
+
+    public StockDialogFrags createSelectDialog() {
+        if (outputIntObserver.hasObservers()) {
+            outputIntObserver = new MutableLiveData<>();
+        }
+        var names = new ArrayList<String>();
+        tempGameData.gameFiles.forEach(documentFile ->
+                names.add(documentFile.getName()));
+        var dialogFragments = new StockDialogFrags();
+        dialogFragments.setDialogType(StockDialogType.SELECT_DIALOG);
+        dialogFragments.setNames(names);
+        return dialogFragments;
     }
 
     public void playGame() {

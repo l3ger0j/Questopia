@@ -55,10 +55,11 @@ import org.qp.android.QuestPlayerApplication;
 import org.qp.android.R;
 import org.qp.android.databinding.ActivityStockBinding;
 import org.qp.android.dto.stock.GameData;
+import org.qp.android.helpers.bus.EventObserver;
 import org.qp.android.helpers.utils.ViewUtil;
+import org.qp.android.ui.dialogs.DialogNavigation;
 import org.qp.android.ui.dialogs.StockDialogFrags;
 import org.qp.android.ui.dialogs.StockDialogType;
-import org.qp.android.ui.dialogs.StockPatternDialogFrags;
 import org.qp.android.ui.settings.SettingsActivity;
 import org.qp.android.ui.settings.SettingsController;
 
@@ -71,8 +72,7 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 
-public class StockActivity extends AppCompatActivity implements
-        StockPatternDialogFrags.StockPatternDialogList, StockPatternFragment.StockPatternFragmentList {
+public class StockActivity extends AppCompatActivity {
 
     private static final int POST_NOTIFICATION = 203;
     private final String TAG = this.getClass().getSimpleName();
@@ -103,6 +103,25 @@ public class StockActivity extends AppCompatActivity implements
         this.mRecyclerView = mRecyclerView;
     }
 
+    private final EventObserver navigationEventsObserver = new EventObserver(eventNavigation -> {
+        if (eventNavigation instanceof StockFragmentNavigation.ShowErrorDialog) {
+            showErrorDialog(((StockFragmentNavigation.ShowErrorDialog) eventNavigation).getErrorMessage());
+        } else if (eventNavigation instanceof StockFragmentNavigation.ShowGameFragment) {
+            onItemClick(((StockFragmentNavigation.ShowGameFragment) eventNavigation).getPosition());
+        } else if (eventNavigation instanceof StockFragmentNavigation.ShowActionMode) {
+            onLongItemClick();
+        } else if (eventNavigation instanceof DialogNavigation.DialogPositiveClick) {
+            onDialogPositiveClick(((DialogNavigation.DialogPositiveClick) eventNavigation).getFragment());
+        } else if (eventNavigation instanceof DialogNavigation.DialogNeutralClick) {
+            onDialogNeutralClick(((DialogNavigation.DialogNeutralClick) eventNavigation).getFragment());
+        } else if (eventNavigation instanceof DialogNavigation.DialogListClick) {
+            onDialogListClick(((DialogNavigation.DialogListClick) eventNavigation).getFragment() ,
+                    ((DialogNavigation.DialogListClick) eventNavigation).getWhich());
+        } else if (eventNavigation instanceof DialogNavigation.DialogOnDestroy){
+            onDialogDestroy(((DialogNavigation.DialogOnDestroy) eventNavigation).getFragment());
+        }
+    });
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         var splashScreen = SplashScreen.installSplashScreen(this);
@@ -123,6 +142,8 @@ public class StockActivity extends AppCompatActivity implements
         activityStockBinding.setStockVM(stockViewModel);
         stockViewModel.activityObserver.setValue(this);
         gamesMap = stockViewModel.getGamesMap();
+
+        stockViewModel.emitter.observe(this , navigationEventsObserver);
 
         mFAB = activityStockBinding.stockFAB;
         mFAB.setOnClickListener(view -> showDirPickerDialog());
@@ -367,6 +388,30 @@ public class StockActivity extends AppCompatActivity implements
         }
     }
 
+    public void onDialogDestroy(DialogFragment dialog) {
+        if (!Objects.equals(dialog.getTag() , "editDialogFragment")) {
+            stockViewModel.isHideFAB.set(false);
+        }
+    }
+
+    public void onDialogPositiveClick(DialogFragment dialog) {
+        if (Objects.equals(dialog.getTag() , "infoDialogFragment")) {
+            stockViewModel.showDialogEdit();
+        }
+    }
+
+    public void onDialogNeutralClick(DialogFragment dialog) {
+        if (Objects.equals(dialog.getTag() , "infoDialogFragment")) {
+            stockViewModel.playGame();
+        }
+    }
+
+    public void onDialogListClick(DialogFragment dialog , int which) {
+        if (Objects.equals(dialog.getTag() , "selectDialogFragment")) {
+            stockViewModel.outputIntObserver.setValue(which);
+        }
+    }
+
     public void onItemClick(int position) {
         if (isEnable) {
             for (var gameData : gamesMap.values()) {
@@ -397,49 +442,6 @@ public class StockActivity extends AppCompatActivity implements
                 stockViewModel.isHideFAB.set(true);
             }
         }
-    }
-
-    @Override
-    public void onDialogDestroy(DialogFragment dialog) {
-        if (!Objects.equals(dialog.getTag() , "editDialogFragment")) {
-            stockViewModel.isHideFAB.set(false);
-        }
-    }
-
-    @Override
-    public void onDialogPositiveClick(DialogFragment dialog) {
-        if (Objects.equals(dialog.getTag() , "infoDialogFragment")) {
-            stockViewModel.showDialogEdit();
-        }
-    }
-
-    @Override
-    public void onDialogNeutralClick(DialogFragment dialog) {
-        if (Objects.equals(dialog.getTag() , "infoDialogFragment")) {
-            stockViewModel.playGame();
-        }
-    }
-
-    @Override
-    public void onDialogListClick(DialogFragment dialog , int which) {
-        if (Objects.equals(dialog.getTag() , "selectDialogFragment")) {
-            stockViewModel.outputIntObserver.setValue(which);
-        }
-    }
-
-    @Override
-    public void onClickEditButton() {
-        stockViewModel.showDialogEdit();
-    }
-
-    @Override
-    public void onClickPlayButton() {
-        stockViewModel.playGame();
-    }
-
-    @Override
-    public void onClickDownloadButton() {
-        // TODO: 19.07.2023 Release this
     }
 
     public void onLongItemClick() {

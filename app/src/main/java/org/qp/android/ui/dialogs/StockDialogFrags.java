@@ -5,15 +5,18 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.fragment.app.DialogFragment;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import org.qp.android.R;
 import org.qp.android.databinding.DialogEditBinding;
+import org.qp.android.ui.stock.StockViewModel;
 
 import java.util.ArrayList;
 
-public class StockDialogFrags extends StockPatternDialogFrags {
+public class StockDialogFrags extends DialogFragment {
     private DialogEditBinding editBinding;
     private StockDialogType dialogType;
     private ArrayList<String> names;
@@ -21,6 +24,8 @@ public class StockDialogFrags extends StockPatternDialogFrags {
     private boolean isInstalled;
     private String message;
     private String title;
+
+    private StockViewModel stockViewModel;
 
     public void setDialogType(StockDialogType dialogType) {
         this.dialogType = dialogType;
@@ -44,6 +49,12 @@ public class StockDialogFrags extends StockPatternDialogFrags {
 
     public void setInstalled(boolean installed) {
         isInstalled = installed;
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        stockViewModel = new ViewModelProvider(requireActivity()).get(StockViewModel.class);
     }
 
     @NonNull
@@ -91,16 +102,16 @@ public class StockDialogFrags extends StockPatternDialogFrags {
                 builder.setNegativeButton(getString(R.string.close) , (dialog , which) -> dialog.cancel());
                 if (isInstalled) {
                     builder.setNeutralButton(getString(R.string.play) , (dialog , which) ->
-                            listener.onDialogNeutralClick(this));
+                            stockViewModel.doDialogNeutralClick(this));
                     builder.setPositiveButton(getString(R.string.editButton) , (dialog , which) ->
-                            listener.onDialogPositiveClick(this));
+                            stockViewModel.doDialogPositiveClick(this));
                 }
                 return builder.create();
             }
             case SELECT_DIALOG -> {
                 builder.setTitle(requireContext().getString(R.string.selectGameFile));
                 builder.setItems(names.toArray(new String[0]) , (dialog , which) ->
-                        listener.onDialogListClick(this , which));
+                        stockViewModel.doDialogListClick(this , which));
                 return builder.create();
             }
             default -> {
@@ -129,7 +140,7 @@ public class StockDialogFrags extends StockPatternDialogFrags {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        listener.onDialogDestroy(this);
+        stockViewModel.doDialogOnDestroy(this);
         if (editBinding != null) {
             editBinding = null;
         }

@@ -33,7 +33,6 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.DialogFragment;
-import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
@@ -49,12 +48,13 @@ import org.jetbrains.annotations.Contract;
 import org.qp.android.QuestPlayerApplication;
 import org.qp.android.R;
 import org.qp.android.databinding.ActivityGameBinding;
+import org.qp.android.helpers.bus.EventObserver;
 import org.qp.android.model.libQP.LibQpProxy;
 import org.qp.android.model.service.AudioPlayer;
 import org.qp.android.model.service.HtmlProcessor;
 import org.qp.android.ui.dialogs.GameDialogFrags;
+import org.qp.android.ui.dialogs.DialogNavigation;
 import org.qp.android.ui.dialogs.GameDialogType;
-import org.qp.android.ui.dialogs.GamePatternDialogFrags;
 import org.qp.android.ui.settings.SettingsActivity;
 import org.qp.android.ui.settings.SettingsController;
 
@@ -67,8 +67,7 @@ import java.util.Objects;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CountDownLatch;
 
-public class GameActivity extends AppCompatActivity implements
-        GamePatternDialogFrags.GamePatternDialogList {
+public class GameActivity extends AppCompatActivity {
 
     private final String TAG = this.getClass().getSimpleName();
 
@@ -102,15 +101,18 @@ public class GameActivity extends AppCompatActivity implements
         return settingsController;
     }
 
-    @Nullable
-    private FragmentManager getFragManager() {
-        var fragmentManager = getSupportFragmentManager();
-        if (fragmentManager.isDestroyed()) {
-            return null;
-        } else {
-            return fragmentManager;
+    private final EventObserver navigationEventsObserver = new EventObserver(eventNavigation -> {
+        if (eventNavigation instanceof DialogNavigation.DialogPositiveClick) {
+            onDialogPositiveClick(((DialogNavigation.DialogPositiveClick) eventNavigation).getFragment());
+        } else if (eventNavigation instanceof DialogNavigation.DialogNegativeClick) {
+            onDialogNegativeClick(((DialogNavigation.DialogNegativeClick) eventNavigation).getFragment());
+        } else if (eventNavigation instanceof DialogNavigation.DialogNeutralClick) {
+            onDialogNeutralClick(((DialogNavigation.DialogNeutralClick) eventNavigation).getFragment());
+        } else if (eventNavigation instanceof DialogNavigation.DialogListClick) {
+            onDialogListClick(((DialogNavigation.DialogListClick) eventNavigation).getFragment() ,
+                    ((DialogNavigation.DialogListClick) eventNavigation).getWhich());
         }
-    }
+    });
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -120,6 +122,8 @@ public class GameActivity extends AppCompatActivity implements
         gameViewModel = new ViewModelProvider(this).get(GameViewModel.class);
         gameViewModel.activityObserver.setValue(this);
         settingsController = gameViewModel.getSettingsController();
+
+        gameViewModel.emitter.observe(this , navigationEventsObserver);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             // Prevent jumping of the player on devices with cutout
@@ -248,8 +252,8 @@ public class GameActivity extends AppCompatActivity implements
     }
 
     private void postTextInDialogFrags (String text) {
-        var manager = getFragManager();
-        if (manager != null) {
+        var manager = getSupportFragmentManager();
+        if (!manager.isDestroyed()) {
             for (var fragment : manager.getFragments()) {
                 if (Objects.equals(fragment.getTag() , "executorDialogFragment")
                         || Objects.equals(fragment.getTag() , "inputDialogFragment")) {
@@ -406,9 +410,10 @@ public class GameActivity extends AppCompatActivity implements
             var dialogFragment = new GameDialogFrags();
             dialogFragment.setDialogType(GameDialogType.CLOSE_DIALOG);
             dialogFragment.setCancelable(false);
-            var manager = getFragManager();
-            if (manager == null) return;
-            dialogFragment.show(manager , "closeGameDialogFragment");
+            var manager = getSupportFragmentManager();
+            if (!manager.isDestroyed()) {
+                dialogFragment.show(manager , "closeGameDialogFragment");
+            }
         }
     }
 
@@ -425,8 +430,8 @@ public class GameActivity extends AppCompatActivity implements
         if (!isMainThread()) {
             runOnUiThread(() -> showSimpleDialog(inputString , dialogType));
         } else {
-            var manager = getFragManager();
-            if (manager == null) return;
+            var manager = getSupportFragmentManager();
+            if (manager.isDestroyed()) return;
 
             switch (dialogType) {
                 case ERROR_DIALOG -> {
@@ -456,8 +461,8 @@ public class GameActivity extends AppCompatActivity implements
         if (!isMainThread()) {
             runOnUiThread(() -> showMessageDialog(inputString, latch));
         } else {
-            var manager = getFragManager();
-            if (manager == null) return;
+            var manager = getSupportFragmentManager();
+            if (manager.isDestroyed()) return;
 
             var config = libQpProxy.getGameState().interfaceConfig;
             var processedMsg = config.useHtml ? htmlProcessor.removeHTMLTags(inputString) : inputString;
@@ -485,8 +490,8 @@ public class GameActivity extends AppCompatActivity implements
         if (!isMainThread()) {
             runOnUiThread(() -> showInputDialog(inputString, inputQueue));
         } else {
-            var manager = getFragManager();
-            if (manager == null) return;
+            var manager = getSupportFragmentManager();
+            if (manager.isDestroyed()) return;
 
             var config = libQpProxy.getGameState().interfaceConfig;
             var message = config.useHtml ? htmlProcessor.removeHTMLTags(inputString) : inputString;
@@ -514,8 +519,8 @@ public class GameActivity extends AppCompatActivity implements
         if (!isMainThread()) {
             runOnUiThread(() -> showExecutorDialog(inputString, inputQueue));
         } else {
-            var manager = getFragManager();
-            if (manager == null) return;
+            var manager = getSupportFragmentManager();
+            if (manager.isDestroyed()) return;
 
             var config = libQpProxy.getGameState().interfaceConfig;
             var message = config.useHtml ? htmlProcessor.removeHTMLTags(inputString) : inputString;
@@ -543,8 +548,8 @@ public class GameActivity extends AppCompatActivity implements
         if (!isMainThread()) {
             runOnUiThread(() -> showMenuDialog(items, resultQueue));
         } else {
-            var manager = getFragManager();
-            if (manager == null) return;
+            var manager = getSupportFragmentManager();
+            if (manager.isDestroyed()) return;
 
             if (gameViewModel.outputIntObserver.hasObservers()) {
                 gameViewModel.outputIntObserver = new MutableLiveData<>();
@@ -728,7 +733,6 @@ public class GameActivity extends AppCompatActivity implements
         }
     }
 
-    @Override
     public void onDialogPositiveClick(DialogFragment dialog) {
         if (dialog == null) return;
         var dialogTag = dialog.getTag();
@@ -760,7 +764,6 @@ public class GameActivity extends AppCompatActivity implements
         }
     }
 
-    @Override
     public void onDialogNegativeClick(DialogFragment dialog) {
         if (dialog.getTag() != null) {
             if (dialog.getTag().equals("showMenuDialogFragment")) {
@@ -769,7 +772,6 @@ public class GameActivity extends AppCompatActivity implements
         }
     }
 
-    @Override
     public void onDialogNeutralClick(DialogFragment dialog) {
         if (dialog.getTag() != null) {
             if (dialog.getTag().equals("inputDialogFragment")
@@ -779,7 +781,6 @@ public class GameActivity extends AppCompatActivity implements
         }
     }
 
-    @Override
     public void onDialogListClick(DialogFragment dialog , int which) {
         if (dialog != null) {
             if (Objects.equals(dialog.getTag() , "showMenuDialogFragment")) {

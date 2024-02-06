@@ -8,6 +8,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
@@ -18,7 +19,7 @@ import org.qp.android.helpers.adapters.RecyclerItemClickListener;
 
 import java.util.ArrayList;
 
-public class StockRecyclerFragment extends StockPatternFragment {
+public class StockRecyclerFragment extends Fragment {
 
     private StockViewModel stockViewModel;
     private RecyclerView mRecyclerView;
@@ -54,12 +55,12 @@ public class StockRecyclerFragment extends StockPatternFragment {
                 new RecyclerItemClickListener.OnItemClickListener() {
                     @Override
                     public void onItemClick(View view , int position) {
-                        listener.onItemClick(position);
+                        stockViewModel.doOnShowGameFragment(position);
                     }
 
                     @Override
                     public void onLongItemClick(View view , int position) {
-                        listener.onLongItemClick();
+                        stockViewModel.doOnShowActionMode();
                     }
                 }));
         mRecyclerView.setAccessibilityDelegate(new View.AccessibilityDelegate() {

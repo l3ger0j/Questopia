@@ -8,11 +8,15 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import org.qp.android.R;
 import org.qp.android.databinding.FragmentStockGameBinding;
+import org.qp.android.ui.dialogs.StockDialogType;
 
-public class StockGameFragment extends StockPatternFragment {
+public class StockGameFragment extends Fragment {
 
     private FragmentStockGameBinding fragmentStockGameBinding;
     private StockViewModel stockViewModel;
@@ -34,8 +38,44 @@ public class StockGameFragment extends StockPatternFragment {
     @Override
     public void onViewCreated(@NonNull View view , @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view , savedInstanceState);
-        fragmentStockGameBinding.editButton.setOnClickListener(view1 -> listener.onClickEditButton());
-        fragmentStockGameBinding.playButton.setOnClickListener(view2 -> listener.onClickPlayButton());
-        fragmentStockGameBinding.downloadButton.setOnClickListener(view3 -> listener.onClickDownloadButton());
+        fragmentStockGameBinding.editButton.setOnClickListener(view1 ->
+                showDialogFragment(stockViewModel.getDialogEdit() , StockDialogType.EDIT_DIALOG));
+        fragmentStockGameBinding.playButton.setOnClickListener(view2 -> {
+            var intent = stockViewModel.createPlayGameIntent();
+            switch (stockViewModel.getCountGameFiles()) {
+                case 0 -> stockViewModel.doOnShowErrorDialog(getString(R.string.gameFolderEmpty));
+                case 1 -> {
+                    var chosenGameFile = stockViewModel.getGameFile(0);
+                    intent.putExtra("gameFileUri" ,  String.valueOf(chosenGameFile.getUri()));
+                    requireActivity().startActivity(intent);
+                }
+                default -> {
+                    var dialog = stockViewModel.createSelectDialog();
+                    var intObserver = stockViewModel.outputIntObserver;
+                    intObserver.observe(getViewLifecycleOwner() , integer -> {
+                        var chosenGameFile = stockViewModel.getGameFile(integer);
+                        intent.putExtra("gameFileUri" , String.valueOf(chosenGameFile.getUri()));
+                        requireActivity().startActivity(intent);
+                    });
+                    showDialogFragment(dialog , StockDialogType.SELECT_DIALOG);
+                }
+            }
+        });
+        // TODO: 19.07.2023 Release this
+        // fragmentStockGameBinding.downloadButton.setOnClickListener(view3 -> listener.onClickDownloadButton());
+    }
+
+    public void showDialogFragment(DialogFragment dialogFragment , StockDialogType dialogType) {
+        var fragment = getParentFragmentManager().findFragmentByTag(dialogFragment.getTag());
+        if (fragment != null && fragment.isAdded()) {
+            fragment.onDestroy();
+        } else {
+            switch (dialogType) {
+                case EDIT_DIALOG ->
+                        dialogFragment.showNow(getParentFragmentManager() , "editDialogFragment");
+                case SELECT_DIALOG ->
+                        dialogFragment.showNow(getParentFragmentManager() , "selectDialogFragment");
+            }
+        }
     }
 }

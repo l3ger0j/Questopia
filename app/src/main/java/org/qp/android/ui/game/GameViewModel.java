@@ -27,6 +27,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.databinding.ObservableBoolean;
 import androidx.databinding.ObservableField;
+import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -36,11 +37,13 @@ import com.anggrayudi.storage.file.DocumentFileCompat;
 
 import org.qp.android.QuestPlayerApplication;
 import org.qp.android.R;
+import org.qp.android.helpers.bus.EventEmitter;
 import org.qp.android.model.libQP.LibQpProxy;
 import org.qp.android.model.libQP.RefreshInterfaceRequest;
 import org.qp.android.model.libQP.WindowType;
 import org.qp.android.model.service.AudioPlayer;
 import org.qp.android.model.service.HtmlProcessor;
+import org.qp.android.ui.dialogs.DialogNavigation;
 import org.qp.android.ui.dialogs.GameDialogType;
 import org.qp.android.ui.settings.SettingsController;
 
@@ -109,6 +112,8 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
             }
         }
     };
+
+    public EventEmitter emitter = new EventEmitter();
 
     // region Getter/Setter
     public HtmlProcessor getHtmlProcessor() {
@@ -240,6 +245,22 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
     }
 
     // endregion Getter/Setter
+
+    public void doDialogPositiveClick(DialogFragment fragment) {
+        emitter.emitAndExecute(new DialogNavigation.DialogPositiveClick(fragment));
+    }
+
+    public void doDialogNegativeClick(DialogFragment fragment) {
+        emitter.emitAndExecute(new DialogNavigation.DialogNegativeClick(fragment));
+    }
+
+    public void doDialogNeutralClick(DialogFragment fragment) {
+        emitter.emitAndExecute(new DialogNavigation.DialogNeutralClick(fragment));
+    }
+
+    public void doDialogListClick(DialogFragment fragment , int which) {
+        emitter.emitAndExecute(new DialogNavigation.DialogListClick(fragment , which));
+    }
 
     public void updatePageTemplate() {
         var pageHeadTemplate = PAGE_HEAD_TEMPLATE
