@@ -27,7 +27,6 @@ import android.webkit.WebViewClient;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.databinding.ObservableBoolean;
-import androidx.databinding.ObservableField;
 import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
@@ -39,7 +38,6 @@ import com.google.android.material.textfield.TextInputLayout;
 
 import org.qp.android.QuestPlayerApplication;
 import org.qp.android.R;
-import org.qp.android.helpers.bus.EventEmitter;
 import org.qp.android.model.libQP.LibQpProxy;
 import org.qp.android.model.libQP.RefreshInterfaceRequest;
 import org.qp.android.model.libQP.WindowType;
@@ -64,8 +62,6 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
     private AudioPlayer audioPlayer;
     private final Uri fullPathGameDir;
 
-    public ObservableField<GameActivity> gameActivityObservableField =
-            new ObservableField<>();
     public ObservableBoolean isActionVisible = new ObservableBoolean();
 
     public MutableLiveData<String> outputTextObserver = new MutableLiveData<>();
@@ -114,8 +110,6 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
             }
         }
     };
-
-    public EventEmitter emitter = new EventEmitter();
 
     // region Getter/Setter
     public HtmlProcessor getHtmlProcessor() {
