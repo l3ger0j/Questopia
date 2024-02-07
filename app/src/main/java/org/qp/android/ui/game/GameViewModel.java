@@ -7,6 +7,7 @@ import static org.qp.android.helpers.utils.ColorUtil.getHexColor;
 import static org.qp.android.helpers.utils.FileUtil.fromRelPath;
 import static org.qp.android.helpers.utils.ThreadUtil.assertNonUiThread;
 import static org.qp.android.helpers.utils.ViewUtil.getFontStyle;
+import static org.qp.android.ui.game.GameActivity.LOAD;
 
 import android.annotation.SuppressLint;
 import android.app.Application;
@@ -34,6 +35,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.preference.PreferenceManager;
 
 import com.anggrayudi.storage.file.DocumentFileCompat;
+import com.google.android.material.textfield.TextInputLayout;
 
 import org.qp.android.QuestPlayerApplication;
 import org.qp.android.R;
@@ -43,12 +45,12 @@ import org.qp.android.model.libQP.RefreshInterfaceRequest;
 import org.qp.android.model.libQP.WindowType;
 import org.qp.android.model.service.AudioPlayer;
 import org.qp.android.model.service.HtmlProcessor;
-import org.qp.android.ui.dialogs.DialogNavigation;
 import org.qp.android.ui.dialogs.GameDialogType;
 import org.qp.android.ui.settings.SettingsController;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CountDownLatch;
 
@@ -246,20 +248,58 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
 
     // endregion Getter/Setter
 
-    public void doDialogPositiveClick(DialogFragment fragment) {
-        emitter.emitAndExecute(new DialogNavigation.DialogPositiveClick(fragment));
+    public void onDialogPositiveClick(DialogFragment dialog) {
+        if (dialog.getTag() != null) {
+            switch (dialog.getTag()) {
+                case "closeGameDialogFragment" -> {
+                    stopAudio();
+                    stopLibQsp();
+                    removeCallback();
+                    getGameActivity().finish();
+                }
+                case "inputDialogFragment" , "executorDialogFragment" -> {
+                    var inputBox = dialog.requireDialog().getWindow().findViewById(R.id.inputBox_edit);
+                    if (inputBox != null) {
+                        var editText = (TextInputLayout) inputBox;
+                        if (editText.getEditText() != null) {
+                            var outputText = editText.getEditText().getText().toString();
+                            if (Objects.equals(outputText , "")) {
+                                outputTextObserver.setValue("");
+                            } else {
+                                outputTextObserver.setValue(outputText);
+                            }
+                        }
+                    }
+                }
+                case "loadGameDialogFragment" -> getGameActivity().startReadOrWriteSave(LOAD);
+                case "showMessageDialogFragment" -> outputBooleanObserver.setValue(true);
+            }
+        }
     }
 
-    public void doDialogNegativeClick(DialogFragment fragment) {
-        emitter.emitAndExecute(new DialogNavigation.DialogNegativeClick(fragment));
+    public void onDialogNegativeClick(DialogFragment dialog) {
+        if (dialog.getTag() != null) {
+            if (dialog.getTag().equals("showMenuDialogFragment")) {
+                outputIntObserver.setValue(-1);
+            }
+        }
     }
 
-    public void doDialogNeutralClick(DialogFragment fragment) {
-        emitter.emitAndExecute(new DialogNavigation.DialogNeutralClick(fragment));
+    public void onDialogNeutralClick(DialogFragment dialog) {
+        if (dialog.getTag() != null) {
+            switch (dialog.getTag()) {
+                case "inputDialogFragment" , "executorDialogFragment" ->
+                        getGameActivity().getStorageHelper().openFilePicker("text/plain");
+            }
+        }
     }
 
-    public void doDialogListClick(DialogFragment fragment , int which) {
-        emitter.emitAndExecute(new DialogNavigation.DialogListClick(fragment , which));
+    public void onDialogListClick(DialogFragment dialog , int which) {
+        if (dialog.getTag() != null) {
+            if (Objects.equals(dialog.getTag() , "showMenuDialogFragment")) {
+                outputIntObserver.setValue(which);
+            }
+        }
     }
 
     public void updatePageTemplate() {

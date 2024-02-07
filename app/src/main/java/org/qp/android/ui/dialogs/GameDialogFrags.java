@@ -1,6 +1,7 @@
 package org.qp.android.ui.dialogs;
 
 import android.app.Dialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.widget.Button;
 
@@ -20,6 +21,7 @@ import org.qp.android.databinding.DialogImageBinding;
 import org.qp.android.ui.game.GameViewModel;
 
 import java.util.ArrayList;
+import java.util.Optional;
 
 public class GameDialogFrags extends DialogFragment {
     private ArrayList<String> items;
@@ -85,7 +87,7 @@ public class GameDialogFrags extends DialogFragment {
                 textInputLayout.setHelperText(message);
                 builder.setView(executorView);
                 builder.setPositiveButton(android.R.string.ok ,
-                        (dialog , which) -> gameViewModel.doDialogPositiveClick(this));
+                        (dialog , which) -> gameViewModel.onDialogPositiveClick(this));
                 builder.setNeutralButton(null , (dialog , which) -> {});
                 builder.setNeutralButtonIcon(ContextCompat.getDrawable(requireContext() ,
                         R.drawable.baseline_file_upload_24));
@@ -101,7 +103,7 @@ public class GameDialogFrags extends DialogFragment {
             case CLOSE_DIALOG -> {
                 builder.setMessage(requireContext().getString(R.string.promptCloseGame));
                 builder.setPositiveButton(android.R.string.ok ,
-                        (dialog , which) -> gameViewModel.doDialogPositiveClick(this));
+                        (dialog , which) -> gameViewModel.onDialogPositiveClick(this));
                 builder.setNegativeButton(android.R.string.cancel ,
                         (dialog , which) -> {});
                 return builder.create();
@@ -116,21 +118,20 @@ public class GameDialogFrags extends DialogFragment {
             case LOAD_DIALOG -> {
                 builder.setMessage(requireContext().getString(R.string.loadGamePopup));
                 builder.setPositiveButton(android.R.string.ok ,
-                        (dialog , which) -> gameViewModel.doDialogPositiveClick(this));
+                        (dialog , which) -> gameViewModel.onDialogPositiveClick(this));
                 builder.setNegativeButton(android.R.string.no ,
                         (dialog , which) -> {});
                 return builder.create();
             }
             case MENU_DIALOG -> {
                 builder.setItems(items.toArray(new CharSequence[0]) ,
-                        (dialog , which) -> gameViewModel.doDialogListClick(this , which));
-                builder.setOnCancelListener(dialog -> gameViewModel.doDialogNegativeClick(this));
+                        (dialog , which) -> gameViewModel.onDialogListClick(this , which));
                 return builder.create();
             }
             case MESSAGE_DIALOG -> {
                 builder.setMessage(processedMsg);
                 builder.setPositiveButton(android.R.string.ok ,
-                        (dialog , which) -> gameViewModel.doDialogPositiveClick(this));
+                        (dialog , which) -> gameViewModel.onDialogPositiveClick(this));
                 return builder.create();
             }
         }
@@ -138,21 +139,28 @@ public class GameDialogFrags extends DialogFragment {
     }
 
     @Override
+    public void onCancel(@NonNull DialogInterface dialog) {
+        super.onCancel(dialog);
+        gameViewModel.onDialogNegativeClick(this);
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
-        if (getArguments() != null) {
-            template = getArguments().getString("template");
-        }
-        final var dialog = (AlertDialog) getDialog();
-        if (dialog != null) {
-            if (dialogType.equals(GameDialogType.EXECUTOR_DIALOG) ||
-                    dialogType.equals(GameDialogType.INPUT_DIALOG)) {
-                var textInputLayout = (TextInputLayout) dialog.findViewById(R.id.inputBox_edit);
-                if (textInputLayout != null && textInputLayout.getEditText() != null) {
-                    textInputLayout.getEditText().setText(template);
+        var arguments = Optional.ofNullable(getArguments());
+        if (arguments.isPresent()) {
+            template = arguments.get().getString("template");
+            final var dialog = Optional.ofNullable((AlertDialog) getDialog());
+            if (dialog.isPresent()) {
+                if (dialogType.equals(GameDialogType.EXECUTOR_DIALOG) ||
+                        dialogType.equals(GameDialogType.INPUT_DIALOG)) {
+                    var textInputLayout = (TextInputLayout) dialog.get().findViewById(R.id.inputBox_edit);
+                    if (textInputLayout != null && textInputLayout.getEditText() != null) {
+                        textInputLayout.getEditText().setText(template);
+                    }
+                    var neutralButton = (Button) dialog.get().getButton(Dialog.BUTTON_NEUTRAL);
+                    neutralButton.setOnClickListener(v -> gameViewModel.onDialogNeutralClick(this));
                 }
-                var neutralButton = (Button) dialog.getButton(Dialog.BUTTON_NEUTRAL);
-                neutralButton.setOnClickListener(v -> gameViewModel.doDialogNeutralClick(this));
             }
         }
     }

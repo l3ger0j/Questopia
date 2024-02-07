@@ -32,7 +32,6 @@ import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.documentfile.provider.DocumentFile;
-import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
@@ -42,18 +41,15 @@ import com.anggrayudi.storage.SimpleStorageHelper;
 import com.anggrayudi.storage.file.DocumentFileCompat;
 import com.anggrayudi.storage.file.MimeType;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.android.material.textfield.TextInputLayout;
 
 import org.jetbrains.annotations.Contract;
 import org.qp.android.QuestPlayerApplication;
 import org.qp.android.R;
 import org.qp.android.databinding.ActivityGameBinding;
-import org.qp.android.helpers.bus.EventObserver;
 import org.qp.android.model.libQP.LibQpProxy;
 import org.qp.android.model.service.AudioPlayer;
 import org.qp.android.model.service.HtmlProcessor;
 import org.qp.android.ui.dialogs.GameDialogFrags;
-import org.qp.android.ui.dialogs.DialogNavigation;
 import org.qp.android.ui.dialogs.GameDialogType;
 import org.qp.android.ui.settings.SettingsActivity;
 import org.qp.android.ui.settings.SettingsController;
@@ -75,8 +71,8 @@ public class GameActivity extends AppCompatActivity {
     public static final int TAB_MAIN_DESC_AND_ACTIONS = 0;
     public static final int TAB_OBJECTS = 1;
     public static final int TAB_VARS_DESC = 2;
-    private static final int LOAD = 0;
-    private static final int SAVE = 1;
+    public static final int LOAD = 0;
+    public static final int SAVE = 1;
 
     private SettingsController settingsController;
     private int activeTab;
@@ -101,18 +97,9 @@ public class GameActivity extends AppCompatActivity {
         return settingsController;
     }
 
-    private final EventObserver navigationEventsObserver = new EventObserver(eventNavigation -> {
-        if (eventNavigation instanceof DialogNavigation.DialogPositiveClick) {
-            onDialogPositiveClick(((DialogNavigation.DialogPositiveClick) eventNavigation).getFragment());
-        } else if (eventNavigation instanceof DialogNavigation.DialogNegativeClick) {
-            onDialogNegativeClick(((DialogNavigation.DialogNegativeClick) eventNavigation).getFragment());
-        } else if (eventNavigation instanceof DialogNavigation.DialogNeutralClick) {
-            onDialogNeutralClick(((DialogNavigation.DialogNeutralClick) eventNavigation).getFragment());
-        } else if (eventNavigation instanceof DialogNavigation.DialogListClick) {
-            onDialogListClick(((DialogNavigation.DialogListClick) eventNavigation).getFragment() ,
-                    ((DialogNavigation.DialogListClick) eventNavigation).getWhich());
-        }
-    });
+    public SimpleStorageHelper getStorageHelper() {
+        return storageHelper;
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -122,8 +109,6 @@ public class GameActivity extends AppCompatActivity {
         gameViewModel = new ViewModelProvider(this).get(GameViewModel.class);
         gameViewModel.activityObserver.setValue(this);
         settingsController = gameViewModel.getSettingsController();
-
-        gameViewModel.emitter.observe(this , navigationEventsObserver);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             // Prevent jumping of the player on devices with cutout
@@ -674,7 +659,7 @@ public class GameActivity extends AppCompatActivity {
         }
     }
 
-    private void startReadOrWriteSave (int slotAction) {
+    public void startReadOrWriteSave (int slotAction) {
         Intent mIntent;
         switch (slotAction) {
             case LOAD -> {
@@ -733,59 +718,5 @@ public class GameActivity extends AppCompatActivity {
         }
     }
 
-    public void onDialogPositiveClick(DialogFragment dialog) {
-        if (dialog == null) return;
-        var dialogTag = dialog.getTag();
-        if (dialogTag != null) {
-            switch (dialogTag) {
-                case "closeGameDialogFragment" -> {
-                    gameViewModel.stopAudio();
-                    gameViewModel.stopLibQsp();
-                    gameViewModel.removeCallback();
-                    finish();
-                }
-                case "inputDialogFragment" , "executorDialogFragment" -> {
-                    var inputBox = dialog.requireDialog().getWindow().findViewById(R.id.inputBox_edit);
-                    if (inputBox != null) {
-                        var editText = (TextInputLayout) inputBox;
-                        if (editText.getEditText() != null) {
-                            var outputText = editText.getEditText().getText().toString();
-                            if (Objects.equals(outputText , "")) {
-                                gameViewModel.outputTextObserver.setValue("");
-                            } else {
-                                gameViewModel.outputTextObserver.setValue(outputText);
-                            }
-                        }
-                    }
-                }
-                case "loadGameDialogFragment" -> startReadOrWriteSave(LOAD);
-                case "showMessageDialogFragment" -> gameViewModel.outputBooleanObserver.setValue(true);
-            }
-        }
-    }
 
-    public void onDialogNegativeClick(DialogFragment dialog) {
-        if (dialog.getTag() != null) {
-            if (dialog.getTag().equals("showMenuDialogFragment")) {
-                gameViewModel.outputIntObserver.setValue(-1);
-            }
-        }
-    }
-
-    public void onDialogNeutralClick(DialogFragment dialog) {
-        if (dialog.getTag() != null) {
-            if (dialog.getTag().equals("inputDialogFragment")
-                    || dialog.getTag().equals("executorDialogFragment")) {
-                storageHelper.openFilePicker("text/plain");
-            }
-        }
-    }
-
-    public void onDialogListClick(DialogFragment dialog , int which) {
-        if (dialog != null) {
-            if (Objects.equals(dialog.getTag() , "showMenuDialogFragment")) {
-                gameViewModel.outputIntObserver.setValue(which);
-            }
-        }
-    }
 }

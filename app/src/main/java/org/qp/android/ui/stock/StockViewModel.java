@@ -19,7 +19,7 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.databinding.ObservableBoolean;
 import androidx.documentfile.provider.DocumentFile;
-import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -34,7 +34,6 @@ import org.qp.android.databinding.DialogEditBinding;
 import org.qp.android.dto.stock.GameData;
 import org.qp.android.helpers.bus.EventEmitter;
 import org.qp.android.helpers.repository.LocalGame;
-import org.qp.android.ui.dialogs.DialogNavigation;
 import org.qp.android.ui.dialogs.StockDialogFrags;
 import org.qp.android.ui.dialogs.StockDialogType;
 import org.qp.android.ui.game.GameActivity;
@@ -74,7 +73,7 @@ public class StockViewModel extends AndroidViewModel {
 
     private final MutableLiveData<ArrayList<GameData>> gameDataList;
 
-    public MutableLiveData<Integer> outputIntObserver = new MutableLiveData<>();
+    public MutableLiveData<Integer> outputIntObserver;
 
     public EventEmitter emitter = new EventEmitter();
 
@@ -307,6 +306,14 @@ public class StockViewModel extends AndroidViewModel {
         return listGamesDir;
     }
 
+    public int getCountGameFiles() {
+        return tempGameData.gameFiles.size();
+    }
+
+    public DocumentFile getGameFile(int index) {
+        return tempGameData.gameFiles.get(index);
+    }
+
     public boolean isGamePossiblyDownload() {
         return !isGameInstalled() && isHasRemoteUrl();
     }
@@ -338,32 +345,12 @@ public class StockViewModel extends AndroidViewModel {
         listGamesDir.add(gameDir);
     }
 
-    public void doOnShowErrorDialog(String errorMessage) {
-        emitter.waitAndExecute(new StockFragmentNavigation.ShowErrorDialog(errorMessage));
-    }
-
     public void doOnShowGameFragment(int position) {
-        emitter.emitAndExecute(new StockFragmentNavigation.ShowGameFragment(position));
+        emitter.emitAndExecuteOnce(new StockFragmentNavigation.ShowGameFragment(position));
     }
 
     public void doOnShowActionMode() {
         emitter.emitAndExecute(new StockFragmentNavigation.ShowActionMode());
-    }
-
-    public void doDialogPositiveClick(DialogFragment fragment) {
-        emitter.emitAndExecute(new DialogNavigation.DialogPositiveClick(fragment));
-    }
-
-    public void doDialogNeutralClick(DialogFragment fragment) {
-        emitter.emitAndExecute(new DialogNavigation.DialogNeutralClick(fragment));
-    }
-
-    public void doDialogListClick(DialogFragment fragment , int which) {
-        emitter.emitAndExecute(new DialogNavigation.DialogListClick(fragment , which));
-    }
-
-    public void doDialogOnDestroy(DialogFragment fragment) {
-        emitter.emitAndExecute(new DialogNavigation.DialogOnDestroy(fragment));
     }
 
     public StockViewModel(@NonNull Application application) {
@@ -375,21 +362,37 @@ public class StockViewModel extends AndroidViewModel {
     // region Dialog
     private StockDialogFrags dialogFragments = new StockDialogFrags();
 
-    public void showDialogEdit() {
-        dialogFragments = new StockDialogFrags();
-        dialogFragments.setDialogType(StockDialogType.EDIT_DIALOG);
-        dialogFragments.setEditBinding(formingEditView());
-        getStockActivity()
-                .showDialogFragment(dialogFragments , StockDialogType.EDIT_DIALOG);
-        isHideFAB.set(true);
-    }
-
-    public StockDialogFrags getDialogEdit() {
-        isHideFAB.set(true);
-        dialogFragments = new StockDialogFrags();
-        dialogFragments.setDialogType(StockDialogType.EDIT_DIALOG);
-        dialogFragments.setEditBinding(formingEditView());
-        return dialogFragments;
+    public void showDialogFragment(FragmentManager manager ,
+                                   StockDialogType dialogType ,
+                                   String errorMessage) {
+        var fragment = manager.findFragmentByTag(dialogFragments.getTag());
+        if (fragment != null && fragment.isAdded()) {
+            fragment.onDestroy();
+        } else {
+            switch (dialogType) {
+                case EDIT_DIALOG -> {
+                    dialogFragments = new StockDialogFrags();
+                    dialogFragments.setDialogType(StockDialogType.EDIT_DIALOG);
+                    dialogFragments.setEditBinding(formingEditView());
+                    dialogFragments.show(manager , "editDialogFragment");
+                }
+                case ERROR_DIALOG -> {
+                    var message = Optional.ofNullable(errorMessage);
+                    dialogFragments.setDialogType(StockDialogType.ERROR_DIALOG);
+                    message.ifPresent(s -> dialogFragments.setMessage(s));
+                    dialogFragments.show(manager , "errorDialogFragment");
+                }
+                case SELECT_DIALOG -> {
+                    outputIntObserver = new MutableLiveData<>();
+                    var names = new ArrayList<String>();
+                    tempGameData.gameFiles.forEach(documentFile ->
+                            names.add(documentFile.getName()));
+                    dialogFragments.setDialogType(StockDialogType.SELECT_DIALOG);
+                    dialogFragments.setNames(names);
+                    dialogFragments.show(manager , "selectDialogFragment");
+                }
+            }
+        }
     }
 
     @NonNull
@@ -476,71 +479,6 @@ public class StockViewModel extends AndroidViewModel {
         intent.putExtra("gameDirUri" , String.valueOf(gameDir.getUri()));
 
         return intent;
-    }
-
-    public int getCountGameFiles() {
-        return tempGameData.gameFiles.size();
-    }
-
-    public DocumentFile getGameFile(int index) {
-        return tempGameData.gameFiles.get(index);
-    }
-
-    public StockDialogFrags createSelectDialog() {
-        if (outputIntObserver.hasObservers()) {
-            outputIntObserver = new MutableLiveData<>();
-        }
-        var names = new ArrayList<String>();
-        tempGameData.gameFiles.forEach(documentFile ->
-                names.add(documentFile.getName()));
-        var dialogFragments = new StockDialogFrags();
-        dialogFragments.setDialogType(StockDialogType.SELECT_DIALOG);
-        dialogFragments.setNames(names);
-        return dialogFragments;
-    }
-
-    public void playGame() {
-        var gameDir = tempGameData.gameDir;
-        var gameFileCount = tempGameData.gameFiles.size();
-        var intent = new Intent(getApplication() , GameActivity.class);
-
-        var application = (QuestPlayerApplication) getApplication();
-        application.setCurrentGameDir(gameDir);
-
-        intent.putExtra("gameId" , tempGameData.id);
-        intent.putExtra("gameTitle" , tempGameData.title);
-        intent.putExtra("gameDirUri" , String.valueOf(gameDir.getUri()));
-
-        switch (gameFileCount) {
-            case 0 -> {
-                var message = getStockActivity().getString(R.string.gameFolderEmpty);
-                getStockActivity().showErrorDialog(message);
-            }
-            case 1 -> {
-                var chosenGameFile = tempGameData.gameFiles.get(0);
-                intent.putExtra("gameFileUri" ,  String.valueOf(chosenGameFile.getUri()));
-                getStockActivity().startGameActivity(intent);
-            }
-            default -> {
-                if (outputIntObserver.hasObservers()) {
-                    outputIntObserver = new MutableLiveData<>();
-                }
-                var names = new ArrayList<String>();
-                for (var file : tempGameData.gameFiles) {
-                    names.add(file.getName());
-                }
-                var dialogFragments = new StockDialogFrags();
-                dialogFragments.setDialogType(StockDialogType.SELECT_DIALOG);
-                dialogFragments.setNames(names);
-                getStockActivity()
-                        .showDialogFragment(dialogFragments , StockDialogType.SELECT_DIALOG);
-                outputIntObserver.observeForever(integer -> {
-                    var chosenGameFile = tempGameData.gameFiles.get(integer);
-                    intent.putExtra("gameFileUri" , String.valueOf(chosenGameFile.getUri()));
-                    getStockActivity().startGameActivity(intent);
-                });
-            }
-        }
     }
 
     public void sendIntent(@NonNull View view) {

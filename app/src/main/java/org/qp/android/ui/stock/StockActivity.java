@@ -37,8 +37,6 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.os.LocaleListCompat;
 import androidx.core.splashscreen.SplashScreen;
 import androidx.documentfile.provider.DocumentFile;
-import androidx.fragment.app.DialogFragment;
-import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
@@ -55,10 +53,7 @@ import org.qp.android.QuestPlayerApplication;
 import org.qp.android.R;
 import org.qp.android.databinding.ActivityStockBinding;
 import org.qp.android.dto.stock.GameData;
-import org.qp.android.helpers.bus.EventObserver;
 import org.qp.android.helpers.utils.ViewUtil;
-import org.qp.android.ui.dialogs.DialogNavigation;
-import org.qp.android.ui.dialogs.StockDialogFrags;
 import org.qp.android.ui.dialogs.StockDialogType;
 import org.qp.android.ui.settings.SettingsActivity;
 import org.qp.android.ui.settings.SettingsController;
@@ -103,25 +98,6 @@ public class StockActivity extends AppCompatActivity {
         this.mRecyclerView = mRecyclerView;
     }
 
-    private final EventObserver navigationEventsObserver = new EventObserver(eventNavigation -> {
-        if (eventNavigation instanceof StockFragmentNavigation.ShowErrorDialog) {
-            showErrorDialog(((StockFragmentNavigation.ShowErrorDialog) eventNavigation).getErrorMessage());
-        } else if (eventNavigation instanceof StockFragmentNavigation.ShowGameFragment) {
-            onItemClick(((StockFragmentNavigation.ShowGameFragment) eventNavigation).getPosition());
-        } else if (eventNavigation instanceof StockFragmentNavigation.ShowActionMode) {
-            onLongItemClick();
-        } else if (eventNavigation instanceof DialogNavigation.DialogPositiveClick) {
-            onDialogPositiveClick(((DialogNavigation.DialogPositiveClick) eventNavigation).getFragment());
-        } else if (eventNavigation instanceof DialogNavigation.DialogNeutralClick) {
-            onDialogNeutralClick(((DialogNavigation.DialogNeutralClick) eventNavigation).getFragment());
-        } else if (eventNavigation instanceof DialogNavigation.DialogListClick) {
-            onDialogListClick(((DialogNavigation.DialogListClick) eventNavigation).getFragment() ,
-                    ((DialogNavigation.DialogListClick) eventNavigation).getWhich());
-        } else if (eventNavigation instanceof DialogNavigation.DialogOnDestroy){
-            onDialogDestroy(((DialogNavigation.DialogOnDestroy) eventNavigation).getFragment());
-        }
-    });
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         var splashScreen = SplashScreen.installSplashScreen(this);
@@ -142,8 +118,6 @@ public class StockActivity extends AppCompatActivity {
         activityStockBinding.setStockVM(stockViewModel);
         stockViewModel.activityObserver.setValue(this);
         gamesMap = stockViewModel.getGamesMap();
-
-        stockViewModel.emitter.observe(this , navigationEventsObserver);
 
         mFAB = activityStockBinding.stockFAB;
         mFAB.setOnClickListener(view -> showDirPickerDialog());
@@ -223,6 +197,16 @@ public class StockActivity extends AppCompatActivity {
         if (savedInstanceState == null) {
             navController.navigate(R.id.stockRecyclerFragment);
         }
+
+        stockViewModel.emitter.observe(this , eventNavigation -> {
+            if (eventNavigation instanceof StockFragmentNavigation.ShowErrorDialog errorDialog) {
+                showErrorDialog(errorDialog.getErrorMessage());
+            } else if (eventNavigation instanceof StockFragmentNavigation.ShowGameFragment gameFragment) {
+                onItemClick(gameFragment.getPosition());
+            } else if (eventNavigation instanceof StockFragmentNavigation.ShowActionMode) {
+                onLongItemClick();
+            }
+        });
 
         new AppUpdater(this)
                 .setUpdateFrom(UpdateFrom.GITHUB)
@@ -331,41 +315,12 @@ public class StockActivity extends AppCompatActivity {
     }
 
     public void showErrorDialog(String errorMessage) {
-        if (getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED)) {
-            var dialogFragments = new StockDialogFrags();
-            dialogFragments.setDialogType(StockDialogType.ERROR_DIALOG);
-            dialogFragments.setMessage(errorMessage);
-            var fragment = getSupportFragmentManager()
-                    .findFragmentByTag("errorDialogFragment");
-            if (fragment != null && fragment.isAdded()) {
-                fragment.onDestroy();
-            } else {
-                dialogFragments.show(getSupportFragmentManager() , "errorDialogFragment");
-            }
-        }
-    }
-
-    public void showDialogFragment(DialogFragment dialogFragment , StockDialogType dialogType) {
-        var fragment = getSupportFragmentManager()
-                .findFragmentByTag(dialogFragment.getTag());
-        if (fragment != null && fragment.isAdded()) {
-            fragment.onDestroy();
-        } else {
-            switch (dialogType) {
-                case EDIT_DIALOG ->
-                        dialogFragment.show(getSupportFragmentManager() , "editDialogFragment");
-                case SELECT_DIALOG ->
-                        dialogFragment.show(getSupportFragmentManager() , "selectDialogFragment");
-            }
-        }
+        stockViewModel.showDialogFragment(getSupportFragmentManager() ,
+                StockDialogType.ERROR_DIALOG , errorMessage);
     }
 
     public void showFilePickerActivity(int requestCode , String[] mimeTypes) {
         storageHelper.openFilePicker(requestCode , false , mimeTypes);
-    }
-
-    public void startGameActivity(Intent intent) {
-        startActivity(intent);
     }
 
     public void showDirPickerDialog() {
@@ -385,30 +340,6 @@ public class StockActivity extends AppCompatActivity {
                     | Intent.FLAG_GRANT_READ_URI_PERMISSION;
             intentLQ.addFlags(flags);
             rootFolderLauncher.launch(intentLQ);
-        }
-    }
-
-    public void onDialogDestroy(DialogFragment dialog) {
-        if (!Objects.equals(dialog.getTag() , "editDialogFragment")) {
-            stockViewModel.isHideFAB.set(false);
-        }
-    }
-
-    public void onDialogPositiveClick(DialogFragment dialog) {
-        if (Objects.equals(dialog.getTag() , "infoDialogFragment")) {
-            stockViewModel.showDialogEdit();
-        }
-    }
-
-    public void onDialogNeutralClick(DialogFragment dialog) {
-        if (Objects.equals(dialog.getTag() , "infoDialogFragment")) {
-            stockViewModel.playGame();
-        }
-    }
-
-    public void onDialogListClick(DialogFragment dialog , int which) {
-        if (Objects.equals(dialog.getTag() , "selectDialogFragment")) {
-            stockViewModel.outputIntObserver.setValue(which);
         }
     }
 

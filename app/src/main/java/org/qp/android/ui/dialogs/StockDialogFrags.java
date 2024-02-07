@@ -95,23 +95,10 @@ public class StockDialogFrags extends DialogFragment {
                 });
                 return builder.create();
             }
-            case INFO_DIALOG -> {
-                builder.setMessage(message);
-                builder.setTitle(title);
-                builder.setIcon(R.mipmap.ic_launcher_round);
-                builder.setNegativeButton(getString(R.string.close) , (dialog , which) -> dialog.cancel());
-                if (isInstalled) {
-                    builder.setNeutralButton(getString(R.string.play) , (dialog , which) ->
-                            stockViewModel.doDialogNeutralClick(this));
-                    builder.setPositiveButton(getString(R.string.editButton) , (dialog , which) ->
-                            stockViewModel.doDialogPositiveClick(this));
-                }
-                return builder.create();
-            }
             case SELECT_DIALOG -> {
                 builder.setTitle(requireContext().getString(R.string.selectGameFile));
                 builder.setItems(names.toArray(new String[0]) , (dialog , which) ->
-                        stockViewModel.doDialogListClick(this , which));
+                        stockViewModel.outputIntObserver.setValue(which));
                 return builder.create();
             }
             default -> {
@@ -140,7 +127,6 @@ public class StockDialogFrags extends DialogFragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        stockViewModel.doDialogOnDestroy(this);
         if (editBinding != null) {
             editBinding = null;
         }
