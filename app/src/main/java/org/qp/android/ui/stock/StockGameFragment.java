@@ -12,12 +12,12 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import org.qp.android.R;
-import org.qp.android.databinding.FragmentStockGameBinding;
+import org.qp.android.databinding.FragmentItemGameBinding;
 import org.qp.android.ui.dialogs.StockDialogType;
 
 public class StockGameFragment extends Fragment {
 
-    private FragmentStockGameBinding fragmentStockGameBinding;
+    private FragmentItemGameBinding fragmentStockGameBinding;
     private StockViewModel stockViewModel;
 
     @Nullable
@@ -27,7 +27,7 @@ public class StockGameFragment extends Fragment {
         if (appCompatActivity.getSupportActionBar() != null) {
             appCompatActivity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
-        fragmentStockGameBinding = FragmentStockGameBinding.inflate(getLayoutInflater());
+        fragmentStockGameBinding = FragmentItemGameBinding.inflate(getLayoutInflater());
         stockViewModel = new ViewModelProvider(requireActivity())
                 .get(StockViewModel.class);
         fragmentStockGameBinding.setViewModel(stockViewModel);
