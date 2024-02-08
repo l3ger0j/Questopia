@@ -20,34 +20,35 @@
 #include "variant.h"
 
 #ifndef QSP_ACTSDEFINES
-#define QSP_ACTSDEFINES
+	#define QSP_ACTSDEFINES
 
-#define QSP_MAXACTIONS 50
+	#define QSP_MAXACTIONS 50
 
-typedef struct {
-  QSP_CHAR *Image;
-  QSP_CHAR *Desc;
-  QSPLineOfCode *OnPressLines;
-  int OnPressLinesCount;
-  int Location;
-  int ActIndex;
-  int StartLine;
-  QSP_BOOL IsManageLines;
-} QSPCurAct;
+	typedef struct
+	{
+		QSP_CHAR *Image;
+		QSP_CHAR *Desc;
+		QSPLineOfCode *OnPressLines;
+		int OnPressLinesCount;
+		int Location;
+		int ActIndex;
+		int StartLine;
+		QSP_BOOL IsManageLines;
+	} QSPCurAct;
 
-extern QSPCurAct qspCurActions[QSP_MAXACTIONS];
-extern int qspCurActionsCount;
-extern int qspCurSelAction;
-extern QSP_BOOL qspIsActionsChanged;
-extern QSP_BOOL qspCurIsShowActs;
+	extern QSPCurAct qspCurActions[QSP_MAXACTIONS];
+	extern int qspCurActionsCount;
+	extern int qspCurSelAction;
+	extern QSP_BOOL qspIsActionsChanged;
+	extern QSP_BOOL qspCurIsShowActs;
 
-/* External functions */
-void qspClearActions(QSP_BOOL);
-void qspAddAction(QSPVariant *, int, QSPLineOfCode *, int, int, QSP_BOOL);
-void qspExecAction(int);
-QSP_CHAR *qspGetAllActionsAsCode();
-/* Statements */
-void qspStatementAddAct(QSPLineOfCode *, int, int);
-QSP_BOOL qspStatementDelAct(QSPVariant *, int, QSP_CHAR **, int);
+	/* External functions */
+	void qspClearActions(QSP_BOOL);
+	void qspAddAction(QSPVariant *, int, QSPLineOfCode *, int, int, QSP_BOOL);
+	void qspExecAction(int);
+	QSP_CHAR *qspGetAllActionsAsCode();
+	/* Statements */
+	void qspStatementAddAct(QSPLineOfCode *, int, int);
+	QSP_BOOL qspStatementDelAct(QSPVariant *, int, QSP_CHAR **, int);
 
 #endif

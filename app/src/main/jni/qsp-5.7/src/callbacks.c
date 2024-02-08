@@ -26,26 +26,28 @@ QSP_BOOL qspIsInCallBack = QSP_FALSE;
 QSP_BOOL qspIsDisableCodeExec = QSP_FALSE;
 QSP_BOOL qspIsExitOnError = QSP_FALSE;
 
-void qspSaveCallState(QSPCallState *state, QSP_BOOL isDisableCodeExec, QSP_BOOL isExitOnError) {
-  state->IsInCallBack = qspIsInCallBack;
-  state->IsDisableCodeExec = qspIsDisableCodeExec;
-  state->IsExitOnError = qspIsExitOnError;
-  state->IsMainDescChanged = qspIsMainDescChanged;
-  state->IsVarsDescChanged = qspIsVarsDescChanged;
-  state->IsObjectsChanged = qspIsObjectsChanged;
-  state->IsActionsChanged = qspIsActionsChanged;
-  qspIsInCallBack = QSP_TRUE;
-  qspIsDisableCodeExec = isDisableCodeExec;
-  qspIsExitOnError = isExitOnError;
+void qspSaveCallState(QSPCallState *state, QSP_BOOL isDisableCodeExec, QSP_BOOL isExitOnError)
+{
+	state->IsInCallBack = qspIsInCallBack;
+	state->IsDisableCodeExec = qspIsDisableCodeExec;
+	state->IsExitOnError = qspIsExitOnError;
+	state->IsMainDescChanged = qspIsMainDescChanged;
+	state->IsVarsDescChanged = qspIsVarsDescChanged;
+	state->IsObjectsChanged = qspIsObjectsChanged;
+	state->IsActionsChanged = qspIsActionsChanged;
+	qspIsInCallBack = QSP_TRUE;
+	qspIsDisableCodeExec = isDisableCodeExec;
+	qspIsExitOnError = isExitOnError;
 }
 
-void qspRestoreCallState(QSPCallState *state) {
-  if (!qspIsExitOnError) qspResetError();
-  qspIsExitOnError = state->IsExitOnError;
-  qspIsDisableCodeExec = state->IsDisableCodeExec;
-  qspIsInCallBack = state->IsInCallBack;
-  if (state->IsActionsChanged) qspIsActionsChanged = QSP_TRUE;
-  if (state->IsObjectsChanged) qspIsObjectsChanged = QSP_TRUE;
-  if (state->IsVarsDescChanged) qspIsVarsDescChanged = QSP_TRUE;
-  if (state->IsMainDescChanged) qspIsMainDescChanged = QSP_TRUE;
+void qspRestoreCallState(QSPCallState *state)
+{
+	if (!qspIsExitOnError) qspResetError();
+	qspIsExitOnError = state->IsExitOnError;
+	qspIsDisableCodeExec = state->IsDisableCodeExec;
+	qspIsInCallBack = state->IsInCallBack;
+	if (state->IsActionsChanged) qspIsActionsChanged = QSP_TRUE;
+	if (state->IsObjectsChanged) qspIsObjectsChanged = QSP_TRUE;
+	if (state->IsVarsDescChanged) qspIsVarsDescChanged = QSP_TRUE;
+	if (state->IsMainDescChanged) qspIsMainDescChanged = QSP_TRUE;
 }

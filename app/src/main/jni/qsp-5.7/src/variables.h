@@ -19,52 +19,55 @@
 #include "variant.h"
 
 #ifndef QSP_VARSDEFINES
-#define QSP_VARSDEFINES
+	#define QSP_VARSDEFINES
 
-#define QSP_VARSSEEK 50
-#define QSP_VARSCOUNT 256 * QSP_VARSSEEK
-#define QSP_VARARGS QSP_FMT("ARGS")
-#define QSP_VARRES QSP_FMT("RESULT")
+	#define QSP_VARSSEEK 50
+	#define QSP_VARSCOUNT 256 * QSP_VARSSEEK
+	#define QSP_VARARGS QSP_FMT("ARGS")
+	#define QSP_VARRES QSP_FMT("RESULT")
 
-typedef struct {
-  int Num;
-  QSP_CHAR *Str;
-} QSPVarValue;
+	typedef struct
+	{
+		int Num;
+		QSP_CHAR *Str;
+	} QSPVarValue;
 
-typedef struct {
-  int Index;
-  QSP_CHAR *Str;
-} QSPVarIndex;
+	typedef struct
+	{
+		int Index;
+		QSP_CHAR *Str;
+	} QSPVarIndex;
 
-typedef struct {
-  QSP_CHAR *Name;
-  QSPVarValue *Values;
-  int ValsCount;
-  QSPVarIndex *Indices;
-  int IndsCount;
-  int IndsBufSize;
-} QSPVar;
+	typedef struct
+	{
+		QSP_CHAR *Name;
+		QSPVarValue *Values;
+		int ValsCount;
+		QSPVarIndex *Indices;
+		int IndsCount;
+		int IndsBufSize;
+	} QSPVar;
 
-extern QSPVar qspVars[QSP_VARSCOUNT];
+	extern QSPVar qspVars[QSP_VARSCOUNT];
 
-/* External functions */
-void qspClearVars(QSP_BOOL);
-void qspEmptyVar(QSPVar *);
-QSPVar *qspVarReference(QSP_CHAR *, QSP_BOOL);
-QSPVar *qspVarReferenceWithType(QSP_CHAR *, QSP_BOOL, QSP_BOOL *);
-void qspSetVarValueByName(QSP_CHAR *, QSPVariant *);
-QSP_CHAR *qspGetVarStrValue(QSP_CHAR *);
-int qspGetVarNumValue(QSP_CHAR *);
-QSPVariant qspGetVar(QSP_CHAR *);
-int qspArraySize(QSP_CHAR *);
-int qspArrayPos(QSPVariant *, int, QSP_BOOL);
-QSPVariant qspArrayMinMaxItem(QSP_CHAR *, QSP_BOOL);
-int qspGetVarsCount();
-void qspSetArgs(QSPVar *, QSPVariant *, int);
-void qspMoveVar(QSPVar *, QSPVar *);
-/* Statements */
-void qspStatementSetVarValue(QSP_CHAR *);
-QSP_BOOL qspStatementCopyArr(QSPVariant *, int, QSP_CHAR **, int);
-QSP_BOOL qspStatementKillVar(QSPVariant *, int, QSP_CHAR **, int);
+	/* External functions */
+	void qspClearVars(QSP_BOOL);
+	void qspEmptyVar(QSPVar *);
+	QSPVar *qspVarReference(QSP_CHAR *, QSP_BOOL);
+	QSPVar *qspVarReferenceWithType(QSP_CHAR *, QSP_BOOL, QSP_BOOL *);
+	void qspSetVarValueByName(QSP_CHAR *, QSPVariant *);
+	QSP_CHAR *qspGetVarStrValue(QSP_CHAR *);
+	int qspGetVarNumValue(QSP_CHAR *);
+	QSPVariant qspGetVar(QSP_CHAR *);
+	int qspArraySize(QSP_CHAR *);
+	int qspArrayPos(QSPVariant *, int, QSP_BOOL);
+	QSPVariant qspArrayMinMaxItem(QSP_CHAR *, QSP_BOOL);
+	int qspGetVarsCount();
+	void qspSetArgs(QSPVar *, QSPVariant *, int);
+	void qspMoveVar(QSPVar *, QSPVar *);
+	/* Statements */
+	void qspStatementSetVarValue(QSP_CHAR *);
+	QSP_BOOL qspStatementCopyArr(QSPVariant *, int, QSP_CHAR **, int);
+	QSP_BOOL qspStatementKillVar(QSPVariant *, int, QSP_CHAR **, int);
 
 #endif

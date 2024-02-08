@@ -19,33 +19,33 @@
 #include "variant.h"
 
 #ifndef QSP_GAMEDEFINES
-#define QSP_GAMEDEFINES
+	#define QSP_GAMEDEFINES
 
-#define QSP_GAMEID QSP_FMT("QSPGAME")
-#define QSP_SAVEDGAMEID QSP_FMT("QSPSAVEDGAME")
-#define QSP_GAMEMINVER QSP_FMT("5.7.0")
-#define QSP_MAXINCFILES 100
-#define QSP_DEFTIMERINTERVAL 500
+	#define QSP_GAMEID QSP_FMT("QSPGAME")
+	#define QSP_SAVEDGAMEID QSP_FMT("QSPSAVEDGAME")
+	#define QSP_GAMEMINVER QSP_FMT("5.7.0")
+	#define QSP_MAXINCFILES 100
+	#define QSP_DEFTIMERINTERVAL 500
 
-extern QSP_CHAR *qspQstPath;
-extern int qspQstPathLen;
-extern QSP_CHAR *qspQstFullPath;
-extern int qspQstCRC;
-extern int qspCurIncLocsCount;
+	extern QSP_CHAR *qspQstPath;
+	extern int qspQstPathLen;
+	extern QSP_CHAR *qspQstFullPath;
+	extern int qspQstCRC;
+	extern int qspCurIncLocsCount;
 
-/* External functions */
-QSP_CHAR *qspGetAbsFromRelPath(QSP_CHAR *);
-void qspClearIncludes(QSP_BOOL);
-void qspNewGame(QSP_BOOL);
-void qspOpenQuestFromData(char *, int, QSP_CHAR *, QSP_BOOL);
-void qspOpenQuest(QSP_CHAR *, QSP_BOOL);
-int qspSaveGameStatusToString(QSP_CHAR **);
-void qspSaveGameStatus(QSP_CHAR *);
-void qspOpenGameStatusFromString(QSP_CHAR *);
-void qspOpenGameStatus(QSP_CHAR *);
-/* Statements */
-QSP_BOOL qspStatementOpenQst(QSPVariant *, int, QSP_CHAR **, int);
-QSP_BOOL qspStatementOpenGame(QSPVariant *, int, QSP_CHAR **, int);
-QSP_BOOL qspStatementSaveGame(QSPVariant *, int, QSP_CHAR **, int);
+	/* External functions */
+	QSP_CHAR *qspGetAbsFromRelPath(QSP_CHAR *);
+	void qspClearIncludes(QSP_BOOL);
+	void qspNewGame(QSP_BOOL);
+	void qspOpenQuestFromData(char *, int, QSP_CHAR *, QSP_BOOL);
+	void qspOpenQuest(QSP_CHAR *, QSP_BOOL);
+	int qspSaveGameStatusToString(QSP_CHAR **);
+	void qspSaveGameStatus(QSP_CHAR *);
+	void qspOpenGameStatusFromString(QSP_CHAR *);
+	void qspOpenGameStatus(QSP_CHAR *);
+	/* Statements */
+	QSP_BOOL qspStatementOpenQst(QSPVariant *, int, QSP_CHAR **, int);
+	QSP_BOOL qspStatementOpenGame(QSPVariant *, int, QSP_CHAR **, int);
+	QSP_BOOL qspStatementSaveGame(QSPVariant *, int, QSP_CHAR **, int);
 
 #endif

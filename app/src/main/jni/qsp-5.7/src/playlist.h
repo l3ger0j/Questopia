@@ -19,20 +19,20 @@
 #include "variant.h"
 
 #ifndef QSP_PLAYLISTDEFINES
-#define QSP_PLAYLISTDEFINES
+	#define QSP_PLAYLISTDEFINES
 
-#define QSP_PLVOLUMEDELIM QSP_FMT("*")
-#define QSP_MAXPLFILES 500
+	#define QSP_PLVOLUMEDELIM QSP_FMT("*")
+	#define QSP_MAXPLFILES 500
 
-extern QSP_CHAR *qspPLFiles[QSP_MAXPLFILES];
-extern int qspPLFilesCount;
+	extern QSP_CHAR *qspPLFiles[QSP_MAXPLFILES];
+	extern int qspPLFilesCount;
 
-/* External functions */
-void qspClearPlayList(QSP_BOOL);
-void qspPlayPLFiles();
-void qspRefreshPlayList();
-/* Statements */
-QSP_BOOL qspStatementPlayFile(QSPVariant *, int, QSP_CHAR **, int);
-QSP_BOOL qspStatementCloseFile(QSPVariant *, int, QSP_CHAR **, int);
+	/* External functions */
+	void qspClearPlayList(QSP_BOOL);
+	void qspPlayPLFiles();
+	void qspRefreshPlayList();
+	/* Statements */
+	QSP_BOOL qspStatementPlayFile(QSPVariant *, int, QSP_CHAR **, int);
+	QSP_BOOL qspStatementCloseFile(QSPVariant *, int, QSP_CHAR **, int);
 
 #endif
