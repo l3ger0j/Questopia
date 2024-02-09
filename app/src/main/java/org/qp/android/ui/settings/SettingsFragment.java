@@ -157,6 +157,6 @@ public class SettingsFragment extends PreferenceFragmentCompat {
         linearLayout.addView(webView);
         var dialogFrag = new SettingsDialogFrag();
         dialogFrag.setView(linearLayout);
-        dialogFrag.show(getParentFragmentManager() , "settingsDialogFragment");
+        dialogFrag.show(getParentFragmentManager() , "aboutDialogFragment");
     }
 }
