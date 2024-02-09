@@ -1,5 +1,6 @@
 package org.qp.android.ui.settings;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.webkit.WebResourceRequest;
@@ -19,6 +20,8 @@ import org.qp.android.BuildConfig;
 import org.qp.android.QuestPlayerApplication;
 import org.qp.android.R;
 import org.qp.android.ui.dialogs.SettingsDialogFrag;
+
+import java.util.Optional;
 
 public class SettingsFragment extends PreferenceFragmentCompat {
 
@@ -128,6 +131,20 @@ public class SettingsFragment extends PreferenceFragmentCompat {
             public WebResourceResponse shouldInterceptRequest(WebView view ,
                                                               WebResourceRequest request) {
                 return assetLoader.shouldInterceptRequest(request.getUrl());
+            }
+
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view , WebResourceRequest request) {
+                var url = Optional.ofNullable(request.getUrl());
+                if (url.isPresent()) {
+                    var workUri = url.get();
+                    if (workUri.getScheme().startsWith("http")
+                            || workUri.getScheme().startsWith("https")) {
+                        requireContext().startActivity(new Intent(Intent.ACTION_VIEW, workUri));
+                        return true;
+                    }
+                }
+                return false;
             }
         });
         webView.loadDataWithBaseURL(
