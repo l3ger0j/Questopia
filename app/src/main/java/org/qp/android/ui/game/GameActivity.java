@@ -17,7 +17,6 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.WindowManager;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -28,6 +27,7 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.os.LocaleListCompat;
+import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
@@ -91,7 +91,6 @@ public class GameActivity extends AppCompatActivity {
     private ActivityGameBinding activityGameBinding;
     private final SimpleStorageHelper storageHelper = new SimpleStorageHelper(this);
     private ActivityResultLauncher<Intent> saveResultLaunch;
-    private View mDecorView;
 
     public SettingsController getSettingsController() {
         return settingsController;
@@ -117,13 +116,6 @@ public class GameActivity extends AppCompatActivity {
         }
         WindowCompat.setDecorFitsSystemWindows(getWindow() , false);
 
-        mDecorView = getWindow().getDecorView();
-        if (settingsController.isUseImmersiveMode) {
-            hideSystemUI();
-        } else {
-            showSystemUI();
-        }
-
         setContentView(activityGameBinding.getRoot());
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
@@ -146,6 +138,20 @@ public class GameActivity extends AppCompatActivity {
             return true;
         });
         setOnApplyWindowInsetsListener(navigationView , null);
+
+        var windowInsetsController =
+                WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
+        windowInsetsController.setSystemBarsBehavior(
+                WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        );
+        ViewCompat.setOnApplyWindowInsetsListener(getWindow().getDecorView() , (v , insets) -> {
+            if (settingsController.isUseImmersiveMode) {
+                windowInsetsController.hide(WindowInsetsCompat.Type.systemBars());
+            } else {
+                windowInsetsController.show(WindowInsetsCompat.Type.systemBars());
+            }
+            return WindowInsetsCompat.toWindowInsetsCompat(v.onApplyWindowInsets(insets.toWindowInsets()));
+        });
 
         saveResultLaunch = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
@@ -248,20 +254,6 @@ public class GameActivity extends AppCompatActivity {
                 }
             }
         }
-    }
-
-    private void hideSystemUI() {
-        var windowInsetsController =
-                WindowCompat.getInsetsController(getWindow() , activityGameBinding.getRoot());
-       windowInsetsController.hide(WindowInsetsCompat.Type.systemBars());
-       windowInsetsController.setSystemBarsBehavior(
-                WindowInsetsControllerCompat.BEHAVIOR_SHOW_BARS_BY_SWIPE);
-    }
-
-    private void showSystemUI() {
-        WindowCompat
-                .getInsetsController(getWindow() , activityGameBinding.getRoot())
-                .show(WindowInsetsCompat.Type.systemBars());
     }
 
     private void initControls() {
