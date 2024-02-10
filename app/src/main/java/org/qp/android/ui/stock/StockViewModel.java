@@ -17,7 +17,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 
 import androidx.annotation.NonNull;
-import androidx.databinding.ObservableBoolean;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.AndroidViewModel;
@@ -60,7 +59,7 @@ public class StockViewModel extends AndroidViewModel {
 
     public MutableLiveData<StockActivity> activityObserver = new MutableLiveData<>();
 
-    public ObservableBoolean isHideFAB = new ObservableBoolean();
+    public MutableLiveData<Boolean> doHideFAB = new MutableLiveData<>();
 
     private final LocalGame localGame = new LocalGame();
     private final HashMap<String, GameData> gamesMap = new HashMap<>();

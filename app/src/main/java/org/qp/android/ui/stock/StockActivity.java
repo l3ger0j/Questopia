@@ -119,6 +119,13 @@ public class StockActivity extends AppCompatActivity {
         gamesMap = stockViewModel.getGamesMap();
 
         mFAB = activityStockBinding.stockFAB;
+        stockViewModel.doHideFAB.observe(this , aBoolean -> {
+            if (aBoolean) {
+                mFAB.hide();
+            } else {
+                mFAB.show();
+            }
+        });
         mFAB.setOnClickListener(view -> showDirPickerDialog());
 
         storageHelper.setOnFileSelected((integer , documentFiles) -> {
@@ -223,7 +230,7 @@ public class StockActivity extends AppCompatActivity {
                             , "StockRecyclerFragment")) {
                         finish();
                     } else {
-                        stockViewModel.isHideFAB.set(false);
+                        stockViewModel.doHideFAB.setValue(false);
                         navController.popBackStack();
                     }
                 } else {
@@ -288,7 +295,7 @@ public class StockActivity extends AppCompatActivity {
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(false);
         }
-        stockViewModel.isHideFAB.set(false);
+        stockViewModel.doHideFAB.setValue(false);
         navController.popBackStack();
         return true;
     }
@@ -369,7 +376,7 @@ public class StockActivity extends AppCompatActivity {
                         .setTempGameData(stockViewModel.getGamesMap()
                                 .get(stockViewModel.getGameIdByPosition(position)));
                 navController.navigate(R.id.stockGameFragment);
-                stockViewModel.isHideFAB.set(true);
+                stockViewModel.doHideFAB.setValue(true);
             }
         }
     }
@@ -481,6 +488,7 @@ public class StockActivity extends AppCompatActivity {
         }
 
         stockViewModel.refreshIntGamesDirectory();
+        stockViewModel.doHideFAB.setValue(false);
         navController.navigate(R.id.stockRecyclerFragment);
     }
 
