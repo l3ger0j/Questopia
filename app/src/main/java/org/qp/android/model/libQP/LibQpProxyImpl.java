@@ -98,7 +98,7 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
     private boolean loadGameWorld() {
         var gameFileUri = gameState.gameFile.getUri();
         var gameFileFullPath = documentWrap(gameState.gameFile).getAbsolutePath(context);
-        final byte[] gameData = getFileContents(context , gameFileUri);
+        final var gameData = getFileContents(context , gameFileUri);
         if (gameData == null) return false;
         if (!nativeMethods.QSPLoadGameWorldFromData(gameData, gameData.length, gameFileFullPath)) {
             showLastQspError();
@@ -521,7 +521,7 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
         if (filename != null) {
             try {
                 var gameFile = fromFullPath(filename , getCurGameDir());
-                if (gameFile == null) throw new NullPointerException();
+                if (gameFile == null) throw new NullPointerException(filename);
                 var gameFileUri = gameFile.getUri();
                 inter.doWithCounterDisabled(() -> loadGameState(gameFileUri));
             } catch (Exception e) {
