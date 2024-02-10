@@ -58,21 +58,20 @@ public class StockViewModel extends AndroidViewModel {
     public static final int CODE_PICK_MOD_FILE = 302;
 
     public MutableLiveData<StockActivity> activityObserver = new MutableLiveData<>();
+    public MutableLiveData<Boolean> doIsHideFAB = new MutableLiveData<>();
+    public MutableLiveData<Integer> outputIntObserver;
 
-    public MutableLiveData<Boolean> doHideFAB = new MutableLiveData<>();
+    // Containers
+    private final HashMap<String, GameData> gamesMap = new HashMap<>();
+    private final MutableLiveData<ArrayList<GameData>> gameDataList;
 
     private final LocalGame localGame = new LocalGame();
-    private final HashMap<String, GameData> gamesMap = new HashMap<>();
     private ArrayList<DocumentFile> listGamesDir;
     private DocumentFile tempImageFile, tempPathFile, tempModFile;
 
     private GameData tempGameData;
     private DialogEditBinding editBinding;
     private SettingsController controller;
-
-    private final MutableLiveData<ArrayList<GameData>> gameDataList;
-
-    public MutableLiveData<Integer> outputIntObserver;
 
     public EventEmitter emitter = new EventEmitter();
 

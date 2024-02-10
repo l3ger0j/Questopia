@@ -119,7 +119,7 @@ public class StockActivity extends AppCompatActivity {
         gamesMap = stockViewModel.getGamesMap();
 
         mFAB = activityStockBinding.stockFAB;
-        stockViewModel.doHideFAB.observe(this , aBoolean -> {
+        stockViewModel.doIsHideFAB.observe(this , aBoolean -> {
             if (aBoolean) {
                 mFAB.hide();
             } else {
@@ -230,7 +230,7 @@ public class StockActivity extends AppCompatActivity {
                             , "StockRecyclerFragment")) {
                         finish();
                     } else {
-                        stockViewModel.doHideFAB.setValue(false);
+                        stockViewModel.doIsHideFAB.setValue(false);
                         navController.popBackStack();
                     }
                 } else {
@@ -295,7 +295,7 @@ public class StockActivity extends AppCompatActivity {
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(false);
         }
-        stockViewModel.doHideFAB.setValue(false);
+        stockViewModel.doIsHideFAB.setValue(false);
         navController.popBackStack();
         return true;
     }
@@ -376,7 +376,7 @@ public class StockActivity extends AppCompatActivity {
                         .setTempGameData(stockViewModel.getGamesMap()
                                 .get(stockViewModel.getGameIdByPosition(position)));
                 navController.navigate(R.id.stockGameFragment);
-                stockViewModel.doHideFAB.setValue(true);
+                stockViewModel.doIsHideFAB.setValue(true);
             }
         }
     }
@@ -488,7 +488,7 @@ public class StockActivity extends AppCompatActivity {
         }
 
         stockViewModel.refreshIntGamesDirectory();
-        stockViewModel.doHideFAB.setValue(false);
+        stockViewModel.doIsHideFAB.setValue(false);
         navController.navigate(R.id.stockRecyclerFragment);
     }
 
