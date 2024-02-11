@@ -103,6 +103,15 @@ public final class FileUtil {
         return checkFile;
     }
 
+    public static void forceCreateFile(DocumentFile parentDir ,
+                                       String mimeType ,
+                                       String displayName) {
+        if (!isWritableDirectory(parentDir)) {
+            return;
+        }
+        parentDir.createFile(mimeType , displayName);
+    }
+
     @Nullable
     public static DocumentFile createFindDFolder(DocumentFile parentDir ,
                                                  String displayName) {

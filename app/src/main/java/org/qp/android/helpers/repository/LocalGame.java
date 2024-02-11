@@ -2,6 +2,7 @@ package org.qp.android.helpers.repository;
 
 import static org.qp.android.helpers.utils.FileUtil.createFindDFile;
 import static org.qp.android.helpers.utils.FileUtil.documentWrap;
+import static org.qp.android.helpers.utils.FileUtil.forceCreateFile;
 import static org.qp.android.helpers.utils.FileUtil.isWritableFile;
 import static org.qp.android.helpers.utils.FileUtil.readFileAsString;
 import static org.qp.android.helpers.utils.JsonUtil.jsonToObject;
@@ -67,14 +68,14 @@ public class LocalGame {
     private void createNoMediaFile(@NonNull DocumentFile gameDir) {
         var findNoMediaFile = gameDir.findFile(NOMEDIA_FILENAME);
         if (findNoMediaFile == null || !findNoMediaFile.exists()) {
-            createFindDFile(gameDir , MimeType.TEXT , NOMEDIA_FILENAME);
+            forceCreateFile(gameDir , MimeType.TEXT , NOMEDIA_FILENAME);
         }
     }
 
     private void createNoSearchFile(@NonNull DocumentFile gameDir) {
         var findNoSearchFile = gameDir.findFile(NOSEARCH_FILENAME);
         if (findNoSearchFile == null || !findNoSearchFile.exists()) {
-            createFindDFile(gameDir , MimeType.TEXT , NOSEARCH_FILENAME);
+            forceCreateFile(gameDir , MimeType.TEXT , NOSEARCH_FILENAME);
         }
     }
 
