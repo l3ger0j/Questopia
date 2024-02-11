@@ -32,6 +32,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.view.ActionMode;
+import androidx.appcompat.widget.SearchView;
 import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.os.LocaleListCompat;
@@ -366,14 +367,13 @@ public class StockActivity extends AppCompatActivity {
                 cardView.setCardBackgroundColor(Color.DKGRAY);
             }
         } else {
-            if (!getSupportFragmentManager().getFragments().isEmpty()) {
-                new ViewModelProvider(this)
-                        .get(StockViewModel.class)
-                        .setTempGameData(stockViewModel.getGamesMap()
-                                .get(stockViewModel.getGameIdByPosition(position)));
-                navController.navigate(R.id.stockGameFragment);
-                stockViewModel.doIsHideFAB.setValue(true);
-            }
+            stockViewModel.getGameDataList().observe(this , gameData -> {
+                if (!gameData.isEmpty() && gameData.size() > position) {
+                    stockViewModel.setCurrGameData(gameData.get(position));
+                }
+            });
+            navController.navigate(R.id.stockGameFragment);
+            stockViewModel.doIsHideFAB.setValue(true);
         }
     }
 
@@ -504,7 +504,7 @@ public class StockActivity extends AppCompatActivity {
         } else if (itemId == R.id.action_search) {
             var searchView = (androidx.appcompat.widget.SearchView) item.getActionView();
             if (searchView != null) {
-                searchView.setOnQueryTextListener(new androidx.appcompat.widget.SearchView.OnQueryTextListener() {
+                searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
                     @Override
                     public boolean onQueryTextSubmit(String query) {
                         return false;
@@ -513,7 +513,7 @@ public class StockActivity extends AppCompatActivity {
                     @Override
                     public boolean onQueryTextChange(String newText) {
                         filter(newText);
-                        return false;
+                        return true;
                     }
                 });
             }
@@ -522,8 +522,7 @@ public class StockActivity extends AppCompatActivity {
     }
 
     private void showSettings() {
-        var intent = new Intent(this , SettingsActivity.class);
-        startActivity(intent);
+        startActivity(new Intent(this , SettingsActivity.class));
     }
 
     @Override

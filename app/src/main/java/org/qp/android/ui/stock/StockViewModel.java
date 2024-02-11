@@ -69,7 +69,7 @@ public class StockViewModel extends AndroidViewModel {
     private ArrayList<DocumentFile> listGamesDir;
     private DocumentFile tempImageFile, tempPathFile, tempModFile;
 
-    private GameData tempGameData;
+    private GameData currGameData;
     private DialogEditBinding editBinding;
     private SettingsController controller;
 
@@ -80,8 +80,8 @@ public class StockViewModel extends AndroidViewModel {
         this.controller = controller;
     }
 
-    public void setTempGameData(GameData tempGameData) {
-        this.tempGameData = tempGameData;
+    public void setCurrGameData(GameData currGameData) {
+        this.currGameData = currGameData;
     }
 
     public void setTempPathFile(DocumentFile tempPathFile) {
@@ -112,7 +112,7 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     public void setGameDataList(ArrayList<GameData> gameDataArrayList) {
-        gameDataList.postValue(gameDataArrayList);
+        gameDataList.setValue(gameDataArrayList);
     }
 
     @NotNull
@@ -126,13 +126,13 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     public String getGameIdByPosition(int position) {
-        getGameData().observeForever(gameDataArrayList -> {
+        getGameDataList().observeForever(gameDataArrayList -> {
             if (!gameDataArrayList.isEmpty() && gameDataArrayList.size() > position) {
-                setTempGameData(gameDataArrayList.get(position));
+                setCurrGameData(gameDataArrayList.get(position));
             }
         });
-        if (getTempGameData().isPresent()) {
-            return getTempGameData().get().id;
+        if (getCurrGameData().isPresent()) {
+            return getCurrGameData().get().id;
         } else {
             return "";
         }
@@ -147,12 +147,12 @@ public class StockViewModel extends AndroidViewModel {
         return gameData;
     }
 
-    public LiveData<ArrayList<GameData>> getGameData() {
+    public LiveData<ArrayList<GameData>> getGameDataList() {
         return gameDataList;
     }
 
-    public Optional<GameData> getTempGameData() {
-        return Optional.ofNullable(tempGameData);
+    public Optional<GameData> getCurrGameData() {
+        return Optional.ofNullable(currGameData);
     }
 
     public HashMap<String, GameData> getGamesMap() {
@@ -160,8 +160,8 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     public String getGameTitle() {
-        if (getTempGameData().isPresent()) {
-            var data = getTempGameData().get();
+        if (getCurrGameData().isPresent()) {
+            var data = getCurrGameData().get();
             if (!data.title.isEmpty()) {
                 return data.title;
             } else {
@@ -173,127 +173,104 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     public String getGameAuthor() {
-        if (getTempGameData().isPresent()) {
-            var data = getTempGameData().get();
+        if (getCurrGameData().isPresent()) {
+            var data = getCurrGameData().get();
             if (!data.author.isEmpty()) {
                 return getStockActivity()
                         .getString(R.string.author)
-                        .replace("-AUTHOR-" , tempGameData.author);
-            } else {
-                return "";
+                        .replace("-AUTHOR-" , data.author);
             }
-        } else {
-            return "";
         }
+        return "";
     }
 
     public String getGameIcon() {
-        if (getTempGameData().isPresent()) {
-            var data = getTempGameData().get();
+        if (getCurrGameData().isPresent()) {
+            var data = getCurrGameData().get();
             if (!data.icon.isEmpty()) {
                 return data.icon;
-            } else {
-                return "";
             }
-        } else {
-            return "";
         }
+        return "";
     }
 
     public String getGamePortBy() {
-        if (getTempGameData().isPresent()) {
-            var data =getTempGameData().get();
+        if (getCurrGameData().isPresent()) {
+            var data = getCurrGameData().get();
             if (!data.portedBy.isEmpty()) {
                 return getStockActivity()
                         .getString(R.string.ported_by)
-                        .replace("-PORTED_BY-" , tempGameData.portedBy);
-            } else {
-                return "";
+                        .replace("-PORTED_BY-" , data.portedBy);
             }
-        } else {
-            return "";
         }
+        return "";
     }
 
     public String getGameVersion() {
-        if (getTempGameData().isPresent()) {
-            var data = getTempGameData().get();
+        if (getCurrGameData().isPresent()) {
+            var data = getCurrGameData().get();
             if (!data.version.isEmpty()) {
                 return getStockActivity()
                         .getString(R.string.version)
                         .replace("-VERSION-" , data.version);
-            } else {
-                return "";
             }
-        } else {
-            return "";
         }
+        return "";
     }
 
     public String getGameType() {
-        if (getTempGameData().isPresent()) {
-            var data = getTempGameData().get();
+        if (getCurrGameData().isPresent()) {
+            var data = getCurrGameData().get();
             if (!data.fileExt.isEmpty()) {
                 if (data.fileExt.equals("aqsp")) {
                     return getStockActivity()
                             .getString(R.string.fileType)
                             .replace("-TYPE-" , data.fileExt)
                             + " " + getStockActivity().getString(R.string.experimental);
+                } else {
+                    return getStockActivity()
+                            .getString(R.string.fileType)
+                            .replace("-TYPE-" , data.fileExt);
                 }
-                return getStockActivity()
-                        .getString(R.string.fileType)
-                        .replace("-TYPE-" , data.fileExt);
-            } else {
-                return "";
             }
-        } else {
-            return "";
         }
+        return "";
     }
 
     public String getGameSize() {
-        if (getTempGameData().isPresent()) {
-            var data = getTempGameData().get();
+        if (getCurrGameData().isPresent()) {
+            var data = getCurrGameData().get();
             if (data.getFileSize() != null) {
                 return getStockActivity()
                         .getString(R.string.fileSize)
-                        .replace("-SIZE-" , tempGameData.getFileSize());
-            } else {
-                return "";
+                        .replace("-SIZE-" , data.getFileSize());
             }
-        } else {
-            return "";
         }
+        return "";
     }
 
     public String getGamePubData() {
-        if (getTempGameData().isPresent()) {
-            var data = getTempGameData().get();
+        if (getCurrGameData().isPresent()) {
+            var data = getCurrGameData().get();
             if (!data.pubDate.isEmpty()) {
                 return getStockActivity()
                         .getString(R.string.pub_data)
                         .replace("-PUB_DATA-" , data.pubDate);
-            } else {
-                return "";
             }
-        } else {
-            return "";
         }
+        return "";
     }
 
     public String getGameModData() {
-        if (getTempGameData().isPresent()) {
-            var data = getTempGameData().get();
+        if (getCurrGameData().isPresent()) {
+            var data = getCurrGameData().get();
             if (!data.modDate.isEmpty()) {
                 return getStockActivity()
                         .getString(R.string.mod_data)
                         .replace("-MOD_DATA-" , data.pubDate);
-            } else {
-                return "";
             }
-        } else {
-            return "";
         }
+        return "";
     }
 
     public SettingsController getSettingsController() {
@@ -305,11 +282,11 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     public int getCountGameFiles() {
-        return tempGameData.gameFiles.size();
+        return currGameData.gameFiles.size();
     }
 
     public DocumentFile getGameFile(int index) {
-        return tempGameData.gameFiles.get(index);
+        return currGameData.gameFiles.get(index);
     }
 
     public boolean isGamePossiblyDownload() {
@@ -317,8 +294,8 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     public boolean isGameInstalled() {
-        if (getTempGameData().isPresent()) {
-            var gameData = getTempGameData().get();
+        if (getCurrGameData().isPresent()) {
+            var gameData = getCurrGameData().get();
             return gameData.isFileInstalled() && isDirContainsGameFile(gameData.gameDir);
         } else {
             return false;
@@ -326,16 +303,20 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     public boolean isHasRemoteUrl() {
-        if (getTempGameData().isPresent()) {
-            return getTempGameData().get().isHasRemoteUrl();
+        if (getCurrGameData().isPresent()) {
+            return getCurrGameData().get().isHasRemoteUrl();
         } else {
             return false;
         }
     }
 
     public boolean isModsDirExist() {
-        var modDir = tempGameData.gameDir.findFile("mods");
-        return modDir != null;
+        if (getCurrGameData().isPresent()) {
+            var gameData = getCurrGameData().get();
+            return gameData.gameDir.findFile("mods") != null;
+        } else {
+            return false;
+        }
     }
     // endregion Getter/Setter
 
@@ -383,7 +364,7 @@ public class StockViewModel extends AndroidViewModel {
                 case SELECT_DIALOG -> {
                     outputIntObserver = new MutableLiveData<>();
                     var names = new ArrayList<String>();
-                    tempGameData.gameFiles.forEach(documentFile ->
+                    currGameData.gameFiles.forEach(documentFile ->
                             names.add(documentFile.getName()));
                     dialogFragments.setDialogType(StockDialogType.SELECT_DIALOG);
                     dialogFragments.setNames(names);
@@ -398,9 +379,9 @@ public class StockViewModel extends AndroidViewModel {
         editBinding = DialogEditBinding.inflate(LayoutInflater.from(getApplication()));
         editBinding.setStockVM(this);
 
-        if (!tempGameData.icon.isEmpty()) {
+        if (!currGameData.icon.isEmpty()) {
             Picasso.get()
-                    .load(tempGameData.icon)
+                    .load(currGameData.icon)
                     .fit()
                     .into(editBinding.imageView);
         }
@@ -416,35 +397,35 @@ public class StockViewModel extends AndroidViewModel {
         try {
             var editTextTitle = editBinding.ET0.getEditText();
             if (editTextTitle != null) {
-                tempGameData.title = editTextTitle.getText().toString().isEmpty()
-                        ? removeExtension(tempGameData.title)
+                currGameData.title = editTextTitle.getText().toString().isEmpty()
+                        ? removeExtension(currGameData.title)
                         : editTextTitle.getText().toString();
             }
             var editTextAuthor = editBinding.ET1.getEditText();
             if (editTextAuthor != null) {
-                tempGameData.author = editTextAuthor.getText().toString().isEmpty()
-                        ? removeExtension(tempGameData.author)
+                currGameData.author = editTextAuthor.getText().toString().isEmpty()
+                        ? removeExtension(currGameData.author)
                         : editTextAuthor.getText().toString();
             }
             var editTextVersion = editBinding.ET2.getEditText();
             if (editTextVersion != null) {
-                tempGameData.version = editTextVersion.toString().isEmpty()
-                        ? removeExtension(tempGameData.version)
+                currGameData.version = editTextVersion.toString().isEmpty()
+                        ? removeExtension(currGameData.version)
                         : editTextVersion.getText().toString();
             }
-            if (tempImageFile != null) tempGameData.icon = tempImageFile.getUri().toString();
-            if (tempGameData.fileSize == null || tempGameData.fileSize.isEmpty()) {
-                calculateSizeDir(tempGameData);
+            if (tempImageFile != null) currGameData.icon = tempImageFile.getUri().toString();
+            if (currGameData.fileSize == null || currGameData.fileSize.isEmpty()) {
+                calculateSizeDir(currGameData);
             }
             if (tempPathFile != null) {
-                copyFileToDir(getApplication() , tempPathFile , tempGameData.gameDir);
+                copyFileToDir(getApplication() , tempPathFile , currGameData.gameDir);
             }
             if (tempModFile != null) {
-                var modDir = findFileOrDirectory(getStockActivity() , tempGameData.gameDir , "mods");
+                var modDir = findFileOrDirectory(getStockActivity() , currGameData.gameDir , "mods");
                 copyFileToDir(getApplication() , tempModFile , modDir);
             }
 
-            localGame.createDataIntoFolder(getApplication() , tempGameData , tempGameData.gameDir);
+            localGame.createDataIntoFolder(getApplication() , currGameData , currGameData.gameDir);
             refreshIntGamesDirectory();
             dialogFragments.dismiss();
         } catch (NullPointerException ex) {
@@ -466,14 +447,14 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     public Intent createPlayGameIntent() {
-        var gameDir = tempGameData.gameDir;
+        var gameDir = currGameData.gameDir;
         var intent = new Intent(getApplication() , GameActivity.class);
 
         var application = (QuestPlayerApplication) getApplication();
         application.setCurrentGameDir(gameDir);
 
-        intent.putExtra("gameId" , tempGameData.id);
-        intent.putExtra("gameTitle" , tempGameData.title);
+        intent.putExtra("gameId" , currGameData.id);
+        intent.putExtra("gameTitle" , currGameData.title);
         intent.putExtra("gameDirUri" , String.valueOf(gameDir.getUri()));
 
         return intent;
@@ -541,7 +522,7 @@ public class StockViewModel extends AndroidViewModel {
                             localGameData.add(data);
                         }
                     }
-                    setGameDataList(localGameData);
+                    gameDataList.postValue(localGameData);
                 } , executor);
     }
     // endregion Refresh

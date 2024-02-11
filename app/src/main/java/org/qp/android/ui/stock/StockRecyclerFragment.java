@@ -39,9 +39,8 @@ public class StockRecyclerFragment extends Fragment {
                 FragmentRecyclerBinding.inflate(inflater);
         mRecyclerView = recyclerBinding.shareRecyclerView;
         mRecyclerView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
-        stockViewModel = new ViewModelProvider(requireActivity())
-                .get(StockViewModel.class);
-        stockViewModel.getGameData().observe(getViewLifecycleOwner(), gameData);
+        stockViewModel = new ViewModelProvider(requireActivity()).get(StockViewModel.class);
+        stockViewModel.getGameDataList().observe(getViewLifecycleOwner(), gameData);
         stockViewModel.activityObserver.observe(getViewLifecycleOwner() , stockActivity ->
                 stockActivity.setRecyclerView(mRecyclerView));
         return recyclerBinding.getRoot();
