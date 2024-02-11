@@ -37,7 +37,7 @@ public class AudioPlayer {
         return (QuestPlayerApplication) context.getApplicationContext();
     }
 
-    private GameActivity getAcitvity() {
+    private GameActivity getActivity() {
         return (GameActivity) context;
     }
 
@@ -118,10 +118,10 @@ public class AudioPlayer {
         var soundFile = fromFullPath(normPath , curGameDir);
 
         if (soundFile == null) {
-            var controller = getAcitvity().getSettingsController();
+            var controller = getActivity().getSettingsController();
             if (controller != null && controller.isUseMusicDebug) {
-                var localizedStr = getAcitvity().getString(R.string.notFoundSound) + normPath;
-                getAcitvity().showSimpleDialog(
+                var localizedStr = getActivity().getString(R.string.notFoundSound) + normPath;
+                getActivity().showSimpleDialog(
                         localizedStr,
                         GameDialogType.ERROR_DIALOG
                 );
