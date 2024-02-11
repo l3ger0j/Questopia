@@ -356,6 +356,7 @@ public class StockActivity extends AppCompatActivity {
             if (mViewHolder == null) return;
             var adapterPosition = mViewHolder.getAdapterPosition();
             if (adapterPosition == NO_POSITION) return;
+            if (adapterPosition < 0 || adapterPosition >= tempList.size()) return;
             var gameData = tempList.get(adapterPosition);
             if (selectList.isEmpty() || !selectList.contains(gameData)) {
                 selectList.add(gameData);
