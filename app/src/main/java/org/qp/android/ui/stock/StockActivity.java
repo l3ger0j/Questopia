@@ -64,6 +64,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 
@@ -129,39 +130,34 @@ public class StockActivity extends AppCompatActivity {
         mFAB.setOnClickListener(view -> showDirPickerDialog());
 
         storageHelper.setOnFileSelected((integer , documentFiles) -> {
-            if (documentFiles != null) {
+            var boxDocumentFiles = Optional.ofNullable(documentFiles);
+            if (boxDocumentFiles.isEmpty()) {
+                showErrorDialog("File is not selected");
+            } else {
+                var unBoxDocFiles = boxDocumentFiles.get();
                 switch (integer) {
-                    case CODE_PICK_IMAGE_FILE -> {
-                        for (var file : documentFiles) {
-                            var document = documentWrap(file);
-                            switch (document.getExtension()) {
-                                case "png" , "jpg" , "jpeg" -> {
-                                    getContentResolver().takePersistableUriPermission(document.getUri() ,
-                                            Intent.FLAG_GRANT_READ_URI_PERMISSION
-                                                    | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-                                    stockViewModel.setTempImageFile(document.getDocumentFile());
-                                }
+                    case CODE_PICK_IMAGE_FILE -> unBoxDocFiles.forEach(documentFile -> {
+                        switch (documentWrap(documentFile).getExtension()) {
+                            case "png" , "jpg" , "jpeg" -> {
+                                getContentResolver().takePersistableUriPermission(documentFile.getUri() ,
+                                        Intent.FLAG_GRANT_READ_URI_PERMISSION
+                                                | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                                stockViewModel.setTempImageFile(documentFile);
                             }
                         }
-                    }
-                    case CODE_PICK_PATH_FILE -> {
-                        for (var file : documentFiles) {
-                            var document = documentWrap(file);
-                            if ("qsp".equals(document.getExtension()))
-                                stockViewModel.setTempPathFile(document.getDocumentFile());
+                    });
+                    case CODE_PICK_PATH_FILE -> unBoxDocFiles.forEach(documentFile -> {
+                        switch (documentWrap(documentFile).getExtension()) {
+                            case "qsp", "gam" ->
+                                    stockViewModel.setTempPathFile(documentFile);
                         }
-                    }
-                    case CODE_PICK_MOD_FILE -> {
-                        for (var file : documentFiles) {
-                            var document = documentWrap(file);
-                            if ("qsp".equals(document.getExtension()))
-                                stockViewModel.setTempModFile(document.getDocumentFile());
+                    });
+                    case CODE_PICK_MOD_FILE -> unBoxDocFiles.forEach(documentFile -> {
+                        if ("qsp".equals(documentWrap(documentFile).getExtension())) {
+                            stockViewModel.setTempModFile(documentFile);
                         }
-                    }
+                    });
                 }
-
-            } else {
-                showErrorDialog("File is not selected");
             }
             return null;
         });
