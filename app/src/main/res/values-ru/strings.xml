@@ -136,8 +136,6 @@
         <string name="slotEmpty">Слот %d [Пусто]</string>
         <string name="loadFrom">Из файла…</string>
         <string name="saveTo">В файл…</string>
-    <!-- Menu plugins -->
-        <string name="pluginMenuTitle">Плагины</string>
     <!-- Menu news -->
         <string name="newsMenuTitle">Новости Questopia</string>
 </resources>

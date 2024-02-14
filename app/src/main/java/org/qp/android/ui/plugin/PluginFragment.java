@@ -48,7 +48,7 @@ public class PluginFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater ,
                              @Nullable ViewGroup container ,
                              @Nullable Bundle savedInstanceState) {
-        requireActivity().setTitle(R.string.pluginMenuTitle);
+        requireActivity().setTitle(R.string.pluginTitle);
 
         var callback = new OnBackPressedCallback(true) {
             @Override
