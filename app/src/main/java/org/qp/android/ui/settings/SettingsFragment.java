@@ -17,7 +17,6 @@ import androidx.preference.PreferenceFragmentCompat;
 import androidx.webkit.WebViewAssetLoader;
 
 import org.qp.android.BuildConfig;
-import org.qp.android.QuestPlayerApplication;
 import org.qp.android.R;
 import org.qp.android.ui.dialogs.SettingsDialogFrag;
 
@@ -39,17 +38,9 @@ public class SettingsFragment extends PreferenceFragmentCompat {
         if (versionPref != null) {
             versionPref.setTitle(getString(R.string.extendedName)
                     .replace("-VERSION-" , BuildConfig.VERSION_NAME));
-            versionPref.setSummaryProvider(preference -> {
-                var application = (QuestPlayerApplication) requireActivity().getApplication();
-                var libQspProxy = application.getLibQspProxy();
-                try {
-                    var compileDateTime = libQspProxy.getCompiledDateTime();
-                    var versionQSP = libQspProxy.getVersionQSP();
-                    return compileDateTime + "\n" + versionQSP;
-                } catch (NullPointerException ex) {
-                    return null;
-                }
-            });
+            versionPref.setSummaryProvider(preference ->
+                    "Lib version: "+"5.7.0" + "\nTimestamp: " + BuildConfig.BUILD_TIME
+            );
         }
 
         Preference.OnPreferenceClickListener listener = preference -> {
