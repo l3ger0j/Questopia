@@ -4,6 +4,8 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.widget.Button;
+import android.widget.ScrollView;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -24,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Optional;
 
 public class GameDialogFrags extends DialogFragment {
+
     private ArrayList<String> items;
     private GameDialogType dialogType;
     private DialogImageBinding imageBinding;
@@ -94,9 +97,16 @@ public class GameDialogFrags extends DialogFragment {
                 return builder.create();
             }
             case ERROR_DIALOG -> {
+                final var errorFeBackView =
+                        getLayoutInflater().inflate(R.layout.dialog_feedback , null);
+                var feedBackScrollError = (ScrollView) errorFeBackView.findViewById(R.id.feedBackScrollError);
+                var feedBackTV = (TextView) feedBackScrollError.findViewById(R.id.feedBackTV);
+                feedBackTV.setText(message);
                 builder.setTitle(R.string.error);
-                builder.setMessage(message);
-                builder.setPositiveButton(android.R.string.ok ,
+                builder.setView(errorFeBackView);
+                builder.setPositiveButton("Send" ,
+                        (dialog , which) -> gameViewModel.onDialogPositiveClick(this));
+                builder.setNegativeButton(android.R.string.cancel ,
                         (dialog , which) -> {});
                 return builder.create();
             }

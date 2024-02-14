@@ -49,6 +49,7 @@ import org.qp.android.ui.settings.SettingsController;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CountDownLatch;
 
@@ -243,6 +244,9 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
     // endregion Getter/Setter
 
     public void onDialogPositiveClick(DialogFragment dialog) {
+        var optWindow = Optional.ofNullable(dialog.requireDialog().getWindow());
+        if (optWindow.isEmpty()) return;
+
         if (dialog.getTag() != null) {
             switch (dialog.getTag()) {
                 case "closeGameDialogFragment" -> {
@@ -252,17 +256,35 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
                     getGameActivity().finish();
                 }
                 case "inputDialogFragment" , "executorDialogFragment" -> {
-                    var inputBox = dialog.requireDialog().getWindow().findViewById(R.id.inputBox_edit);
-                    if (inputBox != null) {
-                        var editText = (TextInputLayout) inputBox;
-                        if (editText.getEditText() != null) {
-                            var outputText = editText.getEditText().getText().toString();
-                            if (Objects.equals(outputText , "")) {
-                                outputTextObserver.setValue("");
-                            } else {
-                                outputTextObserver.setValue(outputText);
-                            }
-                        }
+                    var inputBoxEdit = (TextInputLayout) optWindow.get().findViewById(R.id.inputBox_edit);
+                    var optInputBoxEditET = Optional.ofNullable(inputBoxEdit.getEditText());
+                    if (optInputBoxEditET.isEmpty()) return;
+                    var outputText = optInputBoxEditET.get().getText().toString();
+                    if (Objects.equals(outputText , "")) {
+                        outputTextObserver.setValue("");
+                    } else {
+                        outputTextObserver.setValue(outputText);
+                    }
+                }
+                case "errorDialogFragment" -> {
+                    var feedBackName = (TextInputLayout) optWindow.get().findViewById(R.id.feedBackName);
+                    var feedBackContact = (TextInputLayout) optWindow.get().findViewById(R.id.feedBackContact);
+                    var feedBackMessage = (TextInputLayout) optWindow.get().findViewById(R.id.feedBackMessage);
+
+                    var optFeedBackNameET = Optional.ofNullable(feedBackName.getEditText());
+                    var optFeedBackContactET = Optional.ofNullable(feedBackContact.getEditText());
+                    var optFeedBackMessageET = Optional.ofNullable(feedBackMessage.getEditText());
+                    if (optFeedBackNameET.isEmpty() || optFeedBackContactET.isEmpty()) return;
+                    var feedBackNameET = optFeedBackNameET.get();
+                    var feedBackContactET = optFeedBackContactET.get();
+                    if (optFeedBackMessageET.isPresent()) {
+                        var feedBackMessageET = optFeedBackMessageET.get();
+                        Log.d(this.getClass().getSimpleName() , feedBackMessageET.getText().toString()
+                                +"\n"+feedBackContactET.getText().toString()
+                                +"\n"+feedBackNameET.getText().toString());
+                    } else {
+                        Log.d(this.getClass().getSimpleName() , feedBackContactET.getText().toString()
+                                +"\n"+feedBackNameET.getText().toString());
                     }
                 }
                 case "loadGameDialogFragment" -> getGameActivity().startReadOrWriteSave(LOAD);
