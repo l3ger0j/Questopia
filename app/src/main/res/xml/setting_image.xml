@@ -40,5 +40,11 @@
         android:singleLine="true"
         android:summary="@string/fullScreenImageSum"
         android:title="@string/permImgDialogTitle" />
+    <SwitchPreferenceCompat
+        android:icon="@drawable/baseline_image_24"
+        android:defaultValue="false"
+        android:key="debugImage"
+        android:summary="@string/imageDebugSum"
+        android:title="@string/imageDebugTitle" />
 
 </PreferenceScreen>

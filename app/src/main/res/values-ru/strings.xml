@@ -84,13 +84,17 @@
         <string name="deleteGameTitle">Удалить игру</string>
     <!-- Menu settings fragment -->
         <!-- General section -->
-        <string name="generalCatTitle">Основные настройки приложения</string>
-        <string name="langTitle">Язык</string>
-        <string name="langSum">Выберите язык интерфейса</string>
-        <string name="binPrefTitle">Двоичные Префиксы</string>
-        <string name="binPrefSum">Выберите двоичные префиксы</string>
+        <string name="generalCatTitle">Основное</string>
+        <string name="langTitle">Язык приложения</string>
+        <string name="binPrefTitle">Двоичные префиксы</string>
         <string name="soundTitle">Воспроизводить звук</string>
-        <string name="actsHeightTitle">Высота Списка Действий</string>
+        <string name="actsHeightTitle">Высота списка действий</string>
+        <string name="separatorTitle">Видимость разделителя</string>
+        <string name="separatorSum">Между списком действий и основным описанием</string>
+        <string name="immersiveModeTitle">Режим погружения</string>
+        <string name="autoscrollTitle">Автопролистывание</string>
+        <string name="musicDebugTitle">Отладчик путей к звукам</string>
+        <string name="musicDebugSum">Диалог, сообщающий об ошибке, если путь к звуку неправильный</string>
         <!-- Text section -->
         <string name="textCatTitle">Текст</string>
         <string name="fontStyleTitle">Стиль шрифта</string>
@@ -107,6 +111,8 @@
         <string name="useGameLinkColorSum">Использовать настройки цвета ссылок из игры</string>
         <string name="linkColorTitle">Укажите цвет ссылок</string>
         <string name="textBackLinkColorSum">Значение по умолчанию -VALUE-</string>
+        <string name="execStringTitle">Командная строка QSP</string>
+        <string name="execStringSum">Диалог, используемый для отладки или читерства</string>
         <!-- Image section -->
         <string name="imageCatTitle">Картинки</string>
         <string name="autoWidthTitle">Ширина изображения</string>
@@ -117,18 +123,10 @@
         <string name="customHeightTitle">Укажите высоту изображения</string>
         <string name="permImgDialogTitle">Все картинки в диалоге</string>
         <string name="fullScreenImageSum">Нажатие на картинку в основном описании открывает её в диалоге</string>
+        <string name="imageDebugTitle">Отладчик путей к картинкам</string>
+        <string name="imageDebugSum">Диалог, сообщающий об ошибке, если путь к картинке неправильный</string>
         <!-- Switch section -->
         <string name="filePicker">Диалог Выбора Файла (альфа)</string>
-        <string name="immersiveModeTitle">Режим Погружения</string>
-        <string name="separatorTitle">Разделитель</string>
-        <string name="separatorSum">Изменяет видимость разделителя между списком действий и текстом локации</string>
-        <string name="autoscrollTitle">Автопролистывание</string>
-        <string name="imageDebugTitle">Отладчик путей к картинкам</string>
-        <string name="imageDebugSum">Режим, который включает отображение диалога с ошибкой если путь к картинке неправильный</string>
-        <string name="musicDebugTitle">Отладчик путей к музыке</string>
-        <string name="musicDebugSum">Режим, который включает отображение диалога с ошибкой если путь к музыке указан неверно</string>
-        <string name="execStringTitle">Исполнитель строк</string>
-        <string name="execStringSum">Изменяет видимость специального диалога, который можно использовать для отладки или читерства</string>
         <!-- Extra section -->
         <string name="pluginTitle">Дополнения</string>
         <string name="aboutTitle">О программе</string>

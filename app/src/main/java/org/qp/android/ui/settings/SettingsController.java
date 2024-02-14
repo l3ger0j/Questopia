@@ -33,8 +33,6 @@ public class SettingsController {
     public boolean isUseFullscreenImages;
     public boolean isUseImageDebug;
     public boolean isUseMusicDebug;
-    public boolean isCreateNoMedia;
-    public boolean isCreateNoSearch;
     public String language;
 
     private static SettingsController INSTANCE;
@@ -72,8 +70,6 @@ public class SettingsController {
         settingsController.isUseGameFont = preferences.getBoolean("useGameFont", false);
         settingsController.isUseImmersiveMode = preferences.getBoolean("immersiveMode", true);
         settingsController.isSoundEnabled = preferences.getBoolean("sound", true);
-        settingsController.isCreateNoMedia = preferences.getBoolean("createNoMedia", true);
-        settingsController.isCreateNoSearch = preferences.getBoolean("createNoSearch", true);
         settingsController.language = preferences.getString("lang", "ru");
         imageSettings(settingsController, preferences);
         colorSettings(settingsController , preferences);

@@ -61,5 +61,11 @@
         android:key="linkColor"
         android:summary="@string/linkColorTitle"
         android:title="@string/useGameLinkColorTitle" />
+    <SwitchPreferenceCompat
+        android:icon="@drawable/baseline_tab_input_24"
+        android:defaultValue="false"
+        android:key="execString"
+        android:summary="@string/execStringSum"
+        android:title="@string/execStringTitle" />
 
 </PreferenceScreen>

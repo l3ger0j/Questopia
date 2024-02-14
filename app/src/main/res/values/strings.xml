@@ -84,13 +84,17 @@
         <string name="deleteGameTitle">Delete game</string>
     <!-- Menu settings fragment -->
         <!-- General section -->
-        <string name="generalCatTitle">Basic Application Settings</string>
-        <string name="langTitle">Language</string>
-        <string name="langSum">Choose display language</string>
+        <string name="generalCatTitle">Basic</string>
+        <string name="langTitle">Application language</string>
         <string name="binPrefTitle">Binary prefixes</string>
-        <string name="binPrefSum">Choose binary prefixes</string>
         <string name="soundTitle">Play sound</string>
-        <string name="actsHeightTitle">Actions List Height</string>
+        <string name="actsHeightTitle">Actions list height</string>
+        <string name="separatorTitle">Visibility of the separator</string>
+        <string name="separatorSum">Between the list of actions and the main description</string>
+        <string name="immersiveModeTitle">Immersive mode</string>
+        <string name="autoscrollTitle">Autoscroll</string>
+        <string name="musicDebugTitle">Sound path debugger</string>
+        <string name="musicDebugSum">A dialog that reports an error if the path to the sound is incorrect</string>
         <!-- Text section -->
         <string name="textCatTitle">Text</string>
         <string name="fontStyleTitle">Font style</string>
@@ -107,28 +111,22 @@
         <string name="useGameLinkColorSum">Use the link color settings from the game</string>
         <string name="linkColorTitle">Specify the color of the links</string>
         <string name="textBackLinkColorSum">Default value -VALUE-</string>
+        <string name="execStringTitle">QSP Command Line</string>
+        <string name="execStringSum">A dialog used for debugging or cheating</string>
         <!-- Image section -->
         <string name="imageCatTitle">Pictures</string>
-        <string name="autoWidthTitle">Image Width</string>
+        <string name="autoWidthTitle">Image width</string>
         <string name="autoWidthSum">Automatic image width</string>
         <string name="customWidthTitle">Specify the width of the image</string>
-        <string name="autoHeightTitle">Image Height</string>
+        <string name="autoHeightTitle">Image height</string>
         <string name="autoHeightSum">Automatic image height</string>
         <string name="customHeightTitle">Specify the height of the image</string>
         <string name="permImgDialogTitle">All images in the dialog</string>
         <string name="fullScreenImageSum">Clicking on the image in the main description opens it in the dialog</string>
+        <string name="imageDebugTitle">Image path debugger</string>
+        <string name="imageDebugSum">A dialog that reports an error if the path to the image is incorrect</string>
         <!-- Switch section -->
         <string name="filePicker">File Picker Dialog (alpha)</string>
-        <string name="immersiveModeTitle">Immersive Mode</string>
-        <string name="separatorTitle">Separator</string>
-        <string name="separatorSum">Changes the visibility of the separator between the list of actions and the text of the location</string>
-        <string name="autoscrollTitle">Autoscroll</string>
-        <string name="imageDebugTitle">Image Path Debugger</string>
-        <string name="imageDebugSum">A mode that enables the display of an error dialog if the path to the image is incorrect</string>
-        <string name="musicDebugTitle">Music Path Debugger</string>
-        <string name="musicDebugSum">A mode that enables the display of an error dialog if the path to the music is incorrect</string>
-        <string name="execStringTitle">String executor</string>
-        <string name="execStringSum">Changes the visibility of a special dialog that can be used for debugging or cheating</string>
         <!-- Extra section -->
         <string name="pluginTitle">Additions</string>
         <string name="aboutTitle">About Quest Player</string>

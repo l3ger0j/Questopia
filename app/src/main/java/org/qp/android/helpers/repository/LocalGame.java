@@ -147,8 +147,8 @@ public class LocalGame {
                 }
             }
 
-            if (controller.isCreateNoMedia) createNoMediaFile(gameFolder.dir);
-            if (controller.isCreateNoSearch) createNoSearchFile(gameFolder.dir);
+            createNoMediaFile(gameFolder.dir);
+            createNoSearchFile(gameFolder.dir);
         }
 
         return itemsGamesDirs;
