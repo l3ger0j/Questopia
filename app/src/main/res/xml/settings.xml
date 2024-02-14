@@ -26,6 +26,7 @@
         android:key="newsApp" />
 
     <Preference
+        android:icon="@drawable/baseline_info_24"
         android:title="@string/aboutTitle"
         android:key="showAbout" />
 
