@@ -38,20 +38,32 @@ public class StockGameFragment extends Fragment {
     public void onViewCreated(@NonNull View view , @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view , savedInstanceState);
         fragmentStockGameBinding.editButton.setOnClickListener(view1 ->
-                stockViewModel.showDialogFragment(getParentFragmentManager() , StockDialogType.EDIT_DIALOG , null));
+                stockViewModel.showDialogFragment(
+                        getParentFragmentManager() ,
+                        StockDialogType.EDIT_DIALOG ,
+                        null
+                )
+        );
         fragmentStockGameBinding.playButton.setOnClickListener(view2 -> {
             var intent = stockViewModel.createPlayGameIntent();
             switch (stockViewModel.getCountGameFiles()) {
-                case 0 -> {
-                    stockViewModel.showDialogFragment(getParentFragmentManager() , StockDialogType.ERROR_DIALOG , getString(R.string.gameFolderEmpty));
-                }
+                case 0 ->
+                        stockViewModel.showDialogFragment(
+                                getParentFragmentManager() ,
+                                StockDialogType.ERROR_DIALOG ,
+                                getString(R.string.gameFolderEmpty)
+                        );
                 case 1 -> {
                     var chosenGameFile = stockViewModel.getGameFile(0);
                     intent.putExtra("gameFileUri" ,  String.valueOf(chosenGameFile.getUri()));
                     requireActivity().startActivity(intent);
                 }
                 default -> {
-                    stockViewModel.showDialogFragment(getParentFragmentManager() , StockDialogType.SELECT_DIALOG , null);
+                    stockViewModel.showDialogFragment(
+                            getParentFragmentManager() ,
+                            StockDialogType.SELECT_DIALOG ,
+                            null
+                    );
                     stockViewModel.outputIntObserver.observe(getViewLifecycleOwner() , integer -> {
                         var chosenGameFile = stockViewModel.getGameFile(integer);
                         intent.putExtra("gameFileUri" , String.valueOf(chosenGameFile.getUri()));

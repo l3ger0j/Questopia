@@ -64,11 +64,10 @@ public class StockViewModel extends AndroidViewModel {
     // Containers
     private final HashMap<String, GameData> gamesMap = new HashMap<>();
     private final MutableLiveData<ArrayList<GameData>> gameDataList;
+    private ArrayList<DocumentFile> listGamesDir;
 
     private final LocalGame localGame = new LocalGame();
-    private ArrayList<DocumentFile> listGamesDir;
     private DocumentFile tempImageFile, tempPathFile, tempModFile;
-
     private GameData currGameData;
     private DialogEditBinding editBinding;
     private SettingsController controller;
@@ -122,19 +121,6 @@ public class StockViewModel extends AndroidViewModel {
             return tempStockActivity;
         } else {
             throw new NullPointerException();
-        }
-    }
-
-    public String getGameIdByPosition(int position) {
-        getGameDataList().observeForever(gameDataArrayList -> {
-            if (!gameDataArrayList.isEmpty() && gameDataArrayList.size() > position) {
-                setCurrGameData(gameDataArrayList.get(position));
-            }
-        });
-        if (getCurrGameData().isPresent()) {
-            return getCurrGameData().get().id;
-        } else {
-            return "";
         }
     }
 
