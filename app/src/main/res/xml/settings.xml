@@ -11,6 +11,7 @@
         android:key="textPref" />
 
     <Preference
+        android:icon="@drawable/baseline_image_24"
         android:title="@string/imageCatTitle"
         android:key="imagePref" />
 

@@ -109,15 +109,15 @@
         <string name="textBackLinkColorSum">Default value -VALUE-</string>
         <string name="extendedName">Questopia -VERSION-</string>
         <!-- Image section -->
-        <string name="imageCatTitle">Image Display Settings</string>
-        <string name="autoWidthTitle">Auto Width Image</string>
-        <string name="autoWidthSum">Use an auto-detectable value for the width of the image</string>
-        <string name="customWidthTitle">Custom Width Image</string>
-        <string name="autoHeightTitle">Auto Height Image</string>
-        <string name="autoHeightSum">Use an auto-detectable value for the height of the image</string>
-        <string name="customHeightTitle">Custom Height Image</string>
-        <string name="fullScreenImageSum">When clicked, the picture will open in the dialog</string>
-        <string name="fullScreenImageTitle">Fullscreen Images</string>
+        <string name="imageCatTitle">Pictures</string>
+        <string name="autoWidthTitle">Image Width</string>
+        <string name="autoWidthSum">Automatic image width</string>
+        <string name="customWidthTitle">Specify the width of the image</string>
+        <string name="autoHeightTitle">Image Height</string>
+        <string name="autoHeightSum">Automatic image height</string>
+        <string name="customHeightTitle">Specify the height of the image</string>
+        <string name="permImgDialogTitle">All images in the dialog</string>
+        <string name="fullScreenImageSum">Clicking on the image in the main description opens it in the dialog</string>
         <!-- Switch section -->
         <string name="filePicker">File Picker Dialog (alpha)</string>
         <string name="immersiveModeTitle">Immersive Mode</string>

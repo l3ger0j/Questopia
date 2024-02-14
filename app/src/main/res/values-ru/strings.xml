@@ -109,15 +109,15 @@
         <string name="textBackLinkColorSum">Значение по умолчанию -VALUE-</string>
         <string name="extendedName">Questopia -VERSION-</string>
         <!-- Image section -->
-        <string name="imageCatTitle">Настройки отображения картинок</string>
-        <string name="autoWidthTitle">Авто Ширина Изображения</string>
-        <string name="autoWidthSum">Использовать автоматически определяемое значение для ширины изображения</string>
-        <string name="customWidthTitle">Своё Значение Ширины</string>
-        <string name="autoHeightTitle">Авто Высота Изображения</string>
-        <string name="autoHeightSum">Использовать автоматически определяемое значение для высоты изображения</string>
-        <string name="customHeightTitle">Своё Значение Высоты</string>
-        <string name="fullScreenImageSum">При нажатии на картинку, она откроется в диалоговом окне</string>
-        <string name="fullScreenImageTitle">Полноэкранные изображения</string>
+        <string name="imageCatTitle">Картинки</string>
+        <string name="autoWidthTitle">Ширина изображения</string>
+        <string name="autoWidthSum">Автоматическая ширина изображения</string>
+        <string name="customWidthTitle">Укажите ширину изображения</string>
+        <string name="autoHeightTitle">Высота изображения</string>
+        <string name="autoHeightSum">Автоматическая высота изображения</string>
+        <string name="customHeightTitle">Укажите высоту изображения</string>
+        <string name="permImgDialogTitle">Все картинки в диалоге</string>
+        <string name="fullScreenImageSum">Нажатие на картинку в основном описании открывает её в диалоге</string>
         <!-- Switch section -->
         <string name="filePicker">Диалог Выбора Файла (альфа)</string>
         <string name="immersiveModeTitle">Режим Погружения</string>
