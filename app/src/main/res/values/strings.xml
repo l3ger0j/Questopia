@@ -92,22 +92,21 @@
         <string name="soundTitle">Play sound</string>
         <string name="actsHeightTitle">Actions List Height</string>
         <!-- Text section -->
-        <string name="textCatTitle">Text Display Settings</string>
-        <string name="fontStyleTitle">Font Style</string>
-        <string name="fontSizeTitle">Font Size</string>
-        <string name="useGameFontTitle">Use Game Font</string>
+        <string name="textCatTitle">Text</string>
+        <string name="fontStyleTitle">Font style</string>
+        <string name="fontSizeTitle">Font size</string>
+        <string name="useGameFontTitle">Use game font</string>
         <string name="useGameFontSum">Use the font settings from the game</string>
-        <string name="useGameTextColorTitle">Use Game Text Color</string>
+        <string name="useGameTextColorTitle">Text color</string>
         <string name="useGameTextColorSum">Use the text color settings from the game</string>
-        <string name="textColorTitle">Custom Text Color</string>
-        <string name="useGameBackgroundColorTitle">Use Game Background Color</string>
+        <string name="textColorTitle">Specify the text color</string>
+        <string name="useGameBackgroundColorTitle">Background color</string>
         <string name="useGameBackgroundColorSum">Use the background color settings from the game</string>
-        <string name="backColorTitle">Custom Background Color</string>
-        <string name="useGameLinkColorTitle">Use Game Link Color</string>
+        <string name="backColorTitle">Specify the background color</string>
+        <string name="useGameLinkColorTitle">Link color</string>
         <string name="useGameLinkColorSum">Use the link color settings from the game</string>
-        <string name="linkColorTitle">Custom Link Color</string>
+        <string name="linkColorTitle">Specify the color of the links</string>
         <string name="textBackLinkColorSum">Default value -VALUE-</string>
-        <string name="extendedName">Questopia -VERSION-</string>
         <!-- Image section -->
         <string name="imageCatTitle">Pictures</string>
         <string name="autoWidthTitle">Image Width</string>
@@ -133,6 +132,7 @@
         <!-- Extra section -->
         <string name="pluginTitle">Additions</string>
         <string name="aboutTitle">About Quest Player</string>
+        <string name="extendedName" translatable="false">Questopia -VERSION-</string>
     <!-- Menu save and load -->
         <string name="selectSlot">Select a slot</string>
         <string name="slotPresent" formatted="false">Slot %d - %s</string>

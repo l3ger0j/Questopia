@@ -92,22 +92,21 @@
         <string name="soundTitle">Воспроизводить звук</string>
         <string name="actsHeightTitle">Высота Списка Действий</string>
         <!-- Text section -->
-        <string name="textCatTitle">Настройки отображения текста</string>
-        <string name="fontStyleTitle">Стиль Шрифта</string>
-        <string name="fontSizeTitle">Размер Шрифта</string>
-        <string name="useGameFontTitle">Шрифт из Игры</string>
+        <string name="textCatTitle">Текст</string>
+        <string name="fontStyleTitle">Стиль шрифта</string>
+        <string name="fontSizeTitle">Размер шрифта</string>
+        <string name="useGameFontTitle">Шрифт из игры</string>
         <string name="useGameFontSum">Использовать настройки шрифта из игры</string>
-        <string name="useGameTextColorTitle">Цвет Текста из Игры</string>
+        <string name="useGameTextColorTitle">Цвет текста</string>
         <string name="useGameTextColorSum">Использовать настройки цвета текста из игры</string>
-        <string name="textColorTitle">Свой Цвет Текста</string>
-        <string name="useGameBackgroundColorTitle">Цвет Фона из Игры</string>
+        <string name="textColorTitle">Укажите цвет текста</string>
+        <string name="useGameBackgroundColorTitle">Цвет фона</string>
         <string name="useGameBackgroundColorSum">Использовать настройки цвета фона из игры</string>
-        <string name="backColorTitle">Свой Цвет Фона</string>
-        <string name="useGameLinkColorTitle">Цвет Ссылок из Игры</string>
-        <string name="useGameLinkColorSum">Использовать настройки цвета ссылки из игры</string>
-        <string name="linkColorTitle">Свой Цвет Ссылок</string>
+        <string name="backColorTitle">Укажите цвет фона</string>
+        <string name="useGameLinkColorTitle">Цвет ссылок</string>
+        <string name="useGameLinkColorSum">Использовать настройки цвета ссылок из игры</string>
+        <string name="linkColorTitle">Укажите цвет ссылок</string>
         <string name="textBackLinkColorSum">Значение по умолчанию -VALUE-</string>
-        <string name="extendedName">Questopia -VERSION-</string>
         <!-- Image section -->
         <string name="imageCatTitle">Картинки</string>
         <string name="autoWidthTitle">Ширина изображения</string>
