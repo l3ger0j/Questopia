@@ -131,7 +131,7 @@
         <string name="execStringTitle">Исполнитель строк</string>
         <string name="execStringSum">Изменяет видимость специального диалога, который можно использовать для отладки или читерства</string>
         <!-- Extra section -->
-        <string name="pluginTitle">Меню плагинов</string>
+        <string name="pluginTitle">Дополнения</string>
         <string name="aboutTitle">О программе</string>
     <!-- Menu save and load -->
         <string name="selectSlot">Выберите слот</string>
