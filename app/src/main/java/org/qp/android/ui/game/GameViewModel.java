@@ -381,7 +381,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         super(application);
         preferences = PreferenceManager.getDefaultSharedPreferences(application);
         preferences.registerOnSharedPreferenceChangeListener(preferenceChangeListener);
-        questPlayerApplication = getApplication();
+        questPlayerApplication = (QuestPlayerApplication) getApplication();
         fullPathGameDir = questPlayerApplication.getCurrentGameDir().getUri();
         htmlProcessor = questPlayerApplication.getHtmlProcessor();
     }
