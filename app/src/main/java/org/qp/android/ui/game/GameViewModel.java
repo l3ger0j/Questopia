@@ -455,6 +455,9 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         @Override
         public WebResourceResponse shouldInterceptRequest(WebView view ,
                                                           @NonNull WebResourceRequest request) {
+            if (getSettingsController().isImageDisabled) {
+                return super.shouldInterceptRequest(view , request);
+            }
             var uri = request.getUrl();
             var rootDir = DocumentFileCompat.fromUri(getApplication() , fullPathGameDir);
             if (rootDir != null && uri.getScheme() != null) {

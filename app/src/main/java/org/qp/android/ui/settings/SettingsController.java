@@ -20,6 +20,7 @@ public class SettingsController {
     public int binaryPrefixes;
     public float actionsHeightRatio;
     public boolean isSoundEnabled;
+    public boolean isImageDisabled;
     public boolean isUseAutoWidth;
     public boolean isUseAutoHeight;
     public boolean isUseSeparator;
@@ -64,7 +65,6 @@ public class SettingsController {
         settingsController.actionsHeightRatio = parseActionsHeightRatio(preferences.getString("actsHeight", "1/3"));
         settingsController.isUseAutoscroll = preferences.getBoolean("autoscroll", true);
         settingsController.isUseExecString = preferences.getBoolean("execString", false);
-        settingsController.isUseImageDebug = preferences.getBoolean("debugImage", false);
         settingsController.isUseMusicDebug = preferences.getBoolean("debugMusic", false);
         settingsController.isUseSeparator = preferences.getBoolean("separator", false);
         settingsController.isUseGameFont = preferences.getBoolean("useGameFont", false);
@@ -88,11 +88,13 @@ public class SettingsController {
 
     private static void imageSettings (@NonNull SettingsController settingsController,
                                        @NonNull SharedPreferences preferences) {
+        settingsController.isImageDisabled = preferences.getBoolean("pref_disable_image", false);
         settingsController.isUseAutoWidth = preferences.getBoolean("autoWidth", true);
         settingsController.customWidthImage = Integer.parseInt(preferences.getString("customWidthImage", "400"));
         settingsController.isUseAutoHeight = preferences.getBoolean("autoHeight", true);
         settingsController.customHeightImage = Integer.parseInt(preferences.getString("customHeightImage", "400"));
         settingsController.isUseFullscreenImages = preferences.getBoolean("fullScreenImage", false);
+        settingsController.isUseImageDebug = preferences.getBoolean("debugImage", false);
     }
 
     private static float parseActionsHeightRatio(@NonNull String str) {

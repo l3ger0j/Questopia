@@ -3,6 +3,11 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <SwitchPreferenceCompat
+        android:icon="@drawable/baseline_image_24"
+        android:defaultValue="false"
+        android:key="pref_disable_image"
+        android:title="Disable image" />
+    <SwitchPreferenceCompat
         android:icon="@drawable/baseline_width_24"
         android:defaultValue="true"
         android:disableDependentsState="true"
@@ -41,7 +46,7 @@
         android:summary="@string/fullScreenImageSum"
         android:title="@string/permImgDialogTitle" />
     <SwitchPreferenceCompat
-        android:icon="@drawable/baseline_image_24"
+        android:icon="@drawable/baseline_broken_image_copy_24"
         android:defaultValue="false"
         android:key="debugImage"
         android:summary="@string/imageDebugSum"

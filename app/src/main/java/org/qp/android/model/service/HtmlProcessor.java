@@ -96,29 +96,33 @@ public class HtmlProcessor {
 
     private void processHTMLImages(@NonNull Element documentBody) {
         var dynBlackList = new ArrayList<String>();
-        for (var element : documentBody.select("a")) {
+        documentBody.select("a").forEach(element -> {
             if (element.attr("href").contains("exec:")) {
                 dynBlackList.add(element.select("img").attr("src"));
             }
-        }
-        for (var img : documentBody.select("img")) {
-            if (controller.isUseFullscreenImages) {
-                if (!dynBlackList.contains(img.attr("src"))) {
-                    img.attr("onclick" , "img.onClickImage(this.src);");
+        });
+        if (controller.isImageDisabled) {
+            documentBody.select("img").remove();
+        } else {
+            documentBody.select("img").forEach(img -> {
+                if (controller.isUseFullscreenImages) {
+                    if (!dynBlackList.contains(img.attr("src"))) {
+                        img.attr("onclick" , "img.onClickImage(this.src);");
+                    }
                 }
-            }
-            if (controller.isUseAutoWidth && controller.isUseAutoHeight) {
-                img.attr("style", "display: inline; height: auto; max-width: 100%;");
-            }
-            if (!controller.isUseAutoWidth) {
-                if (shouldChangeWidth(img)) {
-                    img.attr("style" , "max-width:" + controller.customWidthImage+";");
+                if (controller.isUseAutoWidth && controller.isUseAutoHeight) {
+                    img.attr("style", "display: inline; height: auto; max-width: 100%;");
                 }
-            } else if (!controller.isUseAutoHeight) {
-                if (shouldChangeHeight(img)) {
-                    img.attr("style" , "max-height:" + controller.customHeightImage+";");
+                if (!controller.isUseAutoWidth) {
+                    if (shouldChangeWidth(img)) {
+                        img.attr("style" , "max-width:" + controller.customWidthImage+";");
+                    }
+                } else if (!controller.isUseAutoHeight) {
+                    if (shouldChangeHeight(img)) {
+                        img.attr("style" , "max-height:" + controller.customHeightImage+";");
+                    }
                 }
-            }
+            });
         }
     }
 
