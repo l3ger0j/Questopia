@@ -27,7 +27,6 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.os.LocaleListCompat;
-import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
@@ -144,13 +143,13 @@ public class GameActivity extends AppCompatActivity {
         windowInsetsController.setSystemBarsBehavior(
                 WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         );
-        ViewCompat.setOnApplyWindowInsetsListener(getWindow().getDecorView() , (v , insets) -> {
+        getWindow().getDecorView().setOnApplyWindowInsetsListener((v , insets) -> {
             if (settingsController.isUseImmersiveMode) {
                 windowInsetsController.hide(WindowInsetsCompat.Type.systemBars());
             } else {
                 windowInsetsController.show(WindowInsetsCompat.Type.systemBars());
             }
-            return WindowInsetsCompat.toWindowInsetsCompat(v.onApplyWindowInsets(insets.toWindowInsets()));
+            return v.onApplyWindowInsets(insets);
         });
 
         saveResultLaunch = registerForActivityResult(
