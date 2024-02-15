@@ -3,7 +3,10 @@ package org.qp.android.ui.dialogs;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
@@ -35,6 +38,10 @@ public class GameDialogFrags extends DialogFragment {
     private String template;
 
     private GameViewModel gameViewModel;
+    private TextInputLayout feedBackName;
+    private EditText feedBackNameET;
+    private TextInputLayout feedBackContact;
+    private EditText feedBackContactET;
 
     public ObservableField<String> pathToImage = new ObservableField<>();
 
@@ -54,10 +61,55 @@ public class GameDialogFrags extends DialogFragment {
         this.message = message;
     }
 
+    private boolean isValidate() {
+        return validateUserName() && validateEmail();
+    }
+
+    private final TextWatcher watcher = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence s , int start , int count , int after) {
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s , int start , int before , int count) {
+            if (feedBackNameET != null) {
+                validateUserName();
+            } else if (feedBackContactET != null) {
+                validateEmail();
+            }
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+        }
+    };
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         gameViewModel = new ViewModelProvider(requireActivity()).get(GameViewModel.class);
+    }
+
+    private boolean validateUserName() {
+        if (feedBackNameET.getText().toString().trim().isEmpty()) {
+            feedBackName.setError("Required Field!");
+            feedBackNameET.requestFocus();
+            return false;
+        } else {
+            feedBackName.setErrorEnabled(false);
+        }
+        return true;
+    }
+
+    private boolean validateEmail() {
+        if (feedBackContactET.getText().toString().trim().isEmpty()) {
+            feedBackContact.setError("Required Field!");
+            feedBackContactET.requestFocus();
+            return false;
+        } else {
+            feedBackContact.setErrorEnabled(false);
+        }
+        return true;
     }
 
     @NonNull
@@ -97,15 +149,31 @@ public class GameDialogFrags extends DialogFragment {
                 return builder.create();
             }
             case ERROR_DIALOG -> {
-                final var errorFeBackView =
-                        getLayoutInflater().inflate(R.layout.dialog_feedback , null);
+                final var errorFeBackView = getLayoutInflater().inflate(R.layout.dialog_feedback , null);
                 var feedBackScrollError = (ScrollView) errorFeBackView.findViewById(R.id.feedBackScrollError);
                 var feedBackTV = (TextView) feedBackScrollError.findViewById(R.id.feedBackTV);
+                var optFeedBackName = Optional.ofNullable((TextInputLayout) errorFeBackView.findViewById(R.id.feedBackName));
+                optFeedBackName.ifPresent(textInputLayout -> {
+                    feedBackName = optFeedBackName.get();
+                    var optEditText = Optional.ofNullable(optFeedBackName.get().getEditText());
+                    optEditText.ifPresent(editText -> {
+                        feedBackNameET = editText;
+                        editText.addTextChangedListener(watcher);
+                    });
+                });
+                var optFeedBackContact = Optional.ofNullable((TextInputLayout) errorFeBackView.findViewById(R.id.feedBackContact));
+                optFeedBackContact.ifPresent(textInputLayout -> {
+                    feedBackContact = optFeedBackContact.get();
+                    var optEditText = Optional.ofNullable(optFeedBackContact.get().getEditText());
+                    optEditText.ifPresent(editText -> {
+                        feedBackContactET = editText;
+                        editText.addTextChangedListener(watcher);
+                    });
+                });
                 feedBackTV.setText(message);
                 builder.setTitle(R.string.error);
                 builder.setView(errorFeBackView);
-                builder.setPositiveButton("Send" ,
-                        (dialog , which) -> gameViewModel.onDialogPositiveClick(this));
+                builder.setPositiveButton("Send" , null);
                 builder.setNegativeButton(android.R.string.cancel ,
                         (dialog , which) -> {});
                 return builder.create();
@@ -157,10 +225,12 @@ public class GameDialogFrags extends DialogFragment {
     @Override
     public void onResume() {
         super.onResume();
+
+        final var dialog = Optional.ofNullable((AlertDialog) getDialog());
+
         var arguments = Optional.ofNullable(getArguments());
         if (arguments.isPresent()) {
             template = arguments.get().getString("template");
-            final var dialog = Optional.ofNullable((AlertDialog) getDialog());
             if (dialog.isPresent()) {
                 if (dialogType.equals(GameDialogType.EXECUTOR_DIALOG) ||
                         dialogType.equals(GameDialogType.INPUT_DIALOG)) {
@@ -171,6 +241,18 @@ public class GameDialogFrags extends DialogFragment {
                     var neutralButton = (Button) dialog.get().getButton(Dialog.BUTTON_NEUTRAL);
                     neutralButton.setOnClickListener(v -> gameViewModel.onDialogNeutralClick(this));
                 }
+            }
+        }
+
+        if (dialog.isPresent()) {
+            if (dialogType.equals(GameDialogType.ERROR_DIALOG)) {
+                var sendButton = (Button) dialog.get().getButton(Dialog.BUTTON_POSITIVE);
+                sendButton.setOnClickListener(v -> {
+                    if (isValidate()) {
+                        gameViewModel.onDialogPositiveClick(this);
+                        dialog.get().dismiss();
+                    }
+                });
             }
         }
     }
