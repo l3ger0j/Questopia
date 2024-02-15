@@ -404,14 +404,16 @@ public class StockActivity extends AppCompatActivity {
                     case R.id.delete_game -> {
                         var service = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
                         for (var data : selectList) {
-                            dropPersistable(data.gameDir.getUri());
-                            stockViewModel.removeDirFromListDirsFile(listDirsFile , data.gameDir.getName());
                             CompletableFuture
-                                    .runAsync(() -> deleteDirectory(data.gameDir) , service)
-                                    .thenRun(() -> {
-                                        tempList.remove(data);
-                                        stockViewModel.refreshGameData();
-                                    })
+                                    .runAsync(() -> tempList.remove(data) , service)
+                                    .thenCombineAsync(
+                                            stockViewModel.removeDirFromListDirsFile(listDirsFile , data.gameDir.getName()) ,
+                                            (unused , unused2) -> null ,
+                                            service
+                                    )
+                                    .thenRun(() -> stockViewModel.refreshGameData())
+                                    .thenRunAsync(() -> deleteDirectory(data.gameDir) , service)
+                                    .thenRunAsync(() -> dropPersistable(data.gameDir.getUri()) , service)
                                     .exceptionally(ex -> {
                                         showErrorDialog("Error: " + "\n" + ex);
                                         return null;
@@ -541,7 +543,7 @@ public class StockActivity extends AppCompatActivity {
             }
         }
         if (!filteredList.isEmpty()) {
-            stockViewModel.setGameDataList(filteredList);
+            stockViewModel.setValueGameDataList(filteredList);
         }
     }
 }

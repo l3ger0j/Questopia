@@ -47,11 +47,13 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class StockViewModel extends AndroidViewModel {
 
     private final String TAG = this.getClass().getSimpleName();
+    private final ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
     public static final int CODE_PICK_IMAGE_FILE = 300;
     public static final int CODE_PICK_PATH_FILE = 301;
@@ -63,8 +65,8 @@ public class StockViewModel extends AndroidViewModel {
 
     // Containers
     private final HashMap<String, GameData> gamesMap = new HashMap<>();
-    private final MutableLiveData<ArrayList<GameData>> gameDataList;
-    private ArrayList<DocumentFile> listGamesDir;
+    private final MutableLiveData<ArrayList<GameData>> gameDataList = new MutableLiveData<>();
+    private ArrayList<DocumentFile> listGamesDir = new ArrayList<>();
 
     private final LocalGame localGame = new LocalGame();
     private DocumentFile tempImageFile, tempPathFile, tempModFile;
@@ -73,6 +75,7 @@ public class StockViewModel extends AndroidViewModel {
     private SettingsController controller;
 
     public EventEmitter emitter = new EventEmitter();
+
 
     // region Getter/Setter
     public void setController(SettingsController controller) {
@@ -110,8 +113,12 @@ public class StockViewModel extends AndroidViewModel {
         listGamesDir = gameDir;
     }
 
-    public void setGameDataList(ArrayList<GameData> gameDataArrayList) {
+    public void setValueGameDataList(ArrayList<GameData> gameDataArrayList) {
         gameDataList.setValue(gameDataArrayList);
+    }
+
+    public void postValueGameDataList(ArrayList<GameData> gameDataArrayList) {
+        gameDataList.postValue(gameDataArrayList);
     }
 
     @NotNull
@@ -320,8 +327,6 @@ public class StockViewModel extends AndroidViewModel {
 
     public StockViewModel(@NonNull Application application) {
         super(application);
-        gameDataList = new MutableLiveData<>();
-        listGamesDir = new ArrayList<>();
     }
 
     // region Dialog
@@ -415,7 +420,7 @@ public class StockViewModel extends AndroidViewModel {
             refreshIntGamesDirectory();
             dialogFragments.dismiss();
         } catch (NullPointerException ex) {
-            var message = getStockActivity().getString(R.string.error)+": "+ex;
+            var message = getStockActivity().getString(R.string.error) + ": " + ex;
             getStockActivity().showErrorDialog(message);
         }
     }
@@ -423,7 +428,6 @@ public class StockViewModel extends AndroidViewModel {
     private void calculateSizeDir(GameData gameData) {
         var gameDir = gameData.gameDir;
 
-        var executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
         CompletableFuture
                 .supplyAsync(() -> calculateDirSize(gameDir) , executor)
                 .thenAccept(aLong -> {
@@ -465,23 +469,25 @@ public class StockViewModel extends AndroidViewModel {
     public void refreshIntGamesDirectory() {
         var rootDir = ((QuestPlayerApplication) getApplication()).getCurrentGameDir();
         if (rootDir != null) {
-            if (!isWritableDirectory(rootDir)) {
-                var dirName = Optional.ofNullable(rootDir.getName());
-                var message = getStockActivity().getString(R.string.gamesFolderError);
-                getStockActivity().showErrorDialog(message);
-                var saveDir = getStockActivity().getListDirsFile();
-                dirName.ifPresent(s -> removeDirFromListDirsFile(saveDir , s));
-            } else {
-                putGameDirToList(rootDir);
-                refreshGameData();
-            }
+            CompletableFuture
+                    .runAsync(() -> {
+                        if (!isWritableDirectory(rootDir)) {
+                            var dirName = Optional.ofNullable(rootDir.getName());
+                            var message = getStockActivity().getString(R.string.gamesFolderError);
+                            getStockActivity().showErrorDialog(message);
+                            var saveDir = getStockActivity().getListDirsFile();
+                            dirName.ifPresent(s -> removeDirFromListDirsFile(saveDir , s));
+                        } else {
+                            putGameDirToList(rootDir);
+                            refreshGameData();
+                        }
+                    } , executor);
         }
     }
 
     public void refreshGameData() {
         gamesMap.clear();
 
-        var executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
         CompletableFuture
                 .supplyAsync(() -> localGame.extractGameDataFromList(getStockActivity() , listGamesDir) , executor)
                 .thenAccept(innerGameData -> {
@@ -491,9 +497,9 @@ public class StockViewModel extends AndroidViewModel {
                             var aggregateGameData = new GameData(remoteGameData);
                             aggregateGameData.gameDir = localGameData.gameDir;
                             aggregateGameData.gameFiles = localGameData.gameFiles;
-                            gamesMap.put(localGameData.id, aggregateGameData);
+                            gamesMap.put(localGameData.id , aggregateGameData);
                         } else {
-                            gamesMap.put(localGameData.id, localGameData);
+                            gamesMap.put(localGameData.id , localGameData);
                         }
                     }
                 })
@@ -516,9 +522,8 @@ public class StockViewModel extends AndroidViewModel {
     // region Game list dir
     public void saveListDirsIntoFile(File listDirsFile) {
         var listFiles = getListGamesDir();
-        var mapFiles = new HashMap<String , String>();
+        var mapFiles = new HashMap<String, String>();
 
-        var executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
         CompletableFuture
                 .runAsync(() -> {
                     for (var file : listFiles) {
@@ -540,11 +545,10 @@ public class StockViewModel extends AndroidViewModel {
                 });
     }
 
-    public void removeDirFromListDirsFile(File listDirsFile , String folderName) {
-        var ref = new TypeReference<HashMap<String , String>>(){};
+    public CompletableFuture<Void> removeDirFromListDirsFile(File listDirsFile , String folderName) {
+        var ref = new TypeReference<HashMap<String, String>>() {};
 
-        var executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-        CompletableFuture
+        return CompletableFuture
                 .supplyAsync(() -> {
                     try {
                         return jsonToObject(listDirsFile , ref);
@@ -571,7 +575,7 @@ public class StockViewModel extends AndroidViewModel {
                     ((QuestPlayerApplication) getApplication()).setCurrentGameDir(null);
                 })
                 .exceptionally(throwable -> {
-                    Log.e(TAG , "Error: ", throwable);
+                    Log.e(TAG , "Error: " , throwable);
                     return null;
                 });
     }
