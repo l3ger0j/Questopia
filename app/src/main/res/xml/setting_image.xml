@@ -6,7 +6,7 @@
         android:icon="@drawable/baseline_image_24"
         android:defaultValue="false"
         android:key="pref_disable_image"
-        android:title="Disable image" />
+        android:title="@string/pref_disable_image" />
     <SwitchPreferenceCompat
         android:icon="@drawable/baseline_width_24"
         android:defaultValue="true"

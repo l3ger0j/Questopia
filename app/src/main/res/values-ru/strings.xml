@@ -115,6 +115,7 @@
         <string name="execStringSum">Диалог, используемый для отладки или читерства</string>
         <!-- Image section -->
         <string name="imageCatTitle">Картинки</string>
+        <string name="pref_disable_image">Отключить картинки</string>
         <string name="autoWidthTitle">Ширина изображения</string>
         <string name="autoWidthSum">Автоматическая ширина изображения</string>
         <string name="customWidthTitle">Укажите ширину изображения</string>

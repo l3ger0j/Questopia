@@ -115,6 +115,7 @@
         <string name="execStringSum">A dialog used for debugging or cheating</string>
         <!-- Image section -->
         <string name="imageCatTitle">Pictures</string>
+        <string name="pref_disable_image">Disable images</string>
         <string name="autoWidthTitle">Image width</string>
         <string name="autoWidthSum">Automatic image width</string>
         <string name="customWidthTitle">Specify the width of the image</string>
