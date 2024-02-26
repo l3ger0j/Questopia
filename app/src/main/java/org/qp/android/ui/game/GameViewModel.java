@@ -18,7 +18,6 @@ import android.net.Uri;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
-import android.webkit.MimeTypeMap;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
@@ -34,6 +33,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.preference.PreferenceManager;
 
 import com.anggrayudi.storage.file.DocumentFileCompat;
+import com.anggrayudi.storage.file.MimeType;
 import com.google.android.material.textfield.TextInputLayout;
 
 import org.qp.android.QuestPlayerApplication;
@@ -465,10 +465,8 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
                     try {
                         if (uri.getPath() == null) throw new NullPointerException();
                         var imageFile = fromRelPath(uri.getPath() , rootDir);
-                        var extension = imageFile.getName();
-                        var mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
                         var in = getApplication().getContentResolver().openInputStream(imageFile.getUri());
-                        return new WebResourceResponse(mimeType , null , in);
+                        return new WebResourceResponse(MimeType.IMAGE , "utf-8" , in);
                     } catch (FileNotFoundException | NullPointerException ex) {
                         if (getSettingsController().isUseImageDebug) {
                             var errorMessage = getGameActivity()
