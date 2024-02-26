@@ -131,7 +131,7 @@ public class HtmlProcessor {
         var curGameDir = getApplication().getCurrentGameDir();
         var imageFile = fromRelPath(relPath , curGameDir);
         if (imageFile == null) return false;
-        var drawable = imageProvider.get(imageFile.getUri());
+        var drawable = imageProvider.getDrawableFromPath(imageFile.getUri());
         if (drawable == null) return false;
         return drawable.getIntrinsicWidth() < Resources.getSystem()
                 .getDisplayMetrics().widthPixels;
@@ -142,7 +142,7 @@ public class HtmlProcessor {
         var curGameDir = getApplication().getCurrentGameDir();
         var imageFile = fromRelPath(relPath , curGameDir);
         if (imageFile == null) return false;
-        var drawable = imageProvider.get(imageFile.getUri());
+        var drawable = imageProvider.getDrawableFromPath(imageFile.getUri());
         if (drawable == null) return false;
         return drawable.getIntrinsicHeight() < Resources.getSystem()
                 .getDisplayMetrics().heightPixels;
