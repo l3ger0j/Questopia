@@ -411,9 +411,9 @@ public class StockActivity extends AppCompatActivity {
                                             (unused , unused2) -> null ,
                                             service
                                     )
-                                    .thenRun(() -> stockViewModel.refreshGameData())
                                     .thenRunAsync(() -> deleteDirectory(data.gameDir) , service)
                                     .thenRunAsync(() -> dropPersistable(data.gameDir.getUri()) , service)
+                                    .thenRun(() -> stockViewModel.refreshGameData())
                                     .exceptionally(ex -> {
                                         showErrorDialog("Error: " + "\n" + ex);
                                         return null;
