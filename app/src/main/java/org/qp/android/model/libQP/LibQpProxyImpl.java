@@ -35,6 +35,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
@@ -456,10 +457,12 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
     @Override
     public void ShowPicture(String path) {
         var inter = gameInterface;
-        var imageFile = fromFullPath(path , getCurGameDir());
-        if (inter != null && isNotEmpty(path) && imageFile != null) {
-            var imageFileUri = imageFile.getUri();
-            inter.showPicture(String.valueOf(imageFileUri));
+        if (inter != null && isNotEmpty(path)) {
+            Optional.ofNullable(fromFullPath(path , getCurGameDir()))
+                    .ifPresent(documentFile -> {
+                        var imageFileUri = documentFile.getUri();
+                        inter.showPicture(String.valueOf(imageFileUri));
+                    });
         }
     }
 
