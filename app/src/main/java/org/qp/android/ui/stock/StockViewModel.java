@@ -569,9 +569,12 @@ public class StockViewModel extends AndroidViewModel {
                     }
                 } , executor)
                 .thenRunAsync(() -> {
-                    var newList = getListGamesDir();
-                    newList.removeIf(documentFile -> documentFile.getName().equalsIgnoreCase(folderName));
-                    setListGamesDir(newList);
+                    var optNewGameList = Optional.ofNullable(getListGamesDir());
+                    optNewGameList.ifPresent(newGameList -> {
+                        newGameList.removeIf(documentFile ->
+                                documentFile.getName().equalsIgnoreCase(folderName));
+                        setListGamesDir(newGameList);
+                    });
                     ((QuestPlayerApplication) getApplication()).setCurrentGameDir(null);
                 })
                 .exceptionally(throwable -> {
