@@ -7,7 +7,9 @@ import android.content.Context;
 import android.os.Build;
 
 import androidx.documentfile.provider.DocumentFile;
+import androidx.room.Room;
 
+import org.qp.android.data.db.GameDatabase;
 import org.qp.android.model.libQP.LibQpProxy;
 import org.qp.android.model.libQP.LibQpProxyImpl;
 import org.qp.android.model.service.AudioPlayer;
@@ -20,6 +22,8 @@ public class QuestPlayerApplication extends Application {
 
     public static final String CHANNEL_INSTALL_GAME = "org.qp.android.channel.install_game";
 
+    public static QuestPlayerApplication instance;
+    private GameDatabase database;
     private final ImageProvider imageProvider = new ImageProvider();
     private final HtmlProcessor htmlProcessor = new HtmlProcessor(imageProvider);
     private final AudioPlayer audioPlayer = new AudioPlayer();
@@ -31,6 +35,12 @@ public class QuestPlayerApplication extends Application {
     public void onCreate() {
         super.onCreate();
         createNotificationChannels();
+        instance = this;
+        database = Room.databaseBuilder(
+                this ,
+                GameDatabase.class ,
+                "database"
+        ).build();
     }
 
     public void setCurrentGameDir(DocumentFile currentGameDir) {
@@ -52,6 +62,14 @@ public class QuestPlayerApplication extends Application {
 
     public DocumentFile getCurrentGameDir() {
         return currentGameDir;
+    }
+
+    public static QuestPlayerApplication getInstance() {
+        return instance;
+    }
+
+    public GameDatabase getDatabase() {
+        return database;
     }
 
     public void createNotificationChannels() {
