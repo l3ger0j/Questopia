@@ -19,7 +19,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.storage.StorageManager;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
@@ -203,11 +202,19 @@ public class StockActivity extends AppCompatActivity {
 
         stockViewModel.emitter.observe(this , eventNavigation -> {
             if (eventNavigation instanceof StockFragmentNavigation.ShowErrorDialog errorDialog) {
-                showErrorDialog(errorDialog.getErrorMessage());
+                switch (errorDialog.getErrorType()) {
+                    case FOLDER_ERROR ->
+                            showErrorDialog(getString(R.string.gamesFolderError));
+                    case EXCEPTION ->
+                            showErrorDialog(getString(R.string.error)
+                                    + ": " + errorDialog.getErrorMessage());
+                }
             } else if (eventNavigation instanceof StockFragmentNavigation.ShowGameFragment gameFragment) {
                 onItemClick(gameFragment.getPosition());
             } else if (eventNavigation instanceof StockFragmentNavigation.ShowActionMode) {
                 onLongItemClick();
+            } else if (eventNavigation instanceof StockFragmentNavigation.ShowFilePicker filePicker) {
+                showFilePickerActivity(filePicker.getRequestCode() , filePicker.getMimeTypes());
             }
         });
 
@@ -415,7 +422,7 @@ public class StockActivity extends AppCompatActivity {
                                     .thenRunAsync(() -> dropPersistable(data.gameDir.getUri()) , service)
                                     .thenRun(() -> stockViewModel.refreshGameData())
                                     .exceptionally(ex -> {
-                                        showErrorDialog("Error: " + "\n" + ex);
+                                        showErrorDialog(getString(R.string.error) + ": " + ex);
                                         return null;
                                     });
                         }
@@ -499,51 +506,39 @@ public class StockActivity extends AppCompatActivity {
     }
 
     @Override
+    @SuppressLint("NonConstantResourceId")
     public boolean onOptionsItemSelected(MenuItem item) {
-        var itemId = item.getItemId();
-        if (itemId == R.id.menu_options) {
-            showSettings();
-            return true;
-        } else if (itemId == R.id.action_search) {
-            var searchView = (androidx.appcompat.widget.SearchView) item.getActionView();
-            if (searchView != null) {
-                searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-                    @Override
-                    public boolean onQueryTextSubmit(String query) {
-                        return false;
-                    }
-
-                    @Override
-                    public boolean onQueryTextChange(String newText) {
-                        filter(newText);
-                        return true;
-                    }
-                });
+        switch (item.getItemId()) {
+            case R.id.menu_options -> {
+                startActivity(new Intent(this , SettingsActivity.class));
+                return true;
             }
+            case R.id.action_search ->
+                    Optional.ofNullable((SearchView) item.getActionView()).ifPresent(searchView ->
+                            searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                                @Override
+                                public boolean onQueryTextSubmit(String query) {
+                                    return false;
+                                }
+
+                                @Override
+                                public boolean onQueryTextChange(String newText) {
+                                    var gameDataList = stockViewModel.getSortedGames();
+                                    var filteredList = new ArrayList<GameData>();
+                                    gameDataList.forEach(gameData -> {
+                                        if (gameData.title.toLowerCase(Locale.getDefault())
+                                                .contains(newText.toLowerCase(Locale.getDefault()))) {
+                                            filteredList.add(gameData);
+                                        }
+                                    });
+                                    if (!filteredList.isEmpty()) {
+                                        stockViewModel.setValueGameDataList(filteredList);
+                                    }
+                                    return true;
+                                }
+                            }));
         }
         return false;
     }
 
-    private void showSettings() {
-        startActivity(new Intent(this , SettingsActivity.class));
-    }
-
-    @Override
-    public boolean onKeyDown(int keyCode , KeyEvent event) {
-        return super.onKeyDown(keyCode , event);
-    }
-
-    private void filter(String text) {
-        var gameData = stockViewModel.getSortedGames();
-        var filteredList = new ArrayList<GameData>();
-        for (var item : gameData) {
-            if (item.title.toLowerCase(Locale.getDefault())
-                    .contains(text.toLowerCase(Locale.getDefault()))) {
-                filteredList.add(item);
-            }
-        }
-        if (!filteredList.isEmpty()) {
-            stockViewModel.setValueGameDataList(filteredList);
-        }
-    }
 }

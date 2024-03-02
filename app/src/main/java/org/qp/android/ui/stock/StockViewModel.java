@@ -12,7 +12,6 @@ import static org.qp.android.helpers.utils.PathUtil.removeExtension;
 
 import android.app.Application;
 import android.content.Intent;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 
@@ -317,6 +316,14 @@ public class StockViewModel extends AndroidViewModel {
         listGamesDir.add(gameDir);
     }
 
+    public void doOnShowFilePicker(int requestCode , String[] mimeTypes) {
+        emitter.waitAndExecuteOnce(new StockFragmentNavigation.ShowFilePicker(requestCode , mimeTypes));
+    }
+
+    public void doOnShowErrorDialog(String errorMessage , ErrorType errorType) {
+        emitter.emitAndExecuteOnce(new StockFragmentNavigation.ShowErrorDialog(errorMessage , errorType));
+    }
+
     public void doOnShowGameFragment(int position) {
         emitter.emitAndExecuteOnce(new StockFragmentNavigation.ShowGameFragment(position));
     }
@@ -412,7 +419,11 @@ public class StockViewModel extends AndroidViewModel {
                 copyFileToDir(getApplication() , tempPathFile , currGameData.gameDir);
             }
             if (tempModFile != null) {
-                var modDir = findFileOrDirectory(getStockActivity() , currGameData.gameDir , "mods");
+                var modDir = findFileOrDirectory(
+                        getApplication() ,
+                        currGameData.gameDir ,
+                        "mods"
+                );
                 copyFileToDir(getApplication() , tempModFile , modDir);
             }
 
@@ -420,8 +431,7 @@ public class StockViewModel extends AndroidViewModel {
             refreshIntGamesDirectory();
             dialogFragments.dismiss();
         } catch (NullPointerException ex) {
-            var message = getStockActivity().getString(R.string.error) + ": " + ex;
-            getStockActivity().showErrorDialog(message);
+            doOnShowErrorDialog(ex.getMessage() , ErrorType.EXCEPTION);
         }
     }
 
@@ -453,14 +463,11 @@ public class StockViewModel extends AndroidViewModel {
     public void sendIntent(@NonNull View view) {
         int id = view.getId();
         if (id == R.id.buttonSelectIcon) {
-            getStockActivity()
-                    .showFilePickerActivity(CODE_PICK_IMAGE_FILE , new String[]{"image/png" , "image/jpeg"});
+            doOnShowFilePicker(CODE_PICK_IMAGE_FILE , new String[]{"image/png" , "image/jpeg"});
         } else if (id == R.id.buttonSelectPath) {
-            getStockActivity()
-                    .showFilePickerActivity(CODE_PICK_PATH_FILE , new String[]{"application/octet-stream"});
+            doOnShowFilePicker(CODE_PICK_PATH_FILE , new String[]{"application/octet-stream"});
         } else if (id == R.id.buttonSelectMod) {
-            getStockActivity()
-                    .showFilePickerActivity(CODE_PICK_MOD_FILE , new String[]{"application/octet-stream"});
+            doOnShowFilePicker(CODE_PICK_MOD_FILE , new String[]{"application/octet-stream"});
         }
     }
     // endregion Dialog
@@ -472,9 +479,8 @@ public class StockViewModel extends AndroidViewModel {
             CompletableFuture
                     .runAsync(() -> {
                         if (!isWritableDirectory(rootDir)) {
+                            doOnShowErrorDialog(null , ErrorType.FOLDER_ERROR);
                             var dirName = Optional.ofNullable(rootDir.getName());
-                            var message = getStockActivity().getString(R.string.gamesFolderError);
-                            getStockActivity().showErrorDialog(message);
                             var saveDir = getStockActivity().getListDirsFile();
                             dirName.ifPresent(s -> removeDirFromListDirsFile(saveDir , s));
                         } else {
@@ -489,7 +495,7 @@ public class StockViewModel extends AndroidViewModel {
         gamesMap.clear();
 
         CompletableFuture
-                .supplyAsync(() -> localGame.extractGameDataFromList(getStockActivity() , listGamesDir) , executor)
+                .supplyAsync(() -> localGame.extractGameDataFromList(getApplication() , listGamesDir) , executor)
                 .thenAccept(innerGameData -> {
                     for (var localGameData : innerGameData) {
                         var remoteGameData = gamesMap.get(localGameData.id);
@@ -514,7 +520,7 @@ public class StockViewModel extends AndroidViewModel {
                             localGameData.add(data);
                         }
                     }
-                    gameDataList.postValue(localGameData);
+                    postValueGameDataList(localGameData);
                 } , executor);
     }
     // endregion Refresh
@@ -540,7 +546,7 @@ public class StockViewModel extends AndroidViewModel {
                     }
                 } , executor)
                 .exceptionally(throwable -> {
-                    Log.e(TAG , "Error: " , throwable);
+                    doOnShowErrorDialog(throwable.getMessage() , ErrorType.EXCEPTION);
                     return null;
                 });
     }
@@ -578,7 +584,7 @@ public class StockViewModel extends AndroidViewModel {
                     ((QuestPlayerApplication) getApplication()).setCurrentGameDir(null);
                 })
                 .exceptionally(throwable -> {
-                    Log.e(TAG , "Error: " , throwable);
+                    doOnShowErrorDialog(throwable.getMessage() , ErrorType.EXCEPTION);
                     return null;
                 });
     }
