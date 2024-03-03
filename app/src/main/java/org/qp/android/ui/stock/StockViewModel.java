@@ -527,7 +527,7 @@ public class StockViewModel extends AndroidViewModel {
 
     // region Game list dir
     public void saveListDirsIntoFile(File listDirsFile) {
-        var listFiles = getListGamesDir();
+        var listFiles = new ArrayList<>(getListGamesDir());
         var mapFiles = new HashMap<String, String>();
 
         CompletableFuture
