@@ -442,6 +442,7 @@ public class GameActivity extends AppCompatActivity {
     private String getErrorMessage (String inputString , @NonNull ErrorType errorType) {
         return switch (errorType) {
             case IMAGE_ERROR -> getString(R.string.notFoundImage) + "\n" + inputString;
+            case SOUND_ERROR -> getString(R.string.notFoundSound) + "\n" + inputString;
             case WAITING_ERROR -> getString(R.string.waitingError) + "\n" + inputString;
             case WAITING_INPUT_ERROR -> getString(R.string.waitingInputError) + "\n" + inputString;
             case EXCEPTION -> getString(R.string.error) + "\n" + inputString;

@@ -12,7 +12,7 @@ import android.os.Looper;
 import android.util.Log;
 
 import org.qp.android.QuestPlayerApplication;
-import org.qp.android.R;
+import org.qp.android.helpers.ErrorType;
 import org.qp.android.ui.dialogs.GameDialogType;
 import org.qp.android.ui.game.GameActivity;
 
@@ -120,10 +120,10 @@ public class AudioPlayer {
         if (soundFile == null) {
             var controller = getActivity().getSettingsController();
             if (controller != null && controller.isUseMusicDebug) {
-                var localizedStr = getActivity().getString(R.string.notFoundSound) + normPath;
                 getActivity().showSimpleDialog(
-                        localizedStr,
-                        GameDialogType.ERROR_DIALOG
+                        normPath,
+                        GameDialogType.ERROR_DIALOG,
+                        ErrorType.SOUND_ERROR
                 );
             } else {
                 Log.e(TAG,"Sound file not found: " + normPath);
