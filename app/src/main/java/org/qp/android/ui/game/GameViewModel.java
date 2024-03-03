@@ -115,7 +115,6 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
 
     // region Getter/Setter
     public HtmlProcessor getHtmlProcessor() {
-        htmlProcessor.setController(getSettingsController());
         return htmlProcessor;
     }
 

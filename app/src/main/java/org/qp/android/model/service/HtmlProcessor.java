@@ -29,12 +29,8 @@ public class HtmlProcessor {
     private final ImageProvider imageProvider;
     private static final String HTML_PATTERN = "<(\"[^\"]*\"|'[^']*'|[^'\">])*>";
     private final Pattern pattern = Pattern.compile(HTML_PATTERN);
-    private SettingsController controller;
+    private final SettingsController controller;
     private Context context;
-
-    public void setController(SettingsController controller) {
-        this.controller = controller;
-    }
 
     public void setContext(Context context) {
         this.context = context;
@@ -44,8 +40,9 @@ public class HtmlProcessor {
         return (QuestPlayerApplication) context;
     }
 
-    public HtmlProcessor(ImageProvider imageProvider) {
+    public HtmlProcessor(ImageProvider imageProvider , SettingsController settingsController) {
         this.imageProvider = imageProvider;
+        this.controller = settingsController;
     }
 
     /**
