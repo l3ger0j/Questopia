@@ -45,6 +45,7 @@ import org.jetbrains.annotations.Contract;
 import org.qp.android.QuestPlayerApplication;
 import org.qp.android.R;
 import org.qp.android.databinding.ActivityGameBinding;
+import org.qp.android.helpers.ErrorType;
 import org.qp.android.model.libQP.LibQpProxy;
 import org.qp.android.model.service.AudioPlayer;
 import org.qp.android.model.service.HtmlProcessor;
@@ -59,6 +60,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CountDownLatch;
 
@@ -193,11 +195,9 @@ public class GameActivity extends AppCompatActivity {
                                 }
                             }
                         } catch (FileNotFoundException e) {
-                            showSimpleDialog("File not found: " + "\n" + e ,
-                                    GameDialogType.ERROR_DIALOG);
+                            showSimpleDialog(getString(R.string.notFoundFile) + "\n" + e , GameDialogType.ERROR_DIALOG , null);
                         } catch (IOException e) {
-                            showSimpleDialog("Can not read file: " + "\n" + e ,
-                                    GameDialogType.ERROR_DIALOG);
+                            showSimpleDialog(getString(R.string.notReadFile) + "\n" + e , GameDialogType.ERROR_DIALOG , null);
                         }
                         postTextInDialogFrags(stringBuilder.toString());
                     }
@@ -319,21 +319,23 @@ public class GameActivity extends AppCompatActivity {
         if (!isMainThread()) {
             runOnUiThread(() -> warnUser(id));
         } else {
-            var label = navController.getCurrentDestination().getLabel();
-            if (label != null) {
-                switch (id) {
-                    case TAB_MAIN_DESC_AND_ACTIONS -> {
-                        if (!label.equals("GameMainFragment"))
-                            navigationView.getOrCreateBadge(R.id.menu_mainDesc);
-                    }
-                    case TAB_OBJECTS -> {
-                        if (!label.equals("GameObjectFragment"))
-                            navigationView.getOrCreateBadge(R.id.menu_inventory);
-                    }
-                    case TAB_VARS_DESC -> {
-                        if (!label.equals("GameVarsFragment"))
-                            navigationView.getOrCreateBadge(R.id.menu_varsDesc);
-                    }
+            var currDest = navController.getCurrentDestination();
+            if (currDest == null) return;
+            var currDestLabel = currDest.getLabel();
+            if (currDestLabel == null) return;
+
+            switch (id) {
+                case TAB_MAIN_DESC_AND_ACTIONS -> {
+                    if (!currDestLabel.equals("GameMainFragment"))
+                        navigationView.getOrCreateBadge(R.id.menu_mainDesc);
+                }
+                case TAB_OBJECTS -> {
+                    if (!currDestLabel.equals("GameObjectFragment"))
+                        navigationView.getOrCreateBadge(R.id.menu_inventory);
+                }
+                case TAB_VARS_DESC -> {
+                    if (!currDestLabel.equals("GameVarsFragment"))
+                        navigationView.getOrCreateBadge(R.id.menu_varsDesc);
                 }
             }
         }
@@ -344,7 +346,6 @@ public class GameActivity extends AppCompatActivity {
         libQpProxy.setGameInterface(null);
         gameViewModel.removeCallback();
         super.onDestroy();
-        Log.i(TAG,"Game destroyed");
     }
 
     @Override
@@ -402,18 +403,24 @@ public class GameActivity extends AppCompatActivity {
     }
 
     public void showSimpleDialog(@NonNull String inputString ,
-                                 @NonNull GameDialogType dialogType) {
+                                 @NonNull GameDialogType dialogType ,
+                                 @Nullable ErrorType errorType) {
         if (!isMainThread()) {
-            runOnUiThread(() -> showSimpleDialog(inputString , dialogType));
+            runOnUiThread(() -> showSimpleDialog(inputString , dialogType , errorType));
         } else {
             var manager = getSupportFragmentManager();
+            var optErrorType = Optional.ofNullable(errorType);
             if (manager.isDestroyed()) return;
 
             switch (dialogType) {
                 case ERROR_DIALOG -> {
                     var dialogFragment = new GameDialogFrags();
                     dialogFragment.setDialogType(GameDialogType.ERROR_DIALOG);
-                    dialogFragment.setMessage(inputString);
+                    if (optErrorType.isPresent()) {
+                        dialogFragment.setMessage(getErrorMessage(inputString , optErrorType.get()));
+                    } else {
+                        dialogFragment.setMessage(inputString);
+                    }
                     dialogFragment.show(manager , "errorDialogFragment");
                 }
                 case IMAGE_DIALOG -> {
@@ -430,6 +437,16 @@ public class GameActivity extends AppCompatActivity {
                 }
             }
         }
+    }
+
+    private String getErrorMessage (String inputString , @NonNull ErrorType errorType) {
+        return switch (errorType) {
+            case IMAGE_ERROR -> getString(R.string.notFoundImage) + "\n" + inputString;
+            case WAITING_ERROR -> getString(R.string.waitingError) + "\n" + inputString;
+            case WAITING_INPUT_ERROR -> getString(R.string.waitingInputError) + "\n" + inputString;
+            case EXCEPTION -> getString(R.string.error) + "\n" + inputString;
+            default -> "";
+        };
     }
 
     public void showMessageDialog (@Nullable String inputString ,

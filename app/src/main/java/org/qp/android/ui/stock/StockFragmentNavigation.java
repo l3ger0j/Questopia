@@ -1,5 +1,6 @@
 package org.qp.android.ui.stock;
 
+import org.qp.android.helpers.ErrorType;
 import org.qp.android.helpers.bus.EventNavigation;
 
 public interface StockFragmentNavigation {

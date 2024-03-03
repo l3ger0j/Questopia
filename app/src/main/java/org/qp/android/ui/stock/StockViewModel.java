@@ -30,6 +30,7 @@ import org.qp.android.QuestPlayerApplication;
 import org.qp.android.R;
 import org.qp.android.databinding.DialogEditBinding;
 import org.qp.android.dto.stock.GameData;
+import org.qp.android.helpers.ErrorType;
 import org.qp.android.helpers.bus.EventEmitter;
 import org.qp.android.helpers.repository.LocalGame;
 import org.qp.android.ui.dialogs.StockDialogFrags;

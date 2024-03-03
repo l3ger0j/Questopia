@@ -33,6 +33,8 @@
         <string name="noGameFilesError">I didn\'t find the game files after copying!</string>
         <string name="notFoundSound">Sound file not found:</string>
         <string name="notFoundImage">Image file not found:</string>
+        <string name="notFoundFile">File not found:</string>
+        <string name="notReadFile">Can not read file:</string>
     <!-- Dialog Install -->
         <string name="gameName">Game name</string>
         <string name="gameAuthor">Author</string>

@@ -33,6 +33,8 @@
         <string name="noGameFilesError">Я не нашла файлы игры после копирования!</string>
         <string name="notFoundSound">Звуковой файл не найден:</string>
         <string name="notFoundImage">Файл изображения не найден:</string>
+        <string name="notFoundFile">Файл не найден:</string>
+        <string name="notReadFile">Не могу прочитать файл:</string>
     <!-- Dialog Install -->
         <string name="gameName">Название игры</string>
         <string name="gameAuthor">Автор</string>

@@ -38,6 +38,7 @@ import com.google.android.material.textfield.TextInputLayout;
 
 import org.qp.android.QuestPlayerApplication;
 import org.qp.android.R;
+import org.qp.android.helpers.ErrorType;
 import org.qp.android.model.libQP.LibQpProxy;
 import org.qp.android.model.libQP.RefreshInterfaceRequest;
 import org.qp.android.model.libQP.WindowType;
@@ -444,7 +445,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
                         viewLazyLink.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         getApplication().startActivity(viewLazyLink);
                     } catch (ActivityNotFoundException e) {
-                        Log.d(TAG , "Error: " , e);
+                        showErrorDialog(e.getMessage() , ErrorType.EXCEPTION);
                     }
                 }
             }
@@ -469,11 +470,8 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
                         return new WebResourceResponse(MimeType.IMAGE , "utf-8" , in);
                     } catch (FileNotFoundException | NullPointerException ex) {
                         if (getSettingsController().isUseImageDebug) {
-                            var errorMessage = getGameActivity()
-                                    .getString(R.string.notFoundImage) + uri.getPath();
-                            showError(errorMessage);
+                            showErrorDialog(uri.getPath() , ErrorType.IMAGE_ERROR);
                         }
-                        Log.e(TAG , "File not found" , ex);
                         return null;
                     }
                 }
@@ -507,12 +505,16 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
 
     @Override
     public void showError(final String message) {
-        getGameActivity().showSimpleDialog(message , GameDialogType.ERROR_DIALOG);
+        getGameActivity().showSimpleDialog(message , GameDialogType.ERROR_DIALOG , null);
+    }
+
+    public void showErrorDialog(final String message , final ErrorType errorType) {
+        getGameActivity().showSimpleDialog(message , GameDialogType.ERROR_DIALOG , errorType);
     }
 
     @Override
     public void showPicture(final String pathToImg) {
-        getGameActivity().showSimpleDialog(pathToImg , GameDialogType.IMAGE_DIALOG);
+        getGameActivity().showSimpleDialog(pathToImg , GameDialogType.IMAGE_DIALOG , null);
     }
 
     @Override
@@ -524,8 +526,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         try {
             latch.await();
         } catch (InterruptedException ex) {
-            var errorMessage = getGameActivity().getString(R.string.waitingError);
-            showError(errorMessage + "\n" + ex);
+            showErrorDialog(ex.getMessage() , ErrorType.WAITING_ERROR);
         }
     }
 
@@ -538,8 +539,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         try {
             return inputQueue.take();
         } catch (InterruptedException ex) {
-            var errorMessage = getGameActivity().getString(R.string.waitingInputError);
-            showError(errorMessage + "\n" + ex);
+            showErrorDialog(ex.getMessage() , ErrorType.WAITING_INPUT_ERROR);
             return "";
         }
     }
@@ -553,8 +553,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         try {
             return inputQueue.take();
         } catch (InterruptedException ex) {
-            var errorMessage = getGameActivity().getString(R.string.waitingInputError);
-            showError(errorMessage + ex);
+            showErrorDialog(ex.getMessage() , ErrorType.WAITING_INPUT_ERROR);
             return "";
         }
     }
@@ -573,15 +572,14 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         try {
             return resultQueue.take();
         } catch (InterruptedException ex) {
-            var errorMessage = getGameActivity().getString(R.string.waitingError);
-            showError(errorMessage + "\n" + ex);
+            showErrorDialog(ex.getMessage() , ErrorType.WAITING_ERROR);
             return -1;
         }
     }
 
     @Override
     public void showLoadGamePopup() {
-        getGameActivity().showSimpleDialog("" , GameDialogType.LOAD_DIALOG);
+        getGameActivity().showSimpleDialog("" , GameDialogType.LOAD_DIALOG , null);
     }
 
     @Override
