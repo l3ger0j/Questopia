@@ -1,4 +1,4 @@
-package org.qp.android.ui.plugin;
+package org.qp.android.ui.settings;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -26,12 +26,11 @@ import org.qp.android.helpers.adapters.RecyclerItemClickListener;
 import org.qp.android.model.plugin.PluginClient;
 import org.qp.android.model.plugin.PluginType;
 import org.qp.android.plugin.IQuestPlugin;
-import org.qp.android.ui.settings.SettingsViewModel;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class PluginFragment extends Fragment {
+public class SettingsPluginFragment extends Fragment {
 
     private final String TAG = getClass().getSimpleName();
 
@@ -89,7 +88,7 @@ public class PluginFragment extends Fragment {
                     );
                     var arrayList = new ArrayList<PluginInfo>();
                     arrayList.add(pluginInfo);
-                    var adapter = new PluginRecycler(requireActivity());
+                    var adapter = new SettingsPluginRecycler(requireActivity());
                     adapter.submitList(arrayList);
                     recyclerView.setAdapter(adapter);
                 } catch (RemoteException e) {
