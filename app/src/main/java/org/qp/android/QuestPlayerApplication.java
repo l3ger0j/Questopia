@@ -13,6 +13,7 @@ import org.qp.android.model.libQP.LibQpProxyImpl;
 import org.qp.android.model.service.AudioPlayer;
 import org.qp.android.model.service.HtmlProcessor;
 import org.qp.android.model.service.ImageProvider;
+import org.qp.android.ui.settings.SettingsController;
 
 public class QuestPlayerApplication extends Application {
 
@@ -21,7 +22,8 @@ public class QuestPlayerApplication extends Application {
     public static final String CHANNEL_INSTALL_GAME = "org.qp.android.channel.install_game";
 
     private final ImageProvider imageProvider = new ImageProvider();
-    private final HtmlProcessor htmlProcessor = new HtmlProcessor(imageProvider);
+    private final SettingsController settingsController = new SettingsController();
+    private final HtmlProcessor htmlProcessor = new HtmlProcessor(imageProvider , settingsController);
     private final AudioPlayer audioPlayer = new AudioPlayer();
     private final LibQpProxyImpl libQspProxy = new LibQpProxyImpl(this , htmlProcessor , audioPlayer);
 

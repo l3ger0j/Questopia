@@ -10,7 +10,7 @@
         android:label="SettingsFragment" />
     <fragment
         android:id="@+id/pluginFragment"
-        android:name="org.qp.android.ui.plugin.PluginFragment"
+        android:name="org.qp.android.ui.settings.SettingsPluginFragment"
         android:label="PluginFragment" />
     <fragment
         android:id="@+id/newsFragment"

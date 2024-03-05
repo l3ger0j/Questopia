@@ -78,14 +78,14 @@
 	QSP_EXTERN QSP_BOOL QSPExecLocationCode(const QSP_CHAR *name, QSP_BOOL isRefresh);
 	QSP_EXTERN void QSPGetLastErrorData(int *errorNum, QSP_CHAR **errorLoc, int *errorActIndex, int *errorLine);
 	QSP_EXTERN const QSP_CHAR *QSPGetErrorDesc(int errorNum);
-    QSP_EXTERN QSP_BOOL QSPLoadGameWorld(const QSP_CHAR *file);
-    QSP_EXTERN QSP_BOOL QSPLoadGameWorldFromData(const char *data, int dataSize, const QSP_CHAR *file);
-    QSP_EXTERN QSP_BOOL QSPSaveGame(const QSP_CHAR *file, QSP_BOOL isRefresh); // In file
-    QSP_EXTERN QSP_BOOL QSPSaveGameAsData(void **buf, int *realSize, QSP_BOOL isRefresh); // In memory
-    QSP_EXTERN QSP_BOOL QSPSaveGameAsString(QSP_CHAR *strBuf, int strBufSize, int *realSize, QSP_BOOL isRefresh); // In memory
-    QSP_EXTERN QSP_BOOL QSPOpenSavedGame(const QSP_CHAR *file, QSP_BOOL isRefresh); // In file
+	QSP_EXTERN QSP_BOOL QSPLoadGameWorld(const QSP_CHAR *file);
+	QSP_EXTERN QSP_BOOL QSPLoadGameWorldFromData(const char *data, int dataSize, const QSP_CHAR *file);
+	QSP_EXTERN QSP_BOOL QSPSaveGame(const QSP_CHAR *file, QSP_BOOL isRefresh); // In file
+	QSP_EXTERN QSP_BOOL QSPSaveGameAsData(void **buf, int *realSize, QSP_BOOL isRefresh); // In memory
+	QSP_EXTERN QSP_BOOL QSPSaveGameAsString(QSP_CHAR *strBuf, int strBufSize, int *realSize, QSP_BOOL isRefresh); // In memory
+	QSP_EXTERN QSP_BOOL QSPOpenSavedGame(const QSP_CHAR *file, QSP_BOOL isRefresh); // In file
 	QSP_EXTERN QSP_BOOL QSPOpenSavedGameFromData(const void *data, int dataSize, QSP_BOOL isRefresh); // In memory
-    QSP_EXTERN QSP_BOOL QSPOpenSavedGameFromString(const QSP_CHAR *str, QSP_BOOL isRefresh); // In memory
+	QSP_EXTERN QSP_BOOL QSPOpenSavedGameFromString(const QSP_CHAR *str, QSP_BOOL isRefresh); // In memory
 	QSP_EXTERN QSP_BOOL QSPRestartGame(QSP_BOOL isRefresh);
 	QSP_EXTERN void QSPSelectMenuItem(int ind);
 	QSP_EXTERN void QSPSetCallBack(int type, QSP_CALLBACK func);

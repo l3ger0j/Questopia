@@ -4,9 +4,11 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.accessibility.AccessibilityNodeInfo;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
@@ -16,9 +18,8 @@ import org.qp.android.dto.stock.GameData;
 import org.qp.android.helpers.adapters.RecyclerItemClickListener;
 
 import java.util.ArrayList;
-import java.util.Objects;
 
-public class StockRecyclerFragment extends StockPatternFragment {
+public class StockRecyclerFragment extends Fragment {
 
     private StockViewModel stockViewModel;
     private RecyclerView mRecyclerView;
@@ -37,11 +38,11 @@ public class StockRecyclerFragment extends StockPatternFragment {
         org.qp.android.databinding.FragmentRecyclerBinding recyclerBinding =
                 FragmentRecyclerBinding.inflate(inflater);
         mRecyclerView = recyclerBinding.shareRecyclerView;
-        stockViewModel = new ViewModelProvider(requireActivity())
-                .get(StockViewModel.class);
-        stockViewModel.getGameData().observe(getViewLifecycleOwner(), gameData);
-        Objects.requireNonNull(stockViewModel.activityObservableField.get())
-                .setRecyclerView(mRecyclerView);
+        mRecyclerView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
+        stockViewModel = new ViewModelProvider(requireActivity()).get(StockViewModel.class);
+        stockViewModel.getGameDataList().observe(getViewLifecycleOwner(), gameData);
+        stockViewModel.activityObserver.observe(getViewLifecycleOwner() , stockActivity ->
+                stockActivity.setRecyclerView(mRecyclerView));
         return recyclerBinding.getRoot();
     }
 
@@ -53,13 +54,25 @@ public class StockRecyclerFragment extends StockPatternFragment {
                 new RecyclerItemClickListener.OnItemClickListener() {
                     @Override
                     public void onItemClick(View view , int position) {
-                        listener.onItemClick(position);
+                        stockViewModel.doOnShowGameFragment(position);
                     }
 
                     @Override
                     public void onLongItemClick(View view , int position) {
-                        listener.onLongItemClick();
+                        stockViewModel.doOnShowActionMode();
                     }
                 }));
+        mRecyclerView.setAccessibilityDelegate(new View.AccessibilityDelegate() {
+            @Override
+            public boolean performAccessibilityAction(@NonNull View host ,
+                                                      int action ,
+                                                      @Nullable Bundle args) {
+                switch (action) {
+                    case AccessibilityNodeInfo.ACTION_CLICK -> host.performClick();
+                    case AccessibilityNodeInfo.ACTION_LONG_CLICK -> host.performLongClick();
+                }
+                return super.performAccessibilityAction(host , action , args);
+            }
+        });
     }
 }

@@ -7,6 +7,7 @@ import static org.qp.android.helpers.utils.ColorUtil.getHexColor;
 import static org.qp.android.helpers.utils.FileUtil.fromRelPath;
 import static org.qp.android.helpers.utils.ThreadUtil.assertNonUiThread;
 import static org.qp.android.helpers.utils.ViewUtil.getFontStyle;
+import static org.qp.android.ui.game.GameActivity.LOAD;
 
 import android.annotation.SuppressLint;
 import android.app.Application;
@@ -17,7 +18,6 @@ import android.net.Uri;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
-import android.webkit.MimeTypeMap;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
@@ -26,16 +26,19 @@ import android.webkit.WebViewClient;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.databinding.ObservableBoolean;
-import androidx.databinding.ObservableField;
+import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.preference.PreferenceManager;
 
 import com.anggrayudi.storage.file.DocumentFileCompat;
+import com.anggrayudi.storage.file.MimeType;
+import com.google.android.material.textfield.TextInputLayout;
 
 import org.qp.android.QuestPlayerApplication;
 import org.qp.android.R;
+import org.qp.android.helpers.ErrorType;
 import org.qp.android.model.libQP.LibQpProxy;
 import org.qp.android.model.libQP.RefreshInterfaceRequest;
 import org.qp.android.model.libQP.WindowType;
@@ -46,6 +49,8 @@ import org.qp.android.ui.settings.SettingsController;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CountDownLatch;
 
@@ -59,13 +64,13 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
     private AudioPlayer audioPlayer;
     private final Uri fullPathGameDir;
 
-    public ObservableField<GameActivity> gameActivityObservableField =
-            new ObservableField<>();
     public ObservableBoolean isActionVisible = new ObservableBoolean();
 
     public MutableLiveData<String> outputTextObserver = new MutableLiveData<>();
     public MutableLiveData<Integer> outputIntObserver = new MutableLiveData<>();
     public MutableLiveData<Boolean> outputBooleanObserver = new MutableLiveData<>(false);
+
+    public MutableLiveData<GameActivity> activityObserver = new MutableLiveData<>();
 
     private final MutableLiveData<SettingsController> controllerObserver = new MutableLiveData<>();
     private final MutableLiveData<String> mainDescLiveData = new MutableLiveData<>();
@@ -110,7 +115,6 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
 
     // region Getter/Setter
     public HtmlProcessor getHtmlProcessor() {
-        htmlProcessor.setController(getSettingsController());
         return htmlProcessor;
     }
 
@@ -229,15 +233,90 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
 
     @NonNull
     private GameActivity getGameActivity() {
-        var tempGameActivity = gameActivityObservableField.get();
-        if (tempGameActivity != null) {
-            return tempGameActivity;
+        var activity = activityObserver.getValue();
+        if (activity != null) {
+            return activity;
         } else {
-            throw new NullPointerException();
+            throw new NullPointerException("Activity is null");
         }
     }
 
     // endregion Getter/Setter
+
+    public void onDialogPositiveClick(DialogFragment dialog) {
+        var optWindow = Optional.ofNullable(dialog.requireDialog().getWindow());
+        if (optWindow.isEmpty()) return;
+
+        if (dialog.getTag() != null) {
+            switch (dialog.getTag()) {
+                case "closeGameDialogFragment" -> {
+                    stopAudio();
+                    stopLibQsp();
+                    removeCallback();
+                    getGameActivity().finish();
+                }
+                case "inputDialogFragment" , "executorDialogFragment" -> {
+                    var inputBoxEdit = (TextInputLayout) optWindow.get().findViewById(R.id.inputBox_edit);
+                    var optInputBoxEditET = Optional.ofNullable(inputBoxEdit.getEditText());
+                    if (optInputBoxEditET.isEmpty()) return;
+                    var outputText = optInputBoxEditET.get().getText().toString();
+                    if (Objects.equals(outputText , "")) {
+                        outputTextObserver.setValue("");
+                    } else {
+                        outputTextObserver.setValue(outputText);
+                    }
+                }
+                case "errorDialogFragment" -> {
+                    var feedBackName = (TextInputLayout) optWindow.get().findViewById(R.id.feedBackName);
+                    var feedBackContact = (TextInputLayout) optWindow.get().findViewById(R.id.feedBackContact);
+                    var feedBackMessage = (TextInputLayout) optWindow.get().findViewById(R.id.feedBackMessage);
+
+                    var optFeedBackNameET = Optional.ofNullable(feedBackName.getEditText());
+                    var optFeedBackContactET = Optional.ofNullable(feedBackContact.getEditText());
+                    var optFeedBackMessageET = Optional.ofNullable(feedBackMessage.getEditText());
+                    if (optFeedBackNameET.isEmpty() || optFeedBackContactET.isEmpty()) return;
+                    var feedBackNameET = optFeedBackNameET.get();
+                    var feedBackContactET = optFeedBackContactET.get();
+                    if (optFeedBackMessageET.isPresent()) {
+                        var feedBackMessageET = optFeedBackMessageET.get();
+                        Log.d(this.getClass().getSimpleName() , feedBackMessageET.getText().toString()
+                                +"\n"+feedBackContactET.getText().toString()
+                                +"\n"+feedBackNameET.getText().toString());
+                    } else {
+                        Log.d(this.getClass().getSimpleName() , feedBackContactET.getText().toString()
+                                +"\n"+feedBackNameET.getText().toString());
+                    }
+                }
+                case "loadGameDialogFragment" -> getGameActivity().startReadOrWriteSave(LOAD);
+                case "showMessageDialogFragment" -> outputBooleanObserver.setValue(true);
+            }
+        }
+    }
+
+    public void onDialogNegativeClick(DialogFragment dialog) {
+        if (dialog.getTag() != null) {
+            if (dialog.getTag().equals("showMenuDialogFragment")) {
+                outputIntObserver.setValue(-1);
+            }
+        }
+    }
+
+    public void onDialogNeutralClick(DialogFragment dialog) {
+        if (dialog.getTag() != null) {
+            switch (dialog.getTag()) {
+                case "inputDialogFragment" , "executorDialogFragment" ->
+                        getGameActivity().getStorageHelper().openFilePicker("text/plain");
+            }
+        }
+    }
+
+    public void onDialogListClick(DialogFragment dialog , int which) {
+        if (dialog.getTag() != null) {
+            if (Objects.equals(dialog.getTag() , "showMenuDialogFragment")) {
+                outputIntObserver.setValue(which);
+            }
+        }
+    }
 
     public void updatePageTemplate() {
         var pageHeadTemplate = PAGE_HEAD_TEMPLATE
@@ -302,7 +381,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         super(application);
         preferences = PreferenceManager.getDefaultSharedPreferences(application);
         preferences.registerOnSharedPreferenceChangeListener(preferenceChangeListener);
-        questPlayerApplication = getApplication();
+        questPlayerApplication = (QuestPlayerApplication) getApplication();
         fullPathGameDir = questPlayerApplication.getCurrentGameDir().getUri();
         htmlProcessor = questPlayerApplication.getHtmlProcessor();
     }
@@ -315,7 +394,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
 
     public void startAudio() {
         audioPlayer = questPlayerApplication.getAudioPlayer();
-        audioPlayer.start(getGameActivity());
+        audioPlayer.start(getApplication());
     }
 
     public void stopAudio() {
@@ -365,7 +444,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
                         viewLazyLink.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         getApplication().startActivity(viewLazyLink);
                     } catch (ActivityNotFoundException e) {
-                        Log.d(TAG , "Error: " , e);
+                        showErrorDialog(e.getMessage() , ErrorType.EXCEPTION);
                     }
                 }
             }
@@ -376,24 +455,22 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         @Override
         public WebResourceResponse shouldInterceptRequest(WebView view ,
                                                           @NonNull WebResourceRequest request) {
+            if (getSettingsController().isImageDisabled) {
+                return super.shouldInterceptRequest(view , request);
+            }
             var uri = request.getUrl();
-            var rootDir = DocumentFileCompat.fromUri(getGameActivity() , fullPathGameDir);
+            var rootDir = DocumentFileCompat.fromUri(getApplication() , fullPathGameDir);
             if (rootDir != null && uri.getScheme() != null) {
                 if (uri.getScheme().startsWith("file")) {
                     try {
                         if (uri.getPath() == null) throw new NullPointerException();
                         var imageFile = fromRelPath(uri.getPath() , rootDir);
-                        var extension = imageFile.getName();
-                        var mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
-                        var in = getGameActivity().getContentResolver().openInputStream(imageFile.getUri());
-                        return new WebResourceResponse(mimeType , null , in);
+                        var in = getApplication().getContentResolver().openInputStream(imageFile.getUri());
+                        return new WebResourceResponse(MimeType.IMAGE , "utf-8" , in);
                     } catch (FileNotFoundException | NullPointerException ex) {
                         if (getSettingsController().isUseImageDebug) {
-                            var errorMessage = getGameActivity()
-                                    .getString(R.string.notFoundImage) + uri.getPath();
-                            showError(errorMessage);
+                            showErrorDialog(uri.getPath() , ErrorType.IMAGE_ERROR);
                         }
-                        Log.e(TAG , "File not found" , ex);
                         return null;
                     }
                 }
@@ -427,12 +504,16 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
 
     @Override
     public void showError(final String message) {
-        getGameActivity().showSimpleDialog(message , GameDialogType.ERROR_DIALOG);
+        getGameActivity().showSimpleDialog(message , GameDialogType.ERROR_DIALOG , null);
+    }
+
+    public void showErrorDialog(final String message , final ErrorType errorType) {
+        getGameActivity().showSimpleDialog(message , GameDialogType.ERROR_DIALOG , errorType);
     }
 
     @Override
     public void showPicture(final String pathToImg) {
-        getGameActivity().showSimpleDialog(pathToImg , GameDialogType.IMAGE_DIALOG);
+        getGameActivity().showSimpleDialog(pathToImg , GameDialogType.IMAGE_DIALOG , null);
     }
 
     @Override
@@ -444,8 +525,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         try {
             latch.await();
         } catch (InterruptedException ex) {
-            var errorMessage = getGameActivity().getString(R.string.waitingError);
-            showError(errorMessage + "\n" + ex);
+            showErrorDialog(ex.getMessage() , ErrorType.WAITING_ERROR);
         }
     }
 
@@ -458,8 +538,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         try {
             return inputQueue.take();
         } catch (InterruptedException ex) {
-            var errorMessage = getGameActivity().getString(R.string.waitingInputError);
-            showError(errorMessage + "\n" + ex);
+            showErrorDialog(ex.getMessage() , ErrorType.WAITING_INPUT_ERROR);
             return "";
         }
     }
@@ -473,8 +552,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         try {
             return inputQueue.take();
         } catch (InterruptedException ex) {
-            var errorMessage = getGameActivity().getString(R.string.waitingInputError);
-            showError(errorMessage + ex);
+            showErrorDialog(ex.getMessage() , ErrorType.WAITING_INPUT_ERROR);
             return "";
         }
     }
@@ -493,15 +571,14 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         try {
             return resultQueue.take();
         } catch (InterruptedException ex) {
-            var errorMessage = getGameActivity().getString(R.string.waitingError);
-            showError(errorMessage + "\n" + ex);
+            showErrorDialog(ex.getMessage() , ErrorType.WAITING_ERROR);
             return -1;
         }
     }
 
     @Override
     public void showLoadGamePopup() {
-        getGameActivity().showSimpleDialog("" , GameDialogType.LOAD_DIALOG);
+        getGameActivity().showSimpleDialog("" , GameDialogType.LOAD_DIALOG , null);
     }
 
     @Override

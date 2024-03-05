@@ -33,6 +33,8 @@
         <string name="noGameFilesError">I didn\'t find the game files after copying!</string>
         <string name="notFoundSound">Sound file not found:</string>
         <string name="notFoundImage">Image file not found:</string>
+        <string name="notFoundFile">File not found:</string>
+        <string name="notReadFile">Can not read file:</string>
     <!-- Dialog Install -->
         <string name="gameName">Game name</string>
         <string name="gameAuthor">Author</string>
@@ -84,63 +86,60 @@
         <string name="deleteGameTitle">Delete game</string>
     <!-- Menu settings fragment -->
         <!-- General section -->
-        <string name="generalCatTitle">Basic Application Settings</string>
-        <string name="langTitle">Language</string>
-        <string name="langSum">Choose display language</string>
+        <string name="generalCatTitle">Basic</string>
+        <string name="langTitle">Application language</string>
         <string name="binPrefTitle">Binary prefixes</string>
-        <string name="binPrefSum">Choose binary prefixes</string>
         <string name="soundTitle">Play sound</string>
-        <string name="actsHeightTitle">Actions List Height</string>
+        <string name="actsHeightTitle">Actions list height</string>
+        <string name="separatorTitle">Visibility of the separator</string>
+        <string name="separatorSum">Between the list of actions and the main description</string>
+        <string name="immersiveModeTitle">Immersive mode</string>
+        <string name="autoscrollTitle">Autoscroll</string>
+        <string name="musicDebugTitle">Sound path debugger</string>
+        <string name="musicDebugSum">A dialog that reports an error if the path to the sound is incorrect</string>
         <!-- Text section -->
-        <string name="textCatTitle">Text Display Settings</string>
-        <string name="fontStyleTitle">Font Style</string>
-        <string name="fontSizeTitle">Font Size</string>
-        <string name="useGameFontTitle">Use Game Font</string>
+        <string name="textCatTitle">Text</string>
+        <string name="fontStyleTitle">Font style</string>
+        <string name="fontSizeTitle">Font size</string>
+        <string name="useGameFontTitle">Use game font</string>
         <string name="useGameFontSum">Use the font settings from the game</string>
-        <string name="useGameTextColorTitle">Use Game Text Color</string>
+        <string name="useGameTextColorTitle">Text color</string>
         <string name="useGameTextColorSum">Use the text color settings from the game</string>
-        <string name="textColorTitle">Custom Text Color</string>
-        <string name="useGameBackgroundColorTitle">Use Game Background Color</string>
+        <string name="textColorTitle">Specify the text color</string>
+        <string name="useGameBackgroundColorTitle">Background color</string>
         <string name="useGameBackgroundColorSum">Use the background color settings from the game</string>
-        <string name="backColorTitle">Custom Background Color</string>
-        <string name="useGameLinkColorTitle">Use Game Link Color</string>
+        <string name="backColorTitle">Specify the background color</string>
+        <string name="useGameLinkColorTitle">Link color</string>
         <string name="useGameLinkColorSum">Use the link color settings from the game</string>
-        <string name="linkColorTitle">Custom Link Color</string>
+        <string name="linkColorTitle">Specify the color of the links</string>
         <string name="textBackLinkColorSum">Default value -VALUE-</string>
-        <string name="extendedName">Questopia -VERSION-</string>
+        <string name="execStringTitle">QSP Command Line</string>
+        <string name="execStringSum">A dialog used for debugging or cheating</string>
         <!-- Image section -->
-        <string name="imageCatTitle">Image Display Settings</string>
-        <string name="autoWidthTitle">Auto Width Image</string>
-        <string name="autoWidthSum">Use an auto-detectable value for the width of the image</string>
-        <string name="customWidthTitle">Custom Width Image</string>
-        <string name="autoHeightTitle">Auto Height Image</string>
-        <string name="autoHeightSum">Use an auto-detectable value for the height of the image</string>
-        <string name="customHeightTitle">Custom Height Image</string>
-        <string name="fullScreenImageSum">When clicked, the picture will open in the dialog</string>
-        <string name="fullScreenImageTitle">Fullscreen Images</string>
+        <string name="imageCatTitle">Pictures</string>
+        <string name="pref_disable_image">Disable images</string>
+        <string name="autoWidthTitle">Image width</string>
+        <string name="autoWidthSum">Automatic image width</string>
+        <string name="customWidthTitle">Specify the width of the image</string>
+        <string name="autoHeightTitle">Image height</string>
+        <string name="autoHeightSum">Automatic image height</string>
+        <string name="customHeightTitle">Specify the height of the image</string>
+        <string name="permImgDialogTitle">All images in the dialog</string>
+        <string name="fullScreenImageSum">Clicking on the image in the main description opens it in the dialog</string>
+        <string name="imageDebugTitle">Image path debugger</string>
+        <string name="imageDebugSum">A dialog that reports an error if the path to the image is incorrect</string>
         <!-- Switch section -->
         <string name="filePicker">File Picker Dialog (alpha)</string>
-        <string name="immersiveModeTitle">Immersive Mode</string>
-        <string name="separatorTitle">Separator</string>
-        <string name="separatorSum">Changes the visibility of the separator between the list of actions and the text of the location</string>
-        <string name="autoscrollTitle">Autoscroll</string>
-        <string name="imageDebugTitle">Image Path Debugger</string>
-        <string name="imageDebugSum">A mode that enables the display of an error dialog if the path to the image is incorrect</string>
-        <string name="musicDebugTitle">Music Path Debugger</string>
-        <string name="musicDebugSum">A mode that enables the display of an error dialog if the path to the music is incorrect</string>
-        <string name="execStringTitle">String executor</string>
-        <string name="execStringSum">Changes the visibility of a special dialog that can be used for debugging or cheating</string>
         <!-- Extra section -->
-        <string name="pluginTitle">Extension menu</string>
+        <string name="pluginTitle">Additions</string>
         <string name="aboutTitle">About Quest Player</string>
+        <string name="extendedName" translatable="false">Questopia -VERSION-</string>
     <!-- Menu save and load -->
         <string name="selectSlot">Select a slot</string>
         <string name="slotPresent" formatted="false">Slot %d - %s</string>
         <string name="slotEmpty">Slot %d [Empty]</string>
         <string name="loadFrom">From File…</string>
         <string name="saveTo">To File…</string>
-    <!-- Menu plugins -->
-        <string name="pluginMenuTitle">Plugins</string>
     <!-- Menu news -->
         <string name="newsMenuTitle">News Questopia</string>
 </resources>

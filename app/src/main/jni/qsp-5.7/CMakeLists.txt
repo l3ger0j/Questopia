@@ -3,11 +3,13 @@ project(ndkqsp)
 
 include_directories( ../onig )
 
+set_property(TARGET ${TARGET_NAME} PROPERTY C_STANDARD 17)
+
 # -fPIC
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 set(QSP_SOURCES
-        androidqspwrapper.c
+        androidqpwrapper.c
         src/actions.c
         src/callbacks.c
         src/codetools.c

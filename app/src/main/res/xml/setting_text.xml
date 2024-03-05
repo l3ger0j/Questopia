@@ -3,6 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <ListPreference
+        android:icon="@drawable/baseline_text_format_24"
         android:defaultValue="0"
         android:entries="@array/fontName"
         android:entryValues="@array/fontValue"
@@ -15,37 +16,56 @@
         android:icon="@drawable/baseline_format_size_24"
         android:key="fontSize"
         android:title="@string/fontSizeTitle" />
-    <CheckBoxPreference
+    <SwitchPreferenceCompat
+        android:icon="@drawable/baseline_font_download_24"
         android:defaultValue="false"
         android:key="useGameFont"
         android:summary="@string/useGameFontSum"
         android:title="@string/useGameFontTitle" />
     <SwitchPreferenceCompat
+        android:icon="@drawable/baseline_border_color_24"
         android:defaultValue="true"
+        android:disableDependentsState="true"
         android:key="useGameTextColor"
         android:summary="@string/useGameTextColorSum"
         android:title="@string/useGameTextColorTitle" />
     <com.jaredrummler.android.colorpicker.ColorPreferenceCompat
+        android:dependency="useGameTextColor"
         android:defaultValue="@color/def_text_color"
         android:key="textColor"
-        android:title="@string/textColorTitle" />
+        android:summary="@string/textColorTitle"
+        android:title="@string/useGameTextColorTitle" />
     <SwitchPreferenceCompat
+        android:icon="@drawable/baseline_format_color_fill_24"
         android:defaultValue="true"
+        android:disableDependentsState="true"
         android:key="useGameBackgroundColor"
         android:summary="@string/useGameBackgroundColorSum"
         android:title="@string/useGameBackgroundColorTitle" />
     <com.jaredrummler.android.colorpicker.ColorPreferenceCompat
+        android:dependency="useGameBackgroundColor"
         android:defaultValue="@color/def_back_color"
         android:key="backColor"
-        android:title="@string/backColorTitle" />
+        android:summary="@string/backColorTitle"
+        android:title="@string/useGameBackgroundColorTitle"/>
     <SwitchPreferenceCompat
+        android:icon="@drawable/baseline_format_ink_highlighter_24"
         android:defaultValue="true"
+        android:disableDependentsState="true"
         android:key="useGameLinkColor"
         android:summary="@string/useGameLinkColorSum"
         android:title="@string/useGameLinkColorTitle" />
     <com.jaredrummler.android.colorpicker.ColorPreferenceCompat
+        android:dependency="useGameLinkColor"
         android:defaultValue="@color/def_link_color"
         android:key="linkColor"
-        android:title="@string/linkColorTitle" />
+        android:summary="@string/linkColorTitle"
+        android:title="@string/useGameLinkColorTitle" />
+    <SwitchPreferenceCompat
+        android:icon="@drawable/baseline_tab_input_24"
+        android:defaultValue="false"
+        android:key="execString"
+        android:summary="@string/execStringSum"
+        android:title="@string/execStringTitle" />
 
 </PreferenceScreen>

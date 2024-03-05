@@ -35,6 +35,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
@@ -98,7 +99,7 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
     private boolean loadGameWorld() {
         var gameFileUri = gameState.gameFile.getUri();
         var gameFileFullPath = documentWrap(gameState.gameFile).getAbsolutePath(context);
-        final byte[] gameData = getFileContents(context , gameFileUri);
+        final var gameData = getFileContents(context , gameFileUri);
         if (gameData == null) return false;
         if (!nativeMethods.QSPLoadGameWorldFromData(gameData, gameData.length, gameFileFullPath)) {
             showLastQspError();
@@ -254,20 +255,6 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
         runOnQspThread(() -> nativeMethods.QSPEnableDebugMode(isDebug));
     }
 
-    public String getVersionQSP () {
-        if (!isSameThread(libQspHandler.getLooper().getThread())) {
-            runOnQspThread(this::getVersionQSP);
-        }
-        return nativeMethods.QSPGetVersion();
-    }
-
-    public String getCompiledDateTime () {
-        if (!isSameThread(libQspHandler.getLooper().getThread())) {
-            runOnQspThread(this::getCompiledDateTime);
-        }
-        return nativeMethods.QSPGetCompiledDateTime();
-    }
-
     @Override
     public void runGame(final String id,
                         final String title,
@@ -311,7 +298,7 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
             runOnQspThread(() -> loadGameState(uri));
             return;
         }
-        var gameData = getFileContents(context , uri);
+        final var gameData = getFileContents(context , uri);
         if (gameData == null) return;
         if (!nativeMethods.QSPOpenSavedGameFromData(gameData, gameData.length, true)) {
             showLastQspError();
@@ -324,7 +311,7 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
             runOnQspThread(() -> saveGameState(uri));
             return;
         }
-        byte[] gameData = nativeMethods.QSPSaveGameAsData(false);
+        final var gameData = nativeMethods.QSPSaveGameAsData(false);
         if (gameData == null) return;
         writeFileContents(context , uri , gameData);
     }
@@ -470,10 +457,12 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
     @Override
     public void ShowPicture(String path) {
         var inter = gameInterface;
-        var imageFile = fromFullPath(path , getCurGameDir());
-        if (inter != null && isNotEmpty(path) && imageFile != null) {
-            var imageFileUri = imageFile.getUri();
-            inter.showPicture(String.valueOf(imageFileUri));
+        if (inter != null && isNotEmpty(path)) {
+            Optional.ofNullable(fromFullPath(path , getCurGameDir()))
+                    .ifPresent(documentFile -> {
+                        var imageFileUri = documentFile.getUri();
+                        inter.showPicture(String.valueOf(imageFileUri));
+                    });
         }
     }
 
@@ -521,7 +510,7 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
         if (filename != null) {
             try {
                 var gameFile = fromFullPath(filename , getCurGameDir());
-                if (gameFile == null) throw new NullPointerException();
+                if (gameFile == null) throw new NullPointerException(filename);
                 var gameFileUri = gameFile.getUri();
                 inter.doWithCounterDisabled(() -> loadGameState(gameFileUri));
             } catch (Exception e) {

@@ -17,6 +17,7 @@
         android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/appName"
+        android:appCategory="game"
         android:largeHeap="true"
         android:theme="@style/Theme.App.Starting"
         android:allowBackup="false"

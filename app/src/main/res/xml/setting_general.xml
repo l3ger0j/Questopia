@@ -8,24 +8,16 @@
         android:entryValues="@array/langValue"
         android:key="lang"
         android:icon="@drawable/baseline_language_24"
-        android:summary="@string/langSum"
         android:title="@string/langTitle" />
     <ListPreference
+        android:icon="@drawable/baseline_code_24"
         android:defaultValue="1000"
         android:entries="@array/binPrefName"
         android:entryValues="@array/binPrefValue"
         android:key="binPref"
-        android:summary="@string/binPrefSum"
         android:title="@string/binPrefTitle" />
-    <CheckBoxPreference
-        android:defaultValue="true"
-        android:key="createNoMedia"
-        android:title="Create .nomedia file" />
-    <CheckBoxPreference
-        android:defaultValue="true"
-        android:key="createNoSearch"
-        android:title="Create .nosearch file" />
     <ListPreference
+        android:icon="@drawable/baseline_height_24"
         android:defaultValue="1/3"
         android:entries="@array/actsHeight"
         android:entryValues="@array/actsHeight"
@@ -37,6 +29,7 @@
         android:icon="@drawable/baseline_music_note_24"
         android:title="@string/soundTitle" />
     <SwitchPreferenceCompat
+        android:icon="@drawable/baseline_visibility_24"
         android:defaultValue="false"
         android:key="separator"
         android:summary="@string/separatorSum"
@@ -52,16 +45,7 @@
         android:icon="@drawable/baseline_move_down_24"
         android:title="@string/autoscrollTitle" />
     <SwitchPreferenceCompat
-        android:defaultValue="false"
-        android:key="execString"
-        android:summary="@string/execStringSum"
-        android:title="@string/execStringTitle" />
-    <SwitchPreferenceCompat
-        android:defaultValue="false"
-        android:key="debugImage"
-        android:summary="@string/imageDebugSum"
-        android:title="@string/imageDebugTitle" />
-    <SwitchPreferenceCompat
+        android:icon="@drawable/baseline_audio_file_24"
         android:defaultValue="false"
         android:key="debugMusic"
         android:summary="@string/musicDebugSum"

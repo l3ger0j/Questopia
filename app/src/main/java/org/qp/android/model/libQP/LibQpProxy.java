@@ -19,9 +19,6 @@ public interface LibQpProxy {
 
     void enableDebugMode (boolean isDebug);
 
-    String getVersionQSP();
-    String getCompiledDateTime();
-
     void runGame(String id, String title, DocumentFile dir, DocumentFile file);
     void restartGame();
     void loadGameState(Uri uri);

@@ -33,6 +33,8 @@
         <string name="noGameFilesError">Я не нашла файлы игры после копирования!</string>
         <string name="notFoundSound">Звуковой файл не найден:</string>
         <string name="notFoundImage">Файл изображения не найден:</string>
+        <string name="notFoundFile">Файл не найден:</string>
+        <string name="notReadFile">Не могу прочитать файл:</string>
     <!-- Dialog Install -->
         <string name="gameName">Название игры</string>
         <string name="gameAuthor">Автор</string>
@@ -84,54 +86,52 @@
         <string name="deleteGameTitle">Удалить игру</string>
     <!-- Menu settings fragment -->
         <!-- General section -->
-        <string name="generalCatTitle">Основные настройки приложения</string>
-        <string name="langTitle">Язык</string>
-        <string name="langSum">Выберите язык интерфейса</string>
-        <string name="binPrefTitle">Двоичные Префиксы</string>
-        <string name="binPrefSum">Выберите двоичные префиксы</string>
+        <string name="generalCatTitle">Основное</string>
+        <string name="langTitle">Язык приложения</string>
+        <string name="binPrefTitle">Двоичные префиксы</string>
         <string name="soundTitle">Воспроизводить звук</string>
-        <string name="actsHeightTitle">Высота Списка Действий</string>
+        <string name="actsHeightTitle">Высота списка действий</string>
+        <string name="separatorTitle">Видимость разделителя</string>
+        <string name="separatorSum">Между списком действий и основным описанием</string>
+        <string name="immersiveModeTitle">Режим погружения</string>
+        <string name="autoscrollTitle">Автопролистывание</string>
+        <string name="musicDebugTitle">Отладчик путей к звукам</string>
+        <string name="musicDebugSum">Диалог, сообщающий об ошибке, если путь к звуку неправильный</string>
         <!-- Text section -->
-        <string name="textCatTitle">Настройки отображения текста</string>
-        <string name="fontStyleTitle">Стиль Шрифта</string>
-        <string name="fontSizeTitle">Размер Шрифта</string>
-        <string name="useGameFontTitle">Шрифт из Игры</string>
+        <string name="textCatTitle">Текст</string>
+        <string name="fontStyleTitle">Стиль шрифта</string>
+        <string name="fontSizeTitle">Размер шрифта</string>
+        <string name="useGameFontTitle">Шрифт из игры</string>
         <string name="useGameFontSum">Использовать настройки шрифта из игры</string>
-        <string name="useGameTextColorTitle">Цвет Текста из Игры</string>
+        <string name="useGameTextColorTitle">Цвет текста</string>
         <string name="useGameTextColorSum">Использовать настройки цвета текста из игры</string>
-        <string name="textColorTitle">Свой Цвет Текста</string>
-        <string name="useGameBackgroundColorTitle">Цвет Фона из Игры</string>
+        <string name="textColorTitle">Укажите цвет текста</string>
+        <string name="useGameBackgroundColorTitle">Цвет фона</string>
         <string name="useGameBackgroundColorSum">Использовать настройки цвета фона из игры</string>
-        <string name="backColorTitle">Свой Цвет Фона</string>
-        <string name="useGameLinkColorTitle">Цвет Ссылок из Игры</string>
-        <string name="useGameLinkColorSum">Использовать настройки цвета ссылки из игры</string>
-        <string name="linkColorTitle">Свой Цвет Ссылок</string>
+        <string name="backColorTitle">Укажите цвет фона</string>
+        <string name="useGameLinkColorTitle">Цвет ссылок</string>
+        <string name="useGameLinkColorSum">Использовать настройки цвета ссылок из игры</string>
+        <string name="linkColorTitle">Укажите цвет ссылок</string>
         <string name="textBackLinkColorSum">Значение по умолчанию -VALUE-</string>
-        <string name="extendedName">Questopia -VERSION-</string>
+        <string name="execStringTitle">Командная строка QSP</string>
+        <string name="execStringSum">Диалог, используемый для отладки или читерства</string>
         <!-- Image section -->
-        <string name="imageCatTitle">Настройки отображения картинок</string>
-        <string name="autoWidthTitle">Авто Ширина Изображения</string>
-        <string name="autoWidthSum">Использовать автоматически определяемое значение для ширины изображения</string>
-        <string name="customWidthTitle">Своё Значение Ширины</string>
-        <string name="autoHeightTitle">Авто Высота Изображения</string>
-        <string name="autoHeightSum">Использовать автоматически определяемое значение для высоты изображения</string>
-        <string name="customHeightTitle">Своё Значение Высоты</string>
-        <string name="fullScreenImageSum">При нажатии на картинку, она откроется в диалоговом окне</string>
-        <string name="fullScreenImageTitle">Полноэкранные изображения</string>
+        <string name="imageCatTitle">Картинки</string>
+        <string name="pref_disable_image">Отключить картинки</string>
+        <string name="autoWidthTitle">Ширина изображения</string>
+        <string name="autoWidthSum">Автоматическая ширина изображения</string>
+        <string name="customWidthTitle">Укажите ширину изображения</string>
+        <string name="autoHeightTitle">Высота изображения</string>
+        <string name="autoHeightSum">Автоматическая высота изображения</string>
+        <string name="customHeightTitle">Укажите высоту изображения</string>
+        <string name="permImgDialogTitle">Все картинки в диалоге</string>
+        <string name="fullScreenImageSum">Нажатие на картинку в основном описании открывает её в диалоге</string>
+        <string name="imageDebugTitle">Отладчик путей к картинкам</string>
+        <string name="imageDebugSum">Диалог, сообщающий об ошибке, если путь к картинке неправильный</string>
         <!-- Switch section -->
         <string name="filePicker">Диалог Выбора Файла (альфа)</string>
-        <string name="immersiveModeTitle">Режим Погружения</string>
-        <string name="separatorTitle">Разделитель</string>
-        <string name="separatorSum">Изменяет видимость разделителя между списком действий и текстом локации</string>
-        <string name="autoscrollTitle">Автопролистывание</string>
-        <string name="imageDebugTitle">Отладчик путей к картинкам</string>
-        <string name="imageDebugSum">Режим, который включает отображение диалога с ошибкой если путь к картинке неправильный</string>
-        <string name="musicDebugTitle">Отладчик путей к музыке</string>
-        <string name="musicDebugSum">Режим, который включает отображение диалога с ошибкой если путь к музыке указан неверно</string>
-        <string name="execStringTitle">Исполнитель строк</string>
-        <string name="execStringSum">Изменяет видимость специального диалога, который можно использовать для отладки или читерства</string>
         <!-- Extra section -->
-        <string name="pluginTitle">Меню плагинов</string>
+        <string name="pluginTitle">Дополнения</string>
         <string name="aboutTitle">О программе</string>
     <!-- Menu save and load -->
         <string name="selectSlot">Выберите слот</string>
@@ -139,8 +139,6 @@
         <string name="slotEmpty">Слот %d [Пусто]</string>
         <string name="loadFrom">Из файла…</string>
         <string name="saveTo">В файл…</string>
-    <!-- Menu plugins -->
-        <string name="pluginMenuTitle">Плагины</string>
     <!-- Menu news -->
         <string name="newsMenuTitle">Новости Questopia</string>
 </resources>

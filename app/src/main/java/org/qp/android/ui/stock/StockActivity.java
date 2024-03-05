@@ -19,9 +19,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.storage.StorageManager;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.WindowManager;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResultLauncher;
@@ -31,13 +31,12 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.view.ActionMode;
+import androidx.appcompat.widget.SearchView;
 import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.os.LocaleListCompat;
 import androidx.core.splashscreen.SplashScreen;
 import androidx.documentfile.provider.DocumentFile;
-import androidx.fragment.app.DialogFragment;
-import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
@@ -55,9 +54,7 @@ import org.qp.android.R;
 import org.qp.android.databinding.ActivityStockBinding;
 import org.qp.android.dto.stock.GameData;
 import org.qp.android.helpers.utils.ViewUtil;
-import org.qp.android.ui.dialogs.StockDialogFrags;
 import org.qp.android.ui.dialogs.StockDialogType;
-import org.qp.android.ui.dialogs.StockPatternDialogFrags;
 import org.qp.android.ui.settings.SettingsActivity;
 import org.qp.android.ui.settings.SettingsController;
 
@@ -67,11 +64,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 
-public class StockActivity extends AppCompatActivity implements
-        StockPatternDialogFrags.StockPatternDialogList, StockPatternFragment.StockPatternFragmentList {
+public class StockActivity extends AppCompatActivity {
 
     private static final int POST_NOTIFICATION = 203;
     private final String TAG = this.getClass().getSimpleName();
@@ -108,49 +105,59 @@ public class StockActivity extends AppCompatActivity implements
         splashScreen.setKeepOnScreenCondition(() -> false);
         super.onCreate(savedInstanceState);
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            // Prevent jumping of the player on devices with cutout
+            getWindow().getAttributes().layoutInDisplayCutoutMode =
+                    WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT;
+        }
+
+        getWindow().setNavigationBarColor(Color.TRANSPARENT);
+
         activityStockBinding = ActivityStockBinding.inflate(getLayoutInflater());
         stockViewModel = new ViewModelProvider(this).get(StockViewModel.class);
         activityStockBinding.setStockVM(stockViewModel);
-        stockViewModel.activityObservableField.set(this);
+        stockViewModel.activityObserver.setValue(this);
         gamesMap = stockViewModel.getGamesMap();
 
         mFAB = activityStockBinding.stockFAB;
+        stockViewModel.doIsHideFAB.observe(this , aBoolean -> {
+            if (aBoolean) {
+                mFAB.hide();
+            } else {
+                mFAB.show();
+            }
+        });
         mFAB.setOnClickListener(view -> showDirPickerDialog());
 
         storageHelper.setOnFileSelected((integer , documentFiles) -> {
-            if (documentFiles != null) {
+            var boxDocumentFiles = Optional.ofNullable(documentFiles);
+            if (boxDocumentFiles.isEmpty()) {
+                showErrorDialog("File is not selected");
+            } else {
+                var unBoxDocFiles = boxDocumentFiles.get();
                 switch (integer) {
-                    case CODE_PICK_IMAGE_FILE -> {
-                        for (var file : documentFiles) {
-                            var document = documentWrap(file);
-                            switch (document.getExtension()) {
-                                case "png" , "jpg" , "jpeg" -> {
-                                    getContentResolver().takePersistableUriPermission(document.getUri() ,
-                                            Intent.FLAG_GRANT_READ_URI_PERMISSION
-                                                    | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-                                    stockViewModel.setTempImageFile(document.getDocumentFile());
-                                }
+                    case CODE_PICK_IMAGE_FILE -> unBoxDocFiles.forEach(documentFile -> {
+                        switch (documentWrap(documentFile).getExtension()) {
+                            case "png" , "jpg" , "jpeg" -> {
+                                getContentResolver().takePersistableUriPermission(documentFile.getUri() ,
+                                        Intent.FLAG_GRANT_READ_URI_PERMISSION
+                                                | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                                stockViewModel.setTempImageFile(documentFile);
                             }
                         }
-                    }
-                    case CODE_PICK_PATH_FILE -> {
-                        for (var file : documentFiles) {
-                            var document = documentWrap(file);
-                            if ("qsp".equals(document.getExtension()))
-                                stockViewModel.setTempPathFile(document.getDocumentFile());
+                    });
+                    case CODE_PICK_PATH_FILE -> unBoxDocFiles.forEach(documentFile -> {
+                        switch (documentWrap(documentFile).getExtension()) {
+                            case "qsp", "gam" ->
+                                    stockViewModel.setTempPathFile(documentFile);
                         }
-                    }
-                    case CODE_PICK_MOD_FILE -> {
-                        for (var file : documentFiles) {
-                            var document = documentWrap(file);
-                            if ("qsp".equals(document.getExtension()))
-                                stockViewModel.setTempModFile(document.getDocumentFile());
+                    });
+                    case CODE_PICK_MOD_FILE -> unBoxDocFiles.forEach(documentFile -> {
+                        if ("qsp".equals(documentWrap(documentFile).getExtension())) {
+                            stockViewModel.setTempModFile(documentFile);
                         }
-                    }
+                    });
                 }
-
-            } else {
-                showErrorDialog("File is not selected");
             }
             return null;
         });
@@ -193,6 +200,24 @@ public class StockActivity extends AppCompatActivity implements
             navController.navigate(R.id.stockRecyclerFragment);
         }
 
+        stockViewModel.emitter.observe(this , eventNavigation -> {
+            if (eventNavigation instanceof StockFragmentNavigation.ShowErrorDialog errorDialog) {
+                switch (errorDialog.getErrorType()) {
+                    case FOLDER_ERROR ->
+                            showErrorDialog(getString(R.string.gamesFolderError));
+                    case EXCEPTION ->
+                            showErrorDialog(getString(R.string.error)
+                                    + ": " + errorDialog.getErrorMessage());
+                }
+            } else if (eventNavigation instanceof StockFragmentNavigation.ShowGameFragment gameFragment) {
+                onItemClick(gameFragment.getPosition());
+            } else if (eventNavigation instanceof StockFragmentNavigation.ShowActionMode) {
+                onLongItemClick();
+            } else if (eventNavigation instanceof StockFragmentNavigation.ShowFilePicker filePicker) {
+                showFilePickerActivity(filePicker.getRequestCode() , filePicker.getMimeTypes());
+            }
+        });
+
         new AppUpdater(this)
                 .setUpdateFrom(UpdateFrom.GITHUB)
                 .setGitHubUserAndRepo("l3ger0j" , "Questopia")
@@ -209,7 +234,7 @@ public class StockActivity extends AppCompatActivity implements
                             , "StockRecyclerFragment")) {
                         finish();
                     } else {
-                        stockViewModel.isHideFAB.set(false);
+                        stockViewModel.doIsHideFAB.setValue(false);
                         navController.popBackStack();
                     }
                 } else {
@@ -274,7 +299,7 @@ public class StockActivity extends AppCompatActivity implements
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(false);
         }
-        stockViewModel.isHideFAB.set(false);
+        stockViewModel.doIsHideFAB.setValue(false);
         navController.popBackStack();
         return true;
     }
@@ -300,41 +325,12 @@ public class StockActivity extends AppCompatActivity implements
     }
 
     public void showErrorDialog(String errorMessage) {
-        if (getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED)) {
-            var dialogFragments = new StockDialogFrags();
-            dialogFragments.setDialogType(StockDialogType.ERROR_DIALOG);
-            dialogFragments.setMessage(errorMessage);
-            var fragment = getSupportFragmentManager()
-                    .findFragmentByTag("errorDialogFragment");
-            if (fragment != null && fragment.isAdded()) {
-                fragment.onDestroy();
-            } else {
-                dialogFragments.show(getSupportFragmentManager() , "errorDialogFragment");
-            }
-        }
-    }
-
-    public void showDialogFragment(DialogFragment dialogFragment , StockDialogType dialogType) {
-        var fragment = getSupportFragmentManager()
-                .findFragmentByTag(dialogFragment.getTag());
-        if (fragment != null && fragment.isAdded()) {
-            fragment.onDestroy();
-        } else {
-            switch (dialogType) {
-                case EDIT_DIALOG ->
-                        dialogFragment.show(getSupportFragmentManager() , "editDialogFragment");
-                case SELECT_DIALOG ->
-                        dialogFragment.show(getSupportFragmentManager() , "selectDialogFragment");
-            }
-        }
+        stockViewModel.showDialogFragment(getSupportFragmentManager() ,
+                StockDialogType.ERROR_DIALOG , errorMessage);
     }
 
     public void showFilePickerActivity(int requestCode , String[] mimeTypes) {
         storageHelper.openFilePicker(requestCode , false , mimeTypes);
-    }
-
-    public void startGameActivity(Intent intent) {
-        startActivity(intent);
     }
 
     public void showDirPickerDialog() {
@@ -367,6 +363,7 @@ public class StockActivity extends AppCompatActivity implements
             if (mViewHolder == null) return;
             var adapterPosition = mViewHolder.getAdapterPosition();
             if (adapterPosition == NO_POSITION) return;
+            if (adapterPosition < 0 || adapterPosition >= tempList.size()) return;
             var gameData = tempList.get(adapterPosition);
             if (selectList.isEmpty() || !selectList.contains(gameData)) {
                 selectList.add(gameData);
@@ -378,58 +375,14 @@ public class StockActivity extends AppCompatActivity implements
                 cardView.setCardBackgroundColor(Color.DKGRAY);
             }
         } else {
-            if (!getSupportFragmentManager().getFragments().isEmpty()) {
-                new ViewModelProvider(this)
-                        .get(StockViewModel.class)
-                        .setTempGameData(stockViewModel.getGamesMap()
-                                .get(stockViewModel.getGameIdByPosition(position)));
-                navController.navigate(R.id.stockGameFragment);
-                stockViewModel.isHideFAB.set(true);
-            }
+            stockViewModel.getGameDataList().observe(this , gameData -> {
+                if (!gameData.isEmpty() && gameData.size() > position) {
+                    stockViewModel.setCurrGameData(gameData.get(position));
+                }
+            });
+            navController.navigate(R.id.stockGameFragment);
+            stockViewModel.doIsHideFAB.setValue(true);
         }
-    }
-
-    @Override
-    public void onDialogDestroy(DialogFragment dialog) {
-        if (!Objects.equals(dialog.getTag() , "editDialogFragment")) {
-            stockViewModel.isHideFAB.set(false);
-        }
-    }
-
-    @Override
-    public void onDialogPositiveClick(DialogFragment dialog) {
-        if (Objects.equals(dialog.getTag() , "infoDialogFragment")) {
-            stockViewModel.showDialogEdit();
-        }
-    }
-
-    @Override
-    public void onDialogNeutralClick(DialogFragment dialog) {
-        if (Objects.equals(dialog.getTag() , "infoDialogFragment")) {
-            stockViewModel.playGame();
-        }
-    }
-
-    @Override
-    public void onDialogListClick(DialogFragment dialog , int which) {
-        if (Objects.equals(dialog.getTag() , "selectDialogFragment")) {
-            stockViewModel.outputIntObserver.setValue(which);
-        }
-    }
-
-    @Override
-    public void onClickEditButton() {
-        stockViewModel.showDialogEdit();
-    }
-
-    @Override
-    public void onClickPlayButton() {
-        stockViewModel.playGame();
-    }
-
-    @Override
-    public void onClickDownloadButton() {
-        // TODO: 19.07.2023 Release this
     }
 
     public void onLongItemClick() {
@@ -458,16 +411,18 @@ public class StockActivity extends AppCompatActivity implements
                     case R.id.delete_game -> {
                         var service = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
                         for (var data : selectList) {
-                            dropPersistable(data.gameDir.getUri());
-                            stockViewModel.removeDirFromListDirsFile(listDirsFile , data.gameDir.getName());
                             CompletableFuture
-                                    .runAsync(() -> deleteDirectory(data.gameDir) , service)
-                                    .thenRun(() -> {
-                                        tempList.remove(data);
-                                        stockViewModel.refreshGameData();
-                                    })
+                                    .runAsync(() -> tempList.remove(data) , service)
+                                    .thenCombineAsync(
+                                            stockViewModel.removeDirFromListDirsFile(listDirsFile , data.gameDir.getName()) ,
+                                            (unused , unused2) -> null ,
+                                            service
+                                    )
+                                    .thenRunAsync(() -> deleteDirectory(data.gameDir) , service)
+                                    .thenRunAsync(() -> dropPersistable(data.gameDir.getUri()) , service)
+                                    .thenRun(() -> stockViewModel.refreshGameData())
                                     .exceptionally(ex -> {
-                                        showErrorDialog("Error: " + "\n" + ex);
+                                        showErrorDialog(getString(R.string.error) + ": " + ex);
                                         return null;
                                     });
                         }
@@ -539,6 +494,7 @@ public class StockActivity extends AppCompatActivity implements
         }
 
         stockViewModel.refreshIntGamesDirectory();
+        stockViewModel.doIsHideFAB.setValue(false);
         navController.navigate(R.id.stockRecyclerFragment);
     }
 
@@ -550,52 +506,39 @@ public class StockActivity extends AppCompatActivity implements
     }
 
     @Override
+    @SuppressLint("NonConstantResourceId")
     public boolean onOptionsItemSelected(MenuItem item) {
-        var itemId = item.getItemId();
-        if (itemId == R.id.menu_options) {
-            showSettings();
-            return true;
-        } else if (itemId == R.id.action_search) {
-            var searchView = (androidx.appcompat.widget.SearchView) item.getActionView();
-            if (searchView != null) {
-                searchView.setOnQueryTextListener(new androidx.appcompat.widget.SearchView.OnQueryTextListener() {
-                    @Override
-                    public boolean onQueryTextSubmit(String query) {
-                        return false;
-                    }
-
-                    @Override
-                    public boolean onQueryTextChange(String newText) {
-                        filter(newText);
-                        return false;
-                    }
-                });
+        switch (item.getItemId()) {
+            case R.id.menu_options -> {
+                startActivity(new Intent(this , SettingsActivity.class));
+                return true;
             }
+            case R.id.action_search ->
+                    Optional.ofNullable((SearchView) item.getActionView()).ifPresent(searchView ->
+                            searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                                @Override
+                                public boolean onQueryTextSubmit(String query) {
+                                    return false;
+                                }
+
+                                @Override
+                                public boolean onQueryTextChange(String newText) {
+                                    var gameDataList = stockViewModel.getSortedGames();
+                                    var filteredList = new ArrayList<GameData>();
+                                    gameDataList.forEach(gameData -> {
+                                        if (gameData.title.toLowerCase(Locale.getDefault())
+                                                .contains(newText.toLowerCase(Locale.getDefault()))) {
+                                            filteredList.add(gameData);
+                                        }
+                                    });
+                                    if (!filteredList.isEmpty()) {
+                                        stockViewModel.setValueGameDataList(filteredList);
+                                    }
+                                    return true;
+                                }
+                            }));
         }
         return false;
     }
 
-    private void showSettings() {
-        var intent = new Intent(this , SettingsActivity.class);
-        startActivity(intent);
-    }
-
-    @Override
-    public boolean onKeyDown(int keyCode , KeyEvent event) {
-        return super.onKeyDown(keyCode , event);
-    }
-
-    private void filter(String text) {
-        var gameData = stockViewModel.getSortedGames();
-        var filteredList = new ArrayList<GameData>();
-        for (var item : gameData) {
-            if (item.title.toLowerCase(Locale.getDefault())
-                    .contains(text.toLowerCase(Locale.getDefault()))) {
-                filteredList.add(item);
-            }
-        }
-        if (!filteredList.isEmpty()) {
-            stockViewModel.setGameDataList(filteredList);
-        }
-    }
 }

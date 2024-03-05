@@ -3,33 +3,53 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <SwitchPreferenceCompat
+        android:icon="@drawable/baseline_image_24"
+        android:defaultValue="false"
+        android:key="pref_disable_image"
+        android:title="@string/pref_disable_image" />
+    <SwitchPreferenceCompat
+        android:icon="@drawable/baseline_width_24"
         android:defaultValue="true"
+        android:disableDependentsState="true"
         android:key="autoWidth"
         android:summary="@string/autoWidthSum"
         android:title="@string/autoWidthTitle" />
     <EditTextPreference
+        android:dependency="autoWidth"
         android:defaultValue="400"
         android:key="customWidth"
         android:selectAllOnFocus="true"
         android:singleLine="true"
-        android:title="@string/customWidthTitle" />
+        android:summary="@string/customWidthTitle"
+        android:title="@string/autoWidthTitle" />
     <SwitchPreferenceCompat
+        android:icon="@drawable/baseline_height_24"
         android:defaultValue="true"
+        android:disableDependentsState="true"
         android:key="autoHeight"
         android:summary="@string/autoHeightSum"
         android:title="@string/autoHeightTitle" />
     <EditTextPreference
+        android:dependency="autoHeight"
         android:defaultValue="400"
         android:key="customHeight"
         android:selectAllOnFocus="true"
         android:singleLine="true"
-        android:title="@string/customHeightTitle" />
+        android:summary="@string/customHeightTitle"
+        android:title="@string/autoHeightTitle"/>
     <SwitchPreferenceCompat
+        android:icon="@drawable/baseline_open_in_full_24"
         android:defaultValue="false"
         android:key="fullScreenImage"
         android:selectAllOnFocus="true"
         android:singleLine="true"
         android:summary="@string/fullScreenImageSum"
-        android:title="@string/fullScreenImageTitle" />
+        android:title="@string/permImgDialogTitle" />
+    <SwitchPreferenceCompat
+        android:icon="@drawable/baseline_broken_image_copy_24"
+        android:defaultValue="false"
+        android:key="debugImage"
+        android:summary="@string/imageDebugSum"
+        android:title="@string/imageDebugTitle" />
 
 </PreferenceScreen>

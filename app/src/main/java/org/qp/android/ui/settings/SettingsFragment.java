@@ -1,5 +1,6 @@
 package org.qp.android.ui.settings;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.webkit.WebResourceRequest;
@@ -16,9 +17,10 @@ import androidx.preference.PreferenceFragmentCompat;
 import androidx.webkit.WebViewAssetLoader;
 
 import org.qp.android.BuildConfig;
-import org.qp.android.QuestPlayerApplication;
 import org.qp.android.R;
 import org.qp.android.ui.dialogs.SettingsDialogFrag;
+
+import java.util.Optional;
 
 public class SettingsFragment extends PreferenceFragmentCompat {
 
@@ -36,17 +38,9 @@ public class SettingsFragment extends PreferenceFragmentCompat {
         if (versionPref != null) {
             versionPref.setTitle(getString(R.string.extendedName)
                     .replace("-VERSION-" , BuildConfig.VERSION_NAME));
-            versionPref.setSummaryProvider(preference -> {
-                var application = (QuestPlayerApplication) requireActivity().getApplication();
-                var libQspProxy = application.getLibQspProxy();
-                try {
-                    var compileDateTime = libQspProxy.getCompiledDateTime();
-                    var versionQSP = libQspProxy.getVersionQSP();
-                    return compileDateTime + "\n" + versionQSP;
-                } catch (NullPointerException ex) {
-                    return null;
-                }
-            });
+            versionPref.setSummaryProvider(preference ->
+                    "Lib version: "+"5.7.0" + "\nTimestamp: " + BuildConfig.BUILD_TIME
+            );
         }
 
         Preference.OnPreferenceClickListener listener = preference -> {
@@ -129,6 +123,20 @@ public class SettingsFragment extends PreferenceFragmentCompat {
                                                               WebResourceRequest request) {
                 return assetLoader.shouldInterceptRequest(request.getUrl());
             }
+
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view , WebResourceRequest request) {
+                var url = Optional.ofNullable(request.getUrl());
+                if (url.isPresent()) {
+                    var workUri = url.get();
+                    if (workUri.getScheme().startsWith("http")
+                            || workUri.getScheme().startsWith("https")) {
+                        requireContext().startActivity(new Intent(Intent.ACTION_VIEW, workUri));
+                        return true;
+                    }
+                }
+                return false;
+            }
         });
         webView.loadDataWithBaseURL(
                 null ,
@@ -140,6 +148,6 @@ public class SettingsFragment extends PreferenceFragmentCompat {
         linearLayout.addView(webView);
         var dialogFrag = new SettingsDialogFrag();
         dialogFrag.setView(linearLayout);
-        dialogFrag.show(getParentFragmentManager() , "settingsDialogFragment");
+        dialogFrag.show(getParentFragmentManager() , "aboutDialogFragment");
     }
 }

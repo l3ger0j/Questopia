@@ -8,13 +8,16 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
-import org.qp.android.databinding.FragmentStockGameBinding;
+import org.qp.android.R;
+import org.qp.android.databinding.FragmentItemGameBinding;
+import org.qp.android.ui.dialogs.StockDialogType;
 
-public class StockGameFragment extends StockPatternFragment {
+public class StockGameFragment extends Fragment {
 
-    private FragmentStockGameBinding fragmentStockGameBinding;
+    private FragmentItemGameBinding fragmentStockGameBinding;
     private StockViewModel stockViewModel;
 
     @Nullable
@@ -24,7 +27,7 @@ public class StockGameFragment extends StockPatternFragment {
         if (appCompatActivity.getSupportActionBar() != null) {
             appCompatActivity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
-        fragmentStockGameBinding = FragmentStockGameBinding.inflate(getLayoutInflater());
+        fragmentStockGameBinding = FragmentItemGameBinding.inflate(getLayoutInflater());
         stockViewModel = new ViewModelProvider(requireActivity())
                 .get(StockViewModel.class);
         fragmentStockGameBinding.setViewModel(stockViewModel);
@@ -34,8 +37,42 @@ public class StockGameFragment extends StockPatternFragment {
     @Override
     public void onViewCreated(@NonNull View view , @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view , savedInstanceState);
-        fragmentStockGameBinding.editButton.setOnClickListener(view1 -> listener.onClickEditButton());
-        fragmentStockGameBinding.playButton.setOnClickListener(view2 -> listener.onClickPlayButton());
-        fragmentStockGameBinding.downloadButton.setOnClickListener(view3 -> listener.onClickDownloadButton());
+        fragmentStockGameBinding.editButton.setOnClickListener(view1 ->
+                stockViewModel.showDialogFragment(
+                        getParentFragmentManager() ,
+                        StockDialogType.EDIT_DIALOG ,
+                        null
+                )
+        );
+        fragmentStockGameBinding.playButton.setOnClickListener(view2 -> {
+            var intent = stockViewModel.createPlayGameIntent();
+            switch (stockViewModel.getCountGameFiles()) {
+                case 0 ->
+                        stockViewModel.showDialogFragment(
+                                getParentFragmentManager() ,
+                                StockDialogType.ERROR_DIALOG ,
+                                getString(R.string.gameFolderEmpty)
+                        );
+                case 1 -> {
+                    var chosenGameFile = stockViewModel.getGameFile(0);
+                    intent.putExtra("gameFileUri" ,  String.valueOf(chosenGameFile.getUri()));
+                    requireActivity().startActivity(intent);
+                }
+                default -> {
+                    stockViewModel.showDialogFragment(
+                            getParentFragmentManager() ,
+                            StockDialogType.SELECT_DIALOG ,
+                            null
+                    );
+                    stockViewModel.outputIntObserver.observe(getViewLifecycleOwner() , integer -> {
+                        var chosenGameFile = stockViewModel.getGameFile(integer);
+                        intent.putExtra("gameFileUri" , String.valueOf(chosenGameFile.getUri()));
+                        requireActivity().startActivity(intent);
+                    });
+                }
+            }
+        });
+        // TODO: 19.07.2023 Release this
+        // fragmentStockGameBinding.downloadButton.setOnClickListener(view3 -> listener.onClickDownloadButton());
     }
 }

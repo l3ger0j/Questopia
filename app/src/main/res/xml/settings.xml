@@ -3,26 +3,32 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <Preference
+        android:icon="@drawable/baseline_settings_24"
         android:title="@string/generalCatTitle"
         android:key="generalPref" />
 
     <Preference
+        android:icon="@drawable/baseline_edit_24"
         android:title="@string/textCatTitle"
         android:key="textPref" />
 
     <Preference
+        android:icon="@drawable/baseline_image_24"
         android:title="@string/imageCatTitle"
         android:key="imagePref" />
 
     <Preference
+        android:icon="@drawable/baseline_extension_24"
         android:title="@string/pluginTitle"
         android:key="showExtensionMenu"/>
 
     <Preference
+        android:icon="@drawable/baseline_feed_24"
         android:title="@string/newsMenuTitle"
         android:key="newsApp" />
 
     <Preference
+        android:icon="@drawable/baseline_info_24"
         android:title="@string/aboutTitle"
         android:key="showAbout" />
 

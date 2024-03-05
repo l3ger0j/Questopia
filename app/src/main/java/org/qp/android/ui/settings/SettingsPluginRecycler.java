@@ -1,4 +1,4 @@
-package org.qp.android.ui.plugin;
+package org.qp.android.ui.settings;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class PluginRecycler extends RecyclerView.Adapter<PluginRecycler.ViewHolder> {
+public class SettingsPluginRecycler extends RecyclerView.Adapter<SettingsPluginRecycler.ViewHolder> {
     private final Context context;
     private final AsyncListDiffer<PluginInfo> differ =
             new AsyncListDiffer<>(this , DIFF_CALLBACK);
@@ -53,21 +53,21 @@ public class PluginRecycler extends RecyclerView.Adapter<PluginRecycler.ViewHold
         differ.submitList(pluginInfo);
     }
 
-    public PluginRecycler(Context context) {
+    public SettingsPluginRecycler(Context context) {
         this.context = context;
     }
 
     @NonNull
     @Override
-    public PluginRecycler.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent , int viewType) {
+    public SettingsPluginRecycler.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent , int viewType) {
         var inflater = LayoutInflater.from(parent.getContext());
         ListItemPluginBinding listItemPluginBinding =
                 DataBindingUtil.inflate(inflater, R.layout.list_item_plugin, parent, false);
-        return new PluginRecycler.ViewHolder(listItemPluginBinding);
+        return new SettingsPluginRecycler.ViewHolder(listItemPluginBinding);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull PluginRecycler.ViewHolder holder , int position) {
+    public void onBindViewHolder(@NonNull SettingsPluginRecycler.ViewHolder holder , int position) {
         holder.listItemPluginBinding(getGameData().get(position));
         var pluginInfo = getItem(position);
 

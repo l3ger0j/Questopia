@@ -14,48 +14,38 @@ import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
 public class ImageProvider {
-    private Bitmap tempBitmap;
+
+    private Bitmap mBitmap;
+
+    private final Target target = new Target() {
+        @Override
+        public void onBitmapLoaded(Bitmap bitmap , Picasso.LoadedFrom from) {
+            mBitmap = bitmap;
+        }
+
+        @Override
+        public void onBitmapFailed(Exception e , Drawable errorDrawable) {
+
+        }
+
+        @Override
+        public void onPrepareLoad(Drawable placeHolderDrawable) {
+
+        }
+    };
 
     /**
-     * Loads an image from a file using an absolute path.
+     * Loads an image from a file using an Uri.
      *
      * @return uploaded image, or <code>null</code> if the image was not found
      */
-    public Drawable get(Uri path) {
+    public Drawable getDrawableFromPath(Uri path) {
         if (isMainThread()) {
-            Picasso.get().load(path).into(new Target() {
-                @Override
-                public void onBitmapLoaded(Bitmap bitmap , Picasso.LoadedFrom from) {
-                    tempBitmap = bitmap;
-                }
-
-                @Override
-                public void onBitmapFailed(Exception e , Drawable errorDrawable) {
-
-                }
-
-                @Override
-                public void onPrepareLoad(Drawable placeHolderDrawable) {
-                }
-            });
+            Picasso.get().load(path).into(target);
         } else {
             new Handler(Looper.getMainLooper()).post(() ->
-                    Picasso.get().load(path).into(new Target() {
-                        @Override
-                        public void onBitmapLoaded(Bitmap bitmap , Picasso.LoadedFrom from) {
-                            tempBitmap = bitmap;
-                        }
-
-                        @Override
-                        public void onBitmapFailed(Exception e , Drawable errorDrawable) {
-
-                        }
-
-                        @Override
-                        public void onPrepareLoad(Drawable placeHolderDrawable) {
-                        }
-                    }));
+                    Picasso.get().load(path).into(target));
         }
-        return new BitmapDrawable(Resources.getSystem(), tempBitmap);
+        return new BitmapDrawable(Resources.getSystem(), mBitmap);
     }
 }

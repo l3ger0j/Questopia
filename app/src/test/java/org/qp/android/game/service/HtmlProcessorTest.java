@@ -5,11 +5,13 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.qp.android.model.service.HtmlProcessor;
 import org.qp.android.model.service.ImageProvider;
+import org.qp.android.ui.settings.SettingsController;
 
 public class HtmlProcessorTest {
 
     private final ImageProvider imageProvider = new ImageProvider();
-    private final HtmlProcessor sut = new HtmlProcessor(imageProvider);
+    private final SettingsController settingsController = new SettingsController();
+    private final HtmlProcessor sut = new HtmlProcessor(imageProvider , settingsController);
 
     @Test
     public void convertQspHtmlToWebViewHtml_escapedQuotes() {

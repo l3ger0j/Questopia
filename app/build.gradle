@@ -31,10 +31,15 @@ android {
     }
 
     buildTypes {
+        debug {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            buildConfigField "java.util.Date", "BUILD_TIME", "new java.util.Date(" + System.currentTimeMillis() + "L)"
+        }
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            proguardFiles fileTree('proguard').asList().toArray()
+            buildConfigField "java.util.Date", "BUILD_TIME", "new java.util.Date(" + System.currentTimeMillis() + "L)"
         }
     }
 
@@ -67,9 +72,9 @@ dependencies {
     implementation 'androidx.documentfile:documentfile:1.0.1'
     implementation 'androidx.preference:preference:1.2.1'
     implementation 'androidx.fragment:fragment:1.6.2'
-    implementation 'androidx.webkit:webkit:1.9.0'
-    implementation 'androidx.navigation:navigation-fragment:2.7.6'
-    implementation 'androidx.navigation:navigation-ui:2.7.6'
+    implementation 'androidx.webkit:webkit:1.10.0'
+    implementation 'androidx.navigation:navigation-fragment:2.7.7'
+    implementation 'androidx.navigation:navigation-ui:2.7.7'
     implementation 'androidx.work:work-runtime:2.9.0'
     implementation 'com.google.android.material:material:1.11.0'
     implementation 'androidx.core:core-splashscreen:1.0.1'
@@ -80,6 +85,8 @@ dependencies {
     implementation 'com.github.javiersantos:AppUpdater:2.7'
     implementation 'com.anggrayudi:storage:1.5.5'
     implementation 'com.squareup.picasso:picasso:2.71828'
+
+    implementation 'io.reactivex.rxjava3:rxandroid:3.0.2'
 
     implementation 'com.fasterxml.jackson.core:jackson-core:2.16.1'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.16.1'

@@ -29,12 +29,8 @@ public class HtmlProcessor {
     private final ImageProvider imageProvider;
     private static final String HTML_PATTERN = "<(\"[^\"]*\"|'[^']*'|[^'\">])*>";
     private final Pattern pattern = Pattern.compile(HTML_PATTERN);
-    private SettingsController controller;
+    private final SettingsController controller;
     private Context context;
-
-    public void setController(SettingsController controller) {
-        this.controller = controller;
-    }
 
     public void setContext(Context context) {
         this.context = context;
@@ -44,8 +40,9 @@ public class HtmlProcessor {
         return (QuestPlayerApplication) context;
     }
 
-    public HtmlProcessor(ImageProvider imageProvider) {
+    public HtmlProcessor(ImageProvider imageProvider , SettingsController settingsController) {
         this.imageProvider = imageProvider;
+        this.controller = settingsController;
     }
 
     /**
@@ -96,29 +93,33 @@ public class HtmlProcessor {
 
     private void processHTMLImages(@NonNull Element documentBody) {
         var dynBlackList = new ArrayList<String>();
-        for (var element : documentBody.select("a")) {
+        documentBody.select("a").forEach(element -> {
             if (element.attr("href").contains("exec:")) {
                 dynBlackList.add(element.select("img").attr("src"));
             }
-        }
-        for (var img : documentBody.select("img")) {
-            if (controller.isUseFullscreenImages) {
-                if (!dynBlackList.contains(img.attr("src"))) {
-                    img.attr("onclick" , "img.onClickImage(this.src);");
+        });
+        if (controller.isImageDisabled) {
+            documentBody.select("img").remove();
+        } else {
+            documentBody.select("img").forEach(img -> {
+                if (controller.isUseFullscreenImages) {
+                    if (!dynBlackList.contains(img.attr("src"))) {
+                        img.attr("onclick" , "img.onClickImage(this.src);");
+                    }
                 }
-            }
-            if (controller.isUseAutoWidth && controller.isUseAutoHeight) {
-                img.attr("style", "display: inline; height: auto; max-width: 100%;");
-            }
-            if (!controller.isUseAutoWidth) {
-                if (shouldChangeWidth(img)) {
-                    img.attr("style" , "max-width:" + controller.customWidthImage+";");
+                if (controller.isUseAutoWidth && controller.isUseAutoHeight) {
+                    img.attr("style", "display: inline; height: auto; max-width: 100%;");
                 }
-            } else if (!controller.isUseAutoHeight) {
-                if (shouldChangeHeight(img)) {
-                    img.attr("style" , "max-height:" + controller.customHeightImage+";");
+                if (!controller.isUseAutoWidth) {
+                    if (shouldChangeWidth(img)) {
+                        img.attr("style" , "max-width:" + controller.customWidthImage+";");
+                    }
+                } else if (!controller.isUseAutoHeight) {
+                    if (shouldChangeHeight(img)) {
+                        img.attr("style" , "max-height:" + controller.customHeightImage+";");
+                    }
                 }
-            }
+            });
         }
     }
 
@@ -127,7 +128,7 @@ public class HtmlProcessor {
         var curGameDir = getApplication().getCurrentGameDir();
         var imageFile = fromRelPath(relPath , curGameDir);
         if (imageFile == null) return false;
-        var drawable = imageProvider.get(imageFile.getUri());
+        var drawable = imageProvider.getDrawableFromPath(imageFile.getUri());
         if (drawable == null) return false;
         return drawable.getIntrinsicWidth() < Resources.getSystem()
                 .getDisplayMetrics().widthPixels;
@@ -138,7 +139,7 @@ public class HtmlProcessor {
         var curGameDir = getApplication().getCurrentGameDir();
         var imageFile = fromRelPath(relPath , curGameDir);
         if (imageFile == null) return false;
-        var drawable = imageProvider.get(imageFile.getUri());
+        var drawable = imageProvider.getDrawableFromPath(imageFile.getUri());
         if (drawable == null) return false;
         return drawable.getIntrinsicHeight() < Resources.getSystem()
                 .getDisplayMetrics().heightPixels;

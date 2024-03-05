@@ -13,7 +13,8 @@
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:fitsSystemWindows="false">
 
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/stockFragHost"
@@ -28,7 +29,6 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="32dp"
             android:text="@string/addFolder"
-            android:visibility="@{stockVM.isHideFAB ? View.GONE : View.VISIBLE}"
             android:layout_gravity="bottom|center"
             app:icon="@drawable/baseline_create_new_folder_24"
             app:layout_behavior="com.google.android.material.behavior.HideBottomViewOnScrollBehavior" />
