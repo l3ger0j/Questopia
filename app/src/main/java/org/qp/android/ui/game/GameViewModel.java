@@ -4,6 +4,7 @@ import static org.qp.android.helpers.utils.Base64Util.decodeBase64;
 import static org.qp.android.helpers.utils.Base64Util.isBase64;
 import static org.qp.android.helpers.utils.ColorUtil.convertRGBAToBGRA;
 import static org.qp.android.helpers.utils.ColorUtil.getHexColor;
+import static org.qp.android.helpers.utils.FileUtil.documentWrap;
 import static org.qp.android.helpers.utils.FileUtil.fromRelPath;
 import static org.qp.android.helpers.utils.ThreadUtil.assertNonUiThread;
 import static org.qp.android.helpers.utils.ViewUtil.getFontStyle;
@@ -18,6 +19,7 @@ import android.net.Uri;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
+import android.webkit.MimeTypeMap;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
@@ -33,7 +35,6 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.preference.PreferenceManager;
 
 import com.anggrayudi.storage.file.DocumentFileCompat;
-import com.anggrayudi.storage.file.MimeType;
 import com.google.android.material.textfield.TextInputLayout;
 
 import org.qp.android.QuestPlayerApplication;
@@ -115,7 +116,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
 
     // region Getter/Setter
     public HtmlProcessor getHtmlProcessor() {
-        return htmlProcessor;
+        return htmlProcessor.setController(getSettingsController());
     }
 
     public AudioPlayer getAudioPlayer() {
@@ -197,7 +198,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
     public String getHtml(String str) {
         var config = libQpProxy.getGameState().interfaceConfig;
         return config.useHtml ?
-                getHtmlProcessor().convertQspHtmlToWebViewHtml(str) :
+                getHtmlProcessor().convertLibHtmlToWebHtml(str) :
                 getHtmlProcessor().convertQspStringToWebViewHtml(str);
     }
 
@@ -329,19 +330,33 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
     }
 
     private void refreshMainDesc() {
-        var mainDesc = getHtml(getLibQspProxy().getGameState().mainDesc);
-        if (!mainDesc.isBlank()) {
+        var libMainDesc = getHtml(getLibQspProxy().getGameState().mainDesc);
+        var dirtyHTML = pageTemplate.replace("REPLACETEXT" , libMainDesc);
+        var cleanHTML = "";
+        if (getSettingsController().isImageDisabled) {
+            cleanHTML = getHtmlProcessor().getCleanHtmlPageNotImage(dirtyHTML);
+        } else {
+            cleanHTML = getHtmlProcessor().getCleanHtmlPageAndImage(dirtyHTML);
+        }
+        if (!cleanHTML.isBlank()) {
             getGameActivity().warnUser(GameActivity.TAB_MAIN_DESC_AND_ACTIONS);
         }
-        mainDescLiveData.postValue(pageTemplate.replace("REPLACETEXT" , mainDesc));
+        mainDescLiveData.postValue(cleanHTML);
     }
 
     private void refreshVarsDesc() {
-        var varsDesc = getHtml(getLibQspProxy().getGameState().varsDesc);
-        if (!varsDesc.isBlank()) {
+        var libVarsDesc = getHtml(getLibQspProxy().getGameState().varsDesc);
+        var dirtyHTML = pageTemplate.replace("REPLACETEXT" , libVarsDesc);
+        var cleanHTML = "";
+        if (getSettingsController().isImageDisabled) {
+            cleanHTML = getHtmlProcessor().getCleanHtmlPageNotImage(dirtyHTML);
+        } else {
+            cleanHTML = getHtmlProcessor().getCleanHtmlPageAndImage(dirtyHTML);
+        }
+        if (!cleanHTML.isBlank()) {
             getGameActivity().warnUser(GameActivity.TAB_VARS_DESC);
         }
-        varsDescLiveData.postValue(pageTemplate.replace("REPLACETEXT" , varsDesc));
+        varsDescLiveData.postValue(cleanHTML);
     }
 
     private void refreshActionsRecycler() {
@@ -455,9 +470,6 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         @Override
         public WebResourceResponse shouldInterceptRequest(WebView view ,
                                                           @NonNull WebResourceRequest request) {
-            if (getSettingsController().isImageDisabled) {
-                return super.shouldInterceptRequest(view , request);
-            }
             var uri = request.getUrl();
             var rootDir = DocumentFileCompat.fromUri(getApplication() , fullPathGameDir);
             if (rootDir != null && uri.getScheme() != null) {
@@ -465,8 +477,9 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
                     try {
                         if (uri.getPath() == null) throw new NullPointerException();
                         var imageFile = fromRelPath(uri.getPath() , rootDir);
+                        var extension = MimeTypeMap.getSingleton().getMimeTypeFromExtension(documentWrap(imageFile).getExtension());
                         var in = getApplication().getContentResolver().openInputStream(imageFile.getUri());
-                        return new WebResourceResponse(MimeType.IMAGE , "utf-8" , in);
+                        return new WebResourceResponse(extension , "utf-8" , in);
                     } catch (FileNotFoundException | NullPointerException ex) {
                         if (getSettingsController().isUseImageDebug) {
                             showErrorDialog(uri.getPath() , ErrorType.IMAGE_ERROR);

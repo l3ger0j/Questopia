@@ -29,20 +29,25 @@ public class HtmlProcessor {
     private final ImageProvider imageProvider;
     private static final String HTML_PATTERN = "<(\"[^\"]*\"|'[^']*'|[^'\">])*>";
     private final Pattern pattern = Pattern.compile(HTML_PATTERN);
-    private final SettingsController controller;
+    private SettingsController controller;
     private Context context;
 
-    public void setContext(Context context) {
+    public HtmlProcessor setController(SettingsController controller) {
+        this.controller = controller;
+        return this;
+    }
+
+    public HtmlProcessor setContext(Context context) {
         this.context = context;
+        return this;
     }
 
     private QuestPlayerApplication getApplication() {
         return (QuestPlayerApplication) context;
     }
 
-    public HtmlProcessor(ImageProvider imageProvider , SettingsController settingsController) {
+    public HtmlProcessor(ImageProvider imageProvider) {
         this.imageProvider = imageProvider;
-        this.controller = settingsController;
     }
 
     /**
@@ -59,6 +64,31 @@ public class HtmlProcessor {
         var body = document.body();
         processHTMLImages(body);
         processHTMLVideos(body);
+        return document.toString();
+    }
+
+    public String convertLibHtmlToWebHtml(String html) {
+        if (isNullOrEmpty(html)) return "";
+        var result = unescapeQuotes(html);
+        result = encodeExec(result);
+        return lineBreaksInHTML(result);
+    }
+
+    public String getCleanHtmlPageAndImage(String dirtyHtml) {
+        var document = Jsoup.parse(dirtyHtml);
+        document.outputSettings().prettyPrint(true);
+        var body = document.body();
+        processHTMLImages(body);
+        processHTMLVideos(body);
+        return document.toString();
+    }
+
+    public String getCleanHtmlPageNotImage(String dirtyHtml) {
+        var document = Jsoup.parse(dirtyHtml);
+        document.outputSettings().prettyPrint(true);
+        var body = document.body();
+        body.select("img").remove();
+        body.select("video").remove();
         return document.toString();
     }
 
@@ -98,29 +128,26 @@ public class HtmlProcessor {
                 dynBlackList.add(element.select("img").attr("src"));
             }
         });
-        if (controller.isImageDisabled) {
-            documentBody.select("img").remove();
-        } else {
-            documentBody.select("img").forEach(img -> {
-                if (controller.isUseFullscreenImages) {
-                    if (!dynBlackList.contains(img.attr("src"))) {
-                        img.attr("onclick" , "img.onClickImage(this.src);");
-                    }
+
+        documentBody.select("img").forEach(img -> {
+            if (controller.isUseFullscreenImages) {
+                if (!dynBlackList.contains(img.attr("src"))) {
+                    img.attr("onclick" , "img.onClickImage(this.src);");
                 }
-                if (controller.isUseAutoWidth && controller.isUseAutoHeight) {
-                    img.attr("style", "display: inline; height: auto; max-width: 100%;");
+            }
+            if (controller.isUseAutoWidth && controller.isUseAutoHeight) {
+                img.attr("style", "display: inline; height: auto; max-width: 100%;");
+            }
+            if (!controller.isUseAutoWidth) {
+                if (shouldChangeWidth(img)) {
+                    img.attr("style" , "max-width:" + controller.customWidthImage+";");
                 }
-                if (!controller.isUseAutoWidth) {
-                    if (shouldChangeWidth(img)) {
-                        img.attr("style" , "max-width:" + controller.customWidthImage+";");
-                    }
-                } else if (!controller.isUseAutoHeight) {
-                    if (shouldChangeHeight(img)) {
-                        img.attr("style" , "max-height:" + controller.customHeightImage+";");
-                    }
+            } else if (!controller.isUseAutoHeight) {
+                if (shouldChangeHeight(img)) {
+                    img.attr("style" , "max-height:" + controller.customHeightImage+";");
                 }
-            });
-        }
+            }
+        });
     }
 
     private boolean shouldChangeWidth(Element img) {

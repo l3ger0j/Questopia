@@ -8,14 +8,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.qp.android.model.service.HtmlProcessor;
 import org.qp.android.model.service.ImageProvider;
-import org.qp.android.ui.settings.SettingsController;
 
 @RunWith(AndroidJUnit4.class)
 public class HtmlProcessorAndroidTest {
 
     private final ImageProvider imageProvider = new ImageProvider();
-    private final SettingsController settingsController = new SettingsController();
-    private final HtmlProcessor sut = new HtmlProcessor(imageProvider , settingsController);
+    private final HtmlProcessor sut = new HtmlProcessor(imageProvider);
 
     @Test
     public void convertQspHtmlToWebViewHtml_execBlocks() {
