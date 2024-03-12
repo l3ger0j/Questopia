@@ -29,14 +29,12 @@ public class GameMainFragment extends Fragment {
     private View separatorView;
     private RecyclerView actionsView;
 
-    private final Runnable onScroll = new Runnable() {
-        @Override
-        public void run() {
-            if (mainDescView.getContentHeight()
-                    * getResources().getDisplayMetrics().density
-                    >= mainDescView.getScrollY()) {
-                mainDescView.scrollBy(0 , mainDescView.getHeight());
-            }
+    private final Runnable onScroll = () -> {
+        var resFromActivity = requireActivity().getResources();
+        if (mainDescView.getContentHeight()
+                * resFromActivity.getDisplayMetrics().density
+                > mainDescView.getScrollY()) {
+            mainDescView.scrollBy(0 , mainDescView.getHeight());
         }
     };
 

@@ -15,6 +15,7 @@ import android.app.Application;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Handler;
 import android.util.Log;
@@ -163,7 +164,9 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
     }
 
     public int getTextColor() {
-        var config = libQpProxy.getGameState().interfaceConfig;
+        var libState = libQpProxy.getGameState();
+        if (libState == null) return Color.WHITE;
+        var config = libState.interfaceConfig;
         if (getSettingsController().isUseGameTextColor && config.fontColor != 0) {
             return convertRGBAToBGRA(config.fontColor);
         } else {
