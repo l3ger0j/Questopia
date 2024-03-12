@@ -45,7 +45,16 @@ public class StockGameFragment extends Fragment {
                 )
         );
         fragmentStockGameBinding.playButton.setOnClickListener(view2 -> {
-            var intent = stockViewModel.createPlayGameIntent();
+            var optIntent = stockViewModel.createPlayGameIntent();
+            if (optIntent.isEmpty()) {
+                stockViewModel.showDialogFragment(
+                        getParentFragmentManager() ,
+                        StockDialogType.ERROR_DIALOG ,
+                        getString(R.string.gamesFolderError)
+                );
+                return;
+            }
+            var intent = optIntent.get();
             switch (stockViewModel.getCountGameFiles()) {
                 case 0 ->
                         stockViewModel.showDialogFragment(
@@ -55,6 +64,7 @@ public class StockGameFragment extends Fragment {
                         );
                 case 1 -> {
                     var chosenGameFile = stockViewModel.getGameFile(0);
+                    if (chosenGameFile == null) return;
                     intent.putExtra("gameFileUri" ,  String.valueOf(chosenGameFile.getUri()));
                     requireActivity().startActivity(intent);
                 }
@@ -66,6 +76,7 @@ public class StockGameFragment extends Fragment {
                     );
                     stockViewModel.outputIntObserver.observe(getViewLifecycleOwner() , integer -> {
                         var chosenGameFile = stockViewModel.getGameFile(integer);
+                        if (chosenGameFile == null) return;
                         intent.putExtra("gameFileUri" , String.valueOf(chosenGameFile.getUri()));
                         requireActivity().startActivity(intent);
                     });

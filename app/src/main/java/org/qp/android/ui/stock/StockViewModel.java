@@ -16,6 +16,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.AndroidViewModel;
@@ -275,11 +276,22 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     public int getCountGameFiles() {
-        return currGameData.gameFiles.size();
+        if (getCurrGameData().isPresent()) {
+            var data = getCurrGameData().get();
+            return data.gameFiles.size();
+        } else {
+            return 0;
+        }
     }
 
+    @Nullable
     public DocumentFile getGameFile(int index) {
-        return currGameData.gameFiles.get(index);
+        if (getCurrGameData().isPresent()) {
+            var data = getCurrGameData().get();
+            return data.gameFiles.get(index);
+        } else {
+            return null;
+        }
     }
 
     public boolean isGamePossiblyDownload() {
@@ -378,12 +390,14 @@ public class StockViewModel extends AndroidViewModel {
         editBinding = DialogEditBinding.inflate(LayoutInflater.from(getApplication()));
         editBinding.setStockVM(this);
 
-        if (!currGameData.icon.isEmpty()) {
-            Picasso.get()
-                    .load(currGameData.icon)
-                    .fit()
-                    .into(editBinding.imageView);
-        }
+        getCurrGameData().ifPresent(gameData -> {
+            if (gameData.icon.isEmpty()) {
+                Picasso.get()
+                        .load(gameData.icon)
+                        .fit()
+                        .into(editBinding.imageView);
+            }
+        });
 
         editBinding.buttonSelectPath.setOnClickListener(this::sendIntent);
         editBinding.buttonSelectMod.setOnClickListener(this::sendIntent);
@@ -447,18 +461,24 @@ public class StockViewModel extends AndroidViewModel {
                 });
     }
 
-    public Intent createPlayGameIntent() {
-        var gameDir = currGameData.gameDir;
-        var intent = new Intent(getApplication() , GameActivity.class);
+    public Optional<Intent> createPlayGameIntent() {
+        if (getCurrGameData().isPresent()) {
+            var data = getCurrGameData().get();
+            if (data.gameDir == null) return Optional.empty();
+            var intent = new Intent(getApplication() , GameActivity.class);
+            var gameDir = data.gameDir;
 
-        var application = (QuestPlayerApplication) getApplication();
-        application.setCurrentGameDir(gameDir);
+            var application = (QuestPlayerApplication) getApplication();
+            application.setCurrentGameDir(gameDir);
 
-        intent.putExtra("gameId" , currGameData.id);
-        intent.putExtra("gameTitle" , currGameData.title);
-        intent.putExtra("gameDirUri" , String.valueOf(gameDir.getUri()));
+            intent.putExtra("gameId" , data.id);
+            intent.putExtra("gameTitle" , data.title);
+            intent.putExtra("gameDirUri" , String.valueOf(gameDir.getUri()));
 
-        return intent;
+            return Optional.of(intent);
+        } else {
+            return Optional.empty();
+        }
     }
 
     public void sendIntent(@NonNull View view) {
