@@ -30,9 +30,9 @@ public class GameMainFragment extends Fragment {
     private RecyclerView actionsView;
 
     private final Runnable onScroll = () -> {
-        var resFromActivity = requireActivity().getResources();
+        if (!isAdded()) return;
         if (mainDescView.getContentHeight()
-                * resFromActivity.getDisplayMetrics().density
+                * getResources().getDisplayMetrics().density
                 > mainDescView.getScrollY()) {
             mainDescView.scrollBy(0 , mainDescView.getHeight());
         }
