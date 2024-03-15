@@ -38,7 +38,7 @@ public class QuestPlayerApplication extends Application {
     }
 
     public HtmlProcessor getHtmlProcessor() {
-        return htmlProcessor.setContext(this);
+        return htmlProcessor;
     }
 
     public AudioPlayer getAudioPlayer() {

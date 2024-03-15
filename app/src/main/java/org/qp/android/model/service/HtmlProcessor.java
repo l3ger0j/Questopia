@@ -5,16 +5,15 @@ import static org.qp.android.helpers.utils.FileUtil.fromRelPath;
 import static org.qp.android.helpers.utils.StringUtil.isNotEmpty;
 import static org.qp.android.helpers.utils.StringUtil.isNullOrEmpty;
 
-import android.content.Context;
 import android.content.res.Resources;
 import android.util.Base64;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.documentfile.provider.DocumentFile;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
-import org.qp.android.QuestPlayerApplication;
 import org.qp.android.ui.settings.SettingsController;
 
 import java.util.ArrayList;
@@ -30,20 +29,15 @@ public class HtmlProcessor {
     private static final String HTML_PATTERN = "<(\"[^\"]*\"|'[^']*'|[^'\">])*>";
     private final Pattern pattern = Pattern.compile(HTML_PATTERN);
     private SettingsController controller;
-    private Context context;
+    private DocumentFile curGameDir;
 
     public HtmlProcessor setController(SettingsController controller) {
         this.controller = controller;
         return this;
     }
 
-    public HtmlProcessor setContext(Context context) {
-        this.context = context;
-        return this;
-    }
-
-    private QuestPlayerApplication getApplication() {
-        return (QuestPlayerApplication) context;
+    public void setCurGameDir(DocumentFile curGameDir) {
+        this.curGameDir = curGameDir;
     }
 
     public HtmlProcessor(ImageProvider imageProvider) {
@@ -152,7 +146,6 @@ public class HtmlProcessor {
 
     private boolean shouldChangeWidth(Element img) {
         var relPath = img.attr("src");
-        var curGameDir = getApplication().getCurrentGameDir();
         var imageFile = fromRelPath(relPath , curGameDir);
         if (imageFile == null) return false;
         var drawable = imageProvider.getDrawableFromPath(imageFile.getUri());
@@ -163,7 +156,6 @@ public class HtmlProcessor {
 
     private boolean shouldChangeHeight(Element img) {
         var relPath = img.attr("src");
-        var curGameDir = getApplication().getCurrentGameDir();
         var imageFile = fromRelPath(relPath , curGameDir);
         if (imageFile == null) return false;
         var drawable = imageProvider.getDrawableFromPath(imageFile.getUri());

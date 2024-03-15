@@ -293,7 +293,9 @@ public class GameActivity extends AppCompatActivity {
         var gameFile = DocumentFileCompat.fromUri(this , gameFileUri);
 
         audioPlayer.setCurGameDir(gameDir);
+        htmlProcessor.setCurGameDir(gameDir);
         gameViewModel.setGameDirUri(gameDirUri);
+
         libQpProxy.runGame(gameId, gameTitle, gameDir, gameFile);
     }
 
