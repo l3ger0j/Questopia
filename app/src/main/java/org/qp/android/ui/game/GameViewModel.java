@@ -64,7 +64,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
     private final HtmlProcessor htmlProcessor;
     private LibQpProxy libQpProxy;
     private AudioPlayer audioPlayer;
-    private final Uri fullPathGameDir;
+    private Uri gameDirUri;
 
     public ObservableBoolean isActionVisible = new ObservableBoolean();
 
@@ -245,6 +245,10 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         }
     }
 
+    public void setGameDirUri(Uri gameDirUri) {
+        this.gameDirUri = gameDirUri;
+    }
+
     // endregion Getter/Setter
 
     public void onDialogPositiveClick(DialogFragment dialog) {
@@ -400,7 +404,6 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         preferences = PreferenceManager.getDefaultSharedPreferences(application);
         preferences.registerOnSharedPreferenceChangeListener(preferenceChangeListener);
         questPlayerApplication = (QuestPlayerApplication) getApplication();
-        fullPathGameDir = questPlayerApplication.getCurrentGameDir().getUri();
         htmlProcessor = questPlayerApplication.getHtmlProcessor();
     }
 
@@ -474,7 +477,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         public WebResourceResponse shouldInterceptRequest(WebView view ,
                                                           @NonNull WebResourceRequest request) {
             var uri = request.getUrl();
-            var rootDir = DocumentFileCompat.fromUri(getApplication() , fullPathGameDir);
+            var rootDir = DocumentFileCompat.fromUri(getApplication() , gameDirUri);
             if (rootDir != null && uri.getScheme() != null) {
                 if (uri.getScheme().startsWith("file")) {
                     try {

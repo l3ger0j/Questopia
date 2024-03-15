@@ -284,6 +284,7 @@ public class GameActivity extends AppCompatActivity {
         var gameFileUri = Uri.parse(intent.getStringExtra("gameFileUri"));
         var gameFile = DocumentFileCompat.fromUri(this , gameFileUri);
 
+        gameViewModel.setGameDirUri(gameDirUri);
         libQpProxy.runGame(gameId, gameTitle, gameDir, gameFile);
     }
 
