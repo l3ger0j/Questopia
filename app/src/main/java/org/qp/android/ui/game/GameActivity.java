@@ -31,7 +31,6 @@ import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.documentfile.provider.DocumentFile;
-import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
@@ -217,6 +216,15 @@ public class GameActivity extends AppCompatActivity {
             initGame();
         }
 
+        audioPlayer.getIsThrowError().observe(this , path -> {
+            if (!settingsController.isUseMusicDebug) return;
+            showSimpleDialog(
+                    path,
+                    GameDialogType.ERROR_DIALOG,
+                    ErrorType.SOUND_ERROR
+            );
+        });
+
         Log.i(TAG, "Game created");
     }
 
@@ -284,6 +292,7 @@ public class GameActivity extends AppCompatActivity {
         var gameFileUri = Uri.parse(intent.getStringExtra("gameFileUri"));
         var gameFile = DocumentFileCompat.fromUri(this , gameFileUri);
 
+        audioPlayer.setCurGameDir(gameDir);
         gameViewModel.setGameDirUri(gameDirUri);
         libQpProxy.runGame(gameId, gameTitle, gameDir, gameFile);
     }
@@ -407,9 +416,6 @@ public class GameActivity extends AppCompatActivity {
     public void showSimpleDialog(@NonNull String inputString ,
                                  @NonNull GameDialogType dialogType ,
                                  @Nullable ErrorType errorType) {
-        if (this.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.DESTROYED)) {
-            return;
-        }
         if (!isMainThread()) {
             runOnUiThread(() -> showSimpleDialog(inputString , dialogType , errorType));
         } else {

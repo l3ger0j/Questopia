@@ -11,13 +11,13 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
-import org.qp.android.QuestPlayerApplication;
-import org.qp.android.helpers.ErrorType;
-import org.qp.android.ui.dialogs.GameDialogType;
-import org.qp.android.ui.game.GameActivity;
+import androidx.documentfile.provider.DocumentFile;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -31,19 +31,25 @@ public class AudioPlayer {
     private volatile boolean isAudioServiceInit;
     private boolean soundEnabled;
     private boolean isPaused = false;
-    private Context context;
+    private final Context context;
+    private DocumentFile curGameDir;
 
-    private QuestPlayerApplication getApplication() {
-        return (QuestPlayerApplication) context.getApplicationContext();
+    private final MutableLiveData<String> isThrowError = new MutableLiveData<>();
+
+    public LiveData<String> getIsThrowError() {
+        return isThrowError;
     }
 
-    private GameActivity getActivity() {
-        return (GameActivity) context;
+    public void setCurGameDir(DocumentFile curGameDir) {
+        this.curGameDir = curGameDir;
     }
 
-    public void start(Context context) {
-        throwIfNotMainThread();
+    public AudioPlayer(Context context) {
         this.context = context;
+    }
+
+    public void start() {
+        throwIfNotMainThread();
         audioService = Executors.newSingleThreadExecutor();
         audioService.submit(() -> {
             Looper.prepare();
@@ -113,20 +119,15 @@ public class AudioPlayer {
         }
 
         var normPath = normalizeContentPath(sound.path);
-        var application = (QuestPlayerApplication) context.getApplicationContext();
-        var curGameDir = application.getCurrentGameDir();
         var soundFile = fromFullPath(normPath , curGameDir);
 
         if (soundFile == null) {
-            var controller = getActivity().getSettingsController();
-            if (controller != null && controller.isUseMusicDebug) {
-                getActivity().showSimpleDialog(
-                        normPath,
-                        GameDialogType.ERROR_DIALOG,
-                        ErrorType.SOUND_ERROR
-                );
-            } else {
-                Log.e(TAG,"Sound file not found: " + normPath);
+            final var latch = new CountDownLatch(1);
+            isThrowError.postValue(normPath);
+            try {
+                latch.await();
+            } catch (InterruptedException ex) {
+                Log.e(TAG,"An error occurred while waiting", ex);
             }
             return;
         }

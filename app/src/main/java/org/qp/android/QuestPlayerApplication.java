@@ -22,7 +22,7 @@ public class QuestPlayerApplication extends Application {
 
     private final ImageProvider imageProvider = new ImageProvider();
     private final HtmlProcessor htmlProcessor = new HtmlProcessor(imageProvider);
-    private final AudioPlayer audioPlayer = new AudioPlayer();
+    private final AudioPlayer audioPlayer = new AudioPlayer(this);
     private final LibQpProxyImpl libQspProxy = new LibQpProxyImpl(this , htmlProcessor , audioPlayer);
 
     private DocumentFile currentGameDir;
