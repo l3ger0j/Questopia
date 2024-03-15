@@ -391,12 +391,12 @@ public class StockViewModel extends AndroidViewModel {
         editBinding.setStockVM(this);
 
         getCurrGameData().ifPresent(gameData -> {
-            if (gameData.icon.isEmpty()) {
-                Picasso.get()
-                        .load(gameData.icon)
-                        .fit()
-                        .into(editBinding.imageView);
-            }
+            var pathIcon = gameData.icon;
+            if (pathIcon == null || pathIcon.isEmpty()) return;
+            Picasso.get()
+                    .load(pathIcon)
+                    .fit()
+                    .into(editBinding.imageView);
         });
 
         editBinding.buttonSelectPath.setOnClickListener(this::sendIntent);
