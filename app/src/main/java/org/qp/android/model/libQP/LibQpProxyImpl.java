@@ -216,12 +216,11 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
 
     public synchronized void start() {
         libQspThread = new Thread(() -> {
+            exitLoopIfExist();
             while (!Thread.currentThread().isInterrupted()) {
                 try {
                     nativeMethods.QSPInit();
-                    if (Looper.myLooper() == null) {
-                        Looper.prepare();
-                    }
+                    Looper.prepare();
                     libQspHandler = new Handler();
                     libQspThreadInit = true;
                     Looper.loop();
@@ -248,6 +247,18 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
             Log.w(TAG,"libqsp thread has been started, but not initialized");
         }
         libQspThread.interrupt();
+    }
+
+    private void exitLoopIfExist() {
+        var handler = libQspHandler;
+        if (handler != null) {
+            handler.getLooper().quitSafely();
+        } else {
+            var mLooper = Looper.myLooper();
+            if (mLooper != null) {
+                mLooper.quitSafely();
+            }
+        }
     }
 
     public void enableDebugMode (boolean isDebug) {
