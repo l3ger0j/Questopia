@@ -418,6 +418,7 @@ public class GameActivity extends AppCompatActivity {
     public void showSimpleDialog(@NonNull String inputString ,
                                  @NonNull GameDialogType dialogType ,
                                  @Nullable ErrorType errorType) {
+        if (isFinishing()) return;
         if (!isMainThread()) {
             runOnUiThread(() -> showSimpleDialog(inputString , dialogType , errorType));
         } else {
