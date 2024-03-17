@@ -23,12 +23,16 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.anggrayudi.storage.file.DocumentFileCompat;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.squareup.picasso.Picasso;
 
 import org.jetbrains.annotations.NotNull;
 import org.qp.android.QuestPlayerApplication;
 import org.qp.android.R;
+import org.qp.android.data.db.Game;
+import org.qp.android.data.db.GameDao;
+import org.qp.android.data.db.GameDatabase;
 import org.qp.android.databinding.DialogEditBinding;
 import org.qp.android.dto.stock.GameData;
 import org.qp.android.helpers.bus.EventEmitter;
@@ -50,6 +54,11 @@ import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.lifecycle.HiltViewModel;
+
+@HiltViewModel
 public class StockViewModel extends AndroidViewModel {
 
     private final String TAG = this.getClass().getSimpleName();
@@ -73,6 +82,9 @@ public class StockViewModel extends AndroidViewModel {
     private GameData currGameData;
     private DialogEditBinding editBinding;
     private SettingsController controller;
+
+    @Inject private GameDatabase gameDatabase;
+    @Inject private GameDao gameDao;
 
     public EventEmitter emitter = new EventEmitter();
 

@@ -52,6 +52,9 @@ import com.google.android.material.floatingactionbutton.ExtendedFloatingActionBu
 
 import org.qp.android.QuestPlayerApplication;
 import org.qp.android.R;
+import org.qp.android.data.db.Game;
+import org.qp.android.data.db.GameDao;
+import org.qp.android.data.db.GameDatabase;
 import org.qp.android.databinding.ActivityStockBinding;
 import org.qp.android.dto.stock.GameData;
 import org.qp.android.helpers.utils.ViewUtil;
@@ -69,6 +72,11 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class StockActivity extends AppCompatActivity {
 
     private static final int POST_NOTIFICATION = 203;
@@ -78,6 +86,9 @@ public class StockActivity extends AppCompatActivity {
     private StockViewModel stockViewModel;
 
     private NavController navController;
+
+    @Inject private GameDatabase gameDatabase;
+    @Inject private GameDao gameDao;
 
     private ActionMode actionMode;
     protected ActivityStockBinding activityStockBinding;

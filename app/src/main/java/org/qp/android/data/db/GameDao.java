@@ -15,6 +15,11 @@ public interface GameDao {
     @Query("SELECT * FROM game")
     List<Game> getAll();
 
+    @Query("SELECT * FROM game ORDER BY " +
+            "CASE WHEN :isAsc = 1 THEN id END ASC, " +
+            "CASE WHEN :isAsc = 2 THEN id END DESC ")
+    List<Game> getAllSortedByName(int isAsc);
+
     @Query("SELECT * FROM game WHERE id LIKE :name LIMIT 1")
     Game getByName(String name);
 
