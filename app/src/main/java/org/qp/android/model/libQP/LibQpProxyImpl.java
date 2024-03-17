@@ -83,17 +83,16 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
             Log.w(TAG ,"Lib thread has been started, but not initialized!");
             return;
         }
-        var handler = libQspHandler;
-        if (handler != null) {
-            handler.post(() -> {
-                libQspLock.lock();
-                try {
-                    runnable.run();
-                } finally {
-                    libQspLock.unlock();
-                }
-            });
-        }
+        var mLibHandler = libQspHandler;
+        if (mLibHandler == null) return;
+        mLibHandler.post(() -> {
+            libQspLock.lock();
+            try {
+                runnable.run();
+            } finally {
+                libQspLock.unlock();
+            }
+        });
     }
 
     private boolean loadGameWorld() {
