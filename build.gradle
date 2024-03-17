@@ -1,10 +1,15 @@
 buildscript {
+    ext {
+        hilt_version = '2.51'
+        room_version = '2.6.1'
+    }
     repositories {
         google()
         mavenCentral()
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:8.2.2'
+        classpath "com.google.dagger:hilt-android-gradle-plugin:$hilt_version"
     }
 }
 
