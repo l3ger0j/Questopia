@@ -166,6 +166,12 @@ public final class FileUtil {
         return findDir;
     }
 
+    public static DocumentFile findFileFromRelPath(Context context ,
+                                                   DocumentFile parentDir ,
+                                                   final String path) {
+        return DocumentFileUtils.child(parentDir , context , path);
+    }
+
     public static DocumentFile fromRelPath(@NonNull String relPath ,
                                            @NonNull DocumentFile rootDir) {
         var pathToFileSegments = relPath.split("/");
