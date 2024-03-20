@@ -30,6 +30,15 @@ android {
         }
     }
 
+    signingConfigs {
+        release {
+            storeFile file("keystore/github_keystore")
+            storePassword System.getenv('KEYSTORE_PASSWORD')
+            keyAlias System.getenv('RELEASE_SIGN_KEY_ALIAS')
+            keyPassword System.getenv('RELEASE_SIGN_KEY_PASSWORD')
+        }
+    }
+
     buildTypes {
         debug {
             minifyEnabled true
@@ -37,6 +46,7 @@ android {
             buildConfigField "java.util.Date", "BUILD_TIME", "new java.util.Date(" + System.currentTimeMillis() + "L)"
         }
         release {
+            signingConfig signingConfigs.release
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             buildConfigField "java.util.Date", "BUILD_TIME", "new java.util.Date(" + System.currentTimeMillis() + "L)"
