@@ -10,6 +10,7 @@ import android.util.Base64;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.documentfile.provider.DocumentFile;
 
 import org.jsoup.Jsoup;
@@ -31,6 +32,14 @@ public class HtmlProcessor {
     private SettingsController controller;
     private DocumentFile curGameDir;
 
+    @Nullable
+    public String getSrcDir(String html) {
+        var document = Jsoup.parse(html);
+        var imageElement = document.select("img").first();
+        if (imageElement == null) return null;
+        return imageElement.attr("src");
+    }
+
     public HtmlProcessor setController(SettingsController controller) {
         this.controller = controller;
         return this;
@@ -38,6 +47,10 @@ public class HtmlProcessor {
 
     public void setCurGameDir(DocumentFile curGameDir) {
         this.curGameDir = curGameDir;
+    }
+
+    public boolean hasHTMLTags(String text){
+        return pattern.matcher(text).find();
     }
 
     public HtmlProcessor(ImageProvider imageProvider) {
@@ -204,17 +217,4 @@ public class HtmlProcessor {
         return result.toString();
     }
 
-    public String getSrcDir(String html) {
-        var document = Jsoup.parse(html);
-        var imageElement = document.select("img").first();
-        String srcValue = null;
-        if (imageElement != null) {
-            srcValue = imageElement.attr("src");
-        }
-        return srcValue;
-    }
-
-    public boolean hasHTMLTags(String text){
-        return pattern.matcher(text).find();
-    }
 }
