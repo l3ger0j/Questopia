@@ -194,6 +194,7 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
 
             if (objectResult.name().contains("<img")) {
                 if (htmlProcessor.hasHTMLTags(objectResult.name())) {
+                    // TODO NEED TO REFACTORED!!!
                     var tempPath = htmlProcessor.getSrcDir(objectResult.name());
                     var fileFromPath = curGameDir.findFile(tempPath);
                     object.pathToImage = String.valueOf(fileFromPath);
