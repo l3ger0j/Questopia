@@ -5,7 +5,7 @@ import static org.qp.android.helpers.utils.Base64Util.isBase64;
 import static org.qp.android.helpers.utils.ColorUtil.convertRGBAToBGRA;
 import static org.qp.android.helpers.utils.ColorUtil.getHexColor;
 import static org.qp.android.helpers.utils.FileUtil.documentWrap;
-import static org.qp.android.helpers.utils.FileUtil.fromRelPath;
+import static org.qp.android.helpers.utils.FileUtil.findFileFromRelPath;
 import static org.qp.android.helpers.utils.ThreadUtil.assertNonUiThread;
 import static org.qp.android.helpers.utils.ViewUtil.getFontStyle;
 import static org.qp.android.ui.game.GameActivity.LOAD;
@@ -29,6 +29,7 @@ import android.webkit.WebViewClient;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.databinding.ObservableBoolean;
+import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
@@ -205,12 +206,17 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
                 getHtmlProcessor().convertQspStringToWebViewHtml(str);
     }
 
-    public Uri getImageUri(String src) {
-        var relPath = Uri.decode(src.substring(8));
-        var app = (QuestPlayerApplication) getApplication();
-        var curGameDir = app.getCurrentGameDir();
-        var imageFile = fromRelPath(relPath , curGameDir);
-        return imageFile.getUri();
+    public Uri getImageUriFromPath(String src) {
+        var relPath = Uri.parse(src).getPath();
+        if (relPath == null) return Uri.EMPTY;
+        if (getCurGameDir().isPresent()) {
+            var imageFile = findFileFromRelPath(
+                    getApplication() , getCurGameDir().get() , relPath
+            );
+            return imageFile.getUri();
+        } else {
+            return Uri.EMPTY;
+        }
     }
 
     public LiveData<String> getMainDescObserver() {
@@ -233,6 +239,11 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
             refreshActionsRecycler();
         }
         return actionLiveData;
+    }
+
+    private Optional<DocumentFile> getCurGameDir() {
+        if (gameDirUri == null) return Optional.empty();
+        return Optional.ofNullable(DocumentFileCompat.fromUri(getApplication() , gameDirUri));
     }
 
     @NonNull
@@ -438,7 +449,9 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         @Override
         public boolean shouldOverrideUrlLoading(WebView view , WebResourceRequest request) {
             final var uri = request.getUrl();
+            if (uri.getScheme() == null) return false;
             final var uriDecode = Uri.decode(uri.toString());
+
             switch (uri.getScheme()) {
                 case "exec" -> {
                     var tempUriDecode = uriDecode.substring(5);
@@ -469,6 +482,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
                     }
                 }
             }
+
             return true;
         }
 
@@ -476,26 +490,27 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         @Override
         public WebResourceResponse shouldInterceptRequest(WebView view ,
                                                           @NonNull WebResourceRequest request) {
-            var uri = request.getUrl();
-            var rootDir = DocumentFileCompat.fromUri(getApplication() , gameDirUri);
-            if (rootDir != null && uri.getScheme() != null) {
-                if (uri.getScheme().startsWith("file")) {
-                    try {
-                        if (uri.getPath() == null) throw new NullPointerException();
-                        var imageFile = fromRelPath(uri.getPath() , rootDir);
-                        var extension = MimeTypeMap.getSingleton().getMimeTypeFromExtension(documentWrap(imageFile).getExtension());
-                        var in = getApplication().getContentResolver().openInputStream(imageFile.getUri());
-                        return new WebResourceResponse(extension , "utf-8" , in);
-                    } catch (FileNotFoundException | NullPointerException ex) {
-                        if (getSettingsController().isUseImageDebug) {
-                            showErrorDialog(uri.getPath() , ErrorType.IMAGE_ERROR);
-                        }
-                        return null;
+            if (getCurGameDir().isEmpty()) return null;
+            final var uri = request.getUrl();
+            if (uri.getScheme() == null) return null;
+            final var rootDir = getCurGameDir().get();
+
+            if (uri.getScheme().startsWith("file")) {
+                try {
+                    if (uri.getPath() == null) throw new NullPointerException();
+                    var imageFile = findFileFromRelPath(getApplication() , rootDir , uri.getPath());
+                    var extension = MimeTypeMap.getSingleton().getMimeTypeFromExtension(documentWrap(imageFile).getExtension());
+                    var in = getApplication().getContentResolver().openInputStream(imageFile.getUri());
+                    return new WebResourceResponse(extension , "utf-8" , in);
+                } catch (FileNotFoundException | NullPointerException ex) {
+                    if (getSettingsController().isUseImageDebug) {
+                        showErrorDialog(uri.getPath() , ErrorType.IMAGE_ERROR);
                     }
+                    return null;
                 }
-                return super.shouldInterceptRequest(view , request);
             }
-            return null;
+
+            return super.shouldInterceptRequest(view , request);
         }
     }
 
