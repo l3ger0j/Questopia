@@ -1,5 +1,6 @@
 package org.qp.android.ui.game;
 
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -70,7 +71,9 @@ public class GameMainFragment extends Fragment {
         mainDescView.addJavascriptInterface(new Object() {
             @JavascriptInterface
             public void onClickImage(String src) {
-                var imageUri = viewModel.getImageUri(src);
+                if (src == null) return;
+                var imageUri = viewModel.getImageUriFromPath(src);
+                if (imageUri.equals(Uri.EMPTY)) return;
                 viewModel.showPicture(String.valueOf(imageUri));
             }
         } , "img");
