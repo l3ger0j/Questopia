@@ -1,8 +1,8 @@
 package org.qp.android.ui.stock;
 
 import static androidx.recyclerview.widget.RecyclerView.NO_POSITION;
-import static org.qp.android.helpers.utils.FileUtil.deleteDirectory;
 import static org.qp.android.helpers.utils.FileUtil.documentWrap;
+import static org.qp.android.helpers.utils.FileUtil.forceDelFile;
 import static org.qp.android.helpers.utils.JsonUtil.jsonToObject;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_IMAGE_FILE;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_MOD_FILE;
@@ -418,7 +418,7 @@ public class StockActivity extends AppCompatActivity {
                                             (unused , unused2) -> null ,
                                             service
                                     )
-                                    .thenRunAsync(() -> deleteDirectory(data.gameDir) , service)
+                                    .thenRunAsync(() -> forceDelFile(getApplication() , data.gameDir) , service)
                                     .thenRunAsync(() -> dropPersistable(data.gameDir.getUri()) , service)
                                     .thenRun(() -> stockViewModel.refreshGameData())
                                     .exceptionally(ex -> {

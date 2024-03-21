@@ -253,6 +253,11 @@ public final class FileUtil {
         }
     }
 
+    public static void forceDelFile(Context context ,
+                                    @NonNull DocumentFile documentFile) {
+        DocumentFileUtils.forceDelete(documentFile , context);
+    }
+
     @NonNull
     public static String formatFileSize(long size ,
                                         int numCountInfo) {
