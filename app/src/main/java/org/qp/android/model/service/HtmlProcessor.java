@@ -83,7 +83,7 @@ public class HtmlProcessor {
 
     public String getCleanHtmlPageAndImage(String dirtyHtml) {
         var document = Jsoup.parse(dirtyHtml);
-        document.outputSettings().prettyPrint(true);
+        document.outputSettings().prettyPrint(false);
         var body = document.body();
         processHTMLImages(body);
         processHTMLVideos(body);
@@ -92,7 +92,7 @@ public class HtmlProcessor {
 
     public String getCleanHtmlPageNotImage(String dirtyHtml) {
         var document = Jsoup.parse(dirtyHtml);
-        document.outputSettings().prettyPrint(true);
+        document.outputSettings().prettyPrint(false);
         var body = document.body();
         body.select("img").remove();
         body.select("video").remove();
