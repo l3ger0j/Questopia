@@ -57,6 +57,10 @@ public class SettingsMainFragment extends PreferenceFragmentCompat {
                     Navigation.findNavController(requireView()).navigate(R.id.settingImageFragment);
                     return true;
                 }
+                case "soundPref" -> {
+                    Navigation.findNavController(requireView()).navigate(R.id.settingSoundFragment);
+                    return true;
+                }
                 case "showExtensionMenu" -> {
                     Navigation.findNavController(requireView()).navigate(R.id.pluginFragment);
                     return true;
@@ -84,6 +88,10 @@ public class SettingsMainFragment extends PreferenceFragmentCompat {
         var imagePref = findPreference("imagePref");
         if (imagePref != null)
             imagePref.setOnPreferenceClickListener(listener);
+
+        var soundPref = findPreference("soundPref");
+        if (soundPref != null)
+            soundPref.setOnPreferenceClickListener(listener);
 
         var pluginPref = findPreference("showExtensionMenu");
         if (pluginPref != null)
