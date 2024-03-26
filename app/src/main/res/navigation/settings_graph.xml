@@ -28,5 +28,9 @@
         android:id="@+id/settingImageFragment"
         android:name="org.qp.android.ui.settings.SettingImageFragment"
         android:label="SettingImageFragment" />
+    <fragment
+        android:id="@+id/settingSoundFragment"
+        android:name="org.qp.android.ui.settings.SettingSoundFragment"
+        android:label="SettingSoundFragment" />
 
 </navigation>
