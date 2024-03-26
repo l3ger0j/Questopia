@@ -22,7 +22,7 @@ import org.qp.android.ui.dialogs.SettingsDialogFrag;
 
 import java.util.Optional;
 
-public class SettingsFragment extends PreferenceFragmentCompat {
+public class SettingsMainFragment extends PreferenceFragmentCompat {
 
     private SettingsViewModel viewModel;
 

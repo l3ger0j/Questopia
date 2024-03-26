@@ -6,11 +6,11 @@
     app:startDestination="@id/settingsFragment">
     <fragment
         android:id="@+id/settingsFragment"
-        android:name="org.qp.android.ui.settings.SettingsFragment"
+        android:name="org.qp.android.ui.settings.SettingsMainFragment"
         android:label="SettingsFragment" />
     <fragment
         android:id="@+id/pluginFragment"
-        android:name="org.qp.android.ui.settings.SettingsPluginFragment"
+        android:name="org.qp.android.ui.settings.SettingPluginFragment"
         android:label="PluginFragment" />
     <fragment
         android:id="@+id/newsFragment"
