@@ -24,11 +24,6 @@
         android:key="actsHeight"
         android:title="@string/actsHeightTitle" />
     <SwitchPreferenceCompat
-        android:defaultValue="true"
-        android:key="sound"
-        android:icon="@drawable/baseline_music_note_24"
-        android:title="@string/soundTitle" />
-    <SwitchPreferenceCompat
         android:icon="@drawable/baseline_visibility_24"
         android:defaultValue="false"
         android:key="separator"
@@ -44,11 +39,5 @@
         android:key="autoscroll"
         android:icon="@drawable/baseline_move_down_24"
         android:title="@string/autoscrollTitle" />
-    <SwitchPreferenceCompat
-        android:icon="@drawable/baseline_audio_file_24"
-        android:defaultValue="false"
-        android:key="debugMusic"
-        android:summary="@string/musicDebugSum"
-        android:title="@string/musicDebugTitle" />
 
 </PreferenceScreen>

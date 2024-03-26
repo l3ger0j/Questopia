@@ -89,13 +89,11 @@
         <string name="generalCatTitle">Basic</string>
         <string name="langTitle">Application language</string>
         <string name="binPrefTitle">Binary prefixes</string>
-        <string name="soundTitle">Play sound</string>
         <string name="actsHeightTitle">Actions list height</string>
         <string name="separatorTitle">Visibility of the separator</string>
         <string name="separatorSum">Between the list of actions and the main description</string>
         <string name="immersiveModeTitle">Immersive mode</string>
         <string name="autoscrollTitle">Autoscroll</string>
-        <string name="musicDebugTitle">Sound path debugger</string>
         <string name="musicDebugSum">A dialog that reports an error if the path to the sound is incorrect</string>
         <!-- Text section -->
         <string name="textCatTitle">Text</string>
@@ -128,6 +126,10 @@
         <string name="fullScreenImageSum">Clicking on the image in the main description opens it in the dialog</string>
         <string name="imageDebugTitle">Image path debugger</string>
         <string name="imageDebugSum">A dialog that reports an error if the path to the image is incorrect</string>
+        <!-- Sound section -->
+        <string name="soundCatTitle">Audio</string>
+        <string name="pref_audio_play">Play audio in the game</string>
+        <string name="pref_audio_debug">Audio path debugger</string>
         <!-- Switch section -->
         <string name="filePicker">File Picker Dialog (alpha)</string>
         <!-- Extra section -->
