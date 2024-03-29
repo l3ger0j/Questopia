@@ -297,6 +297,10 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void setActiveTab(int tab) {
+        if (activeTab == tab) {
+            return;
+        }
+
         switch (tab) {
             case TAB_MAIN_DESC_AND_ACTIONS -> {
                 navController.navigate(R.id.gameMainFragment);
