@@ -4,7 +4,7 @@ import androidx.annotation.NonNull;
 
 public final class ColorUtil {
 
-    public static int convertRGBAToBGRA(int color) {
+    public static int convertRGBAtoBGRA(int color) {
         return 0xff000000 |
                 ((color & 0x000000ff) << 16) |
                 (color & 0x0000ff00) |

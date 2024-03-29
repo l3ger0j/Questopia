@@ -8,7 +8,6 @@ import androidx.documentfile.provider.DocumentFile;
 
 import java.io.File;
 import java.util.Locale;
-import java.util.Optional;
 
 public final class DirUtil {
 
@@ -70,12 +69,11 @@ public final class DirUtil {
         }
 
         for (var file : dir.listFiles()) {
-            var dirName = Optional.ofNullable(file.getName());
-            if (dirName.isPresent()) {
-                var lcName = dirName.get().toLowerCase(Locale.ROOT);
-                if (lcName.endsWith(".qsp") || lcName.endsWith(".gam"))
-                    return true;
-            }
+            var dirName = file.getName();
+            if (dirName == null) return false;
+            var lcName = dirName.toLowerCase(Locale.ROOT);
+            if (lcName.endsWith(".qsp") || lcName.endsWith(".gam"))
+                return true;
         }
 
         return false;

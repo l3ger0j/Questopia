@@ -230,29 +230,6 @@ public final class FileUtil {
         return result.toString();
     }
 
-    public static void deleteDirectory(@NonNull DocumentFile delDir) {
-        try {
-            for (var file : delDir.listFiles()) {
-                if (file.isDirectory()) {
-                    deleteDirectory(file);
-                } else {
-                    if (file.delete()) {
-                        Log.i(TAG , "File delete");
-                    } else {
-                        Log.e(TAG , "File not delete");
-                    }
-                }
-            }
-            if (delDir.delete()) {
-                Log.i(TAG , "Directory delete");
-            } else {
-                Log.e(TAG , "Directory not delete");
-            }
-        } catch (UnsupportedOperationException e) {
-            Log.e(TAG , "Error: " , e);
-        }
-    }
-
     public static void forceDelFile(Context context ,
                                     @NonNull DocumentFile documentFile) {
         DocumentFileUtils.forceDelete(documentFile , context);

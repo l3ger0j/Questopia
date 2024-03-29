@@ -2,10 +2,10 @@ package org.qp.android.ui.game;
 
 import static org.qp.android.helpers.utils.Base64Util.decodeBase64;
 import static org.qp.android.helpers.utils.Base64Util.isBase64;
-import static org.qp.android.helpers.utils.ColorUtil.convertRGBAToBGRA;
+import static org.qp.android.helpers.utils.ColorUtil.convertRGBAtoBGRA;
 import static org.qp.android.helpers.utils.ColorUtil.getHexColor;
-import static org.qp.android.helpers.utils.FileUtil.documentWrap;
 import static org.qp.android.helpers.utils.FileUtil.findFileFromRelPath;
+import static org.qp.android.helpers.utils.PathUtil.getExtension;
 import static org.qp.android.helpers.utils.ThreadUtil.assertNonUiThread;
 import static org.qp.android.helpers.utils.ViewUtil.getFontStyle;
 import static org.qp.android.ui.game.GameActivity.LOAD;
@@ -169,7 +169,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         if (libState == null) return Color.WHITE;
         var config = libState.interfaceConfig;
         if (getSettingsController().isUseGameTextColor && config.fontColor != 0) {
-            return convertRGBAToBGRA(config.fontColor);
+            return convertRGBAtoBGRA(config.fontColor);
         } else {
             return getSettingsController().textColor;
         }
@@ -178,7 +178,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
     public int getBackgroundColor() {
         var config = libQpProxy.getGameState().interfaceConfig;
         if (getSettingsController().isUseGameBackgroundColor && config.backColor != 0) {
-            return convertRGBAToBGRA(config.backColor);
+            return convertRGBAtoBGRA(config.backColor);
         } else {
             return getSettingsController().backColor;
         }
@@ -187,7 +187,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
     public int getLinkColor() {
         var config = libQpProxy.getGameState().interfaceConfig;
         if (getSettingsController().isUseGameLinkColor && config.linkColor != 0) {
-            return convertRGBAToBGRA(config.linkColor);
+            return convertRGBAtoBGRA(config.linkColor);
         } else {
             return getSettingsController().linkColor;
         }
@@ -499,7 +499,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
                 try {
                     if (uri.getPath() == null) throw new NullPointerException();
                     var imageFile = findFileFromRelPath(getApplication() , rootDir , uri.getPath());
-                    var extension = MimeTypeMap.getSingleton().getMimeTypeFromExtension(documentWrap(imageFile).getExtension());
+                    var extension = MimeTypeMap.getSingleton().getMimeTypeFromExtension(getExtension(imageFile));
                     var in = getApplication().getContentResolver().openInputStream(imageFile.getUri());
                     return new WebResourceResponse(extension , "utf-8" , in);
                 } catch (FileNotFoundException | NullPointerException ex) {
