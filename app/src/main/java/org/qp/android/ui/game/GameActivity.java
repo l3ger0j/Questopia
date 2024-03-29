@@ -463,6 +463,7 @@ public class GameActivity extends AppCompatActivity {
 
     public void showMessageDialog (@Nullable String inputString ,
                                    @NonNull CountDownLatch latch) {
+        if (isFinishing()) return;
         if (!isMainThread()) {
             runOnUiThread(() -> showMessageDialog(inputString, latch));
         } else {
@@ -492,6 +493,7 @@ public class GameActivity extends AppCompatActivity {
 
     public void showInputDialog (@Nullable String inputString ,
                                  @NonNull ArrayBlockingQueue<String> inputQueue) {
+        if (isFinishing()) return;
         if (!isMainThread()) {
             runOnUiThread(() -> showInputDialog(inputString, inputQueue));
         } else {
@@ -521,6 +523,7 @@ public class GameActivity extends AppCompatActivity {
 
     public void showExecutorDialog (@Nullable String inputString ,
                                     @NonNull ArrayBlockingQueue<String> inputQueue) {
+        if (isFinishing()) return;
         if (!isMainThread()) {
             runOnUiThread(() -> showExecutorDialog(inputString, inputQueue));
         } else {
@@ -550,6 +553,7 @@ public class GameActivity extends AppCompatActivity {
 
     public void showMenuDialog (@NonNull ArrayList<String> items ,
                                 @NonNull ArrayBlockingQueue<Integer> resultQueue) {
+        if (isFinishing()) return;
         if (!isMainThread()) {
             runOnUiThread(() -> showMenuDialog(items, resultQueue));
         } else {
