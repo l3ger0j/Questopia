@@ -16,7 +16,7 @@ import com.squareup.picasso.Picasso;
 
 import org.qp.android.R;
 import org.qp.android.databinding.ListGameItemBinding;
-import org.qp.android.model.libQP.QpListItem;
+import org.qp.android.dto.lib.LibListItem;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -25,7 +25,7 @@ import java.util.Objects;
 
 public class GameItemRecycler extends RecyclerView.Adapter<GameItemRecycler.ViewHolder> {
 
-    private final AsyncListDiffer<QpListItem> differ =
+    private final AsyncListDiffer<LibListItem> differ =
             new AsyncListDiffer<>(this , DIFF_CALLBACK);
 
     private Typeface typeface;
@@ -54,11 +54,11 @@ public class GameItemRecycler extends RecyclerView.Adapter<GameItemRecycler.View
         this.linkTextColor = linkTextColor;
     }
 
-    public QpListItem getItem(int position) {
+    public LibListItem getItem(int position) {
         return differ.getCurrentList().get(position);
     }
 
-    public List<QpListItem> getGameData() {
+    public List<LibListItem> getGameData() {
         return differ.getCurrentList();
     }
 
@@ -67,20 +67,20 @@ public class GameItemRecycler extends RecyclerView.Adapter<GameItemRecycler.View
         return differ.getCurrentList().size();
     }
 
-    private static final DiffUtil.ItemCallback<QpListItem> DIFF_CALLBACK =
+    private static final DiffUtil.ItemCallback<LibListItem> DIFF_CALLBACK =
             new DiffUtil.ItemCallback<>() {
                 @Override
-                public boolean areItemsTheSame(@NonNull QpListItem oldItem , @NonNull QpListItem newItem) {
+                public boolean areItemsTheSame(@NonNull LibListItem oldItem , @NonNull LibListItem newItem) {
                     return Objects.equals(oldItem.pathToImage , newItem.pathToImage) && Objects.equals(oldItem.text , newItem.text);
                 }
 
                 @Override
-                public boolean areContentsTheSame(@NonNull QpListItem oldItem , @NonNull QpListItem newItem) {
+                public boolean areContentsTheSame(@NonNull LibListItem oldItem , @NonNull LibListItem newItem) {
                     return oldItem.equals(newItem);
                 }
             };
 
-    public void submitList(ArrayList<QpListItem> gameData){
+    public void submitList(ArrayList<LibListItem> gameData){
         differ.submitList(gameData);
     }
 
@@ -127,7 +127,7 @@ public class GameItemRecycler extends RecyclerView.Adapter<GameItemRecycler.View
             this.listGameItemBinding = binding;
         }
 
-        public void listItemActionObjectBinding(QpListItem qpListItem) {
+        public void listItemActionObjectBinding(LibListItem qpListItem) {
             listGameItemBinding.setQpListItem(qpListItem);
             listGameItemBinding.executePendingBindings();
         }

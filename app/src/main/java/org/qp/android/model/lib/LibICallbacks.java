@@ -1,9 +1,10 @@
-package org.qp.android.model.libQP;
+package org.qp.android.model.lib;
 
 /**
  * Methods of this interface are called from native code. See <code>android_callbacks.c</code>.
  */
-public interface LibQpCallbacks {
+public interface LibICallbacks {
+
     void RefreshInt();
     void ShowPicture(String path);
     void SetTimer(int msecs);
@@ -22,4 +23,5 @@ public interface LibQpCallbacks {
     void ShowWindow(int type, boolean isShow);
     byte[] GetFileContents(String path);
     void ChangeQuestPath(String path);
+
 }

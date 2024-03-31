@@ -1,4 +1,4 @@
-package org.qp.android.model.libQP;
+package org.qp.android.model.lib;
 
 import android.net.Uri;
 
@@ -6,7 +6,7 @@ import androidx.documentfile.provider.DocumentFile;
 
 import org.qp.android.ui.game.GameInterface;
 
-public interface LibQpProxy {
+public interface LibIProxy {
     /**
      * Starts the library thread.
      */
@@ -39,7 +39,7 @@ public interface LibQpProxy {
      */
     void executeCounter();
 
-    GameState getGameState();
+    LibGameState getGameState();
 
     void setGameInterface(GameInterface view);
 }

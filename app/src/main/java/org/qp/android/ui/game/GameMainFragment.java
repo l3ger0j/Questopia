@@ -44,8 +44,7 @@ public class GameMainFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater ,
                              @Nullable ViewGroup container ,
                              @Nullable Bundle savedInstanceState) {
-        org.qp.android.databinding.FragmentGameMainBinding gameMainBinding =
-                FragmentGameMainBinding.inflate(getLayoutInflater());
+        var gameMainBinding = FragmentGameMainBinding.inflate(getLayoutInflater());
         viewModel = new ViewModelProvider(requireActivity()).get(GameViewModel.class);
         gameMainBinding.setGameViewModel(viewModel);
 
@@ -131,7 +130,7 @@ public class GameMainFragment extends Fragment {
                 new RecyclerItemClickListener.OnItemClickListener() {
                     @Override
                     public void onItemClick(View view , int position) {
-                        viewModel.getLibQspProxy().onActionClicked(position);
+                        viewModel.onActionClicked(position);
                     }
 
                     @Override

@@ -1,11 +1,13 @@
-package org.qp.android.model.libQP;
+package org.qp.android.model.lib;
 
 import androidx.documentfile.provider.DocumentFile;
 
+import org.qp.android.dto.lib.LibListItem;
+import org.qp.android.dto.lib.LibMenuItem;
+
 import java.util.ArrayList;
 
-public class GameState {
-    public final InterfaceConfiguration interfaceConfig = new InterfaceConfiguration();
+public class LibGameState {
 
     public boolean gameRunning;
     public String gameId;
@@ -14,9 +16,11 @@ public class GameState {
     public DocumentFile gameFile;
     public String mainDesc = "";
     public String varsDesc = "";
-    public ArrayList<QpListItem> actions = new ArrayList<>();
-    public ArrayList<QpListItem> objects = new ArrayList<>();
-    public ArrayList<QpMenuItem> menuItems = new ArrayList<>();
+    public final LibIConfig interfaceConfig = new LibIConfig();
+    public ArrayList<LibListItem> actionsList = new ArrayList<>();
+    public ArrayList<LibListItem> objectsList = new ArrayList<>();
+    public ArrayList<LibMenuItem> menuItemsList = new ArrayList<>();
+
 
     public void reset() {
         interfaceConfig.reset();
@@ -27,8 +31,9 @@ public class GameState {
         gameFile = null;
         mainDesc = "";
         varsDesc = "";
-        actions = new ArrayList<>();
-        objects = new ArrayList<>();
-        menuItems = new ArrayList<>();
+        actionsList = new ArrayList<>();
+        objectsList = new ArrayList<>();
+        menuItemsList = new ArrayList<>();
     }
+
 }

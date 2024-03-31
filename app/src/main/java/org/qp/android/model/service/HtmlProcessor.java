@@ -45,8 +45,9 @@ public class HtmlProcessor {
         return this;
     }
 
-    public void setCurGameDir(DocumentFile curGameDir) {
+    public HtmlProcessor setCurGameDir(DocumentFile curGameDir) {
         this.curGameDir = curGameDir;
+        return this;
     }
 
     public boolean hasHTMLTags(String text){

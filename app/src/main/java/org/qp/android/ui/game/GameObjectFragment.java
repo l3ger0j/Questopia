@@ -59,7 +59,7 @@ public class GameObjectFragment extends Fragment {
                 new RecyclerItemClickListener.OnItemClickListener() {
                     @Override
                     public void onItemClick(View view , int position) {
-                        viewModel.getLibQspProxy().onObjectSelected(position);
+                        viewModel.onObjectClicked(position);
                     }
 
                     @Override

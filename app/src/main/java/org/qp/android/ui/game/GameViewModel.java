@@ -4,6 +4,7 @@ import static org.qp.android.helpers.utils.Base64Util.decodeBase64;
 import static org.qp.android.helpers.utils.Base64Util.isBase64;
 import static org.qp.android.helpers.utils.ColorUtil.convertRGBAtoBGRA;
 import static org.qp.android.helpers.utils.ColorUtil.getHexColor;
+import static org.qp.android.helpers.utils.FileUtil.createFindDFolder;
 import static org.qp.android.helpers.utils.FileUtil.findFileFromRelPath;
 import static org.qp.android.helpers.utils.PathUtil.getExtension;
 import static org.qp.android.helpers.utils.ThreadUtil.assertNonUiThread;
@@ -42,9 +43,11 @@ import com.google.android.material.textfield.TextInputLayout;
 import org.qp.android.QuestPlayerApplication;
 import org.qp.android.R;
 import org.qp.android.helpers.ErrorType;
-import org.qp.android.model.libQP.LibQpProxy;
-import org.qp.android.model.libQP.RefreshInterfaceRequest;
-import org.qp.android.model.libQP.WindowType;
+import org.qp.android.model.lib.LibGameState;
+import org.qp.android.model.lib.LibIConfig;
+import org.qp.android.model.lib.LibIProxy;
+import org.qp.android.model.lib.LibRefIRequest;
+import org.qp.android.model.lib.LibWindowType;
 import org.qp.android.model.service.AudioPlayer;
 import org.qp.android.model.service.HtmlProcessor;
 import org.qp.android.ui.dialogs.GameDialogType;
@@ -62,24 +65,19 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
     private final String TAG = this.getClass().getSimpleName();
 
     private final QuestPlayerApplication questPlayerApplication;
-    private final HtmlProcessor htmlProcessor;
-    private LibQpProxy libQpProxy;
-    private AudioPlayer audioPlayer;
     private Uri gameDirUri;
 
     public ObservableBoolean isActionVisible = new ObservableBoolean();
-
     public MutableLiveData<String> outputTextObserver = new MutableLiveData<>();
     public MutableLiveData<Integer> outputIntObserver = new MutableLiveData<>();
     public MutableLiveData<Boolean> outputBooleanObserver = new MutableLiveData<>(false);
-
     public MutableLiveData<GameActivity> activityObserver = new MutableLiveData<>();
 
     private final MutableLiveData<SettingsController> controllerObserver = new MutableLiveData<>();
     private final MutableLiveData<String> mainDescLiveData = new MutableLiveData<>();
     private final MutableLiveData<String> varsDescLiveData = new MutableLiveData<>();
-    private final MutableLiveData<GameItemRecycler> actionLiveData = new MutableLiveData<>();
-    private final MutableLiveData<GameItemRecycler> objectLiveData = new MutableLiveData<>();
+    private final MutableLiveData<GameItemRecycler> actionsListLiveData = new MutableLiveData<>();
+    private final MutableLiveData<GameItemRecycler> objectsListLiveData = new MutableLiveData<>();
 
     private static final String PAGE_HEAD_TEMPLATE = """
             <head>
@@ -109,29 +107,31 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
     private final Runnable counterTask = new Runnable() {
         @Override
         public void run() {
-            if (libQpProxy != null) {
-                libQpProxy.executeCounter();
-                counterHandler.postDelayed(this , counterInterval);
-            }
+            if (getLibProxy() == null) return;
+            getLibProxy().executeCounter();
+            counterHandler.postDelayed(this , counterInterval);
         }
     };
 
     // region Getter/Setter
-    public HtmlProcessor getHtmlProcessor() {
-        return htmlProcessor.setController(getSettingsController());
+    private HtmlProcessor getHtmlProcessor() {
+        return questPlayerApplication.getHtmlProcessor();
     }
 
-    public AudioPlayer getAudioPlayer() {
-        return audioPlayer;
+    private LibIProxy getLibProxy() {
+        return questPlayerApplication.getLibProxy();
     }
 
-    public LibQpProxy getLibQspProxy() {
-        if (libQpProxy == null) {
-            libQpProxy = questPlayerApplication.getLibQspProxy();
-        }
+    private LibGameState getLibGameState() {
+        return getLibProxy().getGameState();
+    }
 
-        libQpProxy.setGameInterface(this);
-        return libQpProxy;
+    private AudioPlayer getAudioPlayer() {
+        return questPlayerApplication.getAudioPlayer();
+    }
+
+    public LiveData<String> getAudioErrorObserver() {
+        return getAudioPlayer().getIsThrowError();
     }
 
     public SettingsController getSettingsController() {
@@ -165,7 +165,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
     }
 
     public int getTextColor() {
-        var libState = libQpProxy.getGameState();
+        var libState = getLibGameState();
         if (libState == null) return Color.WHITE;
         var config = libState.interfaceConfig;
         if (getSettingsController().isUseGameTextColor && config.fontColor != 0) {
@@ -176,7 +176,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
     }
 
     public int getBackgroundColor() {
-        var config = libQpProxy.getGameState().interfaceConfig;
+        var config = getLibGameState().interfaceConfig;
         if (getSettingsController().isUseGameBackgroundColor && config.backColor != 0) {
             return convertRGBAtoBGRA(config.backColor);
         } else {
@@ -185,7 +185,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
     }
 
     public int getLinkColor() {
-        var config = libQpProxy.getGameState().interfaceConfig;
+        var config = getLibGameState().interfaceConfig;
         if (getSettingsController().isUseGameLinkColor && config.linkColor != 0) {
             return convertRGBAtoBGRA(config.linkColor);
         } else {
@@ -194,13 +194,13 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
     }
 
     public int getFontSize() {
-        var config = libQpProxy.getGameState().interfaceConfig;
+        var config = getLibGameState().interfaceConfig;
         return getSettingsController().isUseGameFont && config.fontSize != 0 ?
                 config.fontSize : getSettingsController().fontSize;
     }
 
     public String getHtml(String str) {
-        var config = libQpProxy.getGameState().interfaceConfig;
+        var config = getLibGameState().interfaceConfig;
         return config.useHtml ?
                 getHtmlProcessor().convertLibHtmlToWebHtml(str) :
                 getHtmlProcessor().convertQspStringToWebViewHtml(str);
@@ -228,22 +228,27 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
     }
 
     public LiveData<GameItemRecycler> getObjectsObserver() {
-        if (objectLiveData.getValue() == null) {
+        if (objectsListLiveData.getValue() == null) {
             refreshObjectsRecycler();
         }
-        return objectLiveData;
+        return objectsListLiveData;
     }
 
     public LiveData<GameItemRecycler> getActionObserver() {
-        if (actionLiveData.getValue() == null) {
+        if (actionsListLiveData.getValue() == null) {
             refreshActionsRecycler();
         }
-        return actionLiveData;
+        return actionsListLiveData;
     }
 
-    private Optional<DocumentFile> getCurGameDir() {
+    public Optional<DocumentFile> getCurGameDir() {
         if (gameDirUri == null) return Optional.empty();
         return Optional.ofNullable(DocumentFileCompat.fromUri(getApplication() , gameDirUri));
+    }
+
+    public Optional<DocumentFile> getSavesDir() {
+        if (getCurGameDir().isEmpty()) return Optional.empty();
+        return Optional.ofNullable(createFindDFolder(getCurGameDir().get() , "saves"));
     }
 
     @NonNull
@@ -256,11 +261,23 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         }
     }
 
+    public LibIConfig getIConfig() {
+        return getLibGameState().interfaceConfig;
+    }
+
     public void setGameDirUri(Uri gameDirUri) {
         this.gameDirUri = gameDirUri;
     }
 
     // endregion Getter/Setter
+
+    public String removeHTMLTags(String dirtyHTML) {
+        return getHtmlProcessor().removeHTMLTags(dirtyHTML);
+    }
+
+    private boolean isHasHTMLTags(String input) {
+        return getHtmlProcessor().hasHTMLTags(input);
+    }
 
     public void onDialogPositiveClick(DialogFragment dialog) {
         var optWindow = Optional.ofNullable(dialog.requireDialog().getWindow());
@@ -270,7 +287,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
             switch (dialog.getTag()) {
                 case "closeGameDialogFragment" -> {
                     stopAudio();
-                    stopLibQsp();
+                    stopNativeLib();
                     removeCallback();
                     getGameActivity().finish();
                 }
@@ -348,7 +365,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
     }
 
     private void refreshMainDesc() {
-        var libMainDesc = getHtml(getLibQspProxy().getGameState().mainDesc);
+        var libMainDesc = getHtml(getLibGameState().mainDesc);
         var dirtyHTML = pageTemplate.replace("REPLACETEXT" , libMainDesc);
         var cleanHTML = "";
         if (getSettingsController().isImageDisabled) {
@@ -363,7 +380,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
     }
 
     private void refreshVarsDesc() {
-        var libVarsDesc = getHtml(getLibQspProxy().getGameState().varsDesc);
+        var libVarsDesc = getHtml(getLibGameState().varsDesc);
         var dirtyHTML = pageTemplate.replace("REPLACETEXT" , libVarsDesc);
         var cleanHTML = "";
         if (getSettingsController().isImageDisabled) {
@@ -377,6 +394,10 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         varsDescLiveData.postValue(cleanHTML);
     }
 
+    public void onActionClicked(int index) {
+        getLibProxy().onActionClicked(index);
+    }
+
     private void refreshActionsRecycler() {
         var actionsRecycler = new GameItemRecycler();
         actionsRecycler.setTypeface(getSettingsController().getTypeface());
@@ -384,10 +405,14 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         actionsRecycler.setTextColor(getTextColor());
         actionsRecycler.setLinkTextColor(getLinkColor());
         actionsRecycler.setBackgroundColor(getBackgroundColor());
-        actionsRecycler.submitList(libQpProxy.getGameState().actions);
-        actionLiveData.postValue(actionsRecycler);
+        actionsRecycler.submitList(getLibGameState().actionsList);
+        actionsListLiveData.postValue(actionsRecycler);
         int count = actionsRecycler.getItemCount();
         isActionVisible.set(showActions && count > 0);
+    }
+
+    public void onObjectClicked(int index) {
+        getLibProxy().onObjectSelected(index);
     }
 
     private void refreshObjectsRecycler() {
@@ -398,8 +423,8 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         objectsRecycler.setTextColor(getTextColor());
         objectsRecycler.setLinkTextColor(getLinkColor());
         objectsRecycler.setBackgroundColor(getBackgroundColor());
-        objectsRecycler.submitList(libQpProxy.getGameState().objects);
-        objectLiveData.postValue(objectsRecycler);
+        objectsRecycler.submitList(getLibGameState().objectsList);
+        objectsListLiveData.postValue(objectsRecycler);
     }
 
     public void setCallback() {
@@ -415,7 +440,6 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         preferences = PreferenceManager.getDefaultSharedPreferences(application);
         preferences.registerOnSharedPreferenceChangeListener(preferenceChangeListener);
         questPlayerApplication = (QuestPlayerApplication) getApplication();
-        htmlProcessor = questPlayerApplication.getHtmlProcessor();
     }
 
     @Override
@@ -425,24 +449,60 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
     }
 
     public void startAudio() {
-        audioPlayer = questPlayerApplication.getAudioPlayer();
-        audioPlayer.start();
+        getAudioPlayer().start();
+    }
+
+    public void pauseAudio() {
+        getAudioPlayer().pause();
+    }
+
+    public void resumeAudio() {
+        if (getCurGameDir().isEmpty()) return;
+        getAudioPlayer().setCurGameDir(getCurGameDir().get());
+        getAudioPlayer().setSoundEnabled(getSettingsController().isSoundEnabled);
+        getAudioPlayer().resume();
     }
 
     public void stopAudio() {
-        audioPlayer.stop();
-        audioPlayer = null;
+        getAudioPlayer().stop();
     }
 
-    public void startLibQsp() {
-        libQpProxy = questPlayerApplication.getLibQspProxy();
-        libQpProxy.start();
+    public void startNativeLib() {
+        getLibProxy().setGameInterface(this);
+        getLibProxy().start();
     }
 
-    public void stopLibQsp() {
-        libQpProxy.stop();
-        libQpProxy.setGameInterface(null);
-        libQpProxy = null;
+    public void stopNativeLib() {
+        getLibProxy().stop();
+        getLibProxy().setGameInterface(null);
+    }
+
+    public void runGameIntoNativeLib(String gameId ,
+                                     String gameTitle ,
+                                     DocumentFile gameDir ,
+                                     DocumentFile gameFile) {
+        getLibProxy().runGame(gameId, gameTitle, gameDir, gameFile);
+    }
+
+    public void requestForNativeLib(GameLibRequest req , Uri fileUri) {
+        switch (req) {
+            case LOAD_FILE -> doWithCounterDisabled(() ->
+                    getLibProxy().loadGameState(fileUri));
+            case SAVE_FILE -> getLibProxy().saveGameState(fileUri);
+        }
+    }
+
+    public void requestForNativeLib(GameLibRequest req) {
+        switch (req) {
+            case USE_EXECUTOR -> getLibProxy().onUseExecutorString();
+            case USE_INPUT -> getLibProxy().onInputAreaClicked();
+            case RESTART_GAME -> getLibProxy().restartGame();
+        }
+    }
+
+    public Boolean isGameRunning() {
+        if (getLibProxy().getGameState() == null) return false;
+        return getLibProxy().getGameState().gameRunning;
     }
 
     public class GameWebViewClient extends WebViewClient {
@@ -460,10 +520,10 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
                     } else {
                         tempUriDecode = uriDecode.substring(5);
                     }
-                    if (htmlProcessor.hasHTMLTags(tempUriDecode)) {
-                        libQpProxy.execute(htmlProcessor.removeHTMLTags(tempUriDecode));
+                    if (isHasHTMLTags(tempUriDecode)) {
+                        getLibProxy().execute(removeHTMLTags(tempUriDecode));
                     } else {
-                        libQpProxy.execute(tempUriDecode);
+                        getLibProxy().execute(tempUriDecode);
                     }
                 }
                 case "https" , "http" -> {
@@ -516,21 +576,21 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
 
     // region GameInterface
     @Override
-    public void refresh(final RefreshInterfaceRequest request) {
-        if (request.interfaceConfigChanged) {
+    public void refresh(final LibRefIRequest request) {
+        if (request.isIConfigChanged) {
             getGameActivity().applySettings();
         }
-        if (request.interfaceConfigChanged || request.mainDescChanged) {
+        if (request.isIConfigChanged || request.isMainDescChanged) {
             updatePageTemplate();
             refreshMainDesc();
         }
-        if (request.actionsChanged) {
+        if (request.isActionsChanged) {
             refreshActionsRecycler();
         }
-        if (request.objectsChanged) {
+        if (request.isObjectsChanged) {
             refreshObjectsRecycler();
         }
-        if (request.interfaceConfigChanged || request.varsDescChanged) {
+        if (request.isIConfigChanged || request.isVarsDescChanged) {
             updatePageTemplate();
             refreshVarsDesc();
         }
@@ -596,11 +656,9 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         assertNonUiThread();
 
         final var resultQueue = new ArrayBlockingQueue<Integer>(1);
-        final var currentItems = libQpProxy.getGameState().menuItems;
+        final var currentItems = getLibProxy().getGameState().menuItemsList;
         final var newItems = new ArrayList<String>();
-        for (var item : currentItems) {
-            newItems.add(item.name);
-        }
+        currentItems.forEach(libMenuItem -> newItems.add(libMenuItem.name()));
         getGameActivity().showMenuDialog(newItems , resultQueue);
         try {
             return resultQueue.take();
@@ -621,8 +679,8 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
     }
 
     @Override
-    public void showWindow(WindowType type , final boolean show) {
-        if (type == WindowType.ACTIONS) {
+    public void showWindow(LibWindowType type , final boolean show) {
+        if (type == LibWindowType.ACTIONS) {
             showActions = show;
             refreshActionsRecycler();
         }
