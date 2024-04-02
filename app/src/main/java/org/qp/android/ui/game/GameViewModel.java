@@ -275,6 +275,10 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         return getHtmlProcessor().removeHTMLTags(dirtyHTML);
     }
 
+    public String removeHTMLTagAsIs(String dirtyHTML) {
+        return getHtmlProcessor().removeHTMLTagsAsIs(dirtyHTML);
+    }
+
     private boolean isHasHTMLTags(String input) {
         return getHtmlProcessor().hasHTMLTags(input);
     }
@@ -521,7 +525,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
                         tempUriDecode = uriDecode.substring(5);
                     }
                     if (isHasHTMLTags(tempUriDecode)) {
-                        getLibProxy().execute(removeHTMLTags(tempUriDecode));
+                        getLibProxy().execute(removeHTMLTagAsIs(tempUriDecode));
                     } else {
                         getLibProxy().execute(tempUriDecode);
                     }

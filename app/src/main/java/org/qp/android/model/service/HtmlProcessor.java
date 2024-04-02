@@ -15,6 +15,7 @@ import androidx.documentfile.provider.DocumentFile;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
+import org.jsoup.safety.Safelist;
 import org.qp.android.ui.settings.SettingsController;
 
 import java.util.ArrayList;
@@ -220,6 +221,11 @@ public class HtmlProcessor {
             fromIdx = endIdx + 1;
         }
         return result.toString();
+    }
+
+    public String removeHTMLTagsAsIs(String dirtyHTML) {
+        if (isNullOrEmpty(dirtyHTML)) return "";
+        return Jsoup.clean(dirtyHTML , Safelist.none());
     }
 
 }
