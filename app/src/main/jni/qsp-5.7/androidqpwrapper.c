@@ -463,7 +463,7 @@ jboolean Java_org_qp_android_model_lib_LibNativeMethods_QSPExecUserInput(JNIEnv 
 ///* Get information about the latest error */
 jobject Java_org_qp_android_model_lib_LibNativeMethods_QSPGetLastErrorData(JNIEnv *env,
 																		  jobject this) {
-  jclass clazz = (*env)->FindClass(env, "org/qp/android/dto/lib/ErrorData");
+  jclass clazz = (*env)->FindClass(env, "org/qp/android/dto/lib/LibErrorData");
   if (clazz == 0)
 	return NULL;
   jfieldID fid = (*env)->GetFieldID(env, clazz, "locName", "Ljava/lang/String;");
