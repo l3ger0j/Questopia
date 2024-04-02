@@ -106,6 +106,20 @@ public class GameActivity extends AppCompatActivity {
         }
         WindowCompat.setDecorFitsSystemWindows(getWindow() , false);
 
+        var windowInsetsController =
+                WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
+        windowInsetsController.setSystemBarsBehavior(
+                WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        );
+        getWindow().getDecorView().setOnApplyWindowInsetsListener((v , insets) -> {
+            if (settingsController.isUseImmersiveMode) {
+                windowInsetsController.hide(WindowInsetsCompat.Type.systemBars());
+            } else {
+                windowInsetsController.show(WindowInsetsCompat.Type.systemBars());
+            }
+            return v.onApplyWindowInsets(insets);
+        });
+
         setContentView(activityGameBinding.getRoot());
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
@@ -128,20 +142,6 @@ public class GameActivity extends AppCompatActivity {
             return true;
         });
         setOnApplyWindowInsetsListener(bottomNavigationView , null);
-
-        var windowInsetsController =
-                WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
-        windowInsetsController.setSystemBarsBehavior(
-                WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-        );
-        getWindow().getDecorView().setOnApplyWindowInsetsListener((v , insets) -> {
-            if (settingsController.isUseImmersiveMode) {
-                windowInsetsController.hide(WindowInsetsCompat.Type.systemBars());
-            } else {
-                windowInsetsController.show(WindowInsetsCompat.Type.systemBars());
-            }
-            return v.onApplyWindowInsets(insets);
-        });
 
         saveResultLaunch = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
