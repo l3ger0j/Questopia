@@ -129,6 +129,7 @@
         <!-- Sound section -->
         <string name="soundCatTitle">Audio</string>
         <string name="pref_audio_play">Play audio in the game</string>
+        <string name="pref_mute_video">Mute video in the game</string>
         <string name="pref_audio_debug">Audio path debugger</string>
         <!-- Switch section -->
         <string name="filePicker">File Picker Dialog (alpha)</string>

@@ -180,9 +180,13 @@ public class HtmlProcessor {
     }
 
     private void processHTMLVideos(Element documentBody) {
-        documentBody.select("video")
-                .attr("style", "max-width:100%;")
-                .attr("muted", "true");
+        var videoElement = documentBody.select("video");
+        videoElement.attr("style", "max-width:100%;");
+        if (controller.isVideoMute) {
+            videoElement.attr("muted", "true");
+        } else {
+            videoElement.attr("muted", "false");
+        }
     }
 
     /**

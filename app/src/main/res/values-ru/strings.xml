@@ -129,6 +129,7 @@
         <!-- Sound section -->
         <string name="soundCatTitle">Звук</string>
         <string name="pref_audio_play">Воспроизводить звук в игре</string>
+        <string name="pref_mute_video">Отключение звука видео в игре</string>
         <string name="pref_audio_debug">Отладчик путей к звукам</string>
         <!-- Switch section -->
         <string name="filePicker">Диалог Выбора Файла (альфа)</string>
