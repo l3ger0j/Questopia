@@ -211,7 +211,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         if (relPath == null) return Uri.EMPTY;
         if (getCurGameDir().isPresent()) {
             var imageFile = findFileFromRelPath(
-                    getApplication() , getCurGameDir().get() , relPath
+                    getApplication() , relPath , getCurGameDir().get()
             );
             return imageFile.getUri();
         } else {
@@ -375,7 +375,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         if (getSettingsController().isImageDisabled) {
             cleanHTML = getHtmlProcessor().getCleanHtmlPageNotImage(dirtyHTML);
         } else {
-            cleanHTML = getHtmlProcessor().getCleanHtmlPageAndImage(dirtyHTML);
+            cleanHTML = getHtmlProcessor().getCleanHtmlPageAndImage(getApplication() , dirtyHTML);
         }
         if (!cleanHTML.isBlank()) {
             getGameActivity().warnUser(GameActivity.TAB_MAIN_DESC_AND_ACTIONS);
@@ -390,7 +390,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         if (getSettingsController().isImageDisabled) {
             cleanHTML = getHtmlProcessor().getCleanHtmlPageNotImage(dirtyHTML);
         } else {
-            cleanHTML = getHtmlProcessor().getCleanHtmlPageAndImage(dirtyHTML);
+            cleanHTML = getHtmlProcessor().getCleanHtmlPageAndImage(getApplication() , dirtyHTML);
         }
         if (!cleanHTML.isBlank()) {
             getGameActivity().warnUser(GameActivity.TAB_VARS_DESC);
@@ -559,22 +559,21 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
             if (uri.getScheme() == null) return null;
             final var rootDir = getCurGameDir().get();
 
-            if (uri.getScheme().startsWith("file")) {
-                try {
-                    if (uri.getPath() == null) throw new NullPointerException();
-                    var imageFile = findFileFromRelPath(getApplication() , rootDir , uri.getPath());
-                    var extension = MimeTypeMap.getSingleton().getMimeTypeFromExtension(getExtension(imageFile));
-                    var in = getApplication().getContentResolver().openInputStream(imageFile.getUri());
-                    return new WebResourceResponse(extension , "utf-8" , in);
-                } catch (FileNotFoundException | NullPointerException ex) {
-                    if (getSettingsController().isUseImageDebug) {
-                        showErrorDialog(uri.getPath() , ErrorType.IMAGE_ERROR);
-                    }
-                    return null;
-                }
-            }
+            if (!uri.getScheme().startsWith("file"))
+                return super.shouldInterceptRequest(view , request);
 
-            return super.shouldInterceptRequest(view , request);
+            try {
+                if (uri.getPath() == null) throw new NullPointerException();
+                var imageFile = findFileFromRelPath(getApplication() , uri.getPath() , rootDir);
+                var extension = MimeTypeMap.getSingleton().getMimeTypeFromExtension(getExtension(imageFile));
+                var in = getApplication().getContentResolver().openInputStream(imageFile.getUri());
+                return new WebResourceResponse(extension , "utf-8" , in);
+            } catch (FileNotFoundException | NullPointerException ex) {
+                if (getSettingsController().isUseImageDebug) {
+                    showErrorDialog(uri.getPath() , ErrorType.IMAGE_ERROR);
+                }
+                return null;
+            }
         }
     }
 
