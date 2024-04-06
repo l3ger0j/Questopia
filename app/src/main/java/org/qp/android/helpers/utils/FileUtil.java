@@ -166,28 +166,10 @@ public final class FileUtil {
         return findDir;
     }
 
-    public static DocumentFile findFileFromRelPath(Context context ,
-                                                   DocumentFile parentDir ,
-                                                   final String path) {
+    public static DocumentFile findFileFromRelPath(@NonNull Context context ,
+                                                   @NonNull final String path,
+                                                   @NonNull DocumentFile parentDir) {
         return DocumentFileUtils.child(parentDir , context , path);
-    }
-
-    public static DocumentFile fromRelPath(@NonNull String relPath ,
-                                           @NonNull DocumentFile rootDir) {
-        var pathToFileSegments = relPath.split("/");
-        var relFile = rootDir;
-
-        for (var segment : pathToFileSegments) {
-            if (segment.isEmpty()) {
-                continue;
-            }
-            relFile = relFile.findFile(segment);
-            if (relFile == null) {
-                break;
-            }
-        }
-
-        return relFile;
     }
 
     @Nullable
