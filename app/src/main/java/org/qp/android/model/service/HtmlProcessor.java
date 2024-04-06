@@ -1,11 +1,11 @@
 package org.qp.android.model.service;
 
 import static org.qp.android.helpers.utils.Base64Util.encodeBase64;
-import static org.qp.android.helpers.utils.FileUtil.fromRelPath;
+import static org.qp.android.helpers.utils.FileUtil.findFileFromRelPath;
 import static org.qp.android.helpers.utils.StringUtil.isNotEmpty;
 import static org.qp.android.helpers.utils.StringUtil.isNullOrEmpty;
 
-import android.content.res.Resources;
+import android.content.Context;
 import android.util.Base64;
 import android.util.Log;
 
@@ -41,6 +41,29 @@ public class HtmlProcessor {
         return imageElement.attr("src");
     }
 
+    /**
+     * Bring the HTML code <code>html</code> obtained from the library to
+     * HTML code acceptable for display in {@linkplain android.webkit.WebView}.
+     */
+    public String getCleanHtmlPageAndImage(@NonNull Context context ,
+                                           @NonNull String dirtyHtml) {
+        var document = Jsoup.parse(dirtyHtml);
+        document.outputSettings().prettyPrint(false);
+        var body = document.body();
+        processHTMLImages(context , body);
+        processHTMLVideos(body);
+        return document.toString();
+    }
+
+    public String getCleanHtmlPageNotImage(String dirtyHtml) {
+        var document = Jsoup.parse(dirtyHtml);
+        document.outputSettings().prettyPrint(false);
+        var body = document.body();
+        body.select("img").remove();
+        body.select("video").remove();
+        return document.toString();
+    }
+
     public HtmlProcessor setController(SettingsController controller) {
         this.controller = controller;
         return this;
@@ -59,46 +82,11 @@ public class HtmlProcessor {
         this.imageProvider = imageProvider;
     }
 
-    /**
-     * Bring the HTML code <code>html</code> obtained from the library to
-     * HTML code acceptable for display in {@linkplain android.webkit.WebView}.
-     */
-    public String convertQspHtmlToWebViewHtml(String html) {
-        if (isNullOrEmpty(html)) return "";
-        var result = unescapeQuotes(html);
-        result = encodeExec(result);
-        result = lineBreaksInHTML(result);
-        var document = Jsoup.parse(result);
-        document.outputSettings().prettyPrint(false);
-        var body = document.body();
-        processHTMLImages(body);
-        processHTMLVideos(body);
-        return document.toString();
-    }
-
     public String convertLibHtmlToWebHtml(String html) {
         if (isNullOrEmpty(html)) return "";
         var result = unescapeQuotes(html);
         result = encodeExec(result);
         return lineBreaksInHTML(result);
-    }
-
-    public String getCleanHtmlPageAndImage(String dirtyHtml) {
-        var document = Jsoup.parse(dirtyHtml);
-        document.outputSettings().prettyPrint(false);
-        var body = document.body();
-        processHTMLImages(body);
-        processHTMLVideos(body);
-        return document.toString();
-    }
-
-    public String getCleanHtmlPageNotImage(String dirtyHtml) {
-        var document = Jsoup.parse(dirtyHtml);
-        document.outputSettings().prettyPrint(false);
-        var body = document.body();
-        body.select("img").remove();
-        body.select("video").remove();
-        return document.toString();
     }
 
     @NonNull
@@ -130,7 +118,8 @@ public class HtmlProcessor {
                 .replace("\r", "");
     }
 
-    private void processHTMLImages(@NonNull Element documentBody) {
+    private void processHTMLImages(@NonNull Context context,
+                                   @NonNull Element documentBody) {
         var dynBlackList = new ArrayList<String>();
         documentBody.select("a").forEach(element -> {
             if (element.attr("href").contains("exec:")) {
@@ -148,35 +137,37 @@ public class HtmlProcessor {
                 img.attr("style", "display: inline; height: auto; max-width: 100%;");
             }
             if (!controller.isUseAutoWidth) {
-                if (shouldChangeWidth(img)) {
+                if (shouldChangeWidth(context , img)) {
                     img.attr("style" , "max-width:" + controller.customWidthImage+";");
                 }
             } else if (!controller.isUseAutoHeight) {
-                if (shouldChangeHeight(img)) {
+                if (shouldChangeHeight(context , img)) {
                     img.attr("style" , "max-height:" + controller.customHeightImage+";");
                 }
             }
         });
     }
 
-    private boolean shouldChangeWidth(Element img) {
+    private boolean shouldChangeWidth(Context context,
+                                      Element img) {
         var relPath = img.attr("src");
-        var imageFile = fromRelPath(relPath , curGameDir);
+        var imageFile = findFileFromRelPath(context , relPath , curGameDir);
         if (imageFile == null) return false;
-        var drawable = imageProvider.getDrawableFromPath(imageFile.getUri());
+        var drawable = imageProvider.getDrawableFromPath(context , imageFile.getUri());
         if (drawable == null) return false;
-        return drawable.getIntrinsicWidth() < Resources.getSystem()
-                .getDisplayMetrics().widthPixels;
+        var widthPix = context.getResources().getDisplayMetrics().widthPixels;
+        return drawable.getIntrinsicWidth() < widthPix;
     }
 
-    private boolean shouldChangeHeight(Element img) {
+    private boolean shouldChangeHeight(Context context,
+                                       Element img) {
         var relPath = img.attr("src");
-        var imageFile = fromRelPath(relPath , curGameDir);
+        var imageFile = findFileFromRelPath(context , relPath , curGameDir);
         if (imageFile == null) return false;
-        var drawable = imageProvider.getDrawableFromPath(imageFile.getUri());
+        var drawable = imageProvider.getDrawableFromPath(context , imageFile.getUri());
         if (drawable == null) return false;
-        return drawable.getIntrinsicHeight() < Resources.getSystem()
-                .getDisplayMetrics().heightPixels;
+        var heightPix = context.getResources().getDisplayMetrics().heightPixels;
+        return drawable.getIntrinsicHeight() < heightPix;
     }
 
     private void processHTMLVideos(Element documentBody) {
