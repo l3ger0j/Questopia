@@ -1,19 +1,20 @@
-package org.qp.android.model.libQP;
+package org.qp.android.model.lib;
 
 import java.util.Objects;
 
 /**
  * The methods of this class are defined in <code>androidqspwrapper.c</code>.
  */
-public class NativeMethods {
-    private final LibQpCallbacks callbacks;
+public class LibNativeMethods {
+
+    private final LibICallbacks callbacks;
 
     static {
         System.loadLibrary("ndkqsp");
     }
 
-    public NativeMethods(LibQpCallbacks callbacks) {
-        this.callbacks = Objects.requireNonNull(callbacks, "callbacks");
+    public LibNativeMethods(LibICallbacks callbacks) {
+        this.callbacks = Objects.requireNonNull(callbacks, "callbacks must not be null");
     }
 
     public native void QSPInit();
@@ -70,4 +71,5 @@ public class NativeMethods {
     public native boolean QSPRestartGame(boolean isRefresh);
     public native void QSPSelectMenuItem(int index);
     //public native void QSPSetCallBack(int type, QSP_CALLBACK func)
+
 }

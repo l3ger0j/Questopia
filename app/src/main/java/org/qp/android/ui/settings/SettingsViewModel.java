@@ -11,12 +11,10 @@ import androidx.annotation.NonNull;
 import androidx.databinding.ObservableField;
 import androidx.lifecycle.AndroidViewModel;
 
-import org.qp.android.ui.plugin.PluginFragment;
-
 public class SettingsViewModel extends AndroidViewModel {
 
     public ObservableField<SettingsActivity> settingsActivityObservableField = new ObservableField<>();
-    public ObservableField<PluginFragment> fragmentObservableField = new ObservableField<>();
+    public ObservableField<SettingPluginFragment> fragmentObservableField = new ObservableField<>();
 
     public SettingsViewModel(@NonNull Application application) {
         super(application);

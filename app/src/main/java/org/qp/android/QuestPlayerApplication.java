@@ -8,11 +8,12 @@ import android.os.Build;
 
 import androidx.documentfile.provider.DocumentFile;
 
-import org.qp.android.model.libQP.LibQpProxy;
-import org.qp.android.model.libQP.LibQpProxyImpl;
+import org.qp.android.model.lib.LibIProxy;
+import org.qp.android.model.lib.LibProxyImpl;
 import org.qp.android.model.service.AudioPlayer;
 import org.qp.android.model.service.HtmlProcessor;
 import org.qp.android.model.service.ImageProvider;
+import org.qp.android.ui.settings.SettingsController;
 
 import dagger.hilt.android.HiltAndroidApp;
 
@@ -25,8 +26,8 @@ public class QuestPlayerApplication extends Application {
 
     private final ImageProvider imageProvider = new ImageProvider();
     private final HtmlProcessor htmlProcessor = new HtmlProcessor(imageProvider);
-    private final AudioPlayer audioPlayer = new AudioPlayer();
-    private final LibQpProxyImpl libQspProxy = new LibQpProxyImpl(this , htmlProcessor , audioPlayer);
+    private final AudioPlayer audioPlayer = new AudioPlayer(this);
+    private final LibProxyImpl libProxy = new LibProxyImpl(this , htmlProcessor , audioPlayer);
 
     private DocumentFile currentGameDir;
 
@@ -41,16 +42,17 @@ public class QuestPlayerApplication extends Application {
     }
 
     public HtmlProcessor getHtmlProcessor() {
-        htmlProcessor.setContext(this);
-        return htmlProcessor;
+        return htmlProcessor
+                .setCurGameDir(currentGameDir)
+                .setController(SettingsController.newInstance(this));
     }
 
     public AudioPlayer getAudioPlayer() {
-        return audioPlayer;
+        return audioPlayer.setCurGameDir(currentGameDir);
     }
 
-    public LibQpProxy getLibQspProxy() {
-        return libQspProxy;
+    public LibIProxy getLibProxy() {
+        return libProxy;
     }
 
     public DocumentFile getCurrentGameDir() {

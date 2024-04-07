@@ -30,7 +30,6 @@ public final class Base64Util {
     }
 
     public static boolean isBase64(String input) {
-        var matcher = pattern.matcher(input);
-        return matcher.find();
+        return pattern.matcher(input).find();
     }
 }

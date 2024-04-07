@@ -1,20 +1,21 @@
 package org.qp.android.model.service;
 
 import static org.qp.android.helpers.utils.Base64Util.encodeBase64;
-import static org.qp.android.helpers.utils.FileUtil.fromRelPath;
+import static org.qp.android.helpers.utils.FileUtil.findFileFromRelPath;
 import static org.qp.android.helpers.utils.StringUtil.isNotEmpty;
 import static org.qp.android.helpers.utils.StringUtil.isNullOrEmpty;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.util.Base64;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.documentfile.provider.DocumentFile;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
-import org.qp.android.QuestPlayerApplication;
+import org.jsoup.safety.Safelist;
 import org.qp.android.ui.settings.SettingsController;
 
 import java.util.ArrayList;
@@ -30,39 +31,62 @@ public class HtmlProcessor {
     private static final String HTML_PATTERN = "<(\"[^\"]*\"|'[^']*'|[^'\">])*>";
     private final Pattern pattern = Pattern.compile(HTML_PATTERN);
     private SettingsController controller;
-    private Context context;
+    private DocumentFile curGameDir;
 
-    public void setController(SettingsController controller) {
-        this.controller = controller;
-    }
-
-    public void setContext(Context context) {
-        this.context = context;
-    }
-
-    private QuestPlayerApplication getApplication() {
-        return (QuestPlayerApplication) context;
-    }
-
-    public HtmlProcessor(ImageProvider imageProvider) {
-        this.imageProvider = imageProvider;
+    @Nullable
+    public String getSrcDir(String html) {
+        var document = Jsoup.parse(html);
+        var imageElement = document.select("img").first();
+        if (imageElement == null) return null;
+        return imageElement.attr("src");
     }
 
     /**
      * Bring the HTML code <code>html</code> obtained from the library to
      * HTML code acceptable for display in {@linkplain android.webkit.WebView}.
      */
-    public String convertQspHtmlToWebViewHtml(String html) {
+    public String getCleanHtmlPageAndImage(@NonNull Context context ,
+                                           @NonNull String dirtyHtml) {
+        var document = Jsoup.parse(dirtyHtml);
+        document.outputSettings().prettyPrint(false);
+        var body = document.body();
+        processHTMLImages(context , body);
+        processHTMLVideos(body);
+        return document.toString();
+    }
+
+    public String getCleanHtmlPageNotImage(String dirtyHtml) {
+        var document = Jsoup.parse(dirtyHtml);
+        document.outputSettings().prettyPrint(false);
+        var body = document.body();
+        body.select("img").remove();
+        body.select("video").remove();
+        return document.toString();
+    }
+
+    public HtmlProcessor setController(SettingsController controller) {
+        this.controller = controller;
+        return this;
+    }
+
+    public HtmlProcessor setCurGameDir(DocumentFile curGameDir) {
+        this.curGameDir = curGameDir;
+        return this;
+    }
+
+    public boolean hasHTMLTags(String text){
+        return pattern.matcher(text).find();
+    }
+
+    public HtmlProcessor(ImageProvider imageProvider) {
+        this.imageProvider = imageProvider;
+    }
+
+    public String convertLibHtmlToWebHtml(String html) {
         if (isNullOrEmpty(html)) return "";
         var result = unescapeQuotes(html);
         result = encodeExec(result);
-        result = lineBreaksInHTML(result);
-        var document = Jsoup.parse(result);
-        document.outputSettings().prettyPrint(false);
-        var body = document.body();
-        processHTMLImages(body);
-        processHTMLVideos(body);
-        return document.toString();
+        return lineBreaksInHTML(result);
     }
 
     @NonNull
@@ -94,64 +118,66 @@ public class HtmlProcessor {
                 .replace("\r", "");
     }
 
-    private void processHTMLImages(@NonNull Element documentBody) {
+    private void processHTMLImages(@NonNull Context context,
+                                   @NonNull Element documentBody) {
         var dynBlackList = new ArrayList<String>();
         documentBody.select("a").forEach(element -> {
             if (element.attr("href").contains("exec:")) {
                 dynBlackList.add(element.select("img").attr("src"));
             }
         });
-        if (controller.isImageDisabled) {
-            documentBody.select("img").remove();
-        } else {
-            documentBody.select("img").forEach(img -> {
-                if (controller.isUseFullscreenImages) {
-                    if (!dynBlackList.contains(img.attr("src"))) {
-                        img.attr("onclick" , "img.onClickImage(this.src);");
-                    }
+
+        documentBody.select("img").forEach(img -> {
+            if (controller.isUseFullscreenImages) {
+                if (!dynBlackList.contains(img.attr("src"))) {
+                    img.attr("onclick" , "img.onClickImage(this.src);");
                 }
-                if (controller.isUseAutoWidth && controller.isUseAutoHeight) {
-                    img.attr("style", "display: inline; height: auto; max-width: 100%;");
+            }
+            if (controller.isUseAutoWidth && controller.isUseAutoHeight) {
+                img.attr("style", "display: inline; height: auto; max-width: 100%;");
+            }
+            if (!controller.isUseAutoWidth) {
+                if (shouldChangeWidth(context , img)) {
+                    img.attr("style" , "max-width:" + controller.customWidthImage+";");
                 }
-                if (!controller.isUseAutoWidth) {
-                    if (shouldChangeWidth(img)) {
-                        img.attr("style" , "max-width:" + controller.customWidthImage+";");
-                    }
-                } else if (!controller.isUseAutoHeight) {
-                    if (shouldChangeHeight(img)) {
-                        img.attr("style" , "max-height:" + controller.customHeightImage+";");
-                    }
+            } else if (!controller.isUseAutoHeight) {
+                if (shouldChangeHeight(context , img)) {
+                    img.attr("style" , "max-height:" + controller.customHeightImage+";");
                 }
-            });
-        }
+            }
+        });
     }
 
-    private boolean shouldChangeWidth(Element img) {
+    private boolean shouldChangeWidth(Context context,
+                                      Element img) {
         var relPath = img.attr("src");
-        var curGameDir = getApplication().getCurrentGameDir();
-        var imageFile = fromRelPath(relPath , curGameDir);
+        var imageFile = findFileFromRelPath(context , relPath , curGameDir);
         if (imageFile == null) return false;
-        var drawable = imageProvider.getDrawableFromPath(imageFile.getUri());
+        var drawable = imageProvider.getDrawableFromPath(context , imageFile.getUri());
         if (drawable == null) return false;
-        return drawable.getIntrinsicWidth() < Resources.getSystem()
-                .getDisplayMetrics().widthPixels;
+        var widthPix = context.getResources().getDisplayMetrics().widthPixels;
+        return drawable.getIntrinsicWidth() < widthPix;
     }
 
-    private boolean shouldChangeHeight(Element img) {
+    private boolean shouldChangeHeight(Context context,
+                                       Element img) {
         var relPath = img.attr("src");
-        var curGameDir = getApplication().getCurrentGameDir();
-        var imageFile = fromRelPath(relPath , curGameDir);
+        var imageFile = findFileFromRelPath(context , relPath , curGameDir);
         if (imageFile == null) return false;
-        var drawable = imageProvider.getDrawableFromPath(imageFile.getUri());
+        var drawable = imageProvider.getDrawableFromPath(context , imageFile.getUri());
         if (drawable == null) return false;
-        return drawable.getIntrinsicHeight() < Resources.getSystem()
-                .getDisplayMetrics().heightPixels;
+        var heightPix = context.getResources().getDisplayMetrics().heightPixels;
+        return drawable.getIntrinsicHeight() < heightPix;
     }
 
     private void processHTMLVideos(Element documentBody) {
-        documentBody.select("video")
-                .attr("style", "max-width:100%;")
-                .attr("muted", "true");
+        var videoElement = documentBody.select("video");
+        videoElement.attr("style", "max-width:100%;");
+        if (controller.isVideoMute) {
+            videoElement.attr("muted", "true");
+        } else {
+            videoElement.attr("muted", "false");
+        }
     }
 
     /**
@@ -179,7 +205,11 @@ public class HtmlProcessor {
             result.append(html, fromIdx, idx);
             var endIdx = html.indexOf('>', idx + 1);
             if (endIdx == -1) {
-                Log.w(TAG,"Invalid HTML: element at " + idx + " is not closed");
+                var message = "Invalid HTML:"
+                        + "\n source HTML:" + html
+                        + "\n element at " + idx
+                        + " is not closed";
+                Log.w(TAG , message);
                 result.append(html.substring(idx));
                 break;
             }
@@ -188,17 +218,9 @@ public class HtmlProcessor {
         return result.toString();
     }
 
-    public String getSrcDir(String html) {
-        var document = Jsoup.parse(html);
-        var imageElement = document.select("img").first();
-        String srcValue = null;
-        if (imageElement != null) {
-            srcValue = imageElement.attr("src");
-        }
-        return srcValue;
+    public String removeHTMLTagsAsIs(String dirtyHTML) {
+        if (isNullOrEmpty(dirtyHTML)) return "";
+        return Jsoup.clean(dirtyHTML , Safelist.none());
     }
 
-    public boolean hasHTMLTags(String text){
-        return pattern.matcher(text).find();
-    }
 }

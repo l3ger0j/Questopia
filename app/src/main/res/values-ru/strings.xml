@@ -33,6 +33,8 @@
         <string name="noGameFilesError">Я не нашла файлы игры после копирования!</string>
         <string name="notFoundSound">Звуковой файл не найден:</string>
         <string name="notFoundImage">Файл изображения не найден:</string>
+        <string name="notFoundFile">Файл не найден:</string>
+        <string name="notReadFile">Не могу прочитать файл:</string>
     <!-- Dialog Install -->
         <string name="gameName">Название игры</string>
         <string name="gameAuthor">Автор</string>
@@ -87,13 +89,11 @@
         <string name="generalCatTitle">Основное</string>
         <string name="langTitle">Язык приложения</string>
         <string name="binPrefTitle">Двоичные префиксы</string>
-        <string name="soundTitle">Воспроизводить звук</string>
         <string name="actsHeightTitle">Высота списка действий</string>
         <string name="separatorTitle">Видимость разделителя</string>
         <string name="separatorSum">Между списком действий и основным описанием</string>
         <string name="immersiveModeTitle">Режим погружения</string>
         <string name="autoscrollTitle">Автопролистывание</string>
-        <string name="musicDebugTitle">Отладчик путей к звукам</string>
         <string name="musicDebugSum">Диалог, сообщающий об ошибке, если путь к звуку неправильный</string>
         <!-- Text section -->
         <string name="textCatTitle">Текст</string>
@@ -126,6 +126,11 @@
         <string name="fullScreenImageSum">Нажатие на картинку в основном описании открывает её в диалоге</string>
         <string name="imageDebugTitle">Отладчик путей к картинкам</string>
         <string name="imageDebugSum">Диалог, сообщающий об ошибке, если путь к картинке неправильный</string>
+        <!-- Sound section -->
+        <string name="soundCatTitle">Звук</string>
+        <string name="pref_audio_play">Воспроизводить звук в игре</string>
+        <string name="pref_mute_video">Отключение звука видео в игре</string>
+        <string name="pref_audio_debug">Отладчик путей к звукам</string>
         <!-- Switch section -->
         <string name="filePicker">Диалог Выбора Файла (альфа)</string>
         <!-- Extra section -->

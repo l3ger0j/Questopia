@@ -1,5 +1,6 @@
 package org.qp.android.ui.game;
 
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,14 +30,12 @@ public class GameMainFragment extends Fragment {
     private View separatorView;
     private RecyclerView actionsView;
 
-    private final Runnable onScroll = new Runnable() {
-        @Override
-        public void run() {
-            if (mainDescView.getContentHeight()
-                    * getResources().getDisplayMetrics().density
-                    >= mainDescView.getScrollY()) {
-                mainDescView.scrollBy(0 , mainDescView.getHeight());
-            }
+    private final Runnable onScroll = () -> {
+        if (!isAdded()) return;
+        if (mainDescView.getContentHeight()
+                * getResources().getDisplayMetrics().density
+                > mainDescView.getScrollY()) {
+            mainDescView.scrollBy(0 , mainDescView.getHeight());
         }
     };
 
@@ -45,8 +44,7 @@ public class GameMainFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater ,
                              @Nullable ViewGroup container ,
                              @Nullable Bundle savedInstanceState) {
-        org.qp.android.databinding.FragmentGameMainBinding gameMainBinding =
-                FragmentGameMainBinding.inflate(getLayoutInflater());
+        var gameMainBinding = FragmentGameMainBinding.inflate(getLayoutInflater());
         viewModel = new ViewModelProvider(requireActivity()).get(GameViewModel.class);
         gameMainBinding.setGameViewModel(viewModel);
 
@@ -72,7 +70,9 @@ public class GameMainFragment extends Fragment {
         mainDescView.addJavascriptInterface(new Object() {
             @JavascriptInterface
             public void onClickImage(String src) {
-                var imageUri = viewModel.getImageUri(src);
+                if (src == null) return;
+                var imageUri = viewModel.getImageUriFromPath(src);
+                if (imageUri.equals(Uri.EMPTY)) return;
                 viewModel.showPicture(String.valueOf(imageUri));
             }
         } , "img");
@@ -130,7 +130,7 @@ public class GameMainFragment extends Fragment {
                 new RecyclerItemClickListener.OnItemClickListener() {
                     @Override
                     public void onItemClick(View view , int position) {
-                        viewModel.getLibQspProxy().onActionClicked(position);
+                        viewModel.onActionClicked(position);
                     }
 
                     @Override
