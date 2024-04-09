@@ -24,7 +24,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
-public class LocalGame {
+public class RepositoryLocal {
 
     private final String TAG = this.getClass().getSimpleName();
 

@@ -37,7 +37,7 @@ import org.qp.android.databinding.DialogEditBinding;
 import org.qp.android.dto.stock.GameData;
 import org.qp.android.helpers.ErrorType;
 import org.qp.android.helpers.bus.EventEmitter;
-import org.qp.android.helpers.repository.LocalGame;
+import org.qp.android.helpers.repository.RepositoryLocal;
 import org.qp.android.ui.dialogs.StockDialogFrags;
 import org.qp.android.ui.dialogs.StockDialogType;
 import org.qp.android.ui.game.GameActivity;
@@ -78,7 +78,7 @@ public class StockViewModel extends AndroidViewModel {
     private final MutableLiveData<ArrayList<GameData>> gameDataList = new MutableLiveData<>();
     private ArrayList<DocumentFile> listGamesDir = new ArrayList<>();
 
-    private final LocalGame localGame = new LocalGame();
+    private final RepositoryLocal localGame = new RepositoryLocal();
     private DocumentFile tempImageFile, tempPathFile, tempModFile;
     private GameData currGameData;
     private DialogEditBinding editBinding;
