@@ -104,7 +104,7 @@ public class GameActivity extends AppCompatActivity {
             getWindow().getAttributes().layoutInDisplayCutoutMode =
                     WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
         }
-        WindowCompat.setDecorFitsSystemWindows(getWindow() , false);
+        WindowCompat.setDecorFitsSystemWindows(getWindow() , true);
 
         var windowInsetsController =
                 WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
