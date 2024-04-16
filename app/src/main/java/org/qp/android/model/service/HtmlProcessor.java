@@ -195,11 +195,7 @@ public class HtmlProcessor {
             result.append(html, fromIdx, idx);
             var endIdx = html.indexOf('>', idx + 1);
             if (endIdx == -1) {
-                var message = "Invalid HTML:"
-                        + "\n source HTML:" + html
-                        + "\n element at " + idx
-                        + " is not closed";
-                Log.w(TAG , message);
+                Log.w(TAG,"Invalid HTML: element at " + idx + " is not closed");
                 result.append(html.substring(idx));
                 break;
             }
