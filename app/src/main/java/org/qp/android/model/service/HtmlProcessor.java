@@ -14,6 +14,7 @@ import androidx.documentfile.provider.DocumentFile;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
+import org.jsoup.safety.Safelist;
 import org.qp.android.ui.settings.SettingsController;
 
 import java.util.ArrayList;
@@ -195,17 +196,18 @@ public class HtmlProcessor {
             result.append(html, fromIdx, idx);
             var endIdx = html.indexOf('>', idx + 1);
             if (endIdx == -1) {
-                var message = "Invalid HTML:"
-                        + "\n source HTML:" + html
-                        + "\n element at " + idx
-                        + " is not closed";
-                Log.w(TAG , message);
+                Log.w(TAG,"Invalid HTML: element at " + idx + " is not closed");
                 result.append(html.substring(idx));
                 break;
             }
             fromIdx = endIdx + 1;
         }
         return result.toString();
+    }
+
+    public String removeHTMLTagsAsIs(String dirtyHTML) {
+        if (isNullOrEmpty(dirtyHTML)) return "";
+        return Jsoup.clean(dirtyHTML , Safelist.none());
     }
 
     public String getSrcDir(String html) {

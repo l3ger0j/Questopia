@@ -217,10 +217,10 @@ public class LibQpProxyImpl implements LibQpProxy, LibQpCallbacks {
 
     public synchronized void start() {
         libQspThread = new Thread(() -> {
-            exitLoopIfExist();
             while (!Thread.currentThread().isInterrupted()) {
                 try {
                     nativeMethods.QSPInit();
+                    exitLoopIfExist();
                     Looper.prepare();
                     libQspHandler = new Handler();
                     libQspThreadInit = true;
