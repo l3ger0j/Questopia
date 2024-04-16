@@ -448,7 +448,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
                         tempUriDecode = uriDecode.substring(5);
                     }
                     if (htmlProcessor.hasHTMLTags(tempUriDecode)) {
-                        libQpProxy.execute(htmlProcessor.removeHTMLTags(tempUriDecode));
+                        libQpProxy.execute(htmlProcessor.removeHTMLTagsAsIs(tempUriDecode));
                     } else {
                         libQpProxy.execute(tempUriDecode);
                     }
