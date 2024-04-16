@@ -115,7 +115,7 @@ public class GameActivity extends AppCompatActivity {
             getWindow().getAttributes().layoutInDisplayCutoutMode =
                     WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
         }
-        WindowCompat.setDecorFitsSystemWindows(getWindow() , false);
+        WindowCompat.setDecorFitsSystemWindows(getWindow() , true);
 
         setContentView(activityGameBinding.getRoot());
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
