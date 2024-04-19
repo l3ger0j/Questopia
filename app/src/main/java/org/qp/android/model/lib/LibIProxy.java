@@ -10,7 +10,7 @@ public interface LibIProxy {
     /**
      * Starts the library thread.
      */
-    void start();
+    void startLibThread();
 
     /**
      * Stops the library thread.

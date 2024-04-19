@@ -222,7 +222,7 @@ public class LibProxyImpl implements LibIProxy, LibICallbacks {
 
     // region LibQpProxy
 
-    public void start() {
+    public void startLibThread() {
         libThread = new Thread(() -> {
             while (!Thread.currentThread().isInterrupted()) {
                 synchronized (this) {
