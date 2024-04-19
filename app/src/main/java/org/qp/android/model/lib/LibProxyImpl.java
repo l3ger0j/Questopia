@@ -244,7 +244,7 @@ public class LibProxyImpl implements LibIProxy, LibICallbacks {
         libThread.start();
     }
 
-    public void stop() {
+    public void stopLibThread() {
         throwIfNotMainThread();
         if (libThread == null) return;
         if (libThreadInit) {

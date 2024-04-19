@@ -15,7 +15,7 @@ public interface LibIProxy {
     /**
      * Stops the library thread.
      */
-    void stop();
+    void stopLibThread();
 
     void enableDebugMode (boolean isDebug);
 
