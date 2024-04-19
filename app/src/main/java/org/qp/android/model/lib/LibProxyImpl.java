@@ -2,6 +2,7 @@ package org.qp.android.model.lib;
 
 import static org.qp.android.helpers.utils.FileUtil.createFindDFile;
 import static org.qp.android.helpers.utils.FileUtil.documentWrap;
+import static org.qp.android.helpers.utils.FileUtil.findFileFromRelPath;
 import static org.qp.android.helpers.utils.FileUtil.fromFullPath;
 import static org.qp.android.helpers.utils.FileUtil.getFileContents;
 import static org.qp.android.helpers.utils.FileUtil.writeFileContents;
@@ -175,11 +176,12 @@ public class LibProxyImpl implements LibIProxy, LibICallbacks {
         var count = nativeMethods.QSPGetActionsCount();
 
         for (int i = 0; i < count; ++i) {
-            var actionData = (LibActionData) nativeMethods.QSPGetActionData(i);
             var action = new LibListItem();
+            var actionData = (LibActionData) nativeMethods.QSPGetActionData(i);
+
             action.pathToImage = actionData.image();
-            action.text = gameState.interfaceConfig.useHtml ?
-                    htmlProcessor.removeHTMLTags(actionData.name())
+            action.text = gameState.interfaceConfig.useHtml
+                    ? htmlProcessor.removeHTMLTags(actionData.name())
                     : actionData.name();
             actions.add(action);
         }
@@ -199,18 +201,17 @@ public class LibProxyImpl implements LibIProxy, LibICallbacks {
 
             if (objectResult.name().contains("<img")) {
                 if (htmlProcessor.hasHTMLTags(objectResult.name())) {
-                    // TODO NEED TO REFACTORED!!!
                     var tempPath = htmlProcessor.getSrcDir(objectResult.name());
-                    var fileFromPath = curGameDir.findFile(tempPath);
+                    var fileFromPath = findFileFromRelPath(context , tempPath , curGameDir);
                     object.pathToImage = String.valueOf(fileFromPath);
                 } else {
-                    var fileFromPath = curGameDir.findFile(objectResult.name());
+                    var fileFromPath = findFileFromRelPath(context , objectResult.name() , curGameDir);
                     object.pathToImage = String.valueOf(fileFromPath);
                 }
             } else {
                 object.pathToImage = objectResult.image();
-                object.text = gameState.interfaceConfig.useHtml ?
-                        htmlProcessor.removeHTMLTags(objectResult.name())
+                object.text = gameState.interfaceConfig.useHtml
+                        ? htmlProcessor.removeHTMLTags(objectResult.name())
                         : objectResult.name();
             }
             objects.add(object);
