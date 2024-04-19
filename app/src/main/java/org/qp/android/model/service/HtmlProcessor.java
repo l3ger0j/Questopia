@@ -10,7 +10,6 @@ import android.util.Base64;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.documentfile.provider.DocumentFile;
 
 import org.jsoup.Jsoup;
@@ -33,11 +32,10 @@ public class HtmlProcessor {
     private SettingsController controller;
     private DocumentFile curGameDir;
 
-    @Nullable
     public String getSrcDir(String html) {
         var document = Jsoup.parse(html);
         var imageElement = document.select("img").first();
-        if (imageElement == null) return null;
+        if (imageElement == null) return "";
         return imageElement.attr("src");
     }
 
