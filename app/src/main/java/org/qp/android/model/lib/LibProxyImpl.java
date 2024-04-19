@@ -26,10 +26,10 @@ import com.anggrayudi.storage.file.MimeType;
 import org.qp.android.QuestPlayerApplication;
 import org.qp.android.dto.lib.LibActionData;
 import org.qp.android.dto.lib.LibErrorData;
-import org.qp.android.dto.lib.LibVarValResp;
 import org.qp.android.dto.lib.LibListItem;
-import org.qp.android.dto.lib.LibObjectData;
 import org.qp.android.dto.lib.LibMenuItem;
+import org.qp.android.dto.lib.LibObjectData;
+import org.qp.android.dto.lib.LibVarValResp;
 import org.qp.android.model.service.AudioPlayer;
 import org.qp.android.model.service.HtmlProcessor;
 import org.qp.android.ui.game.GameInterface;
@@ -225,19 +225,18 @@ public class LibProxyImpl implements LibIProxy, LibICallbacks {
     public void startLibThread() {
         libThread = new Thread(() -> {
             while (!Thread.currentThread().isInterrupted()) {
-                synchronized (this) {
-                    exitLoopIfExist();
-                    try {
-                        nativeMethods.QSPInit();
+                try {
+                    nativeMethods.QSPInit();
+                    if (Looper.myLooper() == null) {
                         Looper.prepare();
-                        libHandler = new Handler();
-                        libThreadInit = true;
-                        Looper.loop();
-                        nativeMethods.QSPDeInit();
-                    } catch (Throwable t) {
-                        Log.e(TAG , "lib thread has stopped exceptionally" , t);
-                        Thread.currentThread().interrupt();
                     }
+                    libHandler = new Handler(Looper.myLooper());
+                    libThreadInit = true;
+                    Looper.loop();
+                    nativeMethods.QSPDeInit();
+                } catch (Throwable t) {
+                    Log.e(TAG , "lib thread has stopped exceptionally" , t);
+                    Thread.currentThread().interrupt();
                 }
             }
         } , "libQSP");
@@ -257,18 +256,6 @@ public class LibProxyImpl implements LibIProxy, LibICallbacks {
             Log.w(TAG,"libqsp thread has been started, but not initialized");
         }
         libThread.interrupt();
-    }
-
-    private void exitLoopIfExist() {
-        var handler = libHandler;
-        if (handler != null) {
-            handler.getLooper().quitSafely();
-        } else {
-            var mLooper = Looper.myLooper();
-            if (mLooper != null) {
-                mLooper.quitSafely();
-            }
-        }
     }
 
     public void enableDebugMode (boolean isDebug) {
