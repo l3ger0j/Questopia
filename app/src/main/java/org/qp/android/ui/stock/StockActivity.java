@@ -274,6 +274,7 @@ public class StockActivity extends AppCompatActivity {
                 listFile.add(file);
             }
             stockViewModel.setListGamesDir(listFile);
+            stockViewModel.refreshGameData();
         } catch (IOException e) {
             Log.e(TAG , "Error: ", e);
         }
@@ -500,7 +501,6 @@ public class StockActivity extends AppCompatActivity {
     @Override
     public void onResume() {
         super.onResume();
-        loadSettings();
 
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(false);
