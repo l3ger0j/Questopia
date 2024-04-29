@@ -12,6 +12,7 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.Uri;
@@ -40,6 +41,7 @@ import androidx.documentfile.provider.DocumentFile;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
+import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.anggrayudi.storage.SimpleStorageHelper;
@@ -56,7 +58,6 @@ import org.qp.android.dto.stock.GameData;
 import org.qp.android.helpers.utils.ViewUtil;
 import org.qp.android.ui.dialogs.StockDialogType;
 import org.qp.android.ui.settings.SettingsActivity;
-import org.qp.android.ui.settings.SettingsController;
 
 import java.io.File;
 import java.io.IOException;
@@ -72,8 +73,8 @@ public class StockActivity extends AppCompatActivity {
 
     private static final int POST_NOTIFICATION = 203;
     private final String TAG = this.getClass().getSimpleName();
+
     private HashMap<String, GameData> gamesMap = new HashMap<>();
-    public SettingsController settingsController;
     private StockViewModel stockViewModel;
 
     private NavController navController;
@@ -91,6 +92,20 @@ public class StockActivity extends AppCompatActivity {
 
     private File listDirsFile;
 
+    SharedPreferences.OnSharedPreferenceChangeListener preferenceChangeListener = (sharedPreferences , key) -> {
+        if (key == null) return;
+        switch (key) {
+            case "binPref" -> stockViewModel.refreshGameData();
+            case "lang" -> {
+                if (sharedPreferences.getString("lang", "ru").equals("ru")) {
+                    AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("ru"));
+                } else {
+                    AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("en"));
+                }
+            }
+        }
+    };
+
     public File getListDirsFile() {
         return listDirsFile;
     }
@@ -104,6 +119,10 @@ public class StockActivity extends AppCompatActivity {
         var splashScreen = SplashScreen.installSplashScreen(this);
         splashScreen.setKeepOnScreenCondition(() -> false);
         super.onCreate(savedInstanceState);
+
+        PreferenceManager
+                .getDefaultSharedPreferences(getApplication())
+                .registerOnSharedPreferenceChangeListener(preferenceChangeListener);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             // Prevent jumping of the player on devices with cutout
@@ -311,17 +330,6 @@ public class StockActivity extends AppCompatActivity {
         if (listDirsFile.exists()) {
             restoreListDirsFromFile();
         }
-
-        settingsController = stockViewModel.getSettingsController();
-        stockViewModel.setController(settingsController);
-        if (settingsController.binaryPrefixes <= 1000) {
-            stockViewModel.refreshGameData();
-        }
-        if (settingsController.language.equals("ru")) {
-            AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("ru"));
-        } else {
-            AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("en"));
-        }
     }
 
     public void showErrorDialog(String errorMessage) {
@@ -481,6 +489,11 @@ public class StockActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+
+        PreferenceManager
+                .getDefaultSharedPreferences(getApplication())
+                .unregisterOnSharedPreferenceChangeListener(preferenceChangeListener);
+
         Log.i(TAG , "Stock Activity destroyed");
     }
 
