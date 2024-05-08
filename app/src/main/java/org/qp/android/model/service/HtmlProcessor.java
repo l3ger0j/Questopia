@@ -62,6 +62,21 @@ public class HtmlProcessor {
         return document.toString();
     }
 
+    public String oldGetCleanHtmlPageNotImage(String html) {
+        if (isNullOrEmpty(html)) return "";
+
+        var result = unescapeQuotes(html);
+        result = encodeExec(result);
+        result = lineBreaksInHTML(result);
+
+        var document = Jsoup.parse(result);
+        document.outputSettings().prettyPrint(false);
+        var body = document.body();
+        body.select("img").remove();
+        body.select("video").remove();
+        return document.toString();
+    }
+
     public HtmlProcessor setController(SettingsController controller) {
         this.controller = controller;
         return this;
