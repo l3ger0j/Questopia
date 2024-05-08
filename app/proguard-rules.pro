@@ -20,8 +20,8 @@
 -keep class org.qp.android.dto.stock.** { *; }
 
 # NDK
--keep class org.qp.android.dto.libQP.** { *; }
--keep class org.qp.android.model.libQP.** { *; }
+-keep class org.qp.android.dto.lib.** { *; }
+-keep class org.qp.android.model.lib.** { *; }
 
 # AppDevNext
 -keep class info.hannes.** { *; }

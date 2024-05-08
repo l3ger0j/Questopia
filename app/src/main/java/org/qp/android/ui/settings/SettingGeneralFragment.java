@@ -55,9 +55,7 @@ public class SettingGeneralFragment extends PreferenceFragmentCompat
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        if (Objects.equals(key , "lang")) {
-            ViewUtil.showSnackBar(getView(), getString(R.string.closeToApply));
-        } else if (key.equals("binPref")) {
+        if (Objects.equals("binPref", key)) {
             ViewUtil.showSnackBar(getView(), getString(R.string.settingsEffect));
         }
     }

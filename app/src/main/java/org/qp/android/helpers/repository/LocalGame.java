@@ -18,7 +18,6 @@ import androidx.documentfile.provider.DocumentFile;
 import com.anggrayudi.storage.file.MimeType;
 
 import org.qp.android.dto.stock.GameData;
-import org.qp.android.ui.settings.SettingsController;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -104,7 +103,6 @@ public class LocalGame {
             return Collections.emptyList();
         }
 
-        var controller = SettingsController.newInstance(context);
         var itemsGamesDirs = new ArrayList<GameData>();
         var formatGamesDirs = getGamesFolders(fileList);
 

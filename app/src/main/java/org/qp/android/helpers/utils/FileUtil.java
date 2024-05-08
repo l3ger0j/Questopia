@@ -166,22 +166,10 @@ public final class FileUtil {
         return findDir;
     }
 
-    public static DocumentFile fromRelPath(@NonNull String relPath ,
-                                           @NonNull DocumentFile rootDir) {
-        var pathToFileSegments = relPath.split("/");
-        var relFile = rootDir;
-
-        for (var segment : pathToFileSegments) {
-            if (segment.isEmpty()) {
-                continue;
-            }
-            relFile = relFile.findFile(segment);
-            if (relFile == null) {
-                break;
-            }
-        }
-
-        return relFile;
+    public static DocumentFile findFileFromRelPath(@NonNull Context context ,
+                                                   @NonNull final String path,
+                                                   @NonNull DocumentFile parentDir) {
+        return DocumentFileUtils.child(parentDir , context , path);
     }
 
     @Nullable
@@ -224,27 +212,9 @@ public final class FileUtil {
         return result.toString();
     }
 
-    public static void deleteDirectory(@NonNull DocumentFile delDir) {
-        try {
-            for (var file : delDir.listFiles()) {
-                if (file.isDirectory()) {
-                    deleteDirectory(file);
-                } else {
-                    if (file.delete()) {
-                        Log.i(TAG , "File delete");
-                    } else {
-                        Log.e(TAG , "File not delete");
-                    }
-                }
-            }
-            if (delDir.delete()) {
-                Log.i(TAG , "Directory delete");
-            } else {
-                Log.e(TAG , "Directory not delete");
-            }
-        } catch (UnsupportedOperationException e) {
-            Log.e(TAG , "Error: " , e);
-        }
+    public static void forceDelFile(Context context ,
+                                    @NonNull DocumentFile documentFile) {
+        DocumentFileUtils.forceDelete(documentFile , context);
     }
 
     @NonNull

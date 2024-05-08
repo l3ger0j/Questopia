@@ -1,11 +1,11 @@
 package org.qp.android.ui.game;
 
-import org.qp.android.model.libQP.RefreshInterfaceRequest;
-import org.qp.android.model.libQP.WindowType;
+import org.qp.android.model.lib.LibRefIRequest;
+import org.qp.android.model.lib.LibWindowType;
 
 public interface GameInterface {
 
-    void refresh(RefreshInterfaceRequest request);
+    void refresh(LibRefIRequest request);
     void showError(String message);
     void showPicture(String path);
     void showMessage(String message);
@@ -14,7 +14,7 @@ public interface GameInterface {
     int showMenu();
     void showLoadGamePopup();
     void showSaveGamePopup();
-    void showWindow(WindowType type, boolean show);
+    void showWindow(LibWindowType type, boolean show);
 
     /**
      * Set the counter location processing interval to <code>millis</code> milliseconds.

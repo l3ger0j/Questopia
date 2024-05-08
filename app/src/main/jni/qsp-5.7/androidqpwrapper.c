@@ -7,45 +7,45 @@
 JNIEnv *qspJniEnv;
 jobject qspCallbacksObj;
 
-void Java_org_qp_android_model_libQP_NativeMethods_QSPInit(JNIEnv *env,
+void Java_org_qp_android_model_lib_LibNativeMethods_QSPInit(JNIEnv *env,
 														   jobject this) {
   qspJniEnv = env;
 
   jclass cls = (*env)->GetObjectClass(env, this);
   jfieldID fid = (*env)->GetFieldID(env, cls, "callbacks",
-									"Lorg/qp/android/model/libQP/LibQpCallbacks;");
+									"Lorg/qp/android/model/lib/LibICallbacks;");
   jobject callbacks = (*env)->GetObjectField(env, this, fid);
   qspCallbacksObj = (*env)->NewGlobalRef(env, callbacks);
 
   QSPInit();
 }
 
-void Java_org_qp_android_model_libQP_NativeMethods_QSPDeInit(JNIEnv *env,
+void Java_org_qp_android_model_lib_LibNativeMethods_QSPDeInit(JNIEnv *env,
 															 jobject this) {
   QSPDeInit();
   (*env)->DeleteGlobalRef(env, qspCallbacksObj);
   qspCallbacksObj = NULL;
 }
 
-jboolean Java_org_qp_android_model_libQP_NativeMethods_QSPIsInCallBack(JNIEnv *env,
+jboolean Java_org_qp_android_model_lib_LibNativeMethods_QSPIsInCallBack(JNIEnv *env,
 																	   jobject this) {
   return QSPIsInCallBack();
 }
 
-void Java_org_qp_android_model_libQP_NativeMethods_QSPEnableDebugMode(JNIEnv *env,
+void Java_org_qp_android_model_lib_LibNativeMethods_QSPEnableDebugMode(JNIEnv *env,
 																	  jobject this,
 																	  jboolean isDebug) {
   QSPEnableDebugMode((QSP_BOOL)isDebug);
 }
 
-jobject Java_org_qp_android_model_libQP_NativeMethods_QSPGetCurStateData(JNIEnv *env,
+jobject Java_org_qp_android_model_lib_LibNativeMethods_QSPGetCurStateData(JNIEnv *env,
 																		 jobject this) {
   //!!!STUB
   //QSPGetCurStateData(jstring *loc, (int *)actIndex, (int *)line);
   return NULL;
 }
 
-jstring Java_org_qp_android_model_libQP_NativeMethods_QSPGetVersion(JNIEnv *env,
+jstring Java_org_qp_android_model_lib_LibNativeMethods_QSPGetVersion(JNIEnv *env,
 																	jobject this) {
   char *sz = qspW2C(QSPGetVersion());
   jstring result = (*env)->NewStringUTF(env, sz);
@@ -54,7 +54,7 @@ jstring Java_org_qp_android_model_libQP_NativeMethods_QSPGetVersion(JNIEnv *env,
   return result;
 }
 
-jstring Java_org_qp_android_model_libQP_NativeMethods_QSPGetCompiledDateTime(JNIEnv *env,
+jstring Java_org_qp_android_model_lib_LibNativeMethods_QSPGetCompiledDateTime(JNIEnv *env,
 																			 jobject this) {
   char *sz = qspW2C(QSPGetCompiledDateTime());
   jstring result = (*env)->NewStringUTF(env, sz);
@@ -64,14 +64,14 @@ jstring Java_org_qp_android_model_libQP_NativeMethods_QSPGetCompiledDateTime(JNI
 }
 
 ///* Number of complete location updates */
-jint Java_org_qp_android_model_libQP_NativeMethods_QSPGetFullRefreshCount(JNIEnv *env,
+jint Java_org_qp_android_model_lib_LibNativeMethods_QSPGetFullRefreshCount(JNIEnv *env,
 																		  jobject this) {
   return QSPGetFullRefreshCount();
 }
 
 ///* ------------------------------------------------------------ */
 ///* Full path to the downloaded game file */
-jstring Java_org_qp_android_model_libQP_NativeMethods_QSPGetQstFullPath(JNIEnv *env,
+jstring Java_org_qp_android_model_lib_LibNativeMethods_QSPGetQstFullPath(JNIEnv *env,
 																		jobject this) {
   char *sz = qspW2C(QSPGetQstFullPath());
   jstring result = (*env)->NewStringUTF(env, sz);
@@ -82,7 +82,7 @@ jstring Java_org_qp_android_model_libQP_NativeMethods_QSPGetQstFullPath(JNIEnv *
 
 ///* ------------------------------------------------------------ */
 ///* Name of the current location */
-jstring Java_org_qp_android_model_libQP_NativeMethods_QSPGetCurLoc(JNIEnv *env,
+jstring Java_org_qp_android_model_lib_LibNativeMethods_QSPGetCurLoc(JNIEnv *env,
 																   jobject this) {
   char *sz = qspW2C(QSPGetCurLoc());
   jstring result = (*env)->NewStringUTF(env, sz);
@@ -95,7 +95,7 @@ jstring Java_org_qp_android_model_libQP_NativeMethods_QSPGetCurLoc(JNIEnv *env,
 ///* Basic description of the location */
 //
 ///* Text of the main location description window */
-jstring Java_org_qp_android_model_libQP_NativeMethods_QSPGetMainDesc(JNIEnv *env,
+jstring Java_org_qp_android_model_lib_LibNativeMethods_QSPGetMainDesc(JNIEnv *env,
 																	 jobject this) {
   char *sz = qspW2C(QSPGetMainDesc());
   jstring result = (*env)->NewStringUTF(env, sz);
@@ -105,7 +105,7 @@ jstring Java_org_qp_android_model_libQP_NativeMethods_QSPGetMainDesc(JNIEnv *env
 }
 
 ///* The ability to change the text of the main description */
-jboolean Java_org_qp_android_model_libQP_NativeMethods_QSPIsMainDescChanged(JNIEnv *env,
+jboolean Java_org_qp_android_model_lib_LibNativeMethods_QSPIsMainDescChanged(JNIEnv *env,
 																			jobject this) {
   return QSPIsMainDescChanged();
 }
@@ -114,7 +114,7 @@ jboolean Java_org_qp_android_model_libQP_NativeMethods_QSPIsMainDescChanged(JNIE
 ///* Additional description of the location */
 //
 ///* Text of the additional location description window */
-jstring Java_org_qp_android_model_libQP_NativeMethods_QSPGetVarsDesc(JNIEnv *env,
+jstring Java_org_qp_android_model_lib_LibNativeMethods_QSPGetVarsDesc(JNIEnv *env,
 																	 jobject this) {
   char *sz = qspW2C(QSPGetVarsDesc());
   jstring result = (*env)->NewStringUTF(env, sz);
@@ -125,7 +125,7 @@ jstring Java_org_qp_android_model_libQP_NativeMethods_QSPGetVarsDesc(JNIEnv *env
 
 ///* The ability to change the text of the additional description */
 //QSP_BOOL QSPIsVarsDescChanged()
-jboolean Java_org_qp_android_model_libQP_NativeMethods_QSPIsVarsDescChanged(JNIEnv *env,
+jboolean Java_org_qp_android_model_lib_LibNativeMethods_QSPIsVarsDescChanged(JNIEnv *env,
 																			jobject this) {
   return QSPIsVarsDescChanged();
 }
@@ -133,7 +133,7 @@ jboolean Java_org_qp_android_model_libQP_NativeMethods_QSPIsVarsDescChanged(JNIE
 ///* ------------------------------------------------------------ */
 ///* Get the value of the specified expression */
 //(const QSP_CHAR *expr, QSP_BOOL *isString, int *numVal, QSP_CHAR *strVal, int strValBufSize)
-jobject Java_org_qp_android_model_libQP_NativeMethods_QSPGetExprValue(JNIEnv *env,
+jobject Java_org_qp_android_model_lib_LibNativeMethods_QSPGetExprValue(JNIEnv *env,
 																	  jobject this) {
   //!!!STUB
   //{
@@ -159,7 +159,7 @@ jobject Java_org_qp_android_model_libQP_NativeMethods_QSPGetExprValue(JNIEnv *en
 
 ///* ------------------------------------------------------------ */
 ///* Text of the input line */
-void Java_org_qp_android_model_libQP_NativeMethods_QSPSetInputStrText(JNIEnv *env,
+void Java_org_qp_android_model_lib_LibNativeMethods_QSPSetInputStrText(JNIEnv *env,
 																	  jobject this,
 																	  jstring val) {
   const char *str = (*env)->GetStringUTFChars(env, val, NULL);
@@ -176,14 +176,14 @@ void Java_org_qp_android_model_libQP_NativeMethods_QSPSetInputStrText(JNIEnv *en
 ///* List of actions */
 //
 ///* Number of actions */
-jint Java_org_qp_android_model_libQP_NativeMethods_QSPGetActionsCount(JNIEnv *env,
+jint Java_org_qp_android_model_lib_LibNativeMethods_QSPGetActionsCount(JNIEnv *env,
 																	  jobject this) {
   return QSPGetActionsCount();
 }
 
 ///* These actions with the specified index */
 //void QSPGetActionData(int ind, QSP_CHAR **image, QSP_CHAR **desc)
-jobject Java_org_qp_android_model_libQP_NativeMethods_QSPGetActionData(JNIEnv *env,
+jobject Java_org_qp_android_model_lib_LibNativeMethods_QSPGetActionData(JNIEnv *env,
 																	   jobject this,
 																	   jint ind) {
   char *qspImgFileName;
@@ -199,7 +199,7 @@ jobject Java_org_qp_android_model_libQP_NativeMethods_QSPGetActionData(JNIEnv *e
   if (isz != NULL)
 	free(isz);
 
-  jclass clazz = (*env)->FindClass(env, "org/qp/android/dto/libQP/ActionData");
+  jclass clazz = (*env)->FindClass(env, "org/qp/android/dto/lib/LibActionData");
   if (clazz == 0)
 	return 0;
   jobject obj = (*env)->AllocObject(env, clazz);
@@ -215,14 +215,14 @@ jobject Java_org_qp_android_model_libQP_NativeMethods_QSPGetActionData(JNIEnv *e
 }
 
 ///* Executing the code of the selected action */
-jboolean Java_org_qp_android_model_libQP_NativeMethods_QSPExecuteSelActionCode(JNIEnv *env,
+jboolean Java_org_qp_android_model_lib_LibNativeMethods_QSPExecuteSelActionCode(JNIEnv *env,
 																			   jobject this,
 																			   jboolean isRefresh) {
   return QSPExecuteSelActionCode((QSP_BOOL)isRefresh);
 }
 
 ///* Set the index of the selected action */
-jboolean Java_org_qp_android_model_libQP_NativeMethods_QSPSetSelActionIndex(JNIEnv *env,
+jboolean Java_org_qp_android_model_lib_LibNativeMethods_QSPSetSelActionIndex(JNIEnv *env,
 																			jobject this,
 																			jint ind,
 																			jboolean isRefresh) {
@@ -230,13 +230,13 @@ jboolean Java_org_qp_android_model_libQP_NativeMethods_QSPSetSelActionIndex(JNIE
 }
 
 ///* Get the index of the selected action */
-jint Java_org_qp_android_model_libQP_NativeMethods_QSPGetSelActionIndex(JNIEnv *env,
+jint Java_org_qp_android_model_lib_LibNativeMethods_QSPGetSelActionIndex(JNIEnv *env,
 																		jobject this) {
   return QSPGetSelActionIndex();
 }
 
 ///* Ability to change the list of actions */
-jboolean Java_org_qp_android_model_libQP_NativeMethods_QSPIsActionsChanged(JNIEnv *env,
+jboolean Java_org_qp_android_model_lib_LibNativeMethods_QSPIsActionsChanged(JNIEnv *env,
 																		   jobject this) {
   return QSPIsActionsChanged();
 }
@@ -245,14 +245,14 @@ jboolean Java_org_qp_android_model_libQP_NativeMethods_QSPIsActionsChanged(JNIEn
 ///* List of objects */
 //
 ///* Number of objects */
-jint Java_org_qp_android_model_libQP_NativeMethods_QSPGetObjectsCount(JNIEnv *env,
+jint Java_org_qp_android_model_lib_LibNativeMethods_QSPGetObjectsCount(JNIEnv *env,
 																	  jobject this) {
   return QSPGetObjectsCount();
 }
 
 ///* Object data with the specified index */
 //void QSPGetObjectData(int ind, QSP_CHAR **image, QSP_CHAR **desc)
-jobject Java_org_qp_android_model_libQP_NativeMethods_QSPGetObjectData(JNIEnv *env,
+jobject Java_org_qp_android_model_lib_LibNativeMethods_QSPGetObjectData(JNIEnv *env,
 																	   jobject this,
 																	   jint ind) {
   char *qspImgFileName;
@@ -269,7 +269,7 @@ jobject Java_org_qp_android_model_libQP_NativeMethods_QSPGetObjectData(JNIEnv *e
   if (isz != NULL)
 	free(isz);
 
-  jclass clazz = (*env)->FindClass(env, "org/qp/android/dto/libQP/ObjectData");
+  jclass clazz = (*env)->FindClass(env, "org/qp/android/dto/lib/LibObjectData");
   if (clazz == 0)
 	return 0;
   jobject obj = (*env)->AllocObject(env, clazz);
@@ -286,7 +286,7 @@ jobject Java_org_qp_android_model_libQP_NativeMethods_QSPGetObjectData(JNIEnv *e
 }
 
 ///* Set the index of the selected object */
-jboolean Java_org_qp_android_model_libQP_NativeMethods_QSPSetSelObjectIndex(JNIEnv *env,
+jboolean Java_org_qp_android_model_lib_LibNativeMethods_QSPSetSelObjectIndex(JNIEnv *env,
 																			jobject this,
 																			jint ind,
 																			jboolean isRefresh) {
@@ -294,13 +294,13 @@ jboolean Java_org_qp_android_model_libQP_NativeMethods_QSPSetSelObjectIndex(JNIE
 }
 
 ///* Get the index of the selected object */
-jint Java_org_qp_android_model_libQP_NativeMethods_QSPGetSelObjectIndex(JNIEnv *env,
+jint Java_org_qp_android_model_lib_LibNativeMethods_QSPGetSelObjectIndex(JNIEnv *env,
 																		jobject this) {
   return QSPGetSelObjectIndex();
 }
 
 ///* Ability to change the list of objects */
-jboolean Java_org_qp_android_model_libQP_NativeMethods_QSPIsObjectsChanged(JNIEnv *env,
+jboolean Java_org_qp_android_model_lib_LibNativeMethods_QSPIsObjectsChanged(JNIEnv *env,
 																		   jobject this) {
   return QSPIsObjectsChanged();
 }
@@ -308,7 +308,7 @@ jboolean Java_org_qp_android_model_libQP_NativeMethods_QSPIsObjectsChanged(JNIEn
 ///* ------------------------------------------------------------ */
 ///* Показ / скрытие окон */
 void
-Java_org_qp_android_model_libQP_NativeMethods_QSPShowWindow(JNIEnv *env, jobject this, jint type,
+Java_org_qp_android_model_lib_LibNativeMethods_QSPShowWindow(JNIEnv *env, jobject this, jint type,
 															jboolean isShow) {
   QSPShowWindow(type, (QSP_BOOL)isShow);
 }
@@ -318,7 +318,7 @@ Java_org_qp_android_model_libQP_NativeMethods_QSPShowWindow(JNIEnv *env, jobject
 //
 ///* Get the number of array elements */
 //QSP_BOOL QSPGetVarValuesCount(const QSP_CHAR *name, int *count)
-jobject Java_org_qp_android_model_libQP_NativeMethods_QSPGetVarValuesCount(JNIEnv *env,
+jobject Java_org_qp_android_model_lib_LibNativeMethods_QSPGetVarValuesCount(JNIEnv *env,
 																		   jobject this,
 																		   jstring name) {
   //!!!STUB
@@ -336,7 +336,7 @@ jobject Java_org_qp_android_model_libQP_NativeMethods_QSPGetVarValuesCount(JNIEn
 
 ///* Get the values of the specified array element */
 //QSP_BOOL QSPGetVarValues(const QSP_CHAR *name, int ind, int *numVal, QSP_CHAR **strVal)
-jobject Java_org_qp_android_model_libQP_NativeMethods_QSPGetVarValues(JNIEnv *env,
+jobject Java_org_qp_android_model_lib_LibNativeMethods_QSPGetVarValues(JNIEnv *env,
 																	  jobject this,
 																	  jstring name,
 																	  jint ind) {
@@ -352,7 +352,7 @@ jobject Java_org_qp_android_model_libQP_NativeMethods_QSPGetVarValues(JNIEnv *en
   QSP_BOOL result = QSPGetVarValues(strConverted, (int)ind, &numVal, &strVal);
 
   // Attempt to find the GetVarValuesResponse class.
-  jclass clazz = (*env)->FindClass(env, "org/qp/android/dto/libQP/GetVarValuesResponse");
+  jclass clazz = (*env)->FindClass(env, "org/qp/android/dto/lib/LibVarValResp");
   // If this class does not exist then return null.
   if (clazz == 0)
 	return NULL;
@@ -389,14 +389,14 @@ jobject Java_org_qp_android_model_libQP_NativeMethods_QSPGetVarValues(JNIEnv *en
 }
 
 ///* Get the maximum number of variables */
-jint Java_org_qp_android_model_libQP_NativeMethods_QSPGetMaxVarsCount(JNIEnv *env,
+jint Java_org_qp_android_model_lib_LibNativeMethods_QSPGetMaxVarsCount(JNIEnv *env,
 																	  jobject this) {
   return QSPGetMaxVarsCount();
 }
 
 ///* Get the variable name with the specified index */
 //QSP_BOOL QSPGetVarNameByIndex(int index, QSP_CHAR **name)
-jobject Java_org_qp_android_model_libQP_NativeMethods_QSPGetVarNameByIndex(JNIEnv *env,
+jobject Java_org_qp_android_model_lib_LibNativeMethods_QSPGetVarNameByIndex(JNIEnv *env,
 																		   jobject this,
 																		   jint index) {
   //!!!STUB
@@ -412,7 +412,7 @@ jobject Java_org_qp_android_model_libQP_NativeMethods_QSPGetVarNameByIndex(JNIEn
 ///* Code Execution */
 //
 ///* Executing a line of code */
-jboolean Java_org_qp_android_model_libQP_NativeMethods_QSPExecString(JNIEnv *env,
+jboolean Java_org_qp_android_model_lib_LibNativeMethods_QSPExecString(JNIEnv *env,
 																	 jobject this,
 																	 jstring s,
 																	 jboolean isRefresh) {
@@ -428,7 +428,7 @@ jboolean Java_org_qp_android_model_libQP_NativeMethods_QSPExecString(JNIEnv *env
 }
 
 ///* Executing the code of the specified location */
-jboolean Java_org_qp_android_model_libQP_NativeMethods_QSPExecLocationCode(JNIEnv *env,
+jboolean Java_org_qp_android_model_lib_LibNativeMethods_QSPExecLocationCode(JNIEnv *env,
 																		   jobject this,
 																		   jstring name,
 																		   jboolean isRefresh) {
@@ -444,14 +444,14 @@ jboolean Java_org_qp_android_model_libQP_NativeMethods_QSPExecLocationCode(JNIEn
 }
 
 ///* Execution of the location-counter code */
-jboolean Java_org_qp_android_model_libQP_NativeMethods_QSPExecCounter(JNIEnv *env,
+jboolean Java_org_qp_android_model_lib_LibNativeMethods_QSPExecCounter(JNIEnv *env,
 																	  jobject this,
 																	  jboolean isRefresh) {
   return QSPExecCounter((QSP_BOOL)isRefresh);
 }
 
 ///* Execution of the location-handler code of the input string */
-jboolean Java_org_qp_android_model_libQP_NativeMethods_QSPExecUserInput(JNIEnv *env,
+jboolean Java_org_qp_android_model_lib_LibNativeMethods_QSPExecUserInput(JNIEnv *env,
 																		jobject this,
 																		jboolean isRefresh) {
   return QSPExecUserInput((QSP_BOOL)isRefresh);
@@ -461,9 +461,9 @@ jboolean Java_org_qp_android_model_libQP_NativeMethods_QSPExecUserInput(JNIEnv *
 ///* Error */
 //
 ///* Get information about the latest error */
-jobject Java_org_qp_android_model_libQP_NativeMethods_QSPGetLastErrorData(JNIEnv *env,
+jobject Java_org_qp_android_model_lib_LibNativeMethods_QSPGetLastErrorData(JNIEnv *env,
 																		  jobject this) {
-  jclass clazz = (*env)->FindClass(env, "org/qp/android/dto/libQP/ErrorData");
+  jclass clazz = (*env)->FindClass(env, "org/qp/android/dto/lib/LibErrorData");
   if (clazz == 0)
 	return NULL;
   jfieldID fid = (*env)->GetFieldID(env, clazz, "locName", "Ljava/lang/String;");
@@ -495,7 +495,7 @@ jobject Java_org_qp_android_model_libQP_NativeMethods_QSPGetLastErrorData(JNIEnv
 }
 
 ///* Get a description of the error by its number */
-jstring Java_org_qp_android_model_libQP_NativeMethods_QSPGetErrorDesc(JNIEnv *env,
+jstring Java_org_qp_android_model_lib_LibNativeMethods_QSPGetErrorDesc(JNIEnv *env,
 																	  jobject this,
 																	  jint errorNum) {
   char *sz = qspW2C(QSPGetErrorDesc(errorNum));
@@ -509,7 +509,7 @@ jstring Java_org_qp_android_model_libQP_NativeMethods_QSPGetErrorDesc(JNIEnv *en
 ///* Game Management */
 //
 ///* Loading a new game from a file */
-jboolean Java_org_qp_android_model_libQP_NativeMethods_QSPLoadGameWorld(JNIEnv *env, jobject this,
+jboolean Java_org_qp_android_model_lib_LibNativeMethods_QSPLoadGameWorld(JNIEnv *env, jobject this,
 																		jstring fileName) {
   const char *str = (*env)->GetStringUTFChars(env, fileName, NULL);
   if (str == NULL)
@@ -523,7 +523,7 @@ jboolean Java_org_qp_android_model_libQP_NativeMethods_QSPLoadGameWorld(JNIEnv *
 
 ///* Loading a new game from memory */
 jboolean
-Java_org_qp_android_model_libQP_NativeMethods_QSPLoadGameWorldFromData(JNIEnv *env, jobject this,
+Java_org_qp_android_model_lib_LibNativeMethods_QSPLoadGameWorldFromData(JNIEnv *env, jobject this,
 																	   jbyteArray data,
 																	   jint dataSize,
 																	   jstring fileName) {
@@ -557,7 +557,7 @@ Java_org_qp_android_model_libQP_NativeMethods_QSPLoadGameWorldFromData(JNIEnv *e
 }
 
 ///* Saving the state to a file */
-jboolean Java_org_qp_android_model_libQP_NativeMethods_QSPSaveGame(JNIEnv *env, jobject this,
+jboolean Java_org_qp_android_model_lib_LibNativeMethods_QSPSaveGame(JNIEnv *env, jobject this,
 																   jstring fileName,
 																   jboolean isRefresh) {
   const char *str = (*env)->GetStringUTFChars(env, fileName, NULL);
@@ -571,7 +571,7 @@ jboolean Java_org_qp_android_model_libQP_NativeMethods_QSPSaveGame(JNIEnv *env, 
 }
 
 ///* Saving the state to memory */
-jbyteArray Java_org_qp_android_model_libQP_NativeMethods_QSPSaveGameAsData(JNIEnv *env,
+jbyteArray Java_org_qp_android_model_lib_LibNativeMethods_QSPSaveGameAsData(JNIEnv *env,
 																		   jobject this,
 																		   jboolean isRefresh) {
   void *buffer = NULL;
@@ -590,7 +590,7 @@ jbyteArray Java_org_qp_android_model_libQP_NativeMethods_QSPSaveGameAsData(JNIEn
 }
 
 ///* Loading status from a file */
-jboolean Java_org_qp_android_model_libQP_NativeMethods_QSPOpenSavedGame(JNIEnv *env, jobject this,
+jboolean Java_org_qp_android_model_lib_LibNativeMethods_QSPOpenSavedGame(JNIEnv *env, jobject this,
 																		jstring fileName,
 																		jboolean isRefresh) {
   const char *str = (*env)->GetStringUTFChars(env, fileName, NULL);
@@ -604,7 +604,7 @@ jboolean Java_org_qp_android_model_libQP_NativeMethods_QSPOpenSavedGame(JNIEnv *
 }
 
 ///* Loading state from memory */
-jboolean Java_org_qp_android_model_libQP_NativeMethods_QSPOpenSavedGameFromData(JNIEnv *env,
+jboolean Java_org_qp_android_model_lib_LibNativeMethods_QSPOpenSavedGameFromData(JNIEnv *env,
 																				jobject this,
 																				jbyteArray data,
 																				jint dataSize,
@@ -625,7 +625,7 @@ jboolean Java_org_qp_android_model_libQP_NativeMethods_QSPOpenSavedGameFromData(
 }
 
 ///* Restarting the game */
-jboolean Java_org_qp_android_model_libQP_NativeMethods_QSPRestartGame(JNIEnv *env,
+jboolean Java_org_qp_android_model_lib_LibNativeMethods_QSPRestartGame(JNIEnv *env,
 																	  jobject this,
 																	  jboolean isRefresh) {
   return QSPRestartGame((QSP_BOOL)isRefresh);
@@ -633,7 +633,7 @@ jboolean Java_org_qp_android_model_libQP_NativeMethods_QSPRestartGame(JNIEnv *en
 
 ///* ------------------------------------------------------------ */
 ///* Menu */
-void Java_org_qp_android_model_libQP_NativeMethods_QSPSelectMenuItem(JNIEnv *env,
+void Java_org_qp_android_model_lib_LibNativeMethods_QSPSelectMenuItem(JNIEnv *env,
 																	 jobject this,
 																	 jint ind) {
   QSPSelectMenuItem(ind);

@@ -18,6 +18,11 @@
         android:key="imagePref" />
 
     <Preference
+        android:icon="@drawable/baseline_music_note_24"
+        android:title="@string/soundCatTitle"
+        android:key="soundPref" />
+
+    <Preference
         android:icon="@drawable/baseline_extension_24"
         android:title="@string/pluginTitle"
         android:key="showExtensionMenu"/>

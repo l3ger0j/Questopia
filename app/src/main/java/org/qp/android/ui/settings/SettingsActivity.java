@@ -54,7 +54,8 @@ public class SettingsActivity extends AppCompatActivity {
                     var currCharLabel = navController.getCurrentDestination().getLabel();
                     if (currCharLabel == null) return;
                     switch (currCharLabel.toString()) {
-                        case "SettingGeneralFragment" , "SettingTextFragment" , "SettingImageFragment" ->
+                        case "SettingGeneralFragment" , "SettingTextFragment" ,
+                                "SettingImageFragment", "SettingSoundFragment" ->
                                 navController.navigate(R.id.settingsFragment);
                         default -> finish();
                     }
@@ -71,7 +72,8 @@ public class SettingsActivity extends AppCompatActivity {
             switch (currCharLabel.toString()) {
                 case "PluginFragment" , "NewsFragment" ->
                         getOnBackPressedDispatcher().onBackPressed();
-                case "SettingGeneralFragment" , "SettingTextFragment" , "SettingImageFragment" ->
+                case "SettingGeneralFragment" , "SettingTextFragment" ,
+                        "SettingImageFragment" , "SettingSoundFragment" ->
                         navController.navigate(R.id.settingsFragment);
                 default -> finish();
             }

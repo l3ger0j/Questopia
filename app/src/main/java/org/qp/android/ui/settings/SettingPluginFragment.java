@@ -30,7 +30,7 @@ import org.qp.android.plugin.IQuestPlugin;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class SettingsPluginFragment extends Fragment {
+public class SettingPluginFragment extends Fragment {
 
     private final String TAG = getClass().getSimpleName();
 
@@ -88,7 +88,7 @@ public class SettingsPluginFragment extends Fragment {
                     );
                     var arrayList = new ArrayList<PluginInfo>();
                     arrayList.add(pluginInfo);
-                    var adapter = new SettingsPluginRecycler(requireActivity());
+                    var adapter = new SettingPluginRecycler(requireActivity());
                     adapter.submitList(arrayList);
                     recyclerView.setAdapter(adapter);
                 } catch (RemoteException e) {

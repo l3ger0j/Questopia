@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class SettingsPluginRecycler extends RecyclerView.Adapter<SettingsPluginRecycler.ViewHolder> {
+public class SettingPluginRecycler extends RecyclerView.Adapter<SettingPluginRecycler.ViewHolder> {
     private final Context context;
     private final AsyncListDiffer<PluginInfo> differ =
             new AsyncListDiffer<>(this , DIFF_CALLBACK);
@@ -53,21 +53,21 @@ public class SettingsPluginRecycler extends RecyclerView.Adapter<SettingsPluginR
         differ.submitList(pluginInfo);
     }
 
-    public SettingsPluginRecycler(Context context) {
+    public SettingPluginRecycler(Context context) {
         this.context = context;
     }
 
     @NonNull
     @Override
-    public SettingsPluginRecycler.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent , int viewType) {
+    public SettingPluginRecycler.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent , int viewType) {
         var inflater = LayoutInflater.from(parent.getContext());
         ListItemPluginBinding listItemPluginBinding =
                 DataBindingUtil.inflate(inflater, R.layout.list_item_plugin, parent, false);
-        return new SettingsPluginRecycler.ViewHolder(listItemPluginBinding);
+        return new SettingPluginRecycler.ViewHolder(listItemPluginBinding);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull SettingsPluginRecycler.ViewHolder holder , int position) {
+    public void onBindViewHolder(@NonNull SettingPluginRecycler.ViewHolder holder , int position) {
         holder.listItemPluginBinding(getGameData().get(position));
         var pluginInfo = getItem(position);
 

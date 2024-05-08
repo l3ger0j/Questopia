@@ -1,11 +1,11 @@
 package org.qp.android.model.service;
 
 import static org.qp.android.helpers.utils.Base64Util.encodeBase64;
-import static org.qp.android.helpers.utils.FileUtil.fromRelPath;
+import static org.qp.android.helpers.utils.FileUtil.findFileFromRelPath;
 import static org.qp.android.helpers.utils.StringUtil.isNotEmpty;
 import static org.qp.android.helpers.utils.StringUtil.isNullOrEmpty;
 
-import android.content.res.Resources;
+import android.content.Context;
 import android.util.Base64;
 import android.util.Log;
 
@@ -32,34 +32,67 @@ public class HtmlProcessor {
     private SettingsController controller;
     private DocumentFile curGameDir;
 
-    public HtmlProcessor setController(SettingsController controller) {
-        this.controller = controller;
-        return this;
-    }
-
-    public void setCurGameDir(DocumentFile curGameDir) {
-        this.curGameDir = curGameDir;
-    }
-
-    public HtmlProcessor(ImageProvider imageProvider) {
-        this.imageProvider = imageProvider;
+    public String getSrcDir(String html) {
+        var document = Jsoup.parse(html);
+        var imageElement = document.select("img").first();
+        if (imageElement == null) return "";
+        return imageElement.attr("src");
     }
 
     /**
      * Bring the HTML code <code>html</code> obtained from the library to
      * HTML code acceptable for display in {@linkplain android.webkit.WebView}.
      */
-    public String convertQspHtmlToWebViewHtml(String html) {
+    public String getCleanHtmlPageAndImage(@NonNull Context context ,
+                                           @NonNull String dirtyHtml) {
+        var document = Jsoup.parse(dirtyHtml);
+        document.outputSettings().prettyPrint(false);
+        var body = document.body();
+        processHTMLImages(context , body);
+        processHTMLVideos(body);
+        return document.toString();
+    }
+
+    public String getCleanHtmlPageNotImage(String dirtyHtml) {
+        var document = Jsoup.parse(dirtyHtml);
+        document.outputSettings().prettyPrint(false);
+        var body = document.body();
+        body.select("img").remove();
+        body.select("video").remove();
+        return document.toString();
+    }
+
+    public String oldGetCleanHtmlPageNotImage(String html) {
         if (isNullOrEmpty(html)) return "";
+
         var result = unescapeQuotes(html);
         result = encodeExec(result);
         result = lineBreaksInHTML(result);
+
         var document = Jsoup.parse(result);
         document.outputSettings().prettyPrint(false);
         var body = document.body();
-        processHTMLImages(body);
-        processHTMLVideos(body);
+        body.select("img").remove();
+        body.select("video").remove();
         return document.toString();
+    }
+
+    public HtmlProcessor setController(SettingsController controller) {
+        this.controller = controller;
+        return this;
+    }
+
+    public HtmlProcessor setCurGameDir(DocumentFile curGameDir) {
+        this.curGameDir = curGameDir;
+        return this;
+    }
+
+    public boolean hasHTMLTags(String text){
+        return pattern.matcher(text).find();
+    }
+
+    public HtmlProcessor(ImageProvider imageProvider) {
+        this.imageProvider = imageProvider;
     }
 
     public String convertLibHtmlToWebHtml(String html) {
@@ -67,24 +100,6 @@ public class HtmlProcessor {
         var result = unescapeQuotes(html);
         result = encodeExec(result);
         return lineBreaksInHTML(result);
-    }
-
-    public String getCleanHtmlPageAndImage(String dirtyHtml) {
-        var document = Jsoup.parse(dirtyHtml);
-        document.outputSettings().prettyPrint(true);
-        var body = document.body();
-        processHTMLImages(body);
-        processHTMLVideos(body);
-        return document.toString();
-    }
-
-    public String getCleanHtmlPageNotImage(String dirtyHtml) {
-        var document = Jsoup.parse(dirtyHtml);
-        document.outputSettings().prettyPrint(true);
-        var body = document.body();
-        body.select("img").remove();
-        body.select("video").remove();
-        return document.toString();
     }
 
     @NonNull
@@ -116,7 +131,8 @@ public class HtmlProcessor {
                 .replace("\r", "");
     }
 
-    private void processHTMLImages(@NonNull Element documentBody) {
+    private void processHTMLImages(@NonNull Context context,
+                                   @NonNull Element documentBody) {
         var dynBlackList = new ArrayList<String>();
         documentBody.select("a").forEach(element -> {
             if (element.attr("href").contains("exec:")) {
@@ -134,41 +150,49 @@ public class HtmlProcessor {
                 img.attr("style", "display: inline; height: auto; max-width: 100%;");
             }
             if (!controller.isUseAutoWidth) {
-                if (shouldChangeWidth(img)) {
+                if (shouldChangeWidth(context , img)) {
                     img.attr("style" , "max-width:" + controller.customWidthImage+";");
                 }
             } else if (!controller.isUseAutoHeight) {
-                if (shouldChangeHeight(img)) {
+                if (shouldChangeHeight(context , img)) {
                     img.attr("style" , "max-height:" + controller.customHeightImage+";");
                 }
             }
         });
     }
 
-    private boolean shouldChangeWidth(Element img) {
+    private boolean shouldChangeWidth(Context context,
+                                      Element img) {
         var relPath = img.attr("src");
-        var imageFile = fromRelPath(relPath , curGameDir);
+        var imageFile = findFileFromRelPath(context , relPath , curGameDir);
         if (imageFile == null) return false;
-        var drawable = imageProvider.getDrawableFromPath(imageFile.getUri());
+        var drawable = imageProvider.getDrawableFromPath(context , imageFile.getUri());
         if (drawable == null) return false;
-        return drawable.getIntrinsicWidth() < Resources.getSystem()
-                .getDisplayMetrics().widthPixels;
+        var widthPix = context.getResources().getDisplayMetrics().widthPixels;
+        return drawable.getIntrinsicWidth() < widthPix;
     }
 
-    private boolean shouldChangeHeight(Element img) {
+    private boolean shouldChangeHeight(Context context,
+                                       Element img) {
         var relPath = img.attr("src");
-        var imageFile = fromRelPath(relPath , curGameDir);
+        var imageFile = findFileFromRelPath(context , relPath , curGameDir);
         if (imageFile == null) return false;
-        var drawable = imageProvider.getDrawableFromPath(imageFile.getUri());
+        var drawable = imageProvider.getDrawableFromPath(context , imageFile.getUri());
         if (drawable == null) return false;
-        return drawable.getIntrinsicHeight() < Resources.getSystem()
-                .getDisplayMetrics().heightPixels;
+        var heightPix = context.getResources().getDisplayMetrics().heightPixels;
+        return drawable.getIntrinsicHeight() < heightPix;
     }
 
     private void processHTMLVideos(Element documentBody) {
-        documentBody.select("video")
-                .attr("style", "max-width:100%;")
-                .attr("muted", "true");
+        var videoElement = documentBody.select("video");
+        videoElement.attr("style", "max-width:100%;");
+        if (controller.isVideoMute) {
+            videoElement.attr("muted", "true");
+            videoElement.removeAttr("controls");
+        } else {
+            videoElement.attr("controls", "true");
+            videoElement.removeAttr("muted");
+        }
     }
 
     /**
@@ -210,17 +234,4 @@ public class HtmlProcessor {
         return Jsoup.clean(dirtyHTML , Safelist.none());
     }
 
-    public String getSrcDir(String html) {
-        var document = Jsoup.parse(html);
-        var imageElement = document.select("img").first();
-        String srcValue = null;
-        if (imageElement != null) {
-            srcValue = imageElement.attr("src");
-        }
-        return srcValue;
-    }
-
-    public boolean hasHTMLTags(String text){
-        return pattern.matcher(text).find();
-    }
 }

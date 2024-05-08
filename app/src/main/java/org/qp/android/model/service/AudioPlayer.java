@@ -40,8 +40,9 @@ public class AudioPlayer {
         return isThrowError;
     }
 
-    public void setCurGameDir(DocumentFile curGameDir) {
+    public AudioPlayer setCurGameDir(DocumentFile curGameDir) {
         this.curGameDir = curGameDir;
+        return this;
     }
 
     public AudioPlayer(Context context) {

@@ -1,6 +1,6 @@
-package org.qp.android.model.libQP;
+package org.qp.android.model.lib;
 
-public class InterfaceConfiguration {
+public class LibIConfig {
     public boolean useHtml;
     public int fontSize;
     public int backColor;

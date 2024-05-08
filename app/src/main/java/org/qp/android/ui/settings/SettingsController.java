@@ -34,6 +34,7 @@ public class SettingsController {
     public boolean isUseFullscreenImages;
     public boolean isUseImageDebug;
     public boolean isUseMusicDebug;
+    public boolean isVideoMute;
     public String language;
 
     private static SettingsController INSTANCE;
@@ -65,14 +66,13 @@ public class SettingsController {
         settingsController.actionsHeightRatio = parseActionsHeightRatio(preferences.getString("actsHeight", "1/3"));
         settingsController.isUseAutoscroll = preferences.getBoolean("autoscroll", true);
         settingsController.isUseExecString = preferences.getBoolean("execString", false);
-        settingsController.isUseMusicDebug = preferences.getBoolean("debugMusic", false);
         settingsController.isUseSeparator = preferences.getBoolean("separator", false);
         settingsController.isUseGameFont = preferences.getBoolean("useGameFont", false);
         settingsController.isUseImmersiveMode = preferences.getBoolean("immersiveMode", true);
-        settingsController.isSoundEnabled = preferences.getBoolean("sound", true);
         settingsController.language = preferences.getString("lang", "ru");
         imageSettings(settingsController, preferences);
         colorSettings(settingsController , preferences);
+        soundSettings(settingsController , preferences);
         return settingsController;
     }
 
@@ -95,6 +95,13 @@ public class SettingsController {
         settingsController.customHeightImage = Integer.parseInt(preferences.getString("customHeightImage", "400"));
         settingsController.isUseFullscreenImages = preferences.getBoolean("fullScreenImage", false);
         settingsController.isUseImageDebug = preferences.getBoolean("debugImage", false);
+    }
+
+    private static void soundSettings(@NonNull SettingsController controller,
+                                      @NonNull SharedPreferences preferences) {
+        controller.isSoundEnabled = preferences.getBoolean("sound", true);
+        controller.isVideoMute = preferences.getBoolean("videoMute", true);
+        controller.isUseMusicDebug = preferences.getBoolean("debugMusic", false);
     }
 
     private static float parseActionsHeightRatio(@NonNull String str) {
