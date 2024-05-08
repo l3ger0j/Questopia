@@ -173,8 +173,10 @@ public class HtmlProcessor {
         videoElement.attr("style", "max-width:100%;");
         if (controller.isVideoMute) {
             videoElement.attr("muted", "true");
+            videoElement.removeAttr("controls");
         } else {
-            videoElement.attr("muted", "false");
+            videoElement.attr("controls", "true");
+            videoElement.removeAttr("muted");
         }
     }
 
