@@ -28,6 +28,13 @@ jobs:
         distribution: 'temurin'
         cache: gradle
 
+    - name: Checkout keystore repo
+      uses: actions/checkout@v4
+      with:
+        repository: ${{ secrets.KEYSTORE_GIT_REPOSITORY }}
+        token: ${{ secrets.KEYSTORE_ACCESS_TOKEN }}
+        path: app/keystore
+
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
@@ -36,13 +43,6 @@ jobs:
         ./gradlew test
         ./gradlew assembleRelease --stacktrace
         ./gradlew bundleRelease
-
-    - name: Checkout keystore repo
-      uses: actions/checkout@v4
-      with:
-        repository: ${{ secrets.KEYSTORE_GIT_REPOSITORY }}
-        token: ${{ secrets.KEYSTORE_ACCESS_TOKEN }}
-        path: app/keystore
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
