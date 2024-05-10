@@ -13,27 +13,27 @@ public class HtmlProcessorTest {
 
     @Test
     public void convertQspHtmlToWebViewHtml_escapedQuotes() {
-        String html = "Test1 \\\"Test2\\\" Test3";
+        var html = "Test1 \\\"Test2\\\" Test3";
 
-        String result = sut.getCleanHtmlPageNotImage(html);
+        var result = sut.oldGetCleanHtmlPageNotImage(html);
 
         assertEquals("<html><head></head><body>Test1 'Test2' Test3</body></html>", result);
     }
 
     @Test
     public void convertQspHtmlToWebViewHtml_lineBreaks() {
-        String html = "Test1\nTest2\r\nTest3";
+        var html = "Test1\nTest2\r\nTest3";
 
-        String result = sut.getCleanHtmlPageNotImage(html);
+        var result = sut.oldGetCleanHtmlPageNotImage(html);
 
         assertEquals("<html><head></head><body>Test1<br>Test2<br>Test3</body></html>", result);
     }
 
     @Test
     public void convertQspStringToWebViewHtml_lineBreaks() {
-        String str = "Test1\nTest2\r\nTest3";
+        var str = "Test1\nTest2\r\nTest3";
 
-        String result = sut.convertQspStringToWebViewHtml(str);
+        var result = sut.convertQspStringToWebViewHtml(str);
 
         assertEquals("Test1<br>Test2<br>Test3", result);
     }

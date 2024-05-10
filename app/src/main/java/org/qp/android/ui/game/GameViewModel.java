@@ -473,11 +473,11 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
 
     public void startNativeLib() {
         getLibProxy().setGameInterface(this);
-        getLibProxy().start();
+        getLibProxy().startLibThread();
     }
 
     public void stopNativeLib() {
-        getLibProxy().stop();
+        getLibProxy().stopLibThread();
         getLibProxy().setGameInterface(null);
     }
 

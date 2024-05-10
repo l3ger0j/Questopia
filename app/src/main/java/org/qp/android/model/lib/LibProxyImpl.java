@@ -2,6 +2,7 @@ package org.qp.android.model.lib;
 
 import static org.qp.android.helpers.utils.FileUtil.createFindDFile;
 import static org.qp.android.helpers.utils.FileUtil.documentWrap;
+import static org.qp.android.helpers.utils.FileUtil.findFileFromRelPath;
 import static org.qp.android.helpers.utils.FileUtil.fromFullPath;
 import static org.qp.android.helpers.utils.FileUtil.getFileContents;
 import static org.qp.android.helpers.utils.FileUtil.writeFileContents;
@@ -25,10 +26,10 @@ import com.anggrayudi.storage.file.MimeType;
 import org.qp.android.QuestPlayerApplication;
 import org.qp.android.dto.lib.LibActionData;
 import org.qp.android.dto.lib.LibErrorData;
-import org.qp.android.dto.lib.LibVarValResp;
 import org.qp.android.dto.lib.LibListItem;
-import org.qp.android.dto.lib.LibObjectData;
 import org.qp.android.dto.lib.LibMenuItem;
+import org.qp.android.dto.lib.LibObjectData;
+import org.qp.android.dto.lib.LibVarValResp;
 import org.qp.android.model.service.AudioPlayer;
 import org.qp.android.model.service.HtmlProcessor;
 import org.qp.android.ui.game.GameInterface;
@@ -175,11 +176,12 @@ public class LibProxyImpl implements LibIProxy, LibICallbacks {
         var count = nativeMethods.QSPGetActionsCount();
 
         for (int i = 0; i < count; ++i) {
-            var actionData = (LibActionData) nativeMethods.QSPGetActionData(i);
             var action = new LibListItem();
+            var actionData = (LibActionData) nativeMethods.QSPGetActionData(i);
+
             action.pathToImage = actionData.image();
-            action.text = gameState.interfaceConfig.useHtml ?
-                    htmlProcessor.removeHTMLTags(actionData.name())
+            action.text = gameState.interfaceConfig.useHtml
+                    ? htmlProcessor.removeHTMLTags(actionData.name())
                     : actionData.name();
             actions.add(action);
         }
@@ -199,18 +201,17 @@ public class LibProxyImpl implements LibIProxy, LibICallbacks {
 
             if (objectResult.name().contains("<img")) {
                 if (htmlProcessor.hasHTMLTags(objectResult.name())) {
-                    // TODO NEED TO REFACTORED!!!
                     var tempPath = htmlProcessor.getSrcDir(objectResult.name());
-                    var fileFromPath = curGameDir.findFile(tempPath);
+                    var fileFromPath = findFileFromRelPath(context , tempPath , curGameDir);
                     object.pathToImage = String.valueOf(fileFromPath);
                 } else {
-                    var fileFromPath = curGameDir.findFile(objectResult.name());
+                    var fileFromPath = findFileFromRelPath(context , objectResult.name() , curGameDir);
                     object.pathToImage = String.valueOf(fileFromPath);
                 }
             } else {
                 object.pathToImage = objectResult.image();
-                object.text = gameState.interfaceConfig.useHtml ?
-                        htmlProcessor.removeHTMLTags(objectResult.name())
+                object.text = gameState.interfaceConfig.useHtml
+                        ? htmlProcessor.removeHTMLTags(objectResult.name())
                         : objectResult.name();
             }
             objects.add(object);
@@ -221,29 +222,28 @@ public class LibProxyImpl implements LibIProxy, LibICallbacks {
 
     // region LibQpProxy
 
-    public void start() {
+    public void startLibThread() {
         libThread = new Thread(() -> {
             while (!Thread.currentThread().isInterrupted()) {
-                synchronized (this) {
-                    exitLoopIfExist();
-                    try {
-                        nativeMethods.QSPInit();
+                try {
+                    nativeMethods.QSPInit();
+                    if (Looper.myLooper() == null) {
                         Looper.prepare();
-                        libHandler = new Handler();
-                        libThreadInit = true;
-                        Looper.loop();
-                        nativeMethods.QSPDeInit();
-                    } catch (Throwable t) {
-                        Log.e(TAG , "lib thread has stopped exceptionally" , t);
-                        Thread.currentThread().interrupt();
                     }
+                    libHandler = new Handler(Looper.myLooper());
+                    libThreadInit = true;
+                    Looper.loop();
+                    nativeMethods.QSPDeInit();
+                } catch (Throwable t) {
+                    Log.e(TAG , "lib thread has stopped exceptionally" , t);
+                    Thread.currentThread().interrupt();
                 }
             }
         } , "libQSP");
         libThread.start();
     }
 
-    public void stop() {
+    public void stopLibThread() {
         throwIfNotMainThread();
         if (libThread == null) return;
         if (libThreadInit) {
@@ -256,18 +256,6 @@ public class LibProxyImpl implements LibIProxy, LibICallbacks {
             Log.w(TAG,"libqsp thread has been started, but not initialized");
         }
         libThread.interrupt();
-    }
-
-    private void exitLoopIfExist() {
-        var handler = libHandler;
-        if (handler != null) {
-            handler.getLooper().quitSafely();
-        } else {
-            var mLooper = Looper.myLooper();
-            if (mLooper != null) {
-                mLooper.quitSafely();
-            }
-        }
     }
 
     public void enableDebugMode (boolean isDebug) {

@@ -127,8 +127,8 @@ public class GameItemRecycler extends RecyclerView.Adapter<GameItemRecycler.View
             this.listGameItemBinding = binding;
         }
 
-        public void listItemActionObjectBinding(LibListItem qpListItem) {
-            listGameItemBinding.setQpListItem(qpListItem);
+        public void listItemActionObjectBinding(LibListItem libListItem) {
+            listGameItemBinding.setLibListItem(libListItem);
             listGameItemBinding.executePendingBindings();
         }
     }

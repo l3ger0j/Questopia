@@ -10,7 +10,6 @@ import android.util.Base64;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.documentfile.provider.DocumentFile;
 
 import org.jsoup.Jsoup;
@@ -33,11 +32,10 @@ public class HtmlProcessor {
     private SettingsController controller;
     private DocumentFile curGameDir;
 
-    @Nullable
     public String getSrcDir(String html) {
         var document = Jsoup.parse(html);
         var imageElement = document.select("img").first();
-        if (imageElement == null) return null;
+        if (imageElement == null) return "";
         return imageElement.attr("src");
     }
 
@@ -57,6 +55,21 @@ public class HtmlProcessor {
 
     public String getCleanHtmlPageNotImage(String dirtyHtml) {
         var document = Jsoup.parse(dirtyHtml);
+        document.outputSettings().prettyPrint(false);
+        var body = document.body();
+        body.select("img").remove();
+        body.select("video").remove();
+        return document.toString();
+    }
+
+    public String oldGetCleanHtmlPageNotImage(String html) {
+        if (isNullOrEmpty(html)) return "";
+
+        var result = unescapeQuotes(html);
+        result = encodeExec(result);
+        result = lineBreaksInHTML(result);
+
+        var document = Jsoup.parse(result);
         document.outputSettings().prettyPrint(false);
         var body = document.body();
         body.select("img").remove();
@@ -175,8 +188,10 @@ public class HtmlProcessor {
         videoElement.attr("style", "max-width:100%;");
         if (controller.isVideoMute) {
             videoElement.attr("muted", "true");
+            videoElement.removeAttr("controls");
         } else {
-            videoElement.attr("muted", "false");
+            videoElement.attr("controls", "true");
+            videoElement.removeAttr("muted");
         }
     }
 
@@ -205,11 +220,7 @@ public class HtmlProcessor {
             result.append(html, fromIdx, idx);
             var endIdx = html.indexOf('>', idx + 1);
             if (endIdx == -1) {
-                var message = "Invalid HTML:"
-                        + "\n source HTML:" + html
-                        + "\n element at " + idx
-                        + " is not closed";
-                Log.w(TAG , message);
+                Log.w(TAG,"Invalid HTML: element at " + idx + " is not closed");
                 result.append(html.substring(idx));
                 break;
             }
