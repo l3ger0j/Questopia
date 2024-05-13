@@ -16,11 +16,11 @@ public interface GameDao {
     List<Game> getAll();
 
     @Query("SELECT * FROM game ORDER BY " +
-            "CASE WHEN :isAsc = 1 THEN id END ASC, " +
-            "CASE WHEN :isAsc = 2 THEN id END DESC ")
+            "CASE WHEN :isAsc = 1 THEN title END ASC, " +
+            "CASE WHEN :isAsc = 2 THEN title END DESC ")
     List<Game> getAllSortedByName(int isAsc);
 
-    @Query("SELECT * FROM game WHERE id LIKE :name LIMIT 1")
+    @Query("SELECT * FROM game WHERE title LIKE :name LIMIT 1")
     Game getByName(String name);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
