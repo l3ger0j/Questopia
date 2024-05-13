@@ -1,10 +1,15 @@
 plugins {
+    alias(libs.plugins.androidx.room)
     alias(libs.plugins.android.application)
-    id 'dagger.hilt.android.plugin'
+    alias(libs.plugins.hilt.android.gradle.plugin)
 }
 
 def viewBind = true
 def dataBind = true
+
+room {
+    schemaDirectory "$projectDir/schemas"
+}
 
 android {
     namespace 'org.qp.android'
@@ -89,11 +94,12 @@ dependencies {
     implementation libs.androidx.work.runtime
     implementation libs.material
     implementation libs.androidx.core.splashscreen
-    implementation "androidx.room:room-runtime:$room_version"
-    annotationProcessor "androidx.room:room-compiler:$room_version"
+    implementation libs.androidx.room.runtime
+    annotationProcessor libs.androidx.room.compiler
 
-    implementation "com.google.dagger:hilt-android:$hilt_version"
-    annotationProcessor "com.google.dagger:hilt-compiler:$hilt_version"
+    implementation libs.hilt.android
+    annotationProcessor libs.hilt.compiler
+
     implementation libs.changelog
     implementation libs.colorpicker
     implementation libs.jsoup

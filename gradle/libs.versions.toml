@@ -1,5 +1,6 @@
 [versions]
 agp = "8.4.0"
+hagp = "2.51.1"
 appupdater = "2.7"
 changelog = "3.5"
 colorpicker = "1.1.0"
@@ -8,6 +9,7 @@ coreSplashscreen = "1.0.1"
 desugar_jdk_libs = "2.0.4"
 documentfile = "1.0.1"
 fragment = "1.7.0"
+hiltAndroid = "2.51.1"
 jacksonAnnotations = "2.17.1"
 jsoup = "1.17.2"
 junit = "4.13.2"
@@ -18,6 +20,7 @@ material = "1.12.0"
 navigationFragment = "2.7.7"
 picasso = "2.71828"
 preference = "1.2.1"
+roomRuntime = "2.6.1"
 rxandroid = "3.0.2"
 storage = "1.5.5"
 webkit = "1.11.0"
@@ -26,6 +29,8 @@ workRuntime = "2.9.0"
 [libraries]
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
 androidx-navigation-ui = { module = "androidx.navigation:navigation-ui", version.ref = "navigationFragment" }
+androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
+androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomRuntime" }
 androidx-work-runtime = { module = "androidx.work:work-runtime", version.ref = "workRuntime" }
 appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 appupdater = { module = "com.github.javiersantos:AppUpdater", version.ref = "appupdater" }
@@ -34,6 +39,8 @@ colorpicker = { module = "com.jaredrummler:colorpicker", version.ref = "colorpic
 constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "constraintlayout" }
 documentfile = { module = "androidx.documentfile:documentfile", version.ref = "documentfile" }
 fragment = { module = "androidx.fragment:fragment", version.ref = "fragment" }
+hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
+hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hiltAndroid" }
 jackson-annotations = { module = "com.fasterxml.jackson.core:jackson-annotations", version.ref = "jacksonAnnotations" }
 jackson-core = { module = "com.fasterxml.jackson.core:jackson-core", version.ref = "jacksonAnnotations" }
 jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jacksonAnnotations" }
@@ -51,4 +58,6 @@ storage = { module = "com.anggrayudi:storage", version.ref = "storage" }
 webkit = { module = "androidx.webkit:webkit", version.ref = "webkit" }
 
 [plugins]
+androidx-room = { id = "androidx.room", version.ref = "roomRuntime" }
 android-application = { id = "com.android.application", version.ref = "agp" }
+hilt-android-gradle-plugin = { id = "com.google.dagger.hilt.android", version.ref = "hagp" }
