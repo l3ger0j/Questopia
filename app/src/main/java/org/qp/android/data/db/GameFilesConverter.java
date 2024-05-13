@@ -21,11 +21,11 @@ public class GameFilesConverter {
 
     @TypeConverter
     public List<Uri> toGameFilesUri(String data) {
-        var inputList = Arrays.asList(data.split(","));
+        var inputList = data.split(",");
         var tempList = new ArrayList<Uri>();
-        inputList.forEach(s ->
-                tempList.add(Uri.parse(data))
-        );
+        for (var s : inputList) {
+            tempList.add(Uri.parse(s));
+        };
         return tempList;
     }
 
