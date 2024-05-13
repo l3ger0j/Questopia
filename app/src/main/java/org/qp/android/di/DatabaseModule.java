@@ -22,7 +22,7 @@ public class DatabaseModule {
     @Provides
     @Singleton
     public GameDatabase provideDatabase(@ApplicationContext Context context) {
-        return Room.databaseBuilder(context , GameDatabase.class , "database.db").build();
+        return Room.databaseBuilder(context, GameDatabase.class, "games").build();
     }
 
     @Provides
