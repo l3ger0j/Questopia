@@ -23,7 +23,7 @@ public class Game {
     public String player = "";
     public String icon = "";
     public String fileUrl = "";
-    public String fileSize;
+    public String fileSize = "";
     public String fileExt = "";
     public String descUrl = "";
     public String pubDate = "";
