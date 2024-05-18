@@ -24,13 +24,64 @@ public class StockGameFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater , @Nullable ViewGroup container , @Nullable Bundle savedInstanceState) {
         var appCompatActivity = ((AppCompatActivity) requireActivity());
+
         if (appCompatActivity.getSupportActionBar() != null) {
             appCompatActivity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
+
         fragmentStockGameBinding = FragmentItemGameBinding.inflate(getLayoutInflater());
         stockViewModel = new ViewModelProvider(requireActivity())
                 .get(StockViewModel.class);
         fragmentStockGameBinding.setViewModel(stockViewModel);
+
+        stockViewModel.getGameLiveData().observe(getViewLifecycleOwner(), data -> {
+            var gameDataObserver = new GameDataObserver();
+            gameDataObserver.authorObserver.set(
+                    data.author.isEmpty()
+                            ? data.author
+                            : getString(R.string.author).replace("-AUTHOR-" , data.author)
+            );
+            gameDataObserver.portedByObserver.set(
+                    data.portedBy.isEmpty()
+                            ? data.portedBy
+                            : getString(R.string.ported_by).replace("-PORTED_BY-" , data.portedBy)
+            );
+            gameDataObserver.versionObserver.set(
+                    data.version.isEmpty()
+                            ? data.version
+                            : getString(R.string.version).replace("-VERSION-" , data.version)
+            );
+            gameDataObserver.fileExtObserver.set(
+                    data.fileExt.isEmpty()
+                            ? data.fileExt
+                            : data.fileExt.equals("aqsp")
+                                ? getString(R.string.fileType).replace("-TYPE-" , data.fileExt) + " " + getString(R.string.experimental)
+                                : getString(R.string.fileType).replace("-TYPE-" , data.fileExt)
+            );
+            gameDataObserver.fileSizeObserver.set(
+                    data.fileSize.isEmpty()
+                            ? data.fileSize
+                            : getString(R.string.fileSize).replace("-SIZE-" , data.fileSize)
+            );
+            gameDataObserver.pubDateObserver.set(
+                    data.pubDate.isEmpty()
+                            ? data.pubDate
+                            : getString(R.string.pub_data).replace("-PUB_DATA-" , data.pubDate)
+            );
+            gameDataObserver.modDateObserver.set(
+                    data.modDate.isEmpty()
+                            ? data.modDate
+                            : getString(R.string.mod_data).replace("-MOD_DATA-" , data.pubDate)
+            );
+            gameDataObserver.titleObserver.set(data.title);
+            gameDataObserver.langObserver.set(data.lang);
+            gameDataObserver.playerObserver.set(data.player);
+            gameDataObserver.iconPathObserver.set(data.icon);
+            gameDataObserver.fileUrlObserver.set(data.fileUrl);
+            gameDataObserver.descUrlObserver.set(data.descUrl);
+            fragmentStockGameBinding.setGameData(gameDataObserver);
+        });
+
         return fragmentStockGameBinding.getRoot();
     }
 

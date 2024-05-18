@@ -3,7 +3,6 @@ package org.qp.android.ui.stock;
 import static androidx.recyclerview.widget.RecyclerView.NO_POSITION;
 import static org.qp.android.helpers.utils.FileUtil.documentWrap;
 import static org.qp.android.helpers.utils.FileUtil.forceDelFile;
-import static org.qp.android.helpers.utils.JsonUtil.jsonToObject;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_IMAGE_FILE;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_MOD_FILE;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_PATH_FILE;
@@ -37,7 +36,6 @@ import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.os.LocaleListCompat;
 import androidx.core.splashscreen.SplashScreen;
-import androidx.documentfile.provider.DocumentFile;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
@@ -46,14 +44,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.anggrayudi.storage.SimpleStorageHelper;
 import com.anggrayudi.storage.file.DocumentFileCompat;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.github.javiersantos.appupdater.AppUpdater;
 import com.github.javiersantos.appupdater.enums.UpdateFrom;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 
 import org.qp.android.QuestPlayerApplication;
 import org.qp.android.R;
-import org.qp.android.data.db.Game;
 import org.qp.android.data.db.GameDao;
 import org.qp.android.data.db.GameDatabase;
 import org.qp.android.databinding.ActivityStockBinding;
@@ -62,14 +58,12 @@ import org.qp.android.helpers.utils.ViewUtil;
 import org.qp.android.ui.dialogs.StockDialogType;
 import org.qp.android.ui.settings.SettingsActivity;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
@@ -81,15 +75,13 @@ public class StockActivity extends AppCompatActivity {
 
     private static final int POST_NOTIFICATION = 203;
     private final String TAG = this.getClass().getSimpleName();
+    private final ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
-    private HashMap<String, GameData> gamesMap = new HashMap<>();
+    @Inject GameDatabase gameDatabase;
+    @Inject GameDao gameDao;
+
     private StockViewModel stockViewModel;
-
     private NavController navController;
-
-    @Inject private GameDatabase gameDatabase;
-    @Inject private GameDao gameDao;
-
     private ActionMode actionMode;
     protected ActivityStockBinding activityStockBinding;
     private boolean isEnable = false;
@@ -101,12 +93,10 @@ public class StockActivity extends AppCompatActivity {
     private ActivityResultLauncher<Intent> rootFolderLauncher;
     private final SimpleStorageHelper storageHelper = new SimpleStorageHelper(this);
 
-    private File listDirsFile;
-
     SharedPreferences.OnSharedPreferenceChangeListener preferenceChangeListener = (sharedPreferences , key) -> {
         if (key == null) return;
         switch (key) {
-            case "binPref" -> stockViewModel.refreshGameData();
+            case "binPref" -> stockViewModel.loadGameDataFromDB();
             case "lang" -> {
                 if (sharedPreferences.getString("lang", "ru").equals("ru")) {
                     AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("ru"));
@@ -116,10 +106,6 @@ public class StockActivity extends AppCompatActivity {
             }
         }
     };
-
-    public File getListDirsFile() {
-        return listDirsFile;
-    }
 
     public void setRecyclerView(RecyclerView mRecyclerView) {
         this.mRecyclerView = mRecyclerView;
@@ -147,7 +133,6 @@ public class StockActivity extends AppCompatActivity {
         stockViewModel = new ViewModelProvider(this).get(StockViewModel.class);
         activityStockBinding.setStockVM(stockViewModel);
         stockViewModel.activityObserver.setValue(this);
-        gamesMap = stockViewModel.getGamesMap();
 
         mFAB = activityStockBinding.stockFAB;
         stockViewModel.doIsHideFAB.observe(this , aBoolean -> {
@@ -206,6 +191,8 @@ public class StockActivity extends AppCompatActivity {
                 var rootFolder = DocumentFileCompat.fromUri(this , uri);
                 var application = (QuestPlayerApplication) getApplication();
                 if (application != null) application.setCurrentGameDir(rootFolder);
+
+                stockViewModel.createGameDataInDB(rootFolder);
             }
         });
 
@@ -216,7 +203,7 @@ public class StockActivity extends AppCompatActivity {
             }
         }
 
-        loadSettings();
+        stockViewModel.loadGameDataFromDB();
 
         Log.i(TAG , "Stock Activity created");
 
@@ -274,23 +261,6 @@ public class StockActivity extends AppCompatActivity {
         });
     }
 
-    public void restoreListDirsFromFile() {
-        try {
-            var ref = new TypeReference<HashMap<String , String>>() {};
-            var mapFiles = jsonToObject(listDirsFile , ref);
-            var listFile = new ArrayList<DocumentFile>();
-            for (var value : mapFiles.values()) {
-                var uri = Uri.parse(value);
-                var file = DocumentFileCompat.fromUri(this , uri);
-                listFile.add(file);
-            }
-            stockViewModel.setListGamesDir(listFile);
-            stockViewModel.refreshGameData();
-        } catch (IOException e) {
-            Log.e(TAG , "Error: ", e);
-        }
-    }
-
     public void dropPersistable(Uri folderUri) {
         try {
             getContentResolver().releasePersistableUriPermission(
@@ -335,15 +305,6 @@ public class StockActivity extends AppCompatActivity {
         return true;
     }
 
-    private void loadSettings() {
-        var cache = getExternalCacheDir();
-        listDirsFile = new File(cache , "tempListDir");
-
-        if (listDirsFile.exists()) {
-            restoreListDirsFromFile();
-        }
-    }
-
     public void showErrorDialog(String errorMessage) {
         stockViewModel.showDialogFragment(getSupportFragmentManager() ,
                 StockDialogType.ERROR_DIALOG , errorMessage);
@@ -375,10 +336,11 @@ public class StockActivity extends AppCompatActivity {
 
     public void onItemClick(int position) {
         if (isEnable) {
-            for (var gameData : gamesMap.values()) {
-                if (!gameData.isFileInstalled()) continue;
-                tempList.add(gameData);
-            }
+            var dataList = stockViewModel.getGameDataList().getValue();
+            if (dataList == null) return;
+
+            tempList.addAll(dataList);
+
             var mViewHolder = mRecyclerView.findViewHolderForAdapterPosition(position);
             if (mViewHolder == null) return;
             var adapterPosition = mViewHolder.getAdapterPosition();
@@ -418,7 +380,7 @@ public class StockActivity extends AppCompatActivity {
 
             @Override
             public boolean onPrepareActionMode(ActionMode mode , Menu menu) {
-                tempList = stockViewModel.getSortedGames();
+                tempList = stockViewModel.getListGames();
                 isEnable = true;
                 return true;
             }
@@ -429,18 +391,16 @@ public class StockActivity extends AppCompatActivity {
                 int itemId = item.getItemId();
                 switch (itemId) {
                     case R.id.delete_game -> {
-                        var service = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
                         for (var data : selectList) {
                             CompletableFuture
-                                    .runAsync(() -> tempList.remove(data) , service)
+                                    .runAsync(() -> tempList.remove(data) , executor)
                                     .thenCombineAsync(
-                                            stockViewModel.removeDirFromListDirsFile(listDirsFile , data.gameDir.getName()) ,
+                                            stockViewModel.removeGameDataFromDB(data.gameDir.getName()) ,
                                             (unused , unused2) -> null ,
-                                            service
+                                            executor
                                     )
-                                    .thenRunAsync(() -> forceDelFile(getApplication() , data.gameDir) , service)
-                                    .thenRunAsync(() -> dropPersistable(data.gameDir.getUri()) , service)
-                                    .thenRun(() -> stockViewModel.refreshGameData())
+                                    .thenRunAsync(() -> forceDelFile(getApplication() , data.gameDir) , executor)
+                                    .thenRunAsync(() -> dropPersistable(data.gameDir.getUri()) , executor)
                                     .exceptionally(ex -> {
                                         showErrorDialog(getString(R.string.error) + ": " + ex);
                                         return null;
@@ -493,12 +453,6 @@ public class StockActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
-        stockViewModel.saveListDirsIntoFile(listDirsFile);
-    }
-
-    @Override
     protected void onDestroy() {
         super.onDestroy();
 
@@ -517,7 +471,6 @@ public class StockActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(false);
         }
 
-        stockViewModel.refreshIntGamesDirectory();
         stockViewModel.doIsHideFAB.setValue(false);
         navController.navigate(R.id.stockRecyclerFragment);
     }
@@ -547,7 +500,7 @@ public class StockActivity extends AppCompatActivity {
 
                                 @Override
                                 public boolean onQueryTextChange(String newText) {
-                                    var gameDataList = stockViewModel.getSortedGames();
+                                    var gameDataList = stockViewModel.getListGames();
                                     var filteredList = new ArrayList<GameData>();
                                     gameDataList.forEach(gameData -> {
                                         if (gameData.title.toLowerCase(Locale.getDefault())

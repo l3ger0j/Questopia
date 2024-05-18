@@ -9,6 +9,10 @@
         <variable
             name="viewModel"
             type="org.qp.android.ui.stock.StockViewModel" />
+
+        <variable
+            name="gameData"
+            type="org.qp.android.ui.stock.GameDataObserver" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -34,7 +38,7 @@
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
                 android:layout_marginBottom="8dp"
-                app:imageUrl="@{viewModel.getGameIcon()}"
+                app:imageUrl="@{gameData.iconPathObserver}"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
@@ -47,7 +51,7 @@
                 android:layout_marginStart="24dp"
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="16dp"
-                android:text="@{viewModel.getGameTitle()}"
+                android:text="@{gameData.titleObserver}"
                 android:textSize="24sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/gameIconIV"
@@ -60,7 +64,7 @@
                 android:layout_marginStart="24dp"
                 android:layout_marginTop="8dp"
                 android:layout_marginBottom="8dp"
-                android:text="@{viewModel.getGameAuthor()}"
+                android:text="@{gameData.authorObserver}"
                 android:textSize="16sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/gameIconIV"
@@ -73,7 +77,7 @@
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="16dp"
                 android:layout_marginBottom="8dp"
-                android:text="@{viewModel.getGamePortBy()}"
+                android:text="@{gameData.portedByObserver}"
                 android:textSize="16sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -98,7 +102,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.5"
-                android:text="@{viewModel.getGameSize()}"
+                android:text="@{gameData.fileSizeObserver}"
                 android:textSize="16sp" />
 
             <TextView
@@ -106,7 +110,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="0.5"
                 android:tag="gameTypeTV"
-                android:text="@{viewModel.getGameType()}"
+                android:text="@{gameData.fileExtObserver}"
                 android:textSize="16sp" />
 
             <TextView
@@ -114,7 +118,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.5"
-                android:text="@{viewModel.getGameVersion()}"
+                android:text="@{gameData.versionObserver}"
                 android:textSize="16sp" />
         </LinearLayout>
 

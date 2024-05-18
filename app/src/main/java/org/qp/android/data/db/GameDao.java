@@ -20,7 +20,7 @@ public interface GameDao {
             "CASE WHEN :isAsc = 2 THEN title END DESC ")
     List<Game> getAllSortedByName(int isAsc);
 
-    @Query("SELECT * FROM game WHERE title LIKE :name LIMIT 1")
+    @Query("SELECT * FROM game WHERE id LIKE :name LIMIT 1")
     Game getByName(String name);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
