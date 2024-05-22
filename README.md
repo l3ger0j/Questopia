@@ -1,8 +1,20 @@
-# Questopia
+# Questopia ![android-test](https://github.com/l3ger0j/QuestPlayerAndroid/actions/workflows/android-test.yml/badge.svg) ![android-build](https://github.com/l3ger0j/QuestPlayerAndroid/actions/workflows/android-build.yml/badge.svg)
 
-![android-test](https://github.com/l3ger0j/QuestPlayerAndroid/actions/workflows/android-test.yml/badge.svg) ![android-build](https://github.com/l3ger0j/QuestPlayerAndroid/actions/workflows/android-build.yml/badge.svg)
+Android application for launching text format games [QSP](https://qsp.su/) 
 
-Android application for launching text format games [QSP](https://github.com/seedhartha/qsp).
+Text game launchers of a similar format, but from other authors:
+
+**Desktop**
+
+[QSP from seedHarta (last commit on 01/22/2020)](https://github.com/seedhartha/qsp) 
+
+[QSP from Sonnix (last commit from 09/06/2019)](https://gitlab.com/Sonnix1/Qqsp)
+
+[QSP from Byte (last commit 03/15/2024)](https://github.com/QSPFoundation/qsp)
+
+## Disclaimer
+
+**This fork was made WhoYouAndM3. The original project (hereinafter **[QuestPlayer](https://github.com/seedhartha/QuestPlayer)**) with an no license does not bear any responsibility for this fork **[Questopia](https://github.com/l3ger0j/Questopia.git)**.**
 
 ## Thanks
 
@@ -10,7 +22,8 @@ Android application for launching text format games [QSP](https://github.com/see
 
 ## Links to official communities
 
-[Official Telegram chat](https://t.me/QuestPlayer)
+[Official Telegram chat](https://t.me/QuestopiaChat)
+[Official Telegram channel](https://t.me/PixNPunk)
 
 ## How to use the Plugin API
 
@@ -26,7 +39,3 @@ interface yourInterfaceName {
 }
 ```
 Don't forget to return your AIDL interface with the Stub() parameter in the service class, in the onBind method, and initialize the values, and the framework of your plugin for the application is ready!
-
-## Disclaimer
-
-**This fork was made WhoYouAndM3. The original project (hereinafter **[QuestPlayer](https://github.com/seedhartha/QuestPlayer)**) with an no license does not bear any responsibility for this fork **[QuestPlayAndroid](https://github.com/l3ger0j/QuestPlayer.git)**.**
