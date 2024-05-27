@@ -601,7 +601,6 @@ public class LibProxyImpl implements LibIProxy, LibICallbacks {
         inter.showWindow(windowType, isShow);
     }
 
-    // TODO: 09.10.2023 NEEED TO ADD ERROR CATCHER
     @Override
     public byte[] GetFileContents(String path) {
         var targetFile = fromFullPath(path , getCurGameDir());
