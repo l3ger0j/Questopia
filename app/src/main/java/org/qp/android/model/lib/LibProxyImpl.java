@@ -125,7 +125,7 @@ public class LibProxyImpl implements LibIProxy, LibICallbacks {
                 desc);
         Log.e(TAG,message);
         if (gameInterface != null) {
-            gameInterface.showError(message);
+            gameInterface.showErrorDialog(message);
         }
     }
 

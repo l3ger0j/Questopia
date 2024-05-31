@@ -600,7 +600,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
     }
 
     @Override
-    public void showError(final String message) {
+    public void showErrorDialog(final String message) {
         getGameActivity().showSimpleDialog(message , GameDialogType.ERROR_DIALOG , null);
     }
 
