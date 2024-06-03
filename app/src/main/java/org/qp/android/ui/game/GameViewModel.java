@@ -567,7 +567,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
                 var imageFile = findFileFromRelPath(getApplication() , uri.getPath() , rootDir);
                 var extension = MimeTypeMap.getSingleton().getMimeTypeFromExtension(getExtension(imageFile));
                 var in = getApplication().getContentResolver().openInputStream(imageFile.getUri());
-                return new WebResourceResponse(extension , "utf-8" , in);
+                return new WebResourceResponse(extension, null, in);
             } catch (FileNotFoundException | NullPointerException ex) {
                 if (getSettingsController().isUseImageDebug) {
                     showErrorDialog(uri.getPath() , ErrorType.IMAGE_ERROR);
