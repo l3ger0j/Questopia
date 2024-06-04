@@ -181,7 +181,7 @@ public class LibProxyImpl implements LibIProxy, LibICallbacks {
 
             action.pathToImage = actionData.image();
             action.text = gameState.interfaceConfig.useHtml
-                    ? htmlProcessor.removeHTMLTags(actionData.name())
+                    ? htmlProcessor.removeHtmlTags(actionData.name())
                     : actionData.name();
             actions.add(action);
         }
@@ -200,7 +200,7 @@ public class LibProxyImpl implements LibIProxy, LibICallbacks {
             var curGameDir = getCurGameDir();
 
             if (objectResult.name().contains("<img")) {
-                if (htmlProcessor.hasHTMLTags(objectResult.name())) {
+                if (htmlProcessor.isContainsHtmlTags(objectResult.name())) {
                     var tempPath = htmlProcessor.getSrcDir(objectResult.name());
                     var fileFromPath = findFileFromRelPath(context , tempPath , curGameDir);
                     object.pathToImage = String.valueOf(fileFromPath);
@@ -211,7 +211,7 @@ public class LibProxyImpl implements LibIProxy, LibICallbacks {
             } else {
                 object.pathToImage = objectResult.image();
                 object.text = gameState.interfaceConfig.useHtml
-                        ? htmlProcessor.removeHTMLTags(objectResult.name())
+                        ? htmlProcessor.removeHtmlTags(objectResult.name())
                         : objectResult.name();
             }
             objects.add(object);

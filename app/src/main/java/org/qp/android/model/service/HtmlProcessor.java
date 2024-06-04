@@ -7,7 +7,6 @@ import static org.qp.android.helpers.utils.StringUtil.isNullOrEmpty;
 
 import android.content.Context;
 import android.util.Base64;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.documentfile.provider.DocumentFile;
@@ -18,17 +17,16 @@ import org.jsoup.safety.Safelist;
 import org.qp.android.ui.settings.SettingsController;
 
 import java.util.ArrayList;
-import java.util.Objects;
 import java.util.regex.Pattern;
 
 public class HtmlProcessor {
 
     private final String TAG = this.getClass().getSimpleName();
 
-    private static final Pattern execPattern = Pattern.compile("href=\"exec:([\\s\\S]*?)\"", Pattern.CASE_INSENSITIVE);
+    private static final Pattern EXEC_PATTERN = Pattern.compile("href=\"exec:([\\s\\S]*?)\"", Pattern.CASE_INSENSITIVE);
+    private static final Pattern HTML_PATTERN = Pattern.compile("<(\"[^\"]*\"|'[^']*'|[^'\">])*>");
+
     private final ImageProvider imageProvider;
-    private static final String HTML_PATTERN = "<(\"[^\"]*\"|'[^']*'|[^'\">])*>";
-    private final Pattern pattern = Pattern.compile(HTML_PATTERN);
     private SettingsController controller;
     private DocumentFile curGameDir;
 
@@ -43,37 +41,36 @@ public class HtmlProcessor {
      * Bring the HTML code <code>html</code> obtained from the library to
      * HTML code acceptable for display in {@linkplain android.webkit.WebView}.
      */
-    public String getCleanHtmlPageAndImage(@NonNull Context context ,
-                                           @NonNull String dirtyHtml) {
-        var document = Jsoup.parse(dirtyHtml);
+    public String getCleanHtmlAndMedia(@NonNull Context context ,
+                                       @NonNull String dirtyHtml) {
+        if (isNullOrEmpty(dirtyHtml)) return "";
+
+        var processingHtml = unescapeQuotes(dirtyHtml);
+        processingHtml = encodeExec(processingHtml);
+        processingHtml = lineBreaksInHTML(processingHtml);
+
+        var document = Jsoup.parse(processingHtml);
         document.outputSettings().prettyPrint(false);
         var body = document.body();
-        processHTMLImages(context , body);
-        processHTMLVideos(body);
+        handleImagesInHtml(context , body);
+        handleVideosInHtml(body);
+
         return document.toString();
     }
 
-    public String getCleanHtmlPageNotImage(String dirtyHtml) {
-        var document = Jsoup.parse(dirtyHtml);
+    public String getCleanHtmlRemMedia(String dirtyHtml) {
+        if (isNullOrEmpty(dirtyHtml)) return "";
+
+        var processingHtml = unescapeQuotes(dirtyHtml);
+        processingHtml = encodeExec(processingHtml);
+        processingHtml = lineBreaksInHTML(processingHtml);
+
+        var document = Jsoup.parse(processingHtml);
         document.outputSettings().prettyPrint(false);
         var body = document.body();
         body.select("img").remove();
         body.select("video").remove();
-        return document.toString();
-    }
 
-    public String oldGetCleanHtmlPageNotImage(String html) {
-        if (isNullOrEmpty(html)) return "";
-
-        var result = unescapeQuotes(html);
-        result = encodeExec(result);
-        result = lineBreaksInHTML(result);
-
-        var document = Jsoup.parse(result);
-        document.outputSettings().prettyPrint(false);
-        var body = document.body();
-        body.select("img").remove();
-        body.select("video").remove();
         return document.toString();
     }
 
@@ -87,8 +84,8 @@ public class HtmlProcessor {
         return this;
     }
 
-    public boolean hasHTMLTags(String text){
-        return pattern.matcher(text).find();
+    public boolean isContainsHtmlTags(String text){
+        return HTML_PATTERN.matcher(text).find();
     }
 
     public HtmlProcessor(ImageProvider imageProvider) {
@@ -102,6 +99,41 @@ public class HtmlProcessor {
         return lineBreaksInHTML(result);
     }
 
+    /**
+     * Convert the string <code>str</code> obtained from the library to HTML code,
+     * acceptable for display in {@linkplain android.webkit.WebView}.
+     */
+    public String convertLibStrToHtml(String str) {
+        return isNotEmpty(str) ? lineBreaksInHTML(str) : "";
+    }
+
+    /**
+     * Remove HTML tags from the <code>html</code> string and return the resulting string.
+     */
+    public String removeHtmlTags(String html) {
+        if (isNullOrEmpty(html)) return "";
+
+        var result = new StringBuilder();
+        var len = html.length();
+        var fromIdx = 0;
+
+        while (fromIdx < len) {
+            var idx = html.indexOf('<', fromIdx);
+            if (idx == -1) {
+                result.append(html.substring(fromIdx));
+                break;
+            }
+            result.append(html, fromIdx, idx);
+            var endIdx = html.indexOf('>', idx + 1);
+            if (endIdx == -1) {
+                return Jsoup.clean(html , Safelist.none());
+            }
+            fromIdx = endIdx + 1;
+        }
+
+        return result.toString();
+    }
+
     @NonNull
     private String unescapeQuotes(String str) {
         return str.replace("\\\"", "'");
@@ -109,15 +141,16 @@ public class HtmlProcessor {
 
     @NonNull
     private String encodeExec(String html) {
-        var matcher = execPattern.matcher(html);
-        var sb = new StringBuffer();
+        var matcher = EXEC_PATTERN.matcher(html);
+        var buffer = new StringBuffer();
         while (matcher.find()) {
-            var exec = normalizePathsInExec(Objects.requireNonNull(matcher.group(1)));
+            if (matcher.group(1) == null) continue;
+            var exec = normalizePathsInExec(matcher.group(1));
             var encodedExec = encodeBase64(exec, Base64.NO_WRAP);
-            matcher.appendReplacement(sb, "href=\"exec:" + encodedExec + "\"");
+            matcher.appendReplacement(buffer, "href=\"exec:" + encodedExec + "\"");
         }
-        matcher.appendTail(sb);
-        return sb.toString();
+        matcher.appendTail(buffer);
+        return buffer.toString();
     }
 
     @NonNull
@@ -131,8 +164,8 @@ public class HtmlProcessor {
                 .replace("\r", "");
     }
 
-    private void processHTMLImages(@NonNull Context context,
-                                   @NonNull Element documentBody) {
+    private void handleImagesInHtml(@NonNull Context context,
+                                    @NonNull Element documentBody) {
         var dynBlackList = new ArrayList<String>();
         documentBody.select("a").forEach(element -> {
             if (element.attr("href").contains("exec:")) {
@@ -183,7 +216,7 @@ public class HtmlProcessor {
         return drawable.getIntrinsicHeight() < heightPix;
     }
 
-    private void processHTMLVideos(Element documentBody) {
+    private void handleVideosInHtml(Element documentBody) {
         var videoElement = documentBody.select("video");
         videoElement.attr("style", "max-width:100%;");
         if (controller.isVideoMute) {
@@ -193,45 +226,6 @@ public class HtmlProcessor {
             videoElement.attr("controls", "true");
             videoElement.removeAttr("muted");
         }
-    }
-
-    /**
-     * Convert the string <code>str</code> obtained from the library to HTML code,
-     * acceptable for display in {@linkplain android.webkit.WebView}.
-     */
-    public String convertQspStringToWebViewHtml(String str) {
-        return isNotEmpty(str) ? lineBreaksInHTML(str) : "";
-    }
-
-    /**
-     * Remove HTML tags from the <code>html</code> string and return the resulting string.
-     */
-    public String removeHTMLTags(String html) {
-        if (isNullOrEmpty(html)) return "";
-        var result = new StringBuilder();
-        var len = html.length();
-        var fromIdx = 0;
-        while (fromIdx < len) {
-            var idx = html.indexOf('<', fromIdx);
-            if (idx == -1) {
-                result.append(html.substring(fromIdx));
-                break;
-            }
-            result.append(html, fromIdx, idx);
-            var endIdx = html.indexOf('>', idx + 1);
-            if (endIdx == -1) {
-                Log.w(TAG,"Invalid HTML: element at " + idx + " is not closed");
-                result.append(html.substring(idx));
-                break;
-            }
-            fromIdx = endIdx + 1;
-        }
-        return result.toString();
-    }
-
-    public String removeHTMLTagsAsIs(String dirtyHTML) {
-        if (isNullOrEmpty(dirtyHTML)) return "";
-        return Jsoup.clean(dirtyHTML , Safelist.none());
     }
 
 }

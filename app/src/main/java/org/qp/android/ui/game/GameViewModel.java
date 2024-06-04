@@ -203,7 +203,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         var config = getLibGameState().interfaceConfig;
         return config.useHtml ?
                 getHtmlProcessor().convertLibHtmlToWebHtml(str) :
-                getHtmlProcessor().convertQspStringToWebViewHtml(str);
+                getHtmlProcessor().convertLibStrToHtml(str);
     }
 
     public Uri getImageUriFromPath(String src) {
@@ -271,16 +271,12 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
 
     // endregion Getter/Setter
 
-    public String removeHTMLTags(String dirtyHTML) {
-        return getHtmlProcessor().removeHTMLTags(dirtyHTML);
-    }
-
-    public String removeHTMLTagAsIs(String dirtyHTML) {
-        return getHtmlProcessor().removeHTMLTagsAsIs(dirtyHTML);
+    public String removeHtmlTags(String dirtyHTML) {
+        return getHtmlProcessor().removeHtmlTags(dirtyHTML);
     }
 
     private boolean isHasHTMLTags(String input) {
-        return getHtmlProcessor().hasHTMLTags(input);
+        return getHtmlProcessor().isContainsHtmlTags(input);
     }
 
     public void onDialogPositiveClick(DialogFragment dialog) {
@@ -373,9 +369,9 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         var dirtyHTML = pageTemplate.replace("REPLACETEXT" , libMainDesc);
         var cleanHTML = "";
         if (getSettingsController().isImageDisabled) {
-            cleanHTML = getHtmlProcessor().getCleanHtmlPageNotImage(dirtyHTML);
+            cleanHTML = getHtmlProcessor().getCleanHtmlRemMedia(dirtyHTML);
         } else {
-            cleanHTML = getHtmlProcessor().getCleanHtmlPageAndImage(getApplication() , dirtyHTML);
+            cleanHTML = getHtmlProcessor().getCleanHtmlAndMedia(getApplication() , dirtyHTML);
         }
         if (!cleanHTML.isBlank()) {
             getGameActivity().warnUser(GameActivity.TAB_MAIN_DESC_AND_ACTIONS);
@@ -388,9 +384,9 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         var dirtyHTML = pageTemplate.replace("REPLACETEXT" , libVarsDesc);
         var cleanHTML = "";
         if (getSettingsController().isImageDisabled) {
-            cleanHTML = getHtmlProcessor().getCleanHtmlPageNotImage(dirtyHTML);
+            cleanHTML = getHtmlProcessor().getCleanHtmlRemMedia(dirtyHTML);
         } else {
-            cleanHTML = getHtmlProcessor().getCleanHtmlPageAndImage(getApplication() , dirtyHTML);
+            cleanHTML = getHtmlProcessor().getCleanHtmlAndMedia(getApplication() , dirtyHTML);
         }
         if (!cleanHTML.isBlank()) {
             getGameActivity().warnUser(GameActivity.TAB_VARS_DESC);
@@ -525,7 +521,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
                         tempUriDecode = uriDecode.substring(5);
                     }
                     if (isHasHTMLTags(tempUriDecode)) {
-                        getLibProxy().execute(removeHTMLTagAsIs(tempUriDecode));
+                        getLibProxy().execute(removeHtmlTags(tempUriDecode));
                     } else {
                         getLibProxy().execute(tempUriDecode);
                     }
