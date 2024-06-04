@@ -25,6 +25,7 @@ public class HtmlProcessor {
 
     private static final Pattern EXEC_PATTERN = Pattern.compile("href=\"exec:([\\s\\S]*?)\"", Pattern.CASE_INSENSITIVE);
     private static final Pattern HTML_PATTERN = Pattern.compile("<(\"[^\"]*\"|'[^']*'|[^'\">])*>");
+    private static final Pattern BODY_PATTERN = Pattern.compile(".*?<body.*?>(.*?)</body>.*?", Pattern.DOTALL);
 
     private final ImageProvider imageProvider;
     private SettingsController controller;
@@ -45,12 +46,8 @@ public class HtmlProcessor {
                                        @NonNull String dirtyHtml) {
         if (isNullOrEmpty(dirtyHtml)) return "";
 
-        var processingHtml = unescapeQuotes(dirtyHtml);
-        processingHtml = encodeExec(processingHtml);
-        processingHtml = lineBreaksInHTML(processingHtml);
-
-        var document = Jsoup.parse(processingHtml);
-        document.outputSettings().prettyPrint(false);
+        var document = Jsoup.parse(preHandleHtml(dirtyHtml));
+        document.outputSettings().prettyPrint(true);
         var body = document.body();
         handleImagesInHtml(context , body);
         handleVideosInHtml(body);
@@ -61,11 +58,7 @@ public class HtmlProcessor {
     public String getCleanHtmlRemMedia(String dirtyHtml) {
         if (isNullOrEmpty(dirtyHtml)) return "";
 
-        var processingHtml = unescapeQuotes(dirtyHtml);
-        processingHtml = encodeExec(processingHtml);
-        processingHtml = lineBreaksInHTML(processingHtml);
-
-        var document = Jsoup.parse(processingHtml);
+        var document = Jsoup.parse(preHandleHtml(dirtyHtml));
         document.outputSettings().prettyPrint(false);
         var body = document.body();
         body.select("img").remove();
@@ -226,6 +219,35 @@ public class HtmlProcessor {
             videoElement.attr("controls", "true");
             videoElement.removeAttr("muted");
         }
+    }
+
+    private String preHandleHtml(String dirtyHtml) {
+        var checkOne = dirtyHtml.contains("\\\"");
+        var checkTwo = EXEC_PATTERN.matcher(dirtyHtml).find();
+        var checkThree = dirtyHtml.contains("\n") || dirtyHtml.contains("\r");
+
+        var bodyDirt = extractBody(dirtyHtml);
+        if (checkOne) {
+            unescapeQuotes(bodyDirt);
+        }
+        if (checkTwo) {
+            encodeExec(bodyDirt);
+        }
+        if (checkThree) {
+            lineBreaksInHTML(bodyDirt);
+        }
+
+        var headDirt = dirtyHtml.split(".*?<body.*?>(.*?)</body>.*?")[0];
+        return headDirt+"<body>"+bodyDirt+"</body>";
+    }
+
+    private String extractBody(String html) {
+        var match = BODY_PATTERN.matcher(html);
+        while (match.find()) {
+            if (match.group(1) == null) continue;
+            return match.group(1);
+        }
+        return "";
     }
 
 }

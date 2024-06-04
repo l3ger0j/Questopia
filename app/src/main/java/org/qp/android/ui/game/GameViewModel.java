@@ -80,6 +80,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
     private final MutableLiveData<GameItemRecycler> objectsListLiveData = new MutableLiveData<>();
 
     private static final String PAGE_HEAD_TEMPLATE = """
+            <!DOCTYPE html>
             <head>
             <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1">
             <style type="text/css">
@@ -93,7 +94,9 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
               }
               a { color: QSPLINKCOLOR; }
               a:link { color: QSPLINKCOLOR; }
-            </style></head>""";
+            </style>
+            </head>
+            """;
 
     private static final String PAGE_BODY_TEMPLATE = "<body>REPLACETEXT</body>";
     public String pageTemplate = "";
