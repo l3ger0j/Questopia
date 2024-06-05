@@ -56,8 +56,6 @@ public class LibProxyImpl implements LibIProxy, LibICallbacks {
     private GameInterface gameInterface;
 
     private final Context context;
-    private final HtmlProcessor htmlProcessor;
-    private final AudioPlayer audioPlayer;
 
     private QuestPlayerApplication getApplication() {
         return (QuestPlayerApplication) context.getApplicationContext();
@@ -67,13 +65,16 @@ public class LibProxyImpl implements LibIProxy, LibICallbacks {
         return gameState.gameDir;
     }
 
-    public LibProxyImpl(
-            Context context,
-            HtmlProcessor htmlProcessor,
-            AudioPlayer audioPlayer) {
+    private HtmlProcessor getHtmlProcessor() {
+        return getApplication().getHtmlProcessor();
+    }
+
+    public AudioPlayer getAudioPlayer() {
+        return getApplication().getAudioPlayer();
+    }
+
+    public LibProxyImpl(Context context) {
         this.context = context;
-        this.htmlProcessor = htmlProcessor;
-        this.audioPlayer = audioPlayer;
     }
 
     private void runOnQspThread(final Runnable runnable) {
@@ -181,7 +182,7 @@ public class LibProxyImpl implements LibIProxy, LibICallbacks {
 
             action.pathToImage = actionData.image();
             action.text = gameState.interfaceConfig.useHtml
-                    ? htmlProcessor.removeHtmlTags(actionData.name())
+                    ? getHtmlProcessor().removeHtmlTags(actionData.name())
                     : actionData.name();
             actions.add(action);
         }
@@ -200,8 +201,8 @@ public class LibProxyImpl implements LibIProxy, LibICallbacks {
             var curGameDir = getCurGameDir();
 
             if (objectResult.name().contains("<img")) {
-                if (htmlProcessor.isContainsHtmlTags(objectResult.name())) {
-                    var tempPath = htmlProcessor.getSrcDir(objectResult.name());
+                if (getHtmlProcessor().isContainsHtmlTags(objectResult.name())) {
+                    var tempPath = getHtmlProcessor().getSrcDir(objectResult.name());
                     var fileFromPath = findFileFromRelPath(context , tempPath , curGameDir);
                     object.pathToImage = String.valueOf(fileFromPath);
                 } else {
@@ -211,7 +212,7 @@ public class LibProxyImpl implements LibIProxy, LibICallbacks {
             } else {
                 object.pathToImage = objectResult.image();
                 object.text = gameState.interfaceConfig.useHtml
-                        ? htmlProcessor.removeHtmlTags(objectResult.name())
+                        ? getHtmlProcessor().removeHtmlTags(objectResult.name())
                         : objectResult.name();
             }
             objects.add(object);
@@ -275,7 +276,7 @@ public class LibProxyImpl implements LibIProxy, LibICallbacks {
                            final DocumentFile dir,
                            final DocumentFile file) {
         gameInterface.doWithCounterDisabled(() -> {
-            audioPlayer.closeAllFiles();
+            getAudioPlayer().closeAllFiles();
             gameState.reset();
             gameState.gameRunning = true;
             gameState.gameId = id;
@@ -492,21 +493,21 @@ public class LibProxyImpl implements LibIProxy, LibICallbacks {
     @Override
     public void PlayFile(String path, int volume) {
         if (isNotEmpty(path)) {
-            audioPlayer.playFile(path, volume);
+            getAudioPlayer().playFile(path, volume);
         }
     }
 
     @Override
     public boolean IsPlayingFile(final String path) {
-        return isNotEmpty(path) && audioPlayer.isPlayingFile(path);
+        return isNotEmpty(path) && getAudioPlayer().isPlayingFile(path);
     }
 
     @Override
     public void CloseFile(String path) {
         if (isNotEmpty(path)) {
-            audioPlayer.closeFile(path);
+            getAudioPlayer().closeFile(path);
         } else {
-            audioPlayer.closeAllFiles();
+            getAudioPlayer().closeAllFiles();
         }
     }
 
