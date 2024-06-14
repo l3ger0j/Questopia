@@ -58,7 +58,7 @@
         <string name="appName">Questopia</string>
     <!-- SettingsFragment -->
         <string name="settingsEffect">The settings will take effect after changing the description of the game</string>
-        <string name="addFolder">Select the folder with the game</string>
+        <string name="addFolder">Select game folder</string>
         <string name="addFolderSum0">Current root dir is internal directory of the application</string>
         <string name="addFolderSum1">Current root dir is external directory of the device</string>
     <!-- FragmentImageBox -->
