@@ -15,6 +15,7 @@ import org.qp.android.databinding.DialogEditBinding;
 import org.qp.android.ui.stock.StockViewModel;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class StockDialogFrags extends DialogFragment {
     private DialogEditBinding editBinding;
@@ -79,6 +80,18 @@ public class StockDialogFrags extends DialogFragment {
             }
         }
         switch (dialogType) {
+            case DELETE_DIALOG -> {
+                if (Objects.equals(message, "1")) {
+                    builder.setTitle("Delete a folder?");
+                } else {
+                    builder.setTitle("Delete a folders?");
+                }
+                builder.setPositiveButton(android.R.string.ok , (dialog , which) ->
+                        stockViewModel.outputIntObserver.setValue(1));
+                builder.setNegativeButton(android.R.string.cancel , (dialog , which) ->
+                        stockViewModel.outputIntObserver.setValue(0));
+                return builder.create();
+            }
             case EDIT_DIALOG -> {
                 if (editBinding != null) {
                     builder.setView(editBinding.getRoot());

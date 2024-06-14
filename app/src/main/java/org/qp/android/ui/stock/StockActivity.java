@@ -66,8 +66,6 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executors;
 
 public class StockActivity extends AppCompatActivity {
 
@@ -280,16 +278,6 @@ public class StockActivity extends AppCompatActivity {
         }
     }
 
-    public void dropPersistable(Uri folderUri) {
-        try {
-            getContentResolver().releasePersistableUriPermission(
-                    folderUri ,
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION
-                            | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-            );
-        } catch (SecurityException ignored) {}
-    }
-
     @Override
     protected void onActivityResult(int requestCode ,
                                     int resultCode ,
@@ -418,24 +406,24 @@ public class StockActivity extends AppCompatActivity {
                 int itemId = item.getItemId();
                 switch (itemId) {
                     case R.id.delete_game -> {
-                        var service = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-                        for (var data : selectList) {
-                            CompletableFuture
-                                    .runAsync(() -> tempList.remove(data) , service)
-                                    .thenCombineAsync(
-                                            stockViewModel.removeDirFromListDirsFile(listDirsFile , data.gameDir.getName()) ,
-                                            (unused , unused2) -> null ,
-                                            service
-                                    )
-                                    .thenRunAsync(() -> forceDelFile(getApplication() , data.gameDir) , service)
-                                    .thenRunAsync(() -> dropPersistable(data.gameDir.getUri()) , service)
-                                    .thenRun(() -> stockViewModel.refreshGameData())
-                                    .exceptionally(ex -> {
-                                        showErrorDialog(getString(R.string.error) + ": " + ex);
-                                        return null;
-                                    });
-                        }
-                        actionMode.finish();
+                        stockViewModel.showDialogFragment(
+                                getSupportFragmentManager(),
+                                StockDialogType.DELETE_DIALOG,
+                                String.valueOf(selectList.size())
+                        );
+                        stockViewModel.outputIntObserver.observe(StockActivity.this, integer -> {
+                            if (integer == 1) {
+                                for (var data : selectList) {
+                                    stockViewModel.delEntryDirFromList(tempList, data, listDirsFile);
+                                }
+                                actionMode.finish();
+                            } else {
+                                for (var data : selectList) {
+                                    stockViewModel.delEntryFromList(tempList, data, listDirsFile);
+                                }
+                                actionMode.finish();
+                            }
+                        });
                     }
                     case R.id.select_all -> {
                         if (selectList.size() == tempList.size()) {

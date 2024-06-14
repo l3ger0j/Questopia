@@ -4,6 +4,7 @@ import static org.qp.android.helpers.utils.DirUtil.calculateDirSize;
 import static org.qp.android.helpers.utils.DirUtil.isDirContainsGameFile;
 import static org.qp.android.helpers.utils.FileUtil.copyFileToDir;
 import static org.qp.android.helpers.utils.FileUtil.findFileOrDirectory;
+import static org.qp.android.helpers.utils.FileUtil.forceDelFile;
 import static org.qp.android.helpers.utils.FileUtil.formatFileSize;
 import static org.qp.android.helpers.utils.FileUtil.isWritableDirectory;
 import static org.qp.android.helpers.utils.JsonUtil.jsonToObject;
@@ -13,6 +14,7 @@ import static org.qp.android.helpers.utils.PathUtil.removeExtension;
 import android.annotation.SuppressLint;
 import android.app.Application;
 import android.content.Intent;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 
@@ -75,6 +77,7 @@ public class StockViewModel extends AndroidViewModel {
     private DocumentFile tempImageFile, tempPathFile, tempModFile;
     private GameData currGameData;
     private DialogEditBinding editBinding;
+    private StockDialogFrags dialogFragments = new StockDialogFrags();
 
     public EventEmitter emitter = new EventEmitter();
 
@@ -343,8 +346,6 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     // region Dialog
-    private StockDialogFrags dialogFragments = new StockDialogFrags();
-
     public void showDialogFragment(FragmentManager manager ,
                                    StockDialogType dialogType ,
                                    String errorMessage) {
@@ -353,6 +354,13 @@ public class StockViewModel extends AndroidViewModel {
             fragment.onDestroy();
         } else {
             switch (dialogType) {
+                case DELETE_DIALOG -> {
+                    outputIntObserver = new MutableLiveData<>();
+                    dialogFragments = new StockDialogFrags();
+                    dialogFragments.setMessage(errorMessage);
+                    dialogFragments.setDialogType(StockDialogType.DELETE_DIALOG);
+                    dialogFragments.show(manager , "deleteDialogFragment");
+                }
                 case EDIT_DIALOG -> {
                     dialogFragments = new StockDialogFrags();
                     dialogFragments.setDialogType(StockDialogType.EDIT_DIALOG);
@@ -560,7 +568,51 @@ public class StockViewModel extends AndroidViewModel {
                 });
     }
 
-    public CompletableFuture<Void> removeDirFromListDirsFile(File listDirsFile , String folderName) {
+    private void dropPersistable(Uri folderUri) {
+        try {
+            var contentResolver = getApplication().getContentResolver();
+            contentResolver.releasePersistableUriPermission(
+                    folderUri ,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION
+                            | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+            );
+        } catch (SecurityException ignored) {}
+    }
+
+    public void delEntryDirFromList(ArrayList<GameData> tempList, GameData  data, File listDirsFile) {
+        CompletableFuture
+                .runAsync(() -> tempList.remove(data), executor)
+                .thenCombineAsync(
+                        removeDirFromListDirsFile(listDirsFile, data.gameDir.getName()) ,
+                        (unused , unused2) -> null ,
+                        executor
+                )
+                .thenRunAsync(() -> forceDelFile(getApplication(), data.gameDir) , executor)
+                .thenRunAsync(() -> dropPersistable(data.gameDir.getUri()), executor)
+                .thenRun(this::refreshGameData)
+                .exceptionally(ex -> {
+                    doOnShowErrorDialog(ex.getMessage(), ErrorType.EXCEPTION);
+                    return null;
+                });
+    }
+
+    public void delEntryFromList(ArrayList<GameData> tempList, GameData  data, File listDirsFile) {
+        CompletableFuture
+                .runAsync(() -> tempList.remove(data), executor)
+                .thenCombineAsync(
+                        removeDirFromListDirsFile(listDirsFile, data.gameDir.getName()),
+                        (unused , unused2) -> null,
+                        executor
+                )
+                .thenRunAsync(() -> dropPersistable(data.gameDir.getUri()), executor)
+                .thenRun(this::refreshGameData)
+                .exceptionally(ex -> {
+                    doOnShowErrorDialog(ex.getMessage(), ErrorType.EXCEPTION);
+                    return null;
+                });
+    }
+
+    private CompletableFuture<Void> removeDirFromListDirsFile(File listDirsFile , String folderName) {
         var ref = new TypeReference<HashMap<String, String>>() {};
 
         return CompletableFuture
