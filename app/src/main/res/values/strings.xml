@@ -36,7 +36,7 @@
         <string name="notFoundFile">File not found:</string>
         <string name="notReadFile">Can not read file:</string>
     <!-- Dialog Install -->
-        <string name="gameName">Game name</string>
+        <string name="gameName">Name</string>
         <string name="gameAuthor">Author</string>
         <string name="gameVersion">Version</string>
         <string name="selectFolder">Select the folder with the file</string>

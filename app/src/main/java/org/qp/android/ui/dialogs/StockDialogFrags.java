@@ -11,6 +11,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import org.qp.android.R;
+import org.qp.android.databinding.DialogAddBinding;
 import org.qp.android.databinding.DialogEditBinding;
 import org.qp.android.ui.stock.StockViewModel;
 
@@ -18,6 +19,8 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 public class StockDialogFrags extends DialogFragment {
+
+    private DialogAddBinding addBinding;
     private DialogEditBinding editBinding;
     private StockDialogType dialogType;
     private ArrayList<String> names;
@@ -30,6 +33,10 @@ public class StockDialogFrags extends DialogFragment {
 
     public void setDialogType(StockDialogType dialogType) {
         this.dialogType = dialogType;
+    }
+
+    public void setAddBinding(DialogAddBinding addBinding) {
+        this.addBinding = addBinding;
     }
 
     public void setEditBinding(DialogEditBinding editBinding) {
@@ -80,6 +87,15 @@ public class StockDialogFrags extends DialogFragment {
             }
         }
         switch (dialogType) {
+            case ADD_DIALOG -> {
+                if (addBinding != null) {
+                    builder.setView(addBinding.getRoot());
+                    return builder.create();
+                } else {
+                    dismissAllowingStateLoss();
+                    return super.onCreateDialog(savedInstanceState);
+                }
+            }
             case DELETE_DIALOG -> {
                 if (Objects.equals(message, "1")) {
                     builder.setTitle("Delete a folder?");
@@ -140,6 +156,9 @@ public class StockDialogFrags extends DialogFragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        if (addBinding != null) {
+            addBinding = null;
+        }
         if (editBinding != null) {
             editBinding = null;
         }

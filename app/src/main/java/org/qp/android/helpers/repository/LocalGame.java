@@ -32,28 +32,6 @@ public class LocalGame {
     private static final String NOMEDIA_FILENAME = ".nomedia";
     private static final String NOSEARCH_FILENAME = ".nosearch";
 
-    @NonNull
-    private List<GameFolder> getGamesFolders(@NonNull List<DocumentFile> dirs) {
-        var folders = new ArrayList<GameFolder>();
-
-        for (var dir : dirs) {
-            var gameFiles = new ArrayList<DocumentFile>();
-            var files = dir.listFiles();
-
-            for (var file : files) {
-                if (file.getName() == null) continue;
-                var lcName = file.getName().toLowerCase(Locale.ROOT);
-                if (lcName.endsWith(".qsp") || lcName.endsWith(".gam")) {
-                    gameFiles.add(file);
-                }
-            }
-
-            folders.add(new GameFolder(dir , gameFiles));
-        }
-
-        return folders;
-    }
-
     @Nullable
     private DocumentFile getGameInfoFile(@NonNull DocumentFile gameFolder) {
         var findGameInfoFile = gameFolder.findFile(GAME_INFO_FILENAME);
@@ -98,13 +76,13 @@ public class LocalGame {
         }
     }
 
-    public List<GameData> extractGameDataFromList(Context context , List<DocumentFile> fileList) {
+    public List<GameData> extractDataFromList(Context context, List<DocumentFile> fileList) {
         if (fileList.isEmpty()) {
             return Collections.emptyList();
         }
 
         var itemsGamesDirs = new ArrayList<GameData>();
-        var formatGamesDirs = getGamesFolders(fileList);
+        var formatGamesDirs = wrapToGameFolder(fileList);
 
         for (var gameFolder : formatGamesDirs) {
             var item = (GameData) null;
@@ -162,5 +140,27 @@ public class LocalGame {
         }
     }
 
-    private record GameFolder(DocumentFile dir , List<DocumentFile> gameFiles) {}
+    @NonNull
+    private List<GameFolder> wrapToGameFolder(@NonNull List<DocumentFile> dirs) {
+        var folders = new ArrayList<GameFolder>();
+
+        for (var dir : dirs) {
+            var gameFiles = new ArrayList<DocumentFile>();
+            var files = dir.listFiles();
+
+            for (var file : files) {
+                if (file.getName() == null) continue;
+                var lcName = file.getName().toLowerCase(Locale.ROOT);
+                if (lcName.endsWith(".qsp") || lcName.endsWith(".gam")) {
+                    gameFiles.add(file);
+                }
+            }
+
+            folders.add(new GameFolder(dir , gameFiles));
+        }
+
+        return folders;
+    }
+
+    private record GameFolder(DocumentFile dir, List<DocumentFile> gameFiles) {}
 }

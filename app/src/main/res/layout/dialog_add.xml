@@ -1,14 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <data>
-        <import type="android.view.View"/>
-
-        <variable
-            name="stockVM"
-            type="org.qp.android.ui.stock.StockViewModel" />
-    </data>
 
     <ScrollView
         android:layout_width="match_parent"
@@ -73,32 +65,6 @@
                     android:hint="@string/gameVersion" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <Button
-                android:id="@+id/buttonSelectPath"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginTop="16dp"
-                android:layout_weight="1"
-                android:text="@string/selectPathFile"
-                app:icon="@drawable/baseline_add_24"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/ET2" />
-
-            <Button
-                android:id="@+id/buttonSelectMod"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginTop="16dp"
-                android:layout_weight="1"
-                android:text="@string/selectModFile"
-                android:visibility="@{stockVM.isModsDirExist ? View.VISIBLE : View.GONE}"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/buttonSelectPath" />
-
             <com.google.android.material.imageview.ShapeableImageView
                 android:id="@+id/imageView"
                 android:layout_width="50dp"
@@ -107,7 +73,7 @@
                 android:layout_marginTop="16dp"
                 android:layout_weight="1"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/buttonSelectMod"
+                app:layout_constraintTop_toBottomOf="@+id/ET2"
                 app:shapeAppearanceOverlay="@style/roundedImageView" />
 
             <Button
@@ -119,21 +85,46 @@
                 android:layout_weight="1"
                 android:text="@string/selectIcon"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toEndOf="@+id/imageView"
-                app:layout_constraintTop_toBottomOf="@+id/buttonSelectMod" />
+                app:layout_constraintTop_toBottomOf="@+id/ET2" />
 
-            <Button
-                android:id="@+id/editBT"
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/sizeDirSW"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_weight="1"
+                android:checked="true"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/buttonSelectIcon" />
+
+            <TextView
+                android:id="@+id/sizeTV"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="16dp"
                 android:layout_marginTop="16dp"
-                android:text="@string/editButton"
+                android:layout_weight="1"
+                android:text="Calculate size dir"
+                android:textAlignment="center"
+                android:textSize="20sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toEndOf="@+id/sizeDirSW"
+                app:layout_constraintTop_toBottomOf="@+id/buttonSelectIcon" />
+
+            <Button
+                android:id="@+id/addBT"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="16dp"
+                android:text="add game"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/buttonSelectIcon" />
+                app:layout_constraintTop_toBottomOf="@+id/sizeTV" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>

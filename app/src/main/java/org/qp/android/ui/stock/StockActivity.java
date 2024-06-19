@@ -49,7 +49,7 @@ import com.anggrayudi.storage.file.DocumentFileCompat;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.github.javiersantos.appupdater.AppUpdater;
 import com.github.javiersantos.appupdater.enums.UpdateFrom;
-import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import org.qp.android.QuestPlayerApplication;
 import org.qp.android.R;
@@ -80,7 +80,7 @@ public class StockActivity extends AppCompatActivity {
     private ActionMode actionMode;
     protected ActivityStockBinding activityStockBinding;
     private boolean isEnable = false;
-    private ExtendedFloatingActionButton mFAB;
+    private FloatingActionButton mFAB;
     private RecyclerView mRecyclerView;
     private ArrayList<GameData> tempList;
     private final ArrayList<GameData> selectList = new ArrayList<>();
@@ -132,12 +132,11 @@ public class StockActivity extends AppCompatActivity {
 
         activityStockBinding = ActivityStockBinding.inflate(getLayoutInflater());
         stockViewModel = new ViewModelProvider(this).get(StockViewModel.class);
-        activityStockBinding.setStockVM(stockViewModel);
         stockViewModel.activityObserver.setValue(this);
         gamesMap = stockViewModel.getGamesMap();
 
         mFAB = activityStockBinding.stockFAB;
-        stockViewModel.doIsHideFAB.observe(this , aBoolean -> {
+        stockViewModel.doIsHideFAB.observe(this, aBoolean -> {
             if (aBoolean) {
                 mFAB.hide();
             } else {
@@ -191,8 +190,16 @@ public class StockActivity extends AppCompatActivity {
                                 | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
 
                 var rootFolder = DocumentFileCompat.fromUri(this , uri);
-                var application = (QuestPlayerApplication) getApplication();
-                if (application != null) application.setCurrentGameDir(rootFolder);
+                stockViewModel.showAddDialogFragment(
+                        getSupportFragmentManager(),
+                        rootFolder
+                );
+                stockViewModel.outputIntObserver.observe(this, integer -> {
+                    if (integer == 1) {
+                        var application = (QuestPlayerApplication) getApplication();
+                        if (application != null) application.setCurrentGameDir(rootFolder);
+                    }
+                });
             }
         });
 

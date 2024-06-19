@@ -32,6 +32,7 @@ import com.squareup.picasso.Picasso;
 import org.jetbrains.annotations.NotNull;
 import org.qp.android.QuestPlayerApplication;
 import org.qp.android.R;
+import org.qp.android.databinding.DialogAddBinding;
 import org.qp.android.databinding.DialogEditBinding;
 import org.qp.android.dto.stock.GameData;
 import org.qp.android.helpers.ErrorType;
@@ -57,11 +58,13 @@ import java.util.concurrent.Executors;
 public class StockViewModel extends AndroidViewModel {
 
     private final String TAG = this.getClass().getSimpleName();
-    private final ExecutorService executor = Executors.newWorkStealingPool();
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     public static final int CODE_PICK_IMAGE_FILE = 300;
     public static final int CODE_PICK_PATH_FILE = 301;
     public static final int CODE_PICK_MOD_FILE = 302;
+
+    public static final String DISABLE_CALCULATE_DIR = "disable";
 
     public MutableLiveData<StockActivity> activityObserver = new MutableLiveData<>();
     public MutableLiveData<Boolean> doIsHideFAB = new MutableLiveData<>();
@@ -77,6 +80,7 @@ public class StockViewModel extends AndroidViewModel {
     private DocumentFile tempImageFile, tempPathFile, tempModFile;
     private GameData currGameData;
     private DialogEditBinding editBinding;
+    private DialogAddBinding addBinding;
     private StockDialogFrags dialogFragments = new StockDialogFrags();
 
     public EventEmitter emitter = new EventEmitter();
@@ -234,7 +238,8 @@ public class StockViewModel extends AndroidViewModel {
     public String getGameSize() {
         if (getCurrGameData().isPresent()) {
             var data = getCurrGameData().get();
-            if (data.getFileSize() != null) {
+            if (data.getFileSize() != null
+                    && !data.getFileSize().equals(DISABLE_CALCULATE_DIR)) {
                 return getStockActivity()
                         .getString(R.string.fileSize)
                         .replace("-SIZE-" , data.getFileSize());
@@ -346,6 +351,15 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     // region Dialog
+    public void showAddDialogFragment(FragmentManager manager,
+                                      DocumentFile rootDir) {
+        outputIntObserver = new MutableLiveData<>();
+        dialogFragments = new StockDialogFrags();
+        dialogFragments.setDialogType(StockDialogType.ADD_DIALOG);
+        dialogFragments.setAddBinding(setupAddView(rootDir));
+        dialogFragments.show(manager , "addDialogFragment");
+    }
+
     public void showDialogFragment(FragmentManager manager ,
                                    StockDialogType dialogType ,
                                    String errorMessage) {
@@ -386,6 +400,52 @@ public class StockViewModel extends AndroidViewModel {
         }
     }
 
+    public DialogAddBinding setupAddView(DocumentFile rootDir) {
+        addBinding = DialogAddBinding.inflate(LayoutInflater.from(getApplication()));
+
+        var titleText = addBinding.ET0.getEditText();
+        if (titleText != null) {
+            titleText.setText(rootDir.getName());
+        }
+        addBinding.buttonSelectIcon.setOnClickListener(this::sendIntent);
+        addBinding.addBT.setOnClickListener(v -> createAddIntent(rootDir));
+
+        return addBinding;
+    }
+
+    private void createAddIntent(DocumentFile rootDir) {
+        try {
+            var newGameData = new GameData();
+            var editTextTitle = addBinding.ET0.getEditText();
+            if (editTextTitle != null) {
+                newGameData.title = editTextTitle.getText().toString().isEmpty()
+                        ? rootDir.getName()
+                        : editTextTitle.getText().toString();
+            }
+            var editTextAuthor = addBinding.ET1.getEditText();
+            if (editTextAuthor != null) {
+                newGameData.author = editTextAuthor.getText().toString();
+            }
+            var editTextVersion = addBinding.ET2.getEditText();
+            if (editTextVersion != null) {
+                newGameData.version = editTextVersion.getText().toString();
+            }
+            if (tempImageFile != null) {
+                newGameData.icon = tempImageFile.getUri().toString();
+            }
+            if (!addBinding.sizeDirSW.isChecked()) {
+                newGameData.fileSize = DISABLE_CALCULATE_DIR;
+            }
+
+            localGame.createDataIntoFolder(getApplication(), newGameData, rootDir);
+            outputIntObserver.setValue(1);
+            refreshIntGamesDirectory();
+            dialogFragments.dismiss();
+        } catch (NullPointerException ex) {
+            doOnShowErrorDialog(ex.getMessage() , ErrorType.EXCEPTION);
+        }
+    }
+
     @NonNull
     private DialogEditBinding formingEditView() {
         editBinding = DialogEditBinding.inflate(LayoutInflater.from(getApplication()));
@@ -404,6 +464,7 @@ public class StockViewModel extends AndroidViewModel {
         editBinding.buttonSelectMod.setOnClickListener(this::sendIntent);
         editBinding.buttonSelectIcon.setOnClickListener(this::sendIntent);
         editBinding.editBT.setOnClickListener(v -> createEditIntent());
+
         return editBinding;
     }
 
@@ -428,7 +489,7 @@ public class StockViewModel extends AndroidViewModel {
                         : editTextVersion.getText().toString();
             }
             if (tempImageFile != null) currGameData.icon = tempImageFile.getUri().toString();
-            if (currGameData.fileSize == null || currGameData.fileSize.isEmpty()) {
+            if (currGameData.getFileSize().isEmpty()) {
                 calculateSizeDir(currGameData);
             }
             if (tempPathFile != null) {
@@ -517,7 +578,7 @@ public class StockViewModel extends AndroidViewModel {
         gamesMap.clear();
 
         CompletableFuture
-                .supplyAsync(() -> localGame.extractGameDataFromList(getApplication() , listGamesDir) , executor)
+                .supplyAsync(() -> localGame.extractDataFromList(getApplication() , listGamesDir), executor)
                 .thenAccept(innerGameData -> innerGameData.forEach(localGameData -> {
                     var remoteGameData = gamesMap.get(localGameData.id);
                     if (remoteGameData != null) {
@@ -534,7 +595,9 @@ public class StockViewModel extends AndroidViewModel {
                     var localGameData = new ArrayList<GameData>();
                     for (var data : sortedGameData) {
                         if (!data.isFileInstalled()) continue;
-                        calculateSizeDir(data);
+                        if (!data.fileSize.equals(DISABLE_CALCULATE_DIR)) {
+                            calculateSizeDir(data);
+                        }
                         localGameData.add(data);
                     }
                     postValueGameDataList(localGameData);
