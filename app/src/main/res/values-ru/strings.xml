@@ -39,6 +39,8 @@
         <string name="gameName">Название игры</string>
         <string name="gameAuthor">Автор</string>
         <string name="gameVersion">Версия</string>
+        <string name="btnAddGame">Добавить игру</string>
+        <string name="calcSizeDir">Рассчитать размер папки</string>
         <string name="selectFolder">Выберите папку с файлом</string>
         <string name="selectIcon">Выберите иконку</string>
         <string name="add">Скопировать в корневую папку</string>

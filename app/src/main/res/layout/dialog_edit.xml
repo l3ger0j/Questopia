@@ -123,6 +123,32 @@
                 app:layout_constraintStart_toEndOf="@+id/imageView"
                 app:layout_constraintTop_toBottomOf="@+id/buttonSelectMod" />
 
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/sizeDirSW"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_weight="1"
+                android:checked="true"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/buttonSelectIcon" />
+
+            <TextView
+                android:id="@+id/sizeTV"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_weight="1"
+                android:text="@string/calcSizeDir"
+                android:textAlignment="center"
+                android:textSize="20sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toEndOf="@+id/sizeDirSW"
+                app:layout_constraintTop_toBottomOf="@+id/buttonSelectIcon" />
+
             <Button
                 android:id="@+id/editBT"
                 android:layout_width="0dp"
@@ -133,7 +159,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/buttonSelectIcon" />
+                app:layout_constraintTop_toBottomOf="@+id/sizeTV" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>

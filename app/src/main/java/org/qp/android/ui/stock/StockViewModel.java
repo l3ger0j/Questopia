@@ -460,6 +460,10 @@ public class StockViewModel extends AndroidViewModel {
                     .into(editBinding.imageView);
         });
 
+        if (currGameData.getFileSize().equals(DISABLE_CALCULATE_DIR)) {
+            editBinding.sizeDirSW.setChecked(false);
+        }
+
         editBinding.buttonSelectPath.setOnClickListener(this::sendIntent);
         editBinding.buttonSelectMod.setOnClickListener(this::sendIntent);
         editBinding.buttonSelectIcon.setOnClickListener(this::sendIntent);
@@ -489,7 +493,7 @@ public class StockViewModel extends AndroidViewModel {
                         : editTextVersion.getText().toString();
             }
             if (tempImageFile != null) currGameData.icon = tempImageFile.getUri().toString();
-            if (currGameData.getFileSize().isEmpty()) {
+            if (editBinding.sizeDirSW.isChecked() || currGameData.getFileSize().isEmpty()) {
                 calculateSizeDir(currGameData);
             }
             if (tempPathFile != null) {

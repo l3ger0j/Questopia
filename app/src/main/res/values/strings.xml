@@ -39,6 +39,8 @@
         <string name="gameName">Name</string>
         <string name="gameAuthor">Author</string>
         <string name="gameVersion">Version</string>
+        <string name="btnAddGame">Add game</string>
+        <string name="calcSizeDir">Calculate size folder</string>
         <string name="selectFolder">Select the folder with the file</string>
         <string name="selectIcon">Select icon</string>
         <string name="add">Copy to the root folder</string>
