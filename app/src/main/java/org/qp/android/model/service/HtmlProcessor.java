@@ -17,6 +17,10 @@ import org.jsoup.safety.Safelist;
 import org.qp.android.ui.settings.SettingsController;
 
 import java.util.ArrayList;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
 
 public class HtmlProcessor {
@@ -26,6 +30,8 @@ public class HtmlProcessor {
     private static final Pattern EXEC_PATTERN = Pattern.compile("href=\"exec:([\\s\\S]*?)\"", Pattern.CASE_INSENSITIVE);
     private static final Pattern HTML_PATTERN = Pattern.compile("<(\"[^\"]*\"|'[^']*'|[^'\">])*>");
     private static final Pattern BODY_PATTERN = Pattern.compile(".*?<body.*?>(.*?)</body>.*?", Pattern.DOTALL);
+
+    private final ExecutorService executors = Executors.newSingleThreadExecutor();
 
     private final ImageProvider imageProvider;
     private SettingsController controller;
@@ -176,37 +182,45 @@ public class HtmlProcessor {
                 img.attr("style", "display: inline; height: auto; max-width: 100%;");
             }
             if (!controller.isUseAutoWidth) {
-                if (shouldChangeWidth(context , img)) {
+                shouldChangeWidth(context, img).thenAccept(aBoolean -> {
+                    if (!aBoolean) return;
                     img.attr("style" , "max-width:" + controller.customWidthImage+";");
-                }
+                });
             } else if (!controller.isUseAutoHeight) {
-                if (shouldChangeHeight(context , img)) {
-                    img.attr("style" , "max-height:" + controller.customHeightImage+";");
-                }
+                shouldChangeHeight(context, img).thenAccept(aBoolean -> {
+                   if (!aBoolean) return;
+                   img.attr("style" , "max-height:" + controller.customHeightImage+";");
+                });
             }
         });
     }
 
-    private boolean shouldChangeWidth(Context context,
-                                      Element img) {
+    private CompletableFuture<Boolean> shouldChangeWidth(Context context,
+                                                         Element img) {
         var relPath = img.attr("src");
-        var imageFile = findFileFromRelPath(context , relPath , curGameDir);
-        if (imageFile == null) return false;
-        var drawable = imageProvider.getDrawableFromPath(context , imageFile.getUri());
-        if (drawable == null) return false;
-        var widthPix = context.getResources().getDisplayMetrics().widthPixels;
-        return drawable.getIntrinsicWidth() < widthPix;
+        return CompletableFuture
+                .supplyAsync(() -> findFileFromRelPath(context , relPath , curGameDir), executors)
+                .thenApply(imageFile -> {
+                    if (imageFile == null) return false;
+                    var drawable = imageProvider.getDrawableFromPath(context , imageFile.getUri());
+                    if (drawable == null) return false;
+                    var widthPix = context.getResources().getDisplayMetrics().widthPixels;
+                    return drawable.getIntrinsicWidth() < widthPix;
+                });
     }
 
-    private boolean shouldChangeHeight(Context context,
-                                       Element img) {
+    private CompletableFuture<Boolean> shouldChangeHeight(Context context,
+                                                          Element img) {
         var relPath = img.attr("src");
-        var imageFile = findFileFromRelPath(context , relPath , curGameDir);
-        if (imageFile == null) return false;
-        var drawable = imageProvider.getDrawableFromPath(context , imageFile.getUri());
-        if (drawable == null) return false;
-        var heightPix = context.getResources().getDisplayMetrics().heightPixels;
-        return drawable.getIntrinsicHeight() < heightPix;
+        return CompletableFuture
+                .supplyAsync(() -> findFileFromRelPath(context , relPath , curGameDir), executors)
+                .thenApply(imageFile -> {
+                    if (imageFile == null) return false;
+                    var drawable = imageProvider.getDrawableFromPath(context , imageFile.getUri());
+                    if (drawable == null) return false;
+                    var heightPix = context.getResources().getDisplayMetrics().heightPixels;
+                    return drawable.getIntrinsicHeight() < heightPix;
+                });
     }
 
     private void handleVideosInHtml(Element documentBody) {
