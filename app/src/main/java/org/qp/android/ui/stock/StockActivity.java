@@ -2,7 +2,6 @@ package org.qp.android.ui.stock;
 
 import static androidx.recyclerview.widget.RecyclerView.NO_POSITION;
 import static org.qp.android.helpers.utils.FileUtil.documentWrap;
-import static org.qp.android.helpers.utils.FileUtil.forceDelFile;
 import static org.qp.android.helpers.utils.JsonUtil.jsonToObject;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_IMAGE_FILE;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_MOD_FILE;
@@ -18,7 +17,9 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.storage.StorageManager;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -51,6 +52,7 @@ import com.github.javiersantos.appupdater.AppUpdater;
 import com.github.javiersantos.appupdater.enums.UpdateFrom;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import org.qp.android.BuildConfig;
 import org.qp.android.QuestPlayerApplication;
 import org.qp.android.R;
 import org.qp.android.databinding.ActivityStockBinding;
@@ -69,7 +71,10 @@ import java.util.Optional;
 
 public class StockActivity extends AppCompatActivity {
 
-    private static final int POST_NOTIFICATION = 203;
+    private static final int READ_EXTERNAL_STORAGE_CODE = 200;
+    private static final int MANAGE_EXTERNAL_STORAGE_CODE = 201;
+    private static final int POST_NOTIFICATION_CODE = 203;
+
     private final String TAG = this.getClass().getSimpleName();
 
     private HashMap<String, GameData> gamesMap = new HashMap<>();
@@ -206,7 +211,27 @@ public class StockActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ActivityCompat.checkSelfPermission(this , Manifest.permission.POST_NOTIFICATIONS)
                     != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this , new String[]{Manifest.permission.POST_NOTIFICATIONS} , POST_NOTIFICATION);
+                ActivityCompat.requestPermissions(this , new String[]{Manifest.permission.POST_NOTIFICATIONS} , POST_NOTIFICATION_CODE);
+            }
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            if (!Environment.isExternalStorageManager()) {
+                try {
+                    var uri = Uri.parse("package:" + BuildConfig.APPLICATION_ID);
+                    var intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, uri);
+                    startActivity(intent);
+                } catch (Exception ex){
+                    var intent = new Intent();
+                    intent.setAction(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+                    startActivity(intent);
+                }
+            }
+        } else {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
+                    && ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                var permission = new String[]{ Manifest.permission.READ_EXTERNAL_STORAGE , Manifest.permission.WRITE_EXTERNAL_STORAGE};
+                ActivityCompat.requestPermissions(this, permission , READ_EXTERNAL_STORAGE_CODE);
             }
         }
 
@@ -298,12 +323,30 @@ public class StockActivity extends AppCompatActivity {
                                            @NonNull String[] permissions ,
                                            @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode , permissions , grantResults);
-        if (requestCode == POST_NOTIFICATION) {
-            if (grantResults.length > 0
-                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                ViewUtil.showSnackBar(findViewById(android.R.id.content) , "Success");
-            } else {
-                ViewUtil.showSnackBar(findViewById(android.R.id.content) , "Permission denied to post notification");
+        switch (requestCode) {
+            case READ_EXTERNAL_STORAGE_CODE -> {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    ViewUtil.showSnackBar(findViewById(android.R.id.content) , "Success");
+                } else {
+                    ViewUtil.showSnackBar(findViewById(android.R.id.content) , "Permission denied to read your External storage");
+                }
+            }
+            case MANAGE_EXTERNAL_STORAGE_CODE -> {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    ViewUtil.showSnackBar(findViewById(android.R.id.content) , "Success");
+                } else {
+                    ViewUtil.showSnackBar(findViewById(android.R.id.content) , "Permission denied to manage your External storage");
+                }
+            }
+            case POST_NOTIFICATION_CODE -> {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    ViewUtil.showSnackBar(findViewById(android.R.id.content) , "Success");
+                } else {
+                    ViewUtil.showSnackBar(findViewById(android.R.id.content) , "Permission denied to post notification");
+                }
             }
         }
         storageHelper.onRequestPermissionsResult(requestCode , permissions , grantResults);
