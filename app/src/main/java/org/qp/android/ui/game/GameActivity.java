@@ -386,6 +386,7 @@ public class GameActivity extends AppCompatActivity {
                                  @NonNull GameDialogType dialogType ,
                                  @Nullable ErrorType errorType) {
         if (isFinishing()) return;
+        if (isDestroyed()) return;
         if (!isMainThread()) {
             runOnUiThread(() -> showSimpleDialog(inputString , dialogType , errorType));
         } else {
