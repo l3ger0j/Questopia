@@ -455,12 +455,12 @@ public class StockActivity extends AppCompatActivity {
                         stockViewModel.outputIntObserver.observe(StockActivity.this, integer -> {
                             if (integer == 1) {
                                 for (var data : selectList) {
-                                    stockViewModel.delEntryDirFromList(tempList, data, listDirsFile);
+                                    stockViewModel.removeEntryAndDirFromDB(data.id);
                                 }
                                 actionMode.finish();
                             } else {
                                 for (var data : selectList) {
-                                    stockViewModel.delEntryFromList(tempList, data, listDirsFile);
+                                    stockViewModel.removeEntryFromDB(data.id);
                                 }
                                 actionMode.finish();
                             }

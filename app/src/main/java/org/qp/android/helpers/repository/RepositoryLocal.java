@@ -137,6 +137,17 @@ public class RepositoryLocal {
                 });
     }
 
+    public void createEntryInDB(Game emptyGameEntry) {
+        CompletableFuture
+                .supplyAsync(() -> gameDao.getByName(emptyGameEntry.title))
+                .thenAccept(game -> {
+                    if (game != null) {
+                        gameDao.update(game);
+                    }
+                    gameDao.insert(emptyGameEntry);
+                });
+    }
+
     public CompletableFuture<Void> createGameEntryInDB(DocumentFile rootDir) {
         var nameDir = rootDir.getName();
         if (nameDir == null) {

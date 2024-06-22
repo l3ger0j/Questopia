@@ -308,31 +308,30 @@ public class StockViewModel extends AndroidViewModel {
 
     private void createAddIntent(DocumentFile rootDir) {
         try {
-            var newGameData = new GameData();
+            var newGameEntry = new Game();
             var editTextTitle = addBinding.ET0.getEditText();
             if (editTextTitle != null) {
-                newGameData.title = editTextTitle.getText().toString().isEmpty()
+                newGameEntry.title = editTextTitle.getText().toString().isEmpty()
                         ? rootDir.getName()
                         : editTextTitle.getText().toString();
             }
             var editTextAuthor = addBinding.ET1.getEditText();
             if (editTextAuthor != null) {
-                newGameData.author = editTextAuthor.getText().toString();
+                newGameEntry.author = editTextAuthor.getText().toString();
             }
             var editTextVersion = addBinding.ET2.getEditText();
             if (editTextVersion != null) {
-                newGameData.version = editTextVersion.getText().toString();
+                newGameEntry.version = editTextVersion.getText().toString();
             }
             if (tempImageFile != null) {
-                newGameData.icon = tempImageFile.getUri().toString();
+                newGameEntry.icon = tempImageFile.getUri().toString();
             }
             if (!addBinding.sizeDirSW.isChecked()) {
-                newGameData.fileSize = DISABLE_CALCULATE_DIR;
+                newGameEntry.fileSize = DISABLE_CALCULATE_DIR;
             }
-
-            localGame.createDataIntoFolder(getApplication(), newGameData, rootDir);
+            localGame.createEntryInDB(newGameEntry);
             outputIntObserver.setValue(1);
-            refreshIntGamesDirectory();
+            loadGameDataFromDB();
             dialogFragments.dismiss();
         } catch (NullPointerException ex) {
             doOnShowErrorDialog(ex.getMessage() , ErrorType.EXCEPTION);
@@ -498,7 +497,7 @@ public class StockViewModel extends AndroidViewModel {
                         emptyGameEntry.player = gameData.player;
                         emptyGameEntry.icon = gameData.icon;
                         emptyGameEntry.fileUrl = gameData.fileUrl;
-                        emptyGameEntry.fileSize = String.valueOf(calculateDirSize(gameData.gameDir));
+                        emptyGameEntry.fileSize = DISABLE_CALCULATE_DIR;
                         emptyGameEntry.fileExt = gameData.fileExt;
                         emptyGameEntry.descUrl = gameData.descUrl;
                         emptyGameEntry.pubDate = gameData.pubDate;
@@ -556,7 +555,7 @@ public class StockViewModel extends AndroidViewModel {
                         if (!data.fileSize.equals(DISABLE_CALCULATE_DIR)) {
                             calculateSizeDir(data);
                         }
-                        localGameData.add(data);
+                        installedGames.add(data);
                     }
                     postValueGameDataList(installedGames);
                 })
@@ -578,47 +577,47 @@ public class StockViewModel extends AndroidViewModel {
         } catch (SecurityException ignored) {}
     }
 
-    public void delEntryDirFromList(ArrayList<GameData> tempList, GameData  data, File listDirsFile) {
+    public void removeEntryAndDirFromDB(String dirName) {
         CompletableFuture
-                .runAsync(() -> tempList.remove(data), executor)
-                .thenCombineAsync(
-                        removeDirFromListDirsFile(listDirsFile, data.gameDir.getName()) ,
-                        (unused , unused2) -> null ,
-                        executor
-                )
-                .thenRunAsync(() -> forceDelFile(getApplication(), data.gameDir) , executor)
-                .thenRunAsync(() -> dropPersistable(data.gameDir.getUri()), executor)
-                .thenRun(this::refreshGameData)
-                .exceptionally(ex -> {
-                    doOnShowErrorDialog(ex.getMessage(), ErrorType.EXCEPTION);
-                    return null;
-                });
-    }
-
-    public void delEntryFromList(ArrayList<GameData> tempList, GameData  data, File listDirsFile) {
-        CompletableFuture
-                .runAsync(() -> tempList.remove(data), executor)
-                .thenCombineAsync(
-                        removeDirFromListDirsFile(listDirsFile, data.gameDir.getName()),
-                        (unused , unused2) -> null,
-                        executor
-                )
-                .thenRunAsync(() -> dropPersistable(data.gameDir.getUri()), executor)
-                .thenRun(this::refreshGameData)
-                .exceptionally(ex -> {
-                    doOnShowErrorDialog(ex.getMessage(), ErrorType.EXCEPTION);
-                    return null;
-                });
-    }
-
-    private CompletableFuture<Void> removeGameDataFromDB(String dirName) {
-        return CompletableFuture
-                .supplyAsync(() -> gameDao.getByName(dirName), executor)
-                .thenAcceptAsync(gameDao::delete, executor)
-                .thenRunAsync(() -> ((QuestPlayerApplication) getApplication()).setCurrentGameDir(null))
+                .supplyAsync(() -> gameDao.getByName(dirName) , executor)
+                .thenApplyAsync(game -> {
+                    dropPersistable(game.gameDirUri);
+                    return game;
+                })
+                .thenApplyAsync(game -> {
+                    ((QuestPlayerApplication) getApplication()).setCurrentGameDir(null);
+                    return game;
+                })
+                .thenApply(game -> {
+                    var uri = DocumentFileCompat.fromUri(getApplication() , game.gameDirUri);
+                    if (uri == null) return game;
+                    forceDelFile(getApplication() , uri);
+                    return game;
+                })
+                .thenAcceptAsync(gameDao::delete , executor)
                 .thenRun(this::loadGameDataFromDB)
                 .exceptionally(throwable -> {
-                    Log.e(TAG , "Error: ", throwable);
+                    Log.e(TAG , "Error: " , throwable);
+                    doOnShowErrorDialog(throwable.getMessage() , ErrorType.EXCEPTION);
+                    return null;
+                });
+    }
+
+    public void removeEntryFromDB(String dirName) {
+        CompletableFuture
+                .supplyAsync(() -> gameDao.getByName(dirName) , executor)
+                .thenApplyAsync(game -> {
+                    dropPersistable(game.gameDirUri);
+                    return game;
+                })
+                .thenApplyAsync(game -> {
+                    ((QuestPlayerApplication) getApplication()).setCurrentGameDir(null);
+                    return game;
+                })
+                .thenAcceptAsync(gameDao::delete , executor)
+                .thenRun(this::loadGameDataFromDB)
+                .exceptionally(throwable -> {
+                    Log.e(TAG , "Error: " , throwable);
                     doOnShowErrorDialog(throwable.getMessage() , ErrorType.EXCEPTION);
                     return null;
                 });
