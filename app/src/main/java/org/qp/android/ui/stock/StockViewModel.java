@@ -5,11 +5,13 @@ import static org.qp.android.helpers.utils.DirUtil.isDirContainsGameFile;
 import static org.qp.android.helpers.utils.FileUtil.copyFileToDir;
 import static org.qp.android.helpers.utils.FileUtil.findFileOrDirectory;
 import static org.qp.android.helpers.utils.FileUtil.formatFileSize;
+import static org.qp.android.helpers.utils.JsonUtil.jsonToObject;
 import static org.qp.android.helpers.utils.PathUtil.removeExtension;
 
 import android.annotation.SuppressLint;
 import android.app.Application;
 import android.content.Intent;
+import android.net.Uri;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,11 +24,14 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.anggrayudi.storage.file.DocumentFileCompat;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.squareup.picasso.Picasso;
 
 import org.jetbrains.annotations.NotNull;
 import org.qp.android.QuestPlayerApplication;
 import org.qp.android.R;
+import org.qp.android.data.db.Game;
 import org.qp.android.data.db.GameDao;
 import org.qp.android.data.db.GameDatabase;
 import org.qp.android.databinding.DialogEditBinding;
@@ -39,6 +44,8 @@ import org.qp.android.ui.dialogs.StockDialogType;
 import org.qp.android.ui.game.GameActivity;
 import org.qp.android.ui.settings.SettingsController;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Optional;
@@ -248,6 +255,11 @@ public class StockViewModel extends AndroidViewModel {
                     message.ifPresent(s -> dialogFragments.setMessage(s));
                     dialogFragments.show(manager , "errorDialogFragment");
                 }
+                case MIGRATION_DIALOG -> {
+                    dialogFragments = new StockDialogFrags();
+                    dialogFragments.setDialogType(StockDialogType.MIGRATION_DIALOG);
+                    dialogFragments.show(manager , "migrationDialogFragment");
+                }
                 case SELECT_DIALOG -> {
                     outputIntObserver = new MutableLiveData<>();
                     var names = new ArrayList<String>();
@@ -376,6 +388,65 @@ public class StockViewModel extends AndroidViewModel {
         }
     }
     // endregion Dialog
+
+    public void startMigration() {
+        var cache = getApplication().getExternalCacheDir();
+        var listDirsFile = new File(cache , "tempListDir");
+
+        if (!listDirsFile.exists()) return;
+
+        try {
+            var ref = new TypeReference<HashMap<String , String>>() {};
+            var mapFiles = jsonToObject(listDirsFile , ref);
+            var listFile = new ArrayList<DocumentFile>();
+            for (var value : mapFiles.values()) {
+                var uri = Uri.parse(value);
+                var file = DocumentFileCompat.fromUri(getApplication() , uri);
+                listFile.add(file);
+            }
+            endMigration(listFile);
+        } catch (IOException e) {
+            Log.e(TAG , "Error: ", e);
+        }
+    }
+
+    private void endMigration(ArrayList<DocumentFile> listGamesDir) {
+        CompletableFuture
+                .supplyAsync(() -> localGame.extractGameDataFromList(getApplication() , listGamesDir), executor)
+                .thenApply(gameDataList -> {
+                    var listGame = new ArrayList<Game>();
+
+                    gameDataList.forEach(gameData -> {
+                        var emptyGameEntry = new Game();
+
+                        emptyGameEntry.id = gameData.id;
+                        emptyGameEntry.author = gameData.author;
+                        emptyGameEntry.portedBy = gameData.portedBy;
+                        emptyGameEntry.version = gameData.version;
+                        emptyGameEntry.title = gameData.title;
+                        emptyGameEntry.lang = gameData.lang;
+                        emptyGameEntry.player = gameData.player;
+                        emptyGameEntry.icon = gameData.icon;
+                        emptyGameEntry.fileUrl = gameData.fileUrl;
+                        emptyGameEntry.fileSize = String.valueOf(calculateDirSize(gameData.gameDir));
+                        emptyGameEntry.fileExt = gameData.fileExt;
+                        emptyGameEntry.descUrl = gameData.descUrl;
+                        emptyGameEntry.pubDate = gameData.pubDate;
+                        emptyGameEntry.modDate = gameData.modDate;
+                        emptyGameEntry.gameDirUri = gameData.gameDir.getUri();
+
+                        var gameUriList = new ArrayList<Uri>();
+                        gameData.gameFiles.forEach(documentFile ->
+                                gameUriList.add(documentFile.getUri()));
+                        emptyGameEntry.gameFilesUri = gameUriList;
+
+                        listGame.add(emptyGameEntry);
+                    });
+                    return listGame;
+                })
+                .thenAcceptAsync(gameDao::insertAll, executor)
+                .thenRun(this::loadGameDataFromDB);
+    }
 
     // region Refresh
     public void createGameDataInDB(DocumentFile gameFile) {

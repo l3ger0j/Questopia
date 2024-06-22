@@ -3,6 +3,7 @@ package org.qp.android.ui.stock;
 import static androidx.recyclerview.widget.RecyclerView.NO_POSITION;
 import static org.qp.android.helpers.utils.FileUtil.documentWrap;
 import static org.qp.android.helpers.utils.FileUtil.forceDelFile;
+import static org.qp.android.helpers.utils.JsonUtil.jsonToObject;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_IMAGE_FILE;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_MOD_FILE;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_PATH_FILE;
@@ -36,6 +37,7 @@ import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.os.LocaleListCompat;
 import androidx.core.splashscreen.SplashScreen;
+import androidx.documentfile.provider.DocumentFile;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
@@ -44,6 +46,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.anggrayudi.storage.SimpleStorageHelper;
 import com.anggrayudi.storage.file.DocumentFileCompat;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.github.javiersantos.appupdater.AppUpdater;
 import com.github.javiersantos.appupdater.enums.UpdateFrom;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
@@ -58,7 +61,10 @@ import org.qp.android.helpers.utils.ViewUtil;
 import org.qp.android.ui.dialogs.StockDialogType;
 import org.qp.android.ui.settings.SettingsActivity;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
@@ -214,6 +220,7 @@ public class StockActivity extends AppCompatActivity {
             navController = navFragment.getNavController();
         }
         if (savedInstanceState == null) {
+            checkMigration();
             navController.navigate(R.id.stockRecyclerFragment);
         }
 
@@ -293,6 +300,17 @@ public class StockActivity extends AppCompatActivity {
             }
         }
         storageHelper.onRequestPermissionsResult(requestCode , permissions , grantResults);
+    }
+
+    private void checkMigration() {
+        var cache = getExternalCacheDir();
+        var listDirsFile = new File(cache , "tempListDir");
+
+        if (listDirsFile.exists()) {
+            stockViewModel.showDialogFragment(
+                    getSupportFragmentManager(), StockDialogType.MIGRATION_DIALOG, null
+            );
+        }
     }
 
     @Override

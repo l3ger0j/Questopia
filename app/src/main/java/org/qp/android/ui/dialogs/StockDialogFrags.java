@@ -95,6 +95,14 @@ public class StockDialogFrags extends DialogFragment {
                 });
                 return builder.create();
             }
+            case MIGRATION_DIALOG -> {
+                builder.setTitle("Migration is available");
+                builder.setMessage("Previous entries have been found. Do you want to migrate them to the database?");
+                builder.setPositiveButton(android.R.string.ok, (dialog , which) ->
+                        stockViewModel.startMigration());
+                builder.setNegativeButton(android.R.string.cancel, (dialog , which) -> {});
+                return builder.create();
+            }
             case SELECT_DIALOG -> {
                 builder.setTitle(requireContext().getString(R.string.selectGameFile));
                 builder.setItems(names.toArray(new String[0]) , (dialog , which) ->
