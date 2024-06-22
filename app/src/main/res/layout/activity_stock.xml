@@ -1,20 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
-
-    <data>
-        <import type="android.view.View"/>
-
-        <variable
-            name="stockVM"
-            type="org.qp.android.ui.stock.StockViewModel" />
-    </data>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fitsSystemWindows="false">
+        android:fitsSystemWindows="false"
+        tools:viewBindingIgnore="true">
 
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/stockFragHost"
@@ -23,14 +16,15 @@
             android:layout_height="match_parent"
             app:navGraph="@navigation/stock_graph" />
 
-        <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/stockFAB"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="32dp"
-            android:text="@string/addFolder"
-            android:layout_gravity="bottom|center"
-            app:icon="@drawable/baseline_create_new_folder_24"
+            android:layout_marginEnd="32dp"
+            android:layout_gravity="bottom|center|end"
+            android:contentDescription="@string/addFolder"
+            android:src="@drawable/baseline_add_24"
             app:layout_behavior="com.google.android.material.behavior.HideBottomViewOnScrollBehavior" />
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>

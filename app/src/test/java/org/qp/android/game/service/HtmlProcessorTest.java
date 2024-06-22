@@ -15,7 +15,7 @@ public class HtmlProcessorTest {
     public void convertQspHtmlToWebViewHtml_escapedQuotes() {
         var html = "Test1 \\\"Test2\\\" Test3";
 
-        var result = sut.oldGetCleanHtmlPageNotImage(html);
+        var result = sut.getCleanHtmlRemMedia(html);
 
         assertEquals("<html><head></head><body>Test1 'Test2' Test3</body></html>", result);
     }
@@ -24,7 +24,7 @@ public class HtmlProcessorTest {
     public void convertQspHtmlToWebViewHtml_lineBreaks() {
         var html = "Test1\nTest2\r\nTest3";
 
-        var result = sut.oldGetCleanHtmlPageNotImage(html);
+        var result = sut.getCleanHtmlRemMedia(html);
 
         assertEquals("<html><head></head><body>Test1<br>Test2<br>Test3</body></html>", result);
     }
@@ -33,7 +33,7 @@ public class HtmlProcessorTest {
     public void convertQspStringToWebViewHtml_lineBreaks() {
         var str = "Test1\nTest2\r\nTest3";
 
-        var result = sut.convertQspStringToWebViewHtml(str);
+        var result = sut.convertLibStrToHtml(str);
 
         assertEquals("Test1<br>Test2<br>Test3", result);
     }

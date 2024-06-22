@@ -386,6 +386,7 @@ public class GameActivity extends AppCompatActivity {
                                  @NonNull GameDialogType dialogType ,
                                  @Nullable ErrorType errorType) {
         if (isFinishing()) return;
+        if (isDestroyed()) return;
         if (!isMainThread()) {
             runOnUiThread(() -> showSimpleDialog(inputString , dialogType , errorType));
         } else {
@@ -441,7 +442,7 @@ public class GameActivity extends AppCompatActivity {
             if (manager.isDestroyed()) return;
 
             var config = gameViewModel.getIConfig();
-            var processedMsg = config.useHtml ? gameViewModel.removeHTMLTags(inputString) : inputString;
+            var processedMsg = config.useHtml ? gameViewModel.removeHtmlTags(inputString) : inputString;
             if (processedMsg == null) {
                 processedMsg = "";
             }
@@ -471,7 +472,7 @@ public class GameActivity extends AppCompatActivity {
             if (manager.isDestroyed()) return;
 
             var config = gameViewModel.getIConfig();
-            var message = config.useHtml ? gameViewModel.removeHTMLTags(inputString) : inputString;
+            var message = config.useHtml ? gameViewModel.removeHtmlTags(inputString) : inputString;
             if (message == null) {
                 message = "";
             }
@@ -501,7 +502,7 @@ public class GameActivity extends AppCompatActivity {
             if (manager.isDestroyed()) return;
 
             var config = gameViewModel.getIConfig();
-            var message = config.useHtml ? gameViewModel.removeHTMLTags(inputString) : inputString;
+            var message = config.useHtml ? gameViewModel.removeHtmlTags(inputString) : inputString;
             if (message == null) {
                 message = "";
             }

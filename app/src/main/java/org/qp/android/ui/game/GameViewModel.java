@@ -80,6 +80,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
     private final MutableLiveData<GameItemRecycler> objectsListLiveData = new MutableLiveData<>();
 
     private static final String PAGE_HEAD_TEMPLATE = """
+            <!DOCTYPE html>
             <head>
             <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1">
             <style type="text/css">
@@ -93,7 +94,9 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
               }
               a { color: QSPLINKCOLOR; }
               a:link { color: QSPLINKCOLOR; }
-            </style></head>""";
+            </style>
+            </head>
+            """;
 
     private static final String PAGE_BODY_TEMPLATE = "<body>REPLACETEXT</body>";
     public String pageTemplate = "";
@@ -203,7 +206,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         var config = getLibGameState().interfaceConfig;
         return config.useHtml ?
                 getHtmlProcessor().convertLibHtmlToWebHtml(str) :
-                getHtmlProcessor().convertQspStringToWebViewHtml(str);
+                getHtmlProcessor().convertLibStrToHtml(str);
     }
 
     public Uri getImageUriFromPath(String src) {
@@ -271,16 +274,12 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
 
     // endregion Getter/Setter
 
-    public String removeHTMLTags(String dirtyHTML) {
-        return getHtmlProcessor().removeHTMLTags(dirtyHTML);
-    }
-
-    public String removeHTMLTagAsIs(String dirtyHTML) {
-        return getHtmlProcessor().removeHTMLTagsAsIs(dirtyHTML);
+    public String removeHtmlTags(String dirtyHTML) {
+        return getHtmlProcessor().removeHtmlTags(dirtyHTML);
     }
 
     private boolean isHasHTMLTags(String input) {
-        return getHtmlProcessor().hasHTMLTags(input);
+        return getHtmlProcessor().isContainsHtmlTags(input);
     }
 
     public void onDialogPositiveClick(DialogFragment dialog) {
@@ -373,9 +372,9 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         var dirtyHTML = pageTemplate.replace("REPLACETEXT" , libMainDesc);
         var cleanHTML = "";
         if (getSettingsController().isImageDisabled) {
-            cleanHTML = getHtmlProcessor().getCleanHtmlPageNotImage(dirtyHTML);
+            cleanHTML = getHtmlProcessor().getCleanHtmlRemMedia(dirtyHTML);
         } else {
-            cleanHTML = getHtmlProcessor().getCleanHtmlPageAndImage(getApplication() , dirtyHTML);
+            cleanHTML = getHtmlProcessor().getCleanHtmlAndMedia(getApplication() , dirtyHTML);
         }
         if (!cleanHTML.isBlank()) {
             getGameActivity().warnUser(GameActivity.TAB_MAIN_DESC_AND_ACTIONS);
@@ -388,9 +387,9 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         var dirtyHTML = pageTemplate.replace("REPLACETEXT" , libVarsDesc);
         var cleanHTML = "";
         if (getSettingsController().isImageDisabled) {
-            cleanHTML = getHtmlProcessor().getCleanHtmlPageNotImage(dirtyHTML);
+            cleanHTML = getHtmlProcessor().getCleanHtmlRemMedia(dirtyHTML);
         } else {
-            cleanHTML = getHtmlProcessor().getCleanHtmlPageAndImage(getApplication() , dirtyHTML);
+            cleanHTML = getHtmlProcessor().getCleanHtmlAndMedia(getApplication() , dirtyHTML);
         }
         if (!cleanHTML.isBlank()) {
             getGameActivity().warnUser(GameActivity.TAB_VARS_DESC);
@@ -525,7 +524,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
                         tempUriDecode = uriDecode.substring(5);
                     }
                     if (isHasHTMLTags(tempUriDecode)) {
-                        getLibProxy().execute(removeHTMLTagAsIs(tempUriDecode));
+                        getLibProxy().execute(removeHtmlTags(tempUriDecode));
                     } else {
                         getLibProxy().execute(tempUriDecode);
                     }
@@ -567,7 +566,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
                 var imageFile = findFileFromRelPath(getApplication() , uri.getPath() , rootDir);
                 var extension = MimeTypeMap.getSingleton().getMimeTypeFromExtension(getExtension(imageFile));
                 var in = getApplication().getContentResolver().openInputStream(imageFile.getUri());
-                return new WebResourceResponse(extension , "utf-8" , in);
+                return new WebResourceResponse(extension, null, in);
             } catch (FileNotFoundException | NullPointerException ex) {
                 if (getSettingsController().isUseImageDebug) {
                     showErrorDialog(uri.getPath() , ErrorType.IMAGE_ERROR);
@@ -600,7 +599,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
     }
 
     @Override
-    public void showError(final String message) {
+    public void showErrorDialog(final String message) {
         getGameActivity().showSimpleDialog(message , GameDialogType.ERROR_DIALOG , null);
     }
 

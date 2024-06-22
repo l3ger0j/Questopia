@@ -4,6 +4,7 @@ import static org.qp.android.helpers.utils.DirUtil.calculateDirSize;
 import static org.qp.android.helpers.utils.DirUtil.isDirContainsGameFile;
 import static org.qp.android.helpers.utils.FileUtil.copyFileToDir;
 import static org.qp.android.helpers.utils.FileUtil.findFileOrDirectory;
+import static org.qp.android.helpers.utils.FileUtil.forceDelFile;
 import static org.qp.android.helpers.utils.FileUtil.formatFileSize;
 import static org.qp.android.helpers.utils.JsonUtil.jsonToObject;
 import static org.qp.android.helpers.utils.PathUtil.removeExtension;
@@ -34,6 +35,7 @@ import org.qp.android.R;
 import org.qp.android.data.db.Game;
 import org.qp.android.data.db.GameDao;
 import org.qp.android.data.db.GameDatabase;
+import org.qp.android.databinding.DialogAddBinding;
 import org.qp.android.databinding.DialogEditBinding;
 import org.qp.android.dto.stock.GameData;
 import org.qp.android.helpers.ErrorType;
@@ -61,11 +63,13 @@ import dagger.hilt.android.lifecycle.HiltViewModel;
 public class StockViewModel extends AndroidViewModel {
 
     private final String TAG = this.getClass().getSimpleName();
-    private final ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     public static final int CODE_PICK_IMAGE_FILE = 300;
     public static final int CODE_PICK_PATH_FILE = 301;
     public static final int CODE_PICK_MOD_FILE = 302;
+
+    public static final String DISABLE_CALCULATE_DIR = "disable";
 
     public MutableLiveData<StockActivity> activityObserver = new MutableLiveData<>();
     public MutableLiveData<Boolean> doIsHideFAB = new MutableLiveData<>();
@@ -80,6 +84,8 @@ public class StockViewModel extends AndroidViewModel {
     private GameData currGameData;
     private final MutableLiveData<GameData> gameLiveData = new MutableLiveData<>();
     private DialogEditBinding editBinding;
+    private DialogAddBinding addBinding;
+    private StockDialogFrags dialogFragments = new StockDialogFrags();
 
     private final GameDatabase gameDatabase;
     private final GameDao gameDao;
@@ -233,7 +239,14 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     // region Dialog
-    private StockDialogFrags dialogFragments = new StockDialogFrags();
+    public void showAddDialogFragment(FragmentManager manager,
+                                      DocumentFile rootDir) {
+        outputIntObserver = new MutableLiveData<>();
+        dialogFragments = new StockDialogFrags();
+        dialogFragments.setDialogType(StockDialogType.ADD_DIALOG);
+        dialogFragments.setAddBinding(setupAddView(rootDir));
+        dialogFragments.show(manager , "addDialogFragment");
+    }
 
     public void showDialogFragment(FragmentManager manager ,
                                    StockDialogType dialogType ,
@@ -243,6 +256,13 @@ public class StockViewModel extends AndroidViewModel {
             fragment.onDestroy();
         } else {
             switch (dialogType) {
+                case DELETE_DIALOG -> {
+                    outputIntObserver = new MutableLiveData<>();
+                    dialogFragments = new StockDialogFrags();
+                    dialogFragments.setMessage(errorMessage);
+                    dialogFragments.setDialogType(StockDialogType.DELETE_DIALOG);
+                    dialogFragments.show(manager , "deleteDialogFragment");
+                }
                 case EDIT_DIALOG -> {
                     dialogFragments = new StockDialogFrags();
                     dialogFragments.setDialogType(StockDialogType.EDIT_DIALOG);
@@ -273,6 +293,52 @@ public class StockViewModel extends AndroidViewModel {
         }
     }
 
+    public DialogAddBinding setupAddView(DocumentFile rootDir) {
+        addBinding = DialogAddBinding.inflate(LayoutInflater.from(getApplication()));
+
+        var titleText = addBinding.ET0.getEditText();
+        if (titleText != null) {
+            titleText.setText(rootDir.getName());
+        }
+        addBinding.buttonSelectIcon.setOnClickListener(this::sendIntent);
+        addBinding.addBT.setOnClickListener(v -> createAddIntent(rootDir));
+
+        return addBinding;
+    }
+
+    private void createAddIntent(DocumentFile rootDir) {
+        try {
+            var newGameData = new GameData();
+            var editTextTitle = addBinding.ET0.getEditText();
+            if (editTextTitle != null) {
+                newGameData.title = editTextTitle.getText().toString().isEmpty()
+                        ? rootDir.getName()
+                        : editTextTitle.getText().toString();
+            }
+            var editTextAuthor = addBinding.ET1.getEditText();
+            if (editTextAuthor != null) {
+                newGameData.author = editTextAuthor.getText().toString();
+            }
+            var editTextVersion = addBinding.ET2.getEditText();
+            if (editTextVersion != null) {
+                newGameData.version = editTextVersion.getText().toString();
+            }
+            if (tempImageFile != null) {
+                newGameData.icon = tempImageFile.getUri().toString();
+            }
+            if (!addBinding.sizeDirSW.isChecked()) {
+                newGameData.fileSize = DISABLE_CALCULATE_DIR;
+            }
+
+            localGame.createDataIntoFolder(getApplication(), newGameData, rootDir);
+            outputIntObserver.setValue(1);
+            refreshIntGamesDirectory();
+            dialogFragments.dismiss();
+        } catch (NullPointerException ex) {
+            doOnShowErrorDialog(ex.getMessage() , ErrorType.EXCEPTION);
+        }
+    }
+
     @NonNull
     private DialogEditBinding formingEditView() {
         editBinding = DialogEditBinding.inflate(LayoutInflater.from(getStockActivity()));
@@ -286,6 +352,10 @@ public class StockViewModel extends AndroidViewModel {
                     .fit()
                     .into(editBinding.imageView);
         });
+
+        if (currGameData.getFileSize().equals(DISABLE_CALCULATE_DIR)) {
+            editBinding.sizeDirSW.setChecked(false);
+        }
 
         editBinding.buttonSelectPath.setOnClickListener(this::sendIntent);
         editBinding.buttonSelectMod.setOnClickListener(this::sendIntent);
@@ -320,7 +390,7 @@ public class StockViewModel extends AndroidViewModel {
 
             if (tempImageFile != null) currGameData.icon = tempImageFile.getUri().toString();
 
-            if (currGameData.fileSize == null || currGameData.fileSize.isEmpty()) {
+            if (editBinding.sizeDirSW.isChecked() || currGameData.getFileSize().isEmpty()) {
                 calculateSizeDir(currGameData);
             }
 
@@ -412,7 +482,7 @@ public class StockViewModel extends AndroidViewModel {
 
     private void endMigration(ArrayList<DocumentFile> listGamesDir) {
         CompletableFuture
-                .supplyAsync(() -> localGame.extractGameDataFromList(getApplication() , listGamesDir), executor)
+                .supplyAsync(() -> localGame.extractDataFromList(getApplication() , listGamesDir), executor)
                 .thenApply(gameDataList -> {
                     var listGame = new ArrayList<Game>();
 
@@ -483,7 +553,10 @@ public class StockViewModel extends AndroidViewModel {
                     var installedGames = new ArrayList<GameData>();
                     for (var data : gameDataHashMap.values()) {
                         if (!data.isFileInstalled()) continue;
-                        installedGames.add(data);
+                        if (!data.fileSize.equals(DISABLE_CALCULATE_DIR)) {
+                            calculateSizeDir(data);
+                        }
+                        localGameData.add(data);
                     }
                     postValueGameDataList(installedGames);
                 })
@@ -494,7 +567,51 @@ public class StockViewModel extends AndroidViewModel {
                 });
     }
 
-    public CompletableFuture<Void> removeGameDataFromDB(String dirName) {
+    private void dropPersistable(Uri folderUri) {
+        try {
+            var contentResolver = getApplication().getContentResolver();
+            contentResolver.releasePersistableUriPermission(
+                    folderUri ,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION
+                            | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+            );
+        } catch (SecurityException ignored) {}
+    }
+
+    public void delEntryDirFromList(ArrayList<GameData> tempList, GameData  data, File listDirsFile) {
+        CompletableFuture
+                .runAsync(() -> tempList.remove(data), executor)
+                .thenCombineAsync(
+                        removeDirFromListDirsFile(listDirsFile, data.gameDir.getName()) ,
+                        (unused , unused2) -> null ,
+                        executor
+                )
+                .thenRunAsync(() -> forceDelFile(getApplication(), data.gameDir) , executor)
+                .thenRunAsync(() -> dropPersistable(data.gameDir.getUri()), executor)
+                .thenRun(this::refreshGameData)
+                .exceptionally(ex -> {
+                    doOnShowErrorDialog(ex.getMessage(), ErrorType.EXCEPTION);
+                    return null;
+                });
+    }
+
+    public void delEntryFromList(ArrayList<GameData> tempList, GameData  data, File listDirsFile) {
+        CompletableFuture
+                .runAsync(() -> tempList.remove(data), executor)
+                .thenCombineAsync(
+                        removeDirFromListDirsFile(listDirsFile, data.gameDir.getName()),
+                        (unused , unused2) -> null,
+                        executor
+                )
+                .thenRunAsync(() -> dropPersistable(data.gameDir.getUri()), executor)
+                .thenRun(this::refreshGameData)
+                .exceptionally(ex -> {
+                    doOnShowErrorDialog(ex.getMessage(), ErrorType.EXCEPTION);
+                    return null;
+                });
+    }
+
+    private CompletableFuture<Void> removeGameDataFromDB(String dirName) {
         return CompletableFuture
                 .supplyAsync(() -> gameDao.getByName(dirName), executor)
                 .thenAcceptAsync(gameDao::delete, executor)

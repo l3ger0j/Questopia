@@ -1,5 +1,7 @@
 package org.qp.android.ui.stock;
 
+import static org.qp.android.ui.stock.StockViewModel.DISABLE_CALCULATE_DIR;
+
 import android.content.Context;
 import android.net.Uri;
 import android.view.LayoutInflater;
@@ -83,7 +85,8 @@ public class StockGamesRecycler extends RecyclerView.Adapter<StockGamesRecycler.
                     .into(holder.listItemGameBinding.gameIcon);
         }
 
-        if (gameData.fileSize != null) {
+        if (gameData.fileSize != null
+                && !gameData.fileSize.equals(DISABLE_CALCULATE_DIR)) {
             holder.listItemGameBinding.gameSize
                     .setText(context.getString(R.string.fileSize)
                             .replace("-SIZE-", gameData.getFileSize()));

@@ -2,7 +2,6 @@ package org.qp.android.ui.stock;
 
 import static androidx.recyclerview.widget.RecyclerView.NO_POSITION;
 import static org.qp.android.helpers.utils.FileUtil.documentWrap;
-import static org.qp.android.helpers.utils.FileUtil.forceDelFile;
 import static org.qp.android.helpers.utils.JsonUtil.jsonToObject;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_IMAGE_FILE;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_MOD_FILE;
@@ -18,7 +17,9 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.storage.StorageManager;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -49,8 +50,9 @@ import com.anggrayudi.storage.file.DocumentFileCompat;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.github.javiersantos.appupdater.AppUpdater;
 import com.github.javiersantos.appupdater.enums.UpdateFrom;
-import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import org.qp.android.BuildConfig;
 import org.qp.android.QuestPlayerApplication;
 import org.qp.android.R;
 import org.qp.android.data.db.GameDao;
@@ -79,7 +81,10 @@ import dagger.hilt.android.AndroidEntryPoint;
 @AndroidEntryPoint
 public class StockActivity extends AppCompatActivity {
 
-    private static final int POST_NOTIFICATION = 203;
+    private static final int READ_EXTERNAL_STORAGE_CODE = 200;
+    private static final int MANAGE_EXTERNAL_STORAGE_CODE = 201;
+    private static final int POST_NOTIFICATION_CODE = 203;
+
     private final String TAG = this.getClass().getSimpleName();
     private final ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
@@ -91,7 +96,7 @@ public class StockActivity extends AppCompatActivity {
     private ActionMode actionMode;
     protected ActivityStockBinding activityStockBinding;
     private boolean isEnable = false;
-    private ExtendedFloatingActionButton mFAB;
+    private FloatingActionButton mFAB;
     private RecyclerView mRecyclerView;
     private ArrayList<GameData> tempList;
     private final ArrayList<GameData> selectList = new ArrayList<>();
@@ -137,11 +142,10 @@ public class StockActivity extends AppCompatActivity {
 
         activityStockBinding = ActivityStockBinding.inflate(getLayoutInflater());
         stockViewModel = new ViewModelProvider(this).get(StockViewModel.class);
-        activityStockBinding.setStockVM(stockViewModel);
         stockViewModel.activityObserver.setValue(this);
 
         mFAB = activityStockBinding.stockFAB;
-        stockViewModel.doIsHideFAB.observe(this , aBoolean -> {
+        stockViewModel.doIsHideFAB.observe(this, aBoolean -> {
             if (aBoolean) {
                 mFAB.hide();
             } else {
@@ -195,17 +199,43 @@ public class StockActivity extends AppCompatActivity {
                                 | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
 
                 var rootFolder = DocumentFileCompat.fromUri(this , uri);
-                var application = (QuestPlayerApplication) getApplication();
-                if (application != null) application.setCurrentGameDir(rootFolder);
-
-                stockViewModel.createGameDataInDB(rootFolder);
+                stockViewModel.showAddDialogFragment(
+                        getSupportFragmentManager(),
+                        rootFolder
+                );
+                stockViewModel.outputIntObserver.observe(this, integer -> {
+                    if (integer == 1) {
+                        var application = (QuestPlayerApplication) getApplication();
+                        if (application != null) application.setCurrentGameDir(rootFolder);
+                    }
+                });
             }
         });
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ActivityCompat.checkSelfPermission(this , Manifest.permission.POST_NOTIFICATIONS)
                     != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this , new String[]{Manifest.permission.POST_NOTIFICATIONS} , POST_NOTIFICATION);
+                ActivityCompat.requestPermissions(this , new String[]{Manifest.permission.POST_NOTIFICATIONS} , POST_NOTIFICATION_CODE);
+            }
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            if (!Environment.isExternalStorageManager()) {
+                try {
+                    var uri = Uri.parse("package:" + BuildConfig.APPLICATION_ID);
+                    var intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, uri);
+                    startActivity(intent);
+                } catch (Exception ex){
+                    var intent = new Intent();
+                    intent.setAction(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+                    startActivity(intent);
+                }
+            }
+        } else {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
+                    && ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                var permission = new String[]{ Manifest.permission.READ_EXTERNAL_STORAGE , Manifest.permission.WRITE_EXTERNAL_STORAGE};
+                ActivityCompat.requestPermissions(this, permission , READ_EXTERNAL_STORAGE_CODE);
             }
         }
 
@@ -268,16 +298,6 @@ public class StockActivity extends AppCompatActivity {
         });
     }
 
-    public void dropPersistable(Uri folderUri) {
-        try {
-            getContentResolver().releasePersistableUriPermission(
-                    folderUri ,
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION
-                            | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-            );
-        } catch (SecurityException ignored) {}
-    }
-
     @Override
     protected void onActivityResult(int requestCode ,
                                     int resultCode ,
@@ -291,12 +311,30 @@ public class StockActivity extends AppCompatActivity {
                                            @NonNull String[] permissions ,
                                            @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode , permissions , grantResults);
-        if (requestCode == POST_NOTIFICATION) {
-            if (grantResults.length > 0
-                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                ViewUtil.showSnackBar(findViewById(android.R.id.content) , "Success");
-            } else {
-                ViewUtil.showSnackBar(findViewById(android.R.id.content) , "Permission denied to post notification");
+        switch (requestCode) {
+            case READ_EXTERNAL_STORAGE_CODE -> {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    ViewUtil.showSnackBar(findViewById(android.R.id.content) , "Success");
+                } else {
+                    ViewUtil.showSnackBar(findViewById(android.R.id.content) , "Permission denied to read your External storage");
+                }
+            }
+            case MANAGE_EXTERNAL_STORAGE_CODE -> {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    ViewUtil.showSnackBar(findViewById(android.R.id.content) , "Success");
+                } else {
+                    ViewUtil.showSnackBar(findViewById(android.R.id.content) , "Permission denied to manage your External storage");
+                }
+            }
+            case POST_NOTIFICATION_CODE -> {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    ViewUtil.showSnackBar(findViewById(android.R.id.content) , "Success");
+                } else {
+                    ViewUtil.showSnackBar(findViewById(android.R.id.content) , "Permission denied to post notification");
+                }
             }
         }
         storageHelper.onRequestPermissionsResult(requestCode , permissions , grantResults);
@@ -409,22 +447,24 @@ public class StockActivity extends AppCompatActivity {
                 int itemId = item.getItemId();
                 switch (itemId) {
                     case R.id.delete_game -> {
-                        for (var data : selectList) {
-                            CompletableFuture
-                                    .runAsync(() -> tempList.remove(data) , executor)
-                                    .thenCombineAsync(
-                                            stockViewModel.removeGameDataFromDB(data.gameDir.getName()) ,
-                                            (unused , unused2) -> null ,
-                                            executor
-                                    )
-                                    .thenRunAsync(() -> forceDelFile(getApplication() , data.gameDir) , executor)
-                                    .thenRunAsync(() -> dropPersistable(data.gameDir.getUri()) , executor)
-                                    .exceptionally(ex -> {
-                                        showErrorDialog(getString(R.string.error) + ": " + ex);
-                                        return null;
-                                    });
-                        }
-                        actionMode.finish();
+                        stockViewModel.showDialogFragment(
+                                getSupportFragmentManager(),
+                                StockDialogType.DELETE_DIALOG,
+                                String.valueOf(selectList.size())
+                        );
+                        stockViewModel.outputIntObserver.observe(StockActivity.this, integer -> {
+                            if (integer == 1) {
+                                for (var data : selectList) {
+                                    stockViewModel.delEntryDirFromList(tempList, data, listDirsFile);
+                                }
+                                actionMode.finish();
+                            } else {
+                                for (var data : selectList) {
+                                    stockViewModel.delEntryFromList(tempList, data, listDirsFile);
+                                }
+                                actionMode.finish();
+                            }
+                        });
                     }
                     case R.id.select_all -> {
                         if (selectList.size() == tempList.size()) {
