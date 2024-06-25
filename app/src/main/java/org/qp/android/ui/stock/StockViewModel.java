@@ -390,7 +390,7 @@ public class StockViewModel extends AndroidViewModel {
             if (tempImageFile != null) currGameData.icon = tempImageFile.getUri().toString();
 
             if (editBinding.sizeDirSW.isChecked() || currGameData.getFileSize().isEmpty()) {
-                calculateSizeDir(currGameData);
+                // calculateSizeDir(currGameData);
             }
 
             if (tempPathFile != null) {
@@ -414,14 +414,15 @@ public class StockViewModel extends AndroidViewModel {
         }
     }
 
+    // TODO: 25.06.2024 Release service for calculate size dir
     private void calculateSizeDir(GameData gameData) {
         var gameDir = gameData.gameDir;
 
         CompletableFuture
-                .supplyAsync(() -> calculateDirSize(gameDir) , executor)
+                .supplyAsync(() -> calculateDirSize(gameDir), executor)
                 .thenAccept(aLong -> {
-                    gameData.fileSize = formatFileSize(aLong , getController().binaryPrefixes);
-                    localGame.createDataIntoFolder(getApplication() , gameData , gameData.gameDir);
+                    gameData.fileSize = formatFileSize(aLong, getController().binaryPrefixes);
+                    localGame.updateGameEntryInDB(gameData);
                 });
     }
 
@@ -534,15 +535,12 @@ public class StockViewModel extends AndroidViewModel {
                 .thenApply(dataBaseGameData -> {
                     dataBaseGameData.forEach(gameData -> {
                         var remoteGameData = gamesMap.get(gameData.id);
-                        var size = Long.parseLong(gameData.fileSize);
                         if (remoteGameData != null) {
                             var aggregateGameData = new GameData(remoteGameData);
                             aggregateGameData.gameDir = gameData.gameDir;
                             aggregateGameData.gameFiles = gameData.gameFiles;
-                            aggregateGameData.fileSize = formatFileSize(size, getController().binaryPrefixes);
                             gamesMap.put(gameData.id , aggregateGameData);
                         } else {
-                            gameData.fileSize = formatFileSize(size, getController().binaryPrefixes);
                             gamesMap.put(gameData.id , gameData);
                         }
                     });
@@ -552,9 +550,6 @@ public class StockViewModel extends AndroidViewModel {
                     var installedGames = new ArrayList<GameData>();
                     for (var data : gameDataHashMap.values()) {
                         if (!data.isFileInstalled()) continue;
-                        if (!data.fileSize.equals(DISABLE_CALCULATE_DIR)) {
-                            calculateSizeDir(data);
-                        }
                         installedGames.add(data);
                     }
                     postValueGameDataList(installedGames);
