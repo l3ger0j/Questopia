@@ -77,14 +77,13 @@ public class StockActivity extends AppCompatActivity {
 
     private final String TAG = this.getClass().getSimpleName();
 
-    private HashMap<String, GameData> gamesMap = new HashMap<>();
     private StockViewModel stockViewModel;
 
     private NavController navController;
 
-    private ActionMode actionMode;
+    private ActionMode deleteMode;
     protected ActivityStockBinding activityStockBinding;
-    private boolean isEnable = false;
+    private boolean isEnableDeleteMode = false;
     private FloatingActionButton mFAB;
     private RecyclerView mRecyclerView;
     private ArrayList<GameData> tempList;
@@ -138,7 +137,6 @@ public class StockActivity extends AppCompatActivity {
         activityStockBinding = ActivityStockBinding.inflate(getLayoutInflater());
         stockViewModel = new ViewModelProvider(this).get(StockViewModel.class);
         stockViewModel.activityObserver.setValue(this);
-        gamesMap = stockViewModel.getGamesMap();
 
         mFAB = activityStockBinding.stockFAB;
         stockViewModel.doIsHideFAB.observe(this, aBoolean -> {
@@ -259,9 +257,9 @@ public class StockActivity extends AppCompatActivity {
                                     + ": " + errorDialog.getErrorMessage());
                 }
             } else if (eventNavigation instanceof StockFragmentNavigation.ShowGameFragment gameFragment) {
-                onItemClick(gameFragment.getPosition());
+                onListItemClick(gameFragment.getPosition());
             } else if (eventNavigation instanceof StockFragmentNavigation.ShowActionMode) {
-                onLongItemClick();
+                onLongListItemClick();
             } else if (eventNavigation instanceof StockFragmentNavigation.ShowFilePicker filePicker) {
                 showFilePickerActivity(filePicker.getRequestCode() , filePicker.getMimeTypes());
             }
@@ -400,17 +398,29 @@ public class StockActivity extends AppCompatActivity {
         }
     }
 
-    public void onItemClick(int position) {
-        if (isEnable) {
-            for (var gameData : gamesMap.values()) {
-                if (!gameData.isFileInstalled()) continue;
-                tempList.add(gameData);
-            }
+    public void onListItemClick(int position) {
+        if (!isEnableDeleteMode) {
+            stockViewModel.getGameDataList().observe(this, gameData -> {
+                if (!gameData.isEmpty() && gameData.size() > position) {
+                    stockViewModel.setCurrGameData(gameData.get(position));
+                }
+            });
+            navController.navigate(R.id.stockGameFragment);
+            stockViewModel.doIsHideFAB.setValue(true);
+        } else {
             var mViewHolder = mRecyclerView.findViewHolderForAdapterPosition(position);
             if (mViewHolder == null) return;
+
             var adapterPosition = mViewHolder.getAdapterPosition();
             if (adapterPosition == NO_POSITION) return;
             if (adapterPosition < 0 || adapterPosition >= tempList.size()) return;
+
+            var currGamesMapValues = stockViewModel.getGamesMap().values();
+            for (var gameData : currGamesMapValues) {
+                if (!gameData.isFileInstalled()) continue;
+                tempList.add(gameData);
+            }
+
             var gameData = tempList.get(adapterPosition);
             if (selectList.isEmpty() || !selectList.contains(gameData)) {
                 selectList.add(gameData);
@@ -421,21 +431,12 @@ public class StockActivity extends AppCompatActivity {
                 var cardView = (CardView) mViewHolder.itemView.findViewWithTag("gameCardView");
                 cardView.setCardBackgroundColor(Color.DKGRAY);
             }
-        } else {
-            stockViewModel.getGameDataList().observe(this , gameData -> {
-                if (!gameData.isEmpty() && gameData.size() > position) {
-                    stockViewModel.setCurrGameData(gameData.get(position));
-                }
-            });
-            navController.navigate(R.id.stockGameFragment);
-            stockViewModel.doIsHideFAB.setValue(true);
         }
     }
 
-    public void onLongItemClick() {
-        if (isEnable) {
-            return;
-        }
+    public void onLongListItemClick() {
+        if (isEnableDeleteMode) return;
+
         var callback = new ActionMode.Callback() {
             @Override
             public boolean onCreateActionMode(ActionMode mode , Menu menu) {
@@ -446,7 +447,7 @@ public class StockActivity extends AppCompatActivity {
             @Override
             public boolean onPrepareActionMode(ActionMode mode , Menu menu) {
                 tempList = stockViewModel.getSortedGames();
-                isEnable = true;
+                isEnableDeleteMode = true;
                 return true;
             }
 
@@ -466,12 +467,12 @@ public class StockActivity extends AppCompatActivity {
                                 for (var data : selectList) {
                                     stockViewModel.delEntryDirFromList(tempList, data, listDirsFile);
                                 }
-                                actionMode.finish();
+                                deleteMode.finish();
                             } else {
                                 for (var data : selectList) {
                                     stockViewModel.delEntryFromList(tempList, data, listDirsFile);
                                 }
-                                actionMode.finish();
+                                deleteMode.finish();
                             }
                         });
                     }
@@ -507,8 +508,8 @@ public class StockActivity extends AppCompatActivity {
                     var cardView = (CardView) holder.itemView.findViewWithTag("gameCardView");
                     cardView.setCardBackgroundColor(Color.DKGRAY);
                 }
-                actionMode = null;
-                isEnable = false;
+                deleteMode = null;
+                isEnableDeleteMode = false;
                 tempList.clear();
                 selectList.clear();
                 mFAB.show();
@@ -516,7 +517,7 @@ public class StockActivity extends AppCompatActivity {
         };
 
         mFAB.hide();
-        actionMode = startSupportActionMode(callback);
+        deleteMode = startSupportActionMode(callback);
     }
 
     @Override
