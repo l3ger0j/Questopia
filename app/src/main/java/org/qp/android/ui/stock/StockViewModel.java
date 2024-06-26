@@ -3,10 +3,10 @@ package org.qp.android.ui.stock;
 import static org.qp.android.helpers.utils.DirUtil.calculateDirSize;
 import static org.qp.android.helpers.utils.DirUtil.isDirContainsGameFile;
 import static org.qp.android.helpers.utils.FileUtil.copyFileToDir;
-import static org.qp.android.helpers.utils.FileUtil.findFileOrDirectory;
+import static org.qp.android.helpers.utils.FileUtil.fromRelPath;
 import static org.qp.android.helpers.utils.FileUtil.forceDelFile;
 import static org.qp.android.helpers.utils.FileUtil.formatFileSize;
-import static org.qp.android.helpers.utils.FileUtil.isWritableDirectory;
+import static org.qp.android.helpers.utils.FileUtil.isWritable;
 import static org.qp.android.helpers.utils.JsonUtil.jsonToObject;
 import static org.qp.android.helpers.utils.JsonUtil.objectToJson;
 import static org.qp.android.helpers.utils.PathUtil.removeExtension;
@@ -26,6 +26,7 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.anggrayudi.storage.callback.FileCallback;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.squareup.picasso.Picasso;
 
@@ -85,6 +86,13 @@ public class StockViewModel extends AndroidViewModel {
 
     public EventEmitter emitter = new EventEmitter();
 
+    private final FileCallback callback = new FileCallback() {
+        @Override
+        public void onConflict(@NonNull DocumentFile destinationFile,
+                               @NonNull FileConflictAction action) {
+            action.confirmResolution(ConflictResolution.REPLACE);
+        }
+    };
 
     // region Getter/Setter
     public void setCurrGameData(GameData currGameData) {
@@ -497,15 +505,17 @@ public class StockViewModel extends AndroidViewModel {
                 calculateSizeDir(currGameData);
             }
             if (tempPathFile != null) {
-                copyFileToDir(getApplication() , tempPathFile , currGameData.gameDir);
+                CompletableFuture
+                        .runAsync(() -> copyFileToDir(getApplication(),
+                                tempPathFile, currGameData.gameDir, callback
+                        ));
             }
             if (tempModFile != null) {
-                var modDir = findFileOrDirectory(
-                        getApplication() ,
-                        currGameData.gameDir ,
-                        "mods"
-                );
-                copyFileToDir(getApplication() , tempModFile , modDir);
+                var modDir = fromRelPath(getApplication(), "mods", currGameData.gameDir);
+                CompletableFuture
+                        .runAsync(() -> copyFileToDir(getApplication(),
+                                tempModFile, modDir, callback
+                        ));
             }
 
             localGame.createDataIntoFolder(getApplication() , currGameData , currGameData.gameDir);
@@ -566,7 +576,7 @@ public class StockViewModel extends AndroidViewModel {
         if (rootDir == null) return;
         CompletableFuture
                 .runAsync(() -> {
-                    if (isWritableDirectory(rootDir)) {
+                    if (isWritable(getApplication(), rootDir)) {
                         putGameDirToList(rootDir);
                         refreshGameData();
                     } else {
@@ -575,7 +585,7 @@ public class StockViewModel extends AndroidViewModel {
                         var saveDir = getStockActivity().getListDirsFile();
                         dirName.ifPresent(s -> removeDirFromListDirsFile(saveDir , s));
                     }
-                } , executor);
+                }, executor);
     }
 
     public void refreshGameData() {

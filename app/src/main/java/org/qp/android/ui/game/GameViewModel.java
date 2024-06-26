@@ -4,8 +4,8 @@ import static org.qp.android.helpers.utils.Base64Util.decodeBase64;
 import static org.qp.android.helpers.utils.Base64Util.isBase64;
 import static org.qp.android.helpers.utils.ColorUtil.convertRGBAtoBGRA;
 import static org.qp.android.helpers.utils.ColorUtil.getHexColor;
-import static org.qp.android.helpers.utils.FileUtil.createFindDFolder;
-import static org.qp.android.helpers.utils.FileUtil.findFileFromRelPath;
+import static org.qp.android.helpers.utils.FileUtil.findOrCreateFolder;
+import static org.qp.android.helpers.utils.FileUtil.fromRelPath;
 import static org.qp.android.helpers.utils.PathUtil.getExtension;
 import static org.qp.android.helpers.utils.ThreadUtil.assertNonUiThread;
 import static org.qp.android.helpers.utils.ViewUtil.getFontStyle;
@@ -213,9 +213,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         var relPath = Uri.parse(src).getPath();
         if (relPath == null) return Uri.EMPTY;
         if (getCurGameDir().isPresent()) {
-            var imageFile = findFileFromRelPath(
-                    getApplication() , relPath , getCurGameDir().get()
-            );
+            var imageFile = fromRelPath(getApplication(), relPath, getCurGameDir().get());
             return imageFile.getUri();
         } else {
             return Uri.EMPTY;
@@ -251,7 +249,8 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
 
     public Optional<DocumentFile> getSavesDir() {
         if (getCurGameDir().isEmpty()) return Optional.empty();
-        return Optional.ofNullable(createFindDFolder(getCurGameDir().get() , "saves"));
+        var savesDir = findOrCreateFolder(getApplication(), getCurGameDir().get(), "saves");
+        return Optional.ofNullable(savesDir);
     }
 
     @NonNull
@@ -563,7 +562,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
 
             try {
                 if (uri.getPath() == null) throw new NullPointerException();
-                var imageFile = findFileFromRelPath(getApplication() , uri.getPath() , rootDir);
+                var imageFile = fromRelPath(getApplication(), uri.getPath(), rootDir);
                 var extension = MimeTypeMap.getSingleton().getMimeTypeFromExtension(getExtension(imageFile));
                 var in = getApplication().getContentResolver().openInputStream(imageFile.getUri());
                 return new WebResourceResponse(extension, null, in);

@@ -1,9 +1,10 @@
 package org.qp.android.helpers.repository;
 
-import static org.qp.android.helpers.utils.FileUtil.createFindDFile;
 import static org.qp.android.helpers.utils.FileUtil.documentWrap;
+import static org.qp.android.helpers.utils.FileUtil.findOrCreateFile;
+import static org.qp.android.helpers.utils.FileUtil.fromRelPath;
 import static org.qp.android.helpers.utils.FileUtil.forceCreateFile;
-import static org.qp.android.helpers.utils.FileUtil.isWritableFile;
+import static org.qp.android.helpers.utils.FileUtil.isWritable;
 import static org.qp.android.helpers.utils.FileUtil.readFileAsString;
 import static org.qp.android.helpers.utils.JsonUtil.jsonToObject;
 import static org.qp.android.helpers.utils.JsonUtil.objectToJson;
@@ -32,44 +33,28 @@ public class LocalGame {
     private static final String NOMEDIA_FILENAME = ".nomedia";
     private static final String NOSEARCH_FILENAME = ".nosearch";
 
-    @Nullable
-    private DocumentFile getGameInfoFile(@NonNull DocumentFile gameFolder) {
-        var findGameInfoFile = gameFolder.findFile(GAME_INFO_FILENAME);
-        if (findGameInfoFile == null) {
-            Log.w(TAG , "GameData info file not found in " + gameFolder.getName());
-            return null;
-        }
-        return findGameInfoFile;
+    private void createNoMediaFile(@NonNull Context context,
+                                   @NonNull DocumentFile gameDir) {
+        forceCreateFile(context, gameDir, MimeType.TEXT, NOMEDIA_FILENAME);
     }
 
-    private void createNoMediaFile(@NonNull DocumentFile gameDir) {
-        var findNoMediaFile = gameDir.findFile(NOMEDIA_FILENAME);
-        if (findNoMediaFile == null || !findNoMediaFile.exists()) {
-            forceCreateFile(gameDir , MimeType.TEXT , NOMEDIA_FILENAME);
-        }
-    }
-
-    private void createNoSearchFile(@NonNull DocumentFile gameDir) {
-        var findNoSearchFile = gameDir.findFile(NOSEARCH_FILENAME);
-        if (findNoSearchFile == null || !findNoSearchFile.exists()) {
-            forceCreateFile(gameDir , MimeType.TEXT , NOSEARCH_FILENAME);
-        }
+    private void createNoSearchFile(@NonNull Context context,
+                                    @NonNull DocumentFile gameDir) {
+        forceCreateFile(context, gameDir, MimeType.TEXT, NOSEARCH_FILENAME);
     }
 
     public void createDataIntoFolder(Context context ,
                                      GameData gameData ,
                                      DocumentFile gameDir) {
-        var infoFile = getGameInfoFile(gameDir);
-        if (infoFile == null) {
-            infoFile = createFindDFile(gameDir , MimeType.TEXT , GAME_INFO_FILENAME);
-        }
-        if (!isWritableFile(infoFile)) {
+        var infoFile = findOrCreateFile(context, gameDir, GAME_INFO_FILENAME, MimeType.TEXT);
+
+        if (!isWritable(context, infoFile)) {
             Log.e(TAG , "ERROR");
             return;
         }
-        var tempInfoFile = documentWrap(infoFile);
 
-        try (var out = tempInfoFile.openOutputStream(context , false)) {
+        var tempInfoFile = documentWrap(infoFile);
+        try (var out = tempInfoFile.openOutputStream(context, false)) {
             objectToJson(out , gameData);
         } catch (Exception ex) {
             Log.e(TAG , "ERROR: " , ex);
@@ -86,7 +71,7 @@ public class LocalGame {
 
         for (var gameFolder : formatGamesDirs) {
             var item = (GameData) null;
-            var infoFile = getGameInfoFile(gameFolder.dir);
+            var infoFile = fromRelPath(context, GAME_INFO_FILENAME, gameFolder.dir);
 
             if (infoFile == null) {
                 var name = gameFolder.dir.getName();
@@ -123,8 +108,8 @@ public class LocalGame {
                 }
             }
 
-            createNoMediaFile(gameFolder.dir);
-            createNoSearchFile(gameFolder.dir);
+            createNoMediaFile(context, gameFolder.dir);
+            createNoSearchFile(context, gameFolder.dir);
         }
 
         return itemsGamesDirs;

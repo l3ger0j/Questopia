@@ -1,8 +1,9 @@
 package org.qp.android.ui.game;
 
 import static androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener;
-import static org.qp.android.helpers.utils.FileUtil.createFindDFile;
 import static org.qp.android.helpers.utils.FileUtil.documentWrap;
+import static org.qp.android.helpers.utils.FileUtil.findOrCreateFile;
+import static org.qp.android.helpers.utils.FileUtil.fromRelPath;
 import static org.qp.android.helpers.utils.ThreadUtil.isMainThread;
 
 import android.annotation.SuppressLint;
@@ -37,6 +38,7 @@ import androidx.navigation.fragment.NavHostFragment;
 
 import com.anggrayudi.storage.SimpleStorageHelper;
 import com.anggrayudi.storage.file.DocumentFileCompat;
+import com.anggrayudi.storage.file.DocumentFileUtils;
 import com.anggrayudi.storage.file.MimeType;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -596,7 +598,7 @@ public class GameActivity extends AppCompatActivity {
         MenuItem item;
         for (int i = 0; i <= MAX_SAVE_SLOTS; i++) {
             final var filename = getSaveSlotFilename(i);
-            final var loadFile = savesDir.findFile(filename);
+            final var loadFile = fromRelPath(this, filename, savesDir);
             var title = "";
 
             if (loadFile != null) {
@@ -617,11 +619,7 @@ public class GameActivity extends AppCompatActivity {
                         gameViewModel.requestForNativeLib(GameLibRequest.LOAD_FILE , loadFile.getUri());
                     }
                     case SAVE -> {
-                        var saveFile = createFindDFile(
-                                savesDir ,
-                                MimeType.TEXT ,
-                                filename
-                        );
+                        var saveFile = findOrCreateFile(this, savesDir, filename, MimeType.TEXT);
                         if (saveFile == null) return true;
                         gameViewModel.requestForNativeLib(GameLibRequest.SAVE_FILE , saveFile.getUri());
                     }

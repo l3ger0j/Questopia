@@ -1,7 +1,7 @@
 package org.qp.android.model.service;
 
 import static org.qp.android.helpers.utils.Base64Util.encodeBase64;
-import static org.qp.android.helpers.utils.FileUtil.findFileFromRelPath;
+import static org.qp.android.helpers.utils.FileUtil.fromRelPath;
 import static org.qp.android.helpers.utils.StringUtil.isNotEmpty;
 import static org.qp.android.helpers.utils.StringUtil.isNullOrEmpty;
 
@@ -18,7 +18,6 @@ import org.qp.android.ui.settings.SettingsController;
 
 import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
@@ -199,7 +198,7 @@ public class HtmlProcessor {
                                                          Element img) {
         var relPath = img.attr("src");
         return CompletableFuture
-                .supplyAsync(() -> findFileFromRelPath(context , relPath , curGameDir), executors)
+                .supplyAsync(() -> fromRelPath(context , relPath , curGameDir), executors)
                 .thenApply(imageFile -> {
                     if (imageFile == null) return false;
                     var drawable = imageProvider.getDrawableFromPath(context , imageFile.getUri());
@@ -213,7 +212,7 @@ public class HtmlProcessor {
                                                           Element img) {
         var relPath = img.attr("src");
         return CompletableFuture
-                .supplyAsync(() -> findFileFromRelPath(context , relPath , curGameDir), executors)
+                .supplyAsync(() -> fromRelPath(context , relPath , curGameDir), executors)
                 .thenApply(imageFile -> {
                     if (imageFile == null) return false;
                     var drawable = imageProvider.getDrawableFromPath(context , imageFile.getUri());

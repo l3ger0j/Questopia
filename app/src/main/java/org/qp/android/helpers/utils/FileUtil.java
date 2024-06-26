@@ -6,15 +6,16 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.WorkerThread;
 import androidx.documentfile.provider.DocumentFile;
 
 import com.anggrayudi.storage.FileWrapper;
+import com.anggrayudi.storage.callback.FileCallback;
+import com.anggrayudi.storage.file.CreateMode;
 import com.anggrayudi.storage.file.DocumentFileUtils;
-import com.anggrayudi.storage.file.MimeType;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.text.DecimalFormat;
@@ -60,86 +61,43 @@ public final class FileUtil {
         return new FileWrapper.Document(inputFile);
     }
 
-    public static <T> boolean isWritableFile(T file) {
-        if (file == null) {
-            return false;
-        }
-        if (file instanceof File tempFile) {
-            return tempFile.exists() && tempFile.canWrite();
-        } else if (file instanceof DocumentFile tempFile) {
-            return tempFile.exists() && tempFile.isFile() && tempFile.canWrite();
-        }
-        return false;
+    public static boolean isWritable(Context context, DocumentFile dir) {
+        if (dir == null) return false;
+        var canWrite = DocumentFileUtils.isWritable(dir, context);
+        return dir.exists() && dir.isDirectory() && canWrite;
     }
 
-    public static <T> boolean isWritableDirectory(T dir) {
-        if (dir == null) {
-            return false;
-        }
-        if (dir instanceof File tempDir) {
-            return tempDir.exists() && tempDir.isDirectory() && tempDir.canWrite();
-        } else if (dir instanceof DocumentFile tempFile) {
-            return tempFile.exists() && tempFile.isDirectory() && tempFile.canWrite();
-        }
-        return false;
+    public static void forceCreateFile(Context context,
+                                       DocumentFile srcDir,
+                                       String name,
+                                       String mimeType) {
+        DocumentFileUtils.makeFile(srcDir, context, name, mimeType, CreateMode.SKIP_IF_EXISTS);
     }
 
     @Nullable
-    public static DocumentFile createFindDFile(DocumentFile parentDir ,
-                                               String mimeType ,
-                                               String displayName) {
-        if (!isWritableDirectory(parentDir)) {
-            return null;
-        }
-
-        var checkFile = parentDir.findFile(displayName);
-        if (checkFile == null || !checkFile.exists()) {
-            var tempFile = parentDir.createFile(mimeType , displayName);
-            if (isWritableFile(tempFile)) {
-                Log.i(TAG , "File created");
-                return tempFile;
-            }
-        }
-        return checkFile;
-    }
-
-    public static void forceCreateFile(DocumentFile parentDir ,
-                                       String mimeType ,
-                                       String displayName) {
-        if (!isWritableDirectory(parentDir)) {
-            return;
-        }
-        parentDir.createFile(mimeType , displayName);
+    public static DocumentFile findOrCreateFile(Context context,
+                                                DocumentFile srcDir,
+                                                String name,
+                                                String mimeType) {
+        return DocumentFileUtils.makeFile(srcDir, context, name, mimeType, CreateMode.REUSE);
     }
 
     @Nullable
-    public static DocumentFile createFindDFolder(DocumentFile parentDir ,
-                                                 String displayName) {
-        if (!isWritableDirectory(parentDir)) {
-            return null;
-        }
-
-        var checkDir = parentDir.findFile(displayName);
-        if (checkDir == null) {
-            var tempDir = parentDir.createDirectory(displayName);
-            if (isWritableDirectory(tempDir)) {
-                Log.i(TAG , "Directory created");
-                return tempDir;
-            } else {
-                Log.e(TAG , "Directory not created");
-            }
-        }
-        return checkDir;
+    public static DocumentFile findOrCreateFolder(Context context,
+                                                  DocumentFile srcDir,
+                                                  String name) {
+        return DocumentFileUtils.makeFolder(srcDir, context, name, CreateMode.REUSE);
     }
 
-    public static DocumentFile findFileOrDirectory(Context context ,
-                                                   DocumentFile parentDir ,
-                                                   final String name) {
-        return DocumentFileUtils.child(parentDir , context , name);
+    public static DocumentFile fromRelPath(@NonNull Context context ,
+                                           @NonNull final String path,
+                                           @NonNull DocumentFile parentDir) {
+        return DocumentFileUtils.child(parentDir, context, path);
     }
 
     @Nullable
-    public static DocumentFile fromFullPath(@NonNull String fullPath ,
+    public static DocumentFile fromFullPath(@NonNull Context context,
+                                            @NonNull String fullPath,
                                             @NonNull DocumentFile rootDir) {
         var findDir = rootDir;
         var nameGameDir = rootDir.getName();
@@ -154,7 +112,7 @@ public final class FileUtil {
                 if (segment.isEmpty()) {
                     continue;
                 }
-                findDir = findDir.findFile(segment);
+                findDir = fromRelPath(context, segment, findDir);
                 if (findDir == null) {
                     break;
                 }
@@ -164,12 +122,6 @@ public final class FileUtil {
         }
 
         return findDir;
-    }
-
-    public static DocumentFile findFileFromRelPath(@NonNull Context context ,
-                                                   @NonNull final String path,
-                                                   @NonNull DocumentFile parentDir) {
-        return DocumentFileUtils.child(parentDir , context , path);
     }
 
     @Nullable
@@ -235,22 +187,11 @@ public final class FileUtil {
                 + " " + units[digitGroups];
     }
 
-    public static void copyFileToDir(Context context ,
-                                     @NonNull DocumentFile srcFile ,
-                                     @NonNull DocumentFile destDir) {
-        var destFile = createFindDFile(destDir , MimeType.UNKNOWN , srcFile.getName());
-        if (destFile == null) {
-            return;
-        }
-        try (var in = context.getContentResolver().openInputStream(srcFile.getUri());
-             var out = context.getContentResolver().openOutputStream(destFile.getUri())) {
-            if (in != null) {
-                StreamUtil.copy(in , out);
-            } else {
-                throw new IOException();
-            }
-        } catch (IOException ex) {
-            Log.d(TAG , "Error: " , ex);
-        }
+    @WorkerThread
+    public static void copyFileToDir(@NonNull Context context,
+                                     @NonNull DocumentFile srcFile,
+                                     @NonNull DocumentFile destDir,
+                                     @NonNull FileCallback fileCallback) {
+        DocumentFileUtils.copyFileTo(srcFile, context, destDir, null, fileCallback);
     }
 }
