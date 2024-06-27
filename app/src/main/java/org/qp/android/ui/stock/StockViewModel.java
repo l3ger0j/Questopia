@@ -10,11 +10,13 @@ import static org.qp.android.helpers.utils.FileUtil.isWritableDir;
 import static org.qp.android.helpers.utils.JsonUtil.jsonToObject;
 import static org.qp.android.helpers.utils.JsonUtil.objectToJson;
 import static org.qp.android.helpers.utils.PathUtil.removeExtension;
+import static org.qp.android.helpers.utils.StringUtil.isNotEmpty;
 
 import android.annotation.SuppressLint;
 import android.app.Application;
 import android.content.Intent;
 import android.net.Uri;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 
@@ -77,7 +79,6 @@ public class StockViewModel extends AndroidViewModel {
     private final MutableLiveData<ArrayList<GameData>> gameDataList = new MutableLiveData<>();
     private ArrayList<DocumentFile> listGamesDir = new ArrayList<>();
 
-    private final SettingsController controller = SettingsController.newInstance(getApplication());
     private final LocalGame localGame = new LocalGame();
     private DocumentFile tempImageFile, tempPathFile, tempModFile;
     private GameData currGameData;
@@ -143,6 +144,11 @@ public class StockViewModel extends AndroidViewModel {
         } else {
             throw new NullPointerException();
         }
+    }
+
+    @NonNull
+    private SettingsController getController() {
+        return SettingsController.newInstance(getApplication());
     }
 
     @NonNull
@@ -538,10 +544,10 @@ public class StockViewModel extends AndroidViewModel {
         var gameDir = gameData.gameDir;
 
         CompletableFuture
-                .supplyAsync(() -> calculateDirSize(gameDir) , executor)
+                .supplyAsync(() -> calculateDirSize(gameDir), executor)
                 .thenAccept(aLong -> {
-                    gameData.fileSize = formatFileSize(aLong , controller.binaryPrefixes);
-                    localGame.createDataIntoFolder(getApplication() , gameData , gameData.gameDir);
+                    gameData.fileSize = String.valueOf(aLong);
+                    localGame.createDataIntoFolder(getApplication(), gameData, gameData.gameDir);
                 });
     }
 
@@ -617,7 +623,13 @@ public class StockViewModel extends AndroidViewModel {
                     var localGameData = new ArrayList<GameData>();
                     for (var data : sortedGameData) {
                         if (!data.isFileInstalled()) continue;
-                        if (!data.fileSize.equals(DISABLE_CALCULATE_DIR)) {
+                        if (isNotEmpty(data.fileSize)) {
+                            if (!data.fileSize.equals(DISABLE_CALCULATE_DIR)) {
+                                var fileSize = Long.parseLong(data.fileSize);
+                                var currPrefix = getController().binaryPrefixes;
+                                data.fileSize = formatFileSize(fileSize, currPrefix);
+                            }
+                        } else {
                             calculateSizeDir(data);
                         }
                         localGameData.add(data);
