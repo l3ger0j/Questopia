@@ -46,6 +46,7 @@ import org.qp.android.ui.settings.SettingsController;
 
 import java.io.File;
 import java.io.IOException;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -423,11 +424,18 @@ public class StockViewModel extends AndroidViewModel {
 
     private void createAddIntent(DocumentFile rootDir) {
         try {
+            var nameDir = rootDir.getName();
+            if (nameDir == null) {
+                var secureRandom = new SecureRandom();
+                nameDir = "game#" + secureRandom.nextInt();
+            }
+
             var newGameData = new GameData();
+            newGameData.id = nameDir.toLowerCase(Locale.ROOT);
             var editTextTitle = addBinding.ET0.getEditText();
             if (editTextTitle != null) {
                 newGameData.title = editTextTitle.getText().toString().isEmpty()
-                        ? rootDir.getName()
+                        ? nameDir
                         : editTextTitle.getText().toString();
             }
             var editTextAuthor = addBinding.ET1.getEditText();
