@@ -6,7 +6,7 @@ import static org.qp.android.helpers.utils.FileUtil.copyFileToDir;
 import static org.qp.android.helpers.utils.FileUtil.fromRelPath;
 import static org.qp.android.helpers.utils.FileUtil.forceDelFile;
 import static org.qp.android.helpers.utils.FileUtil.formatFileSize;
-import static org.qp.android.helpers.utils.FileUtil.isWritable;
+import static org.qp.android.helpers.utils.FileUtil.isWritableDir;
 import static org.qp.android.helpers.utils.JsonUtil.jsonToObject;
 import static org.qp.android.helpers.utils.JsonUtil.objectToJson;
 import static org.qp.android.helpers.utils.PathUtil.removeExtension;
@@ -576,7 +576,7 @@ public class StockViewModel extends AndroidViewModel {
         if (rootDir == null) return;
         CompletableFuture
                 .runAsync(() -> {
-                    if (isWritable(getApplication(), rootDir)) {
+                    if (isWritableDir(getApplication(), rootDir)) {
                         putGameDirToList(rootDir);
                         refreshGameData();
                     } else {

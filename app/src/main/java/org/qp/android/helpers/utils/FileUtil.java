@@ -61,7 +61,13 @@ public final class FileUtil {
         return new FileWrapper.Document(inputFile);
     }
 
-    public static boolean isWritable(Context context, DocumentFile dir) {
+    public static boolean isWritableFile(Context context, DocumentFile file) {
+        if (file == null) return false;
+        var canWrite = DocumentFileUtils.isWritable(file, context);
+        return file.exists() && file.isFile() && canWrite;
+    }
+
+    public static boolean isWritableDir(Context context, DocumentFile dir) {
         if (dir == null) return false;
         var canWrite = DocumentFileUtils.isWritable(dir, context);
         return dir.exists() && dir.isDirectory() && canWrite;

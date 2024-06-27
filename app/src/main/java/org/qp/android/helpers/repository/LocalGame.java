@@ -4,7 +4,7 @@ import static org.qp.android.helpers.utils.FileUtil.documentWrap;
 import static org.qp.android.helpers.utils.FileUtil.findOrCreateFile;
 import static org.qp.android.helpers.utils.FileUtil.fromRelPath;
 import static org.qp.android.helpers.utils.FileUtil.forceCreateFile;
-import static org.qp.android.helpers.utils.FileUtil.isWritable;
+import static org.qp.android.helpers.utils.FileUtil.isWritableFile;
 import static org.qp.android.helpers.utils.FileUtil.readFileAsString;
 import static org.qp.android.helpers.utils.JsonUtil.jsonToObject;
 import static org.qp.android.helpers.utils.JsonUtil.objectToJson;
@@ -48,8 +48,8 @@ public class LocalGame {
                                      DocumentFile gameDir) {
         var infoFile = findOrCreateFile(context, gameDir, GAME_INFO_FILENAME, MimeType.TEXT);
 
-        if (!isWritable(context, infoFile)) {
-            Log.e(TAG , "ERROR");
+        if (!isWritableFile(context, infoFile)) {
+            Log.e(TAG , "IS NOT WRITABLE");
             return;
         }
 
