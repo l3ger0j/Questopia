@@ -6,6 +6,8 @@ import static org.qp.android.helpers.utils.FileUtil.fromRelPath;
 import static org.qp.android.helpers.utils.FileUtil.fromFullPath;
 import static org.qp.android.helpers.utils.FileUtil.getFileContents;
 import static org.qp.android.helpers.utils.FileUtil.writeFileContents;
+import static org.qp.android.helpers.utils.PathUtil.getFilename;
+import static org.qp.android.helpers.utils.PathUtil.normalizeContentPath;
 import static org.qp.android.helpers.utils.StringUtil.getStringOrEmpty;
 import static org.qp.android.helpers.utils.StringUtil.isNotEmpty;
 import static org.qp.android.helpers.utils.ThreadUtil.isSameThread;
@@ -177,13 +179,26 @@ public class LibProxyImpl implements LibIProxy, LibICallbacks {
 
         for (int i = 0; i < count; ++i) {
             var action = new LibListItem();
-            var actionData = (LibActionData) nativeMethods.QSPGetActionData(i);
+            var actionResult = (LibActionData) nativeMethods.QSPGetActionData(i);
+            var curGameDir = getCurGameDir();
 
-            action.pathToImage = actionData.image();
+            if (actionResult.image() == null) {
+                action.pathToImage = null;
+            } else {
+                var tempPath = normalizeContentPath(getFilename(actionResult.image()));
+                var fileFromPath = fromRelPath(context, tempPath, curGameDir);
+                if (fileFromPath != null) {
+                    action.pathToImage = String.valueOf(fileFromPath.getUri());
+                } else {
+                    action.pathToImage = null;
+                }
+            }
             action.text = gameState.interfaceConfig.useHtml
-                    ? getHtmlProcessor().removeHtmlTags(actionData.name())
-                    : actionData.name();
+                    ? getHtmlProcessor().removeHtmlTags(actionResult.name())
+                    : actionResult.name();
+
             actions.add(action);
+
         }
 
         return actions;
