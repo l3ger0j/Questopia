@@ -1,4 +1,4 @@
-package org.qp.android.helpers.repository;
+package org.qp.android.model.repository;
 
 import static org.qp.android.helpers.utils.FileUtil.documentWrap;
 import static org.qp.android.helpers.utils.FileUtil.findOrCreateFile;

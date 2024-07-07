@@ -244,7 +244,7 @@ public class StockActivity extends AppCompatActivity {
             navController = navFragment.getNavController();
         }
         if (savedInstanceState == null) {
-            navController.navigate(R.id.stockRecyclerFragment);
+            navController.navigate(R.id.stockViewPagerFragment);
         }
 
         stockViewModel.emitter.observe(this , eventNavigation -> {
@@ -277,8 +277,8 @@ public class StockActivity extends AppCompatActivity {
                     getSupportActionBar().setDisplayHomeAsUpEnabled(false);
                 }
                 if (navController.getCurrentDestination() != null) {
-                    if (Objects.equals(navController.getCurrentDestination().getLabel()
-                            , "StockRecyclerFragment")) {
+                    if (Objects.equals(navController.getCurrentDestination().getLabel(),
+                            "StockViewPagerFragment")) {
                         finish();
                     } else {
                         stockViewModel.doIsHideFAB.setValue(false);
@@ -547,7 +547,7 @@ public class StockActivity extends AppCompatActivity {
 
         stockViewModel.refreshIntGamesDirectory();
         stockViewModel.doIsHideFAB.setValue(false);
-        navController.navigate(R.id.stockRecyclerFragment);
+        navController.navigate(R.id.stockViewPagerFragment);
     }
 
     @Override

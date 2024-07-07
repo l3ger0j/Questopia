@@ -14,6 +14,7 @@ import java.util.Objects;
 public class GameData implements Serializable {
 
     public String id = "";
+    public String listId = "";
     public String author = "";
     public String portedBy = "";
     public String version = "";
@@ -22,7 +23,7 @@ public class GameData implements Serializable {
     public String player = "";
     public String icon = "";
     public String fileUrl = "";
-    public String fileSize;
+    public String fileSize = "";
     public String fileExt = "";
     public String descUrl = "";
     public String pubDate = "";
@@ -53,6 +54,7 @@ public class GameData implements Serializable {
 
     public GameData(GameData other) {
         id = other.id;
+        listId = other.listId;
         author = other.author;
         portedBy = other.portedBy;
         version = other.version;
@@ -68,6 +70,24 @@ public class GameData implements Serializable {
         modDate = other.modDate;
         gameDir = other.gameDir;
         gameFiles = other.gameFiles;
+    }
+
+    public GameData(RemoteGameData other) {
+        id = other.id;
+        listId = other.listId;
+        author = other.author;
+        portedBy = other.portedBy;
+        version = other.version;
+        title = other.title;
+        lang = other.lang;
+        player = other.player;
+        icon = other.icon;
+        fileUrl = other.fileUrl;
+        fileSize = other.fileSize;
+        fileExt = other.fileExt;
+        descUrl = other.descUrl;
+        pubDate = other.pubDate;
+        modDate = other.modDate;
     }
 
     @Override

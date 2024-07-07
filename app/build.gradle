@@ -89,6 +89,9 @@ dependencies {
     implementation libs.material
     implementation libs.androidx.core.splashscreen
 
+    implementation libs.stax.api
+    implementation libs.woodstox.core
+
     implementation libs.changelog
     implementation libs.colorpicker
     implementation libs.jsoup
@@ -96,11 +99,15 @@ dependencies {
     implementation libs.storage
     implementation libs.picasso
 
+    implementation libs.retrofit
+    implementation libs.converter.jackson
+
     implementation libs.rxandroid
 
     implementation libs.jackson.core
     implementation libs.jackson.databind
     implementation libs.jackson.annotations
+    implementation libs.jackson.dataformat.xml
 
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit

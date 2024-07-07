@@ -1,6 +1,7 @@
 package org.qp.android.ui.stock;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,38 +10,87 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
-import org.qp.android.databinding.FragmentRecyclerBinding;
-import org.qp.android.dto.stock.GameData;
-import org.qp.android.helpers.adapters.RecyclerItemClickListener;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
-import java.util.ArrayList;
+import org.qp.android.databinding.FragmentRecyclerBinding;
+import org.qp.android.dto.stock.GameDataList;
+import org.qp.android.helpers.adapters.RecyclerItemClickListener;
+import org.qp.android.model.repository.RemoteGame;
+
+import java.io.IOException;
+
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class StockRecyclerFragment extends Fragment {
 
     private StockViewModel stockViewModel;
     private RecyclerView mRecyclerView;
 
-    Observer<ArrayList<GameData>> gameData = gameData -> {
-        var adapter = new StockGamesRecycler(requireActivity());
-        adapter.submitList(gameData);
-        mRecyclerView.setAdapter(adapter);
-    };
+    private int pageNumber;
+
+    @NonNull
+    public static StockRecyclerFragment newInstance(int numberPage) {
+        var args = new Bundle();
+        args.putInt("numPage", numberPage);
+        var fragment = new StockRecyclerFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        pageNumber = getArguments() != null ? getArguments().getInt("numPage") : 0;
+    }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater ,
                              @Nullable ViewGroup container ,
                              @Nullable Bundle savedInstanceState) {
-        org.qp.android.databinding.FragmentRecyclerBinding recyclerBinding =
-                FragmentRecyclerBinding.inflate(inflater);
+        var recyclerBinding = FragmentRecyclerBinding.inflate(inflater);
         mRecyclerView = recyclerBinding.shareRecyclerView;
         mRecyclerView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
         stockViewModel = new ViewModelProvider(requireActivity()).get(StockViewModel.class);
-        stockViewModel.getGameDataList().observe(getViewLifecycleOwner(), gameData);
+
+        if (pageNumber == 0) {
+            stockViewModel.getGameDataList().observe(getViewLifecycleOwner(), gameData -> {
+                var adapter = new StockGamesRecycler(requireActivity());
+                adapter.submitList(gameData);
+                mRecyclerView.setAdapter(adapter);
+            });
+        } else {
+            var remoteGame = new RemoteGame();
+            remoteGame.getRemoteGameData(new Callback<>() {
+                @Override
+                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                    var mapper = new XmlMapper();
+                    try (var body = response.body()){
+                        if (body == null) return;
+                        var string = body.string();
+                        var value = mapper.readValue(string, GameDataList.class);
+                        var adapter = new StockGamesRecycler(requireActivity());
+                        adapter.submitTList(value.game);
+                        mRecyclerView.setAdapter(adapter);
+                    } catch (IOException e) {
+                        Log.e(getTag(), "Error:", e);
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ResponseBody> call, Throwable throwable) {
+                    Log.e(getTag(), "Error:", throwable);
+                }
+            });
+        }
+
+
         stockViewModel.activityObserver.observe(getViewLifecycleOwner() , stockActivity ->
                 stockActivity.setRecyclerView(mRecyclerView));
         return recyclerBinding.getRoot();

@@ -18,6 +18,7 @@ import com.squareup.picasso.Picasso;
 import org.qp.android.R;
 import org.qp.android.databinding.ListItemGameBinding;
 import org.qp.android.dto.stock.GameData;
+import org.qp.android.dto.stock.RemoteGameData;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,6 +54,12 @@ public class StockGamesRecycler extends RecyclerView.Adapter<StockGamesRecycler.
                     return oldItem.equals(newItem);
                 }
             };
+
+    public void submitTList(List<RemoteGameData> data) {
+       var dataList = new ArrayList<GameData>();
+       data.forEach(remoteGameData -> dataList.add(new GameData(remoteGameData)));
+       differ.submitList(dataList);
+    }
 
     public void submitList(ArrayList<GameData> gameData){
         differ.submitList(gameData);
