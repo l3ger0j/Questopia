@@ -1,7 +1,6 @@
 package org.qp.android.ui.stock;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,19 +12,8 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-
 import org.qp.android.databinding.FragmentRecyclerBinding;
-import org.qp.android.dto.stock.GameDataList;
 import org.qp.android.helpers.adapters.RecyclerItemClickListener;
-import org.qp.android.model.repository.RemoteGame;
-
-import java.io.IOException;
-
-import okhttp3.ResponseBody;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class StockRecyclerFragment extends Fragment {
 
@@ -66,30 +54,12 @@ public class StockRecyclerFragment extends Fragment {
                 mRecyclerView.setAdapter(adapter);
             });
         } else {
-            var remoteGame = new RemoteGame();
-            remoteGame.getRemoteGameData(new Callback<>() {
-                @Override
-                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                    var mapper = new XmlMapper();
-                    try (var body = response.body()){
-                        if (body == null) return;
-                        var string = body.string();
-                        var value = mapper.readValue(string, GameDataList.class);
-                        var adapter = new StockGamesRecycler(requireActivity());
-                        adapter.submitTList(value.game);
-                        mRecyclerView.setAdapter(adapter);
-                    } catch (IOException e) {
-                        Log.e(getTag(), "Error:", e);
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<ResponseBody> call, Throwable throwable) {
-                    Log.e(getTag(), "Error:", throwable);
-                }
+            stockViewModel.getRemoteDataList().observe(getViewLifecycleOwner(), remoteGameData -> {
+                var adapter = new StockGamesRecycler(requireActivity());
+                adapter.submitTList(remoteGameData);
+                mRecyclerView.setAdapter(adapter);
             });
         }
-
 
         stockViewModel.activityObserver.observe(getViewLifecycleOwner() , stockActivity ->
                 stockActivity.setRecyclerView(mRecyclerView));
@@ -104,7 +74,7 @@ public class StockRecyclerFragment extends Fragment {
                 new RecyclerItemClickListener.OnItemClickListener() {
                     @Override
                     public void onItemClick(View view , int position) {
-                        stockViewModel.doOnShowGameFragment(position);
+                        stockViewModel.doOnShowGameFragment(position, pageNumber);
                     }
 
                     @Override

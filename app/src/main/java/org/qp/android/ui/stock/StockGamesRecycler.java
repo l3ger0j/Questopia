@@ -61,7 +61,7 @@ public class StockGamesRecycler extends RecyclerView.Adapter<StockGamesRecycler.
        differ.submitList(dataList);
     }
 
-    public void submitList(ArrayList<GameData> gameData){
+    public void submitList(List<GameData> gameData){
         differ.submitList(gameData);
     }
 

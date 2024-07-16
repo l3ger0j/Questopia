@@ -25,13 +25,19 @@ public interface StockFragmentNavigation {
 
     class ShowGameFragment extends EventNavigation {
         private final int position;
+        private final int pageNum;
 
-        public ShowGameFragment(int position) {
+        public ShowGameFragment(int position, int pageNum) {
             this.position = position;
+            this.pageNum = pageNum;
         }
 
         public int getPosition() {
             return position;
+        }
+
+        public int getPageNum() {
+            return pageNum;
         }
     }
 

@@ -83,7 +83,9 @@ public class StockGameFragment extends Fragment {
                 }
             }
         });
-        // TODO: 19.07.2023 Release this
-        // fragmentStockGameBinding.downloadButton.setOnClickListener(view3 -> listener.onClickDownloadButton());
+         fragmentStockGameBinding.downloadButton.setOnClickListener(view3 ->
+                 stockViewModel.getCurrGameData().ifPresent(gameData ->
+                         stockViewModel.startFileDownload(gameData)
+                 ));
     }
 }

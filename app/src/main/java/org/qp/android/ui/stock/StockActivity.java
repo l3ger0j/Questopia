@@ -39,6 +39,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.os.LocaleListCompat;
 import androidx.core.splashscreen.SplashScreen;
 import androidx.documentfile.provider.DocumentFile;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
@@ -57,6 +58,7 @@ import org.qp.android.QuestPlayerApplication;
 import org.qp.android.R;
 import org.qp.android.databinding.ActivityStockBinding;
 import org.qp.android.dto.stock.GameData;
+import org.qp.android.dto.stock.RemoteGameData;
 import org.qp.android.helpers.utils.ViewUtil;
 import org.qp.android.ui.dialogs.StockDialogType;
 import org.qp.android.ui.settings.SettingsActivity;
@@ -65,6 +67,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
@@ -107,10 +110,6 @@ public class StockActivity extends AppCompatActivity {
             }
         }
     };
-
-    public File getListDirsFile() {
-        return listDirsFile;
-    }
 
     public void setRecyclerView(RecyclerView mRecyclerView) {
         this.mRecyclerView = mRecyclerView;
@@ -257,7 +256,7 @@ public class StockActivity extends AppCompatActivity {
                                     + ": " + errorDialog.getErrorMessage());
                 }
             } else if (eventNavigation instanceof StockFragmentNavigation.ShowGameFragment gameFragment) {
-                onListItemClick(gameFragment.getPosition());
+                onListItemClick(gameFragment.getPosition(), gameFragment.getPageNum());
             } else if (eventNavigation instanceof StockFragmentNavigation.ShowActionMode) {
                 onLongListItemClick();
             } else if (eventNavigation instanceof StockFragmentNavigation.ShowFilePicker filePicker) {
@@ -398,13 +397,27 @@ public class StockActivity extends AppCompatActivity {
         }
     }
 
-    public void onListItemClick(int position) {
+    public void onListItemClick(int position, int numPage) {
         if (!isEnableDeleteMode) {
-            stockViewModel.getGameDataList().observe(this, gameData -> {
-                if (!gameData.isEmpty() && gameData.size() > position) {
-                    stockViewModel.setCurrGameData(gameData.get(position));
+            Observer<List<GameData>> localDataObserver = localGameData -> {
+                if (!localGameData.isEmpty() && localGameData.size() > position) {
+                    stockViewModel.setCurrGameData(localGameData.get(position));
                 }
-            });
+            };
+            Observer<List<RemoteGameData>> remoteDataObserver = remoteGameData -> {
+                if (!remoteGameData.isEmpty() && remoteGameData.size() > position) {
+                    stockViewModel.setCurrGameData(new GameData(remoteGameData.get(position)));
+                }
+            };
+
+            if (numPage == 0) {
+                stockViewModel.getRemoteDataList().removeObserver(remoteDataObserver);
+                stockViewModel.getGameDataList().observe(this, localDataObserver);
+            } else {
+                stockViewModel.getGameDataList().removeObserver(localDataObserver);
+                stockViewModel.getRemoteDataList().observe(this, remoteDataObserver);
+            }
+
             navController.navigate(R.id.stockGameFragment);
             stockViewModel.doIsHideFAB.setValue(true);
         } else {
@@ -545,7 +558,7 @@ public class StockActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(false);
         }
 
-        stockViewModel.refreshIntGamesDirectory();
+        stockViewModel.refreshGamesDirs();
         stockViewModel.doIsHideFAB.setValue(false);
         navController.navigate(R.id.stockViewPagerFragment);
     }

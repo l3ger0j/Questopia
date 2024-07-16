@@ -13,9 +13,11 @@ import com.anggrayudi.storage.FileWrapper;
 import com.anggrayudi.storage.callback.FileCallback;
 import com.anggrayudi.storage.file.CreateMode;
 import com.anggrayudi.storage.file.DocumentFileUtils;
+import com.anggrayudi.storage.file.FileUtils;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.text.DecimalFormat;
@@ -73,6 +75,12 @@ public final class FileUtil {
         return dir.exists() && dir.isDirectory() && canWrite;
     }
 
+    public static boolean isWritableDir(Context context, File dir) {
+        if (dir == null) return false;
+        var canWrite = FileUtils.isWritable(dir, context);
+        return dir.exists() && dir.isDirectory() && canWrite;
+    }
+
     public static void forceCreateFile(Context context,
                                        DocumentFile srcDir,
                                        String name,
@@ -93,6 +101,13 @@ public final class FileUtil {
                                                   DocumentFile srcDir,
                                                   String name) {
         return DocumentFileUtils.makeFolder(srcDir, context, name, CreateMode.REUSE);
+    }
+
+    @Nullable
+    public static File findOrCreateFolder(Context context,
+                                          File srcDir,
+                                          String name) {
+        return FileUtils.makeFolder(srcDir, context, name, CreateMode.REUSE);
     }
 
     public static DocumentFile fromRelPath(@NonNull Context context ,
