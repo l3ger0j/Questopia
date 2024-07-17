@@ -23,6 +23,8 @@
 -keep class org.qp.android.dto.lib.** { *; }
 -keep class org.qp.android.model.lib.** { *; }
 
+-dontwarn aQute.bnd.annotation.spi.ServiceProvider
+
 # AppDevNext
 -keep class info.hannes.** { *; }
 -keep class com.google.gson.reflect.TypeToken
