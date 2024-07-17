@@ -360,8 +360,7 @@ public class StockActivity extends AppCompatActivity {
     }
 
     private void loadSettings() {
-        var cache = getExternalCacheDir();
-        listDirsFile = new File(cache , "gamesListDir");
+        listDirsFile = stockViewModel.getListDirsFile();
 
         if (listDirsFile.exists()) {
             restoreListDirsFromFile();

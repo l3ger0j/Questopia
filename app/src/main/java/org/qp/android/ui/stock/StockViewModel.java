@@ -322,6 +322,10 @@ public class StockViewModel extends AndroidViewModel {
         return listGamesDir;
     }
 
+    public File getListDirsFile() {
+        return listDirsFile;
+    }
+
     public int getCountGameFiles() {
         if (getCurrGameData().isPresent()) {
             var data = getCurrGameData().get();
