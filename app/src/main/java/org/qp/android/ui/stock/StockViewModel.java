@@ -396,7 +396,7 @@ public class StockViewModel extends AndroidViewModel {
         super(application);
 
         var cache = getApplication().getExternalCacheDir();
-        listDirsFile = new File(cache, "tempListDir");
+        listDirsFile = new File(cache, "gamesListDir");
     }
 
     // region Dialog

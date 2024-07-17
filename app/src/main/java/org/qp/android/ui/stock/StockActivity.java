@@ -361,7 +361,7 @@ public class StockActivity extends AppCompatActivity {
 
     private void loadSettings() {
         var cache = getExternalCacheDir();
-        listDirsFile = new File(cache , "tempListDir");
+        listDirsFile = new File(cache , "gamesListDir");
 
         if (listDirsFile.exists()) {
             restoreListDirsFromFile();
