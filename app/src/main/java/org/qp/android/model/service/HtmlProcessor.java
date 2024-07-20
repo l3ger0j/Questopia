@@ -235,18 +235,15 @@ public class HtmlProcessor {
     }
 
     private String preHandleHtml(String dirtyHtml) {
-        var checkOne = dirtyHtml.contains("\\\"");
-        var checkTwo = EXEC_PATTERN.matcher(dirtyHtml).find();
-        var checkThree = dirtyHtml.contains("\n") || dirtyHtml.contains("\r");
-
         var bodyDirt = extractBody(dirtyHtml);
-        if (checkOne) {
+
+        if (bodyDirt.contains("\\\"")) {
             unescapeQuotes(bodyDirt);
         }
-        if (checkTwo) {
+        if (EXEC_PATTERN.matcher(bodyDirt).find()) {
             encodeExec(bodyDirt);
         }
-        if (checkThree) {
+        if (bodyDirt.contains("\n") || bodyDirt.contains("\r")) {
             lineBreaksInHTML(bodyDirt);
         }
 
