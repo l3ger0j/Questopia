@@ -39,5 +39,9 @@
         android:key="autoscroll"
         android:icon="@drawable/baseline_move_down_24"
         android:title="@string/autoscrollTitle" />
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="useViewPager2"
+        android:title="Use ViewPager2" />
 
 </PreferenceScreen>
