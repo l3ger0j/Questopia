@@ -104,6 +104,9 @@ dependencies {
 
     implementation libs.rxandroid
 
+    implementation 'net.sf.sevenzipjbinding:sevenzipjbinding:16.02-2.01'
+    implementation 'net.sf.sevenzipjbinding:sevenzipjbinding-all-linux:16.02-2.01'
+
     implementation libs.jackson.core
     implementation libs.jackson.databind
     implementation libs.jackson.annotations

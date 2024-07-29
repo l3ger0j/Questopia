@@ -10,7 +10,11 @@ import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_PATH_FILE;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.DownloadManager;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -36,8 +40,10 @@ import androidx.appcompat.view.ActionMode;
 import androidx.appcompat.widget.SearchView;
 import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.os.LocaleListCompat;
 import androidx.core.splashscreen.SplashScreen;
+import androidx.core.view.MenuItemCompat;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -97,7 +103,7 @@ public class StockActivity extends AppCompatActivity {
 
     private File listDirsFile;
 
-    SharedPreferences.OnSharedPreferenceChangeListener preferenceChangeListener = (sharedPreferences , key) -> {
+    private final SharedPreferences.OnSharedPreferenceChangeListener preferenceChangeListener = (sharedPreferences , key) -> {
         if (key == null) return;
         switch (key) {
             case "binPref" -> stockViewModel.refreshGameData();
@@ -107,6 +113,16 @@ public class StockActivity extends AppCompatActivity {
                 } else {
                     AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("en"));
                 }
+            }
+        }
+    };
+
+    private final BroadcastReceiver downloadReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (DownloadManager.ACTION_DOWNLOAD_COMPLETE.equals(intent.getAction())) {
+                // var downloadId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, 0);
+                stockViewModel.postProcessingDownload();
             }
         }
     };
@@ -205,33 +221,7 @@ public class StockActivity extends AppCompatActivity {
             }
         });
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ActivityCompat.checkSelfPermission(this , Manifest.permission.POST_NOTIFICATIONS)
-                    != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this , new String[]{Manifest.permission.POST_NOTIFICATIONS} , POST_NOTIFICATION_CODE);
-            }
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            if (!Environment.isExternalStorageManager()) {
-                try {
-                    var uri = Uri.parse("package:" + BuildConfig.APPLICATION_ID);
-                    var intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, uri);
-                    startActivity(intent);
-                } catch (Exception ex){
-                    var intent = new Intent();
-                    intent.setAction(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
-                    startActivity(intent);
-                }
-            }
-        } else {
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
-                    && ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                var permission = new String[]{ Manifest.permission.READ_EXTERNAL_STORAGE , Manifest.permission.WRITE_EXTERNAL_STORAGE};
-                ActivityCompat.requestPermissions(this, permission , READ_EXTERNAL_STORAGE_CODE);
-            }
-        }
-
+        loadPermission();
         loadSettings();
 
         Log.i(TAG , "Stock Activity created");
@@ -357,6 +347,48 @@ public class StockActivity extends AppCompatActivity {
         stockViewModel.doIsHideFAB.setValue(false);
         navController.popBackStack();
         return true;
+    }
+
+    private void loadPermission() {
+        ActivityCompat.registerReceiver(
+                this,
+                downloadReceiver,
+                new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE),
+                ContextCompat.RECEIVER_EXPORTED
+        );
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            var postNotification = ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS);
+            if (postNotification != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(
+                        this,
+                        new String[]{ Manifest.permission.POST_NOTIFICATIONS },
+                        POST_NOTIFICATION_CODE
+                );
+            }
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            if (!Environment.isExternalStorageManager()) {
+                try {
+                    var uri = Uri.parse("package:" + BuildConfig.APPLICATION_ID);
+                    var intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, uri);
+                    startActivity(intent);
+                } catch (Exception ex){
+                    var intent = new Intent();
+                    intent.setAction(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+                    startActivity(intent);
+                }
+            }
+        } else {
+            var readStorage = ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
+            var writeStorage = ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+            if (readStorage != PackageManager.PERMISSION_GRANTED && writeStorage != PackageManager.PERMISSION_GRANTED) {
+                var requestPerm = new String[]{ Manifest.permission.READ_EXTERNAL_STORAGE,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE };
+                ActivityCompat.requestPermissions(this, requestPerm , READ_EXTERNAL_STORAGE_CODE);
+            }
+        }
     }
 
     private void loadSettings() {
@@ -553,13 +585,14 @@ public class StockActivity extends AppCompatActivity {
     public void onResume() {
         super.onResume();
 
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(false);
-        }
+        loadPermission();
 
         stockViewModel.refreshGamesDirs();
         stockViewModel.doIsHideFAB.setValue(false);
         navController.navigate(R.id.stockViewPagerFragment);
+
+        if (getSupportActionBar() == null) return;
+        getSupportActionBar().setDisplayHomeAsUpEnabled(false);
     }
 
     @Override
@@ -577,30 +610,35 @@ public class StockActivity extends AppCompatActivity {
                 startActivity(new Intent(this , SettingsActivity.class));
                 return true;
             }
-            case R.id.action_search ->
-                    Optional.ofNullable((SearchView) item.getActionView()).ifPresent(searchView ->
-                            searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-                                @Override
-                                public boolean onQueryTextSubmit(String query) {
-                                    return false;
-                                }
+            case R.id.action_search -> {
+                var actionView = item.getActionView();
+                if (actionView == null) return false;
+                var searchView = (SearchView) actionView;
 
-                                @Override
-                                public boolean onQueryTextChange(String newText) {
-                                    var gameDataList = stockViewModel.getSortedGames();
-                                    var filteredList = new ArrayList<GameData>();
-                                    gameDataList.forEach(gameData -> {
-                                        if (gameData.title.toLowerCase(Locale.getDefault())
-                                                .contains(newText.toLowerCase(Locale.getDefault()))) {
-                                            filteredList.add(gameData);
-                                        }
-                                    });
-                                    if (!filteredList.isEmpty()) {
-                                        stockViewModel.setValueGameDataList(filteredList);
-                                    }
-                                    return true;
-                                }
-                            }));
+                var queryTextListener = new SearchView.OnQueryTextListener() {
+                    @Override
+                    public boolean onQueryTextSubmit(String query) {
+                        return false;
+                    }
+
+                    @Override
+                    public boolean onQueryTextChange(String newText) {
+                        var gameDataList = stockViewModel.getSortedGames();
+                        var filteredList = new ArrayList<GameData>();
+                        gameDataList.forEach(gameData -> {
+                            if (gameData.title.toLowerCase(Locale.getDefault())
+                                    .contains(newText.toLowerCase(Locale.getDefault()))) {
+                                filteredList.add(gameData);
+                            }
+                        });
+                        if (!filteredList.isEmpty()) {
+                            stockViewModel.setValueGameDataList(filteredList);
+                        }
+                        return true;
+                    }
+                };
+                searchView.setOnQueryTextListener(queryTextListener);
+            }
         }
         return false;
     }

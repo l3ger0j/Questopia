@@ -16,7 +16,6 @@ import static org.qp.android.helpers.utils.StringUtil.isNotEmpty;
 import android.annotation.SuppressLint;
 import android.app.Application;
 import android.app.DownloadManager;
-import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Environment;
@@ -819,6 +818,9 @@ public class StockViewModel extends AndroidViewModel {
 
     // endregion Game list dir
 
+    private final DownloadManager downloadManager = getApplication().getSystemService(DownloadManager.class);
+    private long downloadId = 0L;
+
     public void startFileDownload(GameData gameData) {
         CompletableFuture
                 .supplyAsync(() -> {
@@ -843,8 +845,6 @@ public class StockViewModel extends AndroidViewModel {
                 .thenAccept(s -> {
                     if (s.isEmpty() || s.isBlank()) return;
 
-                    var downManager = (DownloadManager) getApplication().getSystemService(Context.DOWNLOAD_SERVICE);
-
                     Environment
                             .getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
                             .mkdirs();
@@ -854,7 +854,28 @@ public class StockViewModel extends AndroidViewModel {
                             .setVisibleInDownloadsUi(true)
                             .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
                             .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, s);
-                    downManager.enqueue(request);
+                    downloadId = downloadManager.enqueue(request);
+                })
+                .exceptionally(throwable -> {
+                    doOnShowErrorDialog(throwable.getMessage() , ErrorType.EXCEPTION);
+                    return null;
                 });
     }
+
+    public void postProcessingDownload() {
+        if (downloadId == 0) return;
+        var query = new DownloadManager.Query()
+                .setFilterById(downloadId);
+        try (var c = downloadManager.query(query)) {
+            if (c.moveToFirst()) {
+                var colStatusIndex = c.getColumnIndex(DownloadManager.COLUMN_STATUS);
+                if (DownloadManager.STATUS_SUCCESSFUL == c.getInt(colStatusIndex)) {
+                    var colUriIndex = c.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI);
+                    if (colUriIndex == -1) return;
+                    Log.d(TAG, c.getString(colUriIndex));
+                }
+            }
+        }
+    }
+
 }
