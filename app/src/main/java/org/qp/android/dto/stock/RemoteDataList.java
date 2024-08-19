@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Objects;
 
 @JacksonXmlRootElement(localName = "game_list")
-public class GameDataList {
+public class RemoteDataList {
 
     public double version;
     public String id;
@@ -22,7 +22,7 @@ public class GameDataList {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        var that = (GameDataList) o;
+        var that = (RemoteDataList) o;
         return Objects.equals(game , that.game);
     }
 

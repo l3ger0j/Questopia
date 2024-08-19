@@ -2,7 +2,9 @@ package org.qp.android.ui.stock;
 
 import static androidx.recyclerview.widget.RecyclerView.NO_POSITION;
 import static org.qp.android.helpers.utils.FileUtil.documentWrap;
+import static org.qp.android.helpers.utils.FileUtil.findOrCreateFile;
 import static org.qp.android.helpers.utils.JsonUtil.jsonToObject;
+import static org.qp.android.ui.stock.StockViewModel.EXT_GAME_LIST_NAME;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_IMAGE_FILE;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_MOD_FILE;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_PATH_FILE;
@@ -43,9 +45,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.os.LocaleListCompat;
 import androidx.core.splashscreen.SplashScreen;
-import androidx.core.view.MenuItemCompat;
 import androidx.documentfile.provider.DocumentFile;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
@@ -54,7 +54,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.anggrayudi.storage.SimpleStorageHelper;
 import com.anggrayudi.storage.file.DocumentFileCompat;
+import com.anggrayudi.storage.file.FileUtils;
+import com.anggrayudi.storage.file.MimeType;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.github.javiersantos.appupdater.AppUpdater;
 import com.github.javiersantos.appupdater.enums.UpdateFrom;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -64,27 +67,38 @@ import org.qp.android.QuestPlayerApplication;
 import org.qp.android.R;
 import org.qp.android.databinding.ActivityStockBinding;
 import org.qp.android.dto.stock.GameData;
-import org.qp.android.dto.stock.RemoteGameData;
+import org.qp.android.dto.stock.RemoteDataList;
 import org.qp.android.helpers.utils.ViewUtil;
+import org.qp.android.model.repository.RemoteGame;
 import org.qp.android.ui.dialogs.StockDialogType;
 import org.qp.android.ui.settings.SettingsActivity;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public class StockActivity extends AppCompatActivity {
+
+    private final String TAG = this.getClass().getSimpleName();
 
     private static final int READ_EXTERNAL_STORAGE_CODE = 200;
     private static final int MANAGE_EXTERNAL_STORAGE_CODE = 201;
     private static final int POST_NOTIFICATION_CODE = 203;
 
-    private final String TAG = this.getClass().getSimpleName();
+    public final SimpleDateFormat timeDateRemGamesList = new SimpleDateFormat("yyyy-MM-dd'T'HH-mm-ss", Locale.ROOT);
 
     private StockViewModel stockViewModel;
 
@@ -95,8 +109,8 @@ public class StockActivity extends AppCompatActivity {
     private boolean isEnableDeleteMode = false;
     private FloatingActionButton mFAB;
     private RecyclerView mRecyclerView;
-    private ArrayList<GameData> tempList;
-    private final ArrayList<GameData> selectList = new ArrayList<>();
+    private List<GameData> tempList;
+    private final List<GameData> selectList = new ArrayList<>();
 
     private ActivityResultLauncher<Intent> rootFolderLauncher;
     private final SimpleStorageHelper storageHelper = new SimpleStorageHelper(this);
@@ -221,6 +235,7 @@ public class StockActivity extends AppCompatActivity {
             }
         });
 
+        checkCacheRemoteRepo();
         loadPermission();
         loadSettings();
 
@@ -246,7 +261,7 @@ public class StockActivity extends AppCompatActivity {
                                     + ": " + errorDialog.getErrorMessage());
                 }
             } else if (eventNavigation instanceof StockFragmentNavigation.ShowGameFragment gameFragment) {
-                onListItemClick(gameFragment.getPosition(), gameFragment.getPageNum());
+                onListItemClick(gameFragment.getPosition());
             } else if (eventNavigation instanceof StockFragmentNavigation.ShowActionMode) {
                 onLongListItemClick();
             } else if (eventNavigation instanceof StockFragmentNavigation.ShowFilePicker filePicker) {
@@ -287,10 +302,10 @@ public class StockActivity extends AppCompatActivity {
             var listFile = new ArrayList<DocumentFile>();
             for (var value : mapFiles.values()) {
                 var uri = Uri.parse(value);
-                var file = DocumentFileCompat.fromUri(this , uri);
+                var file = DocumentFileCompat.fromUri(this, uri);
                 listFile.add(file);
             }
-            stockViewModel.setListGamesDir(listFile);
+            stockViewModel.listGamesDir = listFile;
             stockViewModel.refreshGameData();
         } catch (IOException e) {
             Log.e(TAG , "Error: ", e);
@@ -347,6 +362,85 @@ public class StockActivity extends AppCompatActivity {
         stockViewModel.doIsHideFAB.setValue(false);
         navController.popBackStack();
         return true;
+    }
+
+    private boolean isCacheFileHasExpired() {
+        var cache = getExternalCacheDir();
+        if (cache == null) return true;
+        var listNames = cache.list();
+        if (listNames == null) return true;
+
+        for (var name : listNames) {
+            if (!name.equalsIgnoreCase(EXT_GAME_LIST_NAME)) {
+                try {
+                    var cacheDate = timeDateRemGamesList.parse(name);
+                    if (cacheDate == null) return true;
+
+                    var isDateCurr = cacheDate.equals(Calendar.getInstance().getTime());
+                    var isDateBefore = cacheDate.before(Calendar.getInstance().getTime());
+
+                    return isDateCurr || isDateBefore;
+                } catch (ParseException e) {
+                    showErrorDialog(getString(R.string.error)
+                            + ": " + e.getMessage());
+                }
+            }
+        }
+
+        return true;
+    }
+
+    private String getCurrentTimestamp() {
+        var calendarInstance = Calendar.getInstance();
+        calendarInstance.add(Calendar.DATE, 3);
+        return timeDateRemGamesList.format(calendarInstance.getTime());
+    }
+
+    private void checkCacheRemoteRepo() {
+        if (!isCacheFileHasExpired()) return;
+
+        var remoteGame = new RemoteGame();
+        var cache = getApplication().getExternalCacheDir();
+        if (cache == null) return;
+        var listFiles = cache.listFiles();
+        if (listFiles == null) return;
+
+        for (var item : listFiles) {
+            if (item.getName().isEmpty()) continue;
+            if (!item.getName().equalsIgnoreCase(EXT_GAME_LIST_NAME)) {
+                FileUtils.forceDelete(item);
+            }
+        }
+
+        remoteGame.getRemoteGameData(new Callback<>() {
+            @Override
+            public void onResponse(@NonNull Call<ResponseBody> call,
+                                   @NonNull Response<ResponseBody> response) {
+                var mapper = new XmlMapper();
+                try (var body = response.body()){
+                    if (body == null) return;
+                    var string = body.string();
+                    var value = mapper.readValue(string, RemoteDataList.class);
+                    var remoteGamesList = findOrCreateFile(
+                            StockActivity.this,
+                            cache,
+                            getCurrentTimestamp(),
+                            MimeType.TEXT
+                    );
+                    mapper.writeValue(remoteGamesList, value.game);
+                } catch (IOException e) {
+                    showErrorDialog(getString(R.string.error)
+                            + ": " + e.getMessage());
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ResponseBody> call,
+                                  @NonNull Throwable throwable) {
+                showErrorDialog(getString(R.string.error)
+                        + ": " + throwable.getMessage());
+            }
+        });
     }
 
     private void loadPermission() {
@@ -428,26 +522,13 @@ public class StockActivity extends AppCompatActivity {
         }
     }
 
-    public void onListItemClick(int position, int numPage) {
+    public void onListItemClick(int position) {
         if (!isEnableDeleteMode) {
-            Observer<List<GameData>> localDataObserver = localGameData -> {
-                if (!localGameData.isEmpty() && localGameData.size() > position) {
-                    stockViewModel.setCurrGameData(localGameData.get(position));
+            stockViewModel.getGameDataList().observe(this, gameData -> {
+                if (!gameData.isEmpty() && gameData.size() > position) {
+                    stockViewModel.setCurrGameData(gameData.get(position));
                 }
-            };
-            Observer<List<RemoteGameData>> remoteDataObserver = remoteGameData -> {
-                if (!remoteGameData.isEmpty() && remoteGameData.size() > position) {
-                    stockViewModel.setCurrGameData(new GameData(remoteGameData.get(position)));
-                }
-            };
-
-            if (numPage == 0) {
-                stockViewModel.getRemoteDataList().removeObserver(remoteDataObserver);
-                stockViewModel.getGameDataList().observe(this, localDataObserver);
-            } else {
-                stockViewModel.getGameDataList().removeObserver(localDataObserver);
-                stockViewModel.getRemoteDataList().observe(this, remoteDataObserver);
-            }
+            });
 
             navController.navigate(R.id.stockGameFragment);
             stockViewModel.doIsHideFAB.setValue(true);
@@ -455,7 +536,7 @@ public class StockActivity extends AppCompatActivity {
             var mViewHolder = mRecyclerView.findViewHolderForAdapterPosition(position);
             if (mViewHolder == null) return;
 
-            var adapterPosition = mViewHolder.getAdapterPosition();
+            var adapterPosition = mViewHolder.getAbsoluteAdapterPosition();
             if (adapterPosition == NO_POSITION) return;
             if (adapterPosition < 0 || adapterPosition >= tempList.size()) return;
 

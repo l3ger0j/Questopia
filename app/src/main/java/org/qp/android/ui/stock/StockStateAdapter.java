@@ -18,7 +18,7 @@ public class StockStateAdapter extends FragmentStateAdapter {
     @NonNull
     @Override
     public Fragment createFragment(int position) {
-        return (StockRecyclerFragment.newInstance(position));
+        return new StockRecyclerFragment();
     }
 
     public StockStateAdapter(@NonNull FragmentManager fragmentManager,

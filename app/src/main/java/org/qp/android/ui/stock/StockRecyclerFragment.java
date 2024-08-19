@@ -1,5 +1,6 @@
 package org.qp.android.ui.stock;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,23 +21,6 @@ public class StockRecyclerFragment extends Fragment {
     private StockViewModel stockViewModel;
     private RecyclerView mRecyclerView;
 
-    private int pageNumber;
-
-    @NonNull
-    public static StockRecyclerFragment newInstance(int numberPage) {
-        var args = new Bundle();
-        args.putInt("numPage", numberPage);
-        var fragment = new StockRecyclerFragment();
-        fragment.setArguments(args);
-        return fragment;
-    }
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        pageNumber = getArguments() != null ? getArguments().getInt("numPage") : 0;
-    }
-
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater ,
@@ -47,22 +31,16 @@ public class StockRecyclerFragment extends Fragment {
         mRecyclerView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
         stockViewModel = new ViewModelProvider(requireActivity()).get(StockViewModel.class);
 
-        if (pageNumber == 0) {
-            stockViewModel.getGameDataList().observe(getViewLifecycleOwner(), gameData -> {
-                var adapter = new StockGamesRecycler(requireActivity());
-                adapter.submitList(gameData);
-                mRecyclerView.setAdapter(adapter);
-            });
-        } else {
-            stockViewModel.getRemoteDataList().observe(getViewLifecycleOwner(), remoteGameData -> {
-                var adapter = new StockGamesRecycler(requireActivity());
-                adapter.submitTList(remoteGameData);
-                mRecyclerView.setAdapter(adapter);
-            });
-        }
+        stockViewModel.getGameDataList().observe(getViewLifecycleOwner(), item -> {
+            var adapter = new GamesListAdapter(requireActivity()).submitList(item);
+            var divider = new DividerDecoration(requireContext(), Color.GRAY, 5f);
+            mRecyclerView.setAdapter(adapter);
+            mRecyclerView.addItemDecoration(divider);
+        });
 
         stockViewModel.activityObserver.observe(getViewLifecycleOwner() , stockActivity ->
                 stockActivity.setRecyclerView(mRecyclerView));
+
         return recyclerBinding.getRoot();
     }
 
@@ -74,7 +52,7 @@ public class StockRecyclerFragment extends Fragment {
                 new RecyclerItemClickListener.OnItemClickListener() {
                     @Override
                     public void onItemClick(View view , int position) {
-                        stockViewModel.doOnShowGameFragment(position, pageNumber);
+                        stockViewModel.doOnShowGameFragment(position);
                     }
 
                     @Override

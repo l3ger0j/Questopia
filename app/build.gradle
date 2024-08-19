@@ -88,6 +88,8 @@ dependencies {
     implementation libs.androidx.work.runtime
     implementation libs.material
     implementation libs.androidx.core.splashscreen
+    implementation libs.androidx.collection
+    implementation libs.androidx.recyclerview
 
     implementation libs.stax.api
     implementation libs.woodstox.core
@@ -104,8 +106,7 @@ dependencies {
 
     implementation libs.rxandroid
 
-    implementation 'net.sf.sevenzipjbinding:sevenzipjbinding:16.02-2.01'
-    implementation 'net.sf.sevenzipjbinding:sevenzipjbinding-all-linux:16.02-2.01'
+    implementation libs.unpacker
 
     implementation libs.jackson.core
     implementation libs.jackson.databind
