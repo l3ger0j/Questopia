@@ -82,7 +82,7 @@ import java.util.concurrent.Executors;
 public class StockViewModel extends AndroidViewModel {
 
     private final String TAG = this.getClass().getSimpleName();
-    private final ExecutorService executor = Executors.newWorkStealingPool();
+    private final ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
     public static final int CODE_PICK_IMAGE_FILE = 300;
     public static final int CODE_PICK_PATH_FILE = 301;
@@ -158,10 +158,6 @@ public class StockViewModel extends AndroidViewModel {
 
     public void setValueGameDataList(List<GameData> gameDataArrayList) {
         gameDataList.setValue(gameDataArrayList);
-    }
-
-    public void postValueGameDataList(List<GameData> gameDataArrayList) {
-        gameDataList.postValue(gameDataArrayList);
     }
 
     @NotNull
@@ -697,12 +693,16 @@ public class StockViewModel extends AndroidViewModel {
         if (pageNumber == null) return;
 
         if (pageNumber == 0) {
+            setValueGameDataList(Collections.emptyList());
+
             doIsHideFAB.setValue(false);
 
             syncFromDisk();
         }
 
         if (pageNumber == 1) {
+            setValueGameDataList(Collections.emptyList());
+
             doIsHideFAB.setValue(true);
 
             syncRemote();
@@ -746,7 +746,7 @@ public class StockViewModel extends AndroidViewModel {
                         }
                         localGameData.add(data);
                     }
-                    postValueGameDataList(localGameData);
+                    gameDataList.postValue(localGameData);
                 }, executor)
                 .exceptionally(throwable -> {
                     Log.e(TAG, "Error: ", throwable);
@@ -786,7 +786,7 @@ public class StockViewModel extends AndroidViewModel {
 //                        }
 //                        localGameData.add(data);
 //                    }
-                    postValueGameDataList(sortedGameData);
+                    gameDataList.postValue(sortedGameData);
                 }, executor)
                 .exceptionally(throwable -> {
                     Log.e(TAG, "Error: ", throwable);
