@@ -29,7 +29,13 @@ public class StockViewPagerFragment extends Fragment {
         var stockPager = binding.stockPager;
         stockPager.setAdapter(new StockStateAdapter(getChildFragmentManager(), getLifecycle()));
 
+        var currItem = stockViewModel.currPageNumber.getValue();
         var tabLayout = binding.stockTabLayout;
+        if (currItem != null) {
+            tabLayout.selectTab(tabLayout.getTabAt(currItem));
+            stockPager.setCurrentItem(currItem);
+        }
+
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {

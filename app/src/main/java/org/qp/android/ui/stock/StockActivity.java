@@ -274,22 +274,19 @@ public class StockActivity extends AppCompatActivity {
                 .setGitHubUserAndRepo("l3ger0j" , "Questopia")
                 .start();
 
-        getOnBackPressedDispatcher().addCallback(this , new OnBackPressedCallback(true) {
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
                 if (getSupportActionBar() != null) {
                     getSupportActionBar().setDisplayHomeAsUpEnabled(false);
                 }
-                if (navController.getCurrentDestination() != null) {
-                    if (Objects.equals(navController.getCurrentDestination().getLabel(),
-                            "StockViewPagerFragment")) {
-                        finish();
-                    } else {
-                        stockViewModel.doIsHideFAB.setValue(false);
-                        navController.popBackStack();
-                    }
-                } else {
+                if (navController.getCurrentDestination() == null) finish();
+                var currDestLabel = navController.getCurrentDestination().getLabel();
+                if (Objects.equals(currDestLabel, "StockViewPagerFragment")) {
                     finish();
+                } else {
+                    stockViewModel.doIsHideFAB.setValue(false);
+                    navController.popBackStack();
                 }
             }
         });
@@ -359,8 +356,22 @@ public class StockActivity extends AppCompatActivity {
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(false);
         }
-        stockViewModel.doIsHideFAB.setValue(false);
-        navController.popBackStack();
+
+        var value = stockViewModel.currPageNumber.getValue();
+        if (value == null) {
+            navController.popBackStack();
+            return true;
+        }
+
+        if (value == 0) {
+            stockViewModel.doIsHideFAB.setValue(false);
+            navController.popBackStack();
+        }
+
+        if (value == 1) {
+            navController.popBackStack();
+        }
+
         return true;
     }
 
