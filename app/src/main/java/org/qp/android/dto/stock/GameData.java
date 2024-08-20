@@ -42,11 +42,6 @@ public class GameData implements Serializable {
     @JsonIgnore
     public List<Uri> gameFiles;
 
-    @JsonGetter
-    public String getFileSize() {
-        return (fileSize != null) ? fileSize : "";
-    }
-
     @JsonIgnore
     public DocumentFile getGameDir(Context context) {
         if (gameDir == null) return null;

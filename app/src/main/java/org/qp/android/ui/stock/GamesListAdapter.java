@@ -105,12 +105,14 @@ public class GamesListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                         .into(gameHolder.listItemGameBinding.gameIcon);
             }
 
-            if (gameData.fileSize != null
-                    && !gameData.fileSize.equals(DISABLE_CALCULATE_DIR)) {
-                gameHolder.listItemGameBinding.gameSize
-                        .setText(context.getString(R.string.fileSize)
-                                .replace("-SIZE-", gameData.getFileSize()));
-            }
+            var fileSize = gameData.fileSize;
+            if (fileSize == null || fileSize.isEmpty() || fileSize.isBlank()) return;
+            if (fileSize.equals(DISABLE_CALCULATE_DIR)) return;
+
+            var elementSize = gameHolder.listItemGameBinding.gameSize;
+            var fileSizeString = context.getString(R.string.fileSize);
+
+            elementSize.setText(fileSizeString.replace("-SIZE-", fileSize));
         }
     }
 

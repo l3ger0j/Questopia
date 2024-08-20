@@ -198,119 +198,106 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     public String getGameTitle() {
-        if (getCurrGameData().isPresent()) {
-            var data = getCurrGameData().get();
-            if (!data.title.isEmpty()) {
-                return data.title;
-            } else {
-                return "";
-            }
-        } else {
-            return "";
-        }
+        var data = currGameData;
+        if (data == null) return "";
+
+        var title = data.title;
+        if (title == null || title.isEmpty() || title.isBlank()) return "";
+
+        return data.title;
     }
 
     public String getGameAuthor() {
-        if (getCurrGameData().isPresent()) {
-            var data = getCurrGameData().get();
-            if (!data.author.isEmpty()) {
-                return getStockActivity()
-                        .getString(R.string.author)
-                        .replace("-AUTHOR-" , data.author);
-            }
-        }
-        return "";
+        var data = currGameData;
+        if (data == null) return "";
+
+        var author = data.author;
+        if (author == null || author.isEmpty() || author.isBlank()) return "";
+
+        var authorString = getStockActivity().getString(R.string.author);
+        return authorString.replace("-AUTHOR-", data.author);
     }
 
     public String getGameIcon() {
-        if (getCurrGameData().isPresent()) {
-            var data = getCurrGameData().get();
-            if (!data.icon.isEmpty()) {
-                return data.icon;
-            }
-        }
-        return "";
+        var data = currGameData;
+        if (data == null) return "";
+
+        var icon = data.icon;
+        if (icon == null || icon.isEmpty() || icon.isBlank()) return "";
+
+        return icon;
     }
 
     public String getGamePortBy() {
-        if (getCurrGameData().isPresent()) {
-            var data = getCurrGameData().get();
-            if (!data.portedBy.isEmpty()) {
-                return getStockActivity()
-                        .getString(R.string.ported_by)
-                        .replace("-PORTED_BY-" , data.portedBy);
-            }
-        }
-        return "";
+        var data = currGameData;
+        if (data == null) return "";
+
+        var portedBy = data.portedBy;
+        if (portedBy == null || portedBy.isEmpty() || portedBy.isBlank()) return "";
+
+        var portedByString = getStockActivity().getString(R.string.ported_by);
+        return portedByString.replace("-PORTED_BY-", data.portedBy);
     }
 
     public String getGameVersion() {
-        if (getCurrGameData().isPresent()) {
-            var data = getCurrGameData().get();
-            if (!data.version.isEmpty()) {
-                return getStockActivity()
-                        .getString(R.string.version)
-                        .replace("-VERSION-" , data.version);
-            }
-        }
-        return "";
+        var data = currGameData;
+        if (data == null) return "";
+
+        var version = data.version;
+        if (version == null || version.isEmpty() || version.isBlank()) return "";
+
+        var versionString = getStockActivity().getString(R.string.version);
+        return versionString.replace("-VERSION-", data.version);
     }
 
     public String getGameType() {
-        if (getCurrGameData().isPresent()) {
-            var data = getCurrGameData().get();
-            if (!data.fileExt.isEmpty()) {
-                if (data.fileExt.equals("aqsp")) {
-                    return getStockActivity()
-                            .getString(R.string.fileType)
-                            .replace("-TYPE-" , data.fileExt)
-                            + " " + getStockActivity().getString(R.string.experimental);
-                } else {
-                    return getStockActivity()
-                            .getString(R.string.fileType)
-                            .replace("-TYPE-" , data.fileExt);
-                }
-            }
+        var data = currGameData;
+        if (data == null) return "";
+
+        var fileExt = data.fileExt;
+        if (fileExt == null || fileExt.isEmpty() || fileExt.isBlank()) return "";
+
+        var fileTypeSting = getStockActivity().getString(R.string.fileType);
+        if (fileExt.equals("aqsp")) {
+            var experimentalString = getStockActivity().getString(R.string.experimental);
+            return fileTypeSting.replace("-TYPE-", data.fileExt) + " " + experimentalString;
+        } else {
+            return fileTypeSting.replace("-TYPE-", data.fileExt);
         }
-        return "";
     }
 
     public String getGameSize() {
-        var gameData = currGameData;
-        if (gameData == null) return "";
+        var data = currGameData;
+        if (data == null) return "";
 
-        if (gameData.getFileSize() != null
-                && !gameData.getFileSize().equals(DISABLE_CALCULATE_DIR)) {
-            return getStockActivity()
-                    .getString(R.string.fileSize)
-                    .replace("-SIZE-" , gameData.getFileSize());
-        }
+        var fileSize = data.fileSize;
+        if (fileSize == null || fileSize.isEmpty() || fileSize.isBlank()) return "";
+        if (fileSize.equals(DISABLE_CALCULATE_DIR)) return "";
 
-        return "";
+        var fileSizeString = getStockActivity().getString(R.string.fileSize);
+        return fileSizeString.replace("-SIZE-", fileSize);
     }
 
     public String getGamePubData() {
-        if (getCurrGameData().isPresent()) {
-            var data = getCurrGameData().get();
-            if (!data.pubDate.isEmpty()) {
-                return getStockActivity()
-                        .getString(R.string.pub_data)
-                        .replace("-PUB_DATA-" , data.pubDate);
-            }
-        }
-        return "";
+        var data = currGameData;
+        if (data == null) return "";
+
+        var pubDate = data.pubDate;
+        if (pubDate == null || pubDate.isEmpty() || pubDate.isBlank()) return "";
+
+        var pubDataString = getStockActivity().getString(R.string.pub_data);
+        return pubDataString.replace("-PUB_DATA-", pubDate);
     }
 
     public String getGameModData() {
-        if (getCurrGameData().isPresent()) {
-            var data = getCurrGameData().get();
-            if (!data.modDate.isEmpty()) {
-                return getStockActivity()
-                        .getString(R.string.mod_data)
-                        .replace("-MOD_DATA-" , data.pubDate);
-            }
-        }
-        return "";
+        var data = currGameData;
+        if (data == null) return "";
+
+        var modDate = data.modDate;
+        if (modDate == null || modDate.isEmpty() || modDate.isBlank()) return "";
+
+        var modDataString = getStockActivity().getString(R.string.mod_data);
+        return modDataString.replace("-MOD_DATA-", modDate);
     }
 
     public File getListDirsFile() {
@@ -501,7 +488,7 @@ public class StockViewModel extends AndroidViewModel {
                     .into(editBinding.imageView);
         });
 
-        if (currGameData.getFileSize().equals(DISABLE_CALCULATE_DIR)) {
+        if (getGameSize().equals(DISABLE_CALCULATE_DIR)) {
             editBinding.sizeDirSW.setChecked(false);
         }
 
@@ -534,7 +521,7 @@ public class StockViewModel extends AndroidViewModel {
                         : editTextVersion.getText().toString();
             }
             if (tempImageFile != null) currGameData.icon = tempImageFile.getUri().toString();
-            if (editBinding.sizeDirSW.isChecked() || currGameData.getFileSize().isEmpty()) {
+            if (editBinding.sizeDirSW.isChecked() || getGameSize().isEmpty()) {
                 calculateSizeDir(currGameData);
             }
             var gameDir = currGameData.getGameDir(getApplication());
