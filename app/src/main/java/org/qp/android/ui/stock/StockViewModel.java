@@ -467,10 +467,9 @@ public class StockViewModel extends AndroidViewModel {
 
             localGame.createDataIntoFolder(newGameData, rootDir);
             outputIntObserver.setValue(1);
-            refreshGamesDirs();
             dialogFragments.dismiss();
         } catch (NullPointerException ex) {
-            doOnShowErrorDialog(ex.getMessage() , ErrorType.EXCEPTION);
+            doOnShowErrorDialog(ex.getMessage(), ErrorType.EXCEPTION);
         }
     }
 
@@ -595,22 +594,16 @@ public class StockViewModel extends AndroidViewModel {
     public void refreshGamesDirs() {
         var rootExDir = ((QuestPlayerApplication) getApplication()).getCurrentGameDir();
 
-        CompletableFuture
-                .runAsync(() -> {
-                    if (isWritableDir(getApplication(), rootExDir)) {
-                        extGamesListDir.add(rootExDir);
-                        refreshGameData();
-                    } else {
-                        doOnShowErrorDialog(null, ErrorType.FOLDER_ERROR);
-                        var dirName = Optional.ofNullable(rootExDir.getName());
-                        dirName.ifPresent(s -> removeDirFromListDirsFile(listDirsFile, s));
-                    }
-                }, executor)
-                .thenRunAsync(() -> {
-                    if (isWritableDir(getApplication(), rootInDir)) {
-                        refreshGameData();
-                    }
-                }, executor);
+        if (isWritableDir(getApplication(), rootExDir)) {
+            extGamesListDir.add(rootExDir);
+            refreshGameData();
+        } else {
+            if (rootExDir == null) return;
+            doOnShowErrorDialog(null, ErrorType.FOLDER_ERROR);
+            var dirName = rootExDir.getName();
+            if (dirName == null) return;
+            removeDirFromListDirsFile(listDirsFile, dirName);
+        }
     }
 
     private CompletableFuture<List<GameData>> fetchInternalData() {
@@ -627,7 +620,7 @@ public class StockViewModel extends AndroidViewModel {
                     var newList = new ArrayList<>(intDataList);
                     newList.forEach(item -> item.listId = String.valueOf(0));
                     return newList;
-                });
+                }, executor);
     }
 
     private CompletableFuture<List<GameData>> fetchExternalData() {
@@ -645,7 +638,7 @@ public class StockViewModel extends AndroidViewModel {
                     var newList = new ArrayList<>(extDataList);
                     newList.forEach(item -> item.listId = String.valueOf(1));
                     return newList;
-                });
+                }, executor);
     }
 
     private CompletableFuture<List<RemoteGameData>> fetchRemoteData() {
@@ -858,7 +851,7 @@ public class StockViewModel extends AndroidViewModel {
                 });
     }
 
-    private CompletableFuture<Void> removeDirFromListDirsFile(File listDirsFile , String folderName) {
+    private CompletableFuture<Void> removeDirFromListDirsFile(File listDirsFile, String folderName) {
         var ref = new TypeReference<HashMap<String, String>>() {};
 
         return CompletableFuture

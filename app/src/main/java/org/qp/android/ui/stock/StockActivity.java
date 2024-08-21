@@ -230,6 +230,7 @@ public class StockActivity extends AppCompatActivity {
                     if (integer == 1) {
                         var application = (QuestPlayerApplication) getApplication();
                         if (application != null) application.setCurrentGameDir(rootFolder);
+                        stockViewModel.refreshGamesDirs();
                     }
                 });
             }
