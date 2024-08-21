@@ -98,7 +98,7 @@ public class StockViewModel extends AndroidViewModel {
 
     public final MutableLiveData<Integer> currPageNumber = new MutableLiveData<>();
 
-    public List<DocumentFile> listGamesDir = new ArrayList<>();
+    public List<DocumentFile> extGamesListDir = new ArrayList<>();
 
     // Containers
     private final HashMap<String, GameData> gamesMap = new HashMap<>();
@@ -598,7 +598,7 @@ public class StockViewModel extends AndroidViewModel {
         CompletableFuture
                 .runAsync(() -> {
                     if (isWritableDir(getApplication(), rootExDir)) {
-                        listGamesDir.add(rootExDir);
+                        extGamesListDir.add(rootExDir);
                         refreshGameData();
                     } else {
                         doOnShowErrorDialog(null, ErrorType.FOLDER_ERROR);
@@ -634,7 +634,8 @@ public class StockViewModel extends AndroidViewModel {
         return CompletableFuture
                 .supplyAsync(() -> {
                     try {
-                        return localGame.extractDataFromList(listGamesDir);
+                        var copy = new ArrayList<>(extGamesListDir);
+                        return localGame.extractDataFromList(copy);
                     } catch (IOException e) {
                         Log.d(TAG, "error: ", e);
                         throw new CompletionException(e);
@@ -785,7 +786,7 @@ public class StockViewModel extends AndroidViewModel {
 
     // region Game list dir
     public void saveListDirsIntoFile(File listDirsFile) {
-        var listFiles = new ArrayList<>(listGamesDir);
+        var listFiles = new ArrayList<>(extGamesListDir);
         var mapFiles = new HashMap<String, String>();
 
         CompletableFuture
@@ -881,14 +882,14 @@ public class StockViewModel extends AndroidViewModel {
                     }
                 } , executor)
                 .thenRunAsync(() -> {
-                    var newList = listGamesDir;
+                    var newList = extGamesListDir;
                     if (newList == null) return;
 
                     newList.removeIf(file -> {
                         var nameDir = file.getName();
                         return nameDir.equalsIgnoreCase(folderName);
                     });
-                    listGamesDir = newList;
+                    extGamesListDir = newList;
 
                     ((QuestPlayerApplication) getApplication()).setCurrentGameDir(null);
                 })

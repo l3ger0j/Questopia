@@ -302,7 +302,7 @@ public class StockActivity extends AppCompatActivity {
                 var file = DocumentFileCompat.fromUri(this, uri);
                 listFile.add(file);
             }
-            stockViewModel.listGamesDir = listFile;
+            stockViewModel.extGamesListDir = listFile;
             stockViewModel.refreshGameData();
         } catch (IOException e) {
             Log.e(TAG , "Error: ", e);
