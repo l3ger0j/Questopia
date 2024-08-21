@@ -885,6 +885,7 @@ public class StockViewModel extends AndroidViewModel {
                     extGamesListDir = newList;
 
                     ((QuestPlayerApplication) getApplication()).setCurrentGameDir(null);
+                    getStockActivity().runOnUiThread(this::refreshGameData);
                 })
                 .exceptionally(throwable -> {
                     doOnShowErrorDialog(throwable.getMessage() , ErrorType.EXCEPTION);
