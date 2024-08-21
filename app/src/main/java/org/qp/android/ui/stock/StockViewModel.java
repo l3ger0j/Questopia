@@ -671,7 +671,7 @@ public class StockViewModel extends AndroidViewModel {
                     }
 
                     return Collections.emptyList();
-                });
+                }, executor);
     }
 
     public void refreshGameData() {
