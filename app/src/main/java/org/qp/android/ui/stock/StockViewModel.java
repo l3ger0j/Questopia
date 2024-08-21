@@ -714,7 +714,9 @@ public class StockViewModel extends AndroidViewModel {
                     var localGameData = new ArrayList<GameData>();
                     for (var data : sortedGameData) {
                         if (!data.isFileInstalled()) continue;
-                        if (isNotEmpty(data.fileSize)) {
+                        if (!isNotEmpty(data.fileSize)) {
+                            calculateSizeDir(data);
+                        } else {
                             if (!data.fileSize.equals(DISABLE_CALCULATE_DIR)) {
                                 try {
                                     var fileSize = Long.parseLong(data.fileSize);
@@ -722,8 +724,6 @@ public class StockViewModel extends AndroidViewModel {
                                     data.fileSize = formatFileSize(fileSize , currPrefix);
                                 } catch (NumberFormatException ignored) {}
                             }
-                        } else {
-                            calculateSizeDir(data);
                         }
                         localGameData.add(data);
                     }
