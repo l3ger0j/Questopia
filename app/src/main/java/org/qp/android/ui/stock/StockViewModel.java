@@ -627,8 +627,7 @@ public class StockViewModel extends AndroidViewModel {
         return CompletableFuture
                 .supplyAsync(() -> {
                     try {
-                        var copy = new ArrayList<>(extGamesListDir);
-                        return localGame.extractDataFromList(copy);
+                        return localGame.extractDataFromList(extGamesListDir);
                     } catch (IOException e) {
                         Log.d(TAG, "error: ", e);
                         throw new CompletionException(e);
