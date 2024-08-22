@@ -572,6 +572,10 @@ public class StockActivity extends AppCompatActivity {
     public void onLongListItemClick() {
         if (isEnableDeleteMode) return;
 
+        var pageNumber = stockViewModel.currPageNumber.getValue();
+        if (pageNumber == null) return;
+        if (pageNumber == 1) return;
+
         var callback = new ActionMode.Callback() {
             @Override
             public boolean onCreateActionMode(ActionMode mode , Menu menu) {
