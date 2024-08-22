@@ -64,6 +64,9 @@
         <string name="addFolderSum1">Текущий корневая директория это внешняя директория устройства</string>
     <!-- FragmentImageBox -->
         <string name="image">Изображение</string>
+    <!-- StockViewPagerFragment -->
+        <string name="tabZeroName">Установленные игры</string>
+        <string name="tabOneName">Репозиторий игр</string>
     <!-- Use in menu -->
     <!-- Menu game -->
         <!-- Group running -->

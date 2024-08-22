@@ -14,6 +14,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
+import org.qp.android.R;
 import org.qp.android.databinding.FragmentViewPagerBinding;
 
 public class StockViewPagerFragment extends Fragment {
@@ -53,8 +54,10 @@ public class StockViewPagerFragment extends Fragment {
             }
         });
 
+        var tabZeroName = getString(R.string.tabZeroName);
+        var tabOneName = getString(R.string.tabOneName);
         var tabLayoutMediator = new TabLayoutMediator(tabLayout, stockPager, (tab , position) ->
-                tab.setText(position == 0 ? "Local game" : "Remote game"));
+                tab.setText(position == 0 ? tabZeroName : tabOneName));
         tabLayoutMediator.attach();
 
         return binding.getRoot();

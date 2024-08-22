@@ -64,6 +64,9 @@
         <string name="addFolderSum1">Current root dir is external directory of the device</string>
     <!-- FragmentImageBox -->
         <string name="image">Image</string>
+    <!-- StockViewPagerFragment -->
+        <string name="tabZeroName">Installed Games</string>
+        <string name="tabOneName">Repository games</string>
     <!-- Use in menu -->
     <!-- Menu game -->
         <!-- Group running -->
