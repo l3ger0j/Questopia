@@ -108,7 +108,7 @@ public class StockActivity extends AppCompatActivity {
     protected ActivityStockBinding activityStockBinding;
     private boolean isEnableDeleteMode = false;
     private FloatingActionButton mFAB;
-    private RecyclerView mRecyclerView;
+    private RecyclerView.ViewHolder viewHolder;
     private List<GameData> tempList;
     private final List<GameData> selectList = new ArrayList<>();
 
@@ -141,10 +141,6 @@ public class StockActivity extends AppCompatActivity {
         }
     };
 
-    public void setRecyclerView(RecyclerView mRecyclerView) {
-        this.mRecyclerView = mRecyclerView;
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         var splashScreen = SplashScreen.installSplashScreen(this);
@@ -165,7 +161,6 @@ public class StockActivity extends AppCompatActivity {
 
         activityStockBinding = ActivityStockBinding.inflate(getLayoutInflater());
         stockViewModel = new ViewModelProvider(this).get(StockViewModel.class);
-        stockViewModel.activityObserver.setValue(this);
 
         mFAB = activityStockBinding.stockFAB;
         stockViewModel.doIsHideFAB.observe(this, aBoolean -> {
@@ -261,12 +256,18 @@ public class StockActivity extends AppCompatActivity {
                             showErrorDialog(getString(R.string.error)
                                     + ": " + errorDialog.getErrorMessage());
                 }
-            } else if (eventNavigation instanceof StockFragmentNavigation.ShowGameFragment gameFragment) {
+            }
+            if (eventNavigation instanceof StockFragmentNavigation.ShowGameFragment gameFragment) {
                 onListItemClick(gameFragment.getPosition());
-            } else if (eventNavigation instanceof StockFragmentNavigation.ShowActionMode) {
+            }
+            if (eventNavigation instanceof StockFragmentNavigation.ShowActionMode) {
                 onLongListItemClick();
-            } else if (eventNavigation instanceof StockFragmentNavigation.ShowFilePicker filePicker) {
+            }
+            if (eventNavigation instanceof StockFragmentNavigation.ShowFilePicker filePicker) {
                 showFilePickerActivity(filePicker.getRequestCode() , filePicker.getMimeTypes());
+            }
+            if (eventNavigation instanceof StockFragmentNavigation.GetAdapterViewHolder adapterViewHolder) {
+                viewHolder = adapterViewHolder.viewHolder;
             }
         });
 
@@ -545,10 +546,7 @@ public class StockActivity extends AppCompatActivity {
             navController.navigate(R.id.stockGameFragment);
             stockViewModel.doIsHideFAB.setValue(true);
         } else {
-            var mViewHolder = mRecyclerView.findViewHolderForAdapterPosition(position);
-            if (mViewHolder == null) return;
-
-            var adapterPosition = mViewHolder.getAbsoluteAdapterPosition();
+            var adapterPosition = viewHolder.getAbsoluteAdapterPosition();
             if (adapterPosition == NO_POSITION) return;
             if (adapterPosition < 0 || adapterPosition >= tempList.size()) return;
 
@@ -561,11 +559,11 @@ public class StockActivity extends AppCompatActivity {
             var gameData = tempList.get(adapterPosition);
             if (selectList.isEmpty() || !selectList.contains(gameData)) {
                 selectList.add(gameData);
-                var cardView = (CardView) mViewHolder.itemView.findViewWithTag("gameCardView");
+                var cardView = (CardView) viewHolder.itemView.findViewWithTag("gameCardView");
                 cardView.setCardBackgroundColor(Color.LTGRAY);
             } else {
                 selectList.remove(gameData);
-                var cardView = (CardView) mViewHolder.itemView.findViewWithTag("gameCardView");
+                var cardView = (CardView) viewHolder.itemView.findViewWithTag("gameCardView");
                 cardView.setCardBackgroundColor(Color.DKGRAY);
             }
         }
@@ -616,21 +614,11 @@ public class StockActivity extends AppCompatActivity {
                     case R.id.select_all -> {
                         if (selectList.size() == tempList.size()) {
                             selectList.clear();
-                            for (int childCount = mRecyclerView.getChildCount(), i = 0; i < childCount; ++i) {
-                                final var holder =
-                                        mRecyclerView.getChildViewHolder(mRecyclerView.getChildAt(i));
-                                var cardView = (CardView) holder.itemView.findViewWithTag("gameCardView");
-                                cardView.setCardBackgroundColor(Color.DKGRAY);
-                            }
+                            stockViewModel.doOnChangeElementColorToDKGray();
                         } else {
                             selectList.clear();
                             selectList.addAll(tempList);
-                            for (int childCount = mRecyclerView.getChildCount(), i = 0; i < childCount; ++i) {
-                                final var holder =
-                                        mRecyclerView.getChildViewHolder(mRecyclerView.getChildAt(i));
-                                var cardView = (CardView) holder.itemView.findViewWithTag("gameCardView");
-                                cardView.setCardBackgroundColor(Color.LTGRAY);
-                            }
+                            stockViewModel.doOnChangeElementColorToLTGray();
                         }
                     }
                 }
@@ -639,12 +627,7 @@ public class StockActivity extends AppCompatActivity {
 
             @Override
             public void onDestroyActionMode(ActionMode mode) {
-                for (int childCount = mRecyclerView.getChildCount(), i = 0; i < childCount; ++i) {
-                    final var holder =
-                            mRecyclerView.getChildViewHolder(mRecyclerView.getChildAt(i));
-                    var cardView = (CardView) holder.itemView.findViewWithTag("gameCardView");
-                    cardView.setCardBackgroundColor(Color.DKGRAY);
-                }
+                stockViewModel.doOnChangeElementColorToDKGray();
                 deleteMode = null;
                 isEnableDeleteMode = false;
                 tempList.clear();

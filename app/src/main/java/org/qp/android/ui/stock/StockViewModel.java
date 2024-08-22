@@ -16,6 +16,7 @@ import static org.qp.android.helpers.utils.JsonUtil.jsonToObject;
 import static org.qp.android.helpers.utils.JsonUtil.objectToJson;
 import static org.qp.android.helpers.utils.PathUtil.removeExtension;
 import static org.qp.android.helpers.utils.StringUtil.isNotEmpty;
+import static org.qp.android.helpers.utils.ThreadUtil.runOnUiThread;
 
 import android.annotation.SuppressLint;
 import android.app.Application;
@@ -31,11 +32,13 @@ import android.webkit.CookieManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.anggrayudi.storage.callback.FileCallback;
 import com.anggrayudi.storage.file.DocumentFileCompat;
@@ -44,7 +47,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.squareup.picasso.Picasso;
 
-import org.jetbrains.annotations.NotNull;
 import org.qp.android.QuestPlayerApplication;
 import org.qp.android.R;
 import org.qp.android.databinding.DialogAddBinding;
@@ -92,7 +94,6 @@ public class StockViewModel extends AndroidViewModel {
     private static final String INNER_GAME_DIR_NAME = "games-dir";
     public static final String EXT_GAME_LIST_NAME = "extGameDirs";
 
-    public MutableLiveData<StockActivity> activityObserver = new MutableLiveData<>();
     public MutableLiveData<Boolean> doIsHideFAB = new MutableLiveData<>();
     public MutableLiveData<Integer> outputIntObserver;
 
@@ -160,16 +161,6 @@ public class StockViewModel extends AndroidViewModel {
         gameDataList.setValue(gameDataArrayList);
     }
 
-    @NotNull
-    private StockActivity getStockActivity() {
-        var tempStockActivity = activityObserver.getValue();
-        if (tempStockActivity != null) {
-            return tempStockActivity;
-        } else {
-            throw new NullPointerException();
-        }
-    }
-
     @NonNull
     private SettingsController getController() {
         return SettingsController.newInstance(getApplication());
@@ -214,7 +205,7 @@ public class StockViewModel extends AndroidViewModel {
         var author = data.author;
         if (author == null || author.isEmpty() || author.isBlank()) return "";
 
-        var authorString = getStockActivity().getString(R.string.author);
+        var authorString = ActivityCompat.getString(getApplication(), R.string.author);
         return authorString.replace("-AUTHOR-", data.author);
     }
 
@@ -235,7 +226,7 @@ public class StockViewModel extends AndroidViewModel {
         var portedBy = data.portedBy;
         if (portedBy == null || portedBy.isEmpty() || portedBy.isBlank()) return "";
 
-        var portedByString = getStockActivity().getString(R.string.ported_by);
+        var portedByString = ActivityCompat.getString(getApplication(), R.string.ported_by);
         return portedByString.replace("-PORTED_BY-", data.portedBy);
     }
 
@@ -246,7 +237,7 @@ public class StockViewModel extends AndroidViewModel {
         var version = data.version;
         if (version == null || version.isEmpty() || version.isBlank()) return "";
 
-        var versionString = getStockActivity().getString(R.string.version);
+        var versionString = ActivityCompat.getString(getApplication(), R.string.version);
         return versionString.replace("-VERSION-", data.version);
     }
 
@@ -257,9 +248,9 @@ public class StockViewModel extends AndroidViewModel {
         var fileExt = data.fileExt;
         if (fileExt == null || fileExt.isEmpty() || fileExt.isBlank()) return "";
 
-        var fileTypeSting = getStockActivity().getString(R.string.fileType);
+        var fileTypeSting = ActivityCompat.getString(getApplication(), R.string.fileType);
         if (fileExt.equals("aqsp")) {
-            var experimentalString = getStockActivity().getString(R.string.experimental);
+            var experimentalString = ActivityCompat.getString(getApplication(), R.string.experimental);
             return fileTypeSting.replace("-TYPE-", data.fileExt) + " " + experimentalString;
         } else {
             return fileTypeSting.replace("-TYPE-", data.fileExt);
@@ -274,7 +265,7 @@ public class StockViewModel extends AndroidViewModel {
         if (fileSize == null || fileSize.isEmpty() || fileSize.isBlank()) return "";
         if (fileSize.equals(DISABLE_CALCULATE_DIR)) return "";
 
-        var fileSizeString = getStockActivity().getString(R.string.fileSize);
+        var fileSizeString = ActivityCompat.getString(getApplication(), R.string.fileSize);
         return fileSizeString.replace("-SIZE-", fileSize);
     }
 
@@ -285,7 +276,7 @@ public class StockViewModel extends AndroidViewModel {
         var pubDate = data.pubDate;
         if (pubDate == null || pubDate.isEmpty() || pubDate.isBlank()) return "";
 
-        var pubDataString = getStockActivity().getString(R.string.pub_data);
+        var pubDataString = ActivityCompat.getString(getApplication(), R.string.pub_data);
         return pubDataString.replace("-PUB_DATA-", pubDate);
     }
 
@@ -296,7 +287,7 @@ public class StockViewModel extends AndroidViewModel {
         var modDate = data.modDate;
         if (modDate == null || modDate.isEmpty() || modDate.isBlank()) return "";
 
-        var modDataString = getStockActivity().getString(R.string.mod_data);
+        var modDataString = ActivityCompat.getString(getApplication(), R.string.mod_data);
         return modDataString.replace("-MOD_DATA-", modDate);
     }
 
@@ -358,7 +349,19 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     public void doOnShowActionMode() {
-        emitter.emitAndExecute(new StockFragmentNavigation.ShowActionMode());
+        emitter.emitAndExecuteOnce(new StockFragmentNavigation.ShowActionMode());
+    }
+
+    public void doOnSendAdapterViewHolder(RecyclerView.ViewHolder holder) {
+        emitter.emitAndExecute(new StockFragmentNavigation.GetAdapterViewHolder(holder));
+    }
+
+    public void doOnChangeElementColorToDKGray() {
+        emitter.emitAndExecuteOnce(new StockFragmentNavigation.ChangeElementColorToDKGray());
+    }
+
+    public void doOnChangeElementColorToLTGray() {
+        emitter.emitAndExecuteOnce(new StockFragmentNavigation.ChangeElementColorToLTGray());
     }
 
     public StockViewModel(@NonNull Application application) {
@@ -881,7 +884,7 @@ public class StockViewModel extends AndroidViewModel {
                     extGamesListDir = newList;
 
                     ((QuestPlayerApplication) getApplication()).setCurrentGameDir(null);
-                    getStockActivity().runOnUiThread(this::refreshGameData);
+                    runOnUiThread(this::refreshGameData);
                 })
                 .exceptionally(throwable -> {
                     doOnShowErrorDialog(throwable.getMessage() , ErrorType.EXCEPTION);
@@ -959,9 +962,9 @@ public class StockViewModel extends AndroidViewModel {
                                 archive.delete();
 
                                 var notificationBuild = new NotifyBuilder(getApplication(), UNPACK_GAME_CHANNEL_ID);
-                                var unpackBody = getStockActivity().getString(R.string.bodyUnpackDoneNotify);
+                                var unpackBody = ActivityCompat.getString(getApplication(), R.string.bodyUnpackDoneNotify);
                                 var notification = notificationBuild.buildStandardNotification(
-                                        getStockActivity().getString(R.string.titleUnpackDoneNotify),
+                                        ActivityCompat.getString(getApplication(), R.string.titleUnpackDoneNotify),
                                         unpackBody.replace("-GAMENAME-", currGameData.title)
                                 );
                                 var notificationManager = getApplication().getSystemService(NotificationManager.class);

@@ -1,5 +1,6 @@
 package org.qp.android.helpers.utils;
 
+import android.os.Handler;
 import android.os.Looper;
 
 public final class ThreadUtil {
@@ -35,4 +36,14 @@ public final class ThreadUtil {
             throw new RuntimeException("Must be called from the main thread");
         }
     }
+
+    public static void runOnUiThread(Runnable action) {
+        if (!isMainThread()) {
+            var mHandler = new Handler(Looper.getMainLooper());
+            mHandler.post(action);
+        } else {
+            action.run();
+        }
+    }
+
 }

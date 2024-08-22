@@ -1,5 +1,7 @@
 package org.qp.android.ui.stock;
 
+import androidx.recyclerview.widget.RecyclerView;
+
 import org.qp.android.helpers.ErrorType;
 import org.qp.android.helpers.bus.EventNavigation;
 
@@ -36,6 +38,18 @@ public interface StockFragmentNavigation {
     }
 
     class ShowActionMode extends EventNavigation {}
+
+    class ChangeElementColorToDKGray extends EventNavigation {}
+
+    class ChangeElementColorToLTGray extends EventNavigation {}
+
+    class GetAdapterViewHolder extends EventNavigation {
+        public final RecyclerView.ViewHolder viewHolder;
+
+        public GetAdapterViewHolder(RecyclerView.ViewHolder viewHolder) {
+            this.viewHolder = viewHolder;
+        }
+    }
 
     class ShowFilePicker extends EventNavigation {
         private final int requestCode;
