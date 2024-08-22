@@ -612,7 +612,6 @@ public class StockViewModel extends AndroidViewModel {
                     try {
                         return localGame.extractDataFromFolder(rootInDir);
                     } catch (IOException e) {
-                        Log.d(TAG, "error: ", e);
                         throw new CompletionException(e);
                     }
                 }, executor)
@@ -629,7 +628,6 @@ public class StockViewModel extends AndroidViewModel {
                     try {
                         return localGame.extractDataFromList(extGamesListDir);
                     } catch (IOException e) {
-                        Log.d(TAG, "error: ", e);
                         throw new CompletionException(e);
                     }
                 }, executor)
@@ -656,7 +654,6 @@ public class StockViewModel extends AndroidViewModel {
                                 var ref = new TypeReference<ArrayList<RemoteGameData>>(){};
                                 return mapper.readValue(file, ref);
                             } catch (IOException e) {
-                                Log.d(TAG, "error: ", e);
                                 throw new CompletionException(e);
                             }
                         }
