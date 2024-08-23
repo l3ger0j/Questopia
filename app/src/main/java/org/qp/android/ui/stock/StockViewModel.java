@@ -1,7 +1,7 @@
 package org.qp.android.ui.stock;
 
-import static org.qp.android.QuestPlayerApplication.UNPACK_GAME_CHANNEL_ID;
-import static org.qp.android.QuestPlayerApplication.UNPACK_GAME_NOTIFICATION_ID;
+import static org.qp.android.QuestopiaApplication.UNPACK_GAME_CHANNEL_ID;
+import static org.qp.android.QuestopiaApplication.UNPACK_GAME_NOTIFICATION_ID;
 import static org.qp.android.helpers.utils.DirUtil.calculateDirSize;
 import static org.qp.android.helpers.utils.DirUtil.isDirContainsGameFile;
 import static org.qp.android.helpers.utils.FileUtil.copyFileToDir;
@@ -47,7 +47,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.squareup.picasso.Picasso;
 
-import org.qp.android.QuestPlayerApplication;
+import org.qp.android.QuestopiaApplication;
 import org.qp.android.R;
 import org.qp.android.databinding.DialogAddBinding;
 import org.qp.android.databinding.DialogEditBinding;
@@ -567,7 +567,7 @@ public class StockViewModel extends AndroidViewModel {
             if (gameDir == null) return Optional.empty();
             var intent = new Intent(getApplication() , GameActivity.class);
 
-            var application = (QuestPlayerApplication) getApplication();
+            var application = (QuestopiaApplication) getApplication();
             application.setCurrentGameDir(gameDir);
 
             intent.putExtra("gameId" , data.id);
@@ -595,7 +595,7 @@ public class StockViewModel extends AndroidViewModel {
 
     // region Refresh
     public void refreshGamesDirs() {
-        var rootExDir = ((QuestPlayerApplication) getApplication()).getCurrentGameDir();
+        var rootExDir = ((QuestopiaApplication) getApplication()).getCurrentGameDir();
 
         if (isWritableDir(getApplication(), rootExDir)) {
             extGamesListDir.add(rootExDir);
@@ -883,7 +883,7 @@ public class StockViewModel extends AndroidViewModel {
                     });
                     extGamesListDir = newList;
 
-                    ((QuestPlayerApplication) getApplication()).setCurrentGameDir(null);
+                    ((QuestopiaApplication) getApplication()).setCurrentGameDir(null);
                     runOnUiThread(this::refreshGameData);
                 })
                 .exceptionally(throwable -> {

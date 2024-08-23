@@ -63,7 +63,7 @@ import com.github.javiersantos.appupdater.enums.UpdateFrom;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import org.qp.android.BuildConfig;
-import org.qp.android.QuestPlayerApplication;
+import org.qp.android.QuestopiaApplication;
 import org.qp.android.R;
 import org.qp.android.databinding.ActivityStockBinding;
 import org.qp.android.dto.stock.GameData;
@@ -223,7 +223,7 @@ public class StockActivity extends AppCompatActivity {
                 );
                 stockViewModel.outputIntObserver.observe(this, integer -> {
                     if (integer == 1) {
-                        var application = (QuestPlayerApplication) getApplication();
+                        var application = (QuestopiaApplication) getApplication();
                         if (application != null) application.setCurrentGameDir(rootFolder);
                         stockViewModel.refreshGamesDirs();
                     }

@@ -14,7 +14,7 @@ import org.qp.android.model.service.HtmlProcessor;
 import org.qp.android.model.service.ImageProvider;
 import org.qp.android.ui.settings.SettingsController;
 
-public class QuestPlayerApplication extends Application {
+public class QuestopiaApplication extends Application {
 
     public static final int UNPACK_GAME_NOTIFICATION_ID = 1800;
     public static final String UNPACK_GAME_CHANNEL_ID = "org.qp.android.channel.unpack_game";

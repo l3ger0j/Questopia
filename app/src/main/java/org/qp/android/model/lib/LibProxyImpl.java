@@ -25,7 +25,7 @@ import androidx.documentfile.provider.DocumentFile;
 
 import com.anggrayudi.storage.file.MimeType;
 
-import org.qp.android.QuestPlayerApplication;
+import org.qp.android.QuestopiaApplication;
 import org.qp.android.dto.lib.LibActionData;
 import org.qp.android.dto.lib.LibErrorData;
 import org.qp.android.dto.lib.LibListItem;
@@ -58,8 +58,8 @@ public class LibProxyImpl implements LibIProxy, LibICallbacks {
 
     private final Context context;
 
-    private QuestPlayerApplication getApplication() {
-        return (QuestPlayerApplication) context.getApplicationContext();
+    private QuestopiaApplication getApplication() {
+        return (QuestopiaApplication) context.getApplicationContext();
     }
 
     private DocumentFile getCurGameDir() {

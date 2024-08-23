@@ -42,7 +42,7 @@ import androidx.preference.PreferenceManager;
 import com.anggrayudi.storage.file.DocumentFileCompat;
 import com.google.android.material.textfield.TextInputLayout;
 
-import org.qp.android.QuestPlayerApplication;
+import org.qp.android.QuestopiaApplication;
 import org.qp.android.R;
 import org.qp.android.helpers.ErrorType;
 import org.qp.android.helpers.TwoQCache;
@@ -70,7 +70,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
 
     private final String TAG = this.getClass().getSimpleName();
 
-    private final QuestPlayerApplication questPlayerApplication;
+    private final QuestopiaApplication questopiaApplication;
     private Uri gameDirUri;
 
     private final ExecutorService service = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
@@ -126,11 +126,11 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
 
     // region Getter/Setter
     private HtmlProcessor getHtmlProcessor() {
-        return questPlayerApplication.getHtmlProcessor();
+        return questopiaApplication.getHtmlProcessor();
     }
 
     private LibIProxy getLibProxy() {
-        return questPlayerApplication.getLibProxy();
+        return questopiaApplication.getLibProxy();
     }
 
     private LibGameState getLibGameState() {
@@ -138,7 +138,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
     }
 
     private AudioPlayer getAudioPlayer() {
-        return questPlayerApplication.getAudioPlayer();
+        return questopiaApplication.getAudioPlayer();
     }
 
     public LiveData<String> getAudioErrorObserver() {
@@ -465,7 +465,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         super(application);
         preferences = PreferenceManager.getDefaultSharedPreferences(application);
         preferences.registerOnSharedPreferenceChangeListener(preferenceChangeListener);
-        questPlayerApplication = (QuestPlayerApplication) getApplication();
+        questopiaApplication = (QuestopiaApplication) getApplication();
     }
 
     @Override

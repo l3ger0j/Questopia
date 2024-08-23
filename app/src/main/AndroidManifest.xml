@@ -16,7 +16,7 @@
     </queries>
 
     <application
-        android:name=".QuestPlayerApplication"
+        android:name=".QuestopiaApplication"
         android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/appName"
