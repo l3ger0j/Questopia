@@ -1,5 +1,5 @@
 [versions]
-agp = "8.5.0"
+agp = "8.5.2"
 appupdater = "2.7"
 changelog = "3.5"
 collection = "1.4.3"
