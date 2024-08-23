@@ -35,13 +35,11 @@ import androidx.documentfile.provider.DocumentFile;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
-import androidx.navigation.NavOptions;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.anggrayudi.storage.SimpleStorageHelper;
 import com.anggrayudi.storage.file.DocumentFileCompat;
-import com.anggrayudi.storage.file.DocumentFileUtils;
 import com.anggrayudi.storage.file.MimeType;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -53,7 +51,6 @@ import org.qp.android.ui.dialogs.GameDialogFrags;
 import org.qp.android.ui.dialogs.GameDialogType;
 import org.qp.android.ui.settings.SettingsActivity;
 import org.qp.android.ui.settings.SettingsController;
-import org.qp.android.ui.stock.StockStateAdapter;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -275,6 +272,8 @@ public class GameActivity extends AppCompatActivity {
         var gameDir =  DocumentFileCompat.fromUri(this , gameDirUri);
         var gameFileUri = Uri.parse(intent.getStringExtra("gameFileUri"));
         var gameFile = DocumentFileCompat.fromUri(this , gameFileUri);
+
+
 
         gameViewModel.setGameDirUri(gameDirUri);
         gameViewModel.runGameIntoNativeLib(gameId, gameTitle, gameDir, gameFile);
