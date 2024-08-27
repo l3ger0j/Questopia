@@ -17,7 +17,6 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.WindowManager;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -34,8 +33,6 @@ import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.NavController;
-import androidx.navigation.fragment.NavHostFragment;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.anggrayudi.storage.SimpleStorageHelper;
@@ -79,7 +76,6 @@ public class GameActivity extends AppCompatActivity {
 
     private ActionBar actionBar;
     private Menu mainMenu;
-    private NavController navController;
     private ViewPager2 pager2;
     private BottomNavigationView bottomNavigationView;
 
@@ -128,18 +124,8 @@ public class GameActivity extends AppCompatActivity {
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
         pager2 = activityGameBinding.gamePager;
-        if (settingsController.isUseViewPager2) {
-            pager2.setVisibility(View.VISIBLE);
-            pager2.setUserInputEnabled(false);
-            pager2.setAdapter(new GameStateAdapter(this));
-        } else {
-            pager2.setVisibility(View.GONE);
-            var navFragment = (NavHostFragment) getSupportFragmentManager()
-                    .findFragmentById(R.id.gameFragHost);
-            if (navFragment != null) {
-                navController = navFragment.getNavController();
-            }
-        }
+        pager2.setUserInputEnabled(false);
+        pager2.setAdapter(new GameStateAdapter(this));
 
         bottomNavigationView = activityGameBinding.bottomNavigationView;
         bottomNavigationView.setOnItemSelectedListener(item -> {
@@ -286,31 +272,19 @@ public class GameActivity extends AppCompatActivity {
 
         switch (tab) {
             case TAB_MAIN_DESC_AND_ACTIONS -> {
-                if (settingsController.isUseViewPager2) {
-                    pager2.setCurrentItem(0, false);
-                } else {
-                    navController.navigate(R.id.gameMainFragment);
-                }
+                pager2.setCurrentItem(0, false);
                 var badge = bottomNavigationView.getBadge(R.id.menu_mainDesc);
                 if (badge != null) bottomNavigationView.removeBadge(R.id.menu_mainDesc);
                 setTitle(getString(R.string.mainDescTitle));
             }
             case TAB_OBJECTS -> {
-                if (settingsController.isUseViewPager2) {
-                    pager2.setCurrentItem(1, false);
-                } else {
-                    navController.navigate(R.id.gameObjectFragment);
-                }
+                pager2.setCurrentItem(1, false);
                 var badge = bottomNavigationView.getBadge(R.id.menu_inventory);
                 if (badge != null) bottomNavigationView.removeBadge(R.id.menu_inventory);
                 setTitle(getString(R.string.inventoryTitle));
             }
             case TAB_VARS_DESC -> {
-                if (settingsController.isUseViewPager2) {
-                    pager2.setCurrentItem(2, false);
-                } else {
-                    navController.navigate(R.id.gameVarsFragment);
-                }
+                pager2.setCurrentItem(2, false);
                 var badge = bottomNavigationView.getBadge(R.id.menu_varsDesc);
                 if (badge != null) bottomNavigationView.removeBadge(R.id.menu_varsDesc);
                 setTitle(getString(R.string.varsDescTitle));
@@ -328,42 +302,20 @@ public class GameActivity extends AppCompatActivity {
         if (!isMainThread()) {
             runOnUiThread(() -> warnUser(id));
         } else {
-            if (settingsController.isUseViewPager2) {
-                var currItem = pager2.getCurrentItem();
+            var currItem = pager2.getCurrentItem();
 
-                switch (id) {
-                    case TAB_MAIN_DESC_AND_ACTIONS -> {
-                        if (currItem != 0)
-                            bottomNavigationView.getOrCreateBadge(R.id.menu_mainDesc);
-                    }
-                    case TAB_OBJECTS -> {
-                        if (currItem != 1)
-                            bottomNavigationView.getOrCreateBadge(R.id.menu_inventory);
-                    }
-                    case TAB_VARS_DESC -> {
-                        if (currItem != 2)
-                            bottomNavigationView.getOrCreateBadge(R.id.menu_varsDesc);
-                    }
+            switch (id) {
+                case TAB_MAIN_DESC_AND_ACTIONS -> {
+                    if (currItem != 0)
+                        bottomNavigationView.getOrCreateBadge(R.id.menu_mainDesc);
                 }
-            } else {
-                var currDest = navController.getCurrentDestination();
-                if (currDest == null) return;
-                var currDestLabel = currDest.getLabel();
-                if (currDestLabel == null) return;
-
-                switch (id) {
-                    case TAB_MAIN_DESC_AND_ACTIONS -> {
-                        if (!currDestLabel.equals("GameMainFragment"))
-                            bottomNavigationView.getOrCreateBadge(R.id.menu_mainDesc);
-                    }
-                    case TAB_OBJECTS -> {
-                        if (!currDestLabel.equals("GameObjectFragment"))
-                            bottomNavigationView.getOrCreateBadge(R.id.menu_inventory);
-                    }
-                    case TAB_VARS_DESC -> {
-                        if (!currDestLabel.equals("GameVarsFragment"))
-                            bottomNavigationView.getOrCreateBadge(R.id.menu_varsDesc);
-                    }
+                case TAB_OBJECTS -> {
+                    if (currItem != 1)
+                        bottomNavigationView.getOrCreateBadge(R.id.menu_inventory);
+                }
+                case TAB_VARS_DESC -> {
+                    if (currItem != 2)
+                        bottomNavigationView.getOrCreateBadge(R.id.menu_varsDesc);
                 }
             }
         }

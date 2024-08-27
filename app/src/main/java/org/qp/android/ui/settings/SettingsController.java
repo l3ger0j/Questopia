@@ -26,7 +26,6 @@ public class SettingsController {
     public boolean isUseSeparator;
     public boolean isUseGameFont;
     public boolean isUseAutoscroll;
-    public boolean isUseViewPager2;
     public boolean isUseExecString;
     public boolean isUseImmersiveMode;
     public boolean isUseGameTextColor;
@@ -66,7 +65,6 @@ public class SettingsController {
         settingsController.binaryPrefixes = Integer.parseInt(preferences.getString("binPref","1000"));
         settingsController.actionsHeightRatio = parseActionsHeightRatio(preferences.getString("actsHeight", "1/3"));
         settingsController.isUseAutoscroll = preferences.getBoolean("autoscroll", true);
-        settingsController.isUseViewPager2 = preferences.getBoolean("useViewPager2", false);
         settingsController.isUseExecString = preferences.getBoolean("execString", false);
         settingsController.isUseSeparator = preferences.getBoolean("separator", false);
         settingsController.isUseGameFont = preferences.getBoolean("useGameFont", false);
