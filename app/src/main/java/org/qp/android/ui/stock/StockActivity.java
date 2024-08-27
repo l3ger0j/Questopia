@@ -29,6 +29,7 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.WindowManager;
 
 import androidx.activity.OnBackPressedCallback;
@@ -60,6 +61,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.github.javiersantos.appupdater.AppUpdater;
 import com.github.javiersantos.appupdater.enums.UpdateFrom;
+import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import org.qp.android.BuildConfig;
@@ -111,6 +113,7 @@ public class StockActivity extends AppCompatActivity {
     private RecyclerView.ViewHolder viewHolder;
     private List<GameData> tempList;
     private final List<GameData> selectList = new ArrayList<>();
+    private MaterialToolbar materialToolbar;
 
     private ActivityResultLauncher<Intent> rootFolderLauncher;
     private final SimpleStorageHelper storageHelper = new SimpleStorageHelper(this);
@@ -157,11 +160,13 @@ public class StockActivity extends AppCompatActivity {
                     WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT;
         }
 
-        getWindow().setNavigationBarColor(Color.TRANSPARENT);
+        // getWindow().setNavigationBarColor(Color.TRANSPARENT);
 
         activityStockBinding = ActivityStockBinding.inflate(getLayoutInflater());
         stockViewModel = new ViewModelProvider(this).get(StockViewModel.class);
 
+        materialToolbar = activityStockBinding.stockMaterialBar;
+        setSupportActionBar(materialToolbar);
         mFAB = activityStockBinding.stockFAB;
         stockViewModel.doIsHideFAB.observe(this, aBoolean -> {
             if (aBoolean) {
@@ -579,6 +584,8 @@ public class StockActivity extends AppCompatActivity {
         var callback = new ActionMode.Callback() {
             @Override
             public boolean onCreateActionMode(ActionMode mode , Menu menu) {
+                materialToolbar.setVisibility(View.GONE);
+
                 mode.getMenuInflater().inflate(R.menu.menu_delete , menu);
                 return true;
             }
@@ -631,6 +638,8 @@ public class StockActivity extends AppCompatActivity {
 
             @Override
             public void onDestroyActionMode(ActionMode mode) {
+                materialToolbar.setVisibility(View.VISIBLE);
+
                 stockViewModel.doOnChangeElementColorToDKGray();
                 deleteMode = null;
                 isEnableDeleteMode = false;

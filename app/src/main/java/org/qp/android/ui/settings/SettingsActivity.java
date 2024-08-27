@@ -12,6 +12,7 @@ import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 
 import org.qp.android.R;
+import org.qp.android.databinding.ActivitySettingsBinding;
 
 public class SettingsActivity extends AppCompatActivity {
 
@@ -20,7 +21,10 @@ public class SettingsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_settings);
+
+        var settingsViewBinding = ActivitySettingsBinding.inflate(getLayoutInflater());
+        setSupportActionBar(settingsViewBinding.settingsToolbar);
+        setContentView(settingsViewBinding.getRoot());
 
         if (getSupportActionBar() != null ) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
