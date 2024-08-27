@@ -22,13 +22,12 @@ import org.qp.android.ui.dialogs.SettingsDialogFrag;
 
 import java.util.Optional;
 
-public class SettingsMainFragment extends PreferenceFragmentCompat {
+public class SettingsHostFragment extends PreferenceFragmentCompat {
 
     private SettingsViewModel viewModel;
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState , String rootKey) {
-        requireActivity().setTitle(R.string.settingsTitle);
         addPreferencesFromResource(R.xml.settings);
 
         viewModel =
