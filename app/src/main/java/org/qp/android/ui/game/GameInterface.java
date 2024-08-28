@@ -6,7 +6,7 @@ import org.qp.android.model.lib.LibWindowType;
 public interface GameInterface {
 
     void refresh(LibRefIRequest request);
-    void showError(String message);
+    void showErrorDialog(String message);
     void showPicture(String path);
     void showMessage(String message);
     String showInputDialog(String prompt);

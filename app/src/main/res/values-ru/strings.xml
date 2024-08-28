@@ -2,13 +2,12 @@
 <resources>
     <!-- Use in dialog/toast/notification -->
     <!-- Notification channel -->
-        <string name="channelInstallGame">Установка игр</string>
+        <string name="channelInstallGame">Распаковка игры</string>
     <!-- Install notification -->
         <string name="titleNotify">Установка игры</string>
-    <!-- Copy notification -->
-        <string name="titleCopyNotify">Копирование папки игры</string>
-        <string name="bodyCopyNotify">Копирую папку с игрой!</string>
-        <string name="bodyCopiedNotify">Ура! Я скопировала папку с игрой -GAMENAME-!</string>
+    <!-- Unpack notification -->
+        <string name="titleUnpackDoneNotify">Игра распакована!</string>
+        <string name="bodyUnpackDoneNotify">Фух! Я наконец-таки распаковала игру -GAMENAME-!</string>
     <!-- Dialog LoadGamePopup -->
         <string name="loadGamePopup">Файл сохранения не был найден в gameDir. Хотите ли вы вручную указать путь к файлу сохранения?</string>
     <!-- Dialog Close -->
@@ -39,6 +38,8 @@
         <string name="gameName">Название игры</string>
         <string name="gameAuthor">Автор</string>
         <string name="gameVersion">Версия</string>
+        <string name="btnAddGame">Добавить игру</string>
+        <string name="calcSizeDir">Рассчитать размер папки</string>
         <string name="selectFolder">Выберите папку с файлом</string>
         <string name="selectIcon">Выберите иконку</string>
         <string name="add">Скопировать в корневую папку</string>
@@ -63,6 +64,9 @@
         <string name="addFolderSum1">Текущий корневая директория это внешняя директория устройства</string>
     <!-- FragmentImageBox -->
         <string name="image">Изображение</string>
+    <!-- StockViewPagerFragment -->
+        <string name="tabZeroName">Установленные игры</string>
+        <string name="tabOneName">Репозиторий игр</string>
     <!-- Use in menu -->
     <!-- Menu game -->
         <!-- Group running -->

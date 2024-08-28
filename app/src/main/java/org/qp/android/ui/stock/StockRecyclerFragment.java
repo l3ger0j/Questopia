@@ -1,5 +1,6 @@
 package org.qp.android.ui.stock;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,42 +9,64 @@ import android.view.accessibility.AccessibilityNodeInfo;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.qp.android.databinding.FragmentRecyclerBinding;
-import org.qp.android.dto.stock.GameData;
 import org.qp.android.helpers.adapters.RecyclerItemClickListener;
-
-import java.util.ArrayList;
 
 public class StockRecyclerFragment extends Fragment {
 
     private StockViewModel stockViewModel;
     private RecyclerView mRecyclerView;
 
-    Observer<ArrayList<GameData>> gameData = gameData -> {
-        var adapter = new StockGamesRecycler(requireActivity());
-        adapter.submitList(gameData);
-        mRecyclerView.setAdapter(adapter);
-    };
-
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater ,
                              @Nullable ViewGroup container ,
                              @Nullable Bundle savedInstanceState) {
-        org.qp.android.databinding.FragmentRecyclerBinding recyclerBinding =
-                FragmentRecyclerBinding.inflate(inflater);
+        var recyclerBinding = FragmentRecyclerBinding.inflate(inflater);
         mRecyclerView = recyclerBinding.shareRecyclerView;
         mRecyclerView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
         stockViewModel = new ViewModelProvider(requireActivity()).get(StockViewModel.class);
-        stockViewModel.getGameDataList().observe(getViewLifecycleOwner(), gameData);
-        stockViewModel.activityObserver.observe(getViewLifecycleOwner() , stockActivity ->
-                stockActivity.setRecyclerView(mRecyclerView));
+
+        stockViewModel.getGameDataList().observe(getViewLifecycleOwner(), item -> {
+            var adapter = new GamesListAdapter(requireActivity()).submitList(item);
+            var divider = new DividerDecoration(requireContext(), Color.GRAY, 5f);
+            mRecyclerView.setAdapter(adapter);
+            mRecyclerView.addItemDecoration(divider);
+        });
+
+        stockViewModel.emitter.observe(getViewLifecycleOwner(), eventNavigation -> {
+            if (eventNavigation instanceof StockFragmentNavigation.ChangeElementColorToDKGray) {
+                changeElementColorToDKGray();
+            }
+            if (eventNavigation instanceof StockFragmentNavigation.ChangeElementColorToLTGray) {
+                changeElementColorToLTGray();
+            }
+        });
+
         return recyclerBinding.getRoot();
+    }
+
+    private void changeElementColorToDKGray() {
+        for (int childCount = mRecyclerView.getChildCount(), i = 0; i < childCount; ++i) {
+            final var holder =
+                    mRecyclerView.getChildViewHolder(mRecyclerView.getChildAt(i));
+            var cardView = (CardView) holder.itemView.findViewWithTag("gameCardView");
+            cardView.setCardBackgroundColor(Color.DKGRAY);
+        }
+    }
+
+    private void changeElementColorToLTGray() {
+        for (int childCount = mRecyclerView.getChildCount(), i = 0; i < childCount; ++i) {
+            final var holder =
+                    mRecyclerView.getChildViewHolder(mRecyclerView.getChildAt(i));
+            var cardView = (CardView) holder.itemView.findViewWithTag("gameCardView");
+            cardView.setCardBackgroundColor(Color.LTGRAY);
+        }
     }
 
     @Override
@@ -53,12 +76,15 @@ public class StockRecyclerFragment extends Fragment {
                 mRecyclerView ,
                 new RecyclerItemClickListener.OnItemClickListener() {
                     @Override
-                    public void onItemClick(View view , int position) {
+                    public void onItemClick(View view, int position) {
+                        var mViewHolder = mRecyclerView.findViewHolderForAdapterPosition(position);
+                        if (mViewHolder == null) return;
+                        stockViewModel.doOnSendAdapterViewHolder(mViewHolder);
                         stockViewModel.doOnShowGameFragment(position);
                     }
 
                     @Override
-                    public void onLongItemClick(View view , int position) {
+                    public void onLongItemClick(View view, int position) {
                         stockViewModel.doOnShowActionMode();
                     }
                 }));

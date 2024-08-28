@@ -21,8 +21,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - language: c-cpp
-            build-mode: autobuild
           - language: java-kotlin
             build-mode: autobuild
 

@@ -1,7 +1,10 @@
 package org.qp.android.ui.stock;
 
+import static org.qp.android.ui.stock.StockViewModel.DISABLE_CALCULATE_DIR;
+
 import android.content.Context;
 import android.net.Uri;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
@@ -17,10 +20,12 @@ import org.qp.android.R;
 import org.qp.android.databinding.ListItemGameBinding;
 import org.qp.android.dto.stock.GameData;
 
-import java.util.ArrayList;
 import java.util.List;
 
-public class StockGamesRecycler extends RecyclerView.Adapter<StockGamesRecycler.ViewHolder> {
+public class GamesListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+
+    public static final int DIVIDER = 1;
+    private static final int ITEM = 2;
 
     private final Context context;
     private final AsyncListDiffer<GameData> differ =
@@ -39,6 +44,22 @@ public class StockGamesRecycler extends RecyclerView.Adapter<StockGamesRecycler.
         return differ.getCurrentList().size();
     }
 
+    @Override
+    public int getItemViewType(int position) {
+        var currGameData = getItem(position);
+
+        if (getItemCount() > position + 1) {
+            var nextGameData = getItem(position + 1);
+
+            if (currGameData.listId.equals("0")
+                    && nextGameData.listId.equals("1")) {
+                return DIVIDER;
+            }
+        }
+
+        return ITEM;
+    }
+
     private static final DiffUtil.ItemCallback<GameData> DIFF_CALLBACK =
             new DiffUtil.ItemCallback<>() {
                 @Override
@@ -52,48 +73,53 @@ public class StockGamesRecycler extends RecyclerView.Adapter<StockGamesRecycler.
                 }
             };
 
-    public void submitList(ArrayList<GameData> gameData){
+    public GamesListAdapter submitList(List<GameData> gameData){
         differ.submitList(gameData);
+        return this;
     }
 
-    public StockGamesRecycler(Context context) {
+    public GamesListAdapter(Context context) {
         this.context = context;
     }
 
     @NonNull
     @Override
-    public StockGamesRecycler.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent,
-                                                            int viewType) {
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         var inflater = LayoutInflater.from(parent.getContext());
         ListItemGameBinding listItemGameBinding =
                 DataBindingUtil.inflate(inflater, R.layout.list_item_game, parent, false);
-        return new ViewHolder(listItemGameBinding);
+        return new GameHolder(listItemGameBinding);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull StockGamesRecycler.ViewHolder holder, int position) {
-        holder.listItemGameBinding(getGameData().get(position));
-        var gameData = getItem(position);
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+        if (holder instanceof GameHolder gameHolder) {
+            gameHolder.listItemGameBinding(getGameData().get(position));
+            var gameData = getItem(position);
 
-        if (gameData.icon != null) {
-            Picasso.get()
-                    .load(Uri.parse(gameData.icon))
-                    .fit()
-                    .error(R.drawable.baseline_broken_image_24)
-                    .into(holder.listItemGameBinding.gameIcon);
-        }
+            if (gameData.icon != null) {
+                Picasso.get()
+                        .load(Uri.parse(gameData.icon))
+                        .fit()
+                        .error(R.drawable.baseline_broken_image_24)
+                        .into(gameHolder.listItemGameBinding.gameIcon);
+            }
 
-        if (gameData.fileSize != null) {
-            holder.listItemGameBinding.gameSize
-                    .setText(context.getString(R.string.fileSize)
-                            .replace("-SIZE-", gameData.getFileSize()));
+            var fileSize = gameData.fileSize;
+            if (fileSize == null || fileSize.isEmpty() || fileSize.isBlank()) return;
+            if (fileSize.equals(DISABLE_CALCULATE_DIR)) return;
+
+            var elementSize = gameHolder.listItemGameBinding.gameSize;
+            var fileSizeString = context.getString(R.string.fileSize);
+
+            elementSize.setText(fileSizeString.replace("-SIZE-", fileSize));
         }
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
+    public static class GameHolder extends RecyclerView.ViewHolder {
         ListItemGameBinding listItemGameBinding;
 
-        ViewHolder(ListItemGameBinding listItemGameBinding){
+        GameHolder(ListItemGameBinding listItemGameBinding){
             super(listItemGameBinding.getRoot());
             this.listItemGameBinding = listItemGameBinding;
         }

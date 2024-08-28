@@ -23,6 +23,11 @@
 -keep class org.qp.android.dto.lib.** { *; }
 -keep class org.qp.android.model.lib.** { *; }
 
+-dontwarn aQute.bnd.annotation.spi.ServiceProvider
+
+# SevenZipJBinding
+-keep class net.sf.sevenzipjbinding.** { *; }
+
 # AppDevNext
 -keep class info.hannes.** { *; }
 -keep class com.google.gson.reflect.TypeToken
