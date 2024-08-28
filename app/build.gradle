@@ -13,8 +13,8 @@ android {
         applicationId "org.qp.android"
         minSdk 26
         targetSdk 34
-        versionCode 202300
-        versionName "3.23.0"
+        versionCode 202400
+        versionName "3.24.0"
         resourceConfigurations += ['en', 'ru']
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
