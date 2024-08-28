@@ -4,10 +4,10 @@ import static androidx.recyclerview.widget.RecyclerView.NO_POSITION;
 import static org.qp.android.helpers.utils.FileUtil.documentWrap;
 import static org.qp.android.helpers.utils.FileUtil.findOrCreateFile;
 import static org.qp.android.helpers.utils.JsonUtil.jsonToObject;
-import static org.qp.android.ui.stock.StockViewModel.EXT_GAME_LIST_NAME;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_IMAGE_FILE;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_MOD_FILE;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_PATH_FILE;
+import static org.qp.android.ui.stock.StockViewModel.EXT_GAME_LIST_NAME;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -29,7 +29,6 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.WindowManager;
 
 import androidx.activity.OnBackPressedCallback;
@@ -61,7 +60,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.github.javiersantos.appupdater.AppUpdater;
 import com.github.javiersantos.appupdater.enums.UpdateFrom;
-import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import org.qp.android.BuildConfig;
@@ -113,7 +111,6 @@ public class StockActivity extends AppCompatActivity {
     private RecyclerView.ViewHolder viewHolder;
     private List<GameData> tempList;
     private final List<GameData> selectList = new ArrayList<>();
-    private MaterialToolbar materialToolbar;
 
     private ActivityResultLauncher<Intent> rootFolderLauncher;
     private final SimpleStorageHelper storageHelper = new SimpleStorageHelper(this);
@@ -165,8 +162,9 @@ public class StockActivity extends AppCompatActivity {
         activityStockBinding = ActivityStockBinding.inflate(getLayoutInflater());
         stockViewModel = new ViewModelProvider(this).get(StockViewModel.class);
 
-        materialToolbar = activityStockBinding.stockMaterialBar;
+        var materialToolbar = activityStockBinding.stockMaterialBar;
         setSupportActionBar(materialToolbar);
+
         mFAB = activityStockBinding.stockFAB;
         stockViewModel.doIsHideFAB.observe(this, aBoolean -> {
             if (aBoolean) {
@@ -584,8 +582,6 @@ public class StockActivity extends AppCompatActivity {
         var callback = new ActionMode.Callback() {
             @Override
             public boolean onCreateActionMode(ActionMode mode , Menu menu) {
-                materialToolbar.setVisibility(View.GONE);
-
                 mode.getMenuInflater().inflate(R.menu.menu_delete , menu);
                 return true;
             }
@@ -638,8 +634,6 @@ public class StockActivity extends AppCompatActivity {
 
             @Override
             public void onDestroyActionMode(ActionMode mode) {
-                materialToolbar.setVisibility(View.VISIBLE);
-
                 stockViewModel.doOnChangeElementColorToDKGray();
                 deleteMode = null;
                 isEnableDeleteMode = false;
