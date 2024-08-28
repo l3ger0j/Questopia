@@ -72,6 +72,18 @@ public class HtmlProcessor {
         return document.toString();
     }
 
+    public String getTestHtml(String dirtyHtml) {
+        if (isNullOrEmpty(dirtyHtml)) return "";
+
+        var document = Jsoup.parse(convertLibHtmlToWebHtml(dirtyHtml));
+        document.outputSettings().prettyPrint(false);
+        var body = document.body();
+        body.select("img").remove();
+        body.select("video").remove();
+
+        return document.toString();
+    }
+
     public HtmlProcessor setController(SettingsController controller) {
         this.controller = controller;
         return this;
