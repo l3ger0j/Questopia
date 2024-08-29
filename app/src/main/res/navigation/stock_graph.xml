@@ -2,8 +2,12 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/stock_graph"
-    app:startDestination="@id/stockRecyclerFragment">
+    app:startDestination="@id/stockViewPagerFragment">
 
+    <fragment
+        android:id="@+id/stockViewPagerFragment"
+        android:name="org.qp.android.ui.stock.StockViewPagerFragment"
+        android:label="StockViewPagerFragment" />
     <fragment
         android:id="@+id/stockRecyclerFragment"
         android:name="org.qp.android.ui.stock.StockRecyclerFragment"
@@ -12,4 +16,5 @@
         android:id="@+id/stockGameFragment"
         android:name="org.qp.android.ui.stock.StockGameFragment"
         android:label="StockGameFragment" />
+
 </navigation>

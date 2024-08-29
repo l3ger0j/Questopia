@@ -1,8 +1,9 @@
 package org.qp.android.ui.game;
 
 import static androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener;
-import static org.qp.android.helpers.utils.FileUtil.createFindDFile;
 import static org.qp.android.helpers.utils.FileUtil.documentWrap;
+import static org.qp.android.helpers.utils.FileUtil.findOrCreateFile;
+import static org.qp.android.helpers.utils.FileUtil.fromRelPath;
 import static org.qp.android.helpers.utils.ThreadUtil.isMainThread;
 
 import android.annotation.SuppressLint;
@@ -32,8 +33,7 @@ import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.NavController;
-import androidx.navigation.fragment.NavHostFragment;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.anggrayudi.storage.SimpleStorageHelper;
 import com.anggrayudi.storage.file.DocumentFileCompat;
@@ -76,7 +76,7 @@ public class GameActivity extends AppCompatActivity {
 
     private ActionBar actionBar;
     private Menu mainMenu;
-    private NavController navController;
+    private ViewPager2 pager2;
     private BottomNavigationView bottomNavigationView;
 
     private int slotAction = 0;
@@ -123,11 +123,9 @@ public class GameActivity extends AppCompatActivity {
         setContentView(activityGameBinding.getRoot());
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
-        var navFragment = (NavHostFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.gameFragHost);
-        if (navFragment != null) {
-            navController = navFragment.getNavController();
-        }
+        pager2 = activityGameBinding.gamePager;
+        pager2.setUserInputEnabled(false);
+        pager2.setAdapter(new GameStateAdapter(this));
 
         bottomNavigationView = activityGameBinding.bottomNavigationView;
         bottomNavigationView.setOnItemSelectedListener(item -> {
@@ -261,6 +259,8 @@ public class GameActivity extends AppCompatActivity {
         var gameFileUri = Uri.parse(intent.getStringExtra("gameFileUri"));
         var gameFile = DocumentFileCompat.fromUri(this , gameFileUri);
 
+
+
         gameViewModel.setGameDirUri(gameDirUri);
         gameViewModel.runGameIntoNativeLib(gameId, gameTitle, gameDir, gameFile);
     }
@@ -272,19 +272,19 @@ public class GameActivity extends AppCompatActivity {
 
         switch (tab) {
             case TAB_MAIN_DESC_AND_ACTIONS -> {
-                navController.navigate(R.id.gameMainFragment);
+                pager2.setCurrentItem(0, false);
                 var badge = bottomNavigationView.getBadge(R.id.menu_mainDesc);
                 if (badge != null) bottomNavigationView.removeBadge(R.id.menu_mainDesc);
                 setTitle(getString(R.string.mainDescTitle));
             }
             case TAB_OBJECTS -> {
-                navController.navigate(R.id.gameObjectFragment);
+                pager2.setCurrentItem(1, false);
                 var badge = bottomNavigationView.getBadge(R.id.menu_inventory);
                 if (badge != null) bottomNavigationView.removeBadge(R.id.menu_inventory);
                 setTitle(getString(R.string.inventoryTitle));
             }
             case TAB_VARS_DESC -> {
-                navController.navigate(R.id.gameVarsFragment);
+                pager2.setCurrentItem(2, false);
                 var badge = bottomNavigationView.getBadge(R.id.menu_varsDesc);
                 if (badge != null) bottomNavigationView.removeBadge(R.id.menu_varsDesc);
                 setTitle(getString(R.string.varsDescTitle));
@@ -302,22 +302,19 @@ public class GameActivity extends AppCompatActivity {
         if (!isMainThread()) {
             runOnUiThread(() -> warnUser(id));
         } else {
-            var currDest = navController.getCurrentDestination();
-            if (currDest == null) return;
-            var currDestLabel = currDest.getLabel();
-            if (currDestLabel == null) return;
+            var currItem = pager2.getCurrentItem();
 
             switch (id) {
                 case TAB_MAIN_DESC_AND_ACTIONS -> {
-                    if (!currDestLabel.equals("GameMainFragment"))
+                    if (currItem != 0)
                         bottomNavigationView.getOrCreateBadge(R.id.menu_mainDesc);
                 }
                 case TAB_OBJECTS -> {
-                    if (!currDestLabel.equals("GameObjectFragment"))
+                    if (currItem != 1)
                         bottomNavigationView.getOrCreateBadge(R.id.menu_inventory);
                 }
                 case TAB_VARS_DESC -> {
-                    if (!currDestLabel.equals("GameVarsFragment"))
+                    if (currItem != 2)
                         bottomNavigationView.getOrCreateBadge(R.id.menu_varsDesc);
                 }
             }
@@ -596,7 +593,7 @@ public class GameActivity extends AppCompatActivity {
         MenuItem item;
         for (int i = 0; i <= MAX_SAVE_SLOTS; i++) {
             final var filename = getSaveSlotFilename(i);
-            final var loadFile = savesDir.findFile(filename);
+            final var loadFile = fromRelPath(this, filename, savesDir);
             var title = "";
 
             if (loadFile != null) {
@@ -617,11 +614,7 @@ public class GameActivity extends AppCompatActivity {
                         gameViewModel.requestForNativeLib(GameLibRequest.LOAD_FILE , loadFile.getUri());
                     }
                     case SAVE -> {
-                        var saveFile = createFindDFile(
-                                savesDir ,
-                                MimeType.TEXT ,
-                                filename
-                        );
+                        var saveFile = findOrCreateFile(this, savesDir, filename, MimeType.TEXT);
                         if (saveFile == null) return true;
                         gameViewModel.requestForNativeLib(GameLibRequest.SAVE_FILE , saveFile.getUri());
                     }

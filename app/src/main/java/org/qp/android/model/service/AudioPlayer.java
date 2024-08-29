@@ -120,7 +120,7 @@ public class AudioPlayer {
         }
 
         var normPath = normalizeContentPath(sound.path);
-        var soundFile = fromFullPath(normPath , curGameDir);
+        var soundFile = fromFullPath(context, normPath , curGameDir);
 
         if (soundFile == null) {
             final var latch = new CountDownLatch(1);

@@ -1,11 +1,13 @@
 package org.qp.android.model.lib;
 
-import static org.qp.android.helpers.utils.FileUtil.createFindDFile;
 import static org.qp.android.helpers.utils.FileUtil.documentWrap;
-import static org.qp.android.helpers.utils.FileUtil.findFileFromRelPath;
+import static org.qp.android.helpers.utils.FileUtil.findOrCreateFile;
+import static org.qp.android.helpers.utils.FileUtil.fromRelPath;
 import static org.qp.android.helpers.utils.FileUtil.fromFullPath;
 import static org.qp.android.helpers.utils.FileUtil.getFileContents;
 import static org.qp.android.helpers.utils.FileUtil.writeFileContents;
+import static org.qp.android.helpers.utils.PathUtil.getFilename;
+import static org.qp.android.helpers.utils.PathUtil.normalizeContentPath;
 import static org.qp.android.helpers.utils.StringUtil.getStringOrEmpty;
 import static org.qp.android.helpers.utils.StringUtil.isNotEmpty;
 import static org.qp.android.helpers.utils.ThreadUtil.isSameThread;
@@ -23,7 +25,7 @@ import androidx.documentfile.provider.DocumentFile;
 
 import com.anggrayudi.storage.file.MimeType;
 
-import org.qp.android.QuestPlayerApplication;
+import org.qp.android.QuestopiaApplication;
 import org.qp.android.dto.lib.LibActionData;
 import org.qp.android.dto.lib.LibErrorData;
 import org.qp.android.dto.lib.LibListItem;
@@ -38,7 +40,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class LibProxyImpl implements LibIProxy, LibICallbacks {
@@ -57,8 +58,8 @@ public class LibProxyImpl implements LibIProxy, LibICallbacks {
 
     private final Context context;
 
-    private QuestPlayerApplication getApplication() {
-        return (QuestPlayerApplication) context.getApplicationContext();
+    private QuestopiaApplication getApplication() {
+        return (QuestopiaApplication) context.getApplicationContext();
     }
 
     private DocumentFile getCurGameDir() {
@@ -178,13 +179,26 @@ public class LibProxyImpl implements LibIProxy, LibICallbacks {
 
         for (int i = 0; i < count; ++i) {
             var action = new LibListItem();
-            var actionData = (LibActionData) nativeMethods.QSPGetActionData(i);
+            var actionResult = (LibActionData) nativeMethods.QSPGetActionData(i);
+            var curGameDir = getCurGameDir();
 
-            action.pathToImage = actionData.image();
+            if (actionResult.image() == null) {
+                action.pathToImage = null;
+            } else {
+                var tempPath = normalizeContentPath(getFilename(actionResult.image()));
+                var fileFromPath = fromRelPath(context, tempPath, curGameDir);
+                if (fileFromPath != null) {
+                    action.pathToImage = String.valueOf(fileFromPath.getUri());
+                } else {
+                    action.pathToImage = null;
+                }
+            }
             action.text = gameState.interfaceConfig.useHtml
-                    ? getHtmlProcessor().removeHtmlTags(actionData.name())
-                    : actionData.name();
+                    ? getHtmlProcessor().removeHtmlTags(actionResult.name())
+                    : actionResult.name();
+
             actions.add(action);
+
         }
 
         return actions;
@@ -203,10 +217,10 @@ public class LibProxyImpl implements LibIProxy, LibICallbacks {
             if (objectResult.name().contains("<img")) {
                 if (getHtmlProcessor().isContainsHtmlTags(objectResult.name())) {
                     var tempPath = getHtmlProcessor().getSrcDir(objectResult.name());
-                    var fileFromPath = findFileFromRelPath(context , tempPath , curGameDir);
+                    var fileFromPath = fromRelPath(context, tempPath, curGameDir);
                     object.pathToImage = String.valueOf(fileFromPath);
                 } else {
-                    var fileFromPath = findFileFromRelPath(context , objectResult.name() , curGameDir);
+                    var fileFromPath = fromRelPath(context, objectResult.name(), curGameDir);
                     object.pathToImage = String.valueOf(fileFromPath);
                 }
             } else {
@@ -465,12 +479,12 @@ public class LibProxyImpl implements LibIProxy, LibICallbacks {
     @Override
     public void ShowPicture(String path) {
         var inter = gameInterface;
-        if (inter != null && isNotEmpty(path)) {
-            Optional.ofNullable(fromFullPath(path , getCurGameDir()))
-                    .ifPresent(documentFile -> {
-                        var imageFileUri = documentFile.getUri();
-                        inter.showPicture(String.valueOf(imageFileUri));
-                    });
+        if (inter == null) return;
+
+        if (isNotEmpty(path)) {
+            var picFile = fromFullPath(context, path, getCurGameDir());
+            if (picFile == null) return;
+            inter.showPicture(String.valueOf(picFile.getUri()));
         }
     }
 
@@ -515,36 +529,38 @@ public class LibProxyImpl implements LibIProxy, LibICallbacks {
     public void OpenGame(String filename) {
         var inter = gameInterface;
         if (inter == null) return;
-        if (filename != null) {
+
+        if (filename == null) {
+            inter.showLoadGamePopup();
+        } else {
             try {
-                var gameFile = fromFullPath(filename , getCurGameDir());
-                if (gameFile == null) throw new NullPointerException(filename);
-                var gameFileUri = gameFile.getUri();
-                inter.doWithCounterDisabled(() -> loadGameState(gameFileUri));
+                var saveFile = fromFullPath(context, filename, getCurGameDir());
+                if (saveFile == null) {
+                    Log.e(TAG , "Save file not found");
+                    return;
+                }
+                var saveFileUri = saveFile.getUri();
+                inter.doWithCounterDisabled(() -> loadGameState(saveFileUri));
             } catch (Exception e) {
                 Log.e(TAG , "Error: ", e);
             }
-        } else {
-            Log.e(TAG , "Save file not found");
-            inter.showLoadGamePopup();
         }
     }
 
     @Override
     public void SaveGame(String filename) {
-        var inter = gameInterface;
-        if (inter == null) return;
-        if (filename != null) {
+        if (filename == null) {
+            var inter = gameInterface;
+            if (inter == null) return;
+            inter.showSaveGamePopup();
+        } else {
             var file = new File(filename);
-            var curGameDir = gameState.gameDir;
-            var saveFile =  createFindDFile(curGameDir , MimeType.TEXT , file.getName());
+            var saveFile = findOrCreateFile(context, getCurGameDir(), file.getName(), MimeType.TEXT);
             if (saveFile != null) {
                 saveGameState(saveFile.getUri());
             } else {
-                Log.e(TAG , "File not created");
+                Log.e(TAG , "Error access dir");
             }
-        } else {
-            inter.showSaveGamePopup();
         }
     }
 
@@ -604,7 +620,7 @@ public class LibProxyImpl implements LibIProxy, LibICallbacks {
 
     @Override
     public byte[] GetFileContents(String path) {
-        var targetFile = fromFullPath(path , getCurGameDir());
+        var targetFile = fromFullPath(context, path, getCurGameDir());
         if (targetFile == null) return null;
         var targetFileUri = targetFile.getUri();
         return getFileContents(context , targetFileUri);
@@ -612,7 +628,7 @@ public class LibProxyImpl implements LibIProxy, LibICallbacks {
 
     @Override
     public void ChangeQuestPath(String path) {
-        var newGameDir = fromFullPath(path , getCurGameDir());
+        var newGameDir = fromFullPath(context, path , getCurGameDir());
         if (newGameDir == null || !newGameDir.exists()) {
             Log.e(TAG,"Game directory not found: " + path);
             return;

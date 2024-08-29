@@ -2,15 +2,21 @@ package org.qp.android.ui.stock;
 
 import static androidx.recyclerview.widget.RecyclerView.NO_POSITION;
 import static org.qp.android.helpers.utils.FileUtil.documentWrap;
+import static org.qp.android.helpers.utils.FileUtil.findOrCreateFile;
 import static org.qp.android.helpers.utils.JsonUtil.jsonToObject;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_IMAGE_FILE;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_MOD_FILE;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_PATH_FILE;
+import static org.qp.android.ui.stock.StockViewModel.EXT_GAME_LIST_NAME;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.DownloadManager;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -36,6 +42,7 @@ import androidx.appcompat.view.ActionMode;
 import androidx.appcompat.widget.SearchView;
 import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.os.LocaleListCompat;
 import androidx.core.splashscreen.SplashScreen;
 import androidx.documentfile.provider.DocumentFile;
@@ -47,26 +54,35 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.anggrayudi.storage.SimpleStorageHelper;
 import com.anggrayudi.storage.file.DocumentFileCompat;
+import com.anggrayudi.storage.file.FileUtils;
+import com.anggrayudi.storage.file.MimeType;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.github.javiersantos.appupdater.AppUpdater;
 import com.github.javiersantos.appupdater.enums.UpdateFrom;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import org.qp.android.BuildConfig;
-import org.qp.android.QuestPlayerApplication;
+import org.qp.android.QuestopiaApplication;
 import org.qp.android.R;
 import org.qp.android.data.db.GameDao;
 import org.qp.android.data.db.GameDatabase;
 import org.qp.android.databinding.ActivityStockBinding;
 import org.qp.android.dto.stock.GameData;
+import org.qp.android.dto.stock.RemoteDataList;
 import org.qp.android.helpers.utils.ViewUtil;
+import org.qp.android.model.repository.RemoteGame;
 import org.qp.android.ui.dialogs.StockDialogType;
 import org.qp.android.ui.settings.SettingsActivity;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
@@ -75,6 +91,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
+
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
@@ -85,7 +106,7 @@ public class StockActivity extends AppCompatActivity {
     private static final int MANAGE_EXTERNAL_STORAGE_CODE = 201;
     private static final int POST_NOTIFICATION_CODE = 203;
 
-    private final String TAG = this.getClass().getSimpleName();
+    public final SimpleDateFormat timeDateRemGamesList = new SimpleDateFormat("yyyy-MM-dd'T'HH-mm-ss", Locale.ROOT);
     private final ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
     @Inject GameDatabase gameDatabase;
@@ -93,18 +114,20 @@ public class StockActivity extends AppCompatActivity {
 
     private StockViewModel stockViewModel;
     private NavController navController;
-    private ActionMode actionMode;
+    private ActionMode deleteMode;
     protected ActivityStockBinding activityStockBinding;
-    private boolean isEnable = false;
+    private boolean isEnableDeleteMode = false;
     private FloatingActionButton mFAB;
-    private RecyclerView mRecyclerView;
-    private ArrayList<GameData> tempList;
-    private final ArrayList<GameData> selectList = new ArrayList<>();
+    private RecyclerView.ViewHolder viewHolder;
+    private List<GameData> tempList;
+    private final List<GameData> selectList = new ArrayList<>();
 
     private ActivityResultLauncher<Intent> rootFolderLauncher;
     private final SimpleStorageHelper storageHelper = new SimpleStorageHelper(this);
 
-    SharedPreferences.OnSharedPreferenceChangeListener preferenceChangeListener = (sharedPreferences , key) -> {
+    private File listDirsFile;
+
+    private final SharedPreferences.OnSharedPreferenceChangeListener preferenceChangeListener = (sharedPreferences , key) -> {
         if (key == null) return;
         switch (key) {
             case "binPref" -> stockViewModel.loadGameDataFromDB();
@@ -118,9 +141,15 @@ public class StockActivity extends AppCompatActivity {
         }
     };
 
-    public void setRecyclerView(RecyclerView mRecyclerView) {
-        this.mRecyclerView = mRecyclerView;
-    }
+    private final BroadcastReceiver downloadReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (DownloadManager.ACTION_DOWNLOAD_COMPLETE.equals(intent.getAction())) {
+                // var downloadId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, 0);
+                stockViewModel.postProcessingDownload();
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -142,7 +171,9 @@ public class StockActivity extends AppCompatActivity {
 
         activityStockBinding = ActivityStockBinding.inflate(getLayoutInflater());
         stockViewModel = new ViewModelProvider(this).get(StockViewModel.class);
-        stockViewModel.activityObserver.setValue(this);
+
+        var materialToolbar = activityStockBinding.stockMaterialBar;
+        setSupportActionBar(materialToolbar);
 
         mFAB = activityStockBinding.stockFAB;
         stockViewModel.doIsHideFAB.observe(this, aBoolean -> {
@@ -205,40 +236,16 @@ public class StockActivity extends AppCompatActivity {
                 );
                 stockViewModel.outputIntObserver.observe(this, integer -> {
                     if (integer == 1) {
-                        var application = (QuestPlayerApplication) getApplication();
+                        var application = (QuestopiaApplication) getApplication();
                         if (application != null) application.setCurrentGameDir(rootFolder);
+                        stockViewModel.refreshGamesDirs();
                     }
                 });
             }
         });
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ActivityCompat.checkSelfPermission(this , Manifest.permission.POST_NOTIFICATIONS)
-                    != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this , new String[]{Manifest.permission.POST_NOTIFICATIONS} , POST_NOTIFICATION_CODE);
-            }
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            if (!Environment.isExternalStorageManager()) {
-                try {
-                    var uri = Uri.parse("package:" + BuildConfig.APPLICATION_ID);
-                    var intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, uri);
-                    startActivity(intent);
-                } catch (Exception ex){
-                    var intent = new Intent();
-                    intent.setAction(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
-                    startActivity(intent);
-                }
-            }
-        } else {
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
-                    && ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                var permission = new String[]{ Manifest.permission.READ_EXTERNAL_STORAGE , Manifest.permission.WRITE_EXTERNAL_STORAGE};
-                ActivityCompat.requestPermissions(this, permission , READ_EXTERNAL_STORAGE_CODE);
-            }
-        }
-
+        checkCacheRemoteRepo();
+        loadPermission();
         stockViewModel.loadGameDataFromDB();
 
         Log.i(TAG , "Stock Activity created");
@@ -251,7 +258,7 @@ public class StockActivity extends AppCompatActivity {
         }
         if (savedInstanceState == null) {
             checkMigration();
-            navController.navigate(R.id.stockRecyclerFragment);
+            navController.navigate(R.id.stockViewPagerFragment);
         }
 
         stockViewModel.emitter.observe(this , eventNavigation -> {
@@ -263,12 +270,18 @@ public class StockActivity extends AppCompatActivity {
                             showErrorDialog(getString(R.string.error)
                                     + ": " + errorDialog.getErrorMessage());
                 }
-            } else if (eventNavigation instanceof StockFragmentNavigation.ShowGameFragment gameFragment) {
-                onItemClick(gameFragment.getPosition());
-            } else if (eventNavigation instanceof StockFragmentNavigation.ShowActionMode) {
-                onLongItemClick();
-            } else if (eventNavigation instanceof StockFragmentNavigation.ShowFilePicker filePicker) {
+            }
+            if (eventNavigation instanceof StockFragmentNavigation.ShowGameFragment gameFragment) {
+                onListItemClick(gameFragment.getPosition());
+            }
+            if (eventNavigation instanceof StockFragmentNavigation.ShowActionMode) {
+                onLongListItemClick();
+            }
+            if (eventNavigation instanceof StockFragmentNavigation.ShowFilePicker filePicker) {
                 showFilePickerActivity(filePicker.getRequestCode() , filePicker.getMimeTypes());
+            }
+            if (eventNavigation instanceof StockFragmentNavigation.GetAdapterViewHolder adapterViewHolder) {
+                viewHolder = adapterViewHolder.viewHolder;
             }
         });
 
@@ -277,22 +290,19 @@ public class StockActivity extends AppCompatActivity {
                 .setGitHubUserAndRepo("l3ger0j" , "Questopia")
                 .start();
 
-        getOnBackPressedDispatcher().addCallback(this , new OnBackPressedCallback(true) {
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
                 if (getSupportActionBar() != null) {
                     getSupportActionBar().setDisplayHomeAsUpEnabled(false);
                 }
-                if (navController.getCurrentDestination() != null) {
-                    if (Objects.equals(navController.getCurrentDestination().getLabel()
-                            , "StockRecyclerFragment")) {
-                        finish();
-                    } else {
-                        stockViewModel.doIsHideFAB.setValue(false);
-                        navController.popBackStack();
-                    }
-                } else {
+                if (navController.getCurrentDestination() == null) finish();
+                var currDestLabel = navController.getCurrentDestination().getLabel();
+                if (Objects.equals(currDestLabel, "StockViewPagerFragment")) {
                     finish();
+                } else {
+                    stockViewModel.doIsHideFAB.setValue(false);
+                    navController.popBackStack();
                 }
             }
         });
@@ -356,9 +366,152 @@ public class StockActivity extends AppCompatActivity {
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(false);
         }
-        stockViewModel.doIsHideFAB.setValue(false);
-        navController.popBackStack();
+
+        var value = stockViewModel.currPageNumber.getValue();
+        if (value == null) {
+            navController.popBackStack();
+            return true;
+        }
+
+        if (value == 0) {
+            stockViewModel.doIsHideFAB.setValue(false);
+            navController.popBackStack();
+        }
+
+        if (value == 1) {
+            navController.popBackStack();
+        }
+
         return true;
+    }
+
+    private boolean isCacheFileHasExpired() {
+        var cache = getExternalCacheDir();
+        if (cache == null) return true;
+        var listNames = cache.list();
+        if (listNames == null) return true;
+
+        for (var name : listNames) {
+            if (!name.equalsIgnoreCase(EXT_GAME_LIST_NAME)) {
+                try {
+                    var cacheDate = timeDateRemGamesList.parse(name);
+                    if (cacheDate == null) return true;
+
+                    var isDateCurr = cacheDate.equals(Calendar.getInstance().getTime());
+                    var isDateBefore = cacheDate.before(Calendar.getInstance().getTime());
+
+                    return isDateCurr || isDateBefore;
+                } catch (ParseException e) {
+                    showErrorDialog(getString(R.string.error)
+                            + ": " + e.getMessage());
+                }
+            }
+        }
+
+        return true;
+    }
+
+    private String getCurrentTimestamp() {
+        var calendarInstance = Calendar.getInstance();
+        calendarInstance.add(Calendar.DATE, 3);
+        return timeDateRemGamesList.format(calendarInstance.getTime());
+    }
+
+    private void checkCacheRemoteRepo() {
+        if (!isCacheFileHasExpired()) return;
+
+        var remoteGame = new RemoteGame();
+        var cache = getApplication().getExternalCacheDir();
+        if (cache == null) return;
+        var listFiles = cache.listFiles();
+        if (listFiles == null) return;
+
+        for (var item : listFiles) {
+            if (item.getName().isEmpty()) continue;
+            if (!item.getName().equalsIgnoreCase(EXT_GAME_LIST_NAME)) {
+                FileUtils.forceDelete(item);
+            }
+        }
+
+        remoteGame.getRemoteGameData(new Callback<>() {
+            @Override
+            public void onResponse(@NonNull Call<ResponseBody> call,
+                                   @NonNull Response<ResponseBody> response) {
+                var mapper = new XmlMapper();
+                try (var body = response.body()){
+                    if (body == null) return;
+                    var string = body.string();
+                    var value = mapper.readValue(string, RemoteDataList.class);
+                    var remoteGamesList = findOrCreateFile(
+                            StockActivity.this,
+                            cache,
+                            getCurrentTimestamp(),
+                            MimeType.TEXT
+                    );
+                    mapper.writeValue(remoteGamesList, value.game);
+                } catch (IOException e) {
+                    showErrorDialog(getString(R.string.error)
+                            + ": " + e.getMessage());
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ResponseBody> call,
+                                  @NonNull Throwable throwable) {
+                showErrorDialog(getString(R.string.error)
+                        + ": " + throwable.getMessage());
+            }
+        });
+    }
+
+    private void loadPermission() {
+        ActivityCompat.registerReceiver(
+                this,
+                downloadReceiver,
+                new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE),
+                ContextCompat.RECEIVER_EXPORTED
+        );
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            var postNotification = ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS);
+            if (postNotification != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(
+                        this,
+                        new String[]{ Manifest.permission.POST_NOTIFICATIONS },
+                        POST_NOTIFICATION_CODE
+                );
+            }
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            if (!Environment.isExternalStorageManager()) {
+                try {
+                    var uri = Uri.parse("package:" + BuildConfig.APPLICATION_ID);
+                    var intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, uri);
+                    startActivity(intent);
+                } catch (Exception ex){
+                    var intent = new Intent();
+                    intent.setAction(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+                    startActivity(intent);
+                }
+            }
+        } else {
+            var readStorage = ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
+            var writeStorage = ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+            if (readStorage != PackageManager.PERMISSION_GRANTED && writeStorage != PackageManager.PERMISSION_GRANTED) {
+                var requestPerm = new String[]{ Manifest.permission.READ_EXTERNAL_STORAGE,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE };
+                ActivityCompat.requestPermissions(this, requestPerm , READ_EXTERNAL_STORAGE_CODE);
+            }
+        }
+    }
+
+    private void loadSettings() {
+        listDirsFile = stockViewModel.getListDirsFile();
+
+        if (listDirsFile.exists()) {
+            restoreListDirsFromFile();
+        }
     }
 
     public void showErrorDialog(String errorMessage) {
@@ -390,43 +543,47 @@ public class StockActivity extends AppCompatActivity {
         }
     }
 
-    public void onItemClick(int position) {
-        if (isEnable) {
-            var dataList = stockViewModel.getGameDataList().getValue();
-            if (dataList == null) return;
-
-            tempList.addAll(dataList);
-
-            var mViewHolder = mRecyclerView.findViewHolderForAdapterPosition(position);
-            if (mViewHolder == null) return;
-            var adapterPosition = mViewHolder.getAdapterPosition();
-            if (adapterPosition == NO_POSITION) return;
-            if (adapterPosition < 0 || adapterPosition >= tempList.size()) return;
-            var gameData = tempList.get(adapterPosition);
-            if (selectList.isEmpty() || !selectList.contains(gameData)) {
-                selectList.add(gameData);
-                var cardView = (CardView) mViewHolder.itemView.findViewWithTag("gameCardView");
-                cardView.setCardBackgroundColor(Color.LTGRAY);
-            } else {
-                selectList.remove(gameData);
-                var cardView = (CardView) mViewHolder.itemView.findViewWithTag("gameCardView");
-                cardView.setCardBackgroundColor(Color.DKGRAY);
-            }
-        } else {
-            stockViewModel.getGameDataList().observe(this , gameData -> {
+    public void onListItemClick(int position) {
+        if (!isEnableDeleteMode) {
+            stockViewModel.getGameDataList().observe(this, gameData -> {
                 if (!gameData.isEmpty() && gameData.size() > position) {
                     stockViewModel.setCurrGameData(gameData.get(position));
                 }
             });
+
             navController.navigate(R.id.stockGameFragment);
             stockViewModel.doIsHideFAB.setValue(true);
+        } else {
+            var adapterPosition = viewHolder.getAbsoluteAdapterPosition();
+            if (adapterPosition == NO_POSITION) return;
+            if (adapterPosition < 0 || adapterPosition >= tempList.size()) return;
+
+            var currGamesMapValues = stockViewModel.getGamesMap().values();
+            for (var gameData : currGamesMapValues) {
+                if (!gameData.isFileInstalled()) continue;
+                tempList.add(gameData);
+            }
+
+            var gameData = tempList.get(adapterPosition);
+            if (selectList.isEmpty() || !selectList.contains(gameData)) {
+                selectList.add(gameData);
+                var cardView = (CardView) viewHolder.itemView.findViewWithTag("gameCardView");
+                cardView.setCardBackgroundColor(Color.LTGRAY);
+            } else {
+                selectList.remove(gameData);
+                var cardView = (CardView) viewHolder.itemView.findViewWithTag("gameCardView");
+                cardView.setCardBackgroundColor(Color.DKGRAY);
+            }
         }
     }
 
-    public void onLongItemClick() {
-        if (isEnable) {
-            return;
-        }
+    public void onLongListItemClick() {
+        if (isEnableDeleteMode) return;
+
+        var pageNumber = stockViewModel.currPageNumber.getValue();
+        if (pageNumber == null) return;
+        if (pageNumber == 1) return;
+
         var callback = new ActionMode.Callback() {
             @Override
             public boolean onCreateActionMode(ActionMode mode , Menu menu) {
@@ -437,7 +594,7 @@ public class StockActivity extends AppCompatActivity {
             @Override
             public boolean onPrepareActionMode(ActionMode mode , Menu menu) {
                 tempList = stockViewModel.getListGames();
-                isEnable = true;
+                isEnableDeleteMode = true;
                 return true;
             }
 
@@ -457,33 +614,23 @@ public class StockActivity extends AppCompatActivity {
                                 for (var data : selectList) {
                                     stockViewModel.removeEntryAndDirFromDB(data.id);
                                 }
-                                actionMode.finish();
+                                deleteMode.finish();
                             } else {
                                 for (var data : selectList) {
                                     stockViewModel.removeEntryFromDB(data.id);
                                 }
-                                actionMode.finish();
+                                deleteMode.finish();
                             }
                         });
                     }
                     case R.id.select_all -> {
                         if (selectList.size() == tempList.size()) {
                             selectList.clear();
-                            for (int childCount = mRecyclerView.getChildCount(), i = 0; i < childCount; ++i) {
-                                final var holder =
-                                        mRecyclerView.getChildViewHolder(mRecyclerView.getChildAt(i));
-                                var cardView = (CardView) holder.itemView.findViewWithTag("gameCardView");
-                                cardView.setCardBackgroundColor(Color.DKGRAY);
-                            }
+                            stockViewModel.doOnChangeElementColorToDKGray();
                         } else {
                             selectList.clear();
                             selectList.addAll(tempList);
-                            for (int childCount = mRecyclerView.getChildCount(), i = 0; i < childCount; ++i) {
-                                final var holder =
-                                        mRecyclerView.getChildViewHolder(mRecyclerView.getChildAt(i));
-                                var cardView = (CardView) holder.itemView.findViewWithTag("gameCardView");
-                                cardView.setCardBackgroundColor(Color.LTGRAY);
-                            }
+                            stockViewModel.doOnChangeElementColorToLTGray();
                         }
                     }
                 }
@@ -492,14 +639,9 @@ public class StockActivity extends AppCompatActivity {
 
             @Override
             public void onDestroyActionMode(ActionMode mode) {
-                for (int childCount = mRecyclerView.getChildCount(), i = 0; i < childCount; ++i) {
-                    final var holder =
-                            mRecyclerView.getChildViewHolder(mRecyclerView.getChildAt(i));
-                    var cardView = (CardView) holder.itemView.findViewWithTag("gameCardView");
-                    cardView.setCardBackgroundColor(Color.DKGRAY);
-                }
-                actionMode = null;
-                isEnable = false;
+                stockViewModel.doOnChangeElementColorToDKGray();
+                deleteMode = null;
+                isEnableDeleteMode = false;
                 tempList.clear();
                 selectList.clear();
                 mFAB.show();
@@ -507,7 +649,7 @@ public class StockActivity extends AppCompatActivity {
         };
 
         mFAB.hide();
-        actionMode = startSupportActionMode(callback);
+        deleteMode = startSupportActionMode(callback);
     }
 
     @Override
@@ -525,12 +667,13 @@ public class StockActivity extends AppCompatActivity {
     public void onResume() {
         super.onResume();
 
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(false);
-        }
+        loadPermission();
 
         stockViewModel.doIsHideFAB.setValue(false);
-        navController.navigate(R.id.stockRecyclerFragment);
+        navController.navigate(R.id.stockViewPagerFragment);
+
+        if (getSupportActionBar() == null) return;
+        getSupportActionBar().setDisplayHomeAsUpEnabled(false);
     }
 
     @Override
@@ -548,30 +691,35 @@ public class StockActivity extends AppCompatActivity {
                 startActivity(new Intent(this , SettingsActivity.class));
                 return true;
             }
-            case R.id.action_search ->
-                    Optional.ofNullable((SearchView) item.getActionView()).ifPresent(searchView ->
-                            searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-                                @Override
-                                public boolean onQueryTextSubmit(String query) {
-                                    return false;
-                                }
+            case R.id.action_search -> {
+                var actionView = item.getActionView();
+                if (actionView == null) return false;
+                var searchView = (SearchView) actionView;
 
-                                @Override
-                                public boolean onQueryTextChange(String newText) {
-                                    var gameDataList = stockViewModel.getListGames();
-                                    var filteredList = new ArrayList<GameData>();
-                                    gameDataList.forEach(gameData -> {
-                                        if (gameData.title.toLowerCase(Locale.getDefault())
-                                                .contains(newText.toLowerCase(Locale.getDefault()))) {
-                                            filteredList.add(gameData);
-                                        }
-                                    });
-                                    if (!filteredList.isEmpty()) {
-                                        stockViewModel.setValueGameDataList(filteredList);
-                                    }
-                                    return true;
-                                }
-                            }));
+                var queryTextListener = new SearchView.OnQueryTextListener() {
+                    @Override
+                    public boolean onQueryTextSubmit(String query) {
+                        return false;
+                    }
+
+                    @Override
+                    public boolean onQueryTextChange(String newText) {
+                        var gameDataList = stockViewModel.getListGames();
+                        var filteredList = new ArrayList<GameData>();
+                        gameDataList.forEach(gameData -> {
+                            if (gameData.title.toLowerCase(Locale.getDefault())
+                                    .contains(newText.toLowerCase(Locale.getDefault()))) {
+                                filteredList.add(gameData);
+                            }
+                        });
+                        if (!filteredList.isEmpty()) {
+                            stockViewModel.setValueGameDataList(filteredList);
+                        }
+                        return true;
+                    }
+                };
+                searchView.setOnQueryTextListener(queryTextListener);
+            }
         }
         return false;
     }

@@ -12,6 +12,7 @@ import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 
 import org.qp.android.R;
+import org.qp.android.databinding.ActivitySettingsBinding;
 
 public class SettingsActivity extends AppCompatActivity {
 
@@ -20,7 +21,10 @@ public class SettingsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_settings);
+
+        var settingsViewBinding = ActivitySettingsBinding.inflate(getLayoutInflater());
+        setSupportActionBar(settingsViewBinding.settingsToolbar);
+        setContentView(settingsViewBinding.getRoot());
 
         if (getSupportActionBar() != null ) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -43,6 +47,13 @@ public class SettingsActivity extends AppCompatActivity {
             AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("en"));
         }
 
+        var destination = navController.getCurrentDestination();
+        if (destination != null && destination.getLabel() != null) {
+            if (destination.getLabel().equals("SettingsFragment")) {
+                setTitle(R.string.settingsTitle);
+            }
+        }
+
         if (savedInstanceState == null) {
             navController.navigate(R.id.settingsFragment);
         }
@@ -55,8 +66,10 @@ public class SettingsActivity extends AppCompatActivity {
                     if (currCharLabel == null) return;
                     switch (currCharLabel.toString()) {
                         case "SettingGeneralFragment" , "SettingTextFragment" ,
-                                "SettingImageFragment", "SettingSoundFragment" ->
-                                navController.navigate(R.id.settingsFragment);
+                                "SettingImageFragment", "SettingSoundFragment" -> {
+                            setTitle(R.string.settingsTitle);
+                            navController.navigate(R.id.settingsFragment);
+                        }
                         default -> finish();
                     }
                 }
@@ -73,8 +86,10 @@ public class SettingsActivity extends AppCompatActivity {
                 case "PluginFragment" , "NewsFragment" ->
                         getOnBackPressedDispatcher().onBackPressed();
                 case "SettingGeneralFragment" , "SettingTextFragment" ,
-                        "SettingImageFragment" , "SettingSoundFragment" ->
-                        navController.navigate(R.id.settingsFragment);
+                        "SettingImageFragment" , "SettingSoundFragment" -> {
+                    setTitle(R.string.settingsTitle);
+                    navController.navigate(R.id.settingsFragment);
+                }
                 default -> finish();
             }
         }

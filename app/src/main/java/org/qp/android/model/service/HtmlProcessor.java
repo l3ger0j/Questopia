@@ -1,7 +1,7 @@
 package org.qp.android.model.service;
 
 import static org.qp.android.helpers.utils.Base64Util.encodeBase64;
-import static org.qp.android.helpers.utils.FileUtil.findFileFromRelPath;
+import static org.qp.android.helpers.utils.FileUtil.fromRelPath;
 import static org.qp.android.helpers.utils.StringUtil.isNotEmpty;
 import static org.qp.android.helpers.utils.StringUtil.isNullOrEmpty;
 
@@ -18,7 +18,6 @@ import org.qp.android.ui.settings.SettingsController;
 
 import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
@@ -65,6 +64,18 @@ public class HtmlProcessor {
         if (isNullOrEmpty(dirtyHtml)) return "";
 
         var document = Jsoup.parse(preHandleHtml(dirtyHtml));
+        document.outputSettings().prettyPrint(false);
+        var body = document.body();
+        body.select("img").remove();
+        body.select("video").remove();
+
+        return document.toString();
+    }
+
+    public String getTestHtml(String dirtyHtml) {
+        if (isNullOrEmpty(dirtyHtml)) return "";
+
+        var document = Jsoup.parse(convertLibHtmlToWebHtml(dirtyHtml));
         document.outputSettings().prettyPrint(false);
         var body = document.body();
         body.select("img").remove();
@@ -199,7 +210,7 @@ public class HtmlProcessor {
                                                          Element img) {
         var relPath = img.attr("src");
         return CompletableFuture
-                .supplyAsync(() -> findFileFromRelPath(context , relPath , curGameDir), executors)
+                .supplyAsync(() -> fromRelPath(context , relPath , curGameDir), executors)
                 .thenApply(imageFile -> {
                     if (imageFile == null) return false;
                     var drawable = imageProvider.getDrawableFromPath(context , imageFile.getUri());
@@ -213,7 +224,7 @@ public class HtmlProcessor {
                                                           Element img) {
         var relPath = img.attr("src");
         return CompletableFuture
-                .supplyAsync(() -> findFileFromRelPath(context , relPath , curGameDir), executors)
+                .supplyAsync(() -> fromRelPath(context , relPath , curGameDir), executors)
                 .thenApply(imageFile -> {
                     if (imageFile == null) return false;
                     var drawable = imageProvider.getDrawableFromPath(context , imageFile.getUri());
@@ -236,18 +247,15 @@ public class HtmlProcessor {
     }
 
     private String preHandleHtml(String dirtyHtml) {
-        var checkOne = dirtyHtml.contains("\\\"");
-        var checkTwo = EXEC_PATTERN.matcher(dirtyHtml).find();
-        var checkThree = dirtyHtml.contains("\n") || dirtyHtml.contains("\r");
-
         var bodyDirt = extractBody(dirtyHtml);
-        if (checkOne) {
+
+        if (bodyDirt.contains("\\\"")) {
             unescapeQuotes(bodyDirt);
         }
-        if (checkTwo) {
+        if (EXEC_PATTERN.matcher(bodyDirt).find()) {
             encodeExec(bodyDirt);
         }
-        if (checkThree) {
+        if (bodyDirt.contains("\n") || bodyDirt.contains("\r")) {
             lineBreaksInHTML(bodyDirt);
         }
 

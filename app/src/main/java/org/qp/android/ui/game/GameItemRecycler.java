@@ -18,7 +18,6 @@ import org.qp.android.R;
 import org.qp.android.databinding.ListGameItemBinding;
 import org.qp.android.dto.lib.LibListItem;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -101,7 +100,7 @@ public class GameItemRecycler extends RecyclerView.Adapter<GameItemRecycler.View
 
         if (qpListItem.pathToImage != null) {
             Picasso.get()
-                    .load(new File(qpListItem.pathToImage))
+                    .load(qpListItem.pathToImage)
                     .error(R.drawable.baseline_broken_image_24)
                     .fit()
                     .into(holder.listGameItemBinding.itemIcon);

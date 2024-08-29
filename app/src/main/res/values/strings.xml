@@ -2,13 +2,12 @@
 <resources>
     <!-- Use in dialog/toast/notification -->
     <!-- Notification channel -->
-        <string name="channelInstallGame">Install game</string>
+        <string name="channelInstallGame">Unpack game</string>
     <!-- Install notification -->
         <string name="titleNotify">Game install</string>
-    <!-- Copy notification -->
-        <string name="titleCopyNotify">Copying the game directory</string>
-        <string name="bodyCopyNotify">I am copying the game folder!</string>
-        <string name="bodyCopiedNotify">Hurray! I copied the folder with the game -GAMENAME-!</string>
+    <!-- Unpack notification -->
+        <string name="titleUnpackDoneNotify">The game is unpacked!</string>
+        <string name="bodyUnpackDoneNotify">Phew! I finally unpacked the game -GAMENAME-!</string>
     <!-- Dialog LoadGamePopup -->
         <string name="loadGamePopup">The save file was not found in gameDir. Would you like to manually specify the path to the save file?</string>
     <!-- Dialog Close -->
@@ -65,6 +64,9 @@
         <string name="addFolderSum1">Current root dir is external directory of the device</string>
     <!-- FragmentImageBox -->
         <string name="image">Image</string>
+    <!-- StockViewPagerFragment -->
+        <string name="tabZeroName">Installed Games</string>
+        <string name="tabOneName">Repository games</string>
     <!-- Use in menu -->
     <!-- Menu game -->
         <!-- Group running -->

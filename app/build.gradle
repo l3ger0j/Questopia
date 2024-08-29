@@ -19,8 +19,8 @@ android {
         applicationId "org.qp.android"
         minSdk 26
         targetSdk 34
-        versionCode 202300
-        versionName "3.23.0"
+        versionCode 202400
+        versionName "3.24.0"
         resourceConfigurations += ['en', 'ru']
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -96,9 +96,13 @@ dependencies {
     implementation libs.androidx.core.splashscreen
     implementation libs.androidx.room.runtime
     annotationProcessor libs.androidx.room.compiler
+    implementation libs.androidx.collection
+    implementation libs.androidx.recyclerview
 
     implementation libs.hilt.android
     annotationProcessor libs.hilt.compiler
+    implementation libs.stax.api
+    implementation libs.woodstox.core
 
     implementation libs.changelog
     implementation libs.colorpicker
@@ -107,11 +111,17 @@ dependencies {
     implementation libs.storage
     implementation libs.picasso
 
+    implementation libs.retrofit
+    implementation libs.converter.jackson
+
     implementation libs.rxandroid
+
+    implementation libs.unpacker
 
     implementation libs.jackson.core
     implementation libs.jackson.databind
     implementation libs.jackson.annotations
+    implementation libs.jackson.dataformat.xml
 
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
