@@ -1,12 +1,16 @@
 package org.qp.android.ui.game;
 
 import android.graphics.Typeface;
+import android.os.Bundle;
 import android.text.Html;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
+import android.view.accessibility.AccessibilityNodeInfo;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.AsyncListDiffer;
 import androidx.recyclerview.widget.DiffUtil;
@@ -124,6 +128,14 @@ public class GameItemRecycler extends RecyclerView.Adapter<GameItemRecycler.View
         ViewHolder(ListGameItemBinding binding){
             super(binding.getRoot());
             this.listGameItemBinding = binding;
+            //Аналогично,как мы сделали для полки игр. Вообще,на мой взгляд,этот делегат можно вынести отдельно,чтобы избежать дублирования кода.
+            this.listGameItemBinding.relativeLayout.setAccessibilityDelegate(new View.AccessibilityDelegate() {
+                @Override
+                public boolean performAccessibilityAction(@NonNull View host, int action, @Nullable Bundle args) {
+                    if(action== AccessibilityNodeInfo.ACTION_CLICK) return host.performClick(); else if(action==AccessibilityNodeInfo.ACTION_LONG_CLICK) return host.performLongClick();
+                    return super.performAccessibilityAction(host, action, args);
+                }
+            });
         }
 
         public void listItemActionObjectBinding(LibListItem libListItem) {
