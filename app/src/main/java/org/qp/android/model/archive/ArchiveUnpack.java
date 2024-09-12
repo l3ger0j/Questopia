@@ -5,6 +5,7 @@ import static org.qp.android.helpers.utils.ThreadUtil.assertNonUiThread;
 
 import android.content.Context;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
@@ -57,6 +58,26 @@ public class ArchiveUnpack {
         this.destFolder = destFolder;
     }
 
+private void expandFolderWithGame(File dir) {
+    File it = dir;
+    File rootDirForDeletion=null;
+    while (true) {
+        File[] files = it.listFiles();
+        if (files.length != 1 || !files[0].isDirectory()) {
+            break;
+        }
+        it = files[0];
+        if(rootDirForDeletion==null) rootDirForDeletion=files[0]; //Если уровень вложенности папок больше,чем один,мы должны удалить целую вложенную папку,а не только папку на последнем уровне вложенности.
+    }
+    /*if (it == dir) {
+        return;
+    }*/
+    for (File file : it.listFiles()) {
+        File dest = new File(dir.getAbsolutePath(), file.getName());
+        file.renameTo(dest);
+    }
+    rootDirForDeletion.delete();
+}
     public void extractArchiveEntries() {
         assertNonUiThread();
 
@@ -72,10 +93,8 @@ public class ArchiveUnpack {
                         var archiveName = targetArchive.getName();
                         var pattern = Pattern.compile(".(?:r\\d\\d|r\\d\\d\\d|rar|zip|aqsp)");
                         var folderName = pattern.matcher(archiveName).replaceAll("");
-                        if (fileName.split("/").length == 1) {
                             destFolder = findOrCreateFolder(context, destFolder, folderName);
                             unpackFolder = destFolder;
-                        }
                     }
                 }
                 if (unpackFolder == null && ind == itemCount - 1) {
@@ -93,6 +112,7 @@ public class ArchiveUnpack {
                     false,
                     new ArchiveExtractCallback(destFolder, inArchive)
             );
+expandFolderWithGame(unpackFolder);
         } catch (IOException e) {
             Log.e(TAG, "", e);
         }
