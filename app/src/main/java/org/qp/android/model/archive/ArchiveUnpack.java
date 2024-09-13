@@ -39,7 +39,26 @@ public class ArchiveUnpack {
     private final Context context;
     private final File targetArchive;
     private File destFolder;
+private String gameTitle;
 
+    public ArchiveUnpack(@NonNull Context context,
+                         @NonNull File targetArchive,
+                         @NonNull File destFolder,
+                         String gameTitle) {
+        this.context = context;
+        this.targetArchive = targetArchive;
+        this.gameTitle =gameTitle;
+        if(gameTitle!=null) {
+            this.destFolder = findOrCreateFolder(context, destFolder, gameTitle);
+            this.unpackFolder=this.destFolder;
+        }
+        else this.destFolder = destFolder;
+    }
+    public ArchiveUnpack(@NonNull Context context,
+                         @NonNull File targetArchive,
+                         @NonNull File destFolder) {
+        this(context,targetArchive,destFolder,null);
+    }
     @NonNull
     private static int[] getPrimitiveLongArrayFromInt(Set<Integer> input) {
         int[] ret = new int[input.size()];
@@ -50,15 +69,7 @@ public class ArchiveUnpack {
         return ret;
     }
 
-    public ArchiveUnpack(@NonNull Context context,
-                         @NonNull File targetArchive,
-                         @NonNull File destFolder) {
-        this.context = context;
-        this.targetArchive = targetArchive;
-        this.destFolder = destFolder;
-    }
-
-private void expandFolderWithGame(File dir) {
+    private void expandFolderWithGame(File dir) {
     File it = dir;
     File rootDirForDeletion=null;
     while (true) {
@@ -69,9 +80,9 @@ private void expandFolderWithGame(File dir) {
         it = files[0];
         if(rootDirForDeletion==null) rootDirForDeletion=files[0]; //Если уровень вложенности папок больше,чем один,мы должны удалить целую вложенную папку,а не только папку на последнем уровне вложенности.
     }
-    /*if (it == dir) {
+    if (it == dir) {
         return;
-    }*/
+    }
     for (File file : it.listFiles()) {
         File dest = new File(dir.getAbsolutePath(), file.getName());
         file.renameTo(dest);
@@ -88,16 +99,15 @@ private void expandFolderWithGame(File dir) {
             var fileNames = new HashMap<Integer, String>();
             for (int ind = 0; ind < itemCount; ind++) {
                 var fileName = inArchive.getStringProperty(ind, PropID.PATH);
-                if (fileName.endsWith(".qsp") || fileName.endsWith(".gam")) {
-                    if (fileName.split("/").length == 1) {
+                //Прошлый код некоректно работал в игре 7.40,т.к там несколько qsp файлов. Вообще я не вижу смысла в этом коде и предлагаю использовать имя игры как название папки.
+                if (fileName.split("/").length == 1 &&gameTitle ==null &&(fileName.endsWith(".qsp") || fileName.endsWith(".gam"))) {
                         var archiveName = targetArchive.getName();
                         var pattern = Pattern.compile(".(?:r\\d\\d|r\\d\\d\\d|rar|zip|aqsp)");
                         var folderName = pattern.matcher(archiveName).replaceAll("");
                             destFolder = findOrCreateFolder(context, destFolder, folderName);
                             unpackFolder = destFolder;
                     }
-                }
-                if (unpackFolder == null && ind == itemCount - 1) {
+                                if (unpackFolder == null && ind == itemCount - 1) {
                     unpackFolder = new File(destFolder, fileName);
                 }
                 Log.d(TAG, "index: "+ind+"\nfilename: "+fileName+"\nitemCount: "+itemCount);
@@ -112,7 +122,7 @@ private void expandFolderWithGame(File dir) {
                     false,
                     new ArchiveExtractCallback(destFolder, inArchive)
             );
-expandFolderWithGame(unpackFolder);
+expandFolderWithGame(destFolder);
         } catch (IOException e) {
             Log.e(TAG, "", e);
         }
