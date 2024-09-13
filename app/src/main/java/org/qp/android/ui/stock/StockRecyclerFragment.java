@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.accessibility.AccessibilityNodeInfo;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -29,7 +28,7 @@ public class StockRecyclerFragment extends Fragment {
                              @Nullable Bundle savedInstanceState) {
         var recyclerBinding = FragmentRecyclerBinding.inflate(inflater);
         mRecyclerView = recyclerBinding.shareRecyclerView;
-        mRecyclerView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
+        //mRecyclerView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES); //Не обязательная строка.
         stockViewModel = new ViewModelProvider(requireActivity()).get(StockViewModel.class);
 
         stockViewModel.getGameDataList().observe(getViewLifecycleOwner(), item -> {
@@ -88,17 +87,5 @@ public class StockRecyclerFragment extends Fragment {
                         stockViewModel.doOnShowActionMode();
                     }
                 }));
-        mRecyclerView.setAccessibilityDelegate(new View.AccessibilityDelegate() {
-            @Override
-            public boolean performAccessibilityAction(@NonNull View host ,
-                                                      int action ,
-                                                      @Nullable Bundle args) {
-                switch (action) {
-                    case AccessibilityNodeInfo.ACTION_CLICK -> host.performClick();
-                    case AccessibilityNodeInfo.ACTION_LONG_CLICK -> host.performLongClick();
-                }
-                return super.performAccessibilityAction(host , action , args);
-            }
-        });
     }
-}
+    }

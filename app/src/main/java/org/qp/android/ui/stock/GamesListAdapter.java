@@ -4,11 +4,15 @@ import static org.qp.android.ui.stock.StockViewModel.DISABLE_CALCULATE_DIR;
 
 import android.content.Context;
 import android.net.Uri;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
+import android.view.accessibility.AccessibilityNodeInfo;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.AsyncListDiffer;
 import androidx.recyclerview.widget.DiffUtil;
@@ -122,7 +126,15 @@ public class GamesListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         GameHolder(ListItemGameBinding listItemGameBinding){
             super(listItemGameBinding.getRoot());
             this.listItemGameBinding = listItemGameBinding;
-        }
+            //Если у родительской ноды одна дочерняя нода,то эта нода игнорируется и родительской нодой становится дочерняя нода. Так происходит до тех пор,пока у родительской ноды нее появятся дочерние ноды. В этом случае фреймворк отлавливает нажатие на эту ноду,или на дочерние ноды. Примерно так,на мой взгляд,это работает.
+            this.listItemGameBinding.relativeLayout.setAccessibilityDelegate(new View.AccessibilityDelegate() {
+    @Override
+    public boolean performAccessibilityAction(@NonNull View host, int action, @Nullable Bundle args) {
+        if(action== AccessibilityNodeInfo.ACTION_CLICK) return host.performClick(); else if(action==AccessibilityNodeInfo.ACTION_LONG_CLICK) return host.performLongClick();
+        return super.performAccessibilityAction(host, action, args);
+    }
+});
+                    }
 
         public void listItemGameBinding(GameData gameData) {
             listItemGameBinding.setGameData(gameData);

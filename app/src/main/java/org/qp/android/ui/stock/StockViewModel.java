@@ -953,8 +953,8 @@ public class StockViewModel extends AndroidViewModel {
                     var archiveUnpack = new ArchiveUnpack(
                             getApplication(),
                             archive,
-                            rootInDir
-                    );
+                            rootInDir,
+                    getGameTitle());
 
                     CompletableFuture
                             .runAsync(archiveUnpack::extractArchiveEntries, executor)
