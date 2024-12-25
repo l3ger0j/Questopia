@@ -1,7 +1,6 @@
 package org.qp.android.ui.stock;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,12 +18,12 @@ import org.qp.android.databinding.FragmentViewPagerBinding;
 
 public class StockViewPagerFragment extends Fragment {
 
+    private FragmentViewPagerBinding binding;
+
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater,
-                             @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
-        var binding = FragmentViewPagerBinding.inflate(inflater, container, false);
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        binding = FragmentViewPagerBinding.inflate(inflater, container, false);
         var stockViewModel = new ViewModelProvider(requireActivity()).get(StockViewModel.class);
 
         var stockPager = binding.stockPager;
@@ -56,10 +55,16 @@ public class StockViewPagerFragment extends Fragment {
 
         var tabZeroName = getString(R.string.tabZeroName);
         var tabOneName = getString(R.string.tabOneName);
-        var tabLayoutMediator = new TabLayoutMediator(tabLayout, stockPager, (tab , position) ->
+        var tabLayoutMediator = new TabLayoutMediator(tabLayout, stockPager, (tab, position) ->
                 tab.setText(position == 0 ? tabZeroName : tabOneName));
         tabLayoutMediator.attach();
 
         return binding.getRoot();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null;
     }
 }

@@ -1,9 +1,7 @@
 package org.qp.android.ui.stock;
 
-import static androidx.recyclerview.widget.RecyclerView.NO_POSITION;
 import static org.qp.android.helpers.utils.FileUtil.documentWrap;
 import static org.qp.android.helpers.utils.FileUtil.findOrCreateFile;
-import static org.qp.android.helpers.utils.JsonUtil.jsonToObject;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_IMAGE_FILE;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_MOD_FILE;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_PATH_FILE;
@@ -19,18 +17,19 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.storage.StorageManager;
 import android.provider.Settings;
-import android.util.Log;
+import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 
+import androidx.activity.EdgeToEdge;
 import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -39,41 +38,38 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.view.ActionMode;
-import androidx.appcompat.widget.SearchView;
-import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.os.LocaleListCompat;
 import androidx.core.splashscreen.SplashScreen;
-import androidx.documentfile.provider.DocumentFile;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.preference.PreferenceManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.anggrayudi.storage.SimpleStorageHelper;
 import com.anggrayudi.storage.file.DocumentFileCompat;
 import com.anggrayudi.storage.file.FileUtils;
 import com.anggrayudi.storage.file.MimeType;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.github.javiersantos.appupdater.AppUpdater;
 import com.github.javiersantos.appupdater.enums.UpdateFrom;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import org.qp.android.BuildConfig;
-import org.qp.android.QuestopiaApplication;
 import org.qp.android.R;
+import org.qp.android.data.db.Game;
 import org.qp.android.data.db.GameDao;
 import org.qp.android.data.db.GameDatabase;
 import org.qp.android.databinding.ActivityStockBinding;
-import org.qp.android.dto.stock.GameData;
 import org.qp.android.dto.stock.RemoteDataList;
 import org.qp.android.helpers.utils.ViewUtil;
 import org.qp.android.model.repository.RemoteGame;
 import org.qp.android.ui.dialogs.StockDialogType;
 import org.qp.android.ui.settings.SettingsActivity;
+import org.qp.android.ui.settings.SettingsController;
 
 import java.io.File;
 import java.io.IOException;
@@ -81,23 +77,18 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
 
+import dagger.hilt.android.AndroidEntryPoint;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-
-import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
 public class StockActivity extends AppCompatActivity {
@@ -108,25 +99,13 @@ public class StockActivity extends AppCompatActivity {
 
     public final SimpleDateFormat timeDateRemGamesList = new SimpleDateFormat("yyyy-MM-dd'T'HH-mm-ss", Locale.ROOT);
     private final ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-
-    @Inject GameDatabase gameDatabase;
-    @Inject GameDao gameDao;
-
-    private StockViewModel stockViewModel;
-    private NavController navController;
-    private ActionMode deleteMode;
-    protected ActivityStockBinding activityStockBinding;
-    private boolean isEnableDeleteMode = false;
-    private FloatingActionButton mFAB;
-    private RecyclerView.ViewHolder viewHolder;
-    private List<GameData> tempList;
-    private final List<GameData> selectList = new ArrayList<>();
-
-    private ActivityResultLauncher<Intent> rootFolderLauncher;
     private final SimpleStorageHelper storageHelper = new SimpleStorageHelper(this);
-
-    private File listDirsFile;
-
+    protected ActivityStockBinding activityStockBinding;
+    @Inject
+    public GameDatabase gameDatabase;
+    @Inject
+    public GameDao gameDao;
+    private StockViewModel stockViewModel;
     private final SharedPreferences.OnSharedPreferenceChangeListener preferenceChangeListener = (sharedPreferences , key) -> {
         if (key == null) return;
         switch (key) {
@@ -147,7 +126,6 @@ public class StockActivity extends AppCompatActivity {
             }
         }
     };
-
     private final BroadcastReceiver downloadReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -157,11 +135,14 @@ public class StockActivity extends AppCompatActivity {
             }
         }
     };
+    private NavController navController;
+    private ActionMode deleteMode;
+    private FloatingActionButton mFAB;
+    private ActivityResultLauncher<Intent> rootFolderLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         var splashScreen = SplashScreen.installSplashScreen(this);
-        splashScreen.setKeepOnScreenCondition(() -> false);
         splashScreen.setKeepOnScreenCondition(() -> {
             switch (SettingsController.newInstance(this).theme) {
                 case "auto" -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
@@ -170,6 +151,7 @@ public class StockActivity extends AppCompatActivity {
             }
             return false;
         });
+        EdgeToEdge.enable(this);
         super.onCreate(savedInstanceState);
 
         PreferenceManager
@@ -179,16 +161,35 @@ public class StockActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             // Prevent jumping of the player on devices with cutout
             getWindow().getAttributes().layoutInDisplayCutoutMode =
-                    WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT;
+                    WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
         }
-
-        getWindow().setNavigationBarColor(Color.TRANSPARENT);
 
         activityStockBinding = ActivityStockBinding.inflate(getLayoutInflater());
         stockViewModel = new ViewModelProvider(this).get(StockViewModel.class);
+        var searchToolbar = activityStockBinding.stockSearchBar;
+        setSupportActionBar(activityStockBinding.stockSearchBar);
 
-        var materialToolbar = activityStockBinding.stockMaterialBar;
-        setSupportActionBar(materialToolbar);
+        var searchView = activityStockBinding.stockSearchView;
+        searchView
+                .getEditText()
+                .setOnEditorActionListener((v, actionId, event) -> {
+                    searchToolbar.setText(searchView.getText());
+                    var gameList = stockViewModel.getListGames();
+                    var filteredList = new ArrayList<Game>();
+                    gameList.forEach(game -> {
+                        var title = game.title.toLowerCase(Locale.getDefault());
+                        var searchTitle = searchView.getText().toString().toLowerCase(Locale.getDefault());
+                        if (title.contains(searchTitle)) {
+                            filteredList.add(game);
+                        }
+                    });
+                    if (!filteredList.isEmpty()) {
+                        stockViewModel.gameEntriesLiveData.setValue(filteredList);
+                    }
+                    searchView.hide();
+                    return false;
+                });
+        searchView.setupWithSearchBar(searchToolbar);
 
         mFAB = activityStockBinding.stockFAB;
         stockViewModel.doIsHideFAB.observe(this, aBoolean -> {
@@ -200,35 +201,60 @@ public class StockActivity extends AppCompatActivity {
         });
         mFAB.setOnClickListener(view -> showDirPickerDialog());
 
-        storageHelper.setOnFileSelected((integer , documentFiles) -> {
-            var boxDocumentFiles = Optional.ofNullable(documentFiles);
-            if (boxDocumentFiles.isEmpty()) {
+        ViewCompat.setOnApplyWindowInsetsListener(mFAB, (v, windowInsets) -> {
+            var insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+            // Apply the insets as a margin to the view. This solution sets
+            // only the bottom, left, and right dimensions, but you can apply whichever
+            // insets are appropriate to your layout. You can also update the view padding
+            // if that's more appropriate.
+            var mlp = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
+            var margin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 32, getResources().getDisplayMetrics());
+            mlp.leftMargin = insets.left;
+            mlp.bottomMargin = insets.bottom + margin;
+            mlp.rightMargin = insets.right + margin;
+            v.setLayoutParams(mlp);
+
+            // Return CONSUMED if you don't want want the window insets to keep passing
+            // down to descendant views.
+            return WindowInsetsCompat.CONSUMED;
+        });
+
+        searchView.addTransitionListener((searchView1 , previousState , newState) -> {
+            if (newState.name().equalsIgnoreCase("SHOWING")) {
+                stockViewModel.doIsHideFAB.setValue(true);
+            }
+            if (newState.name().equalsIgnoreCase("HIDING")) {
+                stockViewModel.doIsHideFAB.setValue(false);
+            }
+        });
+
+        storageHelper.setOnFileSelected((integer, documentFiles) -> {
+            if (documentFiles == null) {
                 showErrorDialog("File is not selected");
-            } else {
-                var unBoxDocFiles = boxDocumentFiles.get();
-                switch (integer) {
-                    case CODE_PICK_IMAGE_FILE -> unBoxDocFiles.forEach(documentFile -> {
-                        switch (documentWrap(documentFile).getExtension()) {
-                            case "png" , "jpg" , "jpeg" -> {
-                                getContentResolver().takePersistableUriPermission(documentFile.getUri() ,
-                                        Intent.FLAG_GRANT_READ_URI_PERMISSION
-                                                | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-                                stockViewModel.setTempImageFile(documentFile);
-                            }
+                return null;
+            }
+
+            switch (integer) {
+                case CODE_PICK_IMAGE_FILE -> documentFiles.forEach(documentFile -> {
+                    switch (documentWrap(documentFile).getExtension()) {
+                        case "png" , "jpg" , "jpeg" -> {
+                            getContentResolver().takePersistableUriPermission(documentFile.getUri() ,
+                                    Intent.FLAG_GRANT_READ_URI_PERMISSION
+                                            | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                            stockViewModel.setTempImageFile(documentFile);
                         }
-                    });
-                    case CODE_PICK_PATH_FILE -> unBoxDocFiles.forEach(documentFile -> {
-                        switch (documentWrap(documentFile).getExtension()) {
-                            case "qsp", "gam" ->
-                                    stockViewModel.setTempPathFile(documentFile);
-                        }
-                    });
-                    case CODE_PICK_MOD_FILE -> unBoxDocFiles.forEach(documentFile -> {
-                        if ("qsp".equals(documentWrap(documentFile).getExtension())) {
-                            stockViewModel.setTempModFile(documentFile);
-                        }
-                    });
-                }
+                    }
+                });
+                case CODE_PICK_PATH_FILE -> documentFiles.forEach(documentFile -> {
+                    switch (documentWrap(documentFile).getExtension()) {
+                        case "qsp" , "gam" -> stockViewModel.setTempPathFile(documentFile);
+                    }
+                });
+                case CODE_PICK_MOD_FILE -> documentFiles.forEach(documentFile -> {
+                    if ("qsp".equals(documentWrap(documentFile).getExtension())) {
+                        stockViewModel.setTempModFile(documentFile);
+                    }
+                });
             }
             return null;
         });
@@ -251,9 +277,8 @@ public class StockActivity extends AppCompatActivity {
                 );
                 stockViewModel.outputIntObserver.observe(this, integer -> {
                     if (integer == 1) {
-                        var application = (QuestopiaApplication) getApplication();
-                        if (application != null) application.setCurrentGameDir(rootFolder);
-                        stockViewModel.refreshGamesDirs();
+                        stockViewModel.createEntryInDBFromFile(rootFolder);
+                        stockViewModel.loadGameDataFromDB();
                     }
                 });
             }
@@ -262,8 +287,6 @@ public class StockActivity extends AppCompatActivity {
         checkCacheRemoteRepo();
         loadPermission();
         stockViewModel.loadGameDataFromDB();
-
-        Log.i(TAG , "Stock Activity created");
 
         setContentView(activityStockBinding.getRoot());
 
@@ -279,11 +302,9 @@ public class StockActivity extends AppCompatActivity {
         stockViewModel.emitter.observe(this , eventNavigation -> {
             if (eventNavigation instanceof StockFragmentNavigation.ShowErrorDialog errorDialog) {
                 switch (errorDialog.getErrorType()) {
-                    case FOLDER_ERROR ->
-                            showErrorDialog(getString(R.string.gamesFolderError));
-                    case EXCEPTION ->
-                            showErrorDialog(getString(R.string.error)
-                                    + ": " + errorDialog.getErrorMessage());
+                    case FOLDER_ERROR -> showErrorDialog(getString(R.string.gamesFolderError));
+                    case EXCEPTION -> showErrorDialog(getString(R.string.error)
+                            + ": " + errorDialog.getErrorMessage());
                 }
             }
             if (eventNavigation instanceof StockFragmentNavigation.ShowGameFragment gameFragment) {
@@ -295,9 +316,6 @@ public class StockActivity extends AppCompatActivity {
             if (eventNavigation instanceof StockFragmentNavigation.ShowFilePicker filePicker) {
                 showFilePickerActivity(filePicker.getRequestCode() , filePicker.getMimeTypes());
             }
-            if (eventNavigation instanceof StockFragmentNavigation.GetAdapterViewHolder adapterViewHolder) {
-                viewHolder = adapterViewHolder.viewHolder;
-            }
         });
 
         new AppUpdater(this)
@@ -308,9 +326,6 @@ public class StockActivity extends AppCompatActivity {
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
-                if (getSupportActionBar() != null) {
-                    getSupportActionBar().setDisplayHomeAsUpEnabled(false);
-                }
                 if (navController.getCurrentDestination() == null) finish();
                 var currDestLabel = navController.getCurrentDestination().getLabel();
                 if (Objects.equals(currDestLabel, "StockViewPagerFragment")) {
@@ -378,10 +393,6 @@ public class StockActivity extends AppCompatActivity {
 
     @Override
     public boolean onSupportNavigateUp() {
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(false);
-        }
-
         var value = stockViewModel.currPageNumber.getValue();
         if (value == null) {
             navController.popBackStack();
@@ -514,18 +525,10 @@ public class StockActivity extends AppCompatActivity {
             var readStorage = ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
             var writeStorage = ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
             if (readStorage != PackageManager.PERMISSION_GRANTED && writeStorage != PackageManager.PERMISSION_GRANTED) {
-                var requestPerm = new String[]{ Manifest.permission.READ_EXTERNAL_STORAGE,
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE };
-                ActivityCompat.requestPermissions(this, requestPerm , READ_EXTERNAL_STORAGE_CODE);
+                var requestPerm = new String[]{Manifest.permission.READ_EXTERNAL_STORAGE ,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE};
+                ActivityCompat.requestPermissions(this , requestPerm , READ_EXTERNAL_STORAGE_CODE);
             }
-        }
-    }
-
-    private void loadSettings() {
-        listDirsFile = stockViewModel.getListDirsFile();
-
-        if (listDirsFile.exists()) {
-            restoreListDirsFromFile();
         }
     }
 
@@ -559,41 +562,26 @@ public class StockActivity extends AppCompatActivity {
     }
 
     public void onListItemClick(int position) {
-        if (!isEnableDeleteMode) {
-            stockViewModel.getGameDataList().observe(this, gameData -> {
-                if (!gameData.isEmpty() && gameData.size() > position) {
-                    stockViewModel.setCurrGameData(gameData.get(position));
+        if (stockViewModel.isEnableDeleteMode) {
+            var currGamesMapValues = stockViewModel.getGamesMap().values();
+            for (var gameData : currGamesMapValues) {
+                if (!stockViewModel.isGameInstalled()) continue;
+                stockViewModel.currInstalledGamesList.add(gameData);
+            }
+        } else {
+            stockViewModel.gameEntriesLiveData.observe(this , gameEntries -> {
+                if (!gameEntries.isEmpty() && gameEntries.size() > position) {
+                    stockViewModel.setCurrGameData(gameEntries.get(position));
                 }
             });
 
-            navController.navigate(R.id.stockGameFragment);
+            navController.navigate(R.id.action_stockViewPagerFragment_to_stockGameFragment);
             stockViewModel.doIsHideFAB.setValue(true);
-        } else {
-            var adapterPosition = viewHolder.getAbsoluteAdapterPosition();
-            if (adapterPosition == NO_POSITION) return;
-            if (adapterPosition < 0 || adapterPosition >= tempList.size()) return;
-
-            var currGamesMapValues = stockViewModel.getGamesMap().values();
-            for (var gameData : currGamesMapValues) {
-                if (!gameData.isFileInstalled()) continue;
-                tempList.add(gameData);
-            }
-
-            var gameData = tempList.get(adapterPosition);
-            if (selectList.isEmpty() || !selectList.contains(gameData)) {
-                selectList.add(gameData);
-                var cardView = (CardView) viewHolder.itemView.findViewWithTag("gameCardView");
-                cardView.setCardBackgroundColor(Color.LTGRAY);
-            } else {
-                selectList.remove(gameData);
-                var cardView = (CardView) viewHolder.itemView.findViewWithTag("gameCardView");
-                cardView.setCardBackgroundColor(Color.DKGRAY);
-            }
         }
     }
 
     public void onLongListItemClick() {
-        if (isEnableDeleteMode) return;
+        if (stockViewModel.isEnableDeleteMode) return;
 
         var pageNumber = stockViewModel.currPageNumber.getValue();
         if (pageNumber == null) return;
@@ -608,44 +596,45 @@ public class StockActivity extends AppCompatActivity {
 
             @Override
             public boolean onPrepareActionMode(ActionMode mode , Menu menu) {
-                tempList = stockViewModel.getListGames();
-                isEnableDeleteMode = true;
+                if (getSupportActionBar() != null) {
+                    getSupportActionBar().hide();
+                }
+                stockViewModel.currInstalledGamesList = stockViewModel.getListGames();
+                stockViewModel.isEnableDeleteMode = true;
                 return true;
             }
 
             @SuppressLint("NonConstantResourceId")
             @Override
             public boolean onActionItemClicked(ActionMode mode , MenuItem item) {
-                int itemId = item.getItemId();
-                switch (itemId) {
+                var gamesSelList = stockViewModel.selGameEntriesList;
+                var gameEntriesList = stockViewModel.currInstalledGamesList;
+
+                switch (item.getItemId()) {
                     case R.id.delete_game -> {
                         stockViewModel.showDialogFragment(
                                 getSupportFragmentManager(),
                                 StockDialogType.DELETE_DIALOG,
-                                String.valueOf(selectList.size())
+                                String.valueOf(gamesSelList.size())
                         );
                         stockViewModel.outputIntObserver.observe(StockActivity.this, integer -> {
                             if (integer == 1) {
-                                for (var data : selectList) {
-                                    stockViewModel.removeEntryAndDirFromDB(data.id);
-                                }
+                                stockViewModel.removeEntryAndDirFromDB(gamesSelList);
                                 deleteMode.finish();
                             } else {
-                                for (var data : selectList) {
-                                    stockViewModel.removeEntryFromDB(data.id);
-                                }
+                                stockViewModel.removeEntryFromDB(gamesSelList);
                                 deleteMode.finish();
                             }
                         });
                     }
                     case R.id.select_all -> {
-                        if (selectList.size() == tempList.size()) {
-                            selectList.clear();
-                            stockViewModel.doOnChangeElementColorToDKGray();
+                        if (gamesSelList.size() == gameEntriesList.size()) {
+                            gamesSelList.clear();
+                            stockViewModel.doOnUnselectAllElements();
                         } else {
-                            selectList.clear();
-                            selectList.addAll(tempList);
-                            stockViewModel.doOnChangeElementColorToLTGray();
+                            gamesSelList.clear();
+                            gamesSelList.addAll(gameEntriesList);
+                            stockViewModel.doOnSelectAllElements();
                         }
                     }
                 }
@@ -654,11 +643,15 @@ public class StockActivity extends AppCompatActivity {
 
             @Override
             public void onDestroyActionMode(ActionMode mode) {
-                stockViewModel.doOnChangeElementColorToDKGray();
+                if (getSupportActionBar() != null) {
+                    getSupportActionBar().show();
+                }
+
+                stockViewModel.doOnUnselectAllElements();
                 deleteMode = null;
-                isEnableDeleteMode = false;
-                tempList.clear();
-                selectList.clear();
+                stockViewModel.isEnableDeleteMode = false;
+                stockViewModel.selGameEntriesList.clear();
+                stockViewModel.currInstalledGamesList.clear();
                 mFAB.show();
             }
         };
@@ -675,7 +668,6 @@ public class StockActivity extends AppCompatActivity {
                 .getDefaultSharedPreferences(getApplication())
                 .unregisterOnSharedPreferenceChangeListener(preferenceChangeListener);
 
-        Log.i(TAG , "Stock Activity destroyed");
     }
 
     @Override
@@ -686,55 +678,21 @@ public class StockActivity extends AppCompatActivity {
 
         stockViewModel.doIsHideFAB.setValue(false);
         navController.navigate(R.id.stockViewPagerFragment);
-
-        if (getSupportActionBar() == null) return;
-        getSupportActionBar().setDisplayHomeAsUpEnabled(false);
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         var inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu_stock , menu);
+        inflater.inflate(R.menu.menu_stock, menu);
         return true;
     }
 
     @Override
     @SuppressLint("NonConstantResourceId")
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.menu_options -> {
-                startActivity(new Intent(this , SettingsActivity.class));
-                return true;
-            }
-            case R.id.action_search -> {
-                var actionView = item.getActionView();
-                if (actionView == null) return false;
-                var searchView = (SearchView) actionView;
-
-                var queryTextListener = new SearchView.OnQueryTextListener() {
-                    @Override
-                    public boolean onQueryTextSubmit(String query) {
-                        return false;
-                    }
-
-                    @Override
-                    public boolean onQueryTextChange(String newText) {
-                        var gameDataList = stockViewModel.getListGames();
-                        var filteredList = new ArrayList<GameData>();
-                        gameDataList.forEach(gameData -> {
-                            if (gameData.title.toLowerCase(Locale.getDefault())
-                                    .contains(newText.toLowerCase(Locale.getDefault()))) {
-                                filteredList.add(gameData);
-                            }
-                        });
-                        if (!filteredList.isEmpty()) {
-                            stockViewModel.setValueGameDataList(filteredList);
-                        }
-                        return true;
-                    }
-                };
-                searchView.setOnQueryTextListener(queryTextListener);
-            }
+        if (item.getItemId() == R.id.menu_options) {
+            startActivity(new Intent(this, SettingsActivity.class));
+            return true;
         }
         return false;
     }
