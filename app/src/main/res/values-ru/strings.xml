@@ -15,9 +15,9 @@
     <!-- Dialog Select -->
         <string name="selectGameFile">Выберите файл игры для запуска</string>
     <!-- Dialog Edit -->
-        <string name="selectPathFile">Выберите патч-файл в формате .qsp</string>
-        <string name="selectModFile">Выберите файл мода в формате .qsp</string>
-        <string name="editButton">Изменить игру</string>
+        <string name="selectPathFile">Выбрать файл для патча файла игры</string>
+        <string name="selectModFile">Выбрать файл мода для игры</string>
+        <string name="editButton">Изменить игровую запись</string>
         <string name="downloadButton">Скачать игру</string>
     <!-- Dialog Error -->
         <string name="error">Ошибка</string>
@@ -36,12 +36,12 @@
         <string name="notReadFile">Не могу прочитать файл:</string>
     <!-- Dialog Install -->
         <string name="gameName">Название игры</string>
-        <string name="gameAuthor">Автор</string>
-        <string name="gameVersion">Версия</string>
-        <string name="btnAddGame">Добавить игру</string>
+        <string name="gameAuthor">Автор игры</string>
+        <string name="gameVersion">Версия игры</string>
+        <string name="btnAddGame">Добавить новую игровую запись</string>
         <string name="calcSizeDir">Рассчитать размер папки</string>
         <string name="selectFolder">Выберите папку с файлом</string>
-        <string name="selectIcon">Выберите иконку</string>
+        <string name="selectIcon">Иконка для игры</string>
         <string name="add">Скопировать в корневую папку</string>
     <!-- Dialog GameInfo -->
         <string name="author">Автор: -AUTHOR-</string>
@@ -90,6 +90,7 @@
     <!-- Menu settings fragment -->
         <!-- General section -->
         <string name="generalCatTitle">Основное</string>
+        <string name="appTheme">Тема приложения</string>
         <string name="langTitle">Язык приложения</string>
         <string name="binPrefTitle">Двоичные префиксы</string>
         <string name="actsHeightTitle">Высота списка действий</string>

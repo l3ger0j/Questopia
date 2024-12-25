@@ -15,9 +15,9 @@
     <!-- Dialog Select -->
         <string name="selectGameFile">Select a game file to run</string>
     <!-- Dialog Edit -->
-        <string name="selectPathFile">Select the patch file in the format .qsp</string>
-        <string name="selectModFile">Select the mod file in the format .qsp</string>
-        <string name="editButton">Edit game</string>
+        <string name="selectPathFile">Select a file to patch the game file</string>
+        <string name="selectModFile">Select a mod file for the game</string>
+        <string name="editButton">Change the game entry</string>
         <string name="downloadButton">Download game</string>
     <!-- Dialog Error -->
         <string name="error">Error</string>
@@ -35,13 +35,13 @@
         <string name="notFoundFile">File not found:</string>
         <string name="notReadFile">Can not read file:</string>
     <!-- Dialog Install -->
-        <string name="gameName">Name</string>
-        <string name="gameAuthor">Author</string>
-        <string name="gameVersion">Version</string>
-        <string name="btnAddGame">Add game</string>
+        <string name="gameName">Name game</string>
+        <string name="gameAuthor">Author game</string>
+        <string name="gameVersion">Version game</string>
+        <string name="btnAddGame">Add a new game entry</string>
         <string name="calcSizeDir">Calculate size folder</string>
         <string name="selectFolder">Select the folder with the file</string>
-        <string name="selectIcon">Select icon</string>
+        <string name="selectIcon">Icon for the game</string>
         <string name="add">Copy to the root folder</string>
     <!-- Dialog GameInfo -->
         <string name="author">Author: -AUTHOR-</string>
@@ -90,6 +90,7 @@
     <!-- Menu settings fragment -->
         <!-- General section -->
         <string name="generalCatTitle">Basic</string>
+        <string name="appTheme">Application theme</string>
         <string name="langTitle">Application language</string>
         <string name="binPrefTitle">Binary prefixes</string>
         <string name="actsHeightTitle">Actions list height</string>
