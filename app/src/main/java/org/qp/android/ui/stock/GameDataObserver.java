@@ -15,7 +15,6 @@ public class GameDataObserver {
     public ObservableField<String> titleObserver = new ObservableField<>();
     public ObservableField<String> langObserver = new ObservableField<>();
     public ObservableField<String> playerObserver = new ObservableField<>();
-    public ObservableField<String> iconPathObserver = new ObservableField<>();
     public ObservableField<Uri> iconUriObserver = new ObservableField<>();
     public ObservableField<String> fileUrlObserver = new ObservableField<>();
     public ObservableField<String> fileSizeObserver = new ObservableField<>();
