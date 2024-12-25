@@ -31,12 +31,6 @@ android {
         }
     }
 
-    externalNativeBuild {
-        cmake {
-            path "src/main/jni/CMakeLists.txt"
-        }
-    }
-
     signingConfigs {
         release {
             storeFile file("keystore/github_keystore")
@@ -71,11 +65,6 @@ android {
         dataBinding dataBind
         buildConfig true
         aidl true
-    }
-
-    ndkVersion = '26.1.10909125'
-    lint {
-        abortOnError false
     }
 
 }
