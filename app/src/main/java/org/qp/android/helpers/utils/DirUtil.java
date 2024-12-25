@@ -1,18 +1,32 @@
 package org.qp.android.helpers.utils;
 
+import android.content.Context;
+
 import androidx.annotation.WorkerThread;
 import androidx.documentfile.provider.DocumentFile;
 
+import com.anggrayudi.storage.file.DocumentFileUtils;
+import com.anggrayudi.storage.file.FileUtils;
+
+import java.io.File;
 import java.util.Locale;
 
 public final class DirUtil {
 
-    private static final String TAG = DirUtil.class.getSimpleName();
+    public static boolean isWritableDir(Context context, DocumentFile dir) {
+        if (dir == null) return false;
+        var canWrite = DocumentFileUtils.isWritable(dir, context);
+        return dir.exists() && dir.isDirectory() && canWrite;
+    }
 
-    public static boolean isDirContainsGameFile(DocumentFile dir) {
-        if (dir == null) {
-            return false;
-        }
+    public static boolean isWritableDir(Context context, File dir) {
+        if (dir == null) return false;
+        var canWrite = FileUtils.isWritable(dir, context);
+        return dir.exists() && dir.isDirectory() && canWrite;
+    }
+
+    public static boolean isDirContainsGameFile(Context context, DocumentFile dir) {
+        if (!isWritableDir(context, dir)) return false;
 
         for (var file : dir.listFiles()) {
             var dirName = file.getName();
