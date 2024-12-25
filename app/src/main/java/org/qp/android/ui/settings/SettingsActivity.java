@@ -46,13 +46,13 @@ public class SettingsActivity extends AppCompatActivity {
         } else {
             AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("en"));
         }
-
-        var destination = navController.getCurrentDestination();
-        if (destination != null && destination.getLabel() != null) {
-            if (destination.getLabel().equals("SettingsFragment")) {
-                setTitle(R.string.settingsTitle);
-            }
+        switch (settingsViewModel.getSettingsController().theme) {
+            case "auto" -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+            case "light" -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+            case "dark" -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
         }
+
+        navController.addOnDestinationChangedListener(listener);
 
         if (savedInstanceState == null) {
             navController.navigate(R.id.settingsFragment);

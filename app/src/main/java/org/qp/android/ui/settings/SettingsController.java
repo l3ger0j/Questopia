@@ -70,6 +70,7 @@ public class SettingsController {
         settingsController.isUseGameFont = preferences.getBoolean("useGameFont", false);
         settingsController.isUseImmersiveMode = preferences.getBoolean("immersiveMode", true);
         settingsController.language = preferences.getString("lang", "ru");
+        settingsController.theme = preferences.getString("theme", "auto");
         imageSettings(settingsController, preferences);
         colorSettings(settingsController , preferences);
         soundSettings(settingsController , preferences);

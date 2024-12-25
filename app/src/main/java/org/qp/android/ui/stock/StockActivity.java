@@ -138,6 +138,13 @@ public class StockActivity extends AppCompatActivity {
                     AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("en"));
                 }
             }
+            case "theme" -> {
+                switch (sharedPreferences.getString("theme", "auto")) {
+                    case "auto" -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+                    case "light" -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+                    case "dark" -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+                }
+            }
         }
     };
 
@@ -155,6 +162,14 @@ public class StockActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         var splashScreen = SplashScreen.installSplashScreen(this);
         splashScreen.setKeepOnScreenCondition(() -> false);
+        splashScreen.setKeepOnScreenCondition(() -> {
+            switch (SettingsController.newInstance(this).theme) {
+                case "auto" -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+                case "light" -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+                case "dark" -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+            }
+            return false;
+        });
         super.onCreate(savedInstanceState);
 
         PreferenceManager

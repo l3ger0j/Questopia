@@ -1,6 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- English/Default version -->
 <resources>
+    <string-array name="themeStatesName">
+        <item>Auto</item>
+        <item>Light</item>
+        <item>Dark</item>
+    </string-array>
+    <string-array name="themeStatesValue">
+        <item>auto</item>
+        <item>light</item>
+        <item>dark</item>
+    </string-array>
     <string-array name="fontName">
         <item>DEFAULT</item>
         <item>SANS_SERIF</item>

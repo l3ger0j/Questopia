@@ -354,6 +354,14 @@ public class GameActivity extends AppCompatActivity {
             } else {
                 AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("en"));
             }
+            switch (settingsController.theme) {
+                case "auto" ->
+                        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+                case "light" ->
+                        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+                case "dark" ->
+                        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+            }
         }
     }
 

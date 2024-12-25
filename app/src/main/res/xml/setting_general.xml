@@ -1,7 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <ListPreference
+        android:defaultValue="auto"
+        android:entries="@array/themeStatesName"
+        android:entryValues="@array/themeStatesValue"
+        android:key="theme"
+        android:icon="@drawable/baseline_dark_mode_24"
+        android:title="@string/appTheme"/>
     <ListPreference
         android:defaultValue="ru"
         android:entries="@array/langName"
