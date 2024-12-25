@@ -129,8 +129,9 @@ public final class FileUtil {
 
     public static DocumentFile fromRelPath(@NonNull Context context ,
                                            @NonNull final String path,
-                                           @NonNull DocumentFile parentDir) {
-        return DocumentFileUtils.child(parentDir, context, path);
+                                           @NonNull DocumentFile parentDir,
+                                           final boolean requiresWriteAccess) {
+        return DocumentFileUtils.child(parentDir, context, path, requiresWriteAccess);
     }
 
     @NonNull
@@ -157,7 +158,7 @@ public final class FileUtil {
                 if (segment.isEmpty()) {
                     continue;
                 }
-                findDir = fromRelPath(context, segment, findDir);
+                findDir = fromRelPath(context, segment, findDir, false);
                 if (findDir == null) {
                     break;
                 }

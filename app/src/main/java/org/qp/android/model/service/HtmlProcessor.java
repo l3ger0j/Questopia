@@ -210,7 +210,7 @@ public class HtmlProcessor {
                                                          Element img) {
         var relPath = img.attr("src");
         return CompletableFuture
-                .supplyAsync(() -> fromRelPath(context , relPath , curGameDir), executors)
+                .supplyAsync(() -> fromRelPath(context , relPath , curGameDir, false), executors)
                 .thenApply(imageFile -> {
                     if (imageFile == null) return false;
                     var drawable = imageProvider.getDrawableFromPath(context , imageFile.getUri());
@@ -224,7 +224,7 @@ public class HtmlProcessor {
                                                           Element img) {
         var relPath = img.attr("src");
         return CompletableFuture
-                .supplyAsync(() -> fromRelPath(context , relPath , curGameDir), executors)
+                .supplyAsync(() -> fromRelPath(context , relPath , curGameDir, false), executors)
                 .thenApply(imageFile -> {
                     if (imageFile == null) return false;
                     var drawable = imageProvider.getDrawableFromPath(context , imageFile.getUri());
