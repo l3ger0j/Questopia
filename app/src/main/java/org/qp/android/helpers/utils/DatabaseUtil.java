@@ -42,31 +42,21 @@ public final class DatabaseUtil {
                 });
     }
 
-    public void updateOrInsertEntry(Game gameEntry) {
-        CompletableFuture
+    public CompletableFuture<Void> updateOrInsertEntry(Game gameEntry) {
+        return CompletableFuture
                 .supplyAsync(() -> gameDao.getById(gameEntry.id))
                 .thenAccept(game -> {
                     if (game != null) {
                         gameDao.update(game);
                     } else {
-                        gameDao.insert(gameEntry);
+                        insertEntry(gameEntry);
                     }
                 });
     }
 
-    public CompletableFuture<Void> insertEntry(Game newGameEntry) {
-        return CompletableFuture
-                .supplyAsync(() -> gameDao.getById(newGameEntry.id))
-                .thenAcceptAsync(gameEntry -> {
-                    if (gameEntry != null) {
-//                        if (gameEntry.gameDirUri.equals(newGameEntry.gameDirUri)) return;
-//                        var secureRandom = new SecureRandom();
-//                        newGameEntry.id = gameEntry.id + secureRandom.nextInt();
-//                        newGameEntry.title = gameEntry.title+"(1)";
-                    } else {
-                        gameDao.insert(newGameEntry);
-                    }
-                });
+    public void insertEntry(Game newGameEntry) {
+        CompletableFuture
+                .runAsync(() -> gameDao.insert(newGameEntry));
     }
 
 }

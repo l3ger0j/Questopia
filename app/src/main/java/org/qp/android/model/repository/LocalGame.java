@@ -91,7 +91,7 @@ public class LocalGame {
         emptyGameEntry.gameDirUri = Uri.fromFile(rootDir);
         emptyGameEntry.gameFilesUri = gameFiles;
 
-        return databaseUtil.insertEntry(emptyGameEntry);
+        return databaseUtil.updateOrInsertEntry(emptyGameEntry);
     }
 
     public CompletableFuture<Void> createEntryInDBFromDir(DocumentFile rootDir) {
@@ -123,7 +123,7 @@ public class LocalGame {
         createNoMediaFile(rootDir);
         createNoSearchFile(rootDir);
 
-        return databaseUtil.insertEntry(emptyGameEntry);
+        return databaseUtil.updateOrInsertEntry(emptyGameEntry);
     }
 
     public CompletableFuture<Void> updateEntryInDB(Game gameEntry) {
