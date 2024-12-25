@@ -32,7 +32,7 @@
         <activity
             android:name=".ui.stock.StockActivity"
             android:exported="true"
-            android:theme="@style/Theme.QP.Translucent.NoActionBar">
+            android:theme="@style/AppTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -43,12 +43,12 @@
         <activity
             android:name=".ui.game.GameActivity"
             android:alwaysRetainTaskState="true"
-            android:theme="@style/Theme.QP.Translucent.NoActionBar" />
+            android:theme="@style/AppTheme" />
 
         <activity
             android:name=".ui.settings.SettingsActivity"
             android:label="@string/settingsTitle"
-            android:theme="@style/Theme.QP.Translucent.NoActionBar" />
+            android:theme="@style/AppTheme" />
 
         <service
             android:name="androidx.appcompat.app.AppLocalesMetadataHolderService"

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="title_background">#202020</color>
+    <color name="title_text">#ffffffff</color>
+    <color name="title_separator">#40ffffff</color>
+    <color name="web_text">#ffffffff</color>
+    <color name="web_background">#ff000000</color>
+    <color name="def_text_color">#000000</color>
+    <color name="def_back_color">#e0e0e0</color>
+    <color name="def_link_color">#0000ff</color>
+    <color name="materialcolorpicker__grey">#b3b3b3</color>
+</resources>
