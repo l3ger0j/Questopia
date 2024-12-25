@@ -44,7 +44,6 @@ import org.qp.android.data.db.GameDao;
 import org.qp.android.data.db.GameDatabase;
 import org.qp.android.databinding.DialogAddBinding;
 import org.qp.android.databinding.DialogEditBinding;
-import org.qp.android.dto.stock.GameData;
 import org.qp.android.dto.stock.RemoteGameData;
 import org.qp.android.helpers.ErrorType;
 import org.qp.android.helpers.bus.EventEmitter;
@@ -418,8 +417,8 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     // TODO: 25.06.2024 Release service for calculate size dir
-    private void calculateSizeDir(GameData gameData) {
-        var gameDir = gameData.getGameDir(getApplication());
+    private void calculateSizeDir() {
+//        var gameDir = gameData.getGameDir(getApplication());
 
 //        CompletableFuture
 //                .supplyAsync(() -> calculateDirSize(gameDir), executor)
