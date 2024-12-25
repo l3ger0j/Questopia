@@ -44,6 +44,7 @@ import org.jetbrains.annotations.Contract;
 import org.qp.android.R;
 import org.qp.android.databinding.ActivityGameBinding;
 import org.qp.android.helpers.ErrorType;
+import org.qp.android.questopiabundle.lib.LibGameRequest;
 import org.qp.android.ui.dialogs.GameDialogFrags;
 import org.qp.android.ui.dialogs.GameDialogType;
 import org.qp.android.ui.settings.SettingsActivity;
@@ -62,27 +63,23 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class GameActivity extends AppCompatActivity {
 
-    private final String TAG = this.getClass().getSimpleName();
-
-    private static final int MAX_SAVE_SLOTS = 5;
     public static final int TAB_MAIN_DESC_AND_ACTIONS = 0;
     public static final int TAB_OBJECTS = 1;
     public static final int TAB_VARS_DESC = 2;
     public static final int LOAD = 0;
     public static final int SAVE = 1;
-
+    private static final int MAX_SAVE_SLOTS = 5;
+    private final String TAG = this.getClass().getSimpleName();
+    private final SimpleStorageHelper storageHelper = new SimpleStorageHelper(this);
     private SettingsController settingsController;
     private int activeTab;
-
     private ActionBar actionBar;
     private Menu mainMenu;
     private ViewPager2 pager2;
     private BottomNavigationView bottomNavigationView;
-
     private int slotAction = 0;
     private GameViewModel gameViewModel;
     private ActivityGameBinding activityGameBinding;
-    private final SimpleStorageHelper storageHelper = new SimpleStorageHelper(this);
     private ActivityResultLauncher<Intent> saveResultLaunch;
 
     public SimpleStorageHelper getStorageHelper() {
@@ -104,14 +101,14 @@ public class GameActivity extends AppCompatActivity {
             getWindow().getAttributes().layoutInDisplayCutoutMode =
                     WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
         }
-        WindowCompat.setDecorFitsSystemWindows(getWindow() , !settingsController.isUseImmersiveMode);
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), !settingsController.isUseImmersiveMode);
 
         var windowInsetsController =
                 WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
         windowInsetsController.setSystemBarsBehavior(
                 WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         );
-        getWindow().getDecorView().setOnApplyWindowInsetsListener((v , insets) -> {
+        getWindow().getDecorView().setOnApplyWindowInsetsListener((v, insets) -> {
             if (settingsController.isUseImmersiveMode) {
                 windowInsetsController.hide(WindowInsetsCompat.Type.systemBars());
             } else {
@@ -128,6 +125,7 @@ public class GameActivity extends AppCompatActivity {
         pager2.setAdapter(new GameStateAdapter(this));
 
         bottomNavigationView = activityGameBinding.bottomNavigationView;
+        bottomNavigationView.setSelectedItemId(R.id.menu_mainDesc);
         bottomNavigationView.setOnItemSelectedListener(item -> {
             int itemId = item.getItemId();
             if (itemId == R.id.menu_mainDesc) {
@@ -139,7 +137,7 @@ public class GameActivity extends AppCompatActivity {
             }
             return true;
         });
-        setOnApplyWindowInsetsListener(bottomNavigationView , null);
+        setOnApplyWindowInsetsListener(bottomNavigationView, null);
 
         saveResultLaunch = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
@@ -150,17 +148,19 @@ public class GameActivity extends AppCompatActivity {
                     var uri = resultData.getData();
 
                     switch (slotAction) {
-                        case LOAD -> gameViewModel.requestForNativeLib(GameLibRequest.LOAD_FILE , uri);
-                        case SAVE -> gameViewModel.requestForNativeLib(GameLibRequest.SAVE_FILE , uri);
+                        case LOAD ->
+                                gameViewModel.requestForNativeLib(LibGameRequest.LOAD_FILE, uri);
+                        case SAVE ->
+                                gameViewModel.requestForNativeLib(LibGameRequest.SAVE_FILE, uri);
                     }
                 }
         );
 
-        storageHelper.setOnFileSelected((integer , documentFiles) -> {
+        storageHelper.setOnFileSelected((integer, documentFiles) -> {
             for (DocumentFile documentFile : documentFiles) {
                 var document = documentWrap(documentFile);
                 switch (document.getExtension()) {
-                    case "text" , "pl" , "txt" , "el" -> {
+                    case "text", "pl", "txt", "el" -> {
                         var stringBuilder = new StringBuilder();
                         try (var inputStream = document.openInputStream(this)) {
                             if (inputStream != null) {
@@ -172,9 +172,9 @@ public class GameActivity extends AppCompatActivity {
                                 }
                             }
                         } catch (FileNotFoundException e) {
-                            showSimpleDialog(getString(R.string.notFoundFile) + "\n" + e , GameDialogType.ERROR_DIALOG , null);
+                            showSimpleDialog(getString(R.string.notFoundFile) + "\n" + e, GameDialogType.ERROR_DIALOG, null);
                         } catch (IOException e) {
-                            showSimpleDialog(getString(R.string.notReadFile) + "\n" + e , GameDialogType.ERROR_DIALOG , null);
+                            showSimpleDialog(getString(R.string.notReadFile) + "\n" + e, GameDialogType.ERROR_DIALOG, null);
                         }
                         postTextInDialogFrags(stringBuilder.toString());
                     }
@@ -192,7 +192,7 @@ public class GameActivity extends AppCompatActivity {
             initGame();
         }
 
-        gameViewModel.getAudioErrorObserver().observe(this , path -> {
+        gameViewModel.getAudioErrorObserver().observe(this, path -> {
             if (!settingsController.isUseMusicDebug) return;
             showSimpleDialog(
                     path,
@@ -206,34 +206,34 @@ public class GameActivity extends AppCompatActivity {
 
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
-        outState.putInt("savedActiveTab" , activeTab);
+        outState.putInt("savedActiveTab", activeTab);
         super.onSaveInstanceState(outState);
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode ,
-                                           @NonNull String[] permissions ,
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode , permissions , grantResults);
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         storageHelper.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     @Override
-    protected void onActivityResult(int requestCode ,
-                                    int resultCode ,
+    protected void onActivityResult(int requestCode,
+                                    int resultCode,
                                     @Nullable Intent data) {
-        super.onActivityResult(requestCode , resultCode , data);
-        storageHelper.getStorage().onActivityResult(requestCode , resultCode , data);
+        super.onActivityResult(requestCode, resultCode, data);
+        storageHelper.getStorage().onActivityResult(requestCode, resultCode, data);
     }
 
-    private void postTextInDialogFrags (String text) {
+    private void postTextInDialogFrags(String text) {
         var manager = getSupportFragmentManager();
         if (!manager.isDestroyed()) {
             for (var fragment : manager.getFragments()) {
-                if (Objects.equals(fragment.getTag() , "executorDialogFragment")
-                        || Objects.equals(fragment.getTag() , "inputDialogFragment")) {
+                if (Objects.equals(fragment.getTag(), "executorDialogFragment")
+                        || Objects.equals(fragment.getTag(), "inputDialogFragment")) {
                     var bundle = new Bundle();
-                    bundle.putString("template" , text);
+                    bundle.putString("template", text);
                     fragment.setArguments(bundle);
                 }
             }
@@ -241,8 +241,10 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void initControls() {
-        setSupportActionBar(activityGameBinding.toolbar);
+        setSupportActionBar(activityGameBinding.gameToolbar);
         actionBar = getSupportActionBar();
+        activityGameBinding.gameToolbar.setNavigationIcon(R.drawable.baseline_arrow_back_24);
+        activityGameBinding.gameToolbar.setNavigationOnClickListener(v -> promptCloseGame());
     }
 
     private void initServices() {
@@ -252,14 +254,12 @@ public class GameActivity extends AppCompatActivity {
 
     private void initGame() {
         var intent = getIntent();
-        var gameId = intent.getStringExtra("gameId");
+        var gameId = intent.getLongExtra("gameId", 0L);
         var gameTitle = intent.getStringExtra("gameTitle");
         var gameDirUri = Uri.parse(intent.getStringExtra("gameDirUri"));
-        var gameDir =  DocumentFileCompat.fromUri(this , gameDirUri);
+        var gameDir = DocumentFileCompat.fromUri(this, gameDirUri);
         var gameFileUri = Uri.parse(intent.getStringExtra("gameFileUri"));
-        var gameFile = DocumentFileCompat.fromUri(this , gameFileUri);
-
-
+        var gameFile = DocumentFileCompat.fromUri(this, gameFileUri);
 
         gameViewModel.setGameDirUri(gameDirUri);
         gameViewModel.runGameIntoNativeLib(gameId, gameTitle, gameDir, gameFile);
@@ -323,14 +323,12 @@ public class GameActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        gameViewModel.removeCallback();
         super.onDestroy();
     }
 
     @Override
     public void onPause() {
         gameViewModel.pauseAudio();
-        gameViewModel.removeCallback();
         super.onPause();
     }
 
@@ -341,7 +339,6 @@ public class GameActivity extends AppCompatActivity {
         applySettings();
         if (gameViewModel.isGameRunning()) {
             gameViewModel.resumeAudio();
-            gameViewModel.setCallback();
         }
     }
 
@@ -374,7 +371,7 @@ public class GameActivity extends AppCompatActivity {
             dialogFragment.setCancelable(false);
             var manager = getSupportFragmentManager();
             if (!manager.isDestroyed()) {
-                dialogFragment.show(manager , "closeGameDialogFragment");
+                dialogFragment.show(manager, "closeGameDialogFragment");
             }
         }
     }
@@ -383,17 +380,17 @@ public class GameActivity extends AppCompatActivity {
         if (!isMainThread()) {
             runOnUiThread(this::showSavePopup);
         } else {
-            mainMenu.performIdentifierAction(R.id.menu_saveGame , 0);
+            mainMenu.performIdentifierAction(R.id.menu_saveGame, 0);
         }
     }
 
-    public void showSimpleDialog(@NonNull String inputString ,
-                                 @NonNull GameDialogType dialogType ,
+    public void showSimpleDialog(@NonNull String inputString,
+                                 @NonNull GameDialogType dialogType,
                                  @Nullable ErrorType errorType) {
         if (isFinishing()) return;
         if (isDestroyed()) return;
         if (!isMainThread()) {
-            runOnUiThread(() -> showSimpleDialog(inputString , dialogType , errorType));
+            runOnUiThread(() -> showSimpleDialog(inputString, dialogType, errorType));
         } else {
             var manager = getSupportFragmentManager();
             var optErrorType = Optional.ofNullable(errorType);
@@ -404,29 +401,29 @@ public class GameActivity extends AppCompatActivity {
                     var dialogFragment = new GameDialogFrags();
                     dialogFragment.setDialogType(GameDialogType.ERROR_DIALOG);
                     if (optErrorType.isPresent()) {
-                        dialogFragment.setMessage(getErrorMessage(inputString , optErrorType.get()));
+                        dialogFragment.setMessage(getErrorMessage(inputString, optErrorType.get()));
                     } else {
                         dialogFragment.setMessage(inputString);
                     }
-                    dialogFragment.show(manager , "errorDialogFragment");
+                    dialogFragment.show(manager, "errorDialogFragment");
                 }
                 case IMAGE_DIALOG -> {
                     var dialogFragment = new GameDialogFrags();
                     dialogFragment.setDialogType(GameDialogType.IMAGE_DIALOG);
                     dialogFragment.pathToImage.set(inputString);
-                    dialogFragment.show(manager , "imageDialogFragment");
+                    dialogFragment.show(manager, "imageDialogFragment");
                 }
                 case LOAD_DIALOG -> {
                     var dialogFragment = new GameDialogFrags();
                     dialogFragment.setDialogType(GameDialogType.LOAD_DIALOG);
                     dialogFragment.setCancelable(true);
-                    dialogFragment.show(manager , "loadGameDialogFragment");
+                    dialogFragment.show(manager, "loadGameDialogFragment");
                 }
             }
         }
     }
 
-    private String getErrorMessage (String inputString , @NonNull ErrorType errorType) {
+    private String getErrorMessage(String inputString, @NonNull ErrorType errorType) {
         return switch (errorType) {
             case IMAGE_ERROR -> getString(R.string.notFoundImage) + "\n" + inputString;
             case SOUND_ERROR -> getString(R.string.notFoundSound) + "\n" + inputString;
@@ -437,8 +434,8 @@ public class GameActivity extends AppCompatActivity {
         };
     }
 
-    public void showMessageDialog (@Nullable String inputString ,
-                                   @NonNull CountDownLatch latch) {
+    public void showMessageDialog(@Nullable String inputString,
+                                  @NonNull CountDownLatch latch) {
         if (isFinishing()) return;
         if (!isMainThread()) {
             runOnUiThread(() -> showMessageDialog(inputString, latch));
@@ -458,7 +455,7 @@ public class GameActivity extends AppCompatActivity {
             dialogFragment.setDialogType(GameDialogType.MESSAGE_DIALOG);
             dialogFragment.setProcessedMsg(processedMsg);
             dialogFragment.setCancelable(false);
-            dialogFragment.show(manager , "showMessageDialogFragment");
+            dialogFragment.show(manager, "showMessageDialogFragment");
             gameViewModel.outputBooleanObserver.observeForever(aBoolean -> {
                 if (aBoolean) {
                     latch.countDown();
@@ -467,8 +464,8 @@ public class GameActivity extends AppCompatActivity {
         }
     }
 
-    public void showInputDialog (@Nullable String inputString ,
-                                 @NonNull ArrayBlockingQueue<String> inputQueue) {
+    public void showInputDialog(@Nullable String inputString,
+                                @NonNull ArrayBlockingQueue<String> inputQueue) {
         if (isFinishing()) return;
         if (!isMainThread()) {
             runOnUiThread(() -> showInputDialog(inputString, inputQueue));
@@ -479,7 +476,7 @@ public class GameActivity extends AppCompatActivity {
             var config = gameViewModel.getIConfig();
             var message = config.useHtml ? gameViewModel.removeHtmlTags(inputString) : inputString;
             if (message == null) {
-                message = "";
+                message = "0";
             }
             if (gameViewModel.outputTextObserver.hasObservers()) {
                 gameViewModel.outputTextObserver = new MutableLiveData<>();
@@ -492,13 +489,13 @@ public class GameActivity extends AppCompatActivity {
                 dialogFragment.setMessage(message);
             }
             dialogFragment.setCancelable(false);
-            dialogFragment.show(manager , "inputDialogFragment");
+            dialogFragment.show(manager, "inputDialogFragment");
             gameViewModel.outputTextObserver.observeForever(inputQueue::add);
         }
     }
 
-    public void showExecutorDialog (@Nullable String inputString ,
-                                    @NonNull ArrayBlockingQueue<String> inputQueue) {
+    public void showExecutorDialog(@Nullable String inputString,
+                                   @NonNull ArrayBlockingQueue<String> inputQueue) {
         if (isFinishing()) return;
         if (!isMainThread()) {
             runOnUiThread(() -> showExecutorDialog(inputString, inputQueue));
@@ -522,13 +519,13 @@ public class GameActivity extends AppCompatActivity {
                 dialogFragment.setMessage(message);
             }
             dialogFragment.setCancelable(false);
-            dialogFragment.show(manager , "executorDialogFragment");
+            dialogFragment.show(manager, "executorDialogFragment");
             gameViewModel.outputTextObserver.observeForever(inputQueue::add);
         }
     }
 
-    public void showMenuDialog (@NonNull ArrayList<String> items ,
-                                @NonNull ArrayBlockingQueue<Integer> resultQueue) {
+    public void showMenuDialog(@NonNull ArrayList<String> items,
+                               @NonNull ArrayBlockingQueue<Integer> resultQueue) {
         if (isFinishing()) return;
         if (!isMainThread()) {
             runOnUiThread(() -> showMenuDialog(items, resultQueue));
@@ -543,7 +540,7 @@ public class GameActivity extends AppCompatActivity {
             dialogFragment.setDialogType(GameDialogType.MENU_DIALOG);
             dialogFragment.setItems(items);
             dialogFragment.setCancelable(false);
-            dialogFragment.show(manager , "showMenuDialogFragment");
+            dialogFragment.show(manager, "showMenuDialogFragment");
             gameViewModel.outputIntObserver.observeForever(resultQueue::add);
         }
     }
@@ -562,14 +559,14 @@ public class GameActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         mainMenu = menu;
         getMenuInflater()
-                .inflate(R.menu.menu_game , menu);
+                .inflate(R.menu.menu_game, menu);
         return true;
     }
 
     @Override
     public boolean onPrepareOptionsMenu(@NonNull Menu menu) {
         var gameRunning = gameViewModel.isGameRunning();
-        menu.setGroupVisible(R.id.menuGroup_running , gameRunning);
+        menu.setGroupVisible(R.id.menuGroup_running, gameRunning);
         if (gameRunning) {
             var loadItem = menu.findItem(R.id.menu_loadGame);
             addSaveSlotsSubMenu(loadItem, LOAD);
@@ -591,9 +588,9 @@ public class GameActivity extends AppCompatActivity {
 
         var order = action == LOAD ? 2 : 3;
         var subMenu = mainMenu.addSubMenu(
-                R.id.menuGroup_running ,
-                id ,
-                order ,
+                R.id.menuGroup_running,
+                id,
+                order,
                 parent.getTitle()
         );
         subMenu.setHeaderTitle(getString(R.string.selectSlot));
@@ -601,12 +598,12 @@ public class GameActivity extends AppCompatActivity {
         MenuItem item;
         for (int i = 0; i <= MAX_SAVE_SLOTS; i++) {
             final var filename = getSaveSlotFilename(i);
-            final var loadFile = fromRelPath(this, filename, savesDir);
+            final var loadFile = fromRelPath(this, filename, savesDir, false);
             var title = "";
 
             if (loadFile != null) {
                 var lastMod = DateFormat.format(
-                        "yyyy-MM-dd HH:mm:ss" ,
+                        "yyyy-MM-dd HH:mm:ss",
                         loadFile.lastModified()
                 ).toString();
                 title = getString(R.string.slotPresent, i + 1, lastMod);
@@ -619,12 +616,12 @@ public class GameActivity extends AppCompatActivity {
                 switch (action) {
                     case LOAD -> {
                         if (loadFile == null) return true;
-                        gameViewModel.requestForNativeLib(GameLibRequest.LOAD_FILE , loadFile.getUri());
+                        gameViewModel.requestForNativeLib(LibGameRequest.LOAD_FILE, loadFile.getUri());
                     }
                     case SAVE -> {
                         var saveFile = findOrCreateFile(this, savesDir, filename, MimeType.TEXT);
                         if (saveFile == null) return true;
-                        gameViewModel.requestForNativeLib(GameLibRequest.SAVE_FILE , saveFile.getUri());
+                        gameViewModel.requestForNativeLib(LibGameRequest.SAVE_FILE, saveFile.getUri());
                     }
                 }
                 return true;
@@ -649,12 +646,12 @@ public class GameActivity extends AppCompatActivity {
         }
     }
 
-    public void startReadOrWriteSave (int slotAction) {
+    public void startReadOrWriteSave(int slotAction) {
         Intent mIntent;
         switch (slotAction) {
             case LOAD -> {
                 mIntent = new Intent(Intent.ACTION_GET_CONTENT);
-                mIntent.putExtra(Intent.ACTION_GET_CONTENT , true);
+                mIntent.putExtra(Intent.ACTION_GET_CONTENT, true);
                 mIntent.setType("application/octet-stream");
                 this.slotAction = slotAction;
                 saveResultLaunch.launch(mIntent);
@@ -671,7 +668,7 @@ public class GameActivity extends AppCompatActivity {
                         extraValue = dir.getName() + ".sav";
                     }
                 }
-                mIntent.putExtra(Intent.EXTRA_TITLE , extraValue);
+                mIntent.putExtra(Intent.EXTRA_TITLE, extraValue);
                 mIntent.setType("application/octet-stream");
                 this.slotAction = slotAction;
                 saveResultLaunch.launch(mIntent);
@@ -692,22 +689,18 @@ public class GameActivity extends AppCompatActivity {
         switch (itemId) {
             case R.id.menu_userInput -> {
                 if (settingsController.isUseExecString) {
-                    gameViewModel.requestForNativeLib(GameLibRequest.USE_EXECUTOR);
+                    gameViewModel.requestForNativeLib(LibGameRequest.USE_EXECUTOR);
                 } else {
-                    gameViewModel.requestForNativeLib(GameLibRequest.USE_INPUT);
+                    gameViewModel.requestForNativeLib(LibGameRequest.USE_INPUT);
                 }
                 return true;
             }
-            case R.id.menu_gameStock -> {
-                promptCloseGame();
-                return true;
-            }
             case R.id.menu_options -> {
-                startActivity(new Intent().setClass(this , SettingsActivity.class));
+                startActivity(new Intent().setClass(this, SettingsActivity.class));
                 return true;
             }
             case R.id.menu_newGame -> {
-                gameViewModel.requestForNativeLib(GameLibRequest.RESTART_GAME);
+                gameViewModel.requestForNativeLib(LibGameRequest.RESTART_GAME);
                 setActiveTab(TAB_MAIN_DESC_AND_ACTIONS);
                 return true;
             }
@@ -716,6 +709,4 @@ public class GameActivity extends AppCompatActivity {
             }
         }
     }
-
-
 }
