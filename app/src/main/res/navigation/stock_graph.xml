@@ -7,10 +7,15 @@
     <fragment
         android:id="@+id/stockViewPagerFragment"
         android:name="org.qp.android.ui.stock.StockViewPagerFragment"
-        android:label="StockViewPagerFragment" />
+        android:label="StockViewPagerFragment" >
+        <action
+            android:id="@+id/action_stockViewPagerFragment_to_stockGameFragment"
+            app:destination="@id/stockGameFragment"
+            app:enterAnim="@anim/nav_default_enter_anim" />
+    </fragment>
     <fragment
         android:id="@+id/stockRecyclerFragment"
-        android:name="org.qp.android.ui.stock.StockRecyclerFragment"
+        android:name="org.qp.android.ui.stock.StockRemoteRVFragment"
         android:label="StockRecyclerFragment" />
     <fragment
         android:id="@+id/stockGameFragment"
