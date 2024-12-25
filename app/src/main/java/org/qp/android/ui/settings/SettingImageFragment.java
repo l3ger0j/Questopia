@@ -12,7 +12,6 @@ public class SettingImageFragment extends PreferenceFragmentCompat {
     @Override
     public void onCreatePreferences(@Nullable Bundle savedInstanceState ,
                                     @Nullable String rootKey) {
-        requireActivity().setTitle(R.string.imageCatTitle);
         addPreferencesFromResource(R.xml.setting_image);
     }
 }

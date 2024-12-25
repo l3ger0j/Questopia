@@ -12,7 +12,6 @@ public class SettingTextFragment extends PreferenceFragmentCompat {
     @Override
     public void onCreatePreferences(@Nullable Bundle savedInstanceState ,
                                     @Nullable String rootKey) {
-        requireActivity().setTitle(R.string.textCatTitle);
         addPreferencesFromResource(R.xml.setting_text);
 
         var textColorPref = findPreference("textColor");

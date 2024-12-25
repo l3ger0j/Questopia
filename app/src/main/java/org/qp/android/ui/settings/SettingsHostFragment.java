@@ -20,25 +20,22 @@ import org.qp.android.BuildConfig;
 import org.qp.android.R;
 import org.qp.android.ui.dialogs.SettingsDialogFrag;
 
-import java.util.Optional;
-
 public class SettingsHostFragment extends PreferenceFragmentCompat {
 
     private SettingsViewModel viewModel;
 
     @Override
-    public void onCreatePreferences(Bundle savedInstanceState , String rootKey) {
+    public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         addPreferencesFromResource(R.xml.settings);
 
-        viewModel =
-                new ViewModelProvider(requireActivity()).get(SettingsViewModel.class);
+        viewModel = new ViewModelProvider(requireActivity()).get(SettingsViewModel.class);
 
         var versionPref = findPreference("showVersion");
         if (versionPref != null) {
             versionPref.setTitle(getString(R.string.extendedName)
-                    .replace("-VERSION-" , BuildConfig.VERSION_NAME));
+                    .replace("-VERSION-", BuildConfig.VERSION_NAME));
             versionPref.setSummaryProvider(preference ->
-                    "Lib version: "+"5.7.0" + "\nTimestamp: " + BuildConfig.BUILD_TIME
+                    "Lib version: " + "5.7.0" + "\nTimestamp: " + BuildConfig.BUILD_TIME
             );
         }
 
@@ -106,7 +103,7 @@ public class SettingsHostFragment extends PreferenceFragmentCompat {
     }
 
     private void createCustomView() {
-        final WebViewAssetLoader assetLoader = new WebViewAssetLoader.Builder()
+        final var assetLoader = new WebViewAssetLoader.Builder()
                 .addPathHandler("/assets/", new WebViewAssetLoader.AssetsPathHandler(requireContext()))
                 .addPathHandler("/res/", new WebViewAssetLoader.ResourcesPathHandler(requireContext()))
                 .build();
@@ -114,11 +111,11 @@ public class SettingsHostFragment extends PreferenceFragmentCompat {
         var linearLayout = new LinearLayout(getContext());
         linearLayout.setOrientation(LinearLayout.VERTICAL);
         var linLayoutParam =
-                new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT ,
+                new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
                         LinearLayout.LayoutParams.MATCH_PARENT);
         linearLayout.setLayoutParams(linLayoutParam);
         var lpView =
-                new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT ,
+                new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
                         LinearLayout.LayoutParams.WRAP_CONTENT);
 
         var webView = new WebView(requireContext());
@@ -126,35 +123,38 @@ public class SettingsHostFragment extends PreferenceFragmentCompat {
         webView.setWebViewClient(new WebViewClient() {
             @Nullable
             @Override
-            public WebResourceResponse shouldInterceptRequest(WebView view ,
+            public WebResourceResponse shouldInterceptRequest(WebView view,
                                                               WebResourceRequest request) {
                 return assetLoader.shouldInterceptRequest(request.getUrl());
             }
 
             @Override
-            public boolean shouldOverrideUrlLoading(WebView view , WebResourceRequest request) {
-                var url = Optional.ofNullable(request.getUrl());
-                if (url.isPresent()) {
-                    var workUri = url.get();
-                    if (workUri.getScheme().startsWith("http")
-                            || workUri.getScheme().startsWith("https")) {
-                        requireContext().startActivity(new Intent(Intent.ACTION_VIEW, workUri));
-                        return true;
-                    }
+            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                if (request.getUrl() == null) return false;
+                var workUri = request.getUrl();
+                if (workUri.getScheme() == null) return false;
+                var schemeUri = workUri.getScheme();
+
+                if (schemeUri.startsWith("http") || schemeUri.startsWith("https")) {
+                    requireContext().startActivity(new Intent(Intent.ACTION_VIEW, workUri));
+                    return true;
                 }
+
                 return false;
             }
         });
+
         webView.loadDataWithBaseURL(
-                null ,
-                viewModel.formationAboutDesc(requireContext()) ,
-                null ,
-                "utf-8" ,
-                null);
+                null,
+                viewModel.formationAboutDesc(requireContext()),
+                null,
+                "utf-8",
+                null
+        );
         webView.setLayoutParams(lpView);
         linearLayout.addView(webView);
         var dialogFrag = new SettingsDialogFrag();
         dialogFrag.setView(linearLayout);
-        dialogFrag.show(getParentFragmentManager() , "aboutDialogFragment");
+        dialogFrag.show(getParentFragmentManager(), "aboutDialogFragment");
     }
 }

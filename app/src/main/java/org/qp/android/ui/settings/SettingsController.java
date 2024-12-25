@@ -36,6 +36,7 @@ public class SettingsController {
     public boolean isUseMusicDebug;
     public boolean isVideoMute;
     public String language;
+    public String theme;
 
     private static SettingsController INSTANCE;
 
@@ -80,11 +81,11 @@ public class SettingsController {
     private static void colorSettings (@NonNull SettingsController settingsController,
                                        @NonNull SharedPreferences preferences) {
         settingsController.isUseGameTextColor = preferences.getBoolean("useGameTextColor", true);
-        settingsController.textColor = preferences.getInt("textColor", Color.parseColor("#000000"));
+        settingsController.textColor = preferences.getInt("textColor", Color.BLACK);
         settingsController.isUseGameBackgroundColor = preferences.getBoolean("useGameBackgroundColor", true);
-        settingsController.backColor = preferences.getInt("backColor", Color.parseColor("#e0e0e0"));
+        settingsController.backColor = preferences.getInt("backColor", 0xFFE0E0E0);
         settingsController.isUseGameLinkColor = preferences.getBoolean("useGameLinkColor", true);
-        settingsController.linkColor = preferences.getInt("linkColor", Color.parseColor("#0000ff"));
+        settingsController.linkColor = preferences.getInt("linkColor", Color.BLUE);
     }
 
     private static void imageSettings (@NonNull SettingsController settingsController,
