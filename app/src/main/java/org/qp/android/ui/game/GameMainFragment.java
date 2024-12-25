@@ -58,10 +58,10 @@ public class GameMainFragment extends Fragment {
 
         separatorView = gameMainBinding.separator;
         if (viewModel.getSettingsController().isUseSeparator) {
-            separatorView.setBackgroundColor(viewModel.getBackgroundColor());
+            var defSepColor = requireContext().getColor(R.color.materialcolorpicker__grey);
+            separatorView.setBackgroundColor(defSepColor);
         } else {
-            separatorView.setBackgroundColor(
-                    requireContext().getColor(R.color.materialcolorpicker__grey));
+            separatorView.setBackgroundColor(viewModel.getBackgroundColor());
         }
 
         // WebView
@@ -105,10 +105,10 @@ public class GameMainFragment extends Fragment {
         // Settings
         viewModel.getControllerObserver().observe(getViewLifecycleOwner(), settingsController -> {
             if (settingsController.isUseSeparator) {
-                separatorView.setBackgroundColor(viewModel.getBackgroundColor());
+                var defSepColor = requireContext().getColor(R.color.materialcolorpicker__grey);
+                separatorView.setBackgroundColor(defSepColor);
             } else {
-                separatorView.setBackgroundColor(
-                        requireContext().getColor(R.color.materialcolorpicker__grey));
+                separatorView.setBackgroundColor(viewModel.getBackgroundColor());
             }
 
             constraintSet.clone(layoutTop);

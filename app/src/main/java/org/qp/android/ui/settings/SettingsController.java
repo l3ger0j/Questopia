@@ -67,7 +67,7 @@ public class SettingsController {
         settingsController.actionsHeightRatio = parseActionsHeightRatio(preferences.getString("actsHeight", "1/3"));
         settingsController.isUseAutoscroll = preferences.getBoolean("autoscroll", true);
         settingsController.isUseExecString = preferences.getBoolean("execString", false);
-        settingsController.isUseSeparator = preferences.getBoolean("separator", false);
+        settingsController.isUseSeparator = preferences.getBoolean("separator", true);
         settingsController.isUseGameFont = preferences.getBoolean("useGameFont", false);
         settingsController.isUseImmersiveMode = preferences.getBoolean("immersiveMode", true);
         settingsController.language = preferences.getString("lang", "ru");

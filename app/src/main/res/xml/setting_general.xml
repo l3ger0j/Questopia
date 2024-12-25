@@ -31,7 +31,7 @@
         android:title="@string/actsHeightTitle" />
     <CheckBoxPreference
         android:icon="@drawable/baseline_visibility_24"
-        android:defaultValue="false"
+        android:defaultValue="true"
         android:key="separator"
         android:summary="@string/separatorSum"
         android:title="@string/separatorTitle" />
