@@ -25,10 +25,6 @@
     </group>
 
     <item
-        android:id="@+id/menu_gameStock"
-        android:orderInCategory="4"
-        android:title="@string/gameStockTitle" />
-    <item
         android:id="@+id/menu_options"
         android:orderInCategory="5"
         android:title="@string/settingsTitle" />

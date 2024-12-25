@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:id="@+id/menu_mainDesc"
-        android:title="@string/mainDescTitle"
-        android:icon="@drawable/baseline_tab_main_24" />
-    <item
         android:id="@+id/menu_varsDesc"
         android:title="@string/varsDescTitle"
         android:icon="@drawable/baseline_tab_vars_24" />
+    <item
+        android:id="@+id/menu_mainDesc"
+        android:title="@string/mainDescTitle"
+        android:icon="@drawable/baseline_tab_main_24" />
     <item
         android:id="@+id/menu_inventory"
         android:title="@string/inventoryTitle"
