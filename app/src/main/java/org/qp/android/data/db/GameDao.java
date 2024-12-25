@@ -16,11 +16,19 @@ public interface GameDao {
     List<Game> getAll();
 
     @Query("SELECT * FROM game ORDER BY " +
-            "CASE WHEN :isAsc = 1 THEN title END ASC, " +
-            "CASE WHEN :isAsc = 2 THEN title END DESC ")
+            "CASE WHEN :isAsc = 0 THEN title END ASC, " +
+            "CASE WHEN :isAsc = 1 THEN title END DESC ")
     List<Game> getAllSortedByName(int isAsc);
 
-    @Query("SELECT * FROM game WHERE id LIKE :name LIMIT 1")
+    @Query("SELECT * FROM game WHERE listId LIKE 0 ORDER BY " +
+            "CASE WHEN :isAsc = 1 THEN title END ASC, " +
+            "CASE WHEN :isAsc = 2 THEN title END DESC ")
+    List<Game> getIntSortedByName(int isAsc);
+
+    @Query("SELECT * FROM game WHERE id LIKE :id LIMIT 1")
+    Game getById(long id);
+
+    @Query("SELECT * FROM game WHERE title LIKE :name LIMIT 1")
     Game getByName(String name);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -34,5 +42,8 @@ public interface GameDao {
 
     @Delete
     void delete(Game game);
+
+    @Delete
+    int deleteList(List<Game> entriesDelete);
 
 }

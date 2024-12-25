@@ -9,7 +9,6 @@ import androidx.annotation.NonNull;
 import androidx.documentfile.provider.DocumentFile;
 
 import com.anggrayudi.storage.file.DocumentFileCompat;
-import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.io.File;
@@ -80,6 +79,26 @@ public class GameData implements Serializable {
     }
 
     public GameData() {}
+
+//    public GameData(Game other) {
+//        id = other.id;
+//        listId = other.listId;
+//        author = other.author;
+//        portedBy = other.portedBy;
+//        version = other.version;
+//        title = other.title;
+//        lang = other.lang;
+//        player = other.player;
+//        icon = other.icon;
+//        fileUrl = other.fileUrl;
+//        fileSize = other.fileSize;
+//        fileExt = other.fileExt;
+//        descUrl = other.descUrl;
+//        pubDate = other.pubDate;
+//        modDate = other.modDate;
+//        gameDir = other.gameDirUri;
+//        gameFiles = other.gameFilesUri;
+//    }
 
     public GameData(GameData other) {
         id = other.id;

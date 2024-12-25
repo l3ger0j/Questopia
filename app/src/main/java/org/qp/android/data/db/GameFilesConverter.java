@@ -5,7 +5,6 @@ import android.net.Uri;
 import androidx.room.TypeConverter;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class GameFilesConverter {
@@ -16,7 +15,7 @@ public class GameFilesConverter {
         gameFilesUri.forEach(uri ->
                 tempList.add(String.valueOf(uri))
         );
-        return String.join("," , tempList);
+        return String.join(",", tempList);
     }
 
     @TypeConverter
@@ -25,7 +24,7 @@ public class GameFilesConverter {
         var tempList = new ArrayList<Uri>();
         for (var s : inputList) {
             tempList.add(Uri.parse(s));
-        };
+        }
         return tempList;
     }
 
