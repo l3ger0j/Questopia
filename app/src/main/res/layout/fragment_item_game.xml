@@ -2,6 +2,7 @@
 <layout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
+
     <data>
         <import type="android.text.TextUtils" />
         <import type="android.view.View" />
@@ -11,32 +12,48 @@
             type="org.qp.android.ui.stock.StockViewModel" />
 
         <variable
-            name="gameData"
+            name="data"
             type="org.qp.android.ui.stock.GameDataObserver" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="match_parent">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/constraintLayout"
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/gameItemAppBar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="16dp"
-            android:layout_marginTop="24dp"
+            android:animateLayoutChanges="true"
+            android:fitsSystemWindows="true"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
+
+            <com.google.android.material.appbar.MaterialToolbar
+                android:id="@+id/itemToolbar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/constraintLayout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="16dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/gameItemAppBar">
 
             <ImageView
                 android:id="@+id/gameIconIV"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
-                android:layout_marginStart="8dp"
                 android:layout_marginVertical="8dp"
-                app:imageUrl="@{gameData.iconPathObserver}"
+                android:layout_marginStart="8dp"
+                app:imageUri="@{data.iconUriObserver}"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
@@ -49,7 +66,7 @@
                 android:layout_marginStart="24dp"
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="16dp"
-                android:text="@{gameData.titleObserver}"
+                android:text="@{data.titleObserver}"
                 android:textSize="24sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/gameIconIV"
@@ -57,27 +74,30 @@
 
             <TextView
                 android:id="@+id/gameAuthorTV"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="24dp"
                 android:layout_marginVertical="8dp"
-                android:text="@{gameData.authorObserver}"
+                android:layout_marginStart="24dp"
+                android:layout_marginEnd="16dp"
+                android:text="@{data.authorObserver}"
                 android:textSize="16sp"
-                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/gameIconIV"
                 app:layout_constraintTop_toBottomOf="@+id/gameTitleTV" />
 
             <TextView
                 android:id="@+id/gamePortTV"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginVertical="8dp"
+                android:layout_marginStart="24dp"
                 android:layout_marginEnd="16dp"
-                android:text="@{gameData.portedByObserver}"
+                android:text="@{data.portedByObserver}"
                 android:textSize="16sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/gameTitleTV" />
+                app:layout_constraintStart_toEndOf="@+id/gameIconIV"
+                app:layout_constraintTop_toBottomOf="@+id/gameAuthorTV" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -86,7 +106,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="16dp"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="16dp"
             android:visibility="@{viewModel.isGameInstalled() || viewModel.isGamePossiblyDownload() ? View.VISIBLE : View.GONE}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -97,7 +117,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.5"
-                android:text="@{gameData.fileSizeObserver}"
+                android:text="@{data.fileSizeObserver}"
                 android:textSize="16sp" />
 
             <TextView
@@ -105,7 +125,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.5"
-                android:text="@{gameData.fileExtObserver}"
+                android:text="@{data.fileExtObserver}"
                 android:textSize="16sp" />
 
             <TextView
@@ -113,7 +133,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.5"
-                android:text="@{gameData.versionObserver}"
+                android:text="@{data.versionObserver}"
                 android:textSize="16sp" />
         </LinearLayout>
 
@@ -133,7 +153,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.5"
-                android:text="@{viewModel.getGamePubData()}"
+                android:text="@{data.pubDateObserver}"
                 android:textSize="16sp" />
 
             <TextView
@@ -141,7 +161,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.5"
-                android:text="@{viewModel.getGameModData()}"
+                android:text="@{data.modDateObserver}"
                 android:textSize="16sp" />
         </LinearLayout>
 
@@ -150,7 +170,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="16dp"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="16dp"
             android:orientation="horizontal"
             android:visibility="@{viewModel.isGameInstalled() ? View.VISIBLE : View.GONE}"
             app:layout_constraintEnd_toEndOf="parent"
@@ -158,22 +178,21 @@
             app:layout_constraintTop_toBottomOf="@+id/dataLayout">
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/editButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/editButton"
-                android:textColor="@color/def_back_color"
-                app:cornerRadius="10dp" />
-
-            <com.google.android.material.button.MaterialButton
                 android:id="@+id/playButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/play"
-                android:textColor="@color/def_back_color"
                 app:cornerRadius="10dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/editButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/editButton"
+                app:cornerRadius="10dp" />
+
         </LinearLayout>
 
         <com.google.android.material.button.MaterialButton
@@ -181,9 +200,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="16dp"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="16dp"
             android:text="@string/downloadButton"
-            android:textColor="@color/def_back_color"
             android:visibility="@{viewModel.isGamePossiblyDownload ? View.VISIBLE : View.GONE}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
