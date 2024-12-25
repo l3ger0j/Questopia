@@ -79,8 +79,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
 
@@ -98,7 +96,6 @@ public class StockActivity extends AppCompatActivity {
     private static final int POST_NOTIFICATION_CODE = 203;
 
     public final SimpleDateFormat timeDateRemGamesList = new SimpleDateFormat("yyyy-MM-dd'T'HH-mm-ss", Locale.ROOT);
-    private final ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
     private final SimpleStorageHelper storageHelper = new SimpleStorageHelper(this);
     protected ActivityStockBinding activityStockBinding;
     @Inject
@@ -203,19 +200,12 @@ public class StockActivity extends AppCompatActivity {
 
         ViewCompat.setOnApplyWindowInsetsListener(mFAB, (v, windowInsets) -> {
             var insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
-            // Apply the insets as a margin to the view. This solution sets
-            // only the bottom, left, and right dimensions, but you can apply whichever
-            // insets are appropriate to your layout. You can also update the view padding
-            // if that's more appropriate.
             var mlp = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
             var margin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 32, getResources().getDisplayMetrics());
             mlp.leftMargin = insets.left;
             mlp.bottomMargin = insets.bottom + margin;
             mlp.rightMargin = insets.right + margin;
             v.setLayoutParams(mlp);
-
-            // Return CONSUMED if you don't want want the window insets to keep passing
-            // down to descendant views.
             return WindowInsetsCompat.CONSUMED;
         });
 
