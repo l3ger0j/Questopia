@@ -23,7 +23,7 @@
         android:entryValues="@array/actsHeight"
         android:key="actsHeight"
         android:title="@string/actsHeightTitle" />
-    <SwitchPreferenceCompat
+    <CheckBoxPreference
         android:icon="@drawable/baseline_visibility_24"
         android:defaultValue="false"
         android:key="separator"
@@ -39,5 +39,4 @@
         android:key="autoscroll"
         android:icon="@drawable/baseline_move_down_24"
         android:title="@string/autoscrollTitle" />
-
 </PreferenceScreen>
