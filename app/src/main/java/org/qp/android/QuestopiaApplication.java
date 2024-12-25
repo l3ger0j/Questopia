@@ -28,11 +28,16 @@ public class QuestopiaApplication extends Application {
     private final LibProxyImpl libProxy = new LibProxyImpl(this);
 
     private DocumentFile currentGameDir;
+    private PluginClient currPluginClient;
 
     @Override
     public void onCreate() {
         super.onCreate();
         createNotificationChannels();
+    }
+
+    public void setCurrPluginClient(PluginClient currPluginClient) {
+        this.currPluginClient = currPluginClient;
     }
 
     public void setCurrentGameDir(DocumentFile currentGameDir) {
@@ -55,6 +60,10 @@ public class QuestopiaApplication extends Application {
 
     public DocumentFile getCurrentGameDir() {
         return currentGameDir;
+    }
+
+    public PluginClient getCurrPluginClient() {
+        return currPluginClient;
     }
 
     public void createNotificationChannels() {

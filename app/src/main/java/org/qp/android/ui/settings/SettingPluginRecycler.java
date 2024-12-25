@@ -72,7 +72,7 @@ public class SettingPluginRecycler extends RecyclerView.Adapter<SettingPluginRec
         var pluginInfo = getItem(position);
 
         // pluginAuthor
-        if (pluginInfo.author() != null && pluginInfo.author().length() > 0) {
+        if (pluginInfo.author() != null && !pluginInfo.author().isEmpty()) {
             var authorText = context.getString(R.string.author)
                     .replace("-AUTHOR-", pluginInfo.author());
             holder.listItemPluginBinding.pluginAuthor.setText(authorText);
