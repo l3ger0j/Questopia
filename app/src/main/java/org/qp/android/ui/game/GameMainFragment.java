@@ -21,28 +21,28 @@ import androidx.recyclerview.widget.RecyclerView;
 import org.qp.android.R;
 import org.qp.android.databinding.FragmentGameMainBinding;
 import org.qp.android.helpers.adapters.RecyclerItemClickListener;
+import org.qp.android.questopiabundle.lib.LibTypeDialog;
 
 public class GameMainFragment extends Fragment {
 
     private GameViewModel viewModel;
     private ConstraintLayout layoutTop;
     private WebView mainDescView;
-    private View separatorView;
-    private RecyclerView actionsView;
-
     private final Runnable onScroll = () -> {
         if (!isAdded()) return;
         if (mainDescView.getContentHeight()
                 * getResources().getDisplayMetrics().density
                 > mainDescView.getScrollY()) {
-            mainDescView.scrollBy(0 , mainDescView.getHeight());
+            mainDescView.scrollBy(0, mainDescView.getHeight());
         }
     };
+    private View separatorView;
+    private RecyclerView actionsView;
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater ,
-                             @Nullable ViewGroup container ,
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         var gameMainBinding = FragmentGameMainBinding.inflate(getLayoutInflater());
         viewModel = new ViewModelProvider(requireActivity()).get(GameViewModel.class);
@@ -52,8 +52,8 @@ public class GameMainFragment extends Fragment {
         layoutTop.setBackgroundColor(viewModel.getBackgroundColor());
         var constraintSet = new ConstraintSet();
         constraintSet.clone(layoutTop);
-        constraintSet.setVerticalWeight(R.id.main_desc , 1.0f - (viewModel.getSettingsController().actionsHeightRatio));
-        constraintSet.setVerticalWeight(R.id.actions , (viewModel.getSettingsController().actionsHeightRatio));
+        constraintSet.setVerticalWeight(R.id.gameMainDesc, 1.0f - (viewModel.getSettingsController().actionsHeightRatio));
+        constraintSet.setVerticalWeight(R.id.gameMainActions, (viewModel.getSettingsController().actionsHeightRatio));
         constraintSet.applyTo(layoutTop);
 
         separatorView = gameMainBinding.separator;
@@ -65,7 +65,7 @@ public class GameMainFragment extends Fragment {
         }
 
         // WebView
-        mainDescView = viewModel.getDefaultWebClient(gameMainBinding.mainDesc);
+        mainDescView = viewModel.getDefaultWebClient(gameMainBinding.gameMainDesc);
         mainDescView.setBackgroundColor(viewModel.getBackgroundColor());
         mainDescView.addJavascriptInterface(new Object() {
             @JavascriptInterface
@@ -73,35 +73,37 @@ public class GameMainFragment extends Fragment {
                 if (src == null) return;
                 var imageUri = viewModel.getImageUriFromPath(src);
                 if (imageUri.equals(Uri.EMPTY)) return;
-                viewModel.showPicture(String.valueOf(imageUri));
+                var pathToPic = String.valueOf(imageUri);
+                viewModel.showLibDialog(LibTypeDialog.DIALOG_PICTURE, pathToPic);
             }
-        } , "img");
+        }, "img");
         if (viewModel.getSettingsController().isUseAutoscroll) {
-            mainDescView.postDelayed(onScroll , 300);
+            mainDescView.postDelayed(onScroll, 300);
         }
-        viewModel.getMainDescObserver().observe(getViewLifecycleOwner() , desc ->
-                mainDescView.loadDataWithBaseURL(
-                        "file:///" ,
-                        desc ,
-                        "text/html" ,
-                        "UTF-8" ,
-                        null));
+        viewModel.getMainDescObserver().observe(getViewLifecycleOwner(), desc -> {
+            mainDescView.loadDataWithBaseURL(
+                    "file:///",
+                    desc,
+                    "text/html",
+                    "UTF-8",
+                    "");
+        });
 
         // RecyclerView
-        actionsView = gameMainBinding.actions;
+        actionsView = gameMainBinding.gameMainActions;
         var manager = (LinearLayoutManager) actionsView.getLayoutManager();
         var dividerItemDecoration = new DividerItemDecoration(
-                actionsView.getContext() ,
+                actionsView.getContext(),
                 manager.getOrientation());
         actionsView.addItemDecoration(dividerItemDecoration);
         actionsView.setOverScrollMode(View.OVER_SCROLL_NEVER);
-        viewModel.getActionObserver().observe(getViewLifecycleOwner() , actions -> {
+        viewModel.getActionObserver().observe(getViewLifecycleOwner(), actions -> {
             actionsView.setBackgroundColor(viewModel.getBackgroundColor());
             actionsView.setAdapter(actions);
         });
 
         // Settings
-        viewModel.getControllerObserver().observe(getViewLifecycleOwner() , settingsController -> {
+        viewModel.getControllerObserver().observe(getViewLifecycleOwner(), settingsController -> {
             if (settingsController.isUseSeparator) {
                 separatorView.setBackgroundColor(viewModel.getBackgroundColor());
             } else {
@@ -110,8 +112,8 @@ public class GameMainFragment extends Fragment {
             }
 
             constraintSet.clone(layoutTop);
-            constraintSet.setVerticalWeight(R.id.main_desc , 1.0f - (settingsController.actionsHeightRatio));
-            constraintSet.setVerticalWeight(R.id.actions , (settingsController.actionsHeightRatio));
+            constraintSet.setVerticalWeight(R.id.gameMainDesc, 1.0f - (settingsController.actionsHeightRatio));
+            constraintSet.setVerticalWeight(R.id.gameMainActions, (settingsController.actionsHeightRatio));
             constraintSet.applyTo(layoutTop);
 
             layoutTop.setBackgroundColor(viewModel.getBackgroundColor());
@@ -119,22 +121,23 @@ public class GameMainFragment extends Fragment {
             actionsView.setBackgroundColor(viewModel.getBackgroundColor());
             gameMainBinding.getRoot().refreshDrawableState();
         });
+
         return gameMainBinding.getRoot();
     }
 
     @Override
-    public void onViewCreated(@NonNull View view , @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         actionsView.addOnItemTouchListener(new RecyclerItemClickListener(
-                requireContext() ,
-                actionsView ,
+                requireContext(),
+                actionsView,
                 new RecyclerItemClickListener.OnItemClickListener() {
                     @Override
-                    public void onItemClick(View view , int position) {
+                    public void onItemClick(View view, int position) {
                         viewModel.onActionClicked(position);
                     }
 
                     @Override
-                    public void onLongItemClick(View view , int position) {
+                    public void onLongItemClick(View view, int position) {
 
                     }
                 }

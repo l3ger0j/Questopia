@@ -7,8 +7,7 @@ import android.os.Build;
 
 import androidx.documentfile.provider.DocumentFile;
 
-import org.qp.android.model.lib.LibIProxy;
-import org.qp.android.model.lib.LibProxyImpl;
+import org.qp.android.model.plugin.PluginClient;
 import org.qp.android.model.service.AudioPlayer;
 import org.qp.android.model.service.HtmlProcessor;
 import org.qp.android.model.service.ImageProvider;
@@ -25,7 +24,6 @@ public class QuestopiaApplication extends Application {
     private final ImageProvider imageProvider = new ImageProvider();
     private final HtmlProcessor htmlProcessor = new HtmlProcessor(imageProvider);
     private final AudioPlayer audioPlayer = new AudioPlayer(this);
-    private final LibProxyImpl libProxy = new LibProxyImpl(this);
 
     private DocumentFile currentGameDir;
     private PluginClient currPluginClient;
@@ -52,10 +50,6 @@ public class QuestopiaApplication extends Application {
 
     public AudioPlayer getAudioPlayer() {
         return audioPlayer.setCurGameDir(currentGameDir);
-    }
-
-    public LibIProxy getLibProxy() {
-        return libProxy;
     }
 
     public DocumentFile getCurrentGameDir() {

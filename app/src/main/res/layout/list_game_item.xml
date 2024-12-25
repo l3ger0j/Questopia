@@ -8,7 +8,7 @@
 
         <variable
             name="libListItem"
-            type="org.qp.android.dto.lib.LibListItem" />
+            type="org.qp.android.questopiabundle.dto.LibListItem" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
