@@ -25,25 +25,22 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Set;
 import java.util.regex.Pattern;
 
 public class ArchiveUnpack {
 
     private static final String TAG = ArchiveUnpack.class.getSimpleName();
-
-    public File unpackFolder;
-
     private final Context context;
     private final File targetArchive;
+    public File unpackFolder;
     private File destFolder;
 
     @NonNull
     private static int[] getPrimitiveLongArrayFromInt(Set<Integer> input) {
-        int[] ret = new int[input.size()];
-        Iterator<Integer> iterator = input.iterator();
-        for (int i = 0; i < ret.length; i++) {
+        var ret = new int[input.size()];
+        var iterator = input.iterator();
+        for (var i = 0; i < ret.length; i++) {
             ret[i] = iterator.next();
         }
         return ret;
@@ -63,14 +60,14 @@ public class ArchiveUnpack {
         try (var stream = new RandomAccessFileInStream(new RandomAccessFile(targetArchive, "r"));
              var inArchive = SevenZip.openInArchive(null, stream)) {
             var itemCount = inArchive.getNumberOfItems();
-
             var fileNames = new HashMap<Integer, String>();
+
             for (int ind = 0; ind < itemCount; ind++) {
                 var fileName = inArchive.getStringProperty(ind, PropID.PATH);
                 if (fileName.endsWith(".qsp") || fileName.endsWith(".gam")) {
                     if (fileName.split("/").length == 1) {
                         var archiveName = targetArchive.getName();
-                        var pattern = Pattern.compile(".(?:r\\d\\d|r\\d\\d\\d|rar|zip|aqsp)");
+                        var pattern = Pattern.compile(".(?:rar|zip|aqsp)");
                         var folderName = pattern.matcher(archiveName).replaceAll("");
                         if (fileName.split("/").length == 1) {
                             destFolder = findOrCreateFolder(context, destFolder, folderName);
