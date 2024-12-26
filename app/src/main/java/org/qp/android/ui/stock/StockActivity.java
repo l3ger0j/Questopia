@@ -23,7 +23,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.storage.StorageManager;
 import android.provider.Settings;
-import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
@@ -162,6 +161,14 @@ public class StockActivity extends AppCompatActivity {
         }
 
         activityStockBinding = ActivityStockBinding.inflate(getLayoutInflater());
+        ViewCompat.setOnApplyWindowInsetsListener(activityStockBinding.getRoot(), (v, windowInsets) -> {
+            var insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+            var mlp = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
+            mlp.topMargin = insets.top;
+            mlp.bottomMargin = insets.bottom;
+            v.setLayoutParams(mlp);
+            return WindowInsetsCompat.CONSUMED;
+        });
         stockViewModel = new ViewModelProvider(this).get(StockViewModel.class);
         var searchToolbar = activityStockBinding.stockSearchBar;
         setSupportActionBar(activityStockBinding.stockSearchBar);
@@ -197,17 +204,6 @@ public class StockActivity extends AppCompatActivity {
             }
         });
         mFAB.setOnClickListener(view -> showDirPickerDialog());
-
-        ViewCompat.setOnApplyWindowInsetsListener(mFAB, (v, windowInsets) -> {
-            var insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
-            var mlp = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
-            var margin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 32, getResources().getDisplayMetrics());
-            mlp.leftMargin = insets.left;
-            mlp.bottomMargin = insets.bottom + margin;
-            mlp.rightMargin = insets.right + margin;
-            v.setLayoutParams(mlp);
-            return WindowInsetsCompat.CONSUMED;
-        });
 
         searchView.addTransitionListener((searchView1 , previousState , newState) -> {
             if (newState.name().equalsIgnoreCase("SHOWING")) {
