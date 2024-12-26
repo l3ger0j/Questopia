@@ -11,6 +11,7 @@ public class GameFilesConverter {
 
     @TypeConverter
     public String fromGameFilesUri(List<Uri> gameFilesUri) {
+        if (gameFilesUri == null) return "";
         var tempList = new ArrayList<String>();
         gameFilesUri.forEach(uri ->
                 tempList.add(String.valueOf(uri))

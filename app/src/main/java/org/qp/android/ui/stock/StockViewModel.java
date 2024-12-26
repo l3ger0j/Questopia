@@ -33,8 +33,6 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.anggrayudi.storage.callback.FileCallback;
 import com.anggrayudi.storage.file.DocumentFileCompat;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.squareup.picasso.Picasso;
 
 import org.qp.android.QuestopiaApplication;
@@ -44,7 +42,6 @@ import org.qp.android.data.db.GameDao;
 import org.qp.android.data.db.GameDatabase;
 import org.qp.android.databinding.DialogAddBinding;
 import org.qp.android.databinding.DialogEditBinding;
-import org.qp.android.dto.stock.RemoteGameData;
 import org.qp.android.helpers.ErrorType;
 import org.qp.android.helpers.bus.EventEmitter;
 import org.qp.android.helpers.utils.DatabaseUtil;
@@ -64,10 +61,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -495,33 +490,7 @@ public class StockViewModel extends AndroidViewModel {
                 });
     }
 
-    private CompletableFuture<List<RemoteGameData>> fetchRemoteData() {
-        return CompletableFuture
-                .supplyAsync(() -> {
-                    var cache = getApplication().getExternalCacheDir();
-                    if (cache == null) return Collections.emptyList();
-                    var listFiles = cache.listFiles();
-                    if (listFiles == null) return Collections.emptyList();
-
-                    for (var file : listFiles) {
-                        if (file.getName().isEmpty()) continue;
-                        if (!file.getName().equalsIgnoreCase(EXT_GAME_LIST_NAME)) {
-                            var mapper = new XmlMapper();
-                            try {
-                                var ref = new TypeReference<ArrayList<RemoteGameData>>() {
-                                };
-                                return mapper.readValue(file, ref);
-                            } catch (IOException e) {
-                                throw new CompletionException(e);
-                            }
-                        }
-                    }
-
-                    return Collections.emptyList();
-                }, executor);
-    }
-
-    public void refreshGameData() {
+    public void refreshGameEntry() {
         gamesMap.clear();
 
         var pageNumber = currPageNumber.getValue();
@@ -532,7 +501,19 @@ public class StockViewModel extends AndroidViewModel {
 
             doIsHideFAB.setValue(false);
 
-            syncFromDisk();
+            databaseUtil.getAllGameEntries()
+                    .thenAcceptAsync(listGameEntries -> {
+                        listGameEntries.forEach(gameData -> {
+                            if (gameData.listId == 0) {
+                                gamesMap.put(gameData.id, gameData);
+                            }
+                        });
+                        gameEntriesLiveData.postValue(new ArrayList<>(gamesMap.values()));
+                    }, executor)
+                    .exceptionally(throwable -> {
+                        Log.e(TAG, "Error: ", throwable);
+                        return null;
+                    });
         }
 
         if (pageNumber == 1) {
@@ -540,88 +521,20 @@ public class StockViewModel extends AndroidViewModel {
 
             doIsHideFAB.setValue(true);
 
-            syncRemote();
+            databaseUtil.getAllGameEntries()
+                    .thenAcceptAsync(listGameEntries -> {
+                        listGameEntries.forEach(gameData -> {
+                            if (gameData.listId == 1) {
+                                gamesMap.put(gameData.id, gameData);
+                            }
+                        });
+                        gameEntriesLiveData.postValue(new ArrayList<>(gamesMap.values()));
+                    }, executor)
+                    .exceptionally(throwable -> {
+                        Log.e(TAG, "Error: ", throwable);
+                        return null;
+                    });
         }
-
-    }
-
-    //                        if (!data.isFileInstalled()) continue;
-//                        if (!isNotEmpty(data.fileSize)) {
-//                            calculateSizeDir(data);
-//                        } else {
-//                            if (!data.fileSize.equals(DISABLE_CALCULATE_DIR)) {
-//                                try {
-//                                    var fileSize = Long.parseLong(data.fileSize);
-//                                    var currPrefix = getController().binaryPrefixes;
-//                                    data.fileSize = formatFileSize(fileSize , currPrefix);
-//                                } catch (NumberFormatException ignored) {}
-//                            }
-//                        }
-
-    // Internal and external
-    private void syncFromDisk() {
-        databaseUtil.getAllGameEntries()
-                .thenAcceptAsync(listGameEntries -> {
-                    listGameEntries.forEach(gameData -> gamesMap.put(gameData.id, gameData));
-                    gameEntriesLiveData.postValue(new ArrayList<>(gamesMap.values()));
-                }, executor)
-                .exceptionally(throwable -> {
-                    Log.e(TAG, "Error: ", throwable);
-                    return null;
-                });
-    }
-
-    //                    var sortedGameData = getSortedGames();
-    //                    for (var data : sortedGameData) {
-//                        if (isNotEmpty(data.fileSize)) {
-//                            if (!data.fileSize.equals(DISABLE_CALCULATE_DIR)) {
-//                                var fileSize = Long.parseLong(data.fileSize);
-//                                var currPrefix = getController().binaryPrefixes;
-//                                data.fileSize = formatFileSize(fileSize , currPrefix);
-//                            }
-//                        } else {
-//                            calculateSizeDir(data);
-//                        }
-//                        localGameData.add(data);
-//                    }
-
-    private void syncRemote() {
-        databaseUtil.getAllGameEntries()
-                .thenCombineAsync(fetchRemoteData(), (intDataList, remDataList) -> {
-                    if (intDataList.isEmpty()) return remDataList;
-                    var unionList = new ArrayList<RemoteGameData>();
-                    intDataList.forEach(intData -> remDataList.forEach(remData -> {
-                        if (!Objects.equals(intData.title, remData.title)) {
-                            unionList.add(remData);
-                        }
-                    }));
-                    return unionList;
-                }, executor)
-                .thenAcceptAsync(remDataList -> remDataList.forEach(remData -> {
-                    var newGameEntry = new Game();
-                    newGameEntry.id = Long.parseLong(remData.id);
-                    newGameEntry.listId = Integer.parseInt(isNotEmptyOrBlank(remData.listId) ? remData.listId : "0");
-                    newGameEntry.author = remData.author;
-                    newGameEntry.portedBy = remData.portedBy;
-                    newGameEntry.version = remData.version;
-                    newGameEntry.title = remData.title;
-                    newGameEntry.lang = remData.lang;
-                    newGameEntry.player = remData.player;
-                    newGameEntry.gameIconUri = Uri.parse(remData.icon);
-                    newGameEntry.fileUrl = remData.fileUrl;
-                    newGameEntry.fileSize = remData.fileSize;
-                    newGameEntry.fileExt = remData.fileExt;
-                    newGameEntry.descUrl = remData.descUrl;
-                    newGameEntry.pubDate = remData.pubDate;
-                    newGameEntry.modDate = remData.modDate;
-                    gamesMap.put(Long.valueOf(remData.id), newGameEntry);
-                }), executor)
-                .thenRunAsync(() ->
-                        gameEntriesLiveData.postValue(new ArrayList<>(gamesMap.values())), executor)
-                .exceptionally(throwable -> {
-                    Log.e(TAG, "Error: ", throwable);
-                    return null;
-                });
     }
 
     private void dropPersistable(Uri folderUri) {
@@ -644,7 +557,7 @@ public class StockViewModel extends AndroidViewModel {
                     }
                     var localGameData = new ArrayList<>(gamesMap.values());
                     gameEntriesLiveData.postValue(localGameData);
-                    refreshGameData();
+                    refreshGameEntry();
                 });
     }
 

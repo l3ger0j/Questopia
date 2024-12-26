@@ -40,7 +40,7 @@ public class StockViewPagerFragment extends Fragment {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
                 stockViewModel.currPageNumber.setValue(tab.getPosition());
-                stockViewModel.refreshGameData();
+                stockViewModel.refreshGameEntry();
             }
 
             @Override
