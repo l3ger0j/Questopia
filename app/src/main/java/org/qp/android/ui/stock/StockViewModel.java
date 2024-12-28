@@ -30,6 +30,11 @@ import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModelKt;
+import androidx.paging.Pager;
+import androidx.paging.PagingConfig;
+import androidx.paging.PagingData;
+import androidx.paging.rxjava3.PagingRx;
 
 import com.anggrayudi.storage.callback.FileCallback;
 import com.anggrayudi.storage.file.DocumentFileCompat;
@@ -48,6 +53,7 @@ import org.qp.android.helpers.utils.DatabaseUtil;
 import org.qp.android.model.archive.ArchiveUnpack;
 import org.qp.android.model.notify.NotifyBuilder;
 import org.qp.android.model.repository.LocalGame;
+import org.qp.android.model.repository.RemoteGamePagingSource;
 import org.qp.android.ui.dialogs.StockDialogFrags;
 import org.qp.android.ui.dialogs.StockDialogType;
 import org.qp.android.ui.game.GameActivity;
@@ -69,6 +75,7 @@ import java.util.concurrent.Executors;
 import javax.inject.Inject;
 
 import dagger.hilt.android.lifecycle.HiltViewModel;
+import io.reactivex.rxjava3.core.Flowable;
 
 @HiltViewModel
 public class StockViewModel extends AndroidViewModel {
@@ -112,6 +119,8 @@ public class StockViewModel extends AndroidViewModel {
     private StockDialogFrags dialogFragments = new StockDialogFrags();
     private long downloadId = 0L;
 
+    public Flowable<PagingData<Game>> remoteDataFlow;
+
     @Inject
     public StockViewModel(@NonNull Application application,
                           @NonNull GameDao gameDao,
@@ -126,6 +135,24 @@ public class StockViewModel extends AndroidViewModel {
 
         var rootInDir = getApplication().getExternalFilesDir(null);
         this.rootInDir = findOrCreateFolder(getApplication(), rootInDir, INNER_GAME_DIR_NAME);
+
+        initRecycler();
+    }
+
+    private void initRecycler() {
+        var source = new RemoteGamePagingSource();
+
+        var pager = new Pager<>(new PagingConfig(
+                10,
+                10,
+                false,
+                5,
+                10 * 499
+        ), () -> source);
+
+        remoteDataFlow = PagingRx.getFlowable(pager);
+        var coroutineScope = ViewModelKt.getViewModelScope(this);
+        PagingRx.cachedIn(remoteDataFlow, coroutineScope);
     }
 
     // region Getter/Setter
@@ -505,26 +532,6 @@ public class StockViewModel extends AndroidViewModel {
                     .thenAcceptAsync(listGameEntries -> {
                         listGameEntries.forEach(gameData -> {
                             if (gameData.listId == 0) {
-                                gamesMap.put(gameData.id, gameData);
-                            }
-                        });
-                        gameEntriesLiveData.postValue(new ArrayList<>(gamesMap.values()));
-                    }, executor)
-                    .exceptionally(throwable -> {
-                        Log.e(TAG, "Error: ", throwable);
-                        return null;
-                    });
-        }
-
-        if (pageNumber == 1) {
-            gameEntriesLiveData.postValue(Collections.emptyList());
-
-            doIsHideFAB.setValue(true);
-
-            databaseUtil.getAllGameEntries()
-                    .thenAcceptAsync(listGameEntries -> {
-                        listGameEntries.forEach(gameData -> {
-                            if (gameData.listId == 1) {
                                 gamesMap.put(gameData.id, gameData);
                             }
                         });

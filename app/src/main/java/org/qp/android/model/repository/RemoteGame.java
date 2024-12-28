@@ -1,21 +1,19 @@
 package org.qp.android.model.repository;
 
-import okhttp3.ResponseBody;
-import retrofit2.Callback;
+import androidx.annotation.NonNull;
+
 import retrofit2.Retrofit;
+import retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory;
 
 public class RemoteGame {
 
-    private final Retrofit client;
-
-    public void getRemoteGameData(Callback<ResponseBody> callback) {
-        client.create(RemoteService.class).listRemoteGames().enqueue(callback);
-    }
-
-    public RemoteGame() {
-        client = new Retrofit.Builder()
+    @NonNull
+    public RemoteService getRemoteGameEntry() {
+        var retrofit = new Retrofit.Builder()
                 .baseUrl("https://qsp.org")
+                .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
                 .build();
+        return retrofit.create(RemoteService.class);
     }
 
 }

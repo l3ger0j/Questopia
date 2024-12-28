@@ -22,8 +22,6 @@ import org.qp.android.helpers.adapters.RecyclerItemClickListener;
 
 public class StockLocalRVFragment extends Fragment {
 
-    private final int currentNumberPage = 0;
-
     private StockViewModel stockViewModel;
     private RecyclerView mRecyclerView;
 
@@ -45,7 +43,7 @@ public class StockLocalRVFragment extends Fragment {
         selectColor = ContextCompat.getColor(requireContext(), R.color.md_theme_primaryContainer);
 
         stockViewModel.gameEntriesLiveData.observe(getViewLifecycleOwner(), gameEntries -> {
-            var adapter = new GamesListAdapter(requireContext(), currentNumberPage).submitList(gameEntries);
+            var adapter = new LocalGamesListAdapter().submitList(gameEntries);
             mRecyclerView.setAdapter(adapter);
         });
 

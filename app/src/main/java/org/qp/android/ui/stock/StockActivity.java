@@ -4,7 +4,6 @@ import static org.qp.android.helpers.utils.FileUtil.documentWrap;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_IMAGE_FILE;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_MOD_FILE;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_PATH_FILE;
-import static org.qp.android.ui.stock.StockViewModel.EXT_GAME_LIST_NAME;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -49,7 +48,6 @@ import androidx.preference.PreferenceManager;
 
 import com.anggrayudi.storage.SimpleStorageHelper;
 import com.anggrayudi.storage.file.DocumentFileCompat;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.github.javiersantos.appupdater.AppUpdater;
 import com.github.javiersantos.appupdater.enums.UpdateFrom;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -60,30 +58,19 @@ import org.qp.android.data.db.Game;
 import org.qp.android.data.db.GameDao;
 import org.qp.android.data.db.GameDatabase;
 import org.qp.android.databinding.ActivityStockBinding;
-import org.qp.android.dto.stock.RemoteDataList;
 import org.qp.android.helpers.utils.ViewUtil;
-import org.qp.android.model.repository.RemoteGame;
 import org.qp.android.ui.dialogs.StockDialogType;
 import org.qp.android.ui.settings.SettingsActivity;
 import org.qp.android.ui.settings.SettingsController;
 
 import java.io.File;
-import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
-import okhttp3.ResponseBody;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 @AndroidEntryPoint
 public class StockActivity extends AppCompatActivity {
@@ -92,7 +79,6 @@ public class StockActivity extends AppCompatActivity {
     private static final int MANAGE_EXTERNAL_STORAGE_CODE = 201;
     private static final int POST_NOTIFICATION_CODE = 203;
 
-    public final SimpleDateFormat timeDateRemGamesList = new SimpleDateFormat("yyyy-MM-dd'T'HH-mm-ss", Locale.ROOT);
     private final SimpleStorageHelper storageHelper = new SimpleStorageHelper(this);
     protected ActivityStockBinding activityStockBinding;
     @Inject
@@ -268,7 +254,6 @@ public class StockActivity extends AppCompatActivity {
             }
         });
 
-        checkCacheRemoteRepo();
         loadPermission();
         stockViewModel.loadGameDataFromDB();
 
@@ -393,97 +378,6 @@ public class StockActivity extends AppCompatActivity {
         }
 
         return true;
-    }
-
-    private boolean isCacheFileHasExpired() {
-        var cache = getExternalCacheDir();
-        if (cache == null) return true;
-        var listNames = cache.list();
-        if (listNames == null) return true;
-
-        for (var name : listNames) {
-            if (!name.equalsIgnoreCase(EXT_GAME_LIST_NAME)) {
-                try {
-                    var cacheDate = timeDateRemGamesList.parse(name);
-                    if (cacheDate == null) return true;
-
-                    var isDateCurr = cacheDate.equals(Calendar.getInstance().getTime());
-                    var isDateBefore = cacheDate.before(Calendar.getInstance().getTime());
-
-                    return isDateCurr || isDateBefore;
-                } catch (ParseException e) {
-                    showErrorDialog(getString(R.string.error)
-                            + ": " + e.getMessage());
-                }
-            }
-        }
-
-        return true;
-    }
-
-    private String getCurrentTimestamp() {
-        var calendarInstance = Calendar.getInstance();
-        calendarInstance.add(Calendar.DATE, 3);
-        return timeDateRemGamesList.format(calendarInstance.getTime());
-    }
-
-    private void checkCacheRemoteRepo() {
-        if (!isCacheFileHasExpired()) return;
-
-        var remoteGame = new RemoteGame();
-
-        remoteGame.getRemoteGameData(new Callback<>() {
-            @Override
-            public void onResponse(@NonNull Call<ResponseBody> call,
-                                   @NonNull Response<ResponseBody> response) {
-                var mapper = new XmlMapper();
-                try (var body = response.body()) {
-                    if (body == null) return;
-                    var string = body.string();
-                    var value = mapper.readValue(string, RemoteDataList.class);
-//                    var remoteGamesList = findOrCreateFile(
-//                            StockActivity.this,
-//                            cache,
-//                            getCurrentTimestamp(),
-//                            MimeType.TEXT
-//                    );
-                    CompletableFuture
-                            .supplyAsync(() -> {
-                                var remoteGameEntries = new ArrayList<Game>();
-                                value.game.forEach(remoteGameData -> {
-                                    var emptyEntry = new Game();
-                                    emptyEntry.listId = 1;
-                                    emptyEntry.author = remoteGameData.author;
-                                    emptyEntry.portedBy = remoteGameData.portedBy;
-                                    emptyEntry.version = remoteGameData.version;
-                                    emptyEntry.title = remoteGameData.title;
-                                    emptyEntry.lang = remoteGameData.lang;
-                                    emptyEntry.player = remoteGameData.player;
-                                    emptyEntry.gameIconUri = Uri.parse(remoteGameData.icon);
-                                    emptyEntry.fileUrl = remoteGameData.fileUrl;
-                                    emptyEntry.fileSize = remoteGameData.fileSize;
-                                    emptyEntry.fileExt = remoteGameData.fileExt;
-                                    emptyEntry.descUrl = remoteGameData.descUrl;
-                                    emptyEntry.pubDate = remoteGameData.pubDate;
-                                    emptyEntry.modDate = remoteGameData.modDate;
-                                    remoteGameEntries.add(emptyEntry);
-                                });
-                                return remoteGameEntries;
-                            })
-                            .thenAcceptAsync(remoteGameEntries -> gameDao.insertAll(remoteGameEntries));
-                } catch (IOException e) {
-                    showErrorDialog(getString(R.string.error)
-                            + ": " + e.getMessage());
-                }
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<ResponseBody> call,
-                                  @NonNull Throwable throwable) {
-                showErrorDialog(getString(R.string.error)
-                        + ": " + throwable.getMessage());
-            }
-        });
     }
 
     private void loadPermission() {

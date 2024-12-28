@@ -15,13 +15,15 @@ import androidx.recyclerview.widget.RecyclerView;
 import org.qp.android.databinding.FragmentRecyclerBinding;
 import org.qp.android.helpers.adapters.RecyclerItemClickListener;
 
-public class StockRemoteRVFragment extends Fragment {
+import io.reactivex.rxjava3.disposables.CompositeDisposable;
 
-    private final int currentNumberPage = 1;
+public class StockRemoteRVFragment extends Fragment {
 
     private StockViewModel stockViewModel;
     private RecyclerView mRecyclerView;
     private FragmentRecyclerBinding recyclerBinding;
+
+    private final CompositeDisposable compositeDisposable = new CompositeDisposable();
 
     @Nullable
     @Override
@@ -32,10 +34,16 @@ public class StockRemoteRVFragment extends Fragment {
         mRecyclerView = recyclerBinding.shareRecyclerView;
         mRecyclerView.setLayoutManager(new GridLayoutManager(requireContext(), 2));
 
-        stockViewModel.gameEntriesLiveData.observe(getViewLifecycleOwner(), gameEntries -> {
-            var adapter = new GamesListAdapter(requireContext(), currentNumberPage).submitList(gameEntries);
-            mRecyclerView.setAdapter(adapter);
+        var remoteAdapter = new RemoteGamesAdapter();
+        var disposable = stockViewModel.remoteDataFlow.subscribe(data -> {
+            remoteAdapter.submitData(getLifecycle(), data);
         });
+        compositeDisposable.add(disposable);
+
+        mRecyclerView.setAdapter(
+                remoteAdapter.withLoadStateFooter(
+                        new RemoteGamesLoadStateAdapter(view -> remoteAdapter.retry()))
+        );
 
         return recyclerBinding.getRoot();
     }
@@ -44,6 +52,7 @@ public class StockRemoteRVFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         recyclerBinding = null;
+        compositeDisposable.dispose();
     }
 
     @Override
