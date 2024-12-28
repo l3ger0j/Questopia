@@ -339,23 +339,23 @@ public class StockActivity extends AppCompatActivity {
             case READ_EXTERNAL_STORAGE_CODE -> {
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    ViewUtil.showSnackBar(findViewById(android.R.id.content) , "Success");
+                    ViewUtil.showSnackBar(findViewById(android.R.id.content), "Successfully obtaining permission to read your External storage");
                 } else {
-                    ViewUtil.showSnackBar(findViewById(android.R.id.content) , "Permission denied to read your External storage");
+                    ViewUtil.showSnackBar(findViewById(android.R.id.content), "Permission denied to read your External storage");
                 }
             }
             case MANAGE_EXTERNAL_STORAGE_CODE -> {
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    ViewUtil.showSnackBar(findViewById(android.R.id.content) , "Success");
+                    ViewUtil.showSnackBar(findViewById(android.R.id.content), "Successfully obtaining permission to manage your storage");
                 } else {
-                    ViewUtil.showSnackBar(findViewById(android.R.id.content) , "Permission denied to manage your External storage");
+                    ViewUtil.showSnackBar(findViewById(android.R.id.content), "Permission denied to manage your External storage");
                 }
             }
             case POST_NOTIFICATION_CODE -> {
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    ViewUtil.showSnackBar(findViewById(android.R.id.content) , "Success");
+                    ViewUtil.showSnackBar(findViewById(android.R.id.content) , "Successfully obtaining permission to post notification");
                 } else {
                     ViewUtil.showSnackBar(findViewById(android.R.id.content) , "Permission denied to post notification");
                 }
