@@ -1,6 +1,7 @@
 package org.qp.android.dto.stock;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 import java.util.ArrayList;
@@ -14,6 +15,8 @@ public class RemoteDataList {
     public String id;
     public String title;
     public String text;
+    @JacksonXmlProperty(localName = "max_pages")
+    public String maxPages;
 
     @JacksonXmlElementWrapper(useWrapping = false)
     public List<RemoteGameData> game = new ArrayList<>();
@@ -23,7 +26,7 @@ public class RemoteDataList {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         var that = (RemoteDataList) o;
-        return Objects.equals(game , that.game);
+        return Objects.equals(game, that.game);
     }
 
     @Override

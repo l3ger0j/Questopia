@@ -1,7 +1,6 @@
 package org.qp.android.model.repository;
 
 import android.net.Uri;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -12,10 +11,9 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
 import org.qp.android.data.db.Game;
 import org.qp.android.dto.stock.RemoteDataList;
-import org.qp.android.dto.stock.RemoteGameData;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.regex.Pattern;
 
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.schedulers.Schedulers;
@@ -36,18 +34,18 @@ public class RemoteGamePagingSource extends RxPagingSource<Integer, Game> {
                 .pagingListRemoteGames(nextPageNumber)
                 .subscribeOn(Schedulers.io())
                 .map(body -> {
-                    Log.d(this.getClass().getSimpleName(), body.string());
                     var mapper = new XmlMapper();
                     var string = body.string();
-                    var value = mapper.readValue(string, RemoteDataList.class);
-                    return value.game;
+                    var matcher = Pattern.compile("max_pages=(\\d+)").matcher(string);
+                    var newBody = matcher.find() ? string.replace(matcher.group(1), "\"" + matcher.group(1) + "\"") : string;
+                    return mapper.readValue(newBody, RemoteDataList.class);
                 })
-                .map(list -> toLoadResult(list, finalNextPageNumber));
+                .map(dataList -> toLoadResult(dataList, finalNextPageNumber));
     }
 
-    private LoadResult<Integer, Game> toLoadResult(List<RemoteGameData> remoteData, int page) {
+    private LoadResult<Integer, Game> toLoadResult(RemoteDataList dataList, int page) {
         var listRemoteGameEntry = new ArrayList<Game>();
-        remoteData.forEach(item -> {
+        dataList.game.forEach(item -> {
             var emptyEntry = new Game();
             emptyEntry.listId = 1;
             emptyEntry.author = item.author;
@@ -66,7 +64,8 @@ public class RemoteGamePagingSource extends RxPagingSource<Integer, Game> {
             listRemoteGameEntry.add(emptyEntry);
         });
 
-        return new LoadResult.Page<>(listRemoteGameEntry, page == 0 ? null : page - 1, page + 1);
+        var maxPages = Integer.parseInt(dataList.maxPages);
+        return new LoadResult.Page<>(listRemoteGameEntry, page == 0 ? null : page - 1, page == maxPages ? null : page + 1);
     }
 
     @Nullable

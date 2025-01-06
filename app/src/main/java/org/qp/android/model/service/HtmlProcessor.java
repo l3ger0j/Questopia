@@ -154,8 +154,9 @@ public class HtmlProcessor {
         var matcher = EXEC_PATTERN.matcher(html);
         var buffer = new StringBuffer();
         while (matcher.find()) {
-            if (matcher.group(1) == null) continue;
-            var exec = normalizePathsInExec(matcher.group(1));
+            var path = matcher.group(1);
+            if (path == null) continue;
+            var exec = normalizePathsInExec(path);
             var encodedExec = encodeBase64(exec, Base64.NO_WRAP);
             matcher.appendReplacement(buffer, "href=\"exec:" + encodedExec + "\"");
         }
