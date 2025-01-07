@@ -156,7 +156,7 @@ public class GameViewModel extends AndroidViewModel {
 
                 @Override
                 public void sendChangeCurrGameDir(Uri gameDirUri) throws RemoteException {
-                    Log.d(TAG, String.valueOf(gameDirUri));
+                    // TODO: 06.01.2025 Add necessary functionality
                 }
 
                 @Override
@@ -392,12 +392,14 @@ public class GameViewModel extends AndroidViewModel {
                 var feedBackContactET = optFeedBackContactET.get();
                 if (optFeedBackMessageET.isPresent()) {
                     var feedBackMessageET = optFeedBackMessageET.get();
-                    Log.d(this.getClass().getSimpleName(), feedBackMessageET.getText().toString()
-                            + "\n" + feedBackContactET.getText().toString()
-                            + "\n" + feedBackNameET.getText().toString());
+                    // TODO: 06.01.2025 Replace to ACRA
+//                    Log.d(this.getClass().getSimpleName(), feedBackMessageET.getText().toString()
+//                            + "\n" + feedBackContactET.getText().toString()
+//                            + "\n" + feedBackNameET.getText().toString());
                 } else {
-                    Log.d(this.getClass().getSimpleName(), feedBackContactET.getText().toString()
-                            + "\n" + feedBackNameET.getText().toString());
+                    // TODO: 06.01.2025 Replace to ACRA
+//                    Log.d(this.getClass().getSimpleName(), feedBackContactET.getText().toString()
+//                            + "\n" + feedBackNameET.getText().toString());
                 }
             }
             case "loadGameDialogFragment" -> getGameActivity().startReadOrWriteSave(LOAD);
