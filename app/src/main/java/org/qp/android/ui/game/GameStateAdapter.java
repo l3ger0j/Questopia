@@ -9,6 +9,10 @@ public class GameStateAdapter extends FragmentStateAdapter {
 
     private final static int COUNT_FRAGMENTS = 3;
 
+    public GameStateAdapter(@NonNull FragmentActivity fragmentActivity) {
+        super(fragmentActivity);
+    }
+
     @Override
     public int getItemCount() {
         return COUNT_FRAGMENTS;
@@ -22,10 +26,6 @@ public class GameStateAdapter extends FragmentStateAdapter {
             case 2 -> new GameVarsFragment();
             default -> new GameMainFragment();
         };
-    }
-
-    public GameStateAdapter(@NonNull FragmentActivity fragmentActivity) {
-        super(fragmentActivity);
     }
 
 }

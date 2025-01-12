@@ -94,7 +94,6 @@ public class GameViewModel extends AndroidViewModel {
             </head>
             """;
     private static final String PAGE_BODY_TEMPLATE = "<body>REPLACETEXT</body>";
-    private final String TAG = this.getClass().getSimpleName();
     private final QuestopiaApplication questopiaApplication;
     private final ExecutorService singleService = Executors.newSingleThreadExecutor();
     private final MutableLiveData<SettingsController> controllerObserver = new MutableLiveData<>();
@@ -196,11 +195,11 @@ public class GameViewModel extends AndroidViewModel {
 
                 @Override
                 public void onError(LibException libException) throws RemoteException {
-                    Log.e(TAG, "onErrorRemote", libException.toException());
+                    showErrorDialog(libException.toException().toString(), ErrorType.EXCEPTION);
                 }
             });
         } catch (Exception e) {
-            Log.e(TAG, "Error: ", e);
+            showErrorDialog(e.toString(), ErrorType.EXCEPTION);
         }
     }
 
@@ -415,15 +414,6 @@ public class GameViewModel extends AndroidViewModel {
         }
     }
 
-    public void onDialogNeutralClick(DialogFragment dialog) {
-        if (dialog.getTag() != null) {
-            switch (dialog.getTag()) {
-                case "inputDialogFragment", "executorDialogFragment" ->
-                        getGameActivity().getStorageHelper().openFilePicker("text/plain");
-            }
-        }
-    }
-
     public void onDialogListClick(DialogFragment dialog, int which) {
         if (dialog.getTag() != null) {
             if (Objects.equals(dialog.getTag(), "showMenuDialogFragment")) {
@@ -464,12 +454,12 @@ public class GameViewModel extends AndroidViewModel {
         CompletableFuture
                 .supplyAsync(() -> getHtml(getLibGameState().varsDesc), singleService)
                 .thenAcceptAsync(libVarsDesc -> {
-                    var dirtyHTML = pageTemplate.replace("REPLACETEXT" , libVarsDesc);
+                    var dirtyHTML = pageTemplate.replace("REPLACETEXT", libVarsDesc);
                     var cleanHTML = "";
                     if (getSettingsController().isImageDisabled) {
                         cleanHTML = getHtmlProcessor().getCleanHtmlRemMedia(dirtyHTML);
                     } else {
-                        cleanHTML = getHtmlProcessor().getCleanHtmlAndMedia(getApplication() , dirtyHTML);
+                        cleanHTML = getHtmlProcessor().getCleanHtmlAndMedia(getApplication(), dirtyHTML);
                     }
                     if (!cleanHTML.isBlank()) {
                         getGameActivity().warnUser(GameActivity.TAB_VARS_DESC);
@@ -482,7 +472,7 @@ public class GameViewModel extends AndroidViewModel {
         try {
             pluginClient.questopiaBundle.onActionClicked(index);
         } catch (RemoteException e) {
-            Log.e(TAG, "Error: ", e);
+            showErrorDialog(e.toString(), ErrorType.EXCEPTION);
         }
     }
 
@@ -509,7 +499,7 @@ public class GameViewModel extends AndroidViewModel {
         try {
             pluginClient.questopiaBundle.onObjectClicked(index);
         } catch (RemoteException e) {
-            Log.e(TAG, "Error: ", e);
+            showErrorDialog(e.toString(), ErrorType.EXCEPTION);
         }
     }
 
@@ -570,7 +560,7 @@ public class GameViewModel extends AndroidViewModel {
                 pluginClient.questopiaBundle.stopNativeLib();
                 pluginClient.disconnectPlugin(getApplication(), PluginType.ENGINE_PLUGIN);
             } catch (Exception e) {
-                Log.e(TAG, "Error: ", e);
+                showErrorDialog(e.toString(), ErrorType.EXCEPTION);
             }
         }, 1000);
     }
@@ -596,7 +586,7 @@ public class GameViewModel extends AndroidViewModel {
 
                 pluginClient.questopiaBundle.runGameIntoLib(gameId, gameTitle, gameDir.getUri(), gameFile.getUri());
             } catch (Exception e) {
-                Log.e(TAG, "Error: ", e);
+                showErrorDialog(e.toString(), ErrorType.EXCEPTION);
             }
         }, 1000);
     }
@@ -605,7 +595,7 @@ public class GameViewModel extends AndroidViewModel {
         try {
             pluginClient.questopiaBundle.doLibRequest(new LibResult<>(req), codeToExec, null);
         } catch (Exception e) {
-            Log.e(TAG, "ERROR: ", e);
+            showErrorDialog(e.toString(), ErrorType.EXCEPTION);
         }
     }
 
@@ -613,7 +603,7 @@ public class GameViewModel extends AndroidViewModel {
         try {
             pluginClient.questopiaBundle.doLibRequest(new LibResult<>(req), null, fileUri);
         } catch (Exception e) {
-            Log.e(TAG, "ERROR: ", e);
+            showErrorDialog(e.toString(), ErrorType.EXCEPTION);
         }
     }
 
@@ -621,7 +611,7 @@ public class GameViewModel extends AndroidViewModel {
         try {
             pluginClient.questopiaBundle.doLibRequest(new LibResult<>(req), null, null);
         } catch (Exception e) {
-            Log.e(TAG, "ERROR: ", e);
+            showErrorDialog(e.toString(), ErrorType.EXCEPTION);
         }
     }
 
@@ -657,8 +647,7 @@ public class GameViewModel extends AndroidViewModel {
 
     public LibDialogRetValue showLibDialog(LibTypeDialog dialog, String inputString) {
         switch (dialog) {
-            case DIALOG_POPUP_SAVE ->
-                    getGameActivity().showSavePopup();
+            case DIALOG_POPUP_SAVE -> getGameActivity().showSavePopup();
             case DIALOG_ERROR ->
                     getGameActivity().showSimpleDialog(inputString, GameDialogType.ERROR_DIALOG, null);
             case DIALOG_PICTURE ->
@@ -735,10 +724,6 @@ public class GameViewModel extends AndroidViewModel {
 
     public void showErrorDialog(final String message, final ErrorType errorType) {
         getGameActivity().showSimpleDialog(message, GameDialogType.ERROR_DIALOG, errorType);
-    }
-
-    public void doWithCounterDisabled(Runnable runnable) {
-
     }
     // endregion GameInterface
 

@@ -28,7 +28,7 @@ public class GameMainFragment extends Fragment {
     private GameViewModel viewModel;
     private ConstraintLayout layoutTop;
     private WebView mainDescView;
-    private final Runnable onScroll = () -> {
+    private final Runnable onAutoScroll = () -> {
         if (!isAdded()) return;
         if (mainDescView.getContentHeight()
                 * getResources().getDisplayMetrics().density
@@ -78,7 +78,7 @@ public class GameMainFragment extends Fragment {
             }
         }, "img");
         if (viewModel.getSettingsController().isUseAutoscroll) {
-            mainDescView.postDelayed(onScroll, 300);
+            mainDescView.postDelayed(onAutoScroll, 300);
         }
         viewModel.getMainDescObserver().observe(getViewLifecycleOwner(), desc -> {
             mainDescView.loadDataWithBaseURL(
@@ -98,8 +98,9 @@ public class GameMainFragment extends Fragment {
         actionsView.addItemDecoration(dividerItemDecoration);
         actionsView.setOverScrollMode(View.OVER_SCROLL_NEVER);
         viewModel.getActionObserver().observe(getViewLifecycleOwner(), actions -> {
-            actionsView.setBackgroundColor(viewModel.getBackgroundColor());
+            actions.setStateRestorationPolicy(RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY);
             actionsView.setAdapter(actions);
+            actionsView.setBackgroundColor(viewModel.getBackgroundColor());
         });
 
         // Settings

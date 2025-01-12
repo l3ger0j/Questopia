@@ -13,7 +13,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.format.DateFormat;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -69,7 +68,7 @@ public class GameActivity extends AppCompatActivity {
     public static final int LOAD = 0;
     public static final int SAVE = 1;
     private static final int MAX_SAVE_SLOTS = 5;
-    private final String TAG = this.getClass().getSimpleName();
+
     private final SimpleStorageHelper storageHelper = new SimpleStorageHelper(this);
     private SettingsController settingsController;
     private int activeTab;
@@ -200,8 +199,6 @@ public class GameActivity extends AppCompatActivity {
                     ErrorType.SOUND_ERROR
             );
         });
-
-        Log.i(TAG, "Game created");
     }
 
     @Override

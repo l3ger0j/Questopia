@@ -24,8 +24,8 @@ public class GameObjectFragment extends Fragment {
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater ,
-                             @Nullable ViewGroup container ,
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         recyclerBinding = FragmentRecyclerBinding.inflate(inflater);
         viewModel = new ViewModelProvider(requireActivity()).get(GameViewModel.class);
@@ -34,36 +34,38 @@ public class GameObjectFragment extends Fragment {
         objectView = recyclerBinding.shareRecyclerView;
         var manager = (LinearLayoutManager) objectView.getLayoutManager();
         var dividerItemDecoration = new DividerItemDecoration(
-                objectView.getContext() ,
+                objectView.getContext(),
                 manager.getOrientation());
         objectView.addItemDecoration(dividerItemDecoration);
         objectView.setOverScrollMode(View.OVER_SCROLL_NEVER);
-        viewModel.getObjectsObserver().observe(getViewLifecycleOwner() , gameItemRecycler -> {
+        viewModel.getObjectsObserver().observe(getViewLifecycleOwner(), objects -> {
+            objects.setStateRestorationPolicy(RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY);
+            objectView.setAdapter(objects);
             objectView.setBackgroundColor(viewModel.getBackgroundColor());
-            recyclerBinding.shareRecyclerView.setAdapter(gameItemRecycler);
         });
 
         // Settings
-        viewModel.getControllerObserver().observe(getViewLifecycleOwner() , settingsController -> {
+        viewModel.getControllerObserver().observe(getViewLifecycleOwner(), settingsController -> {
             objectView.setBackgroundColor(viewModel.getBackgroundColor());
             recyclerBinding.getRoot().refreshDrawableState();
         });
+
         return recyclerBinding.getRoot();
     }
 
     @Override
-    public void onViewCreated(@NonNull View view , @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         objectView.addOnItemTouchListener(new RecyclerItemClickListener(
-                requireContext() ,
-                objectView ,
+                requireContext(),
+                objectView,
                 new RecyclerItemClickListener.OnItemClickListener() {
                     @Override
-                    public void onItemClick(View view , int position) {
+                    public void onItemClick(View view, int position) {
                         viewModel.onObjectClicked(position);
                     }
 
                     @Override
-                    public void onLongItemClick(View view , int position) {
+                    public void onLongItemClick(View view, int position) {
 
                     }
                 }

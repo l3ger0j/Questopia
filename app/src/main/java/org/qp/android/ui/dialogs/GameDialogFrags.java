@@ -13,7 +13,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
-import androidx.core.content.ContextCompat;
 import androidx.databinding.ObservableField;
 import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.ViewModelProvider;
@@ -30,20 +29,35 @@ import java.util.Optional;
 
 public class GameDialogFrags extends DialogFragment {
 
+    public ObservableField<String> pathToImage = new ObservableField<>();
     private ArrayList<String> items;
     private GameDialogType dialogType;
     private DialogImageBinding imageBinding;
     private String processedMsg;
     private String message;
-    private String template;
-
     private GameViewModel gameViewModel;
     private TextInputLayout feedBackName;
     private EditText feedBackNameET;
     private TextInputLayout feedBackContact;
     private EditText feedBackContactET;
+    private final TextWatcher watcher = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+        }
 
-    public ObservableField<String> pathToImage = new ObservableField<>();
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+            if (feedBackNameET != null) {
+                validateUserName();
+            } else if (feedBackContactET != null) {
+                validateEmail();
+            }
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+        }
+    };
 
     public void setDialogType(GameDialogType dialogType) {
         this.dialogType = dialogType;
@@ -64,25 +78,6 @@ public class GameDialogFrags extends DialogFragment {
     private boolean isValidate() {
         return validateUserName() && validateEmail();
     }
-
-    private final TextWatcher watcher = new TextWatcher() {
-        @Override
-        public void beforeTextChanged(CharSequence s , int start , int count , int after) {
-        }
-
-        @Override
-        public void onTextChanged(CharSequence s , int start , int before , int count) {
-            if (feedBackNameET != null) {
-                validateUserName();
-            } else if (feedBackContactET != null) {
-                validateEmail();
-            }
-        }
-
-        @Override
-        public void afterTextChanged(Editable s) {
-        }
-    };
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -134,22 +129,19 @@ public class GameDialogFrags extends DialogFragment {
             }
         }
         switch (dialogType) {
-            case EXECUTOR_DIALOG , INPUT_DIALOG -> {
+            case EXECUTOR_DIALOG, INPUT_DIALOG -> {
                 final var executorView =
-                        getLayoutInflater().inflate(R.layout.dialog_input , null);
+                        getLayoutInflater().inflate(R.layout.dialog_input, null);
                 var textInputLayout =
                         (TextInputLayout) executorView.findViewById(R.id.inputBox_edit);
                 textInputLayout.setHelperText(message);
                 builder.setView(executorView);
-                builder.setPositiveButton(android.R.string.ok ,
-                        (dialog , which) -> gameViewModel.onDialogPositiveClick(this));
-                builder.setNeutralButton(null , (dialog , which) -> {});
-                builder.setNeutralButtonIcon(ContextCompat.getDrawable(requireContext() ,
-                        R.drawable.baseline_file_upload_24));
+                builder.setPositiveButton(android.R.string.ok,
+                        (dialog, which) -> gameViewModel.onDialogPositiveClick(this));
                 return builder.create();
             }
             case ERROR_DIALOG -> {
-                final var errorFeBackView = getLayoutInflater().inflate(R.layout.dialog_feedback , null);
+                final var errorFeBackView = getLayoutInflater().inflate(R.layout.dialog_feedback, null);
                 var feedBackScrollError = (ScrollView) errorFeBackView.findViewById(R.id.feedBackScrollError);
                 var feedBackTV = (TextView) feedBackScrollError.findViewById(R.id.feedBackTV);
                 var optFeedBackName = Optional.ofNullable((TextInputLayout) errorFeBackView.findViewById(R.id.feedBackName));
@@ -173,17 +165,19 @@ public class GameDialogFrags extends DialogFragment {
                 feedBackTV.setText(message);
                 builder.setTitle(R.string.error);
                 builder.setView(errorFeBackView);
-                builder.setPositiveButton("Send" , null);
-                builder.setNegativeButton(android.R.string.cancel ,
-                        (dialog , which) -> {});
+                builder.setPositiveButton("Send", null);
+                builder.setNegativeButton(android.R.string.cancel,
+                        (dialog, which) -> {
+                        });
                 return builder.create();
             }
             case CLOSE_DIALOG -> {
                 builder.setMessage(requireContext().getString(R.string.promptCloseGame));
-                builder.setPositiveButton(android.R.string.ok ,
-                        (dialog , which) -> gameViewModel.onDialogPositiveClick(this));
-                builder.setNegativeButton(android.R.string.cancel ,
-                        (dialog , which) -> {});
+                builder.setPositiveButton(android.R.string.ok,
+                        (dialog, which) -> gameViewModel.onDialogPositiveClick(this));
+                builder.setNegativeButton(android.R.string.cancel,
+                        (dialog, which) -> {
+                        });
                 return builder.create();
             }
             case IMAGE_DIALOG -> {
@@ -195,21 +189,22 @@ public class GameDialogFrags extends DialogFragment {
             }
             case LOAD_DIALOG -> {
                 builder.setMessage(requireContext().getString(R.string.loadGamePopup));
-                builder.setPositiveButton(android.R.string.ok ,
-                        (dialog , which) -> gameViewModel.onDialogPositiveClick(this));
-                builder.setNegativeButton(android.R.string.no ,
-                        (dialog , which) -> {});
+                builder.setPositiveButton(android.R.string.ok,
+                        (dialog, which) -> gameViewModel.onDialogPositiveClick(this));
+                builder.setNegativeButton(android.R.string.no,
+                        (dialog, which) -> {
+                        });
                 return builder.create();
             }
             case MENU_DIALOG -> {
-                builder.setItems(items.toArray(new CharSequence[0]) ,
-                        (dialog , which) -> gameViewModel.onDialogListClick(this , which));
+                builder.setItems(items.toArray(new CharSequence[0]),
+                        (dialog, which) -> gameViewModel.onDialogListClick(this, which));
                 return builder.create();
             }
             case MESSAGE_DIALOG -> {
                 builder.setMessage(processedMsg);
-                builder.setPositiveButton(android.R.string.ok ,
-                        (dialog , which) -> gameViewModel.onDialogPositiveClick(this));
+                builder.setPositiveButton(android.R.string.ok,
+                        (dialog, which) -> gameViewModel.onDialogPositiveClick(this));
                 return builder.create();
             }
         }
@@ -227,22 +222,6 @@ public class GameDialogFrags extends DialogFragment {
         super.onResume();
 
         final var dialog = Optional.ofNullable((AlertDialog) getDialog());
-
-        var arguments = Optional.ofNullable(getArguments());
-        if (arguments.isPresent()) {
-            template = arguments.get().getString("template");
-            if (dialog.isPresent()) {
-                if (dialogType.equals(GameDialogType.EXECUTOR_DIALOG) ||
-                        dialogType.equals(GameDialogType.INPUT_DIALOG)) {
-                    var textInputLayout = (TextInputLayout) dialog.get().findViewById(R.id.inputBox_edit);
-                    if (textInputLayout != null && textInputLayout.getEditText() != null) {
-                        textInputLayout.getEditText().setText(template);
-                    }
-                    var neutralButton = (Button) dialog.get().getButton(Dialog.BUTTON_NEUTRAL);
-                    neutralButton.setOnClickListener(v -> gameViewModel.onDialogNeutralClick(this));
-                }
-            }
-        }
 
         if (dialog.isPresent()) {
             if (dialogType.equals(GameDialogType.ERROR_DIALOG)) {
@@ -265,10 +244,10 @@ public class GameDialogFrags extends DialogFragment {
             outState.putStringArrayList("items", items);
         }
         if (message != null) {
-            outState.putString("message" , message);
+            outState.putString("message", message);
         }
         if (pathToImage != null) {
-            outState.putString("pathToImage" , pathToImage.get());
+            outState.putString("pathToImage", pathToImage.get());
         }
         if (processedMsg != null) {
             outState.putString("processedMsg", processedMsg);
@@ -278,7 +257,6 @@ public class GameDialogFrags extends DialogFragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        if (imageBinding != null)
-            imageBinding = null;
+        if (imageBinding != null) imageBinding = null;
     }
 }

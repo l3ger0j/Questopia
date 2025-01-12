@@ -28,17 +28,17 @@ public class GameItemRecycler extends RecyclerView.Adapter<GameItemRecycler.View
     private static final DiffUtil.ItemCallback<LibListItem> DIFF_CALLBACK =
             new DiffUtil.ItemCallback<>() {
                 @Override
-                public boolean areItemsTheSame(@NonNull LibListItem oldItem , @NonNull LibListItem newItem) {
-                    return Objects.equals(oldItem.pathToImage , newItem.pathToImage) && Objects.equals(oldItem.text , newItem.text);
+                public boolean areItemsTheSame(@NonNull LibListItem oldItem, @NonNull LibListItem newItem) {
+                    return Objects.equals(oldItem.pathToImage, newItem.pathToImage) && Objects.equals(oldItem.text, newItem.text);
                 }
 
                 @Override
-                public boolean areContentsTheSame(@NonNull LibListItem oldItem , @NonNull LibListItem newItem) {
+                public boolean areContentsTheSame(@NonNull LibListItem oldItem, @NonNull LibListItem newItem) {
                     return oldItem.equals(newItem);
                 }
             };
     private final AsyncListDiffer<LibListItem> differ =
-            new AsyncListDiffer<>(this , DIFF_CALLBACK);
+            new AsyncListDiffer<>(this, DIFF_CALLBACK);
     private Typeface typeface;
     private int textSize;
     private int backgroundColor;
@@ -84,17 +84,17 @@ public class GameItemRecycler extends RecyclerView.Adapter<GameItemRecycler.View
 
     @NonNull
     @Override
-    public GameItemRecycler.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent ,
+    public GameItemRecycler.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent,
                                                           int viewType) {
         var inflater = LayoutInflater.from(parent.getContext());
         ListGameItemBinding listGameItemBinding =
-                DataBindingUtil.inflate(inflater , R.layout.list_game_item , parent , false);
+                DataBindingUtil.inflate(inflater, R.layout.list_game_item, parent, false);
         listGameItemBinding.relativeLayout.setAccessibilityDelegate(customAccessibilityDelegate());
         return new GameItemRecycler.ViewHolder(listGameItemBinding);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull GameItemRecycler.ViewHolder holder , int position) {
+    public void onBindViewHolder(@NonNull GameItemRecycler.ViewHolder holder, int position) {
         holder.listItemActionObjectBinding(getGameData().get(position));
         var qpListItem = getItem(position);
 
@@ -109,12 +109,12 @@ public class GameItemRecycler extends RecyclerView.Adapter<GameItemRecycler.View
         if (qpListItem.text != null) {
             var itemText = holder.listGameItemBinding.itemText;
             itemText.setTypeface(typeface);
-            itemText.setTextSize(TypedValue.COMPLEX_UNIT_SP , textSize);
+            itemText.setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize);
             itemText.setBackgroundColor(backgroundColor);
             itemText.setTextColor(textColor);
             itemText.setLinkTextColor(linkTextColor);
             // TODO: 27.06.2023 rewrite this!
-            itemText.setText(Html.fromHtml(String.valueOf(qpListItem.text) , Html.FROM_HTML_MODE_LEGACY));
+            itemText.setText(Html.fromHtml(String.valueOf(qpListItem.text), Html.FROM_HTML_MODE_LEGACY));
         }
     }
 
