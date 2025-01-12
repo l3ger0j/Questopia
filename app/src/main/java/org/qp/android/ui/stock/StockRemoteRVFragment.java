@@ -19,11 +19,11 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable;
 
 public class StockRemoteRVFragment extends Fragment {
 
+    private final CompositeDisposable compositeDisposable = new CompositeDisposable();
     private StockViewModel stockViewModel;
     private RecyclerView mRecyclerView;
     private FragmentRecyclerBinding recyclerBinding;
-
-    private final CompositeDisposable compositeDisposable = new CompositeDisposable();
+    private RemoteGamesAdapter remoteAdapter;
 
     @Nullable
     @Override
@@ -34,7 +34,7 @@ public class StockRemoteRVFragment extends Fragment {
         mRecyclerView = recyclerBinding.shareRecyclerView;
         mRecyclerView.setLayoutManager(new GridLayoutManager(requireContext(), 2));
 
-        var remoteAdapter = new RemoteGamesAdapter();
+        remoteAdapter = new RemoteGamesAdapter();
         var disposable = stockViewModel.remoteDataFlow.subscribe(data -> {
             remoteAdapter.submitData(getLifecycle(), data);
         });
@@ -58,17 +58,20 @@ public class StockRemoteRVFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        mRecyclerView.addOnItemTouchListener(new RecyclerItemClickListener(
+                requireContext(),
+                mRecyclerView,
+                new RecyclerItemClickListener.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(View view, int position) {
+                        var entryToShow = remoteAdapter.getItemByPosition(position);
+                        stockViewModel.doOnShowGameFragment(entryToShow);
+                    }
 
-        mRecyclerView.addOnItemTouchListener(new RecyclerItemClickListener(requireContext(), mRecyclerView, new RecyclerItemClickListener.OnItemClickListener() {
-            @Override
-            public void onItemClick(View view, int position) {
-                stockViewModel.doOnShowGameFragment(position);
-            }
-
-            @Override
-            public void onLongItemClick(View view, int position) {
-                // Do nothing
-            }
-        }));
+                    @Override
+                    public void onLongItemClick(View view, int position) {
+                        // Do nothing
+                    }
+                }));
     }
 }

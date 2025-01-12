@@ -37,6 +37,10 @@ public class RemoteGamesAdapter extends PagingDataAdapter<Game, RemoteGamesAdapt
             };
     private Context context;
 
+    public Game getItemByPosition(int position) {
+        return getItem(position);
+    }
+
     public RemoteGamesAdapter() {
         super(DIFF_CALLBACK);
     }

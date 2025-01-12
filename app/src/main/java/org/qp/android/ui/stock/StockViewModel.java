@@ -255,6 +255,10 @@ public class StockViewModel extends AndroidViewModel {
         emitter.emitAndExecuteOnce(new StockFragmentNavigation.ShowGameFragment(position));
     }
 
+    public void doOnShowGameFragment(Game entryToShow) {
+        emitter.emitAndExecuteOnce(new StockFragmentNavigation.ShowGameFragment(entryToShow));
+    }
+
     public void doOnShowActionMode() {
         emitter.emitAndExecuteOnce(new StockFragmentNavigation.ShowActionMode());
     }

@@ -277,7 +277,11 @@ public class StockActivity extends AppCompatActivity {
                 }
             }
             if (eventNavigation instanceof StockFragmentNavigation.ShowGameFragment gameFragment) {
-                onListItemClick(gameFragment.getPosition());
+                if (gameFragment.entry != null) {
+                    onListItemClick(gameFragment.entry);
+                } else {
+                    onListItemClick(gameFragment.position);
+                }
             }
             if (eventNavigation instanceof StockFragmentNavigation.ShowActionMode) {
                 onLongListItemClick();
@@ -464,6 +468,21 @@ public class StockActivity extends AppCompatActivity {
                     stockViewModel.setCurrGameData(gameEntries.get(position));
                 }
             });
+
+            navController.navigate(R.id.action_stockViewPagerFragment_to_stockGameFragment);
+            stockViewModel.doIsHideFAB.setValue(true);
+        }
+    }
+
+    public void onListItemClick(Game entryToShow) {
+        if (stockViewModel.isEnableDeleteMode) {
+            var currGamesMapValues = stockViewModel.getGamesMap().values();
+            for (var gameData : currGamesMapValues) {
+                if (!stockViewModel.isGameInstalled()) continue;
+                stockViewModel.currInstalledGamesList.add(gameData);
+            }
+        } else {
+            stockViewModel.setCurrGameData(entryToShow);
 
             navController.navigate(R.id.action_stockViewPagerFragment_to_stockGameFragment);
             stockViewModel.doIsHideFAB.setValue(true);

@@ -1,5 +1,6 @@
 package org.qp.android.ui.stock;
 
+import org.qp.android.data.db.Game;
 import org.qp.android.helpers.ErrorType;
 import org.qp.android.helpers.bus.EventNavigation;
 
@@ -24,14 +25,15 @@ public interface StockFragmentNavigation {
     }
 
     class ShowGameFragment extends EventNavigation {
-        private final int position;
+        public int position;
+        public Game entry;
 
         public ShowGameFragment(int position) {
             this.position = position;
         }
 
-        public int getPosition() {
-            return position;
+        public ShowGameFragment(Game entryToShow) {
+            this.entry = entryToShow;
         }
     }
 
