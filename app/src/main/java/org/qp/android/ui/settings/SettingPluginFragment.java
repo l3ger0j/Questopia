@@ -37,8 +37,6 @@ import java.util.Objects;
 
 public class SettingPluginFragment extends Fragment {
 
-    private final String TAG = getClass().getSimpleName();
-
     private RecyclerView recyclerView;
     private List<HashMap<String, String>> services;
 
@@ -195,7 +193,6 @@ public class SettingPluginFragment extends Fragment {
 
     class PackageBroadcastReceiver extends BroadcastReceiver {
         public void onReceive(Context context, Intent intent) {
-            Log.d(TAG, "onReceive: " + intent);
             services.clear();
             fillPluginList(new PluginClient());
         }
