@@ -18,6 +18,9 @@ import org.qp.android.databinding.FragmentViewPagerBinding;
 
 public class StockViewPagerFragment extends Fragment {
 
+    public static final int TAB_INSTALLED_GAMES = 0;
+    public static final int TAB_REPOSITORY_GAMES = 1;
+
     private FragmentViewPagerBinding binding;
 
     @Nullable
@@ -39,8 +42,13 @@ public class StockViewPagerFragment extends Fragment {
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                stockViewModel.currPageNumber.setValue(tab.getPosition());
-                stockViewModel.refreshGameEntry();
+                var tabPosition = tab.getPosition();
+                if (tabPosition == TAB_INSTALLED_GAMES) {
+                    stockViewModel.doIsHideFAB.setValue(false);
+                } else if (tabPosition == TAB_REPOSITORY_GAMES) {
+                    stockViewModel.doIsHideFAB.setValue(true);
+                }
+                stockViewModel.currPageNumber.setValue(tabPosition);
             }
 
             @Override
@@ -55,8 +63,15 @@ public class StockViewPagerFragment extends Fragment {
 
         var tabZeroName = getString(R.string.tabZeroName);
         var tabOneName = getString(R.string.tabOneName);
-        var tabLayoutMediator = new TabLayoutMediator(tabLayout, stockPager, (tab, position) ->
-                tab.setText(position == 0 ? tabZeroName : tabOneName));
+
+        var tabLayoutMediator = new TabLayoutMediator(
+                tabLayout, stockPager,
+                (tab, position) -> tab.setText(switch (position) {
+                    case TAB_INSTALLED_GAMES -> tabZeroName;
+                    case TAB_REPOSITORY_GAMES -> tabOneName;
+                    default -> throw new IllegalStateException("Unexpected value: " + position);
+                })
+        );
         tabLayoutMediator.attach();
 
         return binding.getRoot();
