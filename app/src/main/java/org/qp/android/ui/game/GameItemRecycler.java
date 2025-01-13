@@ -1,6 +1,7 @@
 package org.qp.android.ui.game;
 
 import static org.qp.android.helpers.utils.AccessibilityUtil.customAccessibilityDelegate;
+import static org.qp.android.helpers.utils.StringUtil.isNotEmptyOrBlank;
 
 import android.graphics.Typeface;
 import android.text.Html;
@@ -98,7 +99,7 @@ public class GameItemRecycler extends RecyclerView.Adapter<GameItemRecycler.View
         holder.listItemActionObjectBinding(getGameData().get(position));
         var qpListItem = getItem(position);
 
-        if (qpListItem.pathToImage != null) {
+        if (isNotEmptyOrBlank(qpListItem.pathToImage)) {
             Picasso.get()
                     .load(qpListItem.pathToImage)
                     .error(R.drawable.baseline_broken_image_24)
@@ -106,7 +107,7 @@ public class GameItemRecycler extends RecyclerView.Adapter<GameItemRecycler.View
                     .into(holder.listGameItemBinding.itemIcon);
         }
 
-        if (qpListItem.text != null) {
+        if (isNotEmptyOrBlank(qpListItem.text)) {
             var itemText = holder.listGameItemBinding.itemText;
             itemText.setTypeface(typeface);
             itemText.setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize);
