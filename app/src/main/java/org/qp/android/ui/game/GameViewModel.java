@@ -251,7 +251,7 @@ public class GameViewModel extends AndroidViewModel {
         if (libState == null) return Color.WHITE;
         var config = libState.interfaceConfig;
         if (getSettingsController().isUseGameTextColor && config.fontColor != 0) {
-            return convertRGBAtoBGRA(config.fontColor);
+            return convertRGBAtoBGRA((int) config.fontColor);
         } else {
             return getSettingsController().textColor;
         }
@@ -260,7 +260,7 @@ public class GameViewModel extends AndroidViewModel {
     public int getBackgroundColor() {
         var config = getLibGameState().interfaceConfig;
         if (getSettingsController().isUseGameBackgroundColor && config.backColor != 0) {
-            return convertRGBAtoBGRA(config.backColor);
+            return convertRGBAtoBGRA((int) config.backColor);
         } else {
             return getSettingsController().backColor;
         }
@@ -269,7 +269,7 @@ public class GameViewModel extends AndroidViewModel {
     public int getLinkColor() {
         var config = getLibGameState().interfaceConfig;
         if (getSettingsController().isUseGameLinkColor && config.linkColor != 0) {
-            return convertRGBAtoBGRA(config.linkColor);
+            return convertRGBAtoBGRA((int) config.linkColor);
         } else {
             return getSettingsController().linkColor;
         }
@@ -277,8 +277,9 @@ public class GameViewModel extends AndroidViewModel {
 
     public int getFontSize() {
         var config = getLibGameState().interfaceConfig;
-        return getSettingsController().isUseGameFont && config.fontSize != 0 ?
-                config.fontSize : getSettingsController().fontSize;
+        return getSettingsController().isUseGameFont && config.fontSize != 0
+                ? (int) config.fontSize
+                : getSettingsController().fontSize;
     }
 
     public String getHtml(String str) {
