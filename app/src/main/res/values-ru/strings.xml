@@ -66,11 +66,12 @@
         <string name="image">Изображение</string>
     <!-- StockViewPagerFragment -->
         <string name="tabZeroName">Установленные игры</string>
-        <string name="tabOneName">Репозиторий игр</string>
+        <string name="tabOneName">Игровая библиотека</string>
     <!-- Use in menu -->
     <!-- Menu game -->
         <!-- Group running -->
         <string name="mainDescTitle">Описание</string>
+        <string name="mainDescFullTitle">Основное описание</string>
         <string name="mainDescContDesc">Перейти к основному описанию</string>
         <string name="varsDescTitle">Доп. описание</string>
         <string name="varsDescContDesc">Перейти к дополнительному описанию</string>

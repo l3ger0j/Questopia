@@ -65,15 +65,17 @@
     <!-- FragmentImageBox -->
         <string name="image">Image</string>
     <!-- StockViewPagerFragment -->
-        <string name="tabZeroName">Installed Games</string>
-        <string name="tabOneName">Repository games</string>
+        <string name="tabZeroName">Installed games</string>
+        <string name="tabOneName">Game library</string>
     <!-- Use in menu -->
     <!-- Menu game -->
         <!-- Group running -->
-        <string name="mainDescTitle">Description</string>
+        <string name="mainDescTitle">Desc</string>
+        <string name="mainDescFullTitle">Main description</string>
         <string name="mainDescContDesc">Go to main description</string>
-        <string name="varsDescTitle">Add. description</string>
-        <string name="varsDescContDesc">Go to additional description</string>
+        <string name="varsDescTitle">Extra desc</string>
+        <string name="varsDescFullTitle" translatable="false">Extra description</string>
+        <string name="varsDescContDesc">Go to extra description</string>
         <string name="inventoryTitle">Inventory</string>
         <string name="inventoryContDesc">Go to inventory</string>
         <string name="userInputTitle">User input</string>
