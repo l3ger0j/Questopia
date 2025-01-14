@@ -54,8 +54,9 @@ public class LocalGame {
 //                .thenAccept(aLong -> emptyGameEntry.fileSize = String.valueOf(aLong));
 
     public CompletableFuture<Integer> deleteGamesEntries(List<Game> entriesDelete) {
+        var newEntriesList = new ArrayList<>(entriesDelete);
         return CompletableFuture
-                .supplyAsync(() -> gameDao.deleteList(entriesDelete), executor)
+                .supplyAsync(() -> gameDao.deleteList(newEntriesList), executor)
                 .exceptionally(throwable -> {
                     Log.e(TAG , "Error: " , throwable);
                     return null;
