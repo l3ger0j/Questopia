@@ -1,7 +1,8 @@
 package org.qp.android.ui.stock;
 
 import static org.qp.android.helpers.utils.AccessibilityUtil.customAccessibilityDelegate;
-import static org.qp.android.ui.stock.StockViewModel.DISABLE_CALCULATE_DIR;
+import static org.qp.android.helpers.utils.FileUtil.formatFileSize;
+import static org.qp.android.helpers.utils.StringUtil.isNotEmptyOrBlank;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -16,12 +17,14 @@ import androidx.recyclerview.widget.RecyclerView;
 import org.qp.android.R;
 import org.qp.android.data.db.Game;
 import org.qp.android.databinding.ListItemLocalGameBinding;
+import org.qp.android.ui.settings.SettingsController;
 
 import java.util.List;
 import java.util.Objects;
 
 public class LocalGamesListAdapter extends RecyclerView.Adapter<LocalGamesListAdapter.LocalGameHolder> {
 
+    private final static boolean DEFAULT_VALUE = true;
     private static final DiffUtil.ItemCallback<Game> DIFF_CALLBACK =
             new DiffUtil.ItemCallback<>() {
                 @Override
@@ -40,10 +43,6 @@ public class LocalGamesListAdapter extends RecyclerView.Adapter<LocalGamesListAd
 
     public Game getGameEntry(int position) {
         return differ.getCurrentList().get(position);
-    }
-
-    public List<Game> getGameEntries() {
-        return differ.getCurrentList();
     }
 
     @Override
@@ -68,17 +67,18 @@ public class LocalGamesListAdapter extends RecyclerView.Adapter<LocalGamesListAd
 
     @Override
     public void onBindViewHolder(@NonNull LocalGameHolder holder, int position) {
-        holder.listItemGameBinding(getGameEntries().get(position));
-        var gameData = getGameEntry(position);
+        holder.listItemGameBinding(getGameEntry(position));
+        var gameEntry = getGameEntry(position);
 
-        var fileSize = gameData.fileSize;
-        if (fileSize == null || fileSize.isEmpty() || fileSize.isBlank()) return;
-        if (fileSize.equals(DISABLE_CALCULATE_DIR)) return;
+        var fileSize = gameEntry.fileSize;
+        if (!isNotEmptyOrBlank(fileSize)) return;
+
+        var currBinPref = SettingsController.newInstance(context).binaryPrefixes;
+        var sizeWithPref = formatFileSize(Long.parseLong(fileSize), currBinPref);
 
         var elementSize = holder.listItemLocalGameBinding.gameSize;
         var fileSizeString = context.getString(R.string.fileSize);
-
-        elementSize.setText(fileSizeString.replace("-SIZE-", fileSize));
+        elementSize.setText(fileSizeString.replace("-SIZE-", sizeWithPref));
     }
 
     public static class LocalGameHolder extends RecyclerView.ViewHolder {
@@ -92,7 +92,7 @@ public class LocalGamesListAdapter extends RecyclerView.Adapter<LocalGamesListAd
         public void listItemGameBinding(Game gameEntry) {
             var gameDataObserver = new GameDataObserver();
             gameDataObserver.titleObserver.set(gameEntry.title);
-            gameDataObserver.isGameInstalled.set(gameEntry.listId == 0);
+            gameDataObserver.isGameInstalled.set(DEFAULT_VALUE);
             gameDataObserver.iconUriObserver.set(gameEntry.gameIconUri);
             listItemLocalGameBinding.setData(gameDataObserver);
             listItemLocalGameBinding.executePendingBindings();

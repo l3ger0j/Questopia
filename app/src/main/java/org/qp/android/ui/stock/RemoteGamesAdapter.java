@@ -1,7 +1,8 @@
 package org.qp.android.ui.stock;
 
 import static org.qp.android.helpers.utils.AccessibilityUtil.customAccessibilityDelegate;
-import static org.qp.android.ui.stock.StockViewModel.DISABLE_CALCULATE_DIR;
+import static org.qp.android.helpers.utils.FileUtil.formatFileSize;
+import static org.qp.android.helpers.utils.StringUtil.isNotEmptyOrBlank;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -16,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import org.qp.android.R;
 import org.qp.android.data.db.Game;
 import org.qp.android.databinding.ListItemRemoteGameBinding;
+import org.qp.android.ui.settings.SettingsController;
 
 import java.util.Objects;
 
@@ -23,6 +25,7 @@ public class RemoteGamesAdapter extends PagingDataAdapter<Game, RemoteGamesAdapt
 
     public static final int LOADING_ITEM = 0;
     public static final int GAME_ITEM = 1;
+    private final static boolean DEFAULT_VALUE = false;
     private static final DiffUtil.ItemCallback<Game> DIFF_CALLBACK =
             new DiffUtil.ItemCallback<>() {
                 @Override
@@ -64,13 +67,15 @@ public class RemoteGamesAdapter extends PagingDataAdapter<Game, RemoteGamesAdapt
         holder.listItemGameBinding(item);
 
         var fileSize = item.fileSize;
-        if (fileSize == null || fileSize.isEmpty() || fileSize.isBlank()) return;
-        if (fileSize.equals(DISABLE_CALCULATE_DIR)) return;
+        if (!isNotEmptyOrBlank(fileSize)) return;
+
+        var fixedFileSize = fileSize.replace("\"", "");
+        var currBinPref = SettingsController.newInstance(context).binaryPrefixes;
+        var sizeWithPref = formatFileSize(Long.parseLong(fixedFileSize), currBinPref);
 
         var elementSize = holder.listItemRemoteGameBinding.gameSize;
         var fileSizeString = context.getString(R.string.fileSize);
-
-        elementSize.setText(fileSizeString.replace("-SIZE-", fileSize));
+        elementSize.setText(fileSizeString.replace("-SIZE-", sizeWithPref));
     }
 
     @Override
@@ -89,7 +94,7 @@ public class RemoteGamesAdapter extends PagingDataAdapter<Game, RemoteGamesAdapt
         public void listItemGameBinding(Game gameEntry) {
             var gameDataObserver = new GameDataObserver();
             gameDataObserver.titleObserver.set(gameEntry.title);
-            gameDataObserver.isGameInstalled.set(gameEntry.listId == 1);
+            gameDataObserver.isGameInstalled.set(DEFAULT_VALUE);
             gameDataObserver.iconUriObserver.set(gameEntry.gameIconUri);
             listItemRemoteGameBinding.setData(gameDataObserver);
             listItemRemoteGameBinding.executePendingBindings();
