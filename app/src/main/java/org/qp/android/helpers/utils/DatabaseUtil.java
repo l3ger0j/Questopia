@@ -42,21 +42,56 @@ public final class DatabaseUtil {
                 });
     }
 
+    public CompletableFuture<Void> updateEntry(Game gameEntry) {
+        return CompletableFuture
+                .supplyAsync(() -> {
+                    try {
+                        return gameDao.getById(gameEntry.id);
+                    } catch (Exception e) {
+                        throw new CompletionException(e);
+                    }
+                })
+                .thenAccept(game -> {
+                    if (game == null) return;
+                    try {
+                        gameDao.update(gameEntry);
+                    } catch (Exception e) {
+                        throw new CompletionException(e);
+                    }
+                });
+    }
+
     public CompletableFuture<Void> updateOrInsertEntry(Game gameEntry) {
         return CompletableFuture
-                .supplyAsync(() -> gameDao.getById(gameEntry.id))
+                .supplyAsync(() -> {
+                    try {
+                        return gameDao.getById(gameEntry.id);
+                    } catch (Exception e) {
+                        throw new CompletionException(e);
+                    }
+                })
                 .thenAccept(game -> {
                     if (game != null) {
-                        gameDao.update(game);
+                        try {
+                            gameDao.update(game);
+                        } catch (Exception e) {
+                            throw new CompletionException(e);
+                        }
                     } else {
                         insertEntry(gameEntry);
                     }
                 });
     }
 
-    public void insertEntry(Game newGameEntry) {
-        CompletableFuture
-                .runAsync(() -> gameDao.insert(newGameEntry));
+    public CompletableFuture<Void> insertEntry(Game newGameEntry) {
+        return CompletableFuture
+                .runAsync(() -> {
+                    try {
+                        gameDao.insert(newGameEntry);
+                    } catch (Exception e) {
+                        throw new CompletionException(e);
+                    }
+                });
     }
 
 }
