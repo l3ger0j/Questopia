@@ -3,13 +3,16 @@
     <item
         android:id="@+id/menu_varsDesc"
         android:title="@string/varsDescTitle"
+        android:tooltipText="@string/varsDescContDesc"
         android:icon="@drawable/baseline_tab_vars_24" />
     <item
         android:id="@+id/menu_mainDesc"
         android:title="@string/mainDescTitle"
+        android:tooltipText="@string/mainDescContDesc"
         android:icon="@drawable/baseline_tab_main_24" />
     <item
         android:id="@+id/menu_inventory"
         android:title="@string/inventoryTitle"
+        android:tooltipText="@string/inventoryContDesc"
         android:icon="@drawable/baseline_tab_object_24" />
 </menu>
