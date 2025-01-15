@@ -80,13 +80,13 @@ public class StockActivity extends AppCompatActivity {
     private static final int POST_NOTIFICATION_CODE = 203;
 
     private final SimpleStorageHelper storageHelper = new SimpleStorageHelper(this);
-    protected ActivityStockBinding activityStockBinding;
     @Inject
     public GameDatabase gameDatabase;
     @Inject
     public GameDao gameDao;
+    protected ActivityStockBinding activityStockBinding;
     private StockViewModel stockViewModel;
-    private final SharedPreferences.OnSharedPreferenceChangeListener preferenceChangeListener = (sharedPreferences , key) -> {
+    private final SharedPreferences.OnSharedPreferenceChangeListener preferenceChangeListener = (sharedPreferences, key) -> {
         if (key == null) return;
         switch (key) {
             case "binPref" -> stockViewModel.loadGameDataFromDB();
@@ -189,7 +189,7 @@ public class StockActivity extends AppCompatActivity {
         });
         mFAB.setOnClickListener(view -> showDirPickerDialog());
 
-        searchView.addTransitionListener((searchView1 , previousState , newState) -> {
+        searchView.addTransitionListener((searchView1, previousState, newState) -> {
             if (newState.name().equalsIgnoreCase("SHOWING")) {
                 stockViewModel.doIsHideFAB.setValue(true);
             }
@@ -207,8 +207,8 @@ public class StockActivity extends AppCompatActivity {
             switch (integer) {
                 case CODE_PICK_IMAGE_FILE -> documentFiles.forEach(documentFile -> {
                     switch (documentWrap(documentFile).getExtension()) {
-                        case "png" , "jpg" , "jpeg" -> {
-                            getContentResolver().takePersistableUriPermission(documentFile.getUri() ,
+                        case "png", "jpg", "jpeg" -> {
+                            getContentResolver().takePersistableUriPermission(documentFile.getUri(),
                                     Intent.FLAG_GRANT_READ_URI_PERMISSION
                                             | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
                             stockViewModel.setTempImageFile(documentFile);
@@ -217,37 +217,38 @@ public class StockActivity extends AppCompatActivity {
                 });
                 case CODE_PICK_PATH_FILE -> documentFiles.forEach(documentFile -> {
                     switch (documentWrap(documentFile).getExtension()) {
-                        case "qsp" , "gam" -> stockViewModel.setTempPathFile(documentFile);
+                        case "qsp", "gam" -> stockViewModel.setTempPathFile(documentFile);
                     }
                 });
                 case CODE_PICK_MOD_FILE -> documentFiles.forEach(documentFile -> {
-                    if ("qsp".equals(documentWrap(documentFile).getExtension())) {
-                        stockViewModel.setTempModFile(documentFile);
+                    switch (documentWrap(documentFile).getExtension()) {
+                        case "qsp", "gam" -> stockViewModel.setTempModFile(documentFile);
                     }
                 });
             }
             return null;
         });
 
-        rootFolderLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult() , result -> {
+        rootFolderLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
             if (result.getResultCode() == Activity.RESULT_OK) {
                 var data = result.getData();
                 if (data == null) return;
                 var uri = data.getData();
                 if (uri == null) return;
 
-                getContentResolver().takePersistableUriPermission(uri ,
+                getContentResolver().takePersistableUriPermission(uri,
                         Intent.FLAG_GRANT_READ_URI_PERMISSION
                                 | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
 
-                var rootFolder = DocumentFileCompat.fromUri(this , uri);
-                stockViewModel.showAddDialogFragment(
+                var rootFolder = DocumentFileCompat.fromUri(this, uri);
+                stockViewModel.showDialogFragment(
                         getSupportFragmentManager(),
+                        StockDialogType.ADD_DIALOG,
+                        null,
                         rootFolder
                 );
                 stockViewModel.outputIntObserver.observe(this, integer -> {
                     if (integer == 1) {
-                        stockViewModel.createEntryInDBFromFile(rootFolder);
                         stockViewModel.loadGameDataFromDB();
                     }
                 });
@@ -268,7 +269,7 @@ public class StockActivity extends AppCompatActivity {
             navController.navigate(R.id.stockViewPagerFragment);
         }
 
-        stockViewModel.emitter.observe(this , eventNavigation -> {
+        stockViewModel.emitter.observe(this, eventNavigation -> {
             if (eventNavigation instanceof StockFragmentNavigation.ShowErrorDialog errorDialog) {
                 switch (errorDialog.getErrorType()) {
                     case FOLDER_ERROR -> showErrorDialog(getString(R.string.gamesFolderError));
@@ -277,23 +278,19 @@ public class StockActivity extends AppCompatActivity {
                 }
             }
             if (eventNavigation instanceof StockFragmentNavigation.ShowGameFragment gameFragment) {
-                if (gameFragment.entry != null) {
-                    onListItemClick(gameFragment.entry);
-                } else {
-                    onListItemClick(gameFragment.position);
-                }
+                onListItemClick(gameFragment.entry);
             }
             if (eventNavigation instanceof StockFragmentNavigation.ShowActionMode) {
                 onLongListItemClick();
             }
             if (eventNavigation instanceof StockFragmentNavigation.ShowFilePicker filePicker) {
-                showFilePickerActivity(filePicker.getRequestCode() , filePicker.getMimeTypes());
+                showFilePickerActivity(filePicker.getRequestCode(), filePicker.getMimeTypes());
             }
         });
 
         new AppUpdater(this)
                 .setUpdateFrom(UpdateFrom.GITHUB)
-                .setGitHubUserAndRepo("l3ger0j" , "Questopia")
+                .setGitHubUserAndRepo("l3ger0j", "Questopia")
                 .start();
 
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
@@ -312,18 +309,18 @@ public class StockActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onActivityResult(int requestCode ,
-                                    int resultCode ,
+    protected void onActivityResult(int requestCode,
+                                    int resultCode,
                                     @Nullable Intent data) {
-        super.onActivityResult(requestCode , resultCode , data);
-        storageHelper.getStorage().onActivityResult(requestCode , resultCode , data);
+        super.onActivityResult(requestCode, resultCode, data);
+        storageHelper.getStorage().onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode ,
-                                           @NonNull String[] permissions ,
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode , permissions , grantResults);
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode) {
             case READ_EXTERNAL_STORAGE_CODE -> {
                 if (grantResults.length > 0
@@ -344,22 +341,25 @@ public class StockActivity extends AppCompatActivity {
             case POST_NOTIFICATION_CODE -> {
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    ViewUtil.showSnackBar(findViewById(android.R.id.content) , "Successfully obtaining permission to post notification");
+                    ViewUtil.showSnackBar(findViewById(android.R.id.content), "Successfully obtaining permission to post notification");
                 } else {
-                    ViewUtil.showSnackBar(findViewById(android.R.id.content) , "Permission denied to post notification");
+                    ViewUtil.showSnackBar(findViewById(android.R.id.content), "Permission denied to post notification");
                 }
             }
         }
-        storageHelper.onRequestPermissionsResult(requestCode , permissions , grantResults);
+        storageHelper.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     private void checkMigration() {
         var cache = getExternalCacheDir();
-        var listDirsFile = new File(cache , "tempListDir");
+        var listDirsFile = new File(cache, "tempListDir");
 
         if (listDirsFile.exists()) {
             stockViewModel.showDialogFragment(
-                    getSupportFragmentManager(), StockDialogType.MIGRATION_DIALOG, null
+                    getSupportFragmentManager(),
+                    StockDialogType.MIGRATION_DIALOG,
+                    null,
+                    null
             );
         }
     }
@@ -397,7 +397,7 @@ public class StockActivity extends AppCompatActivity {
             if (postNotification != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(
                         this,
-                        new String[]{ Manifest.permission.POST_NOTIFICATIONS },
+                        new String[]{Manifest.permission.POST_NOTIFICATIONS},
                         POST_NOTIFICATION_CODE
                 );
             }
@@ -409,7 +409,7 @@ public class StockActivity extends AppCompatActivity {
                     var uri = Uri.parse("package:" + BuildConfig.APPLICATION_ID);
                     var intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, uri);
                     startActivity(intent);
-                } catch (Exception ex){
+                } catch (Exception ex) {
                     var intent = new Intent();
                     intent.setAction(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
                     startActivity(intent);
@@ -419,20 +419,24 @@ public class StockActivity extends AppCompatActivity {
             var readStorage = ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
             var writeStorage = ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
             if (readStorage != PackageManager.PERMISSION_GRANTED && writeStorage != PackageManager.PERMISSION_GRANTED) {
-                var requestPerm = new String[]{Manifest.permission.READ_EXTERNAL_STORAGE ,
+                var requestPerm = new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,
                         Manifest.permission.WRITE_EXTERNAL_STORAGE};
-                ActivityCompat.requestPermissions(this , requestPerm , READ_EXTERNAL_STORAGE_CODE);
+                ActivityCompat.requestPermissions(this, requestPerm, READ_EXTERNAL_STORAGE_CODE);
             }
         }
     }
 
     public void showErrorDialog(String errorMessage) {
-        stockViewModel.showDialogFragment(getSupportFragmentManager() ,
-                StockDialogType.ERROR_DIALOG , errorMessage);
+        stockViewModel.showDialogFragment(
+                getSupportFragmentManager(),
+                StockDialogType.ERROR_DIALOG,
+                errorMessage,
+                null
+        );
     }
 
-    public void showFilePickerActivity(int requestCode , String[] mimeTypes) {
-        storageHelper.openFilePicker(requestCode , false , mimeTypes);
+    public void showFilePickerActivity(int requestCode, String[] mimeTypes) {
+        storageHelper.openFilePicker(requestCode, false, mimeTypes);
     }
 
     public void showDirPickerDialog() {
@@ -452,25 +456,6 @@ public class StockActivity extends AppCompatActivity {
                     | Intent.FLAG_GRANT_READ_URI_PERMISSION;
             intentLQ.addFlags(flags);
             rootFolderLauncher.launch(intentLQ);
-        }
-    }
-
-    public void onListItemClick(int position) {
-        if (stockViewModel.isEnableDeleteMode) {
-            var currGamesMapValues = stockViewModel.getGamesMap().values();
-            for (var gameData : currGamesMapValues) {
-                if (!stockViewModel.isGameInstalled()) continue;
-                stockViewModel.currInstalledGamesList.add(gameData);
-            }
-        } else {
-            stockViewModel.gameEntriesLiveData.observe(this , gameEntries -> {
-                if (!gameEntries.isEmpty() && gameEntries.size() > position) {
-                    stockViewModel.setCurrGameData(gameEntries.get(position));
-                }
-            });
-
-            navController.navigate(R.id.action_stockViewPagerFragment_to_stockGameFragment);
-            stockViewModel.doIsHideFAB.setValue(true);
         }
     }
 
@@ -498,13 +483,13 @@ public class StockActivity extends AppCompatActivity {
 
         var callback = new ActionMode.Callback() {
             @Override
-            public boolean onCreateActionMode(ActionMode mode , Menu menu) {
-                mode.getMenuInflater().inflate(R.menu.menu_delete , menu);
+            public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+                mode.getMenuInflater().inflate(R.menu.menu_delete, menu);
                 return true;
             }
 
             @Override
-            public boolean onPrepareActionMode(ActionMode mode , Menu menu) {
+            public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
                 if (getSupportActionBar() != null) {
                     getSupportActionBar().hide();
                 }
@@ -515,7 +500,7 @@ public class StockActivity extends AppCompatActivity {
 
             @SuppressLint("NonConstantResourceId")
             @Override
-            public boolean onActionItemClicked(ActionMode mode , MenuItem item) {
+            public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
                 var gamesSelList = stockViewModel.selGameEntriesList;
                 var gameEntriesList = stockViewModel.currInstalledGamesList;
 
@@ -524,7 +509,8 @@ public class StockActivity extends AppCompatActivity {
                         stockViewModel.showDialogFragment(
                                 getSupportFragmentManager(),
                                 StockDialogType.DELETE_DIALOG,
-                                String.valueOf(gamesSelList.size())
+                                String.valueOf(gamesSelList.size()),
+                                null
                         );
                         stockViewModel.outputIntObserver.observe(StockActivity.this, integer -> {
                             if (integer == 1) {

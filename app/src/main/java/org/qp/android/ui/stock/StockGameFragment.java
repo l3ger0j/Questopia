@@ -98,6 +98,7 @@ public class StockGameFragment extends Fragment {
                 stockViewModel.showDialogFragment(
                         getParentFragmentManager(),
                         StockDialogType.EDIT_DIALOG,
+                        null,
                         null
                 )
         );
@@ -107,7 +108,8 @@ public class StockGameFragment extends Fragment {
                 stockViewModel.showDialogFragment(
                         getParentFragmentManager(),
                         StockDialogType.ERROR_DIALOG,
-                        getString(R.string.gamesFolderError)
+                        getString(R.string.gamesFolderError),
+                        null
                 );
                 return;
             }
@@ -115,7 +117,8 @@ public class StockGameFragment extends Fragment {
                 case 0 -> stockViewModel.showDialogFragment(
                         getParentFragmentManager(),
                         StockDialogType.ERROR_DIALOG,
-                        getString(R.string.gameFolderEmpty)
+                        getString(R.string.gameFolderEmpty),
+                        null
                 );
                 case 1 -> {
                     var chosenGameUri = stockViewModel.getGameFile(0);
@@ -130,6 +133,7 @@ public class StockGameFragment extends Fragment {
                     stockViewModel.showDialogFragment(
                             getParentFragmentManager(),
                             StockDialogType.SELECT_DIALOG,
+                            null,
                             null
                     );
                     stockViewModel.outputIntObserver.observe(getViewLifecycleOwner(), integer -> {

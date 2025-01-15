@@ -25,12 +25,7 @@ public interface StockFragmentNavigation {
     }
 
     class ShowGameFragment extends EventNavigation {
-        public int position;
         public Game entry;
-
-        public ShowGameFragment(int position) {
-            this.position = position;
-        }
 
         public ShowGameFragment(Game entryToShow) {
             this.entry = entryToShow;

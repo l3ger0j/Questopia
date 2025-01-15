@@ -51,9 +51,8 @@ public class LocalGamesListAdapter extends RecyclerView.Adapter<LocalGamesListAd
         return differ.getCurrentList().size();
     }
 
-    public LocalGamesListAdapter submitList(List<Game> gameEntriesList) {
+    public void submitList(List<Game> gameEntriesList) {
         differ.submitList(gameEntriesList);
-        return this;
     }
 
     @NonNull

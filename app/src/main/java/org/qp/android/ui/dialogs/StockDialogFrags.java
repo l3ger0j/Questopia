@@ -1,20 +1,28 @@
 package org.qp.android.ui.dialogs;
 
+import static org.qp.android.helpers.utils.PathUtil.removeExtension;
+import static org.qp.android.helpers.utils.StringUtil.isNotEmpty;
+
 import android.app.Dialog;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.DialogFragment;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import org.qp.android.R;
+import org.qp.android.data.db.Game;
 import org.qp.android.databinding.DialogAddBinding;
 import org.qp.android.databinding.DialogEditBinding;
+import org.qp.android.ui.stock.GameDataObserver;
 import org.qp.android.ui.stock.StockViewModel;
 
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -28,19 +36,13 @@ public class StockDialogFrags extends DialogFragment {
     private boolean isInstalled;
     private String message;
     private String title;
+    private DocumentFile newDirEntry;
 
+    private final GameDataObserver dataObserver = new GameDataObserver();
     private StockViewModel stockViewModel;
 
     public void setDialogType(StockDialogType dialogType) {
         this.dialogType = dialogType;
-    }
-
-    public void setAddBinding(DialogAddBinding addBinding) {
-        this.addBinding = addBinding;
-    }
-
-    public void setEditBinding(DialogEditBinding editBinding) {
-        this.editBinding = editBinding;
     }
 
     public void setNames(ArrayList<String> names) {
@@ -53,6 +55,10 @@ public class StockDialogFrags extends DialogFragment {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public void setNewDirEntry(DocumentFile newDirEntryName) {
+        this.newDirEntry = newDirEntryName;
     }
 
     public void setInstalled(boolean installed) {
@@ -69,6 +75,7 @@ public class StockDialogFrags extends DialogFragment {
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
         var builder = new MaterialAlertDialogBuilder(requireContext());
+
         if (savedInstanceState != null ) {
             if (savedInstanceState.containsKey("selectedDialogType")) {
                 dialogType = StockDialogType.valueOf(savedInstanceState.getString("selectedDialogType"));
@@ -86,15 +93,86 @@ public class StockDialogFrags extends DialogFragment {
                 title = savedInstanceState.getString("stringTitle");
             }
         }
+
         switch (dialogType) {
             case ADD_DIALOG -> {
-                if (addBinding != null) {
-                    builder.setView(addBinding.getRoot());
-                    return builder.create();
-                } else {
-                    dismissAllowingStateLoss();
-                    return super.onCreateDialog(savedInstanceState);
+                addBinding = DialogAddBinding.inflate(getLayoutInflater());
+                addBinding.setGame(dataObserver);
+
+                var titleText = addBinding.ET0.getEditText();
+                if (titleText != null) {
+                    titleText.setText(newDirEntry.getName());
                 }
+
+                addBinding.buttonSelectIcon.setOnClickListener(stockViewModel::sendIntent);
+                addBinding.addBT.setOnClickListener(v -> {
+                    var nameDir = newDirEntry.getName();
+                    if (nameDir == null) {
+                        var secureRandom = new SecureRandom();
+                        nameDir = "game#" + secureRandom.nextInt();
+                    }
+
+                    var unfilledEntry = new Game();
+                    var editTextTitle = addBinding.ET0.getEditText();
+                    if (editTextTitle != null) {
+                        var entryTitle = editTextTitle.getText().toString();
+                        unfilledEntry.title = !isNotEmpty(entryTitle)
+                                ? nameDir
+                                : editTextTitle.getText().toString();
+                    }
+                    var editTextAuthor = addBinding.ET1.getEditText();
+                    if (editTextAuthor != null) {
+                        unfilledEntry.author = editTextAuthor.getText().toString();
+                    }
+                    var editTextVersion = addBinding.ET2.getEditText();
+                    if (editTextVersion != null) {
+                        unfilledEntry.version = editTextVersion.getText().toString();
+                    }
+
+                    stockViewModel.createAddIntent(unfilledEntry, newDirEntry);
+                });
+
+                builder.setView(addBinding.getRoot());
+                return builder.create();
+            }
+            case EDIT_DIALOG -> {
+                editBinding = DialogEditBinding.inflate(getLayoutInflater());
+
+                dataObserver.isModDirExist.set(stockViewModel.isModsDirExist());
+                dataObserver.iconUriObserver.set(stockViewModel.currGameEntry.gameIconUri);
+                editBinding.setGame(dataObserver);
+
+                editBinding.buttonSelectPath.setOnClickListener(stockViewModel::sendIntent);
+                editBinding.buttonSelectMod.setOnClickListener(stockViewModel::sendIntent);
+                editBinding.buttonSelectIcon.setOnClickListener(stockViewModel::sendIntent);
+                editBinding.editBT.setOnClickListener(v -> {
+                    var unfilledEntry = new Game();
+                    var editTextTitle = editBinding.ET0.getEditText();
+                    if (editTextTitle != null) {
+                        unfilledEntry.title = editTextTitle.getText().toString().isEmpty()
+                                ? removeExtension(unfilledEntry.title)
+                                : editTextTitle.getText().toString();
+                    }
+
+                    var editTextAuthor = editBinding.ET1.getEditText();
+                    if (editTextAuthor != null) {
+                        unfilledEntry.author = editTextAuthor.getText().toString().isEmpty()
+                                ? removeExtension(unfilledEntry.author)
+                                : editTextAuthor.getText().toString();
+                    }
+
+                    var editTextVersion = editBinding.ET2.getEditText();
+                    if (editTextVersion != null) {
+                        unfilledEntry.version = editTextVersion.toString().isEmpty()
+                                ? removeExtension(unfilledEntry.version)
+                                : editTextVersion.getText().toString();
+                    }
+
+                    stockViewModel.createEditIntent(unfilledEntry);
+                });
+
+                builder.setView(editBinding.getRoot());
+                return builder.create();
             }
             case DELETE_DIALOG -> {
                 if (Objects.equals(message, "1")) {
@@ -107,15 +185,6 @@ public class StockDialogFrags extends DialogFragment {
                 builder.setNegativeButton(android.R.string.cancel , (dialog , which) ->
                         stockViewModel.outputIntObserver.setValue(0));
                 return builder.create();
-            }
-            case EDIT_DIALOG -> {
-                if (editBinding != null) {
-                    builder.setView(editBinding.getRoot());
-                    return builder.create();
-                } else {
-                    dismissAllowingStateLoss();
-                    return super.onCreateDialog(savedInstanceState);
-                }
             }
             case ERROR_DIALOG -> {
                 builder.setTitle(R.string.error);
@@ -143,6 +212,30 @@ public class StockDialogFrags extends DialogFragment {
                 return super.onCreateDialog(savedInstanceState);
             }
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        stockViewModel.fileMutableLiveData = new MutableLiveData<>();
+        stockViewModel.fileMutableLiveData.observe(this, file -> {
+            switch (file.fileType()) {
+                case IMAGE_FILE -> {
+                    if (editBinding == null) {
+                        addBinding.buttonSelectIcon.setText(file.inputFile().getName());
+                        dataObserver.iconUriObserver.set(file.inputFile().getUri());
+                    } else {
+                        editBinding.buttonSelectIcon.setText(file.inputFile().getName());
+                        dataObserver.iconUriObserver.set(file.inputFile().getUri());
+                    }
+                }
+                case PATH_FILE ->
+                        editBinding.buttonSelectPath.setText(file.inputFile().getName());
+                case MOD_FILE ->
+                        editBinding.buttonSelectMod.setText(file.inputFile().getName());
+            }
+        });
     }
 
     @Override

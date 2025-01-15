@@ -29,6 +29,7 @@ public class StockLocalRVFragment extends Fragment {
     private int selectColor;
 
     private FragmentRecyclerBinding recyclerBinding;
+    private LocalGamesListAdapter localAdapter;
 
     @Nullable
     @Override
@@ -42,10 +43,10 @@ public class StockLocalRVFragment extends Fragment {
         unselectColor = android.R.attr.selectableItemBackground;
         selectColor = ContextCompat.getColor(requireContext(), R.color.md_theme_primaryContainer);
 
-        stockViewModel.gameEntriesLiveData.observe(getViewLifecycleOwner(), gameEntries -> {
-            var adapter = new LocalGamesListAdapter().submitList(gameEntries);
-            mRecyclerView.setAdapter(adapter);
-        });
+        localAdapter = new LocalGamesListAdapter();
+        stockViewModel.gameEntriesLiveData.observe(getViewLifecycleOwner(), gameEntries ->
+                localAdapter.submitList(gameEntries));
+        mRecyclerView.setAdapter(localAdapter);
 
         stockViewModel.emitter.observe(getViewLifecycleOwner(), eventNavigation -> {
             if (eventNavigation instanceof StockFragmentNavigation.SelectAllElements) {
@@ -89,7 +90,8 @@ public class StockLocalRVFragment extends Fragment {
             @Override
             public void onItemClick(View view, int position) {
                 if (!stockViewModel.isEnableDeleteMode) {
-                    stockViewModel.doOnShowGameFragment(position);
+                    var entry = localAdapter.getGameEntry(position);
+                    stockViewModel.doOnShowGameFragment(entry);
                 } else {
                     var mViewHolder = mRecyclerView.findViewHolderForAdapterPosition(position);
                     if (mViewHolder == null) return;

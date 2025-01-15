@@ -8,7 +8,6 @@ import static org.qp.android.helpers.utils.FileUtil.copyFileToDir;
 import static org.qp.android.helpers.utils.FileUtil.findOrCreateFolder;
 import static org.qp.android.helpers.utils.FileUtil.fromRelPath;
 import static org.qp.android.helpers.utils.FileUtil.isWritableFile;
-import static org.qp.android.helpers.utils.PathUtil.removeExtension;
 import static org.qp.android.helpers.utils.StringUtil.isNotEmptyOrBlank;
 
 import android.annotation.SuppressLint;
@@ -19,7 +18,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Environment;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.webkit.CookieManager;
 
@@ -38,15 +36,14 @@ import androidx.paging.rxjava3.PagingRx;
 
 import com.anggrayudi.storage.callback.FileCallback;
 import com.anggrayudi.storage.file.DocumentFileCompat;
-import com.squareup.picasso.Picasso;
 
 import org.qp.android.QuestopiaApplication;
 import org.qp.android.R;
 import org.qp.android.data.db.Game;
 import org.qp.android.data.db.GameDao;
 import org.qp.android.data.db.GameDatabase;
-import org.qp.android.databinding.DialogAddBinding;
-import org.qp.android.databinding.DialogEditBinding;
+import org.qp.android.dto.stock.TempFile;
+import org.qp.android.dto.stock.TempFileType;
 import org.qp.android.helpers.ErrorType;
 import org.qp.android.helpers.bus.EventEmitter;
 import org.qp.android.helpers.utils.DatabaseUtil;
@@ -62,7 +59,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -84,8 +80,6 @@ public class StockViewModel extends AndroidViewModel {
     public static final int CODE_PICK_PATH_FILE = 301;
     public static final int CODE_PICK_MOD_FILE = 302;
 
-    public static final String DISABLE_CALCULATE_DIR = "disable";
-    public static final String EXT_GAME_LIST_NAME = "extGameDirs";
     private static final String INNER_GAME_DIR_NAME = "games-dir";
     public final MutableLiveData<Integer> currPageNumber = new MutableLiveData<>();
     private final ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
@@ -104,6 +98,7 @@ public class StockViewModel extends AndroidViewModel {
             action.confirmResolution(ConflictResolution.REPLACE);
         }
     };
+    public MutableLiveData<TempFile> fileMutableLiveData;
     public MutableLiveData<Boolean> doIsHideFAB = new MutableLiveData<>();
     public MutableLiveData<Integer> outputIntObserver;
     public boolean isEnableDeleteMode = false;
@@ -114,8 +109,6 @@ public class StockViewModel extends AndroidViewModel {
     public MutableLiveData<List<Game>> gameEntriesLiveData = new MutableLiveData<>();
     public EventEmitter emitter = new EventEmitter();
     private DocumentFile tempImageFile, tempPathFile, tempModFile;
-    private DialogEditBinding editBinding;
-    private DialogAddBinding addBinding;
     private StockDialogFrags dialogFragments = new StockDialogFrags();
     private long downloadId = 0L;
 
@@ -163,32 +156,17 @@ public class StockViewModel extends AndroidViewModel {
 
     public void setTempPathFile(DocumentFile tempPathFile) {
         this.tempPathFile = tempPathFile;
-        if (editBinding == null) return;
-        editBinding.buttonSelectPath.setText(tempPathFile.getName());
+        fileMutableLiveData.setValue(new TempFile(tempPathFile, TempFileType.PATH_FILE));
     }
 
     public void setTempModFile(DocumentFile tempModFile) {
         this.tempModFile = tempModFile;
-        if (editBinding == null) return;
-        editBinding.buttonSelectMod.setText(tempModFile.getName());
+        fileMutableLiveData.setValue(new TempFile(tempModFile, TempFileType.MOD_FILE));
     }
 
     public void setTempImageFile(@NonNull DocumentFile tempImageFile) {
         this.tempImageFile = tempImageFile;
-        if (addBinding != null) {
-            addBinding.buttonSelectIcon.setText(tempImageFile.getName());
-            Picasso.get()
-                    .load(tempImageFile.getUri())
-                    .fit()
-                    .into(addBinding.imageView);
-        }
-        if (editBinding != null) {
-            editBinding.buttonSelectIcon.setText(tempImageFile.getName());
-            Picasso.get()
-                    .load(tempImageFile.getUri())
-                    .fit()
-                    .into(editBinding.iconView);
-        }
+        fileMutableLiveData.setValue(new TempFile(tempImageFile, TempFileType.IMAGE_FILE));
     }
 
     public List<Game> getListGames() {
@@ -251,10 +229,6 @@ public class StockViewModel extends AndroidViewModel {
         emitter.emitAndExecuteOnce(new StockFragmentNavigation.ShowErrorDialog(errorMessage, errorType));
     }
 
-    public void doOnShowGameFragment(int position) {
-        emitter.emitAndExecuteOnce(new StockFragmentNavigation.ShowGameFragment(position));
-    }
-
     public void doOnShowGameFragment(Game entryToShow) {
         emitter.emitAndExecuteOnce(new StockFragmentNavigation.ShowGameFragment(entryToShow));
     }
@@ -272,23 +246,22 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     // region Dialog
-    public void showAddDialogFragment(FragmentManager manager,
-                                      DocumentFile rootDir) {
-        outputIntObserver = new MutableLiveData<>();
-        dialogFragments = new StockDialogFrags();
-        dialogFragments.setDialogType(StockDialogType.ADD_DIALOG);
-        dialogFragments.setAddBinding(setupAddView(rootDir));
-        dialogFragments.show(manager, "addDialogFragment");
-    }
-
     public void showDialogFragment(FragmentManager manager,
                                    StockDialogType dialogType,
-                                   String errorMessage) {
+                                   String errorMessage,
+                                   DocumentFile rootDir) {
         var fragment = manager.findFragmentByTag(dialogFragments.getTag());
         if (fragment != null && fragment.isAdded()) {
             fragment.onDestroy();
         } else {
             switch (dialogType) {
+                case ADD_DIALOG -> {
+                    outputIntObserver = new MutableLiveData<>();
+                    dialogFragments = new StockDialogFrags();
+                    dialogFragments.setDialogType(StockDialogType.ADD_DIALOG);
+                    dialogFragments.setNewDirEntry(rootDir);
+                    dialogFragments.show(manager, "addDialogFragment");
+                }
                 case DELETE_DIALOG -> {
                     outputIntObserver = new MutableLiveData<>();
                     dialogFragments = new StockDialogFrags();
@@ -297,9 +270,9 @@ public class StockViewModel extends AndroidViewModel {
                     dialogFragments.show(manager, "deleteDialogFragment");
                 }
                 case EDIT_DIALOG -> {
+                    outputIntObserver = new MutableLiveData<>();
                     dialogFragments = new StockDialogFrags();
                     dialogFragments.setDialogType(StockDialogType.EDIT_DIALOG);
-                    dialogFragments.setEditBinding(buildEditDialog());
                     dialogFragments.show(manager, "editDialogFragment");
                 }
                 case ERROR_DIALOG -> {
@@ -326,47 +299,11 @@ public class StockViewModel extends AndroidViewModel {
         }
     }
 
-    public DialogAddBinding setupAddView(DocumentFile rootDir) {
-        addBinding = DialogAddBinding.inflate(LayoutInflater.from(getApplication()));
-
-        var titleText = addBinding.ET0.getEditText();
-        if (titleText != null) {
-            titleText.setText(rootDir.getName());
-        }
-        addBinding.buttonSelectIcon.setOnClickListener(this::sendIntent);
-        addBinding.addBT.setOnClickListener(v -> createAddIntent(rootDir));
-
-        return addBinding;
-    }
-
-    private void createAddIntent(DocumentFile rootDir) {
+    public void createAddIntent(Game unfilledEntry, DocumentFile rootDir) {
         try {
-            var nameDir = rootDir.getName();
-            if (nameDir == null) {
-                var secureRandom = new SecureRandom();
-                nameDir = "game#" + secureRandom.nextInt();
-            }
+            if (tempImageFile != null) unfilledEntry.gameIconUri = tempImageFile.getUri();
 
-            var newGameEntry = new Game();
-            var editTextTitle = addBinding.ET0.getEditText();
-            if (editTextTitle != null) {
-                newGameEntry.title = editTextTitle.getText().toString().isEmpty()
-                        ? nameDir
-                        : editTextTitle.getText().toString();
-            }
-            var editTextAuthor = addBinding.ET1.getEditText();
-            if (editTextAuthor != null) {
-                newGameEntry.author = editTextAuthor.getText().toString();
-            }
-            var editTextVersion = addBinding.ET2.getEditText();
-            if (editTextVersion != null) {
-                newGameEntry.version = editTextVersion.getText().toString();
-            }
-            if (tempImageFile != null) {
-                newGameEntry.gameIconUri = tempImageFile.getUri();
-            }
-            newGameEntry.fileSize = DISABLE_CALCULATE_DIR;
-            databaseUtil.updateOrInsertEntry(newGameEntry);
+            localGame.insertEntryInDB(unfilledEntry, rootDir);
             outputIntObserver.setValue(1);
             dialogFragments.dismiss();
         } catch (NullPointerException ex) {
@@ -374,45 +311,11 @@ public class StockViewModel extends AndroidViewModel {
         }
     }
 
-    @NonNull
-    private DialogEditBinding buildEditDialog() {
-        editBinding = DialogEditBinding.inflate(LayoutInflater.from(getApplication()));
-
-        var gameDataObserver = new GameDataObserver();
-        gameDataObserver.isModDirExist.set(isModsDirExist());
-        gameDataObserver.iconUriObserver.set(currGameEntry.gameIconUri);
-        editBinding.setGame(gameDataObserver);
-
-        editBinding.buttonSelectPath.setOnClickListener(this::sendIntent);
-        editBinding.buttonSelectMod.setOnClickListener(this::sendIntent);
-        editBinding.buttonSelectIcon.setOnClickListener(this::sendIntent);
-        editBinding.editBT.setOnClickListener(v -> createEditIntent());
-
-        return editBinding;
-    }
-
-    public void createEditIntent() {
+    public void createEditIntent(Game unfilledEntry) {
         try {
-            var editTextTitle = editBinding.ET0.getEditText();
-            if (editTextTitle != null) {
-                currGameEntry.title = editTextTitle.getText().toString().isEmpty()
-                        ? removeExtension(currGameEntry.title)
-                        : editTextTitle.getText().toString();
-            }
-
-            var editTextAuthor = editBinding.ET1.getEditText();
-            if (editTextAuthor != null) {
-                currGameEntry.author = editTextAuthor.getText().toString().isEmpty()
-                        ? removeExtension(currGameEntry.author)
-                        : editTextAuthor.getText().toString();
-            }
-
-            var editTextVersion = editBinding.ET2.getEditText();
-            if (editTextVersion != null) {
-                currGameEntry.version = editTextVersion.toString().isEmpty()
-                        ? removeExtension(currGameEntry.version)
-                        : editTextVersion.getText().toString();
-            }
+            currGameEntry.title = unfilledEntry.title;
+            currGameEntry.author = unfilledEntry.author;
+            currGameEntry.version = unfilledEntry.version;
 
             if (tempImageFile != null) currGameEntry.gameIconUri = tempImageFile.getUri();
 
@@ -435,10 +338,14 @@ public class StockViewModel extends AndroidViewModel {
             }
 
             localGame.updateEntryInDB(currGameEntry)
-                    .thenRun(this::loadGameDataFromDB);
+                    .thenRun(this::loadGameDataFromDB)
+                    .exceptionally(throwable -> {
+                        doOnShowErrorDialog(throwable.toString(), ErrorType.EXCEPTION);
+                        return null;
+                    });
             dialogFragments.dismiss();
         } catch (NullPointerException ex) {
-            doOnShowErrorDialog(ex.getMessage(), ErrorType.EXCEPTION);
+            doOnShowErrorDialog(ex.toString(), ErrorType.EXCEPTION);
         }
     }
 
@@ -487,25 +394,11 @@ public class StockViewModel extends AndroidViewModel {
     // endregion Dialog
     public void createEntryInDBFromFile(DocumentFile gameDir) {
         localGame.createEntryInDBFromDir(gameDir)
-                .thenRun(this::loadGameDataFromDB)
                 .exceptionally(throwable -> {
-                    Log.e(TAG, "Error: ", throwable);
+                    doOnShowErrorDialog(throwable.toString(), ErrorType.EXCEPTION);
                     return null;
                 });
     }
-
-    //                        if (!data.isFileInstalled()) continue;
-//                        if (!isNotEmpty(data.fileSize)) {
-//                            calculateSizeDir(data);
-//                        } else {
-//                            if (!data.fileSize.equals(DISABLE_CALCULATE_DIR)) {
-//                                try {
-//                                    var fileSize = Long.parseLong(data.fileSize);
-//                                    var currPrefix = getController().binaryPrefixes;
-//                                    data.fileSize = formatFileSize(fileSize , currPrefix);
-//                                } catch (NumberFormatException ignored) {}
-//                            }
-//                        }
 
     public void loadGameDataFromDB() {
         gamesMap.clear();
