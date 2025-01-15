@@ -58,7 +58,6 @@
     <!-- QTopia -->
         <string name="appName">Questopia</string>
     <!-- SettingsFragment -->
-        <string name="settingsEffect">Настройки вступят в силу после изменения описания к игре</string>
         <string name="addFolder">Выбрать папку с игрой</string>
         <string name="addFolderSum0">Текущий корневой каталог это внутренняя директория приложения</string>
         <string name="addFolderSum1">Текущий корневая директория это внешняя директория устройства</string>
