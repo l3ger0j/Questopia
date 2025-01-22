@@ -1,5 +1,6 @@
 package org.qp.android.ui.stock;
 
+import static org.qp.android.helpers.utils.FileUtil.formatFileSize;
 import static org.qp.android.helpers.utils.StringUtil.isNotEmptyOrBlank;
 
 import android.os.Bundle;
@@ -16,11 +17,17 @@ import androidx.lifecycle.ViewModelProvider;
 import org.qp.android.R;
 import org.qp.android.databinding.FragmentItemGameBinding;
 import org.qp.android.ui.dialogs.StockDialogType;
+import org.qp.android.ui.settings.SettingsController;
 
 public class StockGameFragment extends Fragment {
 
     private FragmentItemGameBinding fragmentStockGameBinding;
     private StockViewModel stockViewModel;
+
+    private String formatSize(long fileSize) {
+        var currBinPref = SettingsController.newInstance(requireContext()).binaryPrefixes;
+        return formatFileSize(fileSize, currBinPref);
+    }
 
     @Nullable
     @Override
@@ -65,9 +72,9 @@ public class StockGameFragment extends Fragment {
                             : getString(R.string.fileType).replace("-TYPE-", dataEntry.fileExt)
             );
             gameDataObserver.fileSizeObserver.set(
-                    dataEntry.fileSize.isEmpty()
-                            ? dataEntry.fileSize
-                            : getString(R.string.fileSize).replace("-SIZE-", dataEntry.fileSize)
+                    dataEntry.fileSize == 0
+                            ? ""
+                            : getString(R.string.fileSize).replace("-SIZE-", formatSize(dataEntry.fileSize))
             );
             gameDataObserver.pubDateObserver.set(
                     dataEntry.pubDate.isEmpty()
