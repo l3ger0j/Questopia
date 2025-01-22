@@ -16,7 +16,7 @@ public class RemoteDataList {
     public String title;
     public String text;
     @JacksonXmlProperty(localName = "max_pages")
-    public String maxPages;
+    public int maxPages;
 
     @JacksonXmlElementWrapper(useWrapping = false)
     public List<RemoteGameData> game = new ArrayList<>();

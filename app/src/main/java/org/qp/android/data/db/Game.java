@@ -23,7 +23,7 @@ public class Game {
     @TypeConverters({GameIconConverter.class})
     public Uri gameIconUri;
     public String fileUrl = "";
-    public String fileSize = "";
+    public long fileSize;
     public String fileExt = "";
     public String descUrl = "";
     public String pubDate = "";

@@ -2,7 +2,6 @@ package org.qp.android.ui.stock;
 
 import static org.qp.android.helpers.utils.AccessibilityUtil.customAccessibilityDelegate;
 import static org.qp.android.helpers.utils.FileUtil.formatFileSize;
-import static org.qp.android.helpers.utils.StringUtil.isNotEmptyOrBlank;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -67,11 +66,10 @@ public class RemoteGamesAdapter extends PagingDataAdapter<Game, RemoteGamesAdapt
         holder.listItemGameBinding(item);
 
         var fileSize = item.fileSize;
-        if (!isNotEmptyOrBlank(fileSize)) return;
+        if (fileSize == 0) return;
 
-        var fixedFileSize = fileSize.replace("\"", "");
         var currBinPref = SettingsController.newInstance(context).binaryPrefixes;
-        var sizeWithPref = formatFileSize(Long.parseLong(fixedFileSize), currBinPref);
+        var sizeWithPref = formatFileSize(fileSize, currBinPref);
 
         var elementSize = holder.listItemRemoteGameBinding.gameSize;
         var fileSizeString = context.getString(R.string.fileSize);
