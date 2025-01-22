@@ -4,9 +4,6 @@ plugins {
     alias(libs.plugins.hilt.android.gradle.plugin)
 }
 
-def viewBind = true
-def dataBind = true
-
 room {
     schemaDirectory "$projectDir/schemas"
 }
@@ -61,8 +58,8 @@ android {
     }
 
     buildFeatures {
-        viewBinding viewBind
-        dataBinding dataBind
+        viewBinding true
+        dataBinding true
         buildConfig true
         aidl true
     }
