@@ -121,7 +121,6 @@ public class SettingPluginFragment extends Fragment {
                                             questEngine.authorPlugin()
                                     );
                                     arrayList.add(pluginInfo);
-                                    questEngine.stopNativeLib();
                                 } catch (Exception e) {
                                     Log.e(getTag(), "Error:", e);
                                 }

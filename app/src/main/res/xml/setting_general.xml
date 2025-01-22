@@ -16,6 +16,12 @@
         android:icon="@drawable/baseline_language_24"
         android:title="@string/langTitle" />
     <ListPreference
+        android:defaultValue="570"
+        android:entries="@array/libVerName"
+        android:entryValues="@array/libVerValue"
+        android:key="libVer"
+        android:title="Application library version" />
+    <ListPreference
         android:icon="@drawable/baseline_code_24"
         android:defaultValue="1000"
         android:entries="@array/binPrefName"

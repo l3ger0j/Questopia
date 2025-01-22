@@ -18,6 +18,7 @@ public class SettingsController {
     public int customWidthImage;
     public int customHeightImage;
     public int binaryPrefixes;
+    public int nativeLibVersion;
     public float actionsHeightRatio;
     public boolean isSoundEnabled;
     public boolean isImageDisabled;
@@ -64,6 +65,7 @@ public class SettingsController {
         settingsController.typeface = Integer.parseInt(preferences.getString("typeface", "0"));
         settingsController.fontSize = Integer.parseInt(preferences.getString("fontSize", "16"));
         settingsController.binaryPrefixes = Integer.parseInt(preferences.getString("binPref","1000"));
+        settingsController.nativeLibVersion = Integer.parseInt(preferences.getString("libVer", "570"));
         settingsController.actionsHeightRatio = parseActionsHeightRatio(preferences.getString("actsHeight", "1/3"));
         settingsController.isUseAutoscroll = preferences.getBoolean("autoscroll", true);
         settingsController.isUseExecString = preferences.getBoolean("execString", false);

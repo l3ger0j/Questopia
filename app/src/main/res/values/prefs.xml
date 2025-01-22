@@ -1,6 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- English/Default version -->
 <resources>
+    <string-array name="libVerName">
+        <item>5.7.0 (by seedHarta)</item>
+        <item>5.8.0 (by Sonnix)</item>
+        <item>5.9.2 (Official)</item>
+    </string-array>
+    <string-array name="libVerValue">
+        <item>570</item>
+        <item>575</item>
+        <item>592</item>
+    </string-array>
     <string-array name="themeStatesName">
         <item>Auto</item>
         <item>Light</item>

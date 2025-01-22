@@ -120,6 +120,7 @@ public class GameViewModel extends AndroidViewModel {
         refreshActionsRecycler();
         refreshObjectsRecycler();
     };
+    private volatile int nativeLibVer;
 
     public GameViewModel(@NonNull Application application) {
         super(application);
@@ -546,9 +547,10 @@ public class GameViewModel extends AndroidViewModel {
     }
 
     public void startNativeLib() {
+        nativeLibVer = getSettingsController().nativeLibVersion;
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
             try {
-                pluginClient.questopiaBundle.startNativeLib();
+                pluginClient.questopiaBundle.startNativeLib(nativeLibVer);
             } catch (Exception e) {
                 Log.e(this.getClass().getSimpleName(), "Error: ", e);
             }
@@ -558,7 +560,7 @@ public class GameViewModel extends AndroidViewModel {
     public void stopNativeLib() {
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
             try {
-                pluginClient.questopiaBundle.stopNativeLib();
+                pluginClient.questopiaBundle.stopNativeLib(nativeLibVer);
                 pluginClient.disconnectPlugin(getApplication(), PluginType.ENGINE_PLUGIN);
             } catch (Exception e) {
                 showErrorDialog(e.toString(), ErrorType.EXCEPTION);

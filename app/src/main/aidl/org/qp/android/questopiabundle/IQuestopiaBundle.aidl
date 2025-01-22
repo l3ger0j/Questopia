@@ -11,8 +11,8 @@ interface IQuestopiaBundle {
     String authorPlugin();
 
     // Plugin part
-    void startNativeLib();
-    void stopNativeLib();
+    void startNativeLib(int libVer);
+    void stopNativeLib(int libVer);
 
     void runGameIntoLib(long gameId, String gameTitle,in Uri gameDirUri,in Uri gameFileUri);
     void onActionClicked(int index);
