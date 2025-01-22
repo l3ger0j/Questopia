@@ -69,9 +69,8 @@ android {
 dependencies {
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 
-    def paging_version = "3.3.5"
-    implementation "androidx.paging:paging-runtime:$paging_version"
-    implementation "androidx.paging:paging-rxjava3:$paging_version"
+    implementation libs.androidx.paging.runtime
+    implementation libs.androidx.paging.rxjava3
 
     implementation libs.appcompat
     implementation libs.constraintlayout
@@ -103,7 +102,7 @@ dependencies {
 
     implementation libs.retrofit
     implementation libs.converter.jackson
-    implementation 'com.squareup.retrofit2:adapter-rxjava3:2.11.0'
+    implementation libs.adapter.rxjava3
 
     implementation libs.rxandroid
 
