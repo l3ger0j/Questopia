@@ -37,7 +37,7 @@ public class RemoteGamePagingSource extends RxPagingSource<Integer, Game> {
                     var mapper = new XmlMapper();
                     var string = body.string();
                     var matcher = Pattern.compile("max_pages=(\\d+)").matcher(string);
-                    var newBody = matcher.find() ? string.replace(matcher.group(1), "\"" + matcher.group(1) + "\"") : string;
+                    var newBody = matcher.find() ? string.replace(matcher.group(), "max_pages=\""+matcher.group(1)+"\"") : string;
                     return mapper.readValue(newBody, RemoteDataList.class);
                 })
                 .map(dataList -> toLoadResult(dataList, finalNextPageNumber));
@@ -64,7 +64,7 @@ public class RemoteGamePagingSource extends RxPagingSource<Integer, Game> {
             listRemoteGameEntry.add(emptyEntry);
         });
 
-        var maxPages = Integer.parseInt(dataList.maxPages);
+        var maxPages = dataList.maxPages;
         return new LoadResult.Page<>(listRemoteGameEntry, page == 0 ? null : page - 1, page == maxPages ? null : page + 1);
     }
 
