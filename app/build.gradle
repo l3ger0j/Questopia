@@ -98,7 +98,7 @@ dependencies {
     implementation libs.jsoup
     implementation libs.appupdater
     implementation libs.storage
-    implementation libs.picasso
+    implementation libs.glide
 
     implementation libs.retrofit
     implementation libs.converter.jackson

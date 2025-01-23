@@ -15,7 +15,7 @@ import androidx.recyclerview.widget.AsyncListDiffer;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.squareup.picasso.Picasso;
+import com.bumptech.glide.Glide;
 
 import org.qp.android.R;
 import org.qp.android.databinding.ListGameItemBinding;
@@ -100,10 +100,10 @@ public class GameItemRecycler extends RecyclerView.Adapter<GameItemRecycler.View
         var qpListItem = getItem(position);
 
         if (isNotEmptyOrBlank(qpListItem.pathToImage)) {
-            Picasso.get()
+            Glide.with(holder.listGameItemBinding.itemIcon)
                     .load(qpListItem.pathToImage)
                     .error(R.drawable.baseline_broken_image_24)
-                    .fit()
+                    .centerCrop()
                     .into(holder.listGameItemBinding.itemIcon);
         }
 
