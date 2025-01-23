@@ -11,7 +11,6 @@ import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import org.qp.android.plugin.IQuestPlugin;
 import org.qp.android.questopiabundle.IQuestopiaBundle;
 
 import java.util.ArrayList;
@@ -27,18 +26,6 @@ public class PluginClient {
     private static final String KEY_CATEGORIES = "categories";
     private final MutableLiveData<ArrayList<HashMap<String, String>>> servicesLiveData = new MutableLiveData<>();
     private final MutableLiveData<ArrayList<String>> categoriesLiveData = new MutableLiveData<>();
-    public IQuestPlugin questPlugin;
-    private final ServiceConnection downConn = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            questPlugin = IQuestPlugin.Stub.asInterface(service);
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            questPlugin = null;
-        }
-    };
     public IQuestopiaBundle questopiaBundle;
     private final ServiceConnection engineConn = new ServiceConnection() {
         @Override
@@ -62,13 +49,6 @@ public class PluginClient {
 
     public void connectPlugin(Context context, PluginType pluginType) {
         switch (pluginType) {
-            case DOWNLOAD_PLUGIN -> {
-                var intent = new Intent("org.qp.android.plugin.DOWNLOAD_PLUGIN");
-                var updatedIntent = createExplicitIntent(context, intent);
-                if (updatedIntent != null) {
-                    context.bindService(updatedIntent, downConn, Context.BIND_AUTO_CREATE);
-                }
-            }
             case ENGINE_PLUGIN -> {
                 var intent = new Intent(ENGINE_PLUGIN_ID);
                 var updatedIntent = createExplicitIntent(context, intent);
@@ -81,10 +61,7 @@ public class PluginClient {
 
     public void disconnectPlugin(Context context, PluginType pluginType) {
         switch (pluginType) {
-            case DOWNLOAD_PLUGIN -> context.unbindService(downConn);
-            case ENGINE_PLUGIN -> {
-                context.unbindService(engineConn);
-            }
+            case ENGINE_PLUGIN -> context.unbindService(engineConn);
         }
     }
 

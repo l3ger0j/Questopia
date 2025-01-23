@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.RemoteException;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,7 +26,6 @@ import org.qp.android.dto.plugin.PluginInfo;
 import org.qp.android.helpers.adapters.RecyclerItemClickListener;
 import org.qp.android.model.plugin.PluginClient;
 import org.qp.android.model.plugin.PluginType;
-import org.qp.android.plugin.IQuestPlugin;
 import org.qp.android.questopiabundle.IQuestopiaBundle;
 
 import java.util.ArrayList;
@@ -43,7 +41,6 @@ public class SettingPluginFragment extends Fragment {
     private PackageBroadcastReceiver packageBroadcastReceiver;
     private IntentFilter packageFilter;
 
-    private IQuestPlugin questPlugin;
     private IQuestopiaBundle questEngine;
 
     @Nullable
@@ -80,22 +77,6 @@ public class SettingPluginFragment extends Fragment {
         new Handler().postDelayed(() -> services.forEach(stringStringHashMap -> stringStringHashMap.forEach((s, s2) -> {
             if (Objects.equals(s, "servicename")) {
                 switch (s2) {
-                    case "org.qp.android.plugin.AidlService" -> {
-                        pluginClient.connectPlugin(requireContext(), PluginType.DOWNLOAD_PLUGIN);
-                        new Handler().postDelayed(() -> {
-                            questPlugin = pluginClient.questPlugin;
-                            try {
-                                var pluginInfo = new PluginInfo(
-                                        questPlugin.versionPlugin(),
-                                        questPlugin.titlePlugin(),
-                                        questPlugin.authorPlugin()
-                                );
-                                arrayList.add(pluginInfo);
-                            } catch (RemoteException e) {
-                                Log.e(getTag(), "Error:", e);
-                            }
-                        }, 1000);
-                    }
                     case "org.qp.android.questopiabundle.QuestopiaBundle" -> {
                         var client = ((QuestopiaApplication) requireActivity().getApplication()).getCurrPluginClient();
                         if (client != null) {
