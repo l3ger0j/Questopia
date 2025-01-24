@@ -8,12 +8,21 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <com.google.android.material.tabs.TabLayout
-            android:id="@+id/stockTabLayout"
+        <com.google.android.material.appbar.CollapsingToolbarLayout
+            android:id="@+id/stockColToolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:tabGravity="fill"
-            app:tabMode="fixed" />
+            app:layout_scrollFlags="scroll|enterAlways"
+            app:titleCollapseMode="scale">
+
+            <com.google.android.material.tabs.TabLayout
+                android:id="@+id/stockTabLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:tabGravity="fill"
+                app:tabMode="fixed" />
+
+        </com.google.android.material.appbar.CollapsingToolbarLayout>
 
     </com.google.android.material.appbar.AppBarLayout>
 
