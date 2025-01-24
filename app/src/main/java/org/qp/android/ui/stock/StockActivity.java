@@ -21,6 +21,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.storage.StorageManager;
 import android.provider.Settings;
+import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
@@ -122,8 +123,11 @@ public class StockActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
         var splashScreen = SplashScreen.installSplashScreen(this);
         splashScreen.setKeepOnScreenCondition(() -> {
+            EdgeToEdge.enable(this);
             switch (SettingsController.newInstance(this).theme) {
                 case "auto" -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
                 case "light" -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
@@ -131,8 +135,6 @@ public class StockActivity extends AppCompatActivity {
             }
             return false;
         });
-        EdgeToEdge.enable(this);
-        super.onCreate(savedInstanceState);
 
         PreferenceManager
                 .getDefaultSharedPreferences(getApplication())
@@ -145,11 +147,17 @@ public class StockActivity extends AppCompatActivity {
         }
 
         activityStockBinding = ActivityStockBinding.inflate(getLayoutInflater());
-        ViewCompat.setOnApplyWindowInsetsListener(activityStockBinding.getRoot(), (v, windowInsets) -> {
+        ViewCompat.setOnApplyWindowInsetsListener(activityStockBinding.stockFAB, (v, windowInsets) -> {
             var insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
             var mlp = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
-            mlp.topMargin = insets.top;
-            mlp.bottomMargin = insets.bottom;
+            var marg = TypedValue.applyDimension(
+                    TypedValue.COMPLEX_UNIT_DIP,
+                    32.0f,
+                    getResources().getDisplayMetrics()
+            );
+            mlp.leftMargin = insets.left;
+            mlp.bottomMargin = (int) (insets.bottom + marg);
+            mlp.rightMargin = (int) (insets.right + marg);
             v.setLayoutParams(mlp);
             return WindowInsetsCompat.CONSUMED;
         });
