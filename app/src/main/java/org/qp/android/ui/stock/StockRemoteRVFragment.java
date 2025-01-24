@@ -1,5 +1,6 @@
 package org.qp.android.ui.stock;
 
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,7 +33,13 @@ public class StockRemoteRVFragment extends Fragment {
 
         stockViewModel = new ViewModelProvider(requireActivity()).get(StockViewModel.class);
         mRecyclerView = recyclerBinding.shareRecyclerView;
-        mRecyclerView.setLayoutManager(new GridLayoutManager(requireContext(), 2));
+
+        var orientation = getResources().getConfiguration().orientation;
+        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            mRecyclerView.setLayoutManager(new GridLayoutManager(requireContext(), 3));
+        } else if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+            mRecyclerView.setLayoutManager(new GridLayoutManager(requireContext(), 2));
+        }
 
         remoteAdapter = new RemoteGamesAdapter();
         var disposable = stockViewModel.remoteDataFlow.subscribe(data -> {
