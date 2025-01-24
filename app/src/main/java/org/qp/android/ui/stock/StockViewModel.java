@@ -36,12 +36,12 @@ import androidx.paging.rxjava3.PagingRx;
 
 import com.anggrayudi.storage.callback.FileCallback;
 import com.anggrayudi.storage.file.DocumentFileCompat;
+import com.anggrayudi.storage.file.DocumentFileUtils;
 
 import org.qp.android.QuestopiaApplication;
 import org.qp.android.R;
 import org.qp.android.data.db.Game;
 import org.qp.android.data.db.GameDao;
-import org.qp.android.data.db.GameDatabase;
 import org.qp.android.dto.stock.TempFile;
 import org.qp.android.dto.stock.TempFileType;
 import org.qp.android.helpers.ErrorType;
@@ -60,7 +60,6 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
@@ -82,15 +81,13 @@ public class StockViewModel extends AndroidViewModel {
 
     private static final String INNER_GAME_DIR_NAME = "games-dir";
     public final MutableLiveData<Integer> currPageNumber = new MutableLiveData<>();
-    private final ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private final String TAG = this.getClass().getSimpleName();
     private final HashMap<Long, Game> gamesMap = new HashMap<>();
     private final DownloadManager downloadManager = getApplication().getSystemService(DownloadManager.class);
     private final LocalGame localGame;
     private final DatabaseUtil databaseUtil;
     private final File rootInDir;
-    private final GameDatabase gameDatabase;
-    private final GameDao gameDao;
     private final FileCallback callback = new FileCallback() {
         @Override
         public void onConflict(@NonNull DocumentFile destinationFile,
@@ -108,20 +105,15 @@ public class StockViewModel extends AndroidViewModel {
     public MutableLiveData<Game> gameEntryLiveData = new MutableLiveData<>();
     public MutableLiveData<List<Game>> gameEntriesLiveData = new MutableLiveData<>();
     public EventEmitter emitter = new EventEmitter();
+    public Flowable<PagingData<Game>> remoteDataFlow;
     private DocumentFile tempImageFile, tempPathFile, tempModFile;
     private StockDialogFrags dialogFragments = new StockDialogFrags();
     private long downloadId = 0L;
 
-    public Flowable<PagingData<Game>> remoteDataFlow;
-
     @Inject
     public StockViewModel(@NonNull Application application,
-                          @NonNull GameDao gameDao,
-                          @NonNull GameDatabase gameDatabase) {
+                          @NonNull GameDao gameDao) {
         super(application);
-
-        this.gameDao = gameDao;
-        this.gameDatabase = gameDatabase;
 
         localGame = new LocalGame(gameDao, getApplication());
         databaseUtil = new DatabaseUtil(gameDao);
@@ -414,33 +406,6 @@ public class StockViewModel extends AndroidViewModel {
                 });
     }
 
-    public void refreshGameEntry() {
-        gamesMap.clear();
-
-        var pageNumber = currPageNumber.getValue();
-        if (pageNumber == null) return;
-
-        if (pageNumber == 0) {
-            gameEntriesLiveData.postValue(Collections.emptyList());
-
-            doIsHideFAB.setValue(false);
-
-            databaseUtil.getAllGameEntries()
-                    .thenAcceptAsync(listGameEntries -> {
-                        listGameEntries.forEach(gameData -> {
-                            if (gameData.listId == 0) {
-                                gamesMap.put(gameData.id, gameData);
-                            }
-                        });
-                        gameEntriesLiveData.postValue(new ArrayList<>(gamesMap.values()));
-                    }, executor)
-                    .exceptionally(throwable -> {
-                        Log.e(TAG, "Error: ", throwable);
-                        return null;
-                    });
-        }
-    }
-
     private void dropPersistable(Uri folderUri) {
         try {
             var contentResolver = getApplication().getContentResolver();
@@ -453,20 +418,29 @@ public class StockViewModel extends AndroidViewModel {
         }
     }
 
-    public void removeEntryFromDB(List<Game> entriesDelete) {
-        localGame.deleteGamesEntries(entriesDelete)
+    public CompletableFuture<Void> removeEntryFromDB(List<Game> entriesDelete) {
+        return localGame.deleteGamesEntries(entriesDelete)
                 .thenAccept(integer -> {
                     for (var element : entriesDelete) {
                         gamesMap.remove(element.id, element);
                     }
                     var localGameData = new ArrayList<>(gamesMap.values());
                     gameEntriesLiveData.postValue(localGameData);
-                    refreshGameEntry();
+                    loadGameDataFromDB();
                 });
     }
 
     public void removeEntryAndDirFromDB(List<Game> entriesDelete) {
-
+        removeEntryFromDB(entriesDelete)
+                .thenRunAsync(() -> {
+                    for (var element : entriesDelete) {
+                        var folder = DocumentFileCompat.fromUri(getApplication(), element.gameDirUri);
+                        if (folder == null) return;
+                        var doDelete = DocumentFileUtils.forceDelete(folder, getApplication());
+                        if (!doDelete) return;
+                        dropPersistable(element.gameDirUri);
+                    }
+                }, executor);
     }
 
     // Download game
