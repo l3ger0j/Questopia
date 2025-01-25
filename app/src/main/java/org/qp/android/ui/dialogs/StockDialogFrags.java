@@ -74,7 +74,10 @@ public class StockDialogFrags extends DialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-        var builder = new MaterialAlertDialogBuilder(requireContext());
+        var builder = new MaterialAlertDialogBuilder(
+                requireContext(),
+                R.style.ThemeOverlay_Material3_MaterialAlertDialog_Centered
+        );
 
         if (savedInstanceState != null ) {
             if (savedInstanceState.containsKey("selectedDialogType")) {
@@ -197,6 +200,14 @@ public class StockDialogFrags extends DialogFragment {
                 builder.setTitle("Migration is available");
                 builder.setMessage("Previous entries have been found. Do you want to migrate them to the database?");
                 // TODO MIGRATION!
+                builder.setPositiveButton(android.R.string.ok, (dialog , which) -> {});
+                builder.setNegativeButton(android.R.string.cancel, (dialog , which) -> {});
+                return builder.create();
+            }
+            case GAME_FOLDER_INIT -> {
+                builder.setIcon(R.drawable.folder_add_24);
+                builder.setTitle("Folder location");
+                builder.setMessage("Select the location of the folder for downloading games");
                 builder.setPositiveButton(android.R.string.ok, (dialog , which) -> {});
                 builder.setNegativeButton(android.R.string.cancel, (dialog , which) -> {});
                 return builder.create();

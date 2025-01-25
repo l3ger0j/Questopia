@@ -13,8 +13,9 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import org.qp.android.databinding.FragmentRecyclerBinding;
+import org.qp.android.databinding.FragmentRecyclerRemoteBinding;
 import org.qp.android.helpers.adapters.RecyclerItemClickListener;
+import org.qp.android.ui.dialogs.StockDialogType;
 
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 
@@ -23,16 +24,21 @@ public class StockRemoteRVFragment extends Fragment {
     private final CompositeDisposable compositeDisposable = new CompositeDisposable();
     private StockViewModel stockViewModel;
     private RecyclerView mRecyclerView;
-    private FragmentRecyclerBinding recyclerBinding;
+    private FragmentRecyclerRemoteBinding recyclerBinding;
     private RemoteGamesAdapter remoteAdapter;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        recyclerBinding = FragmentRecyclerBinding.inflate(inflater, container, false);
+        recyclerBinding = FragmentRecyclerRemoteBinding.inflate(inflater, container, false);
 
         stockViewModel = new ViewModelProvider(requireActivity()).get(StockViewModel.class);
-        mRecyclerView = recyclerBinding.shareRecyclerView;
+        mRecyclerView = recyclerBinding.shareRV.getRoot();
+
+        var banner = recyclerBinding.remoteErrorBanner;
+        banner.setLeftButton("Dismiss", banner1 -> {
+            banner.dismiss(500);
+        });
 
         var orientation = getResources().getConfiguration().orientation;
         if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
@@ -51,6 +57,21 @@ public class StockRemoteRVFragment extends Fragment {
                 remoteAdapter.withLoadStateFooter(
                         new RemoteGamesLoadStateAdapter(view -> remoteAdapter.retry()))
         );
+
+        stockViewModel.emitter.observe(getViewLifecycleOwner(), eventNavigation -> {
+            if (eventNavigation instanceof StockFragmentNavigation.ShowErrorBanner errorBanner) {
+                banner.setMessage(errorBanner.inputMessage);
+                banner.setRightButton(errorBanner.rightButtonMsg, banner3 -> {
+                    stockViewModel.showDialogFragment(
+                            getChildFragmentManager(),
+                            StockDialogType.GAME_FOLDER_INIT,
+                            null,
+                            null
+                    );
+                });
+                banner.show(500);
+            }
+        });
 
         return recyclerBinding.getRoot();
     }

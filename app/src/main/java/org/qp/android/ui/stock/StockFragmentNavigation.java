@@ -56,4 +56,14 @@ public interface StockFragmentNavigation {
         }
     }
 
+    class ShowErrorBanner extends EventNavigation {
+        public final String inputMessage;
+        public final String rightButtonMsg;
+
+        public ShowErrorBanner(String inputMessage, String rightButtonMsg) {
+            this.inputMessage = inputMessage;
+            this.rightButtonMsg = rightButtonMsg;
+        }
+    }
+
 }

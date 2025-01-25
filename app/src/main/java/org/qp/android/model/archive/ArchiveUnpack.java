@@ -1,9 +1,9 @@
 package org.qp.android.model.archive;
 
-import static org.qp.android.helpers.utils.FileUtil.findOrCreateFolder;
 import static org.qp.android.helpers.utils.ThreadUtil.assertNonUiThread;
 
 import android.content.Context;
+import android.net.Uri;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -16,25 +16,21 @@ import net.sf.sevenzipjbinding.ISequentialOutStream;
 import net.sf.sevenzipjbinding.PropID;
 import net.sf.sevenzipjbinding.SevenZip;
 import net.sf.sevenzipjbinding.SevenZipException;
-import net.sf.sevenzipjbinding.impl.RandomAccessFileInStream;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.RandomAccessFile;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 public class ArchiveUnpack {
 
     private static final String TAG = ArchiveUnpack.class.getSimpleName();
     private final Context context;
-    private final File targetArchive;
+    private Uri targetArchive;
     public File unpackFolder;
-    private File destFolder;
+    private Uri destDir;
 
     @NonNull
     private static int[] getPrimitiveLongArrayFromInt(Set<Integer> input) {
@@ -47,62 +43,44 @@ public class ArchiveUnpack {
     }
 
     public ArchiveUnpack(@NonNull Context context,
-                         @NonNull File targetArchive,
-                         @NonNull File destFolder) {
+                         @NonNull Uri targetArchiveUri,
+                         @NonNull Uri destFolderUri) {
         this.context = context;
-        this.targetArchive = targetArchive;
-        this.destFolder = destFolder;
+        this.targetArchive = targetArchiveUri;
+        this.destDir = destFolderUri;
     }
 
     public void extractArchiveEntries() {
         assertNonUiThread();
 
-        try (var stream = new RandomAccessFileInStream(new RandomAccessFile(targetArchive, "r"));
+        Map<Integer, String> fileNames = new HashMap<>();
+        try (var stream = new DocumentFileRandomInStream(context, targetArchive);
              var inArchive = SevenZip.openInArchive(null, stream)) {
             var itemCount = inArchive.getNumberOfItems();
-            var fileNames = new HashMap<Integer, String>();
 
-            for (int ind = 0; ind < itemCount; ind++) {
-                var fileName = inArchive.getStringProperty(ind, PropID.PATH);
-                if (fileName.endsWith(".qsp") || fileName.endsWith(".gam")) {
-                    if (fileName.split("/").length == 1) {
-                        var archiveName = targetArchive.getName();
-                        var pattern = Pattern.compile(".(?:rar|zip|aqsp)");
-                        var folderName = pattern.matcher(archiveName).replaceAll("");
-                        if (fileName.split("/").length == 1) {
-                            destFolder = findOrCreateFolder(context, destFolder, folderName);
-                            unpackFolder = destFolder;
-                        }
-                    }
-                }
-                if (unpackFolder == null && ind == itemCount - 1) {
-                    unpackFolder = new File(destFolder, fileName);
-                }
-                Log.d(TAG, "index: "+ind+"\nfilename: "+fileName+"\nitemCount: "+itemCount);
+            for (var index = 0; index < itemCount; index++) {
+                var fileName = inArchive.getStringProperty(index, PropID.PATH);
                 var lastSeparator = fileName.lastIndexOf(File.separator);
                 if (lastSeparator > -1) fileName = fileName.substring(lastSeparator + 1);
-                fileNames.put(ind, fileName);
+                fileNames.put(index, fileName);
             }
 
             var indexes = getPrimitiveLongArrayFromInt(fileNames.keySet());
-            inArchive.extract(
-                    indexes,
-                    false,
-                    new ArchiveExtractCallback(destFolder, inArchive)
-            );
+            Log.d(TAG, fileNames.toString());
+            inArchive.extract(indexes, false, new ArchiveExtractCallback(destDir, inArchive));
         } catch (IOException e) {
             Log.e(TAG, "", e);
         }
     }
 
-    private static class ArchiveExtractCallback implements IArchiveExtractCallback {
+    private class ArchiveExtractCallback implements IArchiveExtractCallback {
 
-        private final File targetFolder;
+        private final Uri targetFolder;
         private final IInArchive inArchive;
         private ExtractAskMode extractAskMode;
         private SequentialOutStream stream;
 
-        public ArchiveExtractCallback(File targetFolder, IInArchive inArchive) {
+        public ArchiveExtractCallback(Uri targetFolder, IInArchive inArchive) {
             this.targetFolder = targetFolder;
             this.inArchive = inArchive;
         }
@@ -115,23 +93,24 @@ public class ArchiveUnpack {
 
             var isFolder = (Boolean) inArchive.getProperty(index , PropID.IS_FOLDER);
             var path = (String) inArchive.getProperty(index, PropID.PATH);
-            var file = new File(targetFolder.getAbsolutePath(), path);
+//            var documentFile = new File(targetFolder.getAbsolutePath(), path);
+//            DocumentFileCompat.createFile(ArchiveUnpack.this.context, );
 
-            if (isFolder) {
-                createDirectory(file);
-                return null;
-            }
-
-            var fileParent = file.getParentFile();
-            if (fileParent == null) return null;
-
-            createDirectory(fileParent);
-
-            try {
-                stream = new SequentialOutStream(new FileOutputStream(file));
-            } catch (FileNotFoundException e) {
-                Log.e(TAG, "Error: ", e);
-            }
+//            if (isFolder) {
+//                createDirectory(file);
+//                return null;
+//            }
+//
+//            var fileParent = file.getParentFile();
+//            if (fileParent == null) return null;
+//
+//            createDirectory(fileParent);
+//
+//            try {
+//                stream = new SequentialOutStream(new FileOutputStream(file));
+//            } catch (FileNotFoundException e) {
+//                Log.e(TAG, "Error: ", e);
+//            }
             return stream;
         }
 

@@ -6,5 +6,6 @@ public enum StockDialogType {
     EDIT_DIALOG,
     ERROR_DIALOG,
     MIGRATION_DIALOG,
+    GAME_FOLDER_INIT,
     SELECT_DIALOG
 }
