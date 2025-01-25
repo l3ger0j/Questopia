@@ -69,6 +69,8 @@ android {
 dependencies {
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 
+    implementation project(':materialbanner-library')
+
     implementation libs.androidx.paging.runtime
     implementation libs.androidx.paging.rxjava3
 

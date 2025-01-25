@@ -1,0 +1,35 @@
+plugins {
+    id("com.android.library")
+    alias(libs.plugins.kotlin)
+}
+
+def versionNameSuffix = "-debug"
+
+android {
+    namespace 'com.sergivonavi.materialbanner'
+    compileSdk 35
+
+    defaultConfig {
+        minSdk 26
+        targetSdk 34
+
+        resValue("string", "materialbanner_lib_version", "2.0.0")
+    }
+    buildTypes {
+        release {
+            minifyEnabled = false
+            consumerProguardFiles("proguard-rules.pro")
+
+            resValue("string", "materialbanner_lib_version", "2.0.0")
+        }
+    }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
+    }
+}
+
+dependencies {
+    implementation libs.kotlin.stdlib
+    implementation libs.material
+}

@@ -1,5 +1,6 @@
 [versions]
 agp = "8.7.3"
+kotlin = "1.9.24"
 hagp = "2.51.1"
 appupdater = "2.7"
 changelog = "3.5"
@@ -75,8 +76,10 @@ storage = { module = "com.anggrayudi:storage", version.ref = "storage" }
 webkit = { module = "androidx.webkit:webkit", version.ref = "webkit" }
 woodstox-core = { module = "com.fasterxml.woodstox:woodstox-core", version.ref = "woodstoxCore" }
 unpacker = { module = "com.github.omicronapps:7-Zip-JBinding-4Android", version.ref = "unpackerVersion" }
+kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
 
 [plugins]
 androidx-room = { id = "androidx.room", version.ref = "roomRuntime" }
 android-application = { id = "com.android.application", version.ref = "agp" }
 hilt-android-gradle-plugin = { id = "com.google.dagger.hilt.android", version.ref = "hagp" }
+kotlin = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
