@@ -53,7 +53,7 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -190,6 +190,65 @@ public class GameActivity extends AppCompatActivity {
             initControls();
             initGame();
         }
+
+        gameViewModel.emitter.observe(this, eventNavigation -> {
+            if (eventNavigation instanceof GameFragmentNavigation.ApplySettings) {
+                applySettings();
+            }
+            if (eventNavigation instanceof GameFragmentNavigation.StartRWSave rwSave) {
+                startReadOrWriteSave(rwSave.slotAction);
+            }
+            if (eventNavigation instanceof GameFragmentNavigation.FinishActivity) {
+                finish();
+            }
+            if (eventNavigation instanceof GameFragmentNavigation.WarnUser user) {
+                warnUser(user.tabId);
+            }
+            if (eventNavigation instanceof GameFragmentNavigation.ShowPopupSave) {
+                showSavePopup();
+            }
+            if (eventNavigation instanceof GameFragmentNavigation.ShowSimpleDialog dialog) {
+                var inputString = dialog.inputString;
+                var dialogType = dialog.dialogType;
+                var errorType = dialog.errorType;
+
+                if (inputString != null && dialogType != null) {
+                    showSimpleDialog(inputString, dialogType, errorType);
+                }
+            }
+            if (eventNavigation instanceof GameFragmentNavigation.ShowMessageDialog messageDialog) {
+                var inputString = messageDialog.inputString;
+                var latch = messageDialog.latch;
+
+                if (latch != null) {
+                    showMessageDialog(inputString, latch);
+                }
+            }
+            if (eventNavigation instanceof GameFragmentNavigation.ShowInputDialog inputDialog) {
+                var inputString = inputDialog.inputString;
+                var inputQueue = inputDialog.inputQueue;
+
+                if (inputQueue != null) {
+                    showInputDialog(inputString, inputQueue);
+                }
+            }
+            if (eventNavigation instanceof GameFragmentNavigation.ShowExecutorDialog executorDialog) {
+                var inputString = executorDialog.inputString;
+                var inputQueue = executorDialog.inputQueue;
+
+                if (inputQueue != null) {
+                    showExecutorDialog(inputString, inputQueue);
+                }
+            }
+            if (eventNavigation instanceof GameFragmentNavigation.ShowMenuDialog menuDialog) {
+                var inputListString = menuDialog.inputListString;
+                var inputQueue = menuDialog.inputQueue;
+
+                if (inputQueue != null) {
+                    showMenuDialog(inputListString, inputQueue);
+                }
+            }
+        });
 
         gameViewModel.getAudioErrorObserver().observe(this, path -> {
             if (!settingsController.isUseMusicDebug) return;
@@ -525,7 +584,7 @@ public class GameActivity extends AppCompatActivity {
         }
     }
 
-    public void showMenuDialog(@NonNull ArrayList<String> items,
+    public void showMenuDialog(@NonNull List<String> items,
                                @NonNull ArrayBlockingQueue<Integer> resultQueue) {
         if (isFinishing()) return;
         if (!isMainThread()) {
@@ -537,6 +596,7 @@ public class GameActivity extends AppCompatActivity {
             if (gameViewModel.outputIntObserver.hasObservers()) {
                 gameViewModel.outputIntObserver = new MutableLiveData<>();
             }
+
             var dialogFragment = new GameDialogFrags();
             dialogFragment.setDialogType(GameDialogType.MENU_DIALOG);
             dialogFragment.setItems(items);

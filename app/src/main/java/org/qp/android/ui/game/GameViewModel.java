@@ -45,6 +45,7 @@ import com.google.android.material.textfield.TextInputLayout;
 import org.qp.android.QuestopiaApplication;
 import org.qp.android.R;
 import org.qp.android.helpers.ErrorType;
+import org.qp.android.helpers.bus.EventEmitter;
 import org.qp.android.model.plugin.PluginClient;
 import org.qp.android.model.plugin.PluginType;
 import org.qp.android.model.service.AudioPlayer;
@@ -64,6 +65,7 @@ import org.qp.android.ui.settings.SettingsController;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -111,6 +113,7 @@ public class GameViewModel extends AndroidViewModel {
     public SharedPreferences preferences;
     private Uri gameDirUri;
     private boolean showActions = true;
+    public EventEmitter emitter = new EventEmitter();
     private LibGameState libGameState = new LibGameState();
     private final SharedPreferences.OnSharedPreferenceChangeListener preferenceChangeListener = (sharedPreferences, key) -> {
         controllerObserver.postValue(getSettingsController());
@@ -334,21 +337,53 @@ public class GameViewModel extends AndroidViewModel {
         return Optional.ofNullable(savesDir);
     }
 
-    @NonNull
-    private GameActivity getGameActivity() {
-        var activity = activityObserver.getValue();
-        if (activity != null) {
-            return activity;
-        } else {
-            throw new NullPointerException("Activity is null");
-        }
-    }
-
     public void setGameDirUri(Uri gameDirUri) {
         this.gameDirUri = gameDirUri;
     }
 
     // endregion Getter/Setter
+
+    public void doOnStartRWSave(int slotAction) {
+        emitter.emitAndExecuteOnce(new GameFragmentNavigation.StartRWSave(slotAction));
+    }
+
+    public void doOnFinishActivity() {
+        emitter.emitAndExecuteOnce(new GameFragmentNavigation.FinishActivity());
+    }
+
+    public void doOnWarnUser(int tabId) {
+        emitter.emitAndExecuteOnce(new GameFragmentNavigation.WarnUser(tabId));
+    }
+
+    public void doOnShowSavePopup() {
+        emitter.emitAndExecuteOnce(new GameFragmentNavigation.ShowPopupSave());
+    }
+
+    public void doOnShowSimpleDialog(@NonNull String inputString,
+                                     @NonNull GameDialogType dialogType,
+                                     @Nullable ErrorType errorType) {
+        emitter.emitAndExecuteOnce(new GameFragmentNavigation.ShowSimpleDialog(inputString, dialogType, errorType));
+    }
+
+    public void doOnShowMessageDialog(@Nullable String inputString,
+                                      @NonNull CountDownLatch latch) {
+        emitter.emitAndExecuteOnce(new GameFragmentNavigation.ShowMessageDialog(inputString, latch));
+    }
+
+    public void doOnShowInputDialog(@Nullable String inputString,
+                                    @NonNull ArrayBlockingQueue<String> inputQueue) {
+        emitter.emitAndExecuteOnce(new GameFragmentNavigation.ShowInputDialog(inputString, inputQueue));
+    }
+
+    public void doOnShowExecutorDialog(@Nullable String inputString,
+                                       @NonNull ArrayBlockingQueue<String> inputQueue) {
+        emitter.emitAndExecuteOnce(new GameFragmentNavigation.ShowExecutorDialog(inputString, inputQueue));
+    }
+
+    public void doOnShowMenuDialog(@Nullable List<String> inputListString,
+                                   @NonNull ArrayBlockingQueue<Integer> inputQueue) {
+        emitter.emitAndExecuteOnce(new GameFragmentNavigation.ShowMenuDialog(inputListString, inputQueue));
+    }
 
     public String removeHtmlTags(String dirtyHTML) {
         return getHtmlProcessor().removeHtmlTags(dirtyHTML);
@@ -367,7 +402,7 @@ public class GameViewModel extends AndroidViewModel {
             case "closeGameDialogFragment" -> {
                 stopAudio();
                 stopNativeLib();
-                getGameActivity().finish();
+                doOnFinishActivity();
             }
             case "inputDialogFragment", "executorDialogFragment" -> {
                 var inputBoxEdit = (TextInputLayout) optWindow.get().findViewById(R.id.inputBox_edit);
@@ -403,7 +438,7 @@ public class GameViewModel extends AndroidViewModel {
 //                            + "\n" + feedBackNameET.getText().toString());
                 }
             }
-            case "loadGameDialogFragment" -> getGameActivity().startReadOrWriteSave(LOAD);
+            case "loadGameDialogFragment" -> doOnStartRWSave(LOAD);
             case "showMessageDialogFragment" -> outputBooleanObserver.setValue(true);
         }
     }
@@ -446,7 +481,7 @@ public class GameViewModel extends AndroidViewModel {
                         cleanHTML = getHtmlProcessor().getCleanHtmlAndMedia(getApplication(), dirtyHTML);
                     }
                     if (!cleanHTML.isBlank()) {
-                        getGameActivity().warnUser(GameActivity.TAB_MAIN_DESC_AND_ACTIONS);
+                        doOnWarnUser(GameActivity.TAB_MAIN_DESC_AND_ACTIONS);
                     }
                     mainDescLiveData.postValue(cleanHTML);
                 }, singleService);
@@ -464,7 +499,7 @@ public class GameViewModel extends AndroidViewModel {
                         cleanHTML = getHtmlProcessor().getCleanHtmlAndMedia(getApplication(), dirtyHTML);
                     }
                     if (!cleanHTML.isBlank()) {
-                        getGameActivity().warnUser(GameActivity.TAB_VARS_DESC);
+                        doOnWarnUser(GameActivity.TAB_VARS_DESC);
                     }
                     varsDescLiveData.postValue(cleanHTML);
                 }, singleService);
@@ -508,7 +543,7 @@ public class GameViewModel extends AndroidViewModel {
     private void refreshObjectsRecycler() {
         CompletableFuture
                 .supplyAsync(() -> {
-                    getGameActivity().warnUser(GameActivity.TAB_OBJECTS);
+                    doOnWarnUser(GameActivity.TAB_OBJECTS);
                     var objectsRecycler = new GameItemRecycler();
                     objectsRecycler.setTypeface(getSettingsController().getTypeface());
                     objectsRecycler.setTextSize(getFontSize());
@@ -626,7 +661,10 @@ public class GameViewModel extends AndroidViewModel {
     // region GameInterface
     public void doRefresh(final LibRefIRequest request) {
         if (request.isIConfigChanged) {
-            new Handler(Looper.getMainLooper()).postDelayed(() -> getGameActivity().applySettings(), 1000);
+            new Handler(Looper.getMainLooper()).postDelayed(
+                    () -> emitter.emitAndExecuteOnce(new GameFragmentNavigation.ApplySettings()),
+                    1000
+            );
         }
         if (request.isIConfigChanged || request.isMainDescChanged) {
             new Handler(Looper.getMainLooper()).postDelayed(() -> {
@@ -650,18 +688,18 @@ public class GameViewModel extends AndroidViewModel {
 
     public LibDialogRetValue showLibDialog(LibTypeDialog dialog, String inputString) {
         switch (dialog) {
-            case DIALOG_POPUP_SAVE -> getGameActivity().showSavePopup();
+            case DIALOG_POPUP_SAVE -> doOnShowSavePopup();
             case DIALOG_ERROR ->
-                    getGameActivity().showSimpleDialog(inputString, GameDialogType.ERROR_DIALOG, null);
+                    doOnShowSimpleDialog(inputString, GameDialogType.ERROR_DIALOG, null);
             case DIALOG_PICTURE ->
-                    getGameActivity().showSimpleDialog(inputString, GameDialogType.IMAGE_DIALOG, null);
+                    doOnShowSimpleDialog(inputString, GameDialogType.IMAGE_DIALOG, null);
             case DIALOG_POPUP_LOAD ->
-                    getGameActivity().showSimpleDialog("", GameDialogType.LOAD_DIALOG, null);
+                    doOnShowSimpleDialog("", GameDialogType.LOAD_DIALOG, null);
             case DIALOG_MESSAGE -> {
                 assertNonUiThread();
 
                 final var latch = new CountDownLatch(1);
-                getGameActivity().showMessageDialog(inputString, latch);
+                doOnShowMessageDialog(inputString, latch);
                 try {
                     latch.await();
                 } catch (InterruptedException ex) {
@@ -672,7 +710,7 @@ public class GameViewModel extends AndroidViewModel {
                 assertNonUiThread();
 
                 final var inputQueue = new ArrayBlockingQueue<String>(1);
-                getGameActivity().showInputDialog(inputString, inputQueue);
+                doOnShowInputDialog(inputString, inputQueue);
                 try {
                     var wrap = new LibDialogRetValue();
                     wrap.outTextValue = inputQueue.take();
@@ -688,7 +726,7 @@ public class GameViewModel extends AndroidViewModel {
                 assertNonUiThread();
 
                 final var inputQueue = new ArrayBlockingQueue<String>(1);
-                getGameActivity().showExecutorDialog(inputString, inputQueue);
+                doOnShowExecutorDialog(inputString, inputQueue);
                 try {
                     var wrap = new LibDialogRetValue();
                     wrap.outTextValue = inputQueue.take();
@@ -708,8 +746,7 @@ public class GameViewModel extends AndroidViewModel {
                 final var newItems = new ArrayList<String>();
 
                 currentItems.forEach(libMenuItem -> newItems.add(libMenuItem.name));
-                getGameActivity().showMenuDialog(newItems, resultQueue);
-
+                doOnShowMenuDialog(newItems, resultQueue);
                 try {
                     var wrap = new LibDialogRetValue();
                     wrap.outNumValue = resultQueue.take();
@@ -726,7 +763,7 @@ public class GameViewModel extends AndroidViewModel {
     }
 
     public void showErrorDialog(final String message, final ErrorType errorType) {
-        getGameActivity().showSimpleDialog(message, GameDialogType.ERROR_DIALOG, errorType);
+        doOnShowSimpleDialog(message, GameDialogType.ERROR_DIALOG, errorType);
     }
     // endregion GameInterface
 
