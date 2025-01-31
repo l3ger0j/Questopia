@@ -103,7 +103,7 @@ public class GameViewModel extends AndroidViewModel {
     private final MutableLiveData<String> varsDescLiveData = new MutableLiveData<>();
     private final MutableLiveData<GameItemRecycler> actionsListLiveData = new MutableLiveData<>();
     private final MutableLiveData<GameItemRecycler> objectsListLiveData = new MutableLiveData<>();
-    private final PluginClient pluginClient;
+    private final PluginClient pluginClient = PluginClient.getInstance();
     public ObservableBoolean isActionVisible = new ObservableBoolean();
     public MutableLiveData<String> outputTextObserver = new MutableLiveData<>();
     public MutableLiveData<Integer> outputIntObserver = new MutableLiveData<>();
@@ -131,16 +131,12 @@ public class GameViewModel extends AndroidViewModel {
         preferences.registerOnSharedPreferenceChangeListener(preferenceChangeListener);
         questopiaApplication = (QuestopiaApplication) getApplication();
 
-        if (questopiaApplication.getCurrPluginClient() == null) {
-            var client = new PluginClient();
-            client.connectPlugin(questopiaApplication, PluginType.ENGINE_PLUGIN);
-            pluginClient = client;
-            questopiaApplication.setCurrPluginClient(pluginClient);
-            new Handler(Looper.getMainLooper()).postDelayed(this::initPluginHandler, 1000);
-        } else {
-            pluginClient = questopiaApplication.getCurrPluginClient();
-            initPluginHandler();
-        }
+        CompletableFuture
+                .supplyAsync(() -> pluginClient.connectPlugin(questopiaApplication, PluginType.ENGINE_PLUGIN))
+                .thenAccept(aBoolean -> {
+                    if (!aBoolean) return;
+                    initPluginHandler();
+                });
     }
 
     private void initPluginHandler() {
