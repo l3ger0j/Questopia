@@ -36,11 +36,11 @@ public class SettingsHostFragment extends PreferenceFragmentCompat {
             var application = (QuestopiaApplication) requireActivity().getApplication();
             versionPref.setTitle(getString(R.string.extendedName)
                     .replace("-VERSION-", BuildConfig.VERSION_NAME));
-            if (application.getCurrPluginClient() != null) {
-                versionPref.setSummaryProvider(preference ->
-                        "Lib version: " + "5.7.0" + "\nTimestamp: " + BuildConfig.BUILD_TIME
-                );
-            }
+//            if (application.getCurrPluginClient() != null) {
+//                versionPref.setSummaryProvider(preference ->
+//                        "Lib version: " + "5.7.0" + "\nTimestamp: " + BuildConfig.BUILD_TIME
+//                );
+//            }
         }
 
         Preference.OnPreferenceClickListener listener = preference -> {
