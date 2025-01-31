@@ -7,7 +7,6 @@ import android.os.Build;
 
 import androidx.documentfile.provider.DocumentFile;
 
-import org.qp.android.model.plugin.PluginClient;
 import org.qp.android.model.service.AudioPlayer;
 import org.qp.android.model.service.HtmlProcessor;
 import org.qp.android.model.service.ImageProvider;
@@ -25,21 +24,12 @@ public class QuestopiaApplication extends Application {
     private final HtmlProcessor htmlProcessor = new HtmlProcessor(imageProvider);
     private final AudioPlayer audioPlayer = new AudioPlayer(this);
 
-    private DocumentFile currentGameDir;
-    private PluginClient currPluginClient;
+    public DocumentFile currentGameDir;
 
     @Override
     public void onCreate() {
         super.onCreate();
         createNotificationChannels();
-    }
-
-    public void setCurrPluginClient(PluginClient currPluginClient) {
-        this.currPluginClient = currPluginClient;
-    }
-
-    public void setCurrentGameDir(DocumentFile currentGameDir) {
-        this.currentGameDir = currentGameDir;
     }
 
     public HtmlProcessor getHtmlProcessor() {
@@ -50,14 +40,6 @@ public class QuestopiaApplication extends Application {
 
     public AudioPlayer getAudioPlayer() {
         return audioPlayer.setCurGameDir(currentGameDir);
-    }
-
-    public DocumentFile getCurrentGameDir() {
-        return currentGameDir;
-    }
-
-    public PluginClient getCurrPluginClient() {
-        return currPluginClient;
     }
 
     public void createNotificationChannels() {

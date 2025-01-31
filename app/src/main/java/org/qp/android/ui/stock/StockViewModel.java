@@ -370,7 +370,7 @@ public class StockViewModel extends AndroidViewModel {
         var intent = new Intent(getApplication(), GameActivity.class);
 
         var application = (QuestopiaApplication) getApplication();
-        application.setCurrentGameDir(gameDir);
+        application.currentGameDir = gameDir;
 
         intent.putExtra("gameId", data.id);
         intent.putExtra("gameTitle", data.title);
