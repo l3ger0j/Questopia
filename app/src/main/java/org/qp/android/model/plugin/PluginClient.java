@@ -65,6 +65,20 @@ public class PluginClient {
         return categoriesLiveData;
     }
 
+    public boolean isPluginExist(Context context, String serviceName) {
+        loadListPlugin(context);
+        if (!servicesLiveData.isInitialized()) return false;
+        var currPluginList = servicesLiveData.getValue();
+        if (currPluginList == null) return false;
+        if (currPluginList.isEmpty()) return false;
+        for (var element : currPluginList) {
+            var service = element.get(KEY_SERVICENAME);
+            if (service == null) return false;
+            return service.equals(serviceName);
+        }
+        return false;
+    }
+
     @Nullable
     public CompletableFuture<PluginInfo> requestInfo(Context context, PluginType pluginType) {
         return CompletableFuture

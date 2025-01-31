@@ -60,6 +60,7 @@ import org.qp.android.data.db.GameDao;
 import org.qp.android.data.db.GameDatabase;
 import org.qp.android.databinding.ActivityStockBinding;
 import org.qp.android.helpers.utils.ViewUtil;
+import org.qp.android.model.plugin.PluginClient;
 import org.qp.android.ui.dialogs.StockDialogType;
 import org.qp.android.ui.settings.SettingsActivity;
 import org.qp.android.ui.settings.SettingsController;
@@ -133,6 +134,7 @@ public class StockActivity extends AppCompatActivity {
                 case "light" -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
                 case "dark" -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
             }
+            checkPlugins();
             return false;
         });
 
@@ -390,6 +392,13 @@ public class StockActivity extends AppCompatActivity {
         }
 
         return true;
+    }
+
+    private void checkPlugins() {
+        var client = PluginClient.getInstance();
+        if (!client.isPluginExist(this, "org.qp.android.questopiabundle.QuestopiaBundle")) {
+            showErrorDialog("Questopia Bundle plugin non found!");
+        }
     }
 
     private void loadPermission() {
