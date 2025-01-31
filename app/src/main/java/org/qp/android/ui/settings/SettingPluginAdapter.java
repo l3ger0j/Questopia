@@ -1,5 +1,7 @@
 package org.qp.android.ui.settings;
 
+import static org.qp.android.helpers.utils.StringUtil.isNotEmptyOrBlank;
+
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
@@ -14,21 +16,28 @@ import org.qp.android.R;
 import org.qp.android.databinding.ListItemPluginBinding;
 import org.qp.android.dto.plugin.PluginInfo;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class SettingPluginRecycler extends RecyclerView.Adapter<SettingPluginRecycler.ViewHolder> {
-    private final Context context;
-    private final AsyncListDiffer<PluginInfo> differ =
-            new AsyncListDiffer<>(this , DIFF_CALLBACK);
+public class SettingPluginAdapter extends RecyclerView.Adapter<SettingPluginAdapter.ViewHolder> {
+
+    private static final DiffUtil.ItemCallback<PluginInfo> DIFF_CALLBACK =
+            new DiffUtil.ItemCallback<>() {
+                @Override
+                public boolean areItemsTheSame(@NonNull PluginInfo oldItem, @NonNull PluginInfo newItem) {
+                    return Objects.equals(oldItem.version(), newItem.version());
+                }
+
+                @Override
+                public boolean areContentsTheSame(@NonNull PluginInfo oldItem, @NonNull PluginInfo newItem) {
+                    return oldItem.equals(newItem);
+                }
+            };
+    private Context context;
+    private final AsyncListDiffer<PluginInfo> differ = new AsyncListDiffer<>(this, DIFF_CALLBACK);
 
     public PluginInfo getItem(int position) {
         return differ.getCurrentList().get(position);
-    }
-
-    public List<PluginInfo> getGameData() {
-        return differ.getCurrentList();
     }
 
     @Override
@@ -36,43 +45,26 @@ public class SettingPluginRecycler extends RecyclerView.Adapter<SettingPluginRec
         return differ.getCurrentList().size();
     }
 
-    private static final DiffUtil.ItemCallback<PluginInfo> DIFF_CALLBACK =
-            new DiffUtil.ItemCallback<>() {
-                @Override
-                public boolean areItemsTheSame(@NonNull PluginInfo oldItem , @NonNull PluginInfo newItem) {
-                    return Objects.equals(oldItem.version() , newItem.version());
-                }
-
-                @Override
-                public boolean areContentsTheSame(@NonNull PluginInfo oldItem , @NonNull PluginInfo newItem) {
-                    return oldItem.equals(newItem);
-                }
-            };
-
-    public void submitList(ArrayList<PluginInfo> pluginInfo){
+    public void submitList(List<PluginInfo> pluginInfo) {
         differ.submitList(pluginInfo);
-    }
-
-    public SettingPluginRecycler(Context context) {
-        this.context = context;
     }
 
     @NonNull
     @Override
-    public SettingPluginRecycler.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent , int viewType) {
-        var inflater = LayoutInflater.from(parent.getContext());
+    public SettingPluginAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        context = parent.getContext();
+        var inflater = LayoutInflater.from(context);
         ListItemPluginBinding listItemPluginBinding =
                 DataBindingUtil.inflate(inflater, R.layout.list_item_plugin, parent, false);
-        return new SettingPluginRecycler.ViewHolder(listItemPluginBinding);
+        return new SettingPluginAdapter.ViewHolder(listItemPluginBinding);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull SettingPluginRecycler.ViewHolder holder , int position) {
-        holder.listItemPluginBinding(getGameData().get(position));
+    public void onBindViewHolder(@NonNull SettingPluginAdapter.ViewHolder holder, int position) {
+        holder.listItemPluginBinding(getItem(position));
         var pluginInfo = getItem(position);
 
-        // pluginAuthor
-        if (pluginInfo.author() != null && !pluginInfo.author().isEmpty()) {
+        if (isNotEmptyOrBlank(pluginInfo.author())) {
             var authorText = context.getString(R.string.author)
                     .replace("-AUTHOR-", pluginInfo.author());
             holder.listItemPluginBinding.pluginAuthor.setText(authorText);
@@ -84,7 +76,7 @@ public class SettingPluginRecycler extends RecyclerView.Adapter<SettingPluginRec
     public static class ViewHolder extends RecyclerView.ViewHolder {
         ListItemPluginBinding listItemPluginBinding;
 
-        ViewHolder(@NonNull ListItemPluginBinding listItemPluginBinding){
+        ViewHolder(@NonNull ListItemPluginBinding listItemPluginBinding) {
             super(listItemPluginBinding.getRoot());
             this.listItemPluginBinding = listItemPluginBinding;
         }

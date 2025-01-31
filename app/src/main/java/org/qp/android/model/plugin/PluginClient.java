@@ -25,10 +25,10 @@ public class PluginClient {
 
     private static final String ACTION_PICK_PLUGIN = "org.qp.intent.action.PICK_PLUGIN";
     private static final String ENGINE_PLUGIN_ID = "org.qp.android.plugin.ENGINE_PLUGIN";
-    private static final String KEY_PKG = "pkg";
-    private static final String KEY_SERVICENAME = "servicename";
-    private static final String KEY_ACTIONS = "actions";
-    private static final String KEY_CATEGORIES = "categories";
+    public static final String KEY_PKG = "pkg";
+    public static final String KEY_SERVICENAME = "servicename";
+    public static final String KEY_ACTIONS = "actions";
+    public static final String KEY_CATEGORIES = "categories";
 
     private final MutableLiveData<List<HashMap<String, String>>> servicesLiveData = new MutableLiveData<>();
     private final MutableLiveData<List<String>> categoriesLiveData = new MutableLiveData<>();
@@ -67,7 +67,6 @@ public class PluginClient {
 
     public boolean isPluginExist(Context context, String serviceName) {
         loadListPlugin(context);
-        if (!servicesLiveData.isInitialized()) return false;
         var currPluginList = servicesLiveData.getValue();
         if (currPluginList == null) return false;
         if (currPluginList.isEmpty()) return false;

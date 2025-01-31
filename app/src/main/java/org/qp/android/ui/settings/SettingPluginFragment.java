@@ -1,16 +1,15 @@
 package org.qp.android.ui.settings;
 
+import static org.qp.android.model.plugin.PluginClient.KEY_SERVICENAME;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.os.Handler;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
@@ -19,29 +18,23 @@ import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 
-import org.qp.android.QuestopiaApplication;
 import org.qp.android.R;
 import org.qp.android.databinding.FragmentRecyclerBinding;
 import org.qp.android.dto.plugin.PluginInfo;
 import org.qp.android.helpers.adapters.RecyclerItemClickListener;
 import org.qp.android.model.plugin.PluginClient;
 import org.qp.android.model.plugin.PluginType;
-import org.qp.android.questopiabundle.IQuestopiaBundle;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
 
 public class SettingPluginFragment extends Fragment {
 
     private RecyclerView recyclerView;
-    private List<HashMap<String, String>> services;
+    private SettingPluginAdapter pluginAdapter;
 
     private PackageBroadcastReceiver packageBroadcastReceiver;
     private IntentFilter packageFilter;
-
-    private IQuestopiaBundle questEngine;
+    private PluginClient client;
 
     @Nullable
     @Override
@@ -62,62 +55,34 @@ public class SettingPluginFragment extends Fragment {
 
         var shareRecyclerBinding = FragmentRecyclerBinding.inflate(inflater);
         recyclerView = shareRecyclerBinding.shareRecyclerView;
+        pluginAdapter = new SettingPluginAdapter();
+        recyclerView.setAdapter(pluginAdapter);
 
-        refreshPluginInfo();
+        fillPluginList();
 
         return shareRecyclerBinding.getRoot();
     }
 
-    public void refreshPluginInfo() {
-        var pluginClient = new PluginClient();
-        var arrayList = new ArrayList<PluginInfo>();
-
-        fillPluginList(pluginClient);
-
-        new Handler().postDelayed(() -> services.forEach(stringStringHashMap -> stringStringHashMap.forEach((s, s2) -> {
-            if (Objects.equals(s, "servicename")) {
-                switch (s2) {
+    private void refreshPluginInfo() {
+        client.getServicesLiveData().observe(getViewLifecycleOwner(), hashMaps -> {
+            if (hashMaps == null) return;
+            hashMaps.forEach(stringStringHashMap -> {
+                var service = stringStringHashMap.get(KEY_SERVICENAME);
+                if (service == null) return;
+                var pluginInfos = new ArrayList<PluginInfo>();
+                switch (service) {
                     case "org.qp.android.questopiabundle.QuestopiaBundle" -> {
-                        var client = ((QuestopiaApplication) requireActivity().getApplication()).getCurrPluginClient();
-                        if (client != null) {
-                            questEngine = client.questopiaBundle;
-                            try {
-                                var pluginInfo = new PluginInfo(
-                                        questEngine.versionPlugin(),
-                                        questEngine.titlePlugin(),
-                                        questEngine.authorPlugin()
-                                );
-                                arrayList.add(pluginInfo);
-                            } catch (Exception e) {
-                                Log.e(getTag(), "Error:", e);
-                            }
-                        } else {
-                            pluginClient.connectPlugin(requireContext(), PluginType.ENGINE_PLUGIN);
-                            new Handler().postDelayed(() -> {
-                                questEngine = pluginClient.questopiaBundle;
-                                try {
-                                    var pluginInfo = new PluginInfo(
-                                            questEngine.versionPlugin(),
-                                            questEngine.titlePlugin(),
-                                            questEngine.authorPlugin()
-                                    );
-                                    arrayList.add(pluginInfo);
-                                } catch (Exception e) {
-                                    Log.e(getTag(), "Error:", e);
-                                }
-                                pluginClient.disconnectPlugin(requireContext(), PluginType.ENGINE_PLUGIN);
-                            }, 1000);
-                        }
+                        var infoBundle = client.requestInfo(requireContext(), PluginType.ENGINE_PLUGIN);
+                        if (infoBundle == null) return;
+                        infoBundle.thenAccept(pluginInfo -> {
+                            if (pluginInfo == null) return;
+                            pluginInfos.add(pluginInfo);
+                            pluginAdapter.submitList(pluginInfos);
+                        });
                     }
                 }
-            }
-        })), 1000);
-
-        new Handler().postDelayed(() -> {
-            var adapter = new SettingPluginRecycler(requireActivity());
-            adapter.submitList(arrayList);
-            recyclerView.setAdapter(adapter);
-        }, 3000);
+            });
+        });
 
         packageFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
         packageFilter.addAction(Intent.ACTION_PACKAGE_REPLACED);
@@ -129,23 +94,11 @@ public class SettingPluginFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         recyclerView.addOnItemTouchListener(new RecyclerItemClickListener(
-                getContext(),
+                requireContext(),
                 recyclerView,
                 new RecyclerItemClickListener.OnItemClickListener() {
                     @Override
                     public void onItemClick(View view, int position) {
-                        var tv = (TextView) view.findViewById(R.id.plugin_title);
-                        if (Objects.equals(String.valueOf(tv.getText()), "Downloader Plugin For QPA")) {
-                            var launchIntent = requireActivity().getPackageManager()
-                                    .getLaunchIntentForPackage("org.qp.android.plugin");
-                            if (launchIntent != null) {
-                                startActivity(launchIntent);
-                            }
-                        } else {
-                            var pluginClient = new PluginClient();
-                            pluginClient.connectPlugin(requireContext(), PluginType.ENGINE_PLUGIN);
-                            ((QuestopiaApplication) requireActivity().getApplication()).setCurrPluginClient(pluginClient);
-                        }
                     }
 
                     @Override
@@ -154,9 +107,10 @@ public class SettingPluginFragment extends Fragment {
                 }));
     }
 
-    private void fillPluginList(@NonNull PluginClient pluginClient) {
-        pluginClient.loadListPlugin(requireContext());
-        pluginClient.getServicesLiveData().observe(getViewLifecycleOwner(), hashMaps -> services = hashMaps);
+    private void fillPluginList() {
+        client = PluginClient.getInstance();
+        client.loadListPlugin(requireContext());
+        refreshPluginInfo();
     }
 
     @Override
@@ -173,8 +127,7 @@ public class SettingPluginFragment extends Fragment {
 
     class PackageBroadcastReceiver extends BroadcastReceiver {
         public void onReceive(Context context, Intent intent) {
-            services.clear();
-            fillPluginList(new PluginClient());
+            fillPluginList();
         }
     }
 }
