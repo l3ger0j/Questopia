@@ -19,9 +19,8 @@
 # DTO
 -keep class org.qp.android.dto.stock.** { *; }
 
-# NDK
--keep class org.qp.android.dto.lib.** { *; }
--keep class org.qp.android.model.lib.** { *; }
+# AIDL
+-keep class org.qp.android.questopiabundle.** { *; }
 
 -dontwarn aQute.bnd.annotation.spi.ServiceProvider
 
