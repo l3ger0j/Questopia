@@ -485,6 +485,12 @@ public class StockActivity extends AppCompatActivity {
             }
         } else {
             stockViewModel.setCurrGameData(entryToShow);
+            var currDest = navController.getCurrentDestination();
+
+            if (currDest == null) return;
+            var currDestLabel = currDest.getLabel();
+            if (currDestLabel == null) return;
+            if (currDestLabel.equals("StockGameFragment")) return;
 
             navController.navigate(R.id.action_stockViewPagerFragment_to_stockGameFragment);
             stockViewModel.doIsHideFAB.setValue(true);
