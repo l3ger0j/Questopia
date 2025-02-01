@@ -9,6 +9,7 @@ import static org.qp.android.helpers.utils.FileUtil.fromRelPath;
 import static org.qp.android.helpers.utils.PathUtil.getExtension;
 import static org.qp.android.helpers.utils.ThreadUtil.assertNonUiThread;
 import static org.qp.android.helpers.utils.ViewUtil.getFontStyle;
+import static org.qp.android.model.plugin.PluginClient.LIB_DELAY;
 import static org.qp.android.ui.game.GameActivity.LOAD;
 
 import android.annotation.SuppressLint;
@@ -45,7 +46,7 @@ import com.google.android.material.textfield.TextInputLayout;
 import org.qp.android.QuestopiaApplication;
 import org.qp.android.R;
 import org.qp.android.helpers.ErrorType;
-import org.qp.android.helpers.bus.EventEmitter;
+import org.qp.android.helpers.bus.Events;
 import org.qp.android.model.plugin.PluginClient;
 import org.qp.android.model.plugin.PluginType;
 import org.qp.android.model.service.AudioPlayer;
@@ -76,6 +77,7 @@ import java.util.concurrent.Executors;
 
 public class GameViewModel extends AndroidViewModel {
 
+    private static final int EMITTER_DELAY = LIB_DELAY;
     private static final String PAGE_HEAD_TEMPLATE = """
             <!DOCTYPE html>
             <head>
@@ -113,7 +115,7 @@ public class GameViewModel extends AndroidViewModel {
     public SharedPreferences preferences;
     private Uri gameDirUri;
     private boolean showActions = true;
-    public EventEmitter emitter = new EventEmitter();
+    public Events.Emitter emitter = new Events.Emitter();
     private LibGameState libGameState = new LibGameState();
     private final SharedPreferences.OnSharedPreferenceChangeListener preferenceChangeListener = (sharedPreferences, key) -> {
         controllerObserver.postValue(getSettingsController());
@@ -132,11 +134,12 @@ public class GameViewModel extends AndroidViewModel {
         questopiaApplication = (QuestopiaApplication) getApplication();
 
         CompletableFuture
-                .supplyAsync(() -> pluginClient.connectPlugin(questopiaApplication, PluginType.ENGINE_PLUGIN))
-                .thenAccept(aBoolean -> {
-                    if (!aBoolean) return;
-                    initPluginHandler();
-                });
+                .supplyAsync(() -> pluginClient.connectPlugin(questopiaApplication, PluginType.ENGINE_PLUGIN), singleService)
+                .thenAcceptAsync(aBoolean -> {
+                    if (aBoolean) {
+                        new Handler(Looper.getMainLooper()).postDelayed(this::initPluginHandler, LIB_DELAY);
+                    }
+                }, singleService);
     }
 
     private void initPluginHandler() {
@@ -348,37 +351,52 @@ public class GameViewModel extends AndroidViewModel {
     }
 
     public void doOnWarnUser(int tabId) {
-        emitter.emitAndExecuteOnce(new GameFragmentNavigation.WarnUser(tabId));
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            emitter.emitAndExecuteOnce(new GameFragmentNavigation.WarnUser(tabId));
+        }, EMITTER_DELAY);
     }
 
     public void doOnShowSavePopup() {
-        emitter.emitAndExecuteOnce(new GameFragmentNavigation.ShowPopupSave());
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            emitter.emitAndExecuteOnce(new GameFragmentNavigation.ShowPopupSave());
+        }, EMITTER_DELAY);
     }
 
     public void doOnShowSimpleDialog(@NonNull String inputString,
                                      @NonNull GameDialogType dialogType,
                                      @Nullable ErrorType errorType) {
-        emitter.emitAndExecuteOnce(new GameFragmentNavigation.ShowSimpleDialog(inputString, dialogType, errorType));
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            emitter.emitAndExecuteOnce(new GameFragmentNavigation.ShowSimpleDialog(inputString, dialogType, errorType));
+        }, EMITTER_DELAY);
     }
 
     public void doOnShowMessageDialog(@Nullable String inputString,
                                       @NonNull CountDownLatch latch) {
-        emitter.emitAndExecuteOnce(new GameFragmentNavigation.ShowMessageDialog(inputString, latch));
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            emitter.emitAndExecuteOnce(new GameFragmentNavigation.ShowMessageDialog(inputString, latch));
+        }, EMITTER_DELAY);
     }
 
     public void doOnShowInputDialog(@Nullable String inputString,
                                     @NonNull ArrayBlockingQueue<String> inputQueue) {
-        emitter.emitAndExecuteOnce(new GameFragmentNavigation.ShowInputDialog(inputString, inputQueue));
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            emitter.emitAndExecuteOnce(new GameFragmentNavigation.ShowInputDialog(inputString, inputQueue));
+        }, EMITTER_DELAY);
     }
 
     public void doOnShowExecutorDialog(@Nullable String inputString,
                                        @NonNull ArrayBlockingQueue<String> inputQueue) {
-        emitter.emitAndExecuteOnce(new GameFragmentNavigation.ShowExecutorDialog(inputString, inputQueue));
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            emitter.emitAndExecuteOnce(new GameFragmentNavigation.ShowExecutorDialog(inputString, inputQueue));
+        }, EMITTER_DELAY);
     }
 
     public void doOnShowMenuDialog(@Nullable List<String> inputListString,
                                    @NonNull ArrayBlockingQueue<Integer> inputQueue) {
-        emitter.emitAndExecuteOnce(new GameFragmentNavigation.ShowMenuDialog(inputListString, inputQueue));
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            emitter.emitAndExecuteOnce(new GameFragmentNavigation.ShowMenuDialog(inputListString, inputQueue));
+        }, EMITTER_DELAY);
+
     }
 
     public String removeHtmlTags(String dirtyHTML) {
@@ -657,28 +675,26 @@ public class GameViewModel extends AndroidViewModel {
     // region GameInterface
     public void doRefresh(final LibRefIRequest request) {
         if (request.isIConfigChanged) {
-            new Handler(Looper.getMainLooper()).postDelayed(
-                    () -> emitter.emitAndExecuteOnce(new GameFragmentNavigation.ApplySettings()),
-                    1000
-            );
+            new Handler(Looper.getMainLooper()).postDelayed(() ->
+                    emitter.emitAndExecuteOnce(new GameFragmentNavigation.ApplySettings()), LIB_DELAY);
+        }
+        if (request.isActionsChanged) {
+            new Handler(Looper.getMainLooper()).postDelayed(this::refreshActionsRecycler, LIB_DELAY);
+        }
+        if (request.isObjectsChanged) {
+            new Handler(Looper.getMainLooper()).postDelayed(this::refreshObjectsRecycler, LIB_DELAY);
         }
         if (request.isIConfigChanged || request.isMainDescChanged) {
             new Handler(Looper.getMainLooper()).postDelayed(() -> {
                 updatePageTemplate();
                 refreshMainDesc();
-            }, 1000);
-        }
-        if (request.isActionsChanged) {
-            new Handler(Looper.getMainLooper()).postDelayed(this::refreshActionsRecycler, 1000);
-        }
-        if (request.isObjectsChanged) {
-            new Handler(Looper.getMainLooper()).postDelayed(this::refreshObjectsRecycler, 1000);
+            }, LIB_DELAY);
         }
         if (request.isIConfigChanged || request.isVarsDescChanged) {
             new Handler(Looper.getMainLooper()).postDelayed(() -> {
                 updatePageTemplate();
                 refreshVarsDesc();
-            }, 1000);
+            }, LIB_DELAY);
         }
     }
 

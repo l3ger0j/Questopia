@@ -40,7 +40,7 @@ import org.qp.android.data.db.GameDao;
 import org.qp.android.dto.stock.TempFile;
 import org.qp.android.dto.stock.TempFileType;
 import org.qp.android.helpers.ErrorType;
-import org.qp.android.helpers.bus.EventEmitter;
+import org.qp.android.helpers.bus.Events;
 import org.qp.android.helpers.utils.DatabaseUtil;
 import org.qp.android.model.repository.LocalGame;
 import org.qp.android.model.repository.RemoteGamePagingSource;
@@ -95,7 +95,7 @@ public class StockViewModel extends AndroidViewModel {
     public Game currGameEntry;
     public MutableLiveData<Game> gameEntryLiveData = new MutableLiveData<>();
     public MutableLiveData<List<Game>> gameEntriesLiveData = new MutableLiveData<>();
-    public final EventEmitter emitter = new EventEmitter();
+    public final Events.Emitter emitter = new Events.Emitter();
     public Flowable<PagingData<Game>> remoteDataFlow;
     private DocumentFile tempImageFile, tempPathFile, tempModFile;
     private StockDialogFrags dialogFragments = new StockDialogFrags();

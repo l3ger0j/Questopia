@@ -2,61 +2,48 @@ package org.qp.android.ui.stock;
 
 import org.qp.android.data.db.Game;
 import org.qp.android.helpers.ErrorType;
-import org.qp.android.helpers.bus.EventNavigation;
+import org.qp.android.helpers.bus.NavigationEvent;
 
 public interface StockFragmentNavigation {
 
-    class ShowErrorDialog extends EventNavigation {
-        private final String errorMessage;
-        private final ErrorType errorType;
-
-        public ShowErrorDialog(String errorMessage , ErrorType errorType) {
-            this.errorMessage = errorMessage;
-            this.errorType = errorType;
-        }
-
-        public String getErrorMessage() {
-            return errorMessage;
-        }
-
-        public ErrorType getErrorType() {
-            return errorType;
-        }
+    class ShowActionMode extends NavigationEvent {
     }
 
-    class ShowGameFragment extends EventNavigation {
-        public Game entry;
+    class SelectAllElements extends NavigationEvent {
+    }
+
+    class UnselectAllElements extends NavigationEvent {
+    }
+
+    class ShowGameFragment extends NavigationEvent {
+        public final Game entry;
 
         public ShowGameFragment(Game entryToShow) {
             this.entry = entryToShow;
         }
     }
 
-    class ShowActionMode extends EventNavigation {}
+    class ShowErrorDialog extends NavigationEvent {
+        public final String errorMessage;
+        public final ErrorType errorType;
 
-    class SelectAllElements extends EventNavigation {}
-
-    class UnselectAllElements extends EventNavigation {}
-
-    class ShowFilePicker extends EventNavigation {
-        private final int requestCode;
-        private final String[] mimeTypes;
-
-        public ShowFilePicker(int requestCode , String[] mimeTypes) {
-            this.requestCode = requestCode;
-            this.mimeTypes = mimeTypes;
-        }
-
-        public int getRequestCode() {
-            return requestCode;
-        }
-
-        public String[] getMimeTypes() {
-            return mimeTypes;
+        public ShowErrorDialog(String errorMessage, ErrorType errorType) {
+            this.errorMessage = errorMessage;
+            this.errorType = errorType;
         }
     }
 
-    class ShowErrorBanner extends EventNavigation {
+    class ShowFilePicker extends NavigationEvent {
+        public final int requestCode;
+        public final String[] mimeTypes;
+
+        public ShowFilePicker(int requestCode, String[] mimeTypes) {
+            this.requestCode = requestCode;
+            this.mimeTypes = mimeTypes;
+        }
+    }
+
+    class ShowErrorBanner extends NavigationEvent {
         public final String inputMessage;
         public final String rightButtonMsg;
 

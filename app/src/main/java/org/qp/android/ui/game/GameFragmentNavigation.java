@@ -4,7 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import org.qp.android.helpers.ErrorType;
-import org.qp.android.helpers.bus.EventNavigation;
+import org.qp.android.helpers.bus.NavigationEvent;
 import org.qp.android.ui.dialogs.GameDialogType;
 
 import java.util.List;
@@ -13,9 +13,13 @@ import java.util.concurrent.CountDownLatch;
 
 public interface GameFragmentNavigation {
 
-    class ApplySettings extends EventNavigation {}
+    class ApplySettings extends NavigationEvent {}
 
-    class StartRWSave extends EventNavigation {
+    class ShowPopupSave extends NavigationEvent {}
+
+    class FinishActivity extends NavigationEvent {}
+
+    class StartRWSave extends NavigationEvent {
         public final int slotAction;
 
         public StartRWSave(int slotAction) {
@@ -23,9 +27,7 @@ public interface GameFragmentNavigation {
         }
     }
 
-    class FinishActivity extends EventNavigation {}
-
-    class WarnUser extends EventNavigation {
+    class WarnUser extends NavigationEvent {
         public final int tabId;
 
         public WarnUser(int tabId) {
@@ -33,23 +35,7 @@ public interface GameFragmentNavigation {
         }
     }
 
-    class ShowPopupSave extends EventNavigation {}
-
-    class ShowSimpleDialog extends EventNavigation {
-        public final String inputString;
-        public final GameDialogType dialogType;
-        public final ErrorType errorType;
-
-        public ShowSimpleDialog(@NonNull String inputString,
-                                @NonNull GameDialogType dialogType,
-                                @Nullable ErrorType errorType) {
-            this.inputString = inputString;
-            this.dialogType = dialogType;
-            this.errorType = errorType;
-        }
-    }
-
-    class ShowMessageDialog extends EventNavigation {
+    class ShowMessageDialog extends NavigationEvent {
         public final String inputString;
         public final CountDownLatch latch;
 
@@ -60,7 +46,7 @@ public interface GameFragmentNavigation {
         }
     }
 
-    class ShowInputDialog extends EventNavigation {
+    class ShowInputDialog extends NavigationEvent {
         public final String inputString;
         public final ArrayBlockingQueue<String> inputQueue;
 
@@ -71,18 +57,18 @@ public interface GameFragmentNavigation {
         }
     }
 
-    class ShowExecutorDialog extends EventNavigation {
+    class ShowExecutorDialog extends NavigationEvent {
         public final String inputString;
         public final ArrayBlockingQueue<String> inputQueue;
 
         public ShowExecutorDialog(@Nullable String inputString,
-                               @NonNull ArrayBlockingQueue<String> inputQueue) {
+                                  @NonNull ArrayBlockingQueue<String> inputQueue) {
             this.inputString = inputString;
             this.inputQueue = inputQueue;
         }
     }
 
-    class ShowMenuDialog extends EventNavigation {
+    class ShowMenuDialog extends NavigationEvent {
         public final List<String> inputListString;
         public final ArrayBlockingQueue<Integer> inputQueue;
 
@@ -90,6 +76,20 @@ public interface GameFragmentNavigation {
                               @NonNull ArrayBlockingQueue<Integer> inputQueue) {
             this.inputListString = inputListString;
             this.inputQueue = inputQueue;
+        }
+    }
+
+    class ShowSimpleDialog extends NavigationEvent {
+        public final String inputString;
+        public final GameDialogType dialogType;
+        public final ErrorType errorType;
+
+        public ShowSimpleDialog(@NonNull String inputString,
+                                @NonNull GameDialogType dialogType,
+                                @Nullable ErrorType errorType) {
+            this.inputString = inputString;
+            this.dialogType = dialogType;
+            this.errorType = errorType;
         }
     }
 

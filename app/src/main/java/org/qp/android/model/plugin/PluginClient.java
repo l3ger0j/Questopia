@@ -5,7 +5,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.RemoteException;
 
 import androidx.annotation.Nullable;
@@ -25,6 +27,7 @@ public class PluginClient {
 
     private static final String ACTION_PICK_PLUGIN = "org.qp.intent.action.PICK_PLUGIN";
     private static final String ENGINE_PLUGIN_ID = "org.qp.android.plugin.ENGINE_PLUGIN";
+    public static final int LIB_DELAY = 3;
     public static final String KEY_PKG = "pkg";
     public static final String KEY_SERVICENAME = "servicename";
     public static final String KEY_ACTIONS = "actions";
@@ -66,51 +69,62 @@ public class PluginClient {
     }
 
     public boolean isPluginExist(Context context, String serviceName) {
-        loadListPlugin(context);
         var currPluginList = servicesLiveData.getValue();
-        if (currPluginList == null) return false;
+        if (currPluginList == null) {
+            loadListPlugin(context);
+            return new Handler(Looper.getMainLooper()).postDelayed(
+                    () -> isPluginExist(context, serviceName), LIB_DELAY);
+        }
         if (currPluginList.isEmpty()) return false;
         for (var element : currPluginList) {
             var service = element.get(KEY_SERVICENAME);
             if (service == null) return false;
-            return service.equals(serviceName);
+            if (service.equals(serviceName)) {
+                return true;
+            }
         }
         return false;
     }
 
     @Nullable
-    public CompletableFuture<PluginInfo> requestInfo(Context context, PluginType pluginType) {
+    public CompletableFuture<List<PluginInfo>> requestInfo(Context context, PluginType pluginType) {
         return CompletableFuture
-                .supplyAsync(() -> connectPlugin(context, pluginType))
+                .supplyAsync(() -> {
+                    boolean status;
+                    try {
+                        status = connectPlugin(context, pluginType);
+                        Thread.sleep(LIB_DELAY);
+                    } catch (InterruptedException e) {
+                        throw new CompletionException(e);
+                    }
+                    return status;
+                })
                 .thenApplyAsync(aBoolean -> {
                     if (!aBoolean) return null;
-                    PluginInfo pluginInfo = null;
+                    var pluginInfoList = new ArrayList<PluginInfo>();
 
                     switch (pluginType) {
                         case ENGINE_PLUGIN -> {
                             try {
-                                pluginInfo = new PluginInfo(
+                                var pluginInfo = new PluginInfo(
                                         questopiaBundle.versionPlugin(),
                                         questopiaBundle.titlePlugin(),
                                         questopiaBundle.authorPlugin()
                                 );
+                                pluginInfoList.add(pluginInfo);
                             } catch (RemoteException e) {
                                 throw new CompletionException(e);
                             }
                         }
                     }
 
-                    return pluginInfo;
+                    return pluginInfoList;
                 })
                 .thenApplyAsync(info -> {
                     if (!disconnectPlugin(context, pluginType)) {
                         throw new CompletionException(new RuntimeException("Error disconnect plugin"));
                     }
                     return info;
-                })
-                .exceptionally(throwable -> {
-                    // dosmt
-                    return null;
                 });
     }
 
@@ -119,9 +133,8 @@ public class PluginClient {
             case ENGINE_PLUGIN -> {
                 var intent = new Intent(ENGINE_PLUGIN_ID);
                 var updatedIntent = createExplicitIntent(context, intent);
-                if (updatedIntent != null) {
-                    return context.bindService(updatedIntent, engineConn, Context.BIND_AUTO_CREATE);
-                }
+                if (updatedIntent == null) return false;
+                return context.bindService(updatedIntent, engineConn, Context.BIND_AUTO_CREATE);
             }
         }
         return false;
@@ -189,8 +202,10 @@ public class PluginClient {
             }
         }
 
-        servicesLiveData.postValue(servicesList);
-        categoriesLiveData.postValue(categoriesList);
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            servicesLiveData.setValue(servicesList);
+            categoriesLiveData.setValue(categoriesList);
+        }, LIB_DELAY);
     }
 
     @Nullable

@@ -1,12 +1,15 @@
 package org.qp.android.ui.settings;
 
 import static org.qp.android.model.plugin.PluginClient.KEY_SERVICENAME;
+import static org.qp.android.model.plugin.PluginClient.LIB_DELAY;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,12 +23,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import org.qp.android.R;
 import org.qp.android.databinding.FragmentRecyclerBinding;
-import org.qp.android.dto.plugin.PluginInfo;
 import org.qp.android.helpers.adapters.RecyclerItemClickListener;
 import org.qp.android.model.plugin.PluginClient;
 import org.qp.android.model.plugin.PluginType;
-
-import java.util.ArrayList;
 
 public class SettingPluginFragment extends Fragment {
 
@@ -69,16 +69,16 @@ public class SettingPluginFragment extends Fragment {
             hashMaps.forEach(stringStringHashMap -> {
                 var service = stringStringHashMap.get(KEY_SERVICENAME);
                 if (service == null) return;
-                var pluginInfos = new ArrayList<PluginInfo>();
                 switch (service) {
                     case "org.qp.android.questopiabundle.QuestopiaBundle" -> {
                         var infoBundle = client.requestInfo(requireContext(), PluginType.ENGINE_PLUGIN);
                         if (infoBundle == null) return;
-                        infoBundle.thenAccept(pluginInfo -> {
-                            if (pluginInfo == null) return;
-                            pluginInfos.add(pluginInfo);
-                            pluginAdapter.submitList(pluginInfos);
-                        });
+                        infoBundle.thenAccept(pluginInfoList -> {
+                            if (pluginInfoList.isEmpty()) return;
+                            new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                                pluginAdapter.submitList(pluginInfoList);
+                            }, LIB_DELAY);
+                        }).exceptionally(throwable -> null);
                     }
                 }
             });

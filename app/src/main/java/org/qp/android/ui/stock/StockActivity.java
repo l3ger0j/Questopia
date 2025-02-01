@@ -281,10 +281,10 @@ public class StockActivity extends AppCompatActivity {
 
         stockViewModel.emitter.observe(this, eventNavigation -> {
             if (eventNavigation instanceof StockFragmentNavigation.ShowErrorDialog errorDialog) {
-                switch (errorDialog.getErrorType()) {
+                switch (errorDialog.errorType) {
                     case FOLDER_ERROR -> showErrorDialog(getString(R.string.gamesFolderError));
                     case EXCEPTION -> showErrorDialog(getString(R.string.error)
-                            + ": " + errorDialog.getErrorMessage());
+                            + ": " + errorDialog.errorMessage);
                 }
             }
             if (eventNavigation instanceof StockFragmentNavigation.ShowGameFragment gameFragment) {
@@ -294,7 +294,7 @@ public class StockActivity extends AppCompatActivity {
                 onLongListItemClick();
             }
             if (eventNavigation instanceof StockFragmentNavigation.ShowFilePicker filePicker) {
-                showFilePickerActivity(filePicker.getRequestCode(), filePicker.getMimeTypes());
+                showFilePickerActivity(filePicker.requestCode, filePicker.mimeTypes);
             }
         });
 
