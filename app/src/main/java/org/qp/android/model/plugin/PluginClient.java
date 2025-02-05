@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutionException;
 
 public class PluginClient {
 
@@ -92,9 +93,8 @@ public class PluginClient {
                 .supplyAsync(() -> {
                     boolean status;
                     try {
-                        status = connectPlugin(context, pluginType);
-                        Thread.sleep(LIB_DELAY);
-                    } catch (InterruptedException e) {
+                        status = connectPluginTask(context, pluginType).get();
+                    } catch (ExecutionException | InterruptedException e) {
                         throw new CompletionException(e);
                     }
                     return status;
@@ -103,19 +103,19 @@ public class PluginClient {
                     if (!aBoolean) return null;
                     var pluginInfoList = new ArrayList<PluginInfo>();
 
-                    switch (pluginType) {
-                        case ENGINE_PLUGIN -> {
-                            try {
+                    try {
+                        switch (pluginType) {
+                            case ENGINE_PLUGIN -> {
                                 var pluginInfo = new PluginInfo(
                                         questopiaBundle.versionPlugin(),
                                         questopiaBundle.titlePlugin(),
                                         questopiaBundle.authorPlugin()
                                 );
                                 pluginInfoList.add(pluginInfo);
-                            } catch (RemoteException e) {
-                                throw new CompletionException(e);
                             }
                         }
+                    } catch (RemoteException e) {
+                        throw new CompletionException(e);
                     }
 
                     return pluginInfoList;
@@ -128,16 +128,17 @@ public class PluginClient {
                 });
     }
 
-    public boolean connectPlugin(Context context, PluginType pluginType) {
+    public CompletableFuture<Boolean> connectPluginTask(Context context, PluginType pluginType) {
         switch (pluginType) {
             case ENGINE_PLUGIN -> {
                 var intent = new Intent(ENGINE_PLUGIN_ID);
                 var updatedIntent = createExplicitIntent(context, intent);
-                if (updatedIntent == null) return false;
-                return context.bindService(updatedIntent, engineConn, Context.BIND_AUTO_CREATE);
+                if (updatedIntent == null) return CompletableFuture.supplyAsync(() -> false);
+                return CompletableFuture
+                        .supplyAsync(() -> context.bindService(updatedIntent, engineConn, Context.BIND_AUTO_CREATE));
             }
         }
-        return false;
+        return CompletableFuture.supplyAsync(() -> false);
     }
 
     public boolean disconnectPlugin(Context context, PluginType pluginType) {

@@ -71,7 +71,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -134,12 +136,19 @@ public class GameViewModel extends AndroidViewModel {
         questopiaApplication = (QuestopiaApplication) getApplication();
 
         CompletableFuture
-                .supplyAsync(() -> pluginClient.connectPlugin(questopiaApplication, PluginType.ENGINE_PLUGIN), singleService)
-                .thenAcceptAsync(aBoolean -> {
-                    if (aBoolean) {
-                        new Handler(Looper.getMainLooper()).postDelayed(this::initPluginHandler, LIB_DELAY);
+                .supplyAsync(() -> {
+                    boolean status;
+                    try {
+                        status = pluginClient.connectPluginTask(questopiaApplication, PluginType.ENGINE_PLUGIN).get();
+                    } catch (ExecutionException | InterruptedException e) {
+                        throw new CompletionException(e);
                     }
-                }, singleService);
+                    return status;
+                })
+                .thenAccept(aBoolean -> {
+                    if (!aBoolean) return;
+                    new Handler(Looper.getMainLooper()).postDelayed(this::initPluginHandler, LIB_DELAY);
+                });
     }
 
     private void initPluginHandler() {
