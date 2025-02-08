@@ -19,7 +19,7 @@
         android:background="?android:attr/selectableItemBackground">
 
         <com.google.android.material.imageview.ShapeableImageView
-            android:id="@+id/game_icon"
+            android:id="@+id/loc_game_icon"
             android:layout_width="56dp"
             android:layout_height="56dp"
             android:layout_marginVertical="8dp"
@@ -40,7 +40,7 @@
             android:padding="5dp"
             android:text="@{data.titleObserver}"
             app:layout_constraintEnd_toStartOf="@+id/game_installed"
-            app:layout_constraintStart_toEndOf="@+id/game_icon"
+            app:layout_constraintStart_toEndOf="@+id/loc_game_icon"
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
@@ -50,7 +50,7 @@
             android:layout_marginVertical="8dp"
             android:layout_marginStart="8dp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/game_icon"
+            app:layout_constraintStart_toEndOf="@+id/loc_game_icon"
             app:layout_constraintTop_toBottomOf="@+id/game_title" />
 
         <TextView
