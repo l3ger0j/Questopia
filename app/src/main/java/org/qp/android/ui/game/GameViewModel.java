@@ -302,14 +302,12 @@ public class GameViewModel extends AndroidViewModel {
     }
 
     public Uri getImageUriFromPath(String src) {
-        var relPath = Uri.parse(src).getPath();
-        if (relPath == null) return Uri.EMPTY;
-        if (getCurGameDir().isPresent()) {
-            var imageFile = fromRelPath(getApplication(), relPath, getCurGameDir().get(), true);
-            return imageFile.getUri();
-        } else {
-            return Uri.EMPTY;
-        }
+        final var relPath = Uri.parse(src).getPath();
+        if (!isNotEmptyOrBlank(relPath)) return Uri.EMPTY;
+        final var gameDir = getCurGameDir();
+        if (!isWritableDir(getApplication(), gameDir)) return Uri.EMPTY;
+        var imageFile = fromRelPath(getApplication(), relPath, gameDir, true);
+        return imageFile.getUri();
     }
 
     public LiveData<String> getMainDescObserver() {
@@ -334,15 +332,15 @@ public class GameViewModel extends AndroidViewModel {
         return actionsListLiveData;
     }
 
-    public Optional<DocumentFile> getCurGameDir() {
-        if (gameDirUri == null) return Optional.empty();
-        return Optional.ofNullable(DocumentFileCompat.fromUri(getApplication(), gameDirUri));
+    @Nullable
+    public DocumentFile getCurGameDir() {
+        return DocumentFileCompat.fromUri(getApplication(), gameDirUri);
     }
 
-    public Optional<DocumentFile> getSavesDir() {
-        if (getCurGameDir().isEmpty()) return Optional.empty();
-        var savesDir = findOrCreateFolder(getApplication(), getCurGameDir().get(), "saves");
-        return Optional.ofNullable(savesDir);
+    @Nullable
+    public DocumentFile getSavesDir() {
+        if (!isWritableDir(getApplication(), getCurGameDir())) return null;
+        return findOrCreateFolder(getApplication(), getCurGameDir(), "saves");
     }
 
     public void setGameDirUri(Uri gameDirUri) {
@@ -594,8 +592,10 @@ public class GameViewModel extends AndroidViewModel {
     }
 
     public void resumeAudio() {
-        if (getCurGameDir().isEmpty()) return;
-        getAudioPlayer().setCurGameDir(getCurGameDir().get());
+        final var gameDir = getCurGameDir();
+        if (isWritableDir(getApplication(), gameDir)) return;
+
+        getAudioPlayer().setCurGameDir(gameDir);
         getAudioPlayer().setSoundEnabled(getSettingsController().isSoundEnabled);
         getAudioPlayer().resume();
     }
@@ -838,8 +838,8 @@ public class GameViewModel extends AndroidViewModel {
             if (!uri.getScheme().startsWith("file"))
                 return super.shouldInterceptRequest(view, request);
 
-            final var rootDir = getCurGameDir().get();
-            if (getCurGameDir().isEmpty())
+            final var rootDir = getCurGameDir();
+            if (!isWritableDir(getApplication(), getCurGameDir()))
                 return super.shouldInterceptRequest(view, request);
 
             try {

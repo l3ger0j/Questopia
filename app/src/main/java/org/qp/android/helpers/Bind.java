@@ -14,40 +14,21 @@ import org.qp.android.R;
 
 public class Bind {
 
-    @BindingAdapter({"imageUrl"})
-    public static void loadImage(ImageView view, String imageUrl) {
-        if (isNotEmptyOrBlank(imageUrl)) {
+    @BindingAdapter({"imageUri"})
+    public static void loadImage(ImageView view, Uri imageUri) {
+        if (isNotEmptyOrBlank(String.valueOf(imageUri))) {
             switch (view.getId()) {
-                case R.id.imageBox -> Glide.with(view)
-                        .load(imageUrl)
-                        .into(view);
+                case R.id.loc_game_icon -> view.setImageURI(imageUri);
                 case R.id.game_icon -> Glide.with(view)
-                        .load(Uri.parse(imageUrl))
+                        .load(imageUri)
                         .centerCrop()
                         .error(R.drawable.baseline_broken_image_24)
                         .into(view);
                 default -> Glide.with(view)
-                        .load(imageUrl)
+                        .load(imageUri)
                         .centerCrop()
                         .into(view);
             }
-        } else {
-            var drawable = ResourcesCompat.getDrawable(
-                    view.getContext().getResources(),
-                    R.drawable.baseline_broken_image_24,
-                    null
-            );
-            view.setImageDrawable(drawable);
-        }
-    }
-
-    @BindingAdapter({"imageUri"})
-    public static void loadImage(ImageView view, Uri imageUri) {
-        if (isNotEmptyOrBlank(String.valueOf(imageUri))) {
-            Glide.with(view)
-                    .load(imageUri)
-                    .centerCrop()
-                    .into(view);
         } else {
             var drawable = ResourcesCompat.getDrawable(
                     view.getContext().getResources(),

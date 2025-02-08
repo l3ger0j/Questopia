@@ -4,6 +4,8 @@ import static androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener;
 import static org.qp.android.helpers.utils.FileUtil.documentWrap;
 import static org.qp.android.helpers.utils.FileUtil.findOrCreateFile;
 import static org.qp.android.helpers.utils.FileUtil.fromRelPath;
+import static org.qp.android.helpers.utils.FileUtil.isWritableDir;
+import static org.qp.android.helpers.utils.StringUtil.isNotEmptyOrBlank;
 import static org.qp.android.helpers.utils.ThreadUtil.isMainThread;
 
 import android.annotation.SuppressLint;
@@ -470,7 +472,7 @@ public class GameActivity extends AppCompatActivity {
                 case IMAGE_DIALOG -> {
                     var dialogFragment = new GameDialogFrags();
                     dialogFragment.setDialogType(GameDialogType.IMAGE_DIALOG);
-                    dialogFragment.pathToImage.set(inputString);
+                    dialogFragment.pathToImage = gameViewModel.getImageUriFromPath(inputString);
                     dialogFragment.show(manager, "imageDialogFragment");
                 }
                 case LOAD_DIALOG -> {
@@ -640,15 +642,14 @@ public class GameActivity extends AppCompatActivity {
     private void addSaveSlotsSubMenu(MenuItem parent, int action) {
         if (parent == null) return;
 
-        final var savesDirOpt = gameViewModel.getSavesDir();
-        if (savesDirOpt.isEmpty()) return;
-        final var savesDir = savesDirOpt.get();
+        final var savesDir = gameViewModel.getSavesDir();
+        if (!isWritableDir(this, savesDir)) return;
 
-        var id = parent.getItemId();
+        final var id = parent.getItemId();
         mainMenu.removeItem(id);
 
-        var order = action == LOAD ? 2 : 3;
-        var subMenu = mainMenu.addSubMenu(
+        final var order = action == LOAD ? 2 : 3;
+        final var subMenu = mainMenu.addSubMenu(
                 R.id.menuGroup_running,
                 id,
                 order,
@@ -718,16 +719,16 @@ public class GameActivity extends AppCompatActivity {
                 saveResultLaunch.launch(mIntent);
             }
             case SAVE -> {
+                final var gameDir = gameViewModel.getCurGameDir();
+                if (!isWritableDir(getApplication(), gameDir)) return;
+                final var gameDirName = gameDir.getName();
+
                 mIntent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
-                var gameDirOpt = gameViewModel.getCurGameDir();
                 var extraValue = "";
-                if (gameDirOpt.isPresent()) {
-                    var dir = gameDirOpt.get();
-                    if (dir.getName() == null) {
-                        extraValue = ThreadLocalRandom.current().nextInt() + ".sav";
-                    } else {
-                        extraValue = dir.getName() + ".sav";
-                    }
+                if (isNotEmptyOrBlank(gameDirName)) {
+                    extraValue = gameDirName + ".sav";
+                } else {
+                    extraValue = ThreadLocalRandom.current().nextInt() + ".sav";
                 }
                 mIntent.putExtra(Intent.EXTRA_TITLE, extraValue);
                 mIntent.setType("application/octet-stream");

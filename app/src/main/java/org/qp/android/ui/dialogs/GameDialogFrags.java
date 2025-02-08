@@ -2,10 +2,10 @@ package org.qp.android.ui.dialogs;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -13,7 +13,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
-import androidx.databinding.ObservableField;
 import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -30,7 +29,7 @@ import java.util.Optional;
 
 public class GameDialogFrags extends DialogFragment {
 
-    public ObservableField<String> pathToImage = new ObservableField<>();
+    public Uri pathToImage = Uri.EMPTY;
     private List<String> items;
     private GameDialogType dialogType;
     private DialogImageBinding imageBinding;
@@ -123,7 +122,7 @@ public class GameDialogFrags extends DialogFragment {
                 message = savedInstanceState.getString("message");
             }
             if (savedInstanceState.containsKey("pathToImage")) {
-                pathToImage.set(savedInstanceState.getString("pathToImage"));
+                pathToImage = savedInstanceState.getParcelable("pathToImage");
             }
             if (savedInstanceState.containsKey("processedMsg")) {
                 processedMsg = savedInstanceState.getString("processedMsg");
@@ -133,7 +132,7 @@ public class GameDialogFrags extends DialogFragment {
             case EXECUTOR_DIALOG, INPUT_DIALOG -> {
                 final var executorView =
                         getLayoutInflater().inflate(R.layout.dialog_input, null);
-                var textInputLayout =
+                final var textInputLayout =
                         (TextInputLayout) executorView.findViewById(R.id.inputBox_edit);
                 textInputLayout.setHelperText(message);
                 builder.setView(executorView);
@@ -183,7 +182,7 @@ public class GameDialogFrags extends DialogFragment {
             }
             case IMAGE_DIALOG -> {
                 imageBinding = DialogImageBinding.inflate(getLayoutInflater());
-                imageBinding.setDialogFragment(this);
+                imageBinding.imageBox.setImageURI(pathToImage);
                 imageBinding.imageBox.setOnClickListener(v -> dismiss());
                 builder.setView(imageBinding.getRoot());
                 return builder.create();
@@ -226,7 +225,7 @@ public class GameDialogFrags extends DialogFragment {
 
         if (dialog.isPresent()) {
             if (dialogType.equals(GameDialogType.ERROR_DIALOG)) {
-                var sendButton = (Button) dialog.get().getButton(Dialog.BUTTON_POSITIVE);
+                var sendButton = dialog.get().getButton(Dialog.BUTTON_POSITIVE);
                 sendButton.setOnClickListener(v -> {
                     if (isValidate()) {
                         gameViewModel.onDialogPositiveClick(this);
@@ -248,7 +247,7 @@ public class GameDialogFrags extends DialogFragment {
             outState.putString("message", message);
         }
         if (pathToImage != null) {
-            outState.putString("pathToImage", pathToImage.get());
+            outState.putParcelable("pathToImage", pathToImage);
         }
         if (processedMsg != null) {
             outState.putString("processedMsg", processedMsg);
