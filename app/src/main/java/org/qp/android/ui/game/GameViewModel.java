@@ -6,7 +6,9 @@ import static org.qp.android.helpers.utils.ColorUtil.convertRGBAtoBGRA;
 import static org.qp.android.helpers.utils.ColorUtil.getHexColor;
 import static org.qp.android.helpers.utils.FileUtil.findOrCreateFolder;
 import static org.qp.android.helpers.utils.FileUtil.fromRelPath;
+import static org.qp.android.helpers.utils.FileUtil.isWritableDir;
 import static org.qp.android.helpers.utils.PathUtil.getExtension;
+import static org.qp.android.helpers.utils.StringUtil.isNotEmptyOrBlank;
 import static org.qp.android.helpers.utils.ThreadUtil.assertNonUiThread;
 import static org.qp.android.helpers.utils.ViewUtil.getFontStyle;
 import static org.qp.android.model.plugin.PluginClient.LIB_DELAY;
@@ -71,9 +73,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -115,9 +115,9 @@ public class GameViewModel extends AndroidViewModel {
     public MutableLiveData<GameActivity> activityObserver = new MutableLiveData<>();
     public String pageTemplate = "";
     public SharedPreferences preferences;
+    public Events.Emitter emitter = new Events.Emitter();
     private Uri gameDirUri;
     private boolean showActions = true;
-    public Events.Emitter emitter = new Events.Emitter();
     private LibGameState libGameState = new LibGameState();
     private final SharedPreferences.OnSharedPreferenceChangeListener preferenceChangeListener = (sharedPreferences, key) -> {
         controllerObserver.postValue(getSettingsController());
@@ -135,19 +135,10 @@ public class GameViewModel extends AndroidViewModel {
         preferences.registerOnSharedPreferenceChangeListener(preferenceChangeListener);
         questopiaApplication = (QuestopiaApplication) getApplication();
 
-        CompletableFuture
-                .supplyAsync(() -> {
-                    boolean status;
-                    try {
-                        status = pluginClient.connectPluginTask(questopiaApplication, PluginType.ENGINE_PLUGIN).get();
-                    } catch (ExecutionException | InterruptedException e) {
-                        throw new CompletionException(e);
-                    }
-                    return status;
-                })
-                .thenAccept(aBoolean -> {
-                    if (!aBoolean) return;
-                    new Handler(Looper.getMainLooper()).postDelayed(this::initPluginHandler, LIB_DELAY);
+        pluginClient.proxyMethod(questopiaApplication, PluginType.ENGINE_PLUGIN, this::initPluginHandler)
+                .exceptionally(throwable -> {
+                    Log.e(this.getClass().getSimpleName(), "Error", throwable);
+                    return null;
                 });
     }
 
@@ -606,31 +597,37 @@ public class GameViewModel extends AndroidViewModel {
 
     public void startNativeLib() {
         nativeLibVer = getSettingsController().nativeLibVersion;
-        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+        pluginClient.proxyMethod(questopiaApplication, PluginType.ENGINE_PLUGIN, () -> {
             try {
                 pluginClient.questopiaBundle.startNativeLib(nativeLibVer);
             } catch (Exception e) {
                 Log.e(this.getClass().getSimpleName(), "Error: ", e);
             }
-        }, 1000);
+        }).exceptionally(throwable -> {
+            Log.e(this.getClass().getSimpleName(), "Error", throwable);
+            return null;
+        });
     }
 
     public void stopNativeLib() {
-        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+        pluginClient.proxyMethod(questopiaApplication, PluginType.ENGINE_PLUGIN, () -> {
             try {
                 pluginClient.questopiaBundle.stopNativeLib(nativeLibVer);
                 pluginClient.disconnectPlugin(getApplication(), PluginType.ENGINE_PLUGIN);
             } catch (Exception e) {
                 showErrorDialog(e.toString(), ErrorType.EXCEPTION);
             }
-        }, 1000);
+        }).exceptionally(throwable -> {
+            Log.e(this.getClass().getSimpleName(), "Error", throwable);
+            return null;
+        });
     }
 
     public void runGameIntoNativeLib(long gameId,
                                      String gameTitle,
                                      DocumentFile gameDir,
                                      DocumentFile gameFile) {
-        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+        pluginClient.proxyMethod(questopiaApplication, PluginType.ENGINE_PLUGIN, () -> {
             try {
                 getApplication().grantUriPermission(
                         "org.qp.android.questopiabundle",
@@ -649,7 +646,10 @@ public class GameViewModel extends AndroidViewModel {
             } catch (Exception e) {
                 showErrorDialog(e.toString(), ErrorType.EXCEPTION);
             }
-        }, 1000);
+        }).exceptionally(throwable -> {
+            Log.e(this.getClass().getSimpleName(), "Error", throwable);
+            return null;
+        });
     }
 
     public void requestForNativeLib(LibGameRequest req, String codeToExec) {

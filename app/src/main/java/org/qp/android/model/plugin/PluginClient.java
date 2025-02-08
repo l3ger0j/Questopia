@@ -87,6 +87,23 @@ public class PluginClient {
         return false;
     }
 
+    public CompletableFuture<Void> proxyMethod(Context context, PluginType pluginType, Runnable runnable) {
+        return CompletableFuture
+                .supplyAsync(() -> {
+                    boolean status;
+                    try {
+                        status = connectPluginTask(context, pluginType).get();
+                    } catch (ExecutionException | InterruptedException e) {
+                        throw new CompletionException(e);
+                    }
+                    return status;
+                })
+                .thenAccept(aBoolean -> {
+                    if (!aBoolean) return;
+                    new Handler(Looper.getMainLooper()).postDelayed(runnable, LIB_DELAY);
+                });
+    }
+
     @Nullable
     public CompletableFuture<List<PluginInfo>> requestInfo(Context context, PluginType pluginType) {
         return CompletableFuture
@@ -214,7 +231,7 @@ public class PluginClient {
         var pm = context.getPackageManager();
         var resolveInfo = pm.queryIntentServices(intent, 0);
 
-        if (resolveInfo == null || resolveInfo.size() != 1) {
+        if (resolveInfo.isEmpty()) {
             return null;
         }
 
