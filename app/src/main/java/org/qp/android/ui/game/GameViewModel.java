@@ -685,7 +685,7 @@ public class GameViewModel extends AndroidViewModel {
 
     public void requestForNativeLib(LibGameRequest req, String codeToExec) {
         try {
-            pluginClient.questopiaBundle.doLibRequest(new LibResult<>(req), codeToExec, null);
+            pluginClient.questopiaBundle.doLibRequest(new LibResult<>(req), codeToExec, Uri.EMPTY);
         } catch (Exception e) {
             showErrorDialog(e.toString(), ErrorType.EXCEPTION);
         }
@@ -693,7 +693,7 @@ public class GameViewModel extends AndroidViewModel {
 
     public void requestForNativeLib(LibGameRequest req, Uri fileUri) {
         try {
-            pluginClient.questopiaBundle.doLibRequest(new LibResult<>(req), null, fileUri);
+            pluginClient.questopiaBundle.doLibRequest(new LibResult<>(req), "", fileUri);
         } catch (Exception e) {
             showErrorDialog(e.toString(), ErrorType.EXCEPTION);
         }
@@ -701,7 +701,7 @@ public class GameViewModel extends AndroidViewModel {
 
     public void requestForNativeLib(LibGameRequest req) {
         try {
-            pluginClient.questopiaBundle.doLibRequest(new LibResult<>(req), null, null);
+            pluginClient.questopiaBundle.doLibRequest(new LibResult<>(req), "", Uri.EMPTY);
         } catch (Exception e) {
             showErrorDialog(e.toString(), ErrorType.EXCEPTION);
         }
