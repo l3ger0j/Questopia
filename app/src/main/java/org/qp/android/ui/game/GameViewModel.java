@@ -4,9 +4,11 @@ import static org.qp.android.helpers.utils.Base64Util.decodeBase64;
 import static org.qp.android.helpers.utils.Base64Util.isBase64;
 import static org.qp.android.helpers.utils.ColorUtil.convertRGBAtoBGRA;
 import static org.qp.android.helpers.utils.ColorUtil.getHexColor;
+import static org.qp.android.helpers.utils.FileUtil.findOrCreateFile;
 import static org.qp.android.helpers.utils.FileUtil.findOrCreateFolder;
 import static org.qp.android.helpers.utils.FileUtil.fromRelPath;
 import static org.qp.android.helpers.utils.FileUtil.isWritableDir;
+import static org.qp.android.helpers.utils.FileUtil.isWritableFile;
 import static org.qp.android.helpers.utils.PathUtil.getExtension;
 import static org.qp.android.helpers.utils.StringUtil.isNotEmptyOrBlank;
 import static org.qp.android.helpers.utils.ThreadUtil.assertNonUiThread;
@@ -43,6 +45,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.preference.PreferenceManager;
 
 import com.anggrayudi.storage.file.DocumentFileCompat;
+import com.anggrayudi.storage.file.MimeType;
 import com.google.android.material.textfield.TextInputLayout;
 
 import org.qp.android.QuestopiaApplication;
@@ -194,6 +197,34 @@ public class GameViewModel extends AndroidViewModel {
                 @Override
                 public void playFile(String path, int volume) throws RemoteException {
                     getAudioPlayer().playFile(path, volume);
+                }
+
+                @Override
+                public void requestPermOnFile(Uri fileUri) throws RemoteException {
+                    getApplication().grantUriPermission(
+                            "org.qp.android.questopiabundle",
+                            fileUri,
+                            Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                                    | Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    );
+                }
+
+                @Override
+                public Uri requestCreateFile(Uri fileUri, String path) throws RemoteException {
+                    var dir = DocumentFileCompat.fromUri(getApplication(), fileUri);
+                    if (isWritableDir(getApplication(), dir)) {
+                        var file = findOrCreateFile(getApplication(), dir, path, MimeType.TEXT);
+                        if (isWritableFile(getApplication(), file)) {
+                            getApplication().grantUriPermission(
+                                    "org.qp.android.questopiabundle",
+                                    file.getUri(),
+                                    Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                                            | Intent.FLAG_GRANT_READ_URI_PERMISSION
+                            );
+                            return file.getUri();
+                        }
+                    }
+                    return Uri.EMPTY;
                 }
 
                 @Override
