@@ -7,10 +7,10 @@ import androidx.room.TypeConverter;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GameFilesConverter {
+public class ListUriConverter {
 
     @TypeConverter
-    public String fromGameFilesUri(List<Uri> gameFilesUri) {
+    public String fromListUri(List<Uri> gameFilesUri) {
         if (gameFilesUri == null) return "";
         var tempList = new ArrayList<String>();
         gameFilesUri.forEach(uri ->
@@ -20,7 +20,7 @@ public class GameFilesConverter {
     }
 
     @TypeConverter
-    public List<Uri> toGameFilesUri(String data) {
+    public List<Uri> toListUri(String data) {
         var inputList = data.split(",");
         var tempList = new ArrayList<Uri>();
         for (var s : inputList) {

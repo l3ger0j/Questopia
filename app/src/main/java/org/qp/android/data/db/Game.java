@@ -20,7 +20,7 @@ public class Game {
     public String title = "";
     public String lang = "";
     public String player = "";
-    @TypeConverters({GameIconConverter.class})
+    @TypeConverters({UriConverter.class})
     public Uri gameIconUri;
     public String fileUrl = "";
     public long fileSize;
@@ -29,10 +29,10 @@ public class Game {
     public String pubDate = "";
     public String modDate = "";
 
-    @TypeConverters({GameDirConverter.class})
+    @TypeConverters({UriConverter.class})
     public Uri gameDirUri;
 
-    @TypeConverters({GameFilesConverter.class})
+    @TypeConverters({ListUriConverter.class})
     public List<Uri> gameFilesUri;
 
 }
