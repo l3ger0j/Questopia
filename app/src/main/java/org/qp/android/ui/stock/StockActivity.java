@@ -49,15 +49,11 @@ import androidx.preference.PreferenceManager;
 
 import com.anggrayudi.storage.SimpleStorageHelper;
 import com.anggrayudi.storage.file.DocumentFileCompat;
-import com.github.javiersantos.appupdater.AppUpdater;
-import com.github.javiersantos.appupdater.enums.UpdateFrom;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import org.qp.android.BuildConfig;
 import org.qp.android.R;
 import org.qp.android.data.db.Game;
-import org.qp.android.data.db.GameDao;
-import org.qp.android.data.db.GameDatabase;
 import org.qp.android.databinding.ActivityStockBinding;
 import org.qp.android.helpers.utils.ViewUtil;
 import org.qp.android.model.plugin.PluginClient;
@@ -70,8 +66,6 @@ import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Objects;
 
-import javax.inject.Inject;
-
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
@@ -82,10 +76,6 @@ public class StockActivity extends AppCompatActivity {
     private static final int POST_NOTIFICATION_CODE = 203;
 
     private final SimpleStorageHelper storageHelper = new SimpleStorageHelper(this);
-    @Inject
-    public GameDatabase gameDatabase;
-    @Inject
-    public GameDao gameDao;
     protected ActivityStockBinding activityStockBinding;
     private StockViewModel stockViewModel;
     private final SharedPreferences.OnSharedPreferenceChangeListener preferenceChangeListener = (sharedPreferences, key) -> {
@@ -93,10 +83,9 @@ public class StockActivity extends AppCompatActivity {
         switch (key) {
             case "binPref" -> stockViewModel.loadGameDataFromDB();
             case "lang" -> {
-                if (sharedPreferences.getString("lang", "ru").equals("ru")) {
-                    AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("ru"));
-                } else {
-                    AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("en"));
+                switch (sharedPreferences.getString("lang", "ru")) {
+                    case "ru" -> AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("ru"));
+                    case "en" -> AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("en"));
                 }
             }
             case "theme" -> {
@@ -297,11 +286,6 @@ public class StockActivity extends AppCompatActivity {
                 showFilePickerActivity(filePicker.requestCode, filePicker.mimeTypes);
             }
         });
-
-        new AppUpdater(this)
-                .setUpdateFrom(UpdateFrom.GITHUB)
-                .setGitHubUserAndRepo("l3ger0j", "Questopia")
-                .start();
 
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
