@@ -138,6 +138,18 @@ public class StockActivity extends AppCompatActivity {
         }
 
         activityStockBinding = ActivityStockBinding.inflate(getLayoutInflater());
+        ViewCompat.setOnApplyWindowInsetsListener(activityStockBinding.stockAppBar, (v, windowInsets) -> {
+            var insets = windowInsets.getInsets(
+                    WindowInsetsCompat.Type.systemBars()
+                            | WindowInsetsCompat.Type.displayCutout()
+            );
+            var mlp = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
+            mlp.leftMargin = insets.left;
+            mlp.topMargin = insets.top;
+            mlp.rightMargin = insets.right;
+            v.setLayoutParams(mlp);
+            return windowInsets;
+        });
         ViewCompat.setOnApplyWindowInsetsListener(activityStockBinding.stockFAB, (v, windowInsets) -> {
             var insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
             var mlp = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
@@ -150,7 +162,19 @@ public class StockActivity extends AppCompatActivity {
             mlp.bottomMargin = (int) (insets.bottom + marg);
             mlp.rightMargin = (int) (insets.right + marg);
             v.setLayoutParams(mlp);
-            return WindowInsetsCompat.CONSUMED;
+            return windowInsets;
+        });
+        ViewCompat.setOnApplyWindowInsetsListener(activityStockBinding.stockFrame, (v, windowInsets) -> {
+            var insets = windowInsets.getInsets(
+                    WindowInsetsCompat.Type.systemBars()
+                    | WindowInsetsCompat.Type.displayCutout()
+            );
+            var mlp = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
+            mlp.leftMargin = insets.left;
+            mlp.bottomMargin = insets.bottom;
+            mlp.rightMargin = insets.right;
+            v.setLayoutParams(mlp);
+            return windowInsets;
         });
         stockViewModel = new ViewModelProvider(this).get(StockViewModel.class);
         var searchToolbar = activityStockBinding.stockSearchBar;
