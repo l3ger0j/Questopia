@@ -39,14 +39,14 @@ public class SettingsController {
     public String language;
     public String theme;
 
-    private static SettingsController INSTANCE;
+    private static class SettingsControllerHolder {
+        public static final SettingsController HOLDER_INSTANCE = new SettingsController();
+    }
+
+    private SettingsController() {}
 
     @NonNull
-    public static SettingsController newInstance(Context context) {
-        if (INSTANCE == null) {
-            INSTANCE = new SettingsController();
-        }
-
+    public static SettingsController getInstance(Context context) {
         return from(PreferenceManager.getDefaultSharedPreferences(context));
     }
 
@@ -61,10 +61,10 @@ public class SettingsController {
 
     @NonNull
     private static SettingsController from(@NonNull SharedPreferences preferences) {
-        SettingsController settingsController = new SettingsController();
+        var settingsController = SettingsControllerHolder.HOLDER_INSTANCE;
         settingsController.typeface = Integer.parseInt(preferences.getString("typeface", "0"));
         settingsController.fontSize = Integer.parseInt(preferences.getString("fontSize", "16"));
-        settingsController.binaryPrefixes = Integer.parseInt(preferences.getString("binPref","1000"));
+        settingsController.binaryPrefixes = Integer.parseInt(preferences.getString("binPref", "1000"));
         settingsController.nativeLibVersion = Integer.parseInt(preferences.getString("libVer", "570"));
         settingsController.actionsHeightRatio = parseActionsHeightRatio(preferences.getString("actsHeight", "1/3"));
         settingsController.isUseAutoscroll = preferences.getBoolean("autoscroll", true);
@@ -75,13 +75,13 @@ public class SettingsController {
         settingsController.language = preferences.getString("lang", "ru");
         settingsController.theme = preferences.getString("theme", "auto");
         imageSettings(settingsController, preferences);
-        colorSettings(settingsController , preferences);
-        soundSettings(settingsController , preferences);
+        colorSettings(settingsController, preferences);
+        soundSettings(settingsController, preferences);
         return settingsController;
     }
 
-    private static void colorSettings (@NonNull SettingsController settingsController,
-                                       @NonNull SharedPreferences preferences) {
+    private static void colorSettings(@NonNull SettingsController settingsController,
+                                      @NonNull SharedPreferences preferences) {
         settingsController.isUseGameTextColor = preferences.getBoolean("useGameTextColor", true);
         settingsController.textColor = preferences.getInt("textColor", Color.BLACK);
         settingsController.isUseGameBackgroundColor = preferences.getBoolean("useGameBackgroundColor", true);
@@ -90,8 +90,8 @@ public class SettingsController {
         settingsController.linkColor = preferences.getInt("linkColor", Color.BLUE);
     }
 
-    private static void imageSettings (@NonNull SettingsController settingsController,
-                                       @NonNull SharedPreferences preferences) {
+    private static void imageSettings(@NonNull SettingsController settingsController,
+                                      @NonNull SharedPreferences preferences) {
         settingsController.isImageDisabled = preferences.getBoolean("pref_disable_image", false);
         settingsController.isUseAutoWidth = preferences.getBoolean("autoWidth", true);
         settingsController.customWidthImage = Integer.parseInt(preferences.getString("customWidthImage", "400"));

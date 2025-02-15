@@ -118,7 +118,7 @@ public class StockActivity extends AppCompatActivity {
         var splashScreen = SplashScreen.installSplashScreen(this);
         splashScreen.setKeepOnScreenCondition(() -> {
             EdgeToEdge.enable(this);
-            switch (SettingsController.newInstance(this).theme) {
+            switch (SettingsController.getInstance(this).theme) {
                 case "auto" -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
                 case "light" -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
                 case "dark" -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);

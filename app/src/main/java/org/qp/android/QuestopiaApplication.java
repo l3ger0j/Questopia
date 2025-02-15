@@ -35,7 +35,7 @@ public class QuestopiaApplication extends Application {
     public HtmlProcessor getHtmlProcessor() {
         return htmlProcessor
                 .setCurGameDir(currentGameDir)
-                .setController(SettingsController.newInstance(this));
+                .setController(SettingsController.getInstance(this));
     }
 
     public AudioPlayer getAudioPlayer() {

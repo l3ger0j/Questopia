@@ -72,7 +72,7 @@ public class LocalGamesListAdapter extends RecyclerView.Adapter<LocalGamesListAd
         var fileSize = gameEntry.fileSize;
         if (fileSize == 0) return;
 
-        var currBinPref = SettingsController.newInstance(context).binaryPrefixes;
+        var currBinPref = SettingsController.getInstance(context).binaryPrefixes;
         var sizeWithPref = formatFileSize(fileSize, currBinPref);
 
         var elementSize = holder.listItemLocalGameBinding.gameSize;

@@ -20,7 +20,7 @@ public class SettingsViewModel extends AndroidViewModel {
     }
 
     public SettingsController getSettingsController() {
-        return SettingsController.newInstance(getApplication());
+        return SettingsController.getInstance(getApplication());
     }
 
     public String formationAboutDesc(@NonNull Context context) {

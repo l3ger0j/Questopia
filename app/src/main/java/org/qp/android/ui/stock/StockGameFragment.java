@@ -25,7 +25,7 @@ public class StockGameFragment extends Fragment {
     private StockViewModel stockViewModel;
 
     private String formatSize(long fileSize) {
-        var currBinPref = SettingsController.newInstance(requireContext()).binaryPrefixes;
+        var currBinPref = SettingsController.getInstance(requireContext()).binaryPrefixes;
         return formatFileSize(fileSize, currBinPref);
     }
 

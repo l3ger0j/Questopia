@@ -68,7 +68,7 @@ public class RemoteGamesAdapter extends PagingDataAdapter<Game, RemoteGamesAdapt
         var fileSize = item.fileSize;
         if (fileSize == 0) return;
 
-        var currBinPref = SettingsController.newInstance(context).binaryPrefixes;
+        var currBinPref = SettingsController.getInstance(context).binaryPrefixes;
         var sizeWithPref = formatFileSize(fileSize, currBinPref);
 
         var elementSize = holder.listItemRemoteGameBinding.gameSize;

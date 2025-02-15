@@ -259,7 +259,7 @@ public class GameViewModel extends AndroidViewModel {
     }
 
     public SettingsController getSettingsController() {
-        return SettingsController.newInstance(getApplication());
+        return SettingsController.getInstance(getApplication());
     }
 
     @SuppressLint("SetJavaScriptEnabled")
