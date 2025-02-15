@@ -30,7 +30,6 @@
             android:id="@+id/separator"
             android:layout_width="match_parent"
             android:layout_height="4dp"
-            android:background="@color/materialcolorpicker__grey"
             android:visibility="@{gameViewModel.isActionVisible ? View.VISIBLE : View.GONE}"
             app:layout_constraintBottom_toTopOf="@id/gameMainActions"
             app:layout_constraintEnd_toEndOf="parent"
