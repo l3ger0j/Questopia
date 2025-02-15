@@ -9,7 +9,10 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.LinearLayout;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import androidx.preference.Preference;
@@ -27,7 +30,7 @@ public class SettingsHostFragment extends PreferenceFragmentCompat {
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
-        addPreferencesFromResource(R.xml.settings);
+        setPreferencesFromResource(R.xml.settings, rootKey);
 
         viewModel = new ViewModelProvider(requireActivity()).get(SettingsViewModel.class);
 
@@ -104,6 +107,25 @@ public class SettingsHostFragment extends PreferenceFragmentCompat {
         var aboutPref = findPreference("showAbout");
         if (aboutPref != null)
             aboutPref.setOnPreferenceClickListener(listener);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        var rootIns = ViewCompat.getRootWindowInsets(view);
+        if (rootIns == null) return;
+        var ins = rootIns.getInsets(
+                WindowInsetsCompat.Type.systemBars() |
+                        WindowInsetsCompat.Type.displayCutout()
+        );
+
+        view.setPadding(
+                view.getPaddingStart() + ins.left,
+                view.getPaddingTop(),
+                view.getPaddingRight() + ins.right,
+                view.getPaddingBottom() + ins.bottom
+        );
     }
 
     private void createCustomView() {
