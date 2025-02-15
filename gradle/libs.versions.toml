@@ -2,7 +2,6 @@
 agp = "8.7.3"
 kotlin = "2.0.21"
 hagp = "2.51.1"
-appupdater = "2.7"
 changelog = "3.5"
 collection = "1.4.5"
 colorpicker = "1.1.0"
@@ -47,7 +46,6 @@ androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref =
 androidx-recyclerview = { module = "androidx.recyclerview:recyclerview", version.ref = "recyclerview" }
 androidx-work-runtime = { module = "androidx.work:work-runtime", version.ref = "workRuntime" }
 appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
-appupdater = { module = "com.github.javiersantos:AppUpdater", version.ref = "appupdater" }
 changelog = { module = "com.github.AppDevNext:ChangeLog", version.ref = "changelog" }
 colorpicker = { module = "com.jaredrummler:colorpicker", version.ref = "colorpicker" }
 constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "constraintlayout" }

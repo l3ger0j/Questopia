@@ -98,7 +98,6 @@ dependencies {
     implementation libs.changelog
     implementation libs.colorpicker
     implementation libs.jsoup
-    implementation libs.appupdater
     implementation libs.storage
     implementation libs.glide
 
