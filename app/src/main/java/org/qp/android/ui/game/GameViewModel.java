@@ -269,7 +269,6 @@ public class GameViewModel extends AndroidViewModel {
         webClientSettings.setAllowFileAccess(true);
         webClientSettings.setJavaScriptEnabled(true);
         webClientSettings.setUseWideViewPort(true);
-        webClientSettings.setDomStorageEnabled(true);
         view.setLayerType(View.LAYER_TYPE_HARDWARE, null);
         view.setOverScrollMode(View.OVER_SCROLL_NEVER);
         view.setWebViewClient(webViewClient);
