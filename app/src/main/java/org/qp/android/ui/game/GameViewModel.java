@@ -417,11 +417,11 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         CompletableFuture
                 .supplyAsync(() -> {
                     var actionsRecycler = new GameItemRecycler();
-                    actionsRecycler.setTypeface(getSettingsController().getTypeface());
-                    actionsRecycler.setTextSize(getFontSize());
-                    actionsRecycler.setTextColor(getTextColor());
-                    actionsRecycler.setLinkTextColor(getLinkColor());
-                    actionsRecycler.setBackgroundColor(getBackgroundColor());
+                    actionsRecycler.typeface = getSettingsController().getTypeface();
+                    actionsRecycler.textSize = getFontSize();
+                    actionsRecycler.textColor = getTextColor();
+                    actionsRecycler.linkTextColor = getLinkColor();
+                    actionsRecycler.backgroundColor = getBackgroundColor();
                     actionsRecycler.submitList(getLibGameState().actionsList);
                     return actionsRecycler;
                 }, service)
@@ -441,11 +441,11 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
                 .supplyAsync(() -> {
                     getGameActivity().warnUser(GameActivity.TAB_OBJECTS);
                     var objectsRecycler = new GameItemRecycler();
-                    objectsRecycler.setTypeface(getSettingsController().getTypeface());
-                    objectsRecycler.setTextSize(getFontSize());
-                    objectsRecycler.setTextColor(getTextColor());
-                    objectsRecycler.setLinkTextColor(getLinkColor());
-                    objectsRecycler.setBackgroundColor(getBackgroundColor());
+                    objectsRecycler.typeface = getSettingsController().getTypeface();
+                    objectsRecycler.textSize = getFontSize();
+                    objectsRecycler.textColor = getTextColor();
+                    objectsRecycler.linkTextColor = getLinkColor();
+                    objectsRecycler.backgroundColor = getBackgroundColor();
                     objectsRecycler.submitList(getLibGameState().objectsList);
                     return objectsRecycler;
                 }, service)
@@ -697,7 +697,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         final var resultQueue = new ArrayBlockingQueue<Integer>(1);
         final var currentItems = getLibProxy().getGameState().menuItemsList;
         final var newItems = new ArrayList<String>();
-        currentItems.forEach(libMenuItem -> newItems.add(libMenuItem.name()));
+        currentItems.forEach(libMenuItem -> newItems.add(libMenuItem.text()));
         getGameActivity().showMenuDialog(newItems , resultQueue);
         try {
             return resultQueue.take();

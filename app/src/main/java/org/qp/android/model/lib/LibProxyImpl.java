@@ -2,8 +2,8 @@ package org.qp.android.model.lib;
 
 import static org.qp.android.helpers.utils.FileUtil.documentWrap;
 import static org.qp.android.helpers.utils.FileUtil.findOrCreateFile;
-import static org.qp.android.helpers.utils.FileUtil.fromRelPath;
 import static org.qp.android.helpers.utils.FileUtil.fromFullPath;
+import static org.qp.android.helpers.utils.FileUtil.fromRelPath;
 import static org.qp.android.helpers.utils.FileUtil.getFileContents;
 import static org.qp.android.helpers.utils.FileUtil.writeFileContents;
 import static org.qp.android.helpers.utils.PathUtil.getFilename;
@@ -25,13 +25,8 @@ import androidx.documentfile.provider.DocumentFile;
 
 import com.anggrayudi.storage.file.MimeType;
 
+import org.libndkqsp.jni.NDKLib;
 import org.qp.android.QuestopiaApplication;
-import org.qp.android.dto.lib.LibActionData;
-import org.qp.android.dto.lib.LibErrorData;
-import org.qp.android.dto.lib.LibListItem;
-import org.qp.android.dto.lib.LibMenuItem;
-import org.qp.android.dto.lib.LibObjectData;
-import org.qp.android.dto.lib.LibVarValResp;
 import org.qp.android.model.service.AudioPlayer;
 import org.qp.android.model.service.HtmlProcessor;
 import org.qp.android.ui.game.GameInterface;
@@ -42,12 +37,11 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class LibProxyImpl implements LibIProxy, LibICallbacks {
+public class LibProxyImpl extends NDKLib implements LibIProxy {
     private final String TAG = this.getClass().getSimpleName();
 
     private final ReentrantLock libLock = new ReentrantLock();
     private final LibGameState gameState = new LibGameState();
-    private final LibNativeMethods nativeMethods = new LibNativeMethods(this);
 
     private Thread libThread;
     private volatile Handler libHandler;
@@ -105,7 +99,7 @@ public class LibProxyImpl implements LibIProxy, LibICallbacks {
         var gameFileFullPath = documentWrap(gameState.gameFile).getAbsolutePath(context);
         final var gameData = getFileContents(context , gameFileUri);
         if (gameData == null) return false;
-        if (!nativeMethods.QSPLoadGameWorldFromData(gameData, gameData.length, gameFileFullPath)) {
+        if (!QSPLoadGameWorldFromData(gameData, gameFileFullPath)) {
             showLastQspError();
             return false;
         }
@@ -114,9 +108,9 @@ public class LibProxyImpl implements LibIProxy, LibICallbacks {
     }
 
     private void showLastQspError() {
-        var errorData = (LibErrorData) nativeMethods.QSPGetLastErrorData();
+        var errorData = QSPGetLastErrorData();
         var locName = getStringOrEmpty(errorData.locName());
-        var desc = getStringOrEmpty(nativeMethods.QSPGetErrorDesc(errorData.errorNum()));
+        var desc = getStringOrEmpty(QSPGetErrorDesc(errorData.errorNum()));
         final var message = String.format(
                 Locale.getDefault(),
                 "Location: %s\nAction: %d\nLine: %d\nError number: %d\nDescription: %s",
@@ -140,7 +134,7 @@ public class LibProxyImpl implements LibIProxy, LibICallbacks {
         var config = gameState.interfaceConfig;
         boolean changed = false;
 
-        var htmlResult = (LibVarValResp) nativeMethods.QSPGetVarValues("USEHTML", 0);
+        var htmlResult = (VarValResp) QSPGetVarValues("USEHTML", 0);
         if (htmlResult.isSuccess()) {
             boolean useHtml = htmlResult.intValue() != 0;
             if (config.useHtml != useHtml) {
@@ -148,22 +142,22 @@ public class LibProxyImpl implements LibIProxy, LibICallbacks {
                 changed = true;
             }
         }
-        var fSizeResult = (LibVarValResp) nativeMethods.QSPGetVarValues("FSIZE", 0);
+        var fSizeResult = (VarValResp) QSPGetVarValues("FSIZE", 0);
         if (fSizeResult.isSuccess() && config.fontSize != fSizeResult.intValue()) {
             config.fontSize = fSizeResult.intValue();
             changed = true;
         }
-        var bColorResult = (LibVarValResp) nativeMethods.QSPGetVarValues("BCOLOR", 0);
+        var bColorResult = (VarValResp) QSPGetVarValues("BCOLOR", 0);
         if (bColorResult.isSuccess() && config.backColor != bColorResult.intValue()) {
             config.backColor = bColorResult.intValue();
             changed = true;
         }
-        var fColorResult = (LibVarValResp) nativeMethods.QSPGetVarValues("FCOLOR", 0);
+        var fColorResult = (VarValResp) QSPGetVarValues("FCOLOR", 0);
         if (fColorResult.isSuccess() && config.fontColor != fColorResult.intValue()) {
             config.fontColor = fColorResult.intValue();
             changed = true;
         }
-        var lColorResult = (LibVarValResp) nativeMethods.QSPGetVarValues("LCOLOR", 0);
+        var lColorResult = (VarValResp) QSPGetVarValues("LCOLOR", 0);
         if (lColorResult.isSuccess() && config.linkColor != lColorResult.intValue()) {
             config.linkColor = lColorResult.intValue();
             changed = true;
@@ -173,63 +167,61 @@ public class LibProxyImpl implements LibIProxy, LibICallbacks {
     }
 
     @NonNull
-    private ArrayList<LibListItem> getActionsList() {
-        var actions = new ArrayList<LibListItem>();
-        var count = nativeMethods.QSPGetActionsCount();
+    private ArrayList<ListItem> getActionsList() {
+        var actions = new ArrayList<ListItem>();
+        var currGameDir = getCurGameDir();
 
-        for (int i = 0; i < count; ++i) {
-            var action = new LibListItem();
-            var actionResult = (LibActionData) nativeMethods.QSPGetActionData(i);
-            var curGameDir = getCurGameDir();
+        for (var element : QSPGetObjectData()) {
+            var tempImagePath = "";
+            var tempText = "";
 
-            if (actionResult.image() == null) {
-                action.pathToImage = null;
-            } else {
-                var tempPath = normalizeContentPath(getFilename(actionResult.image()));
-                var fileFromPath = fromRelPath(context, tempPath, curGameDir);
+            if (element.image() != null) {
+                var tempPath = normalizeContentPath(getFilename(element.image()));
+                var fileFromPath = fromRelPath(context, tempPath, currGameDir);
                 if (fileFromPath != null) {
-                    action.pathToImage = String.valueOf(fileFromPath.getUri());
-                } else {
-                    action.pathToImage = null;
+                    tempImagePath = String.valueOf(fileFromPath.getUri());
                 }
             }
-            action.text = gameState.interfaceConfig.useHtml
-                    ? getHtmlProcessor().removeHtmlTags(actionResult.name())
-                    : actionResult.name();
 
-            actions.add(action);
+            tempText = gameState.interfaceConfig.useHtml
+                    ? getHtmlProcessor().removeHtmlTags(element.text())
+                    : element.text() == null ? "" : element.text();
 
+            actions.add(new ListItem(tempImagePath, tempText));
         }
 
         return actions;
     }
 
     @NonNull
-    private ArrayList<LibListItem> getObjectsList() {
-        var objects = new ArrayList<LibListItem>();
-        var count = nativeMethods.QSPGetObjectsCount();
+    private ArrayList<ListItem> getObjectsList() {
+        var objects = new ArrayList<ListItem>();
+        var currGameDir = getCurGameDir();
 
-        for (int i = 0; i < count; i++) {
-            var object = new LibListItem();
-            var objectResult = (LibObjectData) nativeMethods.QSPGetObjectData(i);
-            var curGameDir = getCurGameDir();
+        for (var element : QSPGetObjectData()) {
+            var tempImagePath = "";
+            var tempText = "";
 
-            if (objectResult.name().contains("<img")) {
-                if (getHtmlProcessor().isContainsHtmlTags(objectResult.name())) {
-                    var tempPath = getHtmlProcessor().getSrcDir(objectResult.name());
-                    var fileFromPath = fromRelPath(context, tempPath, curGameDir);
-                    object.pathToImage = String.valueOf(fileFromPath);
-                } else {
-                    var fileFromPath = fromRelPath(context, objectResult.name(), curGameDir);
-                    object.pathToImage = String.valueOf(fileFromPath);
-                }
+            if (!element.text().contains("<img")) {
+                tempImagePath = element.image() == null
+                        ? ""
+                        : element.image();
             } else {
-                object.pathToImage = objectResult.image();
-                object.text = gameState.interfaceConfig.useHtml
-                        ? getHtmlProcessor().removeHtmlTags(objectResult.name())
-                        : objectResult.name();
+                if (getHtmlProcessor().isContainsHtmlTags(element.text())) {
+                    var tempPath = getHtmlProcessor().getSrcDir(element.text());
+                    var fileFromPath = fromRelPath(context, tempPath, currGameDir);
+                    tempImagePath = String.valueOf(fileFromPath);
+                } else {
+                    var fileFromPath = fromRelPath(context, element.text(), currGameDir);
+                    tempImagePath = String.valueOf(fileFromPath);
+                }
             }
-            objects.add(object);
+
+            tempText = gameState.interfaceConfig.useHtml
+                    ? getHtmlProcessor().removeHtmlTags(element.text())
+                    : element.text();
+
+            objects.add(new ListItem(tempImagePath, tempText));
         }
 
         return objects;
@@ -241,14 +233,14 @@ public class LibProxyImpl implements LibIProxy, LibICallbacks {
         libThread = new Thread(() -> {
             while (!Thread.currentThread().isInterrupted()) {
                 try {
-                    nativeMethods.QSPInit();
+                    QSPInit();
                     if (Looper.myLooper() == null) {
                         Looper.prepare();
                     }
                     libHandler = new Handler(Looper.myLooper());
                     libThreadInit = true;
                     Looper.loop();
-                    nativeMethods.QSPDeInit();
+                    QSPDeInit();
                 } catch (Throwable t) {
                     Log.e(TAG , "lib thread has stopped exceptionally" , t);
                     Thread.currentThread().interrupt();
@@ -274,7 +266,7 @@ public class LibProxyImpl implements LibIProxy, LibICallbacks {
     }
 
     public void enableDebugMode (boolean isDebug) {
-        runOnQspThread(() -> nativeMethods.QSPEnableDebugMode(isDebug));
+        runOnQspThread(() -> QSPEnableDebugMode(isDebug));
     }
 
     @Override
@@ -301,7 +293,7 @@ public class LibProxyImpl implements LibIProxy, LibICallbacks {
             if (!loadGameWorld()) return;
             gameStartTime = SystemClock.elapsedRealtime();
             lastMsCountCallTime = 0;
-            if (!nativeMethods.QSPRestartGame(true)) {
+            if (!QSPRestartGame(true)) {
                 showLastQspError();
             }
         });
@@ -322,7 +314,7 @@ public class LibProxyImpl implements LibIProxy, LibICallbacks {
         }
         final var gameData = getFileContents(context , uri);
         if (gameData == null) return;
-        if (!nativeMethods.QSPOpenSavedGameFromData(gameData, gameData.length, true)) {
+        if (!QSPOpenSavedGameFromData(gameData, gameData.length, true)) {
             showLastQspError();
         }
     }
@@ -333,7 +325,7 @@ public class LibProxyImpl implements LibIProxy, LibICallbacks {
             runOnQspThread(() -> saveGameState(uri));
             return;
         }
-        final var gameData = nativeMethods.QSPSaveGameAsData(false);
+        final var gameData = QSPSaveGameAsData(false);
         if (gameData == null) return;
         writeFileContents(context , uri , gameData);
     }
@@ -341,10 +333,10 @@ public class LibProxyImpl implements LibIProxy, LibICallbacks {
     @Override
     public void onActionClicked(final int index) {
         runOnQspThread(() -> {
-            if (!nativeMethods.QSPSetSelActionIndex(index, false)) {
+            if (!QSPSetSelActionIndex(index, false)) {
                 showLastQspError();
             }
-            if (!nativeMethods.QSPExecuteSelActionCode(true)) {
+            if (!QSPExecuteSelActionCode(true)) {
                 showLastQspError();
             }
         });
@@ -353,7 +345,7 @@ public class LibProxyImpl implements LibIProxy, LibICallbacks {
     @Override
     public void onObjectSelected(final int index) {
         runOnQspThread(() -> {
-            if (!nativeMethods.QSPSetSelObjectIndex(index, true)) {
+            if (!QSPSetSelObjectIndex(index, true)) {
                 showLastQspError();
             }
         });
@@ -365,8 +357,8 @@ public class LibProxyImpl implements LibIProxy, LibICallbacks {
         if (inter == null) return;
         runOnQspThread(() -> {
             var input = inter.showInputDialog("userInputTitle");
-            nativeMethods.QSPSetInputStrText(input);
-            if (!nativeMethods.QSPExecUserInput(true)) {
+            QSPSetInputStrText(input);
+            if (!QSPExecUserInput(true)) {
                 showLastQspError();
             }
         });
@@ -378,7 +370,7 @@ public class LibProxyImpl implements LibIProxy, LibICallbacks {
         if (inter == null) return;
         runOnQspThread(() -> {
             var input = inter.showExecutorDialog("execStringTitle");
-            if (!nativeMethods.QSPExecString(input, true)) {
+            if (!QSPExecString(input, true)) {
                 showLastQspError();
             }
         });
@@ -387,7 +379,7 @@ public class LibProxyImpl implements LibIProxy, LibICallbacks {
     @Override
     public void execute(final String code) {
         runOnQspThread(() -> {
-            if (!nativeMethods.QSPExecString(code, true)) {
+            if (!QSPExecString(code, true)) {
                 showLastQspError();
             }
         });
@@ -397,7 +389,7 @@ public class LibProxyImpl implements LibIProxy, LibICallbacks {
     public void executeCounter() {
         if (libLock.isLocked()) return;
         runOnQspThread(() -> {
-            if (!nativeMethods.QSPExecCounter(true)) {
+            if (!QSPExecCounter(true)) {
                 showLastQspError();
             }
         });
@@ -425,18 +417,18 @@ public class LibProxyImpl implements LibIProxy, LibICallbacks {
         if (configChanged) {
             request.isIConfigChanged = true;
         }
-        if (nativeMethods.QSPIsMainDescChanged()) {
+        if (QSPIsMainDescChanged()) {
             if (gameState.mainDesc != null) {
-                if (!gameState.mainDesc.equals(nativeMethods.QSPGetMainDesc())) {
-                    gameState.mainDesc = nativeMethods.QSPGetMainDesc();
+                if (!gameState.mainDesc.equals(QSPGetMainDesc())) {
+                    gameState.mainDesc = QSPGetMainDesc();
                     request.isMainDescChanged = true;
                 }
             } else {
-                gameState.mainDesc = nativeMethods.QSPGetMainDesc();
+                gameState.mainDesc = QSPGetMainDesc();
                 request.isMainDescChanged = true;
             }
         }
-        if (nativeMethods.QSPIsActionsChanged()) {
+        if (QSPIsActionsChanged()) {
             if (gameState.actionsList != null) {
                 if (gameState.actionsList != getActionsList()) {
                     gameState.actionsList = getActionsList();
@@ -447,7 +439,7 @@ public class LibProxyImpl implements LibIProxy, LibICallbacks {
                 request.isActionsChanged = true;
             }
         }
-        if (nativeMethods.QSPIsObjectsChanged()) {
+        if (QSPIsObjectsChanged()) {
             if (gameState.objectsList != null) {
                 if (gameState.objectsList != getObjectsList()) {
                     gameState.objectsList = getObjectsList();
@@ -458,14 +450,14 @@ public class LibProxyImpl implements LibIProxy, LibICallbacks {
                 request.isObjectsChanged = true;
             }
         }
-        if (nativeMethods.QSPIsVarsDescChanged()) {
+        if (QSPIsVarsDescChanged()) {
             if (gameState.varsDesc != null) {
-                if (!gameState.varsDesc.equals(nativeMethods.QSPGetVarsDesc())) {
-                    gameState.varsDesc = nativeMethods.QSPGetVarsDesc();
+                if (!gameState.varsDesc.equals(QSPGetVarsDesc())) {
+                    gameState.varsDesc = QSPGetVarsDesc();
                     request.isVarsDescChanged = true;
                 }
             } else {
-                gameState.varsDesc = nativeMethods.QSPGetVarsDesc();
+                gameState.varsDesc = QSPGetVarsDesc();
                 request.isVarsDescChanged = true;
             }
         }
@@ -582,8 +574,7 @@ public class LibProxyImpl implements LibIProxy, LibICallbacks {
 
     @Override
     public void AddMenuItem(String name, String imgPath) {
-        var item = new LibMenuItem(name , imgPath);
-        gameState.menuItemsList.add(item);
+        gameState.menuItemsList.add(new ListItem(name, imgPath));
     }
 
     @Override
@@ -592,7 +583,7 @@ public class LibProxyImpl implements LibIProxy, LibICallbacks {
         if (inter == null) return;
         int result = inter.showMenu();
         if (result != -1) {
-            nativeMethods.QSPSelectMenuItem(result);
+            QSPSelectMenuItem(result);
         }
     }
 

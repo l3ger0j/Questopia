@@ -1,5 +1,7 @@
 package org.qp.android.ui.game;
 
+import static org.qp.android.helpers.utils.StringUtil.isNotEmptyOrBlank;
+
 import android.graphics.Typeface;
 import android.text.Html;
 import android.util.TypedValue;
@@ -14,50 +16,29 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.squareup.picasso.Picasso;
 
+import org.libndkqsp.jni.NDKLib;
 import org.qp.android.R;
 import org.qp.android.databinding.ListGameItemBinding;
-import org.qp.android.dto.lib.LibListItem;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 public class GameItemRecycler extends RecyclerView.Adapter<GameItemRecycler.ViewHolder> {
 
-    private final AsyncListDiffer<LibListItem> differ =
+    private final AsyncListDiffer<NDKLib.ListItem> differ =
             new AsyncListDiffer<>(this , DIFF_CALLBACK);
 
-    private Typeface typeface;
-    private int textSize;
-    private int backgroundColor;
-    private int textColor;
-    private int linkTextColor;
+    public Typeface typeface;
+    public int textSize;
+    public int backgroundColor;
+    public int textColor;
+    public int linkTextColor;
 
-    public void setTypeface(Typeface typeface) {
-        this.typeface = typeface;
-    }
-
-    public void setTextSize(int textSize) {
-        this.textSize = textSize;
-    }
-
-    public void setBackgroundColor(int backgroundColor) {
-        this.backgroundColor = backgroundColor;
-    }
-
-    public void setTextColor(int textColor) {
-        this.textColor = textColor;
-    }
-
-    public void setLinkTextColor(int linkTextColor) {
-        this.linkTextColor = linkTextColor;
-    }
-
-    public LibListItem getItem(int position) {
+    public NDKLib.ListItem getItem(int position) {
         return differ.getCurrentList().get(position);
     }
 
-    public List<LibListItem> getGameData() {
+    public List<NDKLib.ListItem> getGameData() {
         return differ.getCurrentList();
     }
 
@@ -66,20 +47,20 @@ public class GameItemRecycler extends RecyclerView.Adapter<GameItemRecycler.View
         return differ.getCurrentList().size();
     }
 
-    private static final DiffUtil.ItemCallback<LibListItem> DIFF_CALLBACK =
+    private static final DiffUtil.ItemCallback<NDKLib.ListItem> DIFF_CALLBACK =
             new DiffUtil.ItemCallback<>() {
                 @Override
-                public boolean areItemsTheSame(@NonNull LibListItem oldItem , @NonNull LibListItem newItem) {
-                    return Objects.equals(oldItem.pathToImage , newItem.pathToImage) && Objects.equals(oldItem.text , newItem.text);
+                public boolean areItemsTheSame(@NonNull NDKLib.ListItem oldItem , @NonNull NDKLib.ListItem newItem) {
+                    return Objects.equals(oldItem.image(), newItem.image()) && Objects.equals(oldItem.text(), newItem.text());
                 }
 
                 @Override
-                public boolean areContentsTheSame(@NonNull LibListItem oldItem , @NonNull LibListItem newItem) {
+                public boolean areContentsTheSame(@NonNull NDKLib.ListItem oldItem , @NonNull NDKLib.ListItem newItem) {
                     return oldItem.equals(newItem);
                 }
             };
 
-    public void submitList(ArrayList<LibListItem> gameData){
+    public void submitList(List<NDKLib.ListItem> gameData){
         differ.submitList(gameData);
     }
 
@@ -95,18 +76,18 @@ public class GameItemRecycler extends RecyclerView.Adapter<GameItemRecycler.View
 
     @Override
     public void onBindViewHolder(@NonNull GameItemRecycler.ViewHolder holder, int position) {
-        holder.listItemActionObjectBinding(getGameData().get(position));
+        holder.listItemActionObjectBinding(getItem(position));
         var qpListItem = getItem(position);
 
-        if (qpListItem.pathToImage != null) {
+        if (isNotEmptyOrBlank(qpListItem.image())) {
             Picasso.get()
-                    .load(qpListItem.pathToImage)
+                    .load(qpListItem.image())
                     .error(R.drawable.baseline_broken_image_24)
                     .fit()
                     .into(holder.listGameItemBinding.itemIcon);
         }
 
-        if (qpListItem.text != null) {
+        if (isNotEmptyOrBlank(qpListItem.text())) {
             var itemText = holder.listGameItemBinding.itemText;
             itemText.setTypeface(typeface);
             itemText.setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize);
@@ -114,7 +95,7 @@ public class GameItemRecycler extends RecyclerView.Adapter<GameItemRecycler.View
             itemText.setTextColor(textColor);
             itemText.setLinkTextColor(linkTextColor);
             // TODO: 27.06.2023 rewrite this!
-            itemText.setText(Html.fromHtml(String.valueOf(qpListItem.text) , Html.FROM_HTML_MODE_LEGACY));
+            itemText.setText(Html.fromHtml(qpListItem.text(), Html.FROM_HTML_MODE_LEGACY));
         }
     }
 
@@ -126,8 +107,8 @@ public class GameItemRecycler extends RecyclerView.Adapter<GameItemRecycler.View
             this.listGameItemBinding = binding;
         }
 
-        public void listItemActionObjectBinding(LibListItem libListItem) {
-            listGameItemBinding.setLibListItem(libListItem);
+        public void listItemActionObjectBinding(NDKLib.ListItem libListItem) {
+            listGameItemBinding.setListItem(libListItem);
             listGameItemBinding.executePendingBindings();
         }
     }

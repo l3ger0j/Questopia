@@ -2,8 +2,7 @@ package org.qp.android.model.lib;
 
 import androidx.documentfile.provider.DocumentFile;
 
-import org.qp.android.dto.lib.LibListItem;
-import org.qp.android.dto.lib.LibMenuItem;
+import org.libndkqsp.jni.NDKLib;
 
 import java.util.ArrayList;
 
@@ -17,10 +16,9 @@ public class LibGameState {
     public String mainDesc = "";
     public String varsDesc = "";
     public final LibIConfig interfaceConfig = new LibIConfig();
-    public ArrayList<LibListItem> actionsList = new ArrayList<>();
-    public ArrayList<LibListItem> objectsList = new ArrayList<>();
-    public ArrayList<LibMenuItem> menuItemsList = new ArrayList<>();
-
+    public ArrayList<NDKLib.ListItem> actionsList = new ArrayList<>();
+    public ArrayList<NDKLib.ListItem> objectsList = new ArrayList<>();
+    public ArrayList<NDKLib.ListItem> menuItemsList = new ArrayList<>();
 
     public void reset() {
         interfaceConfig.reset();
