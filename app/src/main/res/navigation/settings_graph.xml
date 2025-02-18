@@ -9,10 +9,6 @@
         android:name="org.qp.android.ui.settings.SettingsHostFragment"
         android:label="SettingsFragment" />
     <fragment
-        android:id="@+id/pluginFragment"
-        android:name="org.qp.android.ui.settings.SettingPluginFragment"
-        android:label="PluginFragment" />
-    <fragment
         android:id="@+id/newsFragment"
         android:name="org.qp.android.ui.news.NewsFragment"
         android:label="NewsFragment" />

@@ -137,7 +137,6 @@
         <!-- Switch section -->
         <string name="filePicker">Диалог Выбора Файла (альфа)</string>
         <!-- Extra section -->
-        <string name="pluginTitle">Дополнения</string>
         <string name="aboutTitle">О программе</string>
     <!-- Menu save and load -->
         <string name="selectSlot">Выберите слот</string>

@@ -64,7 +64,6 @@ android {
         viewBinding viewBind
         dataBinding dataBind
         buildConfig true
-        aidl true
     }
 
     ndkVersion = '26.1.10909125'

@@ -137,7 +137,6 @@
         <!-- Switch section -->
         <string name="filePicker">File Picker Dialog (alpha)</string>
         <!-- Extra section -->
-        <string name="pluginTitle">Additions</string>
         <string name="aboutTitle">About Quest Player</string>
         <string name="extendedName" translatable="false">Questopia -VERSION-</string>
     <!-- Menu save and load -->

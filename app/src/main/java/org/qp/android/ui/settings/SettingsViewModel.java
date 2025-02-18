@@ -14,7 +14,6 @@ import androidx.lifecycle.AndroidViewModel;
 public class SettingsViewModel extends AndroidViewModel {
 
     public ObservableField<SettingsActivity> settingsActivityObservableField = new ObservableField<>();
-    public ObservableField<SettingPluginFragment> fragmentObservableField = new ObservableField<>();
 
     public SettingsViewModel(@NonNull Application application) {
         super(application);

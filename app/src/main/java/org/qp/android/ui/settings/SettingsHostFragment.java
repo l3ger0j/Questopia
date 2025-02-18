@@ -60,10 +60,6 @@ public class SettingsHostFragment extends PreferenceFragmentCompat {
                     Navigation.findNavController(requireView()).navigate(R.id.settingSoundFragment);
                     return true;
                 }
-                case "showExtensionMenu" -> {
-                    Navigation.findNavController(requireView()).navigate(R.id.pluginFragment);
-                    return true;
-                }
                 case "newsApp" -> {
                     Navigation.findNavController(requireView()).navigate(R.id.newsFragment);
                     return true;
