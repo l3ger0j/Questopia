@@ -1,5 +1,7 @@
 package org.qp.android.ui.stock;
 
+import static org.qp.android.ui.stock.StockViewModel.FOLDER_CREATE;
+
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -61,13 +63,20 @@ public class StockRemoteRVFragment extends Fragment {
         stockViewModel.emitter.observe(getViewLifecycleOwner(), eventNavigation -> {
             if (eventNavigation instanceof StockFragmentNavigation.ShowErrorBanner errorBanner) {
                 banner.setMessage(errorBanner.inputMessage);
+
                 banner.setRightButton(errorBanner.rightButtonMsg, banner3 -> {
-                    stockViewModel.showDialogFragment(
-                            getChildFragmentManager(),
-                            StockDialogType.GAME_FOLDER_INIT,
-                            null,
-                            null
-                    );
+                    if (errorBanner.rightButtonMsg.equals(FOLDER_CREATE)) {
+                        if (stockViewModel.doMakeGameDir(null)) {
+                            banner.dismiss(500);
+                        }
+                    } else {
+                        stockViewModel.showDialogFragment(
+                                getChildFragmentManager(),
+                                StockDialogType.GAME_FOLDER_INIT,
+                                null,
+                                null
+                        );
+                    }
                 });
                 banner.show(500);
             }

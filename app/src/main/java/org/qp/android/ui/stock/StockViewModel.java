@@ -1,15 +1,19 @@
 package org.qp.android.ui.stock;
 
+import static org.qp.android.QuestopiaApplication.UNPACK_GAME_CHANNEL_ID;
+import static org.qp.android.QuestopiaApplication.UNPACK_GAME_NOTIFICATION_ID;
 import static org.qp.android.helpers.utils.DirUtil.isDirContainsGameFile;
 import static org.qp.android.helpers.utils.DirUtil.isWritableDir;
 import static org.qp.android.helpers.utils.FileUtil.copyFileToDir;
 import static org.qp.android.helpers.utils.FileUtil.fromRelPath;
+import static org.qp.android.helpers.utils.FileUtil.isSDCardAvailable;
 import static org.qp.android.helpers.utils.FileUtil.isWritableFile;
 import static org.qp.android.helpers.utils.StringUtil.isNotEmptyOrBlank;
 
 import android.annotation.SuppressLint;
 import android.app.Application;
 import android.app.DownloadManager;
+import android.app.NotificationManager;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Environment;
@@ -19,6 +23,8 @@ import android.webkit.CookieManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.AndroidViewModel;
@@ -42,12 +48,16 @@ import org.qp.android.dto.stock.TempFileType;
 import org.qp.android.helpers.ErrorType;
 import org.qp.android.helpers.bus.Events;
 import org.qp.android.helpers.utils.DatabaseUtil;
+import org.qp.android.helpers.utils.FileUtil;
+import org.qp.android.model.archive.ArchiveUnpack;
+import org.qp.android.model.notify.NotifyBuilder;
 import org.qp.android.model.repository.LocalGame;
 import org.qp.android.model.repository.RemoteGamePagingSource;
 import org.qp.android.ui.dialogs.StockDialogFrags;
 import org.qp.android.ui.dialogs.StockDialogType;
 import org.qp.android.ui.game.GameActivity;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -71,7 +81,11 @@ public class StockViewModel extends AndroidViewModel {
     public static final int CODE_PICK_PATH_FILE = 301;
     public static final int CODE_PICK_MOD_FILE = 302;
 
-    private static final String INNER_GAME_DIR_NAME = "games-dir";
+    public static final String FOLDER_LOCK = "Select a folder location";
+    public static final String FOLDER_CREATE = "Create a folder";
+
+    public static final String GAME_DIR_NAME = "Questopia games";
+
     public final MutableLiveData<Integer> currPageNumber = new MutableLiveData<>();
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private final String TAG = this.getClass().getSimpleName();
@@ -97,6 +111,7 @@ public class StockViewModel extends AndroidViewModel {
     public MutableLiveData<List<Game>> gameEntriesLiveData = new MutableLiveData<>();
     public final Events.Emitter emitter = new Events.Emitter();
     public Flowable<PagingData<Game>> remoteDataFlow;
+    private Uri gameFolderUri;
     private DocumentFile tempImageFile, tempPathFile, tempModFile;
     private StockDialogFrags dialogFragments = new StockDialogFrags();
     private long downloadId = 0L;
@@ -134,12 +149,21 @@ public class StockViewModel extends AndroidViewModel {
         // if is exist - do nothing
         // if is not exist - do show dialog -> Game folder is not found! Process to create?
 
+        DocumentFile targetFolder = null;
+        for (var file : ContextCompat.getExternalFilesDirs(getApplication(), null)) {
+            var rootPath = file.getAbsolutePath();
+            var storagePath = rootPath.replace("Android/data/org.qp.android/files", "");
+            var rootFile = DocumentFile.fromFile(new File(storagePath));
+            if (rootFile != null) {
+                targetFolder = DocumentFileUtils.findFolder(rootFile, GAME_DIR_NAME);
+                break;
+            }
+        }
+
+        if (isWritableDir(getApplication(), targetFolder)) return;
+
         var inputStr = "No folder for downloading games was found. Download functionality is disabled";
-        var rightButtonMsg = "Select a folder";
-
-        var rootInDir = getApplication().getExternalFilesDir(null);
-//        this.rootInDir = findOrCreateFolder(getApplication(), rootInDir, INNER_GAME_DIR_NAME);
-
+        var rightButtonMsg = isSDCardAvailable(getApplication()) ? FOLDER_LOCK : FOLDER_CREATE;
         emitter.waitAndExecuteOnce(new StockFragmentNavigation.ShowErrorBanner(inputStr, rightButtonMsg));
     }
 
@@ -214,6 +238,18 @@ public class StockViewModel extends AndroidViewModel {
         if (!isWritableDir(getApplication(), gameDir)) return false;
         var modDir = fromRelPath(getApplication(), "mods", gameDir, false);
         return isWritableFile(getApplication(), modDir);
+    }
+
+    public boolean doMakeGameDir(DocumentFile rootDir) {
+        if (rootDir == null) {
+            rootDir = DocumentFile.fromFile(Environment.getExternalStorageDirectory());
+            if (!isWritableDir(getApplication(), rootDir)) return false;
+            var gameFolder = FileUtil.findOrCreateFolder(getApplication(), rootDir, GAME_DIR_NAME);
+            if (!isWritableDir(getApplication(), gameFolder)) return false;
+            gameFolderUri = gameFolder.getUri();
+            return true;
+        }
+        return false;
     }
 
     public void doOnShowFilePicker(int requestCode, String[] mimeTypes) {
@@ -494,45 +530,48 @@ public class StockViewModel extends AndroidViewModel {
         var query = new DownloadManager.Query()
                 .setFilterById(downloadId);
         try (var c = downloadManager.query(query)) {
-//            if (c.moveToFirst()) {
-//                var colStatusIndex = c.getColumnIndex(DownloadManager.COLUMN_STATUS);
-//                if (DownloadManager.STATUS_SUCCESSFUL == c.getInt(colStatusIndex)) {
-//                    var colUriIndex = c.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI);
-//                    if (colUriIndex == -1) return;
-//                    var path = c.getString(colUriIndex).replace("file:///", "");
-//                    var file = DocumentFileCompat.fromUri(getApplication(), Uri.parse(c.getString(colUriIndex)));
-//                    if (file == null || !isWritableFile(getApplication(), file)) return;
-//
-//                    var archive = new File(path);
-//                    var archiveUnpack = new ArchiveUnpack(
-//                            getApplication(),
-//                            file.getUri(),
-//                            rootInDir
-//                    );
-//
-//                    CompletableFuture
-//                            .runAsync(archiveUnpack::extractArchiveEntries, executor)
-//                            .thenRunAsync(() -> {
-//                                Log.i(TAG, "Archive is delete " + archive.delete());
-//
-//                                var notificationBuild = new NotifyBuilder(getApplication(), UNPACK_GAME_CHANNEL_ID);
-//                                var unpackBody = ActivityCompat.getString(getApplication(), R.string.bodyUnpackDoneNotify);
-//                                var notification = notificationBuild.buildStandardNotification(
-//                                        ActivityCompat.getString(getApplication(), R.string.titleUnpackDoneNotify),
-//                                        unpackBody.replace("-GAMENAME-", currGameEntry.title)
-//                                );
-//                                var notificationManager = getApplication().getSystemService(NotificationManager.class);
-//                                notificationManager.notify(UNPACK_GAME_NOTIFICATION_ID, notification);
-//
-//                                var gameFolder = archiveUnpack.unpackFolder;
-//                                createEntryInDBFromFile(gameFolder);
-//                            }, executor)
-//                            .exceptionally(throwable -> {
-//                                Log.e(TAG, String.valueOf(throwable.getMessage()));
-//                                return null;
-//                            });
-//                }
-//            }
+            if (c.moveToFirst()) {
+                var colStatusIndex = c.getColumnIndex(DownloadManager.COLUMN_STATUS);
+                if (DownloadManager.STATUS_SUCCESSFUL == c.getInt(colStatusIndex)) {
+                    var colUriIndex = c.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI);
+                    if (colUriIndex == -1) return;
+                    var path = c.getString(colUriIndex).replace("file:///", "");
+                    var file = DocumentFileCompat.fromUri(getApplication(), Uri.parse(c.getString(colUriIndex)));
+                    if (file == null || !isWritableFile(getApplication(), file)) return;
+
+                    var archive = new File(path);
+                    var archiveUnpack = new ArchiveUnpack(
+                            getApplication(),
+                            file.getUri(),
+                            gameFolderUri
+                    );
+
+                    CompletableFuture
+                            .runAsync(archiveUnpack::extractArchiveEntries, executor)
+                            .thenRunAsync(() -> {
+                                Log.i(TAG, "Archive is delete " + archive.delete());
+
+                                var notificationBuild = new NotifyBuilder(getApplication(), UNPACK_GAME_CHANNEL_ID);
+                                var unpackBody = ActivityCompat.getString(getApplication(), R.string.bodyUnpackDoneNotify);
+                                var notification = notificationBuild.buildStandardNotification(
+                                        ActivityCompat.getString(getApplication(), R.string.titleUnpackDoneNotify),
+                                        unpackBody.replace("-GAMENAME-", currGameEntry.title)
+                                );
+                                var notificationManager = getApplication().getSystemService(NotificationManager.class);
+                                notificationManager.notify(UNPACK_GAME_NOTIFICATION_ID, notification);
+
+                                var gameFolderUri = archiveUnpack.unpackFolder;
+                                var gameFolder = DocumentFileCompat.fromUri(getApplication(), gameFolderUri);
+                                if (isWritableDir(getApplication(), gameFolder)) {
+                                    createEntryInDBFromFile(gameFolder);
+                                }
+                            }, executor)
+                            .exceptionally(throwable -> {
+                                Log.e(TAG, String.valueOf(throwable.getMessage()));
+                                return null;
+                            });
+                }
+            }
         }
     }
 }

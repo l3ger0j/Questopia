@@ -37,6 +37,7 @@ public class StockDialogFrags extends DialogFragment {
     private String message;
     private String title;
     private DocumentFile newDirEntry;
+    private String[] folderLocations;
 
     private final GameDataObserver dataObserver = new GameDataObserver();
     private StockViewModel stockViewModel;
@@ -207,7 +208,8 @@ public class StockDialogFrags extends DialogFragment {
             case GAME_FOLDER_INIT -> {
                 builder.setIcon(R.drawable.folder_add_24);
                 builder.setTitle("Folder location");
-                builder.setMessage("Select the location of the folder for downloading games");
+                builder.setSingleChoiceItems(folderLocations, 1, (dialog, which) -> {
+                });
                 builder.setPositiveButton(android.R.string.ok, (dialog , which) -> {});
                 builder.setNegativeButton(android.R.string.cancel, (dialog , which) -> {});
                 return builder.create();

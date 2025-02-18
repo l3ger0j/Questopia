@@ -29,7 +29,7 @@ public class ArchiveUnpack {
     private static final String TAG = ArchiveUnpack.class.getSimpleName();
     private final Context context;
     private Uri targetArchive;
-    public File unpackFolder;
+    public Uri unpackFolder;
     private Uri destDir;
 
     @NonNull
