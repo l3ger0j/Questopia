@@ -19,11 +19,11 @@ public class LibIConfig implements Parcelable {
         }
     };
 
-    public boolean useHtml;
-    public long fontSize;
-    public long backColor;
-    public long fontColor;
-    public long linkColor;
+    public boolean useHtml = false;
+    public long fontSize = 0L;
+    public long backColor = 0L;
+    public long fontColor = 0L;
+    public long linkColor = 0L;
 
     public LibIConfig() {}
 
@@ -37,10 +37,10 @@ public class LibIConfig implements Parcelable {
 
     public void reset() {
         useHtml = false;
-        fontSize = 0;
-        backColor = 0;
-        fontColor = 0;
-        linkColor = 0;
+        fontSize = 0L;
+        backColor = 0L;
+        fontColor = 0L;
+        linkColor = 0L;
     }
 
     @Override
@@ -55,5 +55,17 @@ public class LibIConfig implements Parcelable {
         dest.writeLong(backColor);
         dest.writeLong(fontColor);
         dest.writeLong(linkColor);
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return "LibIConfig{" +
+                "useHtml=" + useHtml +
+                ", fontSize=" + fontSize +
+                ", backColor=" + backColor +
+                ", fontColor=" + fontColor +
+                ", linkColor=" + linkColor +
+                '}';
     }
 }
