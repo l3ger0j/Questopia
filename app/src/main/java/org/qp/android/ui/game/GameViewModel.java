@@ -165,7 +165,6 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         webClientSettings.setAllowFileAccess(true);
         webClientSettings.setJavaScriptEnabled(true);
         webClientSettings.setUseWideViewPort(true);
-        webClientSettings.setDomStorageEnabled(true);
         view.setOverScrollMode(View.OVER_SCROLL_NEVER);
         view.setWebViewClient(webViewClient);
         return view;
