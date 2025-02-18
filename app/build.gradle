@@ -17,6 +17,11 @@ android {
         versionName "3.24.0"
         resourceConfigurations += ['en', 'ru']
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        externalNativeBuild {
+            cmake {
+                cFlags "-D_ANDROID"
+            }
+        }
     }
 
     configurations {
@@ -27,6 +32,7 @@ android {
 
     externalNativeBuild {
         cmake {
+            version "3.22.1"
             path "src/main/jni/CMakeLists.txt"
         }
     }
@@ -66,7 +72,7 @@ android {
         buildConfig true
     }
 
-    ndkVersion = '26.1.10909125'
+    ndkVersion = '27.2.12479018'
     lint {
         abortOnError false
     }
