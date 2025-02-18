@@ -46,7 +46,7 @@ public class LibGameState implements Parcelable {
 
     protected LibGameState(Parcel in) {
         interfaceConfig = in.readParcelable(LibIConfig.class.getClassLoader());
-        gameRunning = in.readByte() != 0;
+        gameRunning = in.readInt() != 0;
         gameId = in.readLong();
         gameTitle = in.readString();
         gameDirUri = in.readParcelable(Uri.class.getClassLoader());
@@ -61,7 +61,7 @@ public class LibGameState implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeParcelable(interfaceConfig, flags);
-        dest.writeByte((byte) (gameRunning ? 1 : 0));
+        dest.writeInt(gameRunning ? 1 : 0);
         dest.writeLong(gameId);
         dest.writeString(gameTitle);
         dest.writeParcelable(gameDirUri, flags);

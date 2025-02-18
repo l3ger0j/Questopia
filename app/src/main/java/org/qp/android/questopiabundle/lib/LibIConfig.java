@@ -28,7 +28,7 @@ public class LibIConfig implements Parcelable {
     public LibIConfig() {}
 
     protected LibIConfig(Parcel in) {
-        useHtml = in.readByte() != 0;
+        useHtml = in.readInt() != 0;
         fontSize = in.readLong();
         backColor = in.readLong();
         fontColor = in.readLong();
@@ -50,7 +50,7 @@ public class LibIConfig implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeByte((byte) (useHtml ? 1 : 0));
+        dest.writeInt(useHtml ? 1 : 0);
         dest.writeLong(fontSize);
         dest.writeLong(backColor);
         dest.writeLong(fontColor);
