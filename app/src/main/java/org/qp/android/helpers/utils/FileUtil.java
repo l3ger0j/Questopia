@@ -7,6 +7,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
+import androidx.core.content.ContextCompat;
 import androidx.documentfile.provider.DocumentFile;
 
 import com.anggrayudi.storage.FileWrapper;
@@ -18,7 +19,6 @@ import com.anggrayudi.storage.file.FileUtils;
 import org.jetbrains.annotations.Contract;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -28,38 +28,19 @@ import java.text.DecimalFormat;
 public final class FileUtil {
     private static final String TAG = FileUtil.class.getSimpleName();
 
-    @Nullable
-    public static byte[] getFileContents(@NonNull Context context ,
-                                         @NonNull Uri uriContent) {
-        var resolver = context.getContentResolver();
-        try (var in = resolver.openInputStream(uriContent);
-             var out = new ByteArrayOutputStream()) {
-            if (in != null) {
-                StreamUtil.copy(in , out);
-            } else {
-                throw new NullPointerException();
+    public static boolean isSDCardAvailable(Context context) {
+        if (ContextCompat.getExternalFilesDirs(context, null).length < 2) {
+            return false;
+        } else {
+            var f = ContextCompat.getExternalFilesDirs(context, null);
+            for (int i = 0; i < f.length; i++) {
+                var file = f[i];
+                if(file != null && i == 1) {
+                    return true;
+                }
             }
-            return out.toByteArray();
-        } catch (Exception ex) {
-            Log.e(TAG , "Error reading file: " + uriContent , ex);
-            return null;
         }
-    }
-
-    public static void writeFileContents(@NonNull Context context ,
-                                         @NonNull Uri uriContent ,
-                                         byte[] dataToWrite) {
-        var resolver = context.getContentResolver();
-        try (var out = resolver.openOutputStream(uriContent , "w")) {
-            if (out != null) {
-                out.write(dataToWrite);
-            } else {
-                throw new IOException("Input is NULL!");
-            }
-        } catch (IOException ex) {
-            Log.e(TAG,"Failed to save the game state", ex);
-        }
-
+        return false;
     }
 
     public static FileWrapper.Document documentWrap(DocumentFile inputFile) {
