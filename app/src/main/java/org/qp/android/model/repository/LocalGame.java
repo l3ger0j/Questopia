@@ -31,6 +31,7 @@ import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -119,6 +120,7 @@ public class LocalGame {
 
         var itemsGamesDirs = new ArrayList<GameData>();
         var formatGamesDirs = wrapFToGameFolder(gamesDirs);
+        var random = new SecureRandom();
 
         for (var gameFolder : formatGamesDirs) {
             var gameDir = new File(gameFolder.gameUriDir.getPath());
@@ -132,7 +134,7 @@ public class LocalGame {
                 if (name.isEmpty()) return Collections.emptyList();
 
                 item = new GameData();
-                item.id = name;
+                item.id = random.nextInt();
                 item.title = name;
                 item.gameDir = gameFolder.gameUriDir;
                 item.gameFiles = gameFolder.gameUriFiles;
@@ -151,7 +153,7 @@ public class LocalGame {
                     if (name.isEmpty()) return Collections.emptyList();
 
                     item = new GameData();
-                    item.id = name;
+                    item.id = random.nextInt();
                     item.title = name;
                     item.gameDir = gameFolder.gameUriDir;
                     item.gameFiles = gameFolder.gameUriFiles;
@@ -177,6 +179,7 @@ public class LocalGame {
 
         var itemsGamesDirs = new ArrayList<GameData>();
         var formatGamesDirs = wrapDToGameFolder(fileList);
+        var random = new SecureRandom();
 
         for (var gameFolder : formatGamesDirs) {
             var gameDir = DocumentFileCompat.fromUri(context, gameFolder.gameUriDir);
@@ -190,7 +193,7 @@ public class LocalGame {
                 if (name == null) return Collections.emptyList();
 
                 item = new GameData();
-                item.id = name;
+                item.id = random.nextInt();
                 item.title = name;
                 item.gameDir = gameFolder.gameUriDir;
                 item.gameFiles = gameFolder.gameUriFiles;
@@ -209,7 +212,7 @@ public class LocalGame {
                     if (name == null) return Collections.emptyList();
 
                     item = new GameData();
-                    item.id = name;
+                    item.id = random.nextInt();
                     item.title = name;
                     item.gameDir = gameFolder.gameUriDir;
                     item.gameFiles = gameFolder.gameUriFiles;

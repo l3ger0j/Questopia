@@ -10,7 +10,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 public class RemoteGameData {
 
     @JacksonXmlCData
-    public String id = "";
+    public long id = 0L;
 
     @JacksonXmlProperty(localName = "list_id")
     @JacksonXmlCData
@@ -44,7 +44,7 @@ public class RemoteGameData {
 
     @JacksonXmlProperty(localName = "file_size")
     @JacksonXmlCData
-    public String fileSize = "";
+    public long fileSize = 0L;
 
     @JacksonXmlProperty(localName = "file_ext")
     @JacksonXmlCData

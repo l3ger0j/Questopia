@@ -21,7 +21,7 @@ import java.util.Objects;
 
 public class GameData implements Serializable {
 
-    public String id = "";
+    public long id = 0L;
     public String listId = "";
     public String author = "";
     public String portedBy = "";
@@ -31,7 +31,7 @@ public class GameData implements Serializable {
     public String player = "";
     public String icon = "";
     public String fileUrl = "";
-    public String fileSize = "";
+    public long fileSize = 0L;
     public String fileExt = "";
     public String descUrl = "";
     public String pubDate = "";

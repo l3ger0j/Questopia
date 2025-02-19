@@ -7,15 +7,15 @@ import static org.qp.android.helpers.utils.DirUtil.isDirContainsGameFile;
 import static org.qp.android.helpers.utils.FileUtil.copyFileToDir;
 import static org.qp.android.helpers.utils.FileUtil.findOrCreateFile;
 import static org.qp.android.helpers.utils.FileUtil.findOrCreateFolder;
-import static org.qp.android.helpers.utils.FileUtil.fromRelPath;
 import static org.qp.android.helpers.utils.FileUtil.forceDelFile;
 import static org.qp.android.helpers.utils.FileUtil.formatFileSize;
+import static org.qp.android.helpers.utils.FileUtil.fromRelPath;
 import static org.qp.android.helpers.utils.FileUtil.isWritableDir;
 import static org.qp.android.helpers.utils.FileUtil.isWritableFile;
 import static org.qp.android.helpers.utils.JsonUtil.jsonToObject;
 import static org.qp.android.helpers.utils.JsonUtil.objectToJson;
 import static org.qp.android.helpers.utils.PathUtil.removeExtension;
-import static org.qp.android.helpers.utils.StringUtil.isNotEmpty;
+import static org.qp.android.helpers.utils.StringUtil.isNotEmptyOrBlank;
 import static org.qp.android.helpers.utils.ThreadUtil.runOnUiThread;
 
 import android.annotation.SuppressLint;
@@ -90,7 +90,7 @@ public class StockViewModel extends AndroidViewModel {
     public static final int CODE_PICK_PATH_FILE = 301;
     public static final int CODE_PICK_MOD_FILE = 302;
 
-    public static final String DISABLE_CALCULATE_DIR = "disable";
+    public static final long DISABLE_CALC_SIZE = -1;
     private static final String INNER_GAME_DIR_NAME = "games-dir";
     public static final String EXT_GAME_LIST_NAME = "extGameDirs";
 
@@ -102,7 +102,7 @@ public class StockViewModel extends AndroidViewModel {
     public List<DocumentFile> extGamesListDir = new ArrayList<>();
 
     // Containers
-    private final HashMap<String, GameData> gamesMap = new HashMap<>();
+    private final HashMap<Long, GameData> gamesMap = new HashMap<>();
     private final MutableLiveData<List<GameData>> gameDataList = new MutableLiveData<>();
 
     private final LocalGame localGame = new LocalGame(getApplication());
@@ -184,7 +184,7 @@ public class StockViewModel extends AndroidViewModel {
         return Optional.ofNullable(currGameData);
     }
 
-    public HashMap<String, GameData> getGamesMap() {
+    public HashMap<Long, GameData> getGamesMap() {
         return gamesMap;
     }
 
@@ -257,16 +257,24 @@ public class StockViewModel extends AndroidViewModel {
         }
     }
 
-    public String getGameSize() {
+    public long getGameSize() {
+        var data = currGameData;
+        if (data == null) return 0L;
+        return data.fileSize;
+    }
+
+    public String getFormattedGameSize() {
         var data = currGameData;
         if (data == null) return "";
 
         var fileSize = data.fileSize;
-        if (fileSize == null || fileSize.isEmpty() || fileSize.isBlank()) return "";
-        if (fileSize.equals(DISABLE_CALCULATE_DIR)) return "";
+        if (fileSize == DISABLE_CALC_SIZE) return "";
+
+        var currBinPref = getController().binaryPrefixes;
+        var sizeWithPref = formatFileSize(fileSize, currBinPref);
 
         var fileSizeString = ActivityCompat.getString(getApplication(), R.string.fileSize);
-        return fileSizeString.replace("-SIZE-", fileSize);
+        return fileSizeString.replace("-SIZE-", sizeWithPref);
     }
 
     public String getGamePubData() {
@@ -440,18 +448,20 @@ public class StockViewModel extends AndroidViewModel {
     private void createAddIntent(DocumentFile rootDir) {
         try {
             var nameDir = rootDir.getName();
+            var secureRandom = new SecureRandom();
+
             if (nameDir == null) {
-                var secureRandom = new SecureRandom();
                 nameDir = "game#" + secureRandom.nextInt();
             }
 
             var newGameData = new GameData();
-            newGameData.id = nameDir.toLowerCase(Locale.ROOT);
+            newGameData.id = secureRandom.nextInt();
             var editTextTitle = addBinding.ET0.getEditText();
             if (editTextTitle != null) {
-                newGameData.title = editTextTitle.getText().toString().isEmpty()
-                        ? nameDir
-                        : editTextTitle.getText().toString();
+                var title = editTextTitle.getText().toString();
+                newGameData.title = isNotEmptyOrBlank(title)
+                        ? title
+                        : nameDir;
             }
             var editTextAuthor = addBinding.ET1.getEditText();
             if (editTextAuthor != null) {
@@ -465,7 +475,7 @@ public class StockViewModel extends AndroidViewModel {
                 newGameData.icon = tempImageFile.getUri().toString();
             }
             if (!addBinding.sizeDirSW.isChecked()) {
-                newGameData.fileSize = DISABLE_CALCULATE_DIR;
+                newGameData.fileSize = DISABLE_CALC_SIZE;
             }
 
             localGame.createDataIntoFolder(newGameData, rootDir);
@@ -490,7 +500,7 @@ public class StockViewModel extends AndroidViewModel {
                     .into(editBinding.imageView);
         });
 
-        if (getGameSize().equals(DISABLE_CALCULATE_DIR)) {
+        if (getGameSize() == DISABLE_CALC_SIZE) {
             editBinding.sizeDirSW.setChecked(false);
         }
 
@@ -523,7 +533,7 @@ public class StockViewModel extends AndroidViewModel {
                         : editTextVersion.getText().toString();
             }
             if (tempImageFile != null) currGameData.icon = tempImageFile.getUri().toString();
-            if (editBinding.sizeDirSW.isChecked() || getGameSize().isEmpty()) {
+            if (editBinding.sizeDirSW.isChecked() || getGameSize() != DISABLE_CALC_SIZE) {
                 calculateSizeDir(currGameData);
             }
             var gameDir = currGameData.getGameDir(getApplication());
@@ -555,7 +565,7 @@ public class StockViewModel extends AndroidViewModel {
         CompletableFuture
                 .supplyAsync(() -> calculateDirSize(gameDir), executor)
                 .thenAccept(aLong -> {
-                    gameData.fileSize = String.valueOf(aLong);
+                    gameData.fileSize = aLong;
                     localGame.createDataIntoFolder(gameData, gameDir);
                 });
     }
@@ -713,17 +723,6 @@ public class StockViewModel extends AndroidViewModel {
                     var localGameData = new ArrayList<GameData>();
                     for (var data : sortedGameData) {
                         if (!data.isFileInstalled()) continue;
-                        if (!isNotEmpty(data.fileSize)) {
-                            calculateSizeDir(data);
-                        } else {
-                            if (!data.fileSize.equals(DISABLE_CALCULATE_DIR)) {
-                                try {
-                                    var fileSize = Long.parseLong(data.fileSize);
-                                    var currPrefix = getController().binaryPrefixes;
-                                    data.fileSize = formatFileSize(fileSize , currPrefix);
-                                } catch (NumberFormatException ignored) {}
-                            }
-                        }
                         localGameData.add(data);
                     }
                     gameDataList.postValue(localGameData);
