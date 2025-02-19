@@ -9,10 +9,8 @@ import androidx.annotation.NonNull;
 import androidx.documentfile.provider.DocumentFile;
 
 import com.anggrayudi.storage.file.DocumentFileCompat;
-import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -46,13 +44,6 @@ public class GameData implements Serializable {
     public DocumentFile getGameDir(Context context) {
         if (gameDir == null) return null;
         return DocumentFileCompat.fromUri(context, gameDir);
-    }
-
-    @JsonIgnore
-    public File getGameDir() {
-        if (gameDir == null) return null;
-        var path = gameDir.getPath();
-        return new File(path);
     }
 
     @JsonIgnore
