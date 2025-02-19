@@ -1,6 +1,7 @@
 package org.qp.android.ui.stock;
 
-import androidx.recyclerview.widget.RecyclerView;
+import androidx.annotation.IdRes;
+import androidx.appcompat.view.ActionMode;
 
 import org.qp.android.helpers.ErrorType;
 import org.qp.android.helpers.bus.EventNavigation;
@@ -11,7 +12,7 @@ public interface StockFragmentNavigation {
         private final String errorMessage;
         private final ErrorType errorType;
 
-        public ShowErrorDialog(String errorMessage , ErrorType errorType) {
+        public ShowErrorDialog(String errorMessage, ErrorType errorType) {
             this.errorMessage = errorMessage;
             this.errorType = errorType;
         }
@@ -25,29 +26,53 @@ public interface StockFragmentNavigation {
         }
     }
 
-    class ShowGameFragment extends EventNavigation {
-        private final int position;
+    class ShowDeleteDialog extends EventNavigation {
+        public final String errorMessage;
 
-        public ShowGameFragment(int position) {
-            this.position = position;
-        }
-
-        public int getPosition() {
-            return position;
+        public ShowDeleteDialog(String errorMessage) {
+            this.errorMessage = errorMessage;
         }
     }
 
-    class ShowActionMode extends EventNavigation {}
+    class ShowActionMode extends EventNavigation {
+        public final ActionMode.Callback callback;
 
-    class ChangeElementColorToDKGray extends EventNavigation {}
+        public ShowActionMode(ActionMode.Callback callback) {
+            this.callback = callback;
+        }
+    }
 
-    class ChangeElementColorToLTGray extends EventNavigation {}
+    class FinishActionMode extends EventNavigation {
+    }
 
-    class GetAdapterViewHolder extends EventNavigation {
-        public final RecyclerView.ViewHolder viewHolder;
+    class ChangeDestination extends EventNavigation {
+        @IdRes
+        public final int resId;
 
-        public GetAdapterViewHolder(RecyclerView.ViewHolder viewHolder) {
-            this.viewHolder = viewHolder;
+        public ChangeDestination(int resId) {
+            this.resId = resId;
+        }
+    }
+
+    class ChangeElementColorToDKGray extends EventNavigation {
+    }
+
+    class ChangeElementColorToLTGray extends EventNavigation {
+    }
+
+    class SelectOnce extends EventNavigation {
+        public final int position;
+
+        public SelectOnce(int position) {
+            this.position = position;
+        }
+    }
+
+    class UnselectOnce extends EventNavigation {
+        public final int position;
+
+        public UnselectOnce(int position) {
+            this.position = position;
         }
     }
 
@@ -55,7 +80,7 @@ public interface StockFragmentNavigation {
         private final int requestCode;
         private final String[] mimeTypes;
 
-        public ShowFilePicker(int requestCode , String[] mimeTypes) {
+        public ShowFilePicker(int requestCode, String[] mimeTypes) {
             this.requestCode = requestCode;
             this.mimeTypes = mimeTypes;
         }

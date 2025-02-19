@@ -1,5 +1,6 @@
 package org.qp.android.ui.stock;
 
+import static org.qp.android.helpers.utils.AccessibilityUtil.customAccessibilityDelegate;
 import static org.qp.android.helpers.utils.FileUtil.formatFileSize;
 import static org.qp.android.ui.stock.StockViewModel.DISABLE_CALC_SIZE;
 
@@ -9,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.AsyncListDiffer;
 import androidx.recyclerview.widget.DiffUtil;
@@ -21,16 +23,28 @@ import org.qp.android.databinding.ListItemGameBinding;
 import org.qp.android.dto.stock.GameData;
 import org.qp.android.ui.settings.SettingsController;
 
+import java.lang.ref.WeakReference;
 import java.util.List;
 
-public class GamesListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public class LocalGamesListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     public static final int DIVIDER = 1;
     private static final int ITEM = 2;
+    private static final DiffUtil.ItemCallback<GameData> DIFF_CALLBACK =
+            new DiffUtil.ItemCallback<>() {
+                @Override
+                public boolean areItemsTheSame(@NonNull GameData oldItem, @NonNull GameData newItem) {
+                    return oldItem.id == newItem.id;
+                }
 
-    private final Context context;
+                @Override
+                public boolean areContentsTheSame(@NonNull GameData oldItem, @NonNull GameData newItem) {
+                    return oldItem.equals(newItem);
+                }
+            };
     private final AsyncListDiffer<GameData> differ =
-            new AsyncListDiffer<>(this , DIFF_CALLBACK);
+            new AsyncListDiffer<>(this, DIFF_CALLBACK);
+    private WeakReference<Context> context;
 
     public GameData getItem(int position) {
         return differ.getCurrentList().get(position);
@@ -47,9 +61,9 @@ public class GamesListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
     @Override
     public int getItemViewType(int position) {
-        var currGameData = getItem(position);
-
+        if (position == -1) return ITEM;
         if (getItemCount() > position + 1) {
+            var currGameData = getItem(position);
             var nextGameData = getItem(position + 1);
 
             if (currGameData.listId.equals("0")
@@ -61,42 +75,26 @@ public class GamesListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         return ITEM;
     }
 
-    private static final DiffUtil.ItemCallback<GameData> DIFF_CALLBACK =
-            new DiffUtil.ItemCallback<>() {
-                @Override
-                public boolean areItemsTheSame(@NonNull GameData oldItem , @NonNull GameData newItem) {
-                    return oldItem.id == newItem.id;
-                }
-
-                @Override
-                public boolean areContentsTheSame(@NonNull GameData oldItem , @NonNull GameData newItem) {
-                    return oldItem.equals(newItem);
-                }
-            };
-
-    public GamesListAdapter submitList(List<GameData> gameData){
+    public void submitList(List<GameData> gameData) {
         differ.submitList(gameData);
-        return this;
-    }
-
-    public GamesListAdapter(Context context) {
-        this.context = context;
     }
 
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        this.context = new WeakReference<>(parent.getContext());
         var inflater = LayoutInflater.from(parent.getContext());
         ListItemGameBinding listItemGameBinding =
                 DataBindingUtil.inflate(inflater, R.layout.list_item_game, parent, false);
+        listItemGameBinding.relativeLayout.setAccessibilityDelegate(customAccessibilityDelegate());
         return new GameHolder(listItemGameBinding);
     }
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof GameHolder gameHolder) {
-            gameHolder.listItemGameBinding(getGameData().get(position));
             var gameData = getItem(position);
+            gameHolder.listItemGameBinding(gameData);
 
             if (gameData.icon != null) {
                 Picasso.get()
@@ -109,11 +107,11 @@ public class GamesListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             var fileSize = gameData.fileSize;
             if (fileSize == DISABLE_CALC_SIZE) return;
 
-            var currBinPref = SettingsController.newInstance(context).binaryPrefixes;
+            var currBinPref = SettingsController.newInstance(context.get()).binaryPrefixes;
             var sizeWithPref = formatFileSize(fileSize, currBinPref);
 
             var elementSize = gameHolder.listItemGameBinding.gameSize;
-            var fileSizeString = context.getString(R.string.fileSize);
+            var fileSizeString = ContextCompat.getString(context.get(), R.string.fileSize);
             elementSize.setText(fileSizeString.replace("-SIZE-", sizeWithPref));
         }
     }
@@ -121,7 +119,7 @@ public class GamesListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     public static class GameHolder extends RecyclerView.ViewHolder {
         ListItemGameBinding listItemGameBinding;
 
-        GameHolder(ListItemGameBinding listItemGameBinding){
+        GameHolder(ListItemGameBinding listItemGameBinding) {
             super(listItemGameBinding.getRoot());
             this.listItemGameBinding = listItemGameBinding;
         }

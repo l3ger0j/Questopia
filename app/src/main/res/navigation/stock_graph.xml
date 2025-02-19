@@ -10,7 +10,7 @@
         android:label="StockViewPagerFragment" />
     <fragment
         android:id="@+id/stockRecyclerFragment"
-        android:name="org.qp.android.ui.stock.StockRecyclerFragment"
+        android:name="org.qp.android.ui.stock.StockLocalRVFragment"
         android:label="StockRecyclerFragment" />
     <fragment
         android:id="@+id/stockGameFragment"

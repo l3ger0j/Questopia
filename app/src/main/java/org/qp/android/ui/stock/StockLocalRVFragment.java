@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.accessibility.AccessibilityNodeInfo;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -17,34 +16,38 @@ import androidx.recyclerview.widget.RecyclerView;
 import org.qp.android.databinding.FragmentRecyclerBinding;
 import org.qp.android.helpers.adapters.RecyclerItemClickListener;
 
-public class StockRecyclerFragment extends Fragment {
+public class StockLocalRVFragment extends Fragment {
 
+    private final LocalGamesListAdapter adapter = new LocalGamesListAdapter();
     private StockViewModel stockViewModel;
     private RecyclerView mRecyclerView;
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater ,
-                             @Nullable ViewGroup container ,
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         var recyclerBinding = FragmentRecyclerBinding.inflate(inflater);
+        var divider = new DividerDecoration(requireContext(), Color.GRAY, 5f);
+
         mRecyclerView = recyclerBinding.shareRecyclerView;
-        mRecyclerView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
+        mRecyclerView.setAdapter(adapter);
+        mRecyclerView.addItemDecoration(divider);
+
         stockViewModel = new ViewModelProvider(requireActivity()).get(StockViewModel.class);
-
-        stockViewModel.getGameDataList().observe(getViewLifecycleOwner(), item -> {
-            var adapter = new GamesListAdapter(requireActivity()).submitList(item);
-            var divider = new DividerDecoration(requireContext(), Color.GRAY, 5f);
-            mRecyclerView.setAdapter(adapter);
-            mRecyclerView.addItemDecoration(divider);
-        });
-
+        stockViewModel.dataList.observe(getViewLifecycleOwner(), adapter::submitList);
         stockViewModel.emitter.observe(getViewLifecycleOwner(), eventNavigation -> {
             if (eventNavigation instanceof StockFragmentNavigation.ChangeElementColorToDKGray) {
                 changeElementColorToDKGray();
             }
             if (eventNavigation instanceof StockFragmentNavigation.ChangeElementColorToLTGray) {
                 changeElementColorToLTGray();
+            }
+            if (eventNavigation instanceof StockFragmentNavigation.SelectOnce once) {
+                selectOnce(once.position);
+            }
+            if (eventNavigation instanceof StockFragmentNavigation.UnselectOnce unselect) {
+                unselectOnce(unselect.position);
             }
         });
 
@@ -69,36 +72,40 @@ public class StockRecyclerFragment extends Fragment {
         }
     }
 
+    private void unselectOnce(int position) {
+        final var holder =
+                mRecyclerView.getChildViewHolder(mRecyclerView.getChildAt(position));
+        var cardView = (CardView) holder.itemView.findViewWithTag("gameCardView");
+        cardView.setCardBackgroundColor(Color.DKGRAY);
+    }
+
+    private void selectOnce(int position) {
+        final var holder =
+                mRecyclerView.getChildViewHolder(mRecyclerView.getChildAt(position));
+        var cardView = (CardView) holder.itemView.findViewWithTag("gameCardView");
+        cardView.setCardBackgroundColor(Color.LTGRAY);
+    }
+
     @Override
-    public void onViewCreated(@NonNull View view , @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         mRecyclerView.addOnItemTouchListener(new RecyclerItemClickListener(
-                requireContext() ,
-                mRecyclerView ,
+                requireContext(),
+                mRecyclerView,
                 new RecyclerItemClickListener.OnItemClickListener() {
                     @Override
                     public void onItemClick(View view, int position) {
-                        var mViewHolder = mRecyclerView.findViewHolderForAdapterPosition(position);
-                        if (mViewHolder == null) return;
-                        stockViewModel.doOnSendAdapterViewHolder(mViewHolder);
-                        stockViewModel.doOnShowGameFragment(position);
+                        if (stockViewModel.isEnableDeleteMode) {
+                            stockViewModel.onListItemClick(position);
+                        } else {
+                            var entryToShow = adapter.getItem(position);
+                            stockViewModel.onListItemClick(entryToShow);
+                        }
                     }
 
                     @Override
                     public void onLongItemClick(View view, int position) {
-                        stockViewModel.doOnShowActionMode();
+                        stockViewModel.onLongListItemClick();
                     }
                 }));
-        mRecyclerView.setAccessibilityDelegate(new View.AccessibilityDelegate() {
-            @Override
-            public boolean performAccessibilityAction(@NonNull View host ,
-                                                      int action ,
-                                                      @Nullable Bundle args) {
-                switch (action) {
-                    case AccessibilityNodeInfo.ACTION_CLICK -> host.performClick();
-                    case AccessibilityNodeInfo.ACTION_LONG_CLICK -> host.performLongClick();
-                }
-                return super.performAccessibilityAction(host , action , args);
-            }
-        });
     }
 }
