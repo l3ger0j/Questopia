@@ -254,7 +254,7 @@ JNIEXPORT jobjectArray JNICALL Java_org_libndkqsp_jni_NDKLib_QSPGetObjectData(JN
 	jobjectArray res = (*env)->NewObjectArray(env, qspCurActionsCount, ndkListItemClass, 0);
 	for (i = 0; i < qspCurActionsCount; ++i)
 	{
-		item = ndkToJavaListItem(env, qspCurActions[i].Image, qspCurActions[i].Desc);
+		item = ndkToJavaListItem(env, qspCurObjects[i].Image, qspCurObjects[i].Desc);
 		(*env)->SetObjectArrayElement(env, res, i, item.ListItem);
 	}
 	return res;
