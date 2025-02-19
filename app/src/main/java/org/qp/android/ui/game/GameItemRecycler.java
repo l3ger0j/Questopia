@@ -94,7 +94,6 @@ public class GameItemRecycler extends RecyclerView.Adapter<GameItemRecycler.View
             itemText.setBackgroundColor(backgroundColor);
             itemText.setTextColor(textColor);
             itemText.setLinkTextColor(linkTextColor);
-            // TODO: 27.06.2023 rewrite this!
             itemText.setText(Html.fromHtml(qpListItem.text(), Html.FROM_HTML_MODE_LEGACY));
         }
     }
