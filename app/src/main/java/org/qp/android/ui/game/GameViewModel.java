@@ -6,14 +6,12 @@ import static org.qp.android.helpers.utils.ColorUtil.convertRGBAtoBGRA;
 import static org.qp.android.helpers.utils.ColorUtil.getHexColor;
 import static org.qp.android.helpers.utils.FileUtil.findOrCreateFolder;
 import static org.qp.android.helpers.utils.FileUtil.fromRelPath;
-import static org.qp.android.helpers.utils.FileUtil.getFileContents;
 import static org.qp.android.helpers.utils.PathUtil.getExtension;
 import static org.qp.android.helpers.utils.ThreadUtil.assertNonUiThread;
 import static org.qp.android.helpers.utils.ViewUtil.getFontStyle;
 import static org.qp.android.ui.game.GameActivity.LOAD;
 
 import android.annotation.SuppressLint;
-import android.app.ActivityManager;
 import android.app.Application;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
@@ -45,7 +43,6 @@ import com.google.android.material.textfield.TextInputLayout;
 import org.qp.android.QuestopiaApplication;
 import org.qp.android.R;
 import org.qp.android.helpers.ErrorType;
-import org.qp.android.helpers.TwoQCache;
 import org.qp.android.model.lib.LibGameState;
 import org.qp.android.model.lib.LibIConfig;
 import org.qp.android.model.lib.LibIProxy;
@@ -56,7 +53,7 @@ import org.qp.android.model.service.HtmlProcessor;
 import org.qp.android.ui.dialogs.GameDialogType;
 import org.qp.android.ui.settings.SettingsController;
 
-import java.io.ByteArrayInputStream;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Optional;
@@ -530,15 +527,6 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         return getLibProxy().getGameState().gameRunning;
     }
 
-    private int calculateMemoryCacheSize() {
-        var activityManager = getApplication().getSystemService(ActivityManager.class);
-        var memoryClass = activityManager.getLargeMemoryClass();
-        // Target ~15% of the available heap.
-        return 1024 * 1024 * memoryClass / 7;
-    }
-
-    private final TwoQCache<String, byte[]> cache = new TwoQCache<>(calculateMemoryCacheSize());
-
     public class GameWebViewClient extends WebViewClient {
         @Override
         public boolean shouldOverrideUrlLoading(WebView view , WebResourceRequest request) {
@@ -596,17 +584,11 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
                 if (uri.getPath() == null) throw new NullPointerException();
                 var imageFile = fromRelPath(getGameActivity(), uri.getPath(), rootDir);
                 var extension = MimeTypeMap.getSingleton().getMimeTypeFromExtension(getExtension(imageFile));
-                Log.d(TAG, cache.toString());
-                if (cache.get(uri.getPath()) == null) {
-                    var byteArray = getFileContents(getGameActivity(), imageFile.getUri());
-                    cache.put(uri.getPath(), byteArray);
-                    return new WebResourceResponse(extension, null, new ByteArrayInputStream(byteArray));
-                } else {
-                    return new WebResourceResponse(extension, null, new ByteArrayInputStream(cache.get(uri.getPath())));
-                }
-            } catch (NullPointerException ex) {
+                var in = getApplication().getContentResolver().openInputStream(imageFile.getUri());
+                return new WebResourceResponse(extension, null, in);
+            } catch (NullPointerException | FileNotFoundException ex) {
                 if (getSettingsController().isUseImageDebug) {
-                    showErrorDialog(uri.getPath() , ErrorType.IMAGE_ERROR);
+                    showErrorDialog(uri.getPath(), ErrorType.IMAGE_ERROR);
                 }
                 return null;
             }
