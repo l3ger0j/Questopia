@@ -5,11 +5,13 @@ import static org.qp.android.helpers.utils.FileUtil.findOrCreateFile;
 import static org.qp.android.helpers.utils.FileUtil.fromFullPath;
 import static org.qp.android.helpers.utils.FileUtil.fromRelPath;
 import static org.qp.android.helpers.utils.FileUtil.getFileContents;
+import static org.qp.android.helpers.utils.FileUtil.isWritableFile;
 import static org.qp.android.helpers.utils.FileUtil.writeFileContents;
 import static org.qp.android.helpers.utils.PathUtil.getFilename;
 import static org.qp.android.helpers.utils.PathUtil.normalizeContentPath;
 import static org.qp.android.helpers.utils.StringUtil.getStringOrEmpty;
 import static org.qp.android.helpers.utils.StringUtil.isNotEmpty;
+import static org.qp.android.helpers.utils.StringUtil.isNotEmptyOrBlank;
 import static org.qp.android.helpers.utils.ThreadUtil.isSameThread;
 import static org.qp.android.helpers.utils.ThreadUtil.throwIfNotMainThread;
 
@@ -32,6 +34,7 @@ import org.qp.android.model.service.HtmlProcessor;
 import org.qp.android.ui.game.GameInterface;
 
 import java.io.File;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Objects;
@@ -50,10 +53,10 @@ public class LibProxyImpl extends NDKLib implements LibIProxy {
     private volatile long lastMsCountCallTime;
     private GameInterface gameInterface;
 
-    private final Context context;
+    private final WeakReference<Context> context;
 
     private QuestopiaApplication getApplication() {
-        return (QuestopiaApplication) context.getApplicationContext();
+        return (QuestopiaApplication) context.get();
     }
 
     private DocumentFile getCurGameDir() {
@@ -69,7 +72,7 @@ public class LibProxyImpl extends NDKLib implements LibIProxy {
     }
 
     public LibProxyImpl(Context context) {
-        this.context = context;
+        this.context = new WeakReference<>(context);
     }
 
     private void runOnQspThread(final Runnable runnable) {
@@ -96,8 +99,8 @@ public class LibProxyImpl extends NDKLib implements LibIProxy {
 
     private boolean loadGameWorld() {
         var gameFileUri = gameState.gameFile.getUri();
-        var gameFileFullPath = documentWrap(gameState.gameFile).getAbsolutePath(context);
-        final var gameData = getFileContents(context , gameFileUri);
+        var gameFileFullPath = documentWrap(gameState.gameFile).getAbsolutePath(context.get());
+        final var gameData = getFileContents(context.get(), gameFileUri);
         if (gameData == null) return false;
         if (!QSPLoadGameWorldFromData(gameData, gameFileFullPath)) {
             showLastQspError();
@@ -171,21 +174,17 @@ public class LibProxyImpl extends NDKLib implements LibIProxy {
         var actions = new ArrayList<ListItem>();
         var currGameDir = getCurGameDir();
 
-        for (var element : QSPGetObjectData()) {
-            var tempImagePath = "";
-            var tempText = "";
+        for (var element : QSPGetActionData()) {
+            var tempImagePath = element.image() == null ? "" : element.image();
+            var tempText = element.text() == null ? "" : element.text();
 
-            if (element.image() != null) {
-                var tempPath = normalizeContentPath(getFilename(element.image()));
-                var fileFromPath = fromRelPath(context, tempPath, currGameDir);
+            if (isNotEmptyOrBlank(tempImagePath)) {
+                var tempPath = normalizeContentPath(getFilename(tempImagePath));
+                var fileFromPath = fromRelPath(context.get(), tempPath, currGameDir);
                 if (fileFromPath != null) {
                     tempImagePath = String.valueOf(fileFromPath.getUri());
                 }
             }
-
-            tempText = gameState.interfaceConfig.useHtml
-                    ? getHtmlProcessor().removeHtmlTags(element.text())
-                    : element.text() == null ? "" : element.text();
 
             actions.add(new ListItem(tempImagePath, tempText));
         }
@@ -199,27 +198,19 @@ public class LibProxyImpl extends NDKLib implements LibIProxy {
         var currGameDir = getCurGameDir();
 
         for (var element : QSPGetObjectData()) {
-            var tempImagePath = "";
-            var tempText = "";
+            var tempImagePath = element.image() == null ? "" : element.image();
+            var tempText = element.text() == null ? "" : element.text();
 
-            if (!element.text().contains("<img")) {
-                tempImagePath = element.image() == null
-                        ? ""
-                        : element.image();
-            } else {
-                if (getHtmlProcessor().isContainsHtmlTags(element.text())) {
-                    var tempPath = getHtmlProcessor().getSrcDir(element.text());
-                    var fileFromPath = fromRelPath(context, tempPath, currGameDir);
+            if (tempText.contains("<img")) {
+                if (getHtmlProcessor().isContainsHtmlTags(tempText)) {
+                    var tempPath = getHtmlProcessor().getSrcDir(tempText);
+                    var fileFromPath = fromRelPath(context.get(), tempPath, currGameDir);
                     tempImagePath = String.valueOf(fileFromPath);
                 } else {
-                    var fileFromPath = fromRelPath(context, element.text(), currGameDir);
+                    var fileFromPath = fromRelPath(context.get(), tempText, currGameDir);
                     tempImagePath = String.valueOf(fileFromPath);
                 }
             }
-
-            tempText = gameState.interfaceConfig.useHtml
-                    ? getHtmlProcessor().removeHtmlTags(element.text())
-                    : element.text();
 
             objects.add(new ListItem(tempImagePath, tempText));
         }
@@ -312,7 +303,7 @@ public class LibProxyImpl extends NDKLib implements LibIProxy {
             runOnQspThread(() -> loadGameState(uri));
             return;
         }
-        final var gameData = getFileContents(context , uri);
+        final var gameData = getFileContents(context.get() , uri);
         if (gameData == null) return;
         if (!QSPOpenSavedGameFromData(gameData, gameData.length, true)) {
             showLastQspError();
@@ -327,7 +318,7 @@ public class LibProxyImpl extends NDKLib implements LibIProxy {
         }
         final var gameData = QSPSaveGameAsData(false);
         if (gameData == null) return;
-        writeFileContents(context , uri , gameData);
+        writeFileContents(context.get() , uri , gameData);
     }
 
     @Override
@@ -474,8 +465,8 @@ public class LibProxyImpl extends NDKLib implements LibIProxy {
         if (inter == null) return;
 
         if (isNotEmpty(path)) {
-            var picFile = fromFullPath(context, path, getCurGameDir());
-            if (picFile == null) return;
+            var picFile = fromRelPath(context.get(), path, getCurGameDir());
+            if (!isWritableFile(context.get(), picFile)) return;
             inter.showPicture(String.valueOf(picFile.getUri()));
         }
     }
@@ -483,29 +474,29 @@ public class LibProxyImpl extends NDKLib implements LibIProxy {
     @Override
     public void SetTimer(int msecs) {
         var inter = gameInterface;
-        if (inter != null) {
-            inter.setCounterInterval(msecs);
-        }
+        if (inter == null) return;
+
+        inter.setCounterInterval(msecs);
     }
 
     @Override
     public void ShowMessage(String message) {
         var inter = gameInterface;
-        if (inter != null) {
-            inter.showMessage(message);
-        }
+        if (inter == null) return;
+
+        inter.showMessage(message);
     }
 
     @Override
     public void PlayFile(String path, int volume) {
-        if (isNotEmpty(path)) {
-            getAudioPlayer().playFile(path, volume);
-        }
+        if (!isNotEmptyOrBlank(path)) return;
+
+        getAudioPlayer().playFile(path, volume);
     }
 
     @Override
     public boolean IsPlayingFile(final String path) {
-        return isNotEmpty(path) && getAudioPlayer().isPlayingFile(path);
+        return isNotEmptyOrBlank(path) && getAudioPlayer().isPlayingFile(path);
     }
 
     @Override
@@ -526,7 +517,7 @@ public class LibProxyImpl extends NDKLib implements LibIProxy {
             inter.showLoadGamePopup();
         } else {
             try {
-                var saveFile = fromFullPath(context, filename, getCurGameDir());
+                var saveFile = fromFullPath(context.get(), filename);
                 if (saveFile == null) {
                     Log.e(TAG , "Save file not found");
                     return;
@@ -547,7 +538,7 @@ public class LibProxyImpl extends NDKLib implements LibIProxy {
             inter.showSaveGamePopup();
         } else {
             var file = new File(filename);
-            var saveFile = findOrCreateFile(context, getCurGameDir(), file.getName(), MimeType.TEXT);
+            var saveFile = findOrCreateFile(context.get(), getCurGameDir(), file.getName(), MimeType.TEXT);
             if (saveFile != null) {
                 saveGameState(saveFile.getUri());
             } else {
@@ -611,15 +602,15 @@ public class LibProxyImpl extends NDKLib implements LibIProxy {
 
     @Override
     public byte[] GetFileContents(String path) {
-        var targetFile = fromFullPath(context, path, getCurGameDir());
+        var targetFile = fromRelPath(context.get(), path, getCurGameDir());
         if (targetFile == null) return null;
         var targetFileUri = targetFile.getUri();
-        return getFileContents(context , targetFileUri);
+        return getFileContents(context.get(), targetFileUri);
     }
 
     @Override
     public void ChangeQuestPath(String path) {
-        var newGameDir = fromFullPath(context, path , getCurGameDir());
+        var newGameDir = fromFullPath(context.get(), path);
         if (newGameDir == null || !newGameDir.exists()) {
             Log.e(TAG,"Game directory not found: " + path);
             return;
