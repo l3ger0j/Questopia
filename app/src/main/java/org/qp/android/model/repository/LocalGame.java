@@ -2,8 +2,8 @@ package org.qp.android.model.repository;
 
 import static org.qp.android.helpers.utils.FileUtil.documentWrap;
 import static org.qp.android.helpers.utils.FileUtil.findOrCreateFile;
-import static org.qp.android.helpers.utils.FileUtil.fromRelPath;
 import static org.qp.android.helpers.utils.FileUtil.forceCreateFile;
+import static org.qp.android.helpers.utils.FileUtil.fromRelPath;
 import static org.qp.android.helpers.utils.FileUtil.isWritableDir;
 import static org.qp.android.helpers.utils.FileUtil.isWritableFile;
 import static org.qp.android.helpers.utils.FileUtil.readFileAsString;
@@ -183,7 +183,7 @@ public class LocalGame {
 
         for (var gameFolder : formatGamesDirs) {
             var gameDir = DocumentFileCompat.fromUri(context, gameFolder.gameUriDir);
-            if (gameDir == null) return Collections.emptyList();
+            if (!isWritableDir(context, gameDir)) return Collections.emptyList();
 
             var item = (GameData) null;
             var infoFile = fromRelPath(context, GAME_INFO_FILENAME, gameDir);
