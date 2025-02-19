@@ -1,6 +1,6 @@
 package org.qp.android.model.service;
 
-import static org.qp.android.helpers.utils.FileUtil.fromFullPath;
+import static org.qp.android.helpers.utils.FileUtil.fromRelPath;
 import static org.qp.android.helpers.utils.PathUtil.normalizeContentPath;
 import static org.qp.android.helpers.utils.StringUtil.isNotEmpty;
 import static org.qp.android.helpers.utils.ThreadUtil.throwIfNotMainThread;
@@ -120,7 +120,7 @@ public class AudioPlayer {
         }
 
         var normPath = normalizeContentPath(sound.path);
-        var soundFile = fromFullPath(context, normPath , curGameDir);
+        var soundFile = fromRelPath(context, normPath, curGameDir);
 
         if (soundFile == null) {
             final var latch = new CountDownLatch(1);
