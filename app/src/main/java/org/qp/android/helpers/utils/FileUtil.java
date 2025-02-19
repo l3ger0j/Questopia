@@ -12,6 +12,8 @@ import androidx.documentfile.provider.DocumentFile;
 import com.anggrayudi.storage.FileWrapper;
 import com.anggrayudi.storage.callback.FileCallback;
 import com.anggrayudi.storage.file.CreateMode;
+import com.anggrayudi.storage.file.DocumentFileCompat;
+import com.anggrayudi.storage.file.DocumentFileType;
 import com.anggrayudi.storage.file.DocumentFileUtils;
 import com.anggrayudi.storage.file.FileUtils;
 
@@ -142,31 +144,8 @@ public final class FileUtil {
 
     @Nullable
     public static DocumentFile fromFullPath(@NonNull Context context,
-                                            @NonNull String fullPath,
-                                            @NonNull DocumentFile rootDir) {
-        var findDir = rootDir;
-        var nameGameDir = rootDir.getName();
-
-        try {
-            var index = fullPath.indexOf(nameGameDir);
-            var subString = fullPath.substring(index);
-            var splitString = subString.replace(nameGameDir + "/" , "");
-            var pathToFileSegments = splitString.split("/");
-
-            for (var segment : pathToFileSegments) {
-                if (segment.isEmpty()) {
-                    continue;
-                }
-                findDir = fromRelPath(context, segment, findDir);
-                if (findDir == null) {
-                    break;
-                }
-            }
-        } catch (NullPointerException i) {
-            return null;
-        }
-
-        return findDir;
+                                            @NonNull String fullPath) {
+        return DocumentFileCompat.fromFullPath(context, fullPath, DocumentFileType.ANY, true);
     }
 
     @Nullable
