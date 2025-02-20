@@ -6,14 +6,23 @@ import org.qp.android.model.lib.LibWindowType;
 public interface GameInterface {
 
     void refresh(LibRefIRequest request);
+
     void showErrorDialog(String message);
+
     void showPicture(String path);
+
     void showMessage(String message);
+
     String showInputDialog(String prompt);
+
     String showExecutorDialog(String prompt);
+
     int showMenu();
+
     void showLoadGamePopup();
+
     void showSaveGamePopup();
+
     void showWindow(LibWindowType type, boolean show);
 
     /**

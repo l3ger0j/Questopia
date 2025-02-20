@@ -25,9 +25,20 @@ import java.util.Objects;
 
 public class GameItemRecycler extends RecyclerView.Adapter<GameItemRecycler.ViewHolder> {
 
-    private final AsyncListDiffer<NDKLib.ListItem> differ =
-            new AsyncListDiffer<>(this , DIFF_CALLBACK);
+    private static final DiffUtil.ItemCallback<NDKLib.ListItem> DIFF_CALLBACK =
+            new DiffUtil.ItemCallback<>() {
+                @Override
+                public boolean areItemsTheSame(@NonNull NDKLib.ListItem oldItem, @NonNull NDKLib.ListItem newItem) {
+                    return Objects.equals(oldItem.image(), newItem.image()) && Objects.equals(oldItem.text(), newItem.text());
+                }
 
+                @Override
+                public boolean areContentsTheSame(@NonNull NDKLib.ListItem oldItem, @NonNull NDKLib.ListItem newItem) {
+                    return oldItem.equals(newItem);
+                }
+            };
+    private final AsyncListDiffer<NDKLib.ListItem> differ =
+            new AsyncListDiffer<>(this, DIFF_CALLBACK);
     public Typeface typeface;
     public int textSize;
     public int backgroundColor;
@@ -47,20 +58,7 @@ public class GameItemRecycler extends RecyclerView.Adapter<GameItemRecycler.View
         return differ.getCurrentList().size();
     }
 
-    private static final DiffUtil.ItemCallback<NDKLib.ListItem> DIFF_CALLBACK =
-            new DiffUtil.ItemCallback<>() {
-                @Override
-                public boolean areItemsTheSame(@NonNull NDKLib.ListItem oldItem , @NonNull NDKLib.ListItem newItem) {
-                    return Objects.equals(oldItem.image(), newItem.image()) && Objects.equals(oldItem.text(), newItem.text());
-                }
-
-                @Override
-                public boolean areContentsTheSame(@NonNull NDKLib.ListItem oldItem , @NonNull NDKLib.ListItem newItem) {
-                    return oldItem.equals(newItem);
-                }
-            };
-
-    public void submitList(List<NDKLib.ListItem> gameData){
+    public void submitList(List<NDKLib.ListItem> gameData) {
         differ.submitList(gameData);
     }
 
@@ -70,7 +68,7 @@ public class GameItemRecycler extends RecyclerView.Adapter<GameItemRecycler.View
                                                           int viewType) {
         var inflater = LayoutInflater.from(parent.getContext());
         ListGameItemBinding listGameItemBinding =
-                DataBindingUtil.inflate(inflater, R.layout.list_game_item , parent, false);
+                DataBindingUtil.inflate(inflater, R.layout.list_game_item, parent, false);
         return new GameItemRecycler.ViewHolder(listGameItemBinding);
     }
 
@@ -101,7 +99,7 @@ public class GameItemRecycler extends RecyclerView.Adapter<GameItemRecycler.View
     public static class ViewHolder extends RecyclerView.ViewHolder {
         ListGameItemBinding listGameItemBinding;
 
-        ViewHolder(ListGameItemBinding binding){
+        ViewHolder(ListGameItemBinding binding) {
             super(binding.getRoot());
             this.listGameItemBinding = binding;
         }
