@@ -4,11 +4,11 @@ import androidx.annotation.IdRes;
 import androidx.appcompat.view.ActionMode;
 
 import org.qp.android.helpers.ErrorType;
-import org.qp.android.helpers.bus.EventNavigation;
+import org.qp.android.helpers.bus.NavigationEvent;
 
 public interface StockFragmentNavigation {
 
-    class ShowErrorDialog extends EventNavigation {
+    class ShowErrorDialog extends NavigationEvent {
         private final String errorMessage;
         private final ErrorType errorType;
 
@@ -26,7 +26,7 @@ public interface StockFragmentNavigation {
         }
     }
 
-    class ShowDeleteDialog extends EventNavigation {
+    class ShowDeleteDialog extends NavigationEvent {
         public final String errorMessage;
 
         public ShowDeleteDialog(String errorMessage) {
@@ -34,7 +34,7 @@ public interface StockFragmentNavigation {
         }
     }
 
-    class ShowActionMode extends EventNavigation {
+    class ShowActionMode extends NavigationEvent {
         public final ActionMode.Callback callback;
 
         public ShowActionMode(ActionMode.Callback callback) {
@@ -42,10 +42,10 @@ public interface StockFragmentNavigation {
         }
     }
 
-    class FinishActionMode extends EventNavigation {
+    class FinishActionMode extends NavigationEvent {
     }
 
-    class ChangeDestination extends EventNavigation {
+    class ChangeDestination extends NavigationEvent {
         @IdRes
         public final int resId;
 
@@ -54,13 +54,13 @@ public interface StockFragmentNavigation {
         }
     }
 
-    class ChangeElementColorToDKGray extends EventNavigation {
+    class ChangeElementColorToDKGray extends NavigationEvent {
     }
 
-    class ChangeElementColorToLTGray extends EventNavigation {
+    class ChangeElementColorToLTGray extends NavigationEvent {
     }
 
-    class SelectOnce extends EventNavigation {
+    class SelectOnce extends NavigationEvent {
         public final int position;
 
         public SelectOnce(int position) {
@@ -68,7 +68,7 @@ public interface StockFragmentNavigation {
         }
     }
 
-    class UnselectOnce extends EventNavigation {
+    class UnselectOnce extends NavigationEvent {
         public final int position;
 
         public UnselectOnce(int position) {
@@ -76,7 +76,7 @@ public interface StockFragmentNavigation {
         }
     }
 
-    class ShowFilePicker extends EventNavigation {
+    class ShowFilePicker extends NavigationEvent {
         private final int requestCode;
         private final String[] mimeTypes;
 

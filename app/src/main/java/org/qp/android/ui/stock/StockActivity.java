@@ -64,6 +64,7 @@ import org.qp.android.R;
 import org.qp.android.databinding.ActivityStockBinding;
 import org.qp.android.dto.stock.GameData;
 import org.qp.android.dto.stock.RemoteDataList;
+import org.qp.android.helpers.bus.Events;
 import org.qp.android.helpers.utils.ViewUtil;
 import org.qp.android.model.repository.RemoteGame;
 import org.qp.android.ui.dialogs.StockDialogType;
@@ -228,35 +229,35 @@ public class StockActivity extends AppCompatActivity {
             navController.navigate(R.id.stockViewPagerFragment);
         }
 
-        stockViewModel.emitter.observe(this, eventNavigation -> {
-            if (eventNavigation instanceof StockFragmentNavigation.ShowErrorDialog errorDialog) {
+        stockViewModel.emitter.observe(this, new Events.EventObserver(event -> {
+            if (event instanceof StockFragmentNavigation.ShowErrorDialog errorDialog) {
                 switch (errorDialog.getErrorType()) {
                     case FOLDER_ERROR -> showErrorDialog(getString(R.string.gamesFolderError));
                     case EXCEPTION -> showErrorDialog(getString(R.string.error)
                             + ": " + errorDialog.getErrorMessage());
                 }
             }
-            if (eventNavigation instanceof StockFragmentNavigation.ShowDeleteDialog dialog) {
+            if (event instanceof StockFragmentNavigation.ShowDeleteDialog dialog) {
                 stockViewModel.showDialogFragment(
                         getSupportFragmentManager(),
                         StockDialogType.DELETE_DIALOG,
                         dialog.errorMessage
                 );
             }
-            if (eventNavigation instanceof StockFragmentNavigation.ShowActionMode mode) {
+            if (event instanceof StockFragmentNavigation.ShowActionMode mode) {
                 deleteMode = startSupportActionMode(mode.callback);
             }
-            if (eventNavigation instanceof StockFragmentNavigation.FinishActionMode) {
+            if (event instanceof StockFragmentNavigation.FinishActionMode) {
                 deleteMode.finish();
                 deleteMode = null;
             }
-            if (eventNavigation instanceof StockFragmentNavigation.ChangeDestination destination) {
+            if (event instanceof StockFragmentNavigation.ChangeDestination destination) {
                 navController.navigate(destination.resId);
             }
-            if (eventNavigation instanceof StockFragmentNavigation.ShowFilePicker filePicker) {
+            if (event instanceof StockFragmentNavigation.ShowFilePicker filePicker) {
                 showFilePickerActivity(filePicker.getRequestCode(), filePicker.getMimeTypes());
             }
-        });
+        }));
 
         new AppUpdater(this)
                 .setUpdateFrom(UpdateFrom.GITHUB)

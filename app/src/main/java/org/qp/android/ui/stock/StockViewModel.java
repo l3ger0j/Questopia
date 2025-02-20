@@ -56,7 +56,7 @@ import org.qp.android.databinding.DialogEditBinding;
 import org.qp.android.dto.stock.GameData;
 import org.qp.android.dto.stock.RemoteGameData;
 import org.qp.android.helpers.ErrorType;
-import org.qp.android.helpers.bus.EventEmitter;
+import org.qp.android.helpers.bus.Events;
 import org.qp.android.model.archive.ArchiveUnpack;
 import org.qp.android.model.notify.NotifyBuilder;
 import org.qp.android.model.repository.LocalGame;
@@ -111,7 +111,7 @@ public class StockViewModel extends AndroidViewModel {
     public MutableLiveData<Integer> outputIntObserver;
     public List<DocumentFile> extGamesListDir = new ArrayList<>();
     public GameData currGameData;
-    public EventEmitter emitter = new EventEmitter();
+    public Events.Emitter emitter = new Events.Emitter();
     protected boolean isEnableDeleteMode = false;
     protected List<GameData> tempList = new ArrayList<>();
     protected List<GameData> selectList = new ArrayList<>();
@@ -361,7 +361,7 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     public void doOnChangeDestination(@IdRes int resId) {
-        emitter.emitAndExecuteOnce(new StockFragmentNavigation.ChangeDestination(resId));
+        emitter.emitAndExecute(new StockFragmentNavigation.ChangeDestination(resId));
     }
 
     public void doOnChangeElementColorToDKGray() {
