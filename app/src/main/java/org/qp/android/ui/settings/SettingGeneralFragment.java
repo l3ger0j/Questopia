@@ -16,7 +16,7 @@ public class SettingGeneralFragment extends PreferenceFragmentCompat
         implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     @Override
-    public void onCreatePreferences(@Nullable Bundle savedInstanceState ,
+    public void onCreatePreferences(@Nullable Bundle savedInstanceState,
                                     @Nullable String rootKey) {
         requireActivity().setTitle(R.string.generalCatTitle);
         addPreferencesFromResource(R.xml.setting_general);

@@ -27,7 +27,7 @@ public class SettingsHostFragment extends PreferenceFragmentCompat {
     private SettingsViewModel viewModel;
 
     @Override
-    public void onCreatePreferences(Bundle savedInstanceState , String rootKey) {
+    public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         addPreferencesFromResource(R.xml.settings);
 
         viewModel =
@@ -36,9 +36,9 @@ public class SettingsHostFragment extends PreferenceFragmentCompat {
         var versionPref = findPreference("showVersion");
         if (versionPref != null) {
             versionPref.setTitle(getString(R.string.extendedName)
-                    .replace("-VERSION-" , BuildConfig.VERSION_NAME));
+                    .replace("-VERSION-", BuildConfig.VERSION_NAME));
             versionPref.setSummaryProvider(preference ->
-                    "Lib version: "+"5.7.0" + "\nTimestamp: " + BuildConfig.BUILD_TIME
+                    "Lib version: " + "5.7.0" + "\nTimestamp: " + BuildConfig.BUILD_TIME
             );
         }
 
@@ -110,11 +110,11 @@ public class SettingsHostFragment extends PreferenceFragmentCompat {
         var linearLayout = new LinearLayout(getContext());
         linearLayout.setOrientation(LinearLayout.VERTICAL);
         var linLayoutParam =
-                new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT ,
+                new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
                         LinearLayout.LayoutParams.MATCH_PARENT);
         linearLayout.setLayoutParams(linLayoutParam);
         var lpView =
-                new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT ,
+                new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
                         LinearLayout.LayoutParams.WRAP_CONTENT);
 
         var webView = new WebView(requireContext());
@@ -122,13 +122,13 @@ public class SettingsHostFragment extends PreferenceFragmentCompat {
         webView.setWebViewClient(new WebViewClient() {
             @Nullable
             @Override
-            public WebResourceResponse shouldInterceptRequest(WebView view ,
+            public WebResourceResponse shouldInterceptRequest(WebView view,
                                                               WebResourceRequest request) {
                 return assetLoader.shouldInterceptRequest(request.getUrl());
             }
 
             @Override
-            public boolean shouldOverrideUrlLoading(WebView view , WebResourceRequest request) {
+            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 var url = Optional.ofNullable(request.getUrl());
                 if (url.isPresent()) {
                     var workUri = url.get();
@@ -142,15 +142,15 @@ public class SettingsHostFragment extends PreferenceFragmentCompat {
             }
         });
         webView.loadDataWithBaseURL(
-                null ,
-                viewModel.formationAboutDesc(requireContext()) ,
-                null ,
-                "utf-8" ,
+                null,
+                viewModel.formationAboutDesc(requireContext()),
+                null,
+                "utf-8",
                 null);
         webView.setLayoutParams(lpView);
         linearLayout.addView(webView);
         var dialogFrag = new SettingsDialogFrag();
         dialogFrag.setView(linearLayout);
-        dialogFrag.show(getParentFragmentManager() , "aboutDialogFragment");
+        dialogFrag.show(getParentFragmentManager(), "aboutDialogFragment");
     }
 }

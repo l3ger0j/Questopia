@@ -26,7 +26,7 @@ public class SettingsActivity extends AppCompatActivity {
         setSupportActionBar(settingsViewBinding.settingsToolbar);
         setContentView(settingsViewBinding.getRoot());
 
-        if (getSupportActionBar() != null ) {
+        if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setDisplayShowHomeEnabled(true);
         }
@@ -58,15 +58,15 @@ public class SettingsActivity extends AppCompatActivity {
             navController.navigate(R.id.settingsFragment);
         }
 
-        getOnBackPressedDispatcher().addCallback(this , new OnBackPressedCallback(true) {
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
                 if (navController.getCurrentDestination() != null) {
                     var currCharLabel = navController.getCurrentDestination().getLabel();
                     if (currCharLabel == null) return;
                     switch (currCharLabel.toString()) {
-                        case "SettingGeneralFragment" , "SettingTextFragment" ,
-                                "SettingImageFragment", "SettingSoundFragment" -> {
+                        case "SettingGeneralFragment", "SettingTextFragment",
+                             "SettingImageFragment", "SettingSoundFragment" -> {
                             setTitle(R.string.settingsTitle);
                             navController.navigate(R.id.settingsFragment);
                         }
@@ -83,10 +83,10 @@ public class SettingsActivity extends AppCompatActivity {
             var currCharLabel = navController.getCurrentDestination().getLabel();
             if (currCharLabel == null) return true;
             switch (currCharLabel.toString()) {
-                case "PluginFragment" , "NewsFragment" ->
+                case "PluginFragment", "NewsFragment" ->
                         getOnBackPressedDispatcher().onBackPressed();
-                case "SettingGeneralFragment" , "SettingTextFragment" ,
-                        "SettingImageFragment" , "SettingSoundFragment" -> {
+                case "SettingGeneralFragment", "SettingTextFragment",
+                     "SettingImageFragment", "SettingSoundFragment" -> {
                     setTitle(R.string.settingsTitle);
                     navController.navigate(R.id.settingsFragment);
                 }

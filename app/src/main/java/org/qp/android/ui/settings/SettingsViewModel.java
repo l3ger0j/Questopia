@@ -26,9 +26,9 @@ public class SettingsViewModel extends AndroidViewModel {
     public String formationAboutDesc(@NonNull Context context) {
         var aboutPage = "";
         if (getSettingsController().language.equalsIgnoreCase("ru")) {
-            aboutPage = readAssetFileAsString(context , "about-ru.html");
+            aboutPage = readAssetFileAsString(context, "about-ru.html");
         } else if (getSettingsController().language.equalsIgnoreCase("en")) {
-            aboutPage = readAssetFileAsString(context , "about-en.html");
+            aboutPage = readAssetFileAsString(context, "about-en.html");
         }
         if (aboutPage == null || aboutPage.isEmpty()) return null;
         return aboutPage

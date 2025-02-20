@@ -36,7 +36,6 @@ public class SettingsController {
     public boolean isUseMusicDebug;
     public boolean isVideoMute;
     public String language;
-
     private static SettingsController INSTANCE;
 
     @NonNull
@@ -48,21 +47,12 @@ public class SettingsController {
         return from(PreferenceManager.getDefaultSharedPreferences(context));
     }
 
-    public Typeface getTypeface() {
-        return switch (typeface) {
-            case 1 -> Typeface.SANS_SERIF;
-            case 2 -> Typeface.SERIF;
-            case 3 -> Typeface.MONOSPACE;
-            default -> Typeface.DEFAULT;
-        };
-    }
-
     @NonNull
     private static SettingsController from(@NonNull SharedPreferences preferences) {
         SettingsController settingsController = new SettingsController();
         settingsController.typeface = Integer.parseInt(preferences.getString("typeface", "0"));
         settingsController.fontSize = Integer.parseInt(preferences.getString("fontSize", "16"));
-        settingsController.binaryPrefixes = Integer.parseInt(preferences.getString("binPref","1000"));
+        settingsController.binaryPrefixes = Integer.parseInt(preferences.getString("binPref", "1000"));
         settingsController.actionsHeightRatio = parseActionsHeightRatio(preferences.getString("actsHeight", "1/3"));
         settingsController.isUseAutoscroll = preferences.getBoolean("autoscroll", true);
         settingsController.isUseExecString = preferences.getBoolean("execString", false);
@@ -71,13 +61,13 @@ public class SettingsController {
         settingsController.isUseImmersiveMode = preferences.getBoolean("immersiveMode", true);
         settingsController.language = preferences.getString("lang", "ru");
         imageSettings(settingsController, preferences);
-        colorSettings(settingsController , preferences);
-        soundSettings(settingsController , preferences);
+        colorSettings(settingsController, preferences);
+        soundSettings(settingsController, preferences);
         return settingsController;
     }
 
-    private static void colorSettings (@NonNull SettingsController settingsController,
-                                       @NonNull SharedPreferences preferences) {
+    private static void colorSettings(@NonNull SettingsController settingsController,
+                                      @NonNull SharedPreferences preferences) {
         settingsController.isUseGameTextColor = preferences.getBoolean("useGameTextColor", true);
         settingsController.textColor = preferences.getInt("textColor", Color.parseColor("#000000"));
         settingsController.isUseGameBackgroundColor = preferences.getBoolean("useGameBackgroundColor", true);
@@ -86,8 +76,8 @@ public class SettingsController {
         settingsController.linkColor = preferences.getInt("linkColor", Color.parseColor("#0000ff"));
     }
 
-    private static void imageSettings (@NonNull SettingsController settingsController,
-                                       @NonNull SharedPreferences preferences) {
+    private static void imageSettings(@NonNull SettingsController settingsController,
+                                      @NonNull SharedPreferences preferences) {
         settingsController.isImageDisabled = preferences.getBoolean("pref_disable_image", false);
         settingsController.isUseAutoWidth = preferences.getBoolean("autoWidth", true);
         settingsController.customWidthImage = Integer.parseInt(preferences.getString("customWidthImage", "400"));
@@ -112,6 +102,15 @@ public class SettingsController {
             case "1/2" -> 0.5f;
             case "2/3" -> 0.67f;
             default -> throw new RuntimeException("Unsupported value of actsHeight: " + str);
+        };
+    }
+
+    public Typeface getTypeface() {
+        return switch (typeface) {
+            case 1 -> Typeface.SANS_SERIF;
+            case 2 -> Typeface.SERIF;
+            case 3 -> Typeface.MONOSPACE;
+            default -> Typeface.DEFAULT;
         };
     }
 }
