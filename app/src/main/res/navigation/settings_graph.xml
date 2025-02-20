@@ -10,7 +10,7 @@
         android:label="SettingsFragment" />
     <fragment
         android:id="@+id/newsFragment"
-        android:name="org.qp.android.ui.news.NewsFragment"
+        android:name="org.qp.android.ui.settings.SettingNewsFragment"
         android:label="NewsFragment" />
     <fragment
         android:id="@+id/settingGeneralFragment"
