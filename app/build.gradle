@@ -2,9 +2,6 @@ plugins {
     alias(libs.plugins.android.application)
 }
 
-def viewBind = true
-def dataBind = true
-
 android {
     namespace 'org.qp.android'
     compileSdk 34
@@ -67,8 +64,8 @@ android {
     }
 
     buildFeatures {
-        viewBinding viewBind
-        dataBinding dataBind
+        viewBinding true
+        dataBinding true
         buildConfig true
     }
 
