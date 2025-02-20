@@ -6,7 +6,9 @@ import static org.qp.android.helpers.utils.ColorUtil.convertRGBAtoBGRA;
 import static org.qp.android.helpers.utils.ColorUtil.getHexColor;
 import static org.qp.android.helpers.utils.FileUtil.findOrCreateFolder;
 import static org.qp.android.helpers.utils.FileUtil.fromRelPath;
+import static org.qp.android.helpers.utils.FileUtil.isWritableDir;
 import static org.qp.android.helpers.utils.PathUtil.getExtension;
+import static org.qp.android.helpers.utils.StringUtil.isNotEmptyOrBlank;
 import static org.qp.android.helpers.utils.ThreadUtil.assertNonUiThread;
 import static org.qp.android.helpers.utils.ViewUtil.getFontStyle;
 import static org.qp.android.ui.game.GameActivity.LOAD;
@@ -38,6 +40,7 @@ import androidx.preference.PreferenceManager;
 
 import com.anggrayudi.storage.file.DocumentFileCompat;
 import com.google.android.material.textfield.TextInputLayout;
+import com.libqsp.jni.QSPLib;
 
 import org.qp.android.QuestopiaApplication;
 import org.qp.android.R;
@@ -54,6 +57,7 @@ import org.qp.android.ui.settings.SettingsController;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -61,6 +65,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 public class GameViewModel extends AndroidViewModel implements GameInterface {
 
@@ -408,15 +413,28 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
     private void refreshActionsRecycler() {
         CompletableFuture
                 .supplyAsync(() -> {
+                    var list = new ArrayList<>(getLibGameState().actionsList);
+                    var dir = DocumentFileCompat.fromUri(getApplication(), gameDirUri);
+                    if (!isWritableDir(getApplication(), dir)) return null;
+                    list.stream()
+                            .parallel()
+                            .map(item -> isNotEmptyOrBlank(item.image())
+                                    ? String.valueOf(fromRelPath(getApplication(), item.image(), dir))
+                                    : ""
+                            )
+                            .collect(Collectors.toUnmodifiableList());
+                    return list;
+                }, service)
+                .thenApplyAsync(list -> {
                     var actionsRecycler = new GameItemRecycler();
                     actionsRecycler.typeface = getSettingsController().getTypeface();
                     actionsRecycler.textSize = getFontSize();
                     actionsRecycler.textColor = getTextColor();
                     actionsRecycler.linkTextColor = getLinkColor();
                     actionsRecycler.backgroundColor = getBackgroundColor();
-                    actionsRecycler.submitList(getLibGameState().actionsList);
+                    actionsRecycler.submitList(list);
                     return actionsRecycler;
-                }, service)
+                })
                 .thenAcceptAsync(actionsRecycler -> {
                     actionsListLiveData.postValue(actionsRecycler);
                     int count = actionsRecycler.getItemCount();
@@ -431,6 +449,19 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
     private void refreshObjectsRecycler() {
         CompletableFuture
                 .supplyAsync(() -> {
+                    var list = new ArrayList<>(getLibGameState().objectsList);
+                    var dir = DocumentFileCompat.fromUri(getApplication(), gameDirUri);
+                    if (!isWritableDir(getApplication(), dir)) return null;
+                    list.stream()
+                            .parallel()
+                            .map(item -> isNotEmptyOrBlank(item.image())
+                                    ? String.valueOf(fromRelPath(getApplication(), item.image(), dir))
+                                    : ""
+                            )
+                            .collect(Collectors.toUnmodifiableList());
+                    return list;
+                }, service)
+                .thenApplyAsync(list -> {
                     getGameActivity().warnUser(GameActivity.TAB_OBJECTS);
                     var objectsRecycler = new GameItemRecycler();
                     objectsRecycler.typeface = getSettingsController().getTypeface();
@@ -438,9 +469,9 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
                     objectsRecycler.textColor = getTextColor();
                     objectsRecycler.linkTextColor = getLinkColor();
                     objectsRecycler.backgroundColor = getBackgroundColor();
-                    objectsRecycler.submitList(getLibGameState().objectsList);
+                    objectsRecycler.submitList(list);
                     return objectsRecycler;
-                }, service)
+                })
                 .thenAcceptAsync(objectsListLiveData::postValue, service);
     }
 
@@ -487,10 +518,10 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         getLibProxy().setGameInterface(null);
     }
 
-    public void runGameIntoNativeLib(String gameId,
+    public void runGameIntoNativeLib(long gameId,
                                      String gameTitle,
-                                     DocumentFile gameDir,
-                                     DocumentFile gameFile) {
+                                     Uri gameDir,
+                                     Uri gameFile) {
         getLibProxy().runGame(gameId, gameTitle, gameDir, gameFile);
     }
 
@@ -593,13 +624,12 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
     }
 
     @Override
-    public int showMenu() {
+    public int showMenu(List<QSPLib.ListItem> items) {
         assertNonUiThread();
 
         final var resultQueue = new ArrayBlockingQueue<Integer>(1);
-        final var currentItems = getLibProxy().getGameState().menuItemsList;
         final var newItems = new ArrayList<String>();
-        currentItems.forEach(libMenuItem -> newItems.add(libMenuItem.text()));
+        items.forEach(libMenuItem -> newItems.add(libMenuItem.image()));
         getGameActivity().showMenuDialog(newItems, resultQueue);
         try {
             return resultQueue.take();

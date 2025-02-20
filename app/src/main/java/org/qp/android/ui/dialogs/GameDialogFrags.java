@@ -26,11 +26,12 @@ import org.qp.android.databinding.DialogImageBinding;
 import org.qp.android.ui.game.GameViewModel;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public class GameDialogFrags extends DialogFragment {
 
-    private ArrayList<String> items;
+    private List<String> items;
     private GameDialogType dialogType;
     private DialogImageBinding imageBinding;
     private String processedMsg;
@@ -49,7 +50,7 @@ public class GameDialogFrags extends DialogFragment {
         this.dialogType = dialogType;
     }
 
-    public void setItems(ArrayList<String> items) {
+    public void setItems(List<String> items) {
         this.items = items;
     }
 
@@ -262,7 +263,7 @@ public class GameDialogFrags extends DialogFragment {
         super.onSaveInstanceState(outState);
         outState.putString("selectedDialogType", dialogType.toString());
         if (items != null) {
-            outState.putStringArrayList("items", items);
+            outState.putStringArrayList("items", new ArrayList<>(items));
         }
         if (message != null) {
             outState.putString("message" , message);

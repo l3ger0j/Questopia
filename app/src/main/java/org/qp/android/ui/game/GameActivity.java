@@ -35,7 +35,6 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.anggrayudi.storage.SimpleStorageHelper;
-import com.anggrayudi.storage.file.DocumentFileCompat;
 import com.anggrayudi.storage.file.MimeType;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -52,7 +51,7 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -246,16 +245,13 @@ public class GameActivity extends AppCompatActivity {
 
     private void initGame() {
         var intent = getIntent();
-        var gameId = intent.getStringExtra("gameId");
+        var gameId = intent.getLongExtra("gameId", 0L);
         var gameTitle = intent.getStringExtra("gameTitle");
         var gameDirUri = Uri.parse(intent.getStringExtra("gameDirUri"));
-        var gameDir = DocumentFileCompat.fromUri(this, gameDirUri);
         var gameFileUri = Uri.parse(intent.getStringExtra("gameFileUri"));
-        var gameFile = DocumentFileCompat.fromUri(this, gameFileUri);
-
 
         gameViewModel.setGameDirUri(gameDirUri);
-        gameViewModel.runGameIntoNativeLib(gameId, gameTitle, gameDir, gameFile);
+        gameViewModel.runGameIntoNativeLib(gameId, gameTitle, gameDirUri, gameFileUri);
     }
 
     private void setActiveTab(int tab) {
@@ -512,7 +508,7 @@ public class GameActivity extends AppCompatActivity {
         }
     }
 
-    public void showMenuDialog(@NonNull ArrayList<String> items,
+    public void showMenuDialog(@NonNull List<String> items,
                                @NonNull ArrayBlockingQueue<Integer> resultQueue) {
         if (isFinishing()) return;
         if (!isMainThread()) {

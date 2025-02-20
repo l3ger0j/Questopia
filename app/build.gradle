@@ -16,7 +16,8 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
-                cFlags "-D_ANDROID"
+                arguments "-DBUILD_JAVA=1"
+                cFlags "-DANDROID"
             }
         }
     }
@@ -30,7 +31,7 @@ android {
     externalNativeBuild {
         cmake {
             version "3.22.1"
-            path "src/main/jni/CMakeLists.txt"
+            path "src/main/cpp/CMakeLists.txt"
         }
     }
 

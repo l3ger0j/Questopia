@@ -1,8 +1,0 @@
-#ifndef QSP_CONFIG_H
-#define QSP_CONFIG_H
-
-#define QSP_VER_STR "@ndkqsp_VERSION@"
-#define QSP_GAMEMINVER_STR "@QSP_GAMEMIN_VER@"
-
-#endif
-

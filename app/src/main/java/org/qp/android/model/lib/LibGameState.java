@@ -1,37 +1,35 @@
 package org.qp.android.model.lib;
 
-import androidx.documentfile.provider.DocumentFile;
+import android.net.Uri;
 
-import org.libndkqsp.jni.NDKLib;
+import com.libqsp.jni.QSPLib;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public class LibGameState {
 
     public boolean gameRunning;
-    public String gameId;
+    public long gameId = 0L;
     public String gameTitle;
-    public DocumentFile gameDir;
-    public DocumentFile gameFile;
+    public Uri gameDirUri;
+    public Uri gameFileUri;
     public String mainDesc = "";
     public String varsDesc = "";
     public final LibIConfig interfaceConfig = new LibIConfig();
-    public ArrayList<NDKLib.ListItem> actionsList = new ArrayList<>();
-    public ArrayList<NDKLib.ListItem> objectsList = new ArrayList<>();
-    public ArrayList<NDKLib.ListItem> menuItemsList = new ArrayList<>();
+    public List<QSPLib.ListItem> actionsList = List.of();
+    public List<QSPLib.ListItem> objectsList = List.of();
 
     public void reset() {
         interfaceConfig.reset();
         gameRunning = false;
-        gameId = null;
-        gameTitle = null;
-        gameDir = null;
-        gameFile = null;
+        gameId = 0L;
+        gameTitle = "";
+        gameDirUri = Uri.EMPTY;
+        gameFileUri = Uri.EMPTY;
         mainDesc = "";
         varsDesc = "";
-        actionsList = new ArrayList<>();
-        objectsList = new ArrayList<>();
-        menuItemsList = new ArrayList<>();
+        actionsList.clear();
+        objectsList.clear();
     }
 
 }
