@@ -210,6 +210,7 @@ public class StockActivity extends AppCompatActivity {
                         var application = (QuestopiaApplication) getApplication();
                         if (application != null) application.setCurrentGameDir(rootFolder);
                         stockViewModel.refreshGamesDirs();
+                        stockViewModel.saveListDirsIntoFile(listDirsFile);
                     }
                 });
             }
@@ -488,7 +489,7 @@ public class StockActivity extends AppCompatActivity {
     }
 
     private void loadSettings() {
-        listDirsFile = stockViewModel.getListDirsFile();
+        listDirsFile = stockViewModel.listDirsFile;
 
         if (listDirsFile.exists()) {
             restoreListDirsFromFile();
