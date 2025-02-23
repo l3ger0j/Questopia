@@ -9,8 +9,10 @@ import static org.qp.android.helpers.utils.FileUtil.isWritableFile;
 import static org.qp.android.helpers.utils.FileUtil.readFileAsString;
 import static org.qp.android.helpers.utils.JsonUtil.jsonToObject;
 import static org.qp.android.helpers.utils.JsonUtil.objectToJson;
+import static org.qp.android.helpers.utils.StringUtil.isNotEmptyOrBlank;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.util.Log;
 
@@ -19,6 +21,8 @@ import androidx.annotation.Nullable;
 import androidx.documentfile.provider.DocumentFile;
 
 import com.anggrayudi.storage.file.DocumentFileCompat;
+import com.anggrayudi.storage.file.DocumentFileType;
+import com.anggrayudi.storage.file.DocumentFileUtils;
 import com.anggrayudi.storage.file.MimeType;
 
 import org.qp.android.dto.stock.GameData;
@@ -26,46 +30,37 @@ import org.qp.android.dto.stock.GameData;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.file.FileVisitOption;
-import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.SimpleFileVisitor;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 public class LocalGame {
-
-    private final String TAG = this.getClass().getSimpleName();
 
     private static final String GAME_INFO_FILENAME = ".gameInfo";
     private static final String NOMEDIA_FILENAME = ".nomedia";
     private static final String NOSEARCH_FILENAME = ".nosearch";
-
+    private final String TAG = this.getClass().getSimpleName();
     private final Context context;
-
-    @NonNull
-    private List<File> getGameDirectories(Path generalGamesDir) throws IOException {
-        var gamesDirsList = new ArrayList<File>();
-
-        Files.walkFileTree(generalGamesDir, Collections.singleton(FileVisitOption.FOLLOW_LINKS), 2, new SimpleFileVisitor<>() {
-            @Override
-            public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-                if (!dir.equals(generalGamesDir)) {
-                    gamesDirsList.add(dir.toFile());
-                }
-                return super.postVisitDirectory(dir , exc);
-            }
-        });
-
-        return gamesDirsList;
-    }
 
     public LocalGame(Context context) {
         this.context = context;
+    }
+
+    private void dropPersistable(Uri folderUri) {
+        try {
+            var contentResolver = context.getContentResolver();
+            contentResolver.releasePersistableUriPermission(
+                    folderUri,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION
+                            | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+            );
+        } catch (SecurityException ignored) {
+        }
     }
 
     private void createNoMediaFile(@NonNull DocumentFile gameDir) {
@@ -80,15 +75,15 @@ public class LocalGame {
         var infoFile = findOrCreateFile(context, gameDir, GAME_INFO_FILENAME, MimeType.TEXT);
 
         if (!isWritableFile(context, infoFile)) {
-            Log.e(TAG , "IS NOT WRITABLE");
+            Log.e(TAG, "IS NOT WRITABLE");
             return;
         }
 
         var tempInfoFile = documentWrap(infoFile);
         try (var out = tempInfoFile.openOutputStream(context, false)) {
-            objectToJson(out , gameData);
+            objectToJson(out, gameData);
         } catch (Exception ex) {
-            Log.e(TAG , "ERROR: " , ex);
+            Log.e(TAG, "ERROR: ", ex);
         }
     }
 
@@ -108,61 +103,74 @@ public class LocalGame {
     }
 
     public List<GameData> extractDataFromFolder(File generalGamesFolder) throws IOException {
-        if (generalGamesFolder == null) {
-            return Collections.emptyList();
-        }
-
-        var gamesDirs = getGameDirectories(generalGamesFolder.toPath());
-        if (gamesDirs.isEmpty()) {
-            Log.e(TAG, "game dir is null");
+        if (!isWritableDir(context, generalGamesFolder)) {
             return Collections.emptyList();
         }
 
         var itemsGamesDirs = new ArrayList<GameData>();
-        var formatGamesDirs = wrapFToGameFolder(gamesDirs);
+        var formatGamesDirs = wrapFToGameFolder(generalGamesFolder);
         var random = new SecureRandom();
 
         for (var gameFolder : formatGamesDirs) {
             var gameDir = new File(gameFolder.gameUriDir.getPath());
-            if (!isWritableDir(context, gameDir)) return Collections.emptyList();
+            if (!isWritableDir(context, gameDir)) {
+                dropPersistable(gameFolder.gameUriDir);
+                formatGamesDirs.remove(gameFolder);
+                continue;
+            }
 
             var item = (GameData) null;
             var infoFile = fromRelPath(GAME_INFO_FILENAME, gameDir);
 
             if (!isWritableFile(context, infoFile)) {
                 var name = gameDir.getName();
-                if (name.isEmpty()) return Collections.emptyList();
+                if (!isNotEmptyOrBlank(name)) {
+                    name = "game#" + random.nextInt();
+                }
 
                 item = new GameData();
                 item.id = random.nextInt();
                 item.title = name;
-                item.gameDir = gameFolder.gameUriDir;
-                item.gameFiles = gameFolder.gameUriFiles;
+                item.gameDirUri = gameFolder.gameUriDir;
+                item.gameFilesUri = gameFolder.gameUriFiles;
 
                 createDataIntoFolder(item, gameDir);
                 itemsGamesDirs.add(item);
             } else {
                 var infoFileCont = readFileAsString(infoFile);
 
-                if (infoFileCont != null) {
-                    item = parseGameInfo(infoFileCont);
+                if (isNotEmptyOrBlank(infoFileCont)) {
+                    try {
+                        item = parseGameInfo(infoFileCont);
+                    } catch (IOException e) {
+                        continue;
+                    }
                 }
 
                 if (item == null) {
                     var name = gameDir.getName();
-                    if (name.isEmpty()) return Collections.emptyList();
+                    if (!isNotEmptyOrBlank(name)) {
+                        name = "game#" + random.nextInt();
+                    }
 
                     item = new GameData();
                     item.id = random.nextInt();
                     item.title = name;
-                    item.gameDir = gameFolder.gameUriDir;
-                    item.gameFiles = gameFolder.gameUriFiles;
+                    item.gameDirUri = gameFolder.gameUriDir;
+                    item.gameFilesUri = gameFolder.gameUriFiles;
 
                     createDataIntoFolder(item, gameDir);
                     itemsGamesDirs.add(item);
                 } else {
-                    item.gameDir = gameFolder.gameUriDir;
-                    item.gameFiles = gameFolder.gameUriFiles;
+                    var isNotEqualsRootDirs = !Objects.equals(item.gameDirUri, gameFolder.gameUriDir);
+                    var isNotEqualsListFiles = !Objects.equals(item.gameFilesUri, gameFolder.gameUriFiles);
+
+                    if (isNotEqualsRootDirs) {
+                        item.gameDirUri = gameFolder.gameUriDir;
+                    }
+                    if (isNotEqualsListFiles) {
+                        item.gameFilesUri = gameFolder.gameUriFiles;
+                    }
 
                     itemsGamesDirs.add(item);
                 }
@@ -183,45 +191,65 @@ public class LocalGame {
 
         for (var gameFolder : formatGamesDirs) {
             var gameDir = DocumentFileCompat.fromUri(context, gameFolder.gameUriDir);
-            if (!isWritableDir(context, gameDir)) return Collections.emptyList();
+            if (!isWritableDir(context, gameDir)) {
+                dropPersistable(gameFolder.gameUriDir);
+                formatGamesDirs.remove(gameFolder);
+                continue;
+            }
 
             var item = (GameData) null;
             var infoFile = fromRelPath(context, GAME_INFO_FILENAME, gameDir);
 
-            if (infoFile == null) {
+            if (!isWritableFile(context, infoFile)) {
                 var name = gameDir.getName();
-                if (name == null) return Collections.emptyList();
+                if (!isNotEmptyOrBlank(name)) {
+                    name = "game#" + random.nextInt();
+                }
 
                 item = new GameData();
                 item.id = random.nextInt();
                 item.title = name;
-                item.gameDir = gameFolder.gameUriDir;
-                item.gameFiles = gameFolder.gameUriFiles;
+                item.gameDirUri = gameFolder.gameUriDir;
+                item.gameFilesUri = gameFolder.gameUriFiles;
 
                 createDataIntoFolder(item, gameDir);
                 itemsGamesDirs.add(item);
             } else {
-                var infoFileCont = readFileAsString(context , infoFile.getUri());
+                var infoFileCont = readFileAsString(context, infoFile.getUri());
 
-                if (infoFileCont != null) {
-                    item = parseGameInfo(infoFileCont);
+                if (isNotEmptyOrBlank(infoFileCont)) {
+                    try {
+                        item = parseGameInfo(infoFileCont);
+                    } catch (IOException e) {
+                        continue;
+                    }
                 }
 
                 if (item == null) {
                     var name = gameDir.getName();
-                    if (name == null) return Collections.emptyList();
+                    if (!isNotEmptyOrBlank(name)) {
+                        name = "game#" + random.nextInt();
+                    }
 
                     item = new GameData();
                     item.id = random.nextInt();
                     item.title = name;
-                    item.gameDir = gameFolder.gameUriDir;
-                    item.gameFiles = gameFolder.gameUriFiles;
+                    item.gameDirUri = gameFolder.gameUriDir;
+                    item.gameFilesUri = gameFolder.gameUriFiles;
 
                     createDataIntoFolder(item, gameDir);
                     itemsGamesDirs.add(item);
                 } else {
-                    item.gameDir = gameFolder.gameUriDir;
-                    item.gameFiles = gameFolder.gameUriFiles;
+                    var isNotEqualsRootDirs = !Objects.equals(item.gameDirUri, gameFolder.gameUriDir);
+                    var isNotEqualsListFiles = !Objects.equals(item.gameFilesUri, gameFolder.gameUriFiles);
+
+                    if (isNotEqualsRootDirs) {
+                        item.gameDirUri = gameFolder.gameUriDir;
+                    }
+                    if (isNotEqualsListFiles) {
+                        item.gameFilesUri = gameFolder.gameUriFiles;
+                    }
+
                     itemsGamesDirs.add(item);
                 }
             }
@@ -244,13 +272,12 @@ public class LocalGame {
 
         for (var rootDir : dirs) {
             var gameFiles = new ArrayList<Uri>();
-            var files = rootDir.listFiles();
-            if (files == null) return Collections.emptyList();
+            var files = DocumentFileUtils.search(rootDir, true, DocumentFileType.FILE);
 
             for (var file : files) {
-                if (file.getName() == null) continue;
-                var lcName = file.getName().toLowerCase(Locale.ROOT);
-                if (lcName.endsWith(".qsp") || lcName.endsWith(".gam")) {
+                var dirExtension = documentWrap(file).getExtension();
+                var lcName = dirExtension.toLowerCase(Locale.ROOT);
+                if (lcName.endsWith("qsp") || lcName.endsWith("gam")) {
                     gameFiles.add(file.getUri());
                 }
             }
@@ -262,27 +289,34 @@ public class LocalGame {
     }
 
     @NonNull
-    private List<GameFolder> wrapFToGameFolder(List<File> dirs) {
+    private List<GameFolder> wrapFToGameFolder(File rootDir) {
         var folders = new ArrayList<GameFolder>();
 
-        for (var dir : dirs) {
-            var gameFiles = new ArrayList<Uri>();
-            var files = dir.listFiles();
-            if (files == null) return Collections.emptyList();
+        var subRootDir = new ArrayList<File>();
+        try (var walk = Files.walk(rootDir.toPath(), 1)) {
+            walk.map(Path::toFile)
+                    .filter(file -> file.isDirectory() && !Objects.deepEquals(file, rootDir))
+                    .forEach(subRootDir::add);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
-            for (var file : files) {
-                if (file.getName().isEmpty()) continue;
-                var lcName = file.getName().toLowerCase(Locale.ROOT);
-                if (lcName.endsWith(".qsp") || lcName.endsWith(".gam")) {
-                    gameFiles.add(Uri.fromFile(file));
-                }
+        var subFiles = new ArrayList<Uri>();
+        for (var element : subRootDir) {
+            try (var walk = Files.walk(element.toPath())) {
+                walk.map(Path::toFile)
+                        .filter(f -> f.isFile() && f.getPath().endsWith(".qsp") || f.getPath().endsWith(".gam"))
+                        .map(Uri::fromFile)
+                        .forEach(subFiles::add);
+            } catch (IOException e) {
+                return Collections.emptyList();
             }
-
-            folders.add(new GameFolder(Uri.fromFile(dir), gameFiles));
+            folders.add(new GameFolder(Uri.fromFile(element), subFiles));
         }
 
         return folders;
     }
 
-    private record GameFolder(Uri gameUriDir, List<Uri> gameUriFiles) {}
+    private record GameFolder(Uri gameUriDir, List<Uri> gameUriFiles) {
+    }
 }

@@ -2,8 +2,11 @@ package org.qp.android.ui.stock;
 
 import static org.qp.android.QuestopiaApplication.UNPACK_GAME_CHANNEL_ID;
 import static org.qp.android.QuestopiaApplication.UNPACK_GAME_NOTIFICATION_ID;
+import static org.qp.android.helpers.utils.DirUtil.MOD_DIR_NAME;
 import static org.qp.android.helpers.utils.DirUtil.calculateDirSize;
+import static org.qp.android.helpers.utils.DirUtil.getNamesDir;
 import static org.qp.android.helpers.utils.DirUtil.isDirContainsGameFile;
+import static org.qp.android.helpers.utils.DirUtil.isModDirExist;
 import static org.qp.android.helpers.utils.FileUtil.copyFileToDir;
 import static org.qp.android.helpers.utils.FileUtil.findOrCreateFile;
 import static org.qp.android.helpers.utils.FileUtil.findOrCreateFolder;
@@ -33,7 +36,6 @@ import android.webkit.CookieManager;
 
 import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.view.ActionMode;
 import androidx.core.app.ActivityCompat;
 import androidx.documentfile.provider.DocumentFile;
@@ -98,7 +100,7 @@ public class StockViewModel extends AndroidViewModel {
     private final HashMap<Long, GameData> gamesMap = new HashMap<>();
     private final LocalGame localGame = new LocalGame(getApplication());
     private final DownloadManager downloadManager = getApplication().getSystemService(DownloadManager.class);
-    private final File listDirsFile;
+    public final File listDirsFile;
     private final File rootInDir;
     private final FileCallback callback = new FileCallback() {
         @Override
@@ -289,23 +291,17 @@ public class StockViewModel extends AndroidViewModel {
         return modDataString.replace("-MOD_DATA-", modDate);
     }
 
-    public File getListDirsFile() {
-        return listDirsFile;
-    }
-
     public int getCountGameFiles() {
         var gameData = currGameData;
         if (gameData == null) return 0;
-        var gameFiles = gameData.getGameFiles(getApplication());
-        return gameFiles.size();
+        return gameData.gameFilesUri.size();
     }
 
-    @Nullable
-    public DocumentFile getGameFile(int index) {
+    @NonNull
+    public Uri getGameFile(int index) {
         var gameData = currGameData;
-        if (gameData == null) return null;
-        var gameFiles = gameData.getGameFiles(getApplication());
-        return gameFiles.get(index);
+        if (gameData == null) return Uri.EMPTY;
+        return gameData.gameFilesUri.get(index);
     }
 
     public boolean isGamePossiblyDownload() {
@@ -315,30 +311,36 @@ public class StockViewModel extends AndroidViewModel {
     public boolean isGameInstalled() {
         var gameData = currGameData;
         if (gameData == null) return false;
-        var gameDir = gameData.getGameDir(getApplication());
-        return gameData.isFileInstalled() && isDirContainsGameFile(gameDir);
+
+        var rootDirUri = gameData.gameDirUri;
+        if (rootDirUri == Uri.EMPTY) return false;
+        if (isNotEmptyOrBlank(String.valueOf(rootDirUri))) {
+            return isDirContainsGameFile(getApplication(), rootDirUri);
+        }
+        return false;
     }
 
     public boolean isGameInstalled(GameData entry) {
         if (entry == null) return false;
-        var gameDir = entry.getGameDir(getApplication());
-        return entry.isFileInstalled() && isDirContainsGameFile(gameDir);
+        var rootDirUri = entry.gameDirUri;
+        if (rootDirUri == Uri.EMPTY) return false;
+        if (!isNotEmptyOrBlank(String.valueOf(rootDirUri))) return false;
+        return isDirContainsGameFile(getApplication(), rootDirUri);
     }
 
     public boolean isHasRemoteUrl() {
         var gameData = currGameData;
         if (gameData == null) return false;
-        return currGameData.isHasRemoteUrl();
+        return isNotEmptyOrBlank(currGameData.fileUrl);
     }
-    // endregion Getter/Setter
 
     public boolean isModsDirExist() {
         var gameData = currGameData;
         if (gameData == null) return false;
-        var gameDir = gameData.getGameDir(getApplication());
-        var modDir = fromRelPath(getApplication(), "mods", gameDir);
-        return modDir != null;
+        return isModDirExist(getApplication(), currGameData.gameDirUri);
     }
+
+    // endregion Getter/Setter
 
     public void doOnShowFilePicker(int requestCode, String[] mimeTypes) {
         emitter.waitAndExecuteOnce(new StockFragmentNavigation.ShowFilePicker(requestCode, mimeTypes));
@@ -510,11 +512,8 @@ public class StockViewModel extends AndroidViewModel {
                 }
                 case SELECT_DIALOG -> {
                     outputIntObserver = new MutableLiveData<>();
-                    var names = new ArrayList<String>();
-                    var files = currGameData.getGameFiles(getApplication());
-                    files.forEach(file -> names.add(file.getName()));
                     dialogFragments.setDialogType(StockDialogType.SELECT_DIALOG);
-                    dialogFragments.setNames(names);
+                    dialogFragments.setNames(getNamesDir(getApplication(), currGameData.gameFilesUri));
                     dialogFragments.show(manager, "selectDialogFragment");
                 }
             }
@@ -539,8 +538,8 @@ public class StockViewModel extends AndroidViewModel {
             var nameDir = rootDir.getName();
             var secureRandom = new SecureRandom();
 
-            if (nameDir == null) {
-                nameDir = "game#" + secureRandom.nextInt();
+            if (!isNotEmptyOrBlank(nameDir)) {
+                nameDir = "game#"+secureRandom.nextInt();
             }
 
             var newGameData = new GameData();
@@ -625,19 +624,16 @@ public class StockViewModel extends AndroidViewModel {
             if (editBinding.sizeDirSW.isChecked() || getGameSize() != DISABLE_CALC_SIZE) {
                 calculateSizeDir(currGameData);
             }
-            var gameDir = currGameData.getGameDir(getApplication());
-            if (tempPathFile != null) {
+
+            var gameDir = DocumentFileCompat.fromUri(getApplication(), currGameData.gameDirUri);
+            if (isWritableFile(getApplication(), tempPathFile) && isWritableDir(getApplication(), gameDir)) {
                 CompletableFuture
-                        .runAsync(() -> copyFileToDir(getApplication(),
-                                tempPathFile, gameDir, callback
-                        ));
+                        .runAsync(() -> copyFileToDir(getApplication(), tempPathFile, gameDir, callback));
             }
-            if (tempModFile != null) {
-                var modDir = fromRelPath(getApplication(), "mods", gameDir);
+            if (isWritableFile(getApplication(), tempModFile) && isWritableDir(getApplication(), gameDir)) {
+                var modDir = fromRelPath(getApplication(), MOD_DIR_NAME, gameDir);
                 CompletableFuture
-                        .runAsync(() -> copyFileToDir(getApplication(),
-                                tempModFile, modDir, callback
-                        ));
+                        .runAsync(() -> copyFileToDir(getApplication(), tempModFile, modDir, callback));
             }
 
             localGame.createDataIntoFolder(currGameData, gameDir);
@@ -649,7 +645,8 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     private void calculateSizeDir(GameData gameData) {
-        var gameDir = gameData.getGameDir(getApplication());
+        var gameDir = DocumentFileCompat.fromUri(getApplication(), currGameData.gameDirUri);
+        if (!isWritableDir(getApplication(), gameDir)) return;
 
         CompletableFuture
                 .supplyAsync(() -> calculateDirSize(gameDir), executor)
@@ -662,8 +659,8 @@ public class StockViewModel extends AndroidViewModel {
     public Optional<Intent> createPlayGameIntent() {
         if (getCurrGameData().isPresent()) {
             var data = getCurrGameData().get();
-            var gameDir = data.getGameDir(getApplication());
-            if (gameDir == null) return Optional.empty();
+            var gameDir = DocumentFileCompat.fromUri(getApplication(), currGameData.gameDirUri);
+            if (!isWritableDir(getApplication(), gameDir)) return Optional.empty();
             var intent = new Intent(getApplication(), GameActivity.class);
 
             var application = (QuestopiaApplication) getApplication();
@@ -797,26 +794,10 @@ public class StockViewModel extends AndroidViewModel {
                     unionList.addAll(extDataList);
                     return unionList;
                 }, executor)
-                .thenAccept(externalGameData -> externalGameData.forEach(localGameData -> {
-                    var remoteGameData = gamesMap.get(localGameData.id);
-                    if (remoteGameData != null) {
-                        var aggregateGameData = new GameData(remoteGameData);
-                        aggregateGameData.gameDir = localGameData.gameDir;
-                        aggregateGameData.gameFiles = localGameData.gameFiles;
-                        gamesMap.put(localGameData.id, aggregateGameData);
-                    } else {
-                        gamesMap.put(localGameData.id, localGameData);
-                    }
-                }))
-                .thenRunAsync(() -> {
-                    var sortedGameData = getSortedGames();
-                    var localGameData = new ArrayList<GameData>();
-                    for (var data : sortedGameData) {
-                        if (!data.isFileInstalled()) continue;
-                        localGameData.add(data);
-                    }
-                    dataList.postValue(localGameData);
-                }, executor)
+                .thenAccept(externalGameData -> externalGameData.forEach(localGameData ->
+                        gamesMap.put(localGameData.id, localGameData))
+                )
+                .thenRunAsync(() -> dataList.postValue(getSortedGames()), executor)
                 .exceptionally(throwable -> {
                     doOnShowErrorDialog(throwable.toString(), ErrorType.EXCEPTION);
                     return null;
@@ -840,15 +821,7 @@ public class StockViewModel extends AndroidViewModel {
                 .thenAcceptAsync(remDataList -> remDataList.forEach(remGameData ->
                         gamesMap.put(remGameData.id, new GameData(remGameData))
                 ), executor)
-                .thenRunAsync(() -> {
-                    var sortedGameData = getSortedGames();
-                    var remoteGameData = new ArrayList<GameData>();
-                    for (var data : sortedGameData) {
-                        if (data.isFileInstalled()) continue;
-                        remoteGameData.add(data);
-                    }
-                    dataList.postValue(remoteGameData);
-                }, executor)
+                .thenRunAsync(() -> dataList.postValue(getSortedGames()), executor)
                 .exceptionally(throwable -> {
                     doOnShowErrorDialog(throwable.toString(), ErrorType.EXCEPTION);
                     return null;
@@ -896,7 +869,8 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     public void delEntryDirFromList(List<GameData> tempList, GameData data, File listDirsFile) {
-        var gameDir = data.getGameDir(getApplication());
+        var gameDir = DocumentFileCompat.fromUri(getApplication(), currGameData.gameDirUri);
+        if (!isWritableDir(getApplication(), gameDir)) return;
 
         CompletableFuture
                 .runAsync(() -> tempList.remove(data), executor)
@@ -906,7 +880,7 @@ public class StockViewModel extends AndroidViewModel {
                         executor
                 )
                 .thenRunAsync(() -> forceDelFile(getApplication(), gameDir), executor)
-                .thenRunAsync(() -> dropPersistable(data.gameDir), executor)
+                .thenRunAsync(() -> dropPersistable(data.gameDirUri), executor)
                 .thenRun(this::refreshGameData)
                 .exceptionally(ex -> {
                     doOnShowErrorDialog(ex.getMessage(), ErrorType.EXCEPTION);
@@ -915,7 +889,8 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     public void delEntryFromList(List<GameData> tempList, GameData data, File listDirsFile) {
-        var gameDir = data.getGameDir(getApplication());
+        var gameDir = DocumentFileCompat.fromUri(getApplication(), currGameData.gameDirUri);
+        if (!isWritableDir(getApplication(), gameDir)) return;
 
         CompletableFuture
                 .runAsync(() -> tempList.remove(data), executor)
@@ -924,7 +899,7 @@ public class StockViewModel extends AndroidViewModel {
                         (unused, unused2) -> null,
                         executor
                 )
-                .thenRunAsync(() -> dropPersistable(data.gameDir), executor)
+                .thenRunAsync(() -> dropPersistable(data.gameDirUri), executor)
                 .thenRun(this::refreshGameData)
                 .exceptionally(ex -> {
                     doOnShowErrorDialog(ex.getMessage(), ErrorType.EXCEPTION);

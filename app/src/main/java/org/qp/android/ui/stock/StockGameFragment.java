@@ -63,8 +63,7 @@ public class StockGameFragment extends Fragment {
                 );
                 case 1 -> {
                     var chosenGameFile = stockViewModel.getGameFile(0);
-                    if (chosenGameFile == null) return;
-                    intent.putExtra("gameFileUri", String.valueOf(chosenGameFile.getUri()));
+                    intent.putExtra("gameFileUri", String.valueOf(chosenGameFile));
                     requireActivity().startActivity(intent);
                 }
                 default -> {
@@ -75,8 +74,7 @@ public class StockGameFragment extends Fragment {
                     );
                     stockViewModel.outputIntObserver.observe(getViewLifecycleOwner(), integer -> {
                         var chosenGameFile = stockViewModel.getGameFile(integer);
-                        if (chosenGameFile == null) return;
-                        intent.putExtra("gameFileUri", String.valueOf(chosenGameFile.getUri()));
+                        intent.putExtra("gameFileUri", String.valueOf(chosenGameFile));
                         requireActivity().startActivity(intent);
                     });
                 }

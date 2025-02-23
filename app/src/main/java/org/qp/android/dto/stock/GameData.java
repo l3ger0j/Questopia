@@ -1,18 +1,12 @@
 package org.qp.android.dto.stock;
 
-import static org.qp.android.helpers.utils.StringUtil.isNotEmpty;
-
-import android.content.Context;
 import android.net.Uri;
 
 import androidx.annotation.NonNull;
-import androidx.documentfile.provider.DocumentFile;
 
-import com.anggrayudi.storage.file.DocumentFileCompat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -36,61 +30,11 @@ public class GameData implements Serializable {
     public String modDate = "";
 
     @JsonIgnore
-    public Uri gameDir;
+    public Uri gameDirUri = Uri.EMPTY;
     @JsonIgnore
-    public List<Uri> gameFiles;
+    public List<Uri> gameFilesUri = Collections.emptyList();
 
-    @JsonIgnore
-    public DocumentFile getGameDir(Context context) {
-        if (gameDir == null) return null;
-        return DocumentFileCompat.fromUri(context, gameDir);
-    }
-
-    @JsonIgnore
-    public List<DocumentFile> getGameFiles(Context context) {
-        if (gameFiles == null) return Collections.emptyList();
-
-        var listDocumentFile = new ArrayList<DocumentFile>();
-        for (var element : gameFiles) {
-            var file = DocumentFileCompat.fromUri(context, element);
-            listDocumentFile.add(file);
-        }
-
-        return listDocumentFile;
-    }
-
-    @JsonIgnore
-    public boolean isHasRemoteUrl() {
-        if (fileUrl == null) return false;
-        return isNotEmpty(fileUrl);
-    }
-
-    @JsonIgnore
-    public boolean isFileInstalled() {
-        return gameDir != null;
-    }
-
-    public GameData() {}
-
-    public GameData(GameData other) {
-        id = other.id;
-        listId = other.listId;
-        author = other.author;
-        portedBy = other.portedBy;
-        version = other.version;
-        title = other.title;
-        lang = other.lang;
-        player = other.player;
-        icon = other.icon;
-        fileUrl = other.fileUrl;
-        fileSize = other.fileSize;
-        fileExt = other.fileExt;
-        descUrl = other.descUrl;
-        pubDate = other.pubDate;
-        modDate = other.modDate;
-        gameDir = other.gameDir;
-        gameFiles = other.gameFiles;
-    }
+    public GameData() { }
 
     public GameData(RemoteGameData other) {
         id = other.id;
@@ -129,8 +73,8 @@ public class GameData implements Serializable {
                 ", descUrl='" + descUrl + '\'' +
                 ", pubDate='" + pubDate + '\'' +
                 ", modDate='" + modDate + '\'' +
-                ", gameDir=" + gameDir +
-                ", gameFiles=" + gameFiles +
+                ", gameDir=" + gameDirUri +
+                ", gameFiles=" + gameFilesUri +
                 '}';
     }
 
@@ -152,8 +96,8 @@ public class GameData implements Serializable {
                 && Objects.equals(descUrl , gameData.descUrl)
                 && Objects.equals(pubDate , gameData.pubDate)
                 && Objects.equals(modDate , gameData.modDate)
-                && Objects.equals(gameDir , gameData.gameDir)
-                && Objects.equals(gameFiles , gameData.gameFiles);
+                && Objects.equals(gameDirUri, gameData.gameDirUri)
+                && Objects.equals(gameFilesUri, gameData.gameFilesUri);
     }
 
     @Override
@@ -162,6 +106,6 @@ public class GameData implements Serializable {
                 version , title , lang ,
                 player , icon , fileUrl ,
                 fileSize , fileExt , descUrl ,
-                pubDate , modDate , gameDir , gameFiles);
+                pubDate , modDate , gameDirUri, gameFilesUri);
     }
 }
