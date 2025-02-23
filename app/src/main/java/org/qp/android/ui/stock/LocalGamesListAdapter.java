@@ -2,6 +2,7 @@ package org.qp.android.ui.stock;
 
 import static org.qp.android.helpers.utils.AccessibilityUtil.customAccessibilityDelegate;
 import static org.qp.android.helpers.utils.FileUtil.formatFileSize;
+import static org.qp.android.helpers.utils.StringUtil.isNotEmptyOrBlank;
 import static org.qp.android.ui.stock.StockViewModel.DISABLE_CALC_SIZE;
 
 import android.content.Context;
@@ -10,13 +11,11 @@ import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.core.content.ContextCompat;
-import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.AsyncListDiffer;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
-
-import com.squareup.picasso.Picasso;
 
 import org.qp.android.R;
 import org.qp.android.databinding.ListItemGameBinding;
@@ -84,8 +83,7 @@ public class LocalGamesListAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         this.context = new WeakReference<>(parent.getContext());
         var inflater = LayoutInflater.from(parent.getContext());
-        ListItemGameBinding listItemGameBinding =
-                DataBindingUtil.inflate(inflater, R.layout.list_item_game, parent, false);
+        var listItemGameBinding = ListItemGameBinding.inflate(inflater, parent, false);
         listItemGameBinding.relativeLayout.setAccessibilityDelegate(customAccessibilityDelegate());
         return new GameHolder(listItemGameBinding);
     }
@@ -94,14 +92,22 @@ public class LocalGamesListAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof GameHolder gameHolder) {
             var gameData = getItem(position);
-            gameHolder.listItemGameBinding(gameData);
 
-            if (gameData.icon != null) {
-                Picasso.get()
-                        .load(Uri.parse(gameData.icon))
-                        .fit()
-                        .error(R.drawable.baseline_broken_image_24)
-                        .into(gameHolder.listItemGameBinding.gameIcon);
+            final var icon = gameHolder.listItemGameBinding.gameIcon;
+            if (isNotEmptyOrBlank(gameData.icon)) {
+                icon.setImageURI(Uri.parse(gameData.icon));
+            } else {
+                var drawable = AppCompatResources.getDrawable(
+                        context.get(),
+                        R.drawable.baseline_broken_image_24
+                );
+                icon.setImageDrawable(drawable);
+            }
+
+            final var text = gameHolder.listItemGameBinding.gameTitle;
+            if (isNotEmptyOrBlank(gameData.title)) {
+                text.setText(gameData.title);
+                text.setTextColor(0xFFE0E0E0);
             }
 
             var fileSize = gameData.fileSize;
@@ -122,11 +128,6 @@ public class LocalGamesListAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         GameHolder(ListItemGameBinding listItemGameBinding) {
             super(listItemGameBinding.getRoot());
             this.listItemGameBinding = listItemGameBinding;
-        }
-
-        public void listItemGameBinding(GameData gameData) {
-            listItemGameBinding.setGameData(gameData);
-            listItemGameBinding.executePendingBindings();
         }
     }
 }

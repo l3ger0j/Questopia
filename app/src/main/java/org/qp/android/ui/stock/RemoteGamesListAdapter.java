@@ -11,8 +11,8 @@ import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.core.content.ContextCompat;
-import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.AsyncListDiffer;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
@@ -63,8 +63,7 @@ public class RemoteGamesListAdapter extends RecyclerView.Adapter<RemoteGamesList
     public RemoteGameHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         this.context = new WeakReference<>(parent.getContext());
         var inflater = LayoutInflater.from(parent.getContext());
-        ListItemGameBinding listItemGameBinding =
-                DataBindingUtil.inflate(inflater, R.layout.list_item_game, parent, false);
+        var listItemGameBinding = ListItemGameBinding.inflate(inflater, parent, false);
         listItemGameBinding.relativeLayout.setAccessibilityDelegate(customAccessibilityDelegate());
         return new RemoteGameHolder(listItemGameBinding);
     }
@@ -72,14 +71,26 @@ public class RemoteGamesListAdapter extends RecyclerView.Adapter<RemoteGamesList
     @Override
     public void onBindViewHolder(@NonNull RemoteGameHolder holder, int position) {
         var gameData = getItem(position);
-        holder.listItemGameBinding(gameData);
 
+        final var icon = holder.listItemGameBinding.gameIcon;
         if (isNotEmptyOrBlank(gameData.icon)) {
             Picasso.get()
                     .load(Uri.parse(gameData.icon))
                     .fit()
                     .error(R.drawable.baseline_broken_image_24)
                     .into(holder.listItemGameBinding.gameIcon);
+        } else {
+            var drawable = AppCompatResources.getDrawable(
+                    context.get(),
+                    R.drawable.baseline_broken_image_24
+            );
+            icon.setImageDrawable(drawable);
+        }
+
+        final var text = holder.listItemGameBinding.gameTitle;
+        if (isNotEmptyOrBlank(gameData.title)) {
+            text.setText(gameData.title);
+            text.setTextColor(0xFFFFD700);
         }
 
         var fileSize = gameData.fileSize;
@@ -99,11 +110,6 @@ public class RemoteGamesListAdapter extends RecyclerView.Adapter<RemoteGamesList
         RemoteGameHolder(ListItemGameBinding listItemGameBinding) {
             super(listItemGameBinding.getRoot());
             this.listItemGameBinding = listItemGameBinding;
-        }
-
-        public void listItemGameBinding(GameData gameData) {
-            listItemGameBinding.setGameData(gameData);
-            listItemGameBinding.executePendingBindings();
         }
     }
 }
