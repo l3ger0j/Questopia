@@ -25,7 +25,6 @@ import org.qp.android.databinding.ListItemGameBinding;
 import org.qp.android.dto.stock.GameData;
 import org.qp.android.ui.settings.SettingsController;
 
-import java.lang.ref.WeakReference;
 import java.util.List;
 
 public class LocalGamesListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
@@ -46,7 +45,7 @@ public class LocalGamesListAdapter extends RecyclerView.Adapter<RecyclerView.Vie
             };
     private final AsyncListDiffer<GameData> differ =
             new AsyncListDiffer<>(this, DIFF_CALLBACK);
-    private WeakReference<Context> context;
+    private Context context;
 
     public GameData getItem(int position) {
         return differ.getCurrentList().get(position);
@@ -80,7 +79,7 @@ public class LocalGamesListAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        this.context = new WeakReference<>(parent.getContext());
+        this.context = parent.getContext();
         var inflater = LayoutInflater.from(parent.getContext());
         var listItemGameBinding = ListItemGameBinding.inflate(inflater, parent, false);
         listItemGameBinding.relativeLayout.setAccessibilityDelegate(customAccessibilityDelegate());
@@ -106,7 +105,7 @@ public class LocalGamesListAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                 }
             } else {
                 var drawable = AppCompatResources.getDrawable(
-                        context.get(),
+                        context,
                         R.drawable.baseline_broken_image_24
                 );
                 icon.setImageDrawable(drawable);
@@ -121,11 +120,11 @@ public class LocalGamesListAdapter extends RecyclerView.Adapter<RecyclerView.Vie
             var fileSize = gameData.fileSize;
             if (fileSize == DISABLE_CALC_SIZE) return;
 
-            var currBinPref = SettingsController.newInstance(context.get()).binaryPrefixes;
+            var currBinPref = SettingsController.newInstance(context).binaryPrefixes;
             var sizeWithPref = formatFileSize(fileSize, currBinPref);
 
             var elementSize = gameHolder.listItemGameBinding.gameSize;
-            var fileSizeString = ContextCompat.getString(context.get(), R.string.fileSize);
+            var fileSizeString = ContextCompat.getString(context, R.string.fileSize);
             elementSize.setText(fileSizeString.replace("-SIZE-", sizeWithPref));
         }
     }
