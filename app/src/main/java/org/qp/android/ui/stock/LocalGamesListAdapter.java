@@ -49,10 +49,6 @@ public class LocalGamesListAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         return differ.getCurrentList().get(position);
     }
 
-    public List<GameData> getGameData() {
-        return differ.getCurrentList();
-    }
-
     @Override
     public int getItemCount() {
         return differ.getCurrentList().size();
