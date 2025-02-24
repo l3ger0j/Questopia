@@ -4,6 +4,7 @@ import static org.qp.android.helpers.utils.FileUtil.findOrCreateFile;
 import static org.qp.android.helpers.utils.FileUtil.fromFullPath;
 import static org.qp.android.helpers.utils.FileUtil.fromRelPath;
 import static org.qp.android.helpers.utils.FileUtil.getFileContents;
+import static org.qp.android.helpers.utils.FileUtil.isWritableDir;
 import static org.qp.android.helpers.utils.FileUtil.isWritableFile;
 import static org.qp.android.helpers.utils.FileUtil.writeFileContents;
 import static org.qp.android.helpers.utils.PathUtil.getFilename;
@@ -35,8 +36,8 @@ import org.qp.android.model.service.HtmlProcessor;
 import org.qp.android.ui.game.GameInterface;
 
 import java.io.File;
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.locks.ReentrantLock;
@@ -46,7 +47,7 @@ public class LibProxyImpl extends QSPLib implements LibIProxy {
 
     private final ReentrantLock libLock = new ReentrantLock();
     private final LibGameState gameState = new LibGameState();
-    private final WeakReference<Context> context;
+    private final Context context;
     private Thread libThread;
     private volatile Handler libHandler;
     private volatile boolean libThreadInit;
@@ -55,21 +56,18 @@ public class LibProxyImpl extends QSPLib implements LibIProxy {
     private GameInterface gameInterface;
 
     public LibProxyImpl(Context context) {
-        this.context = new WeakReference<>(context);
+        this.context = context;
     }
 
     private QuestopiaApplication getApplication() {
-        return (QuestopiaApplication) context.get();
+        return (QuestopiaApplication) context;
     }
 
     @Nullable
-    private WeakReference<DocumentFile> getCurGameDir() {
-        var file = DocumentFileCompat.fromUri(
-                context.get(),
-                gameState.gameDirUri
-        );
-        if (file == null) return null;
-        return new WeakReference<>(file);
+    private DocumentFile getCurGameDir() {
+        var file = DocumentFileCompat.fromUri(context, gameState.gameDirUri);
+        if (!isWritableDir(context, file)) return null;
+        return file;
     }
 
     private HtmlProcessor getHtmlProcessor() {
@@ -104,7 +102,7 @@ public class LibProxyImpl extends QSPLib implements LibIProxy {
 
     private boolean loadGameWorld() {
         final var gameFileUri = gameState.gameFileUri;
-        final var gameData = getFileContents(context.get(), gameFileUri);
+        final var gameData = getFileContents(context, gameFileUri);
         if (gameData == null) return false;
         if (!loadGameWorldFromData(gameData, true)) {
             showLastQspError();
@@ -175,10 +173,8 @@ public class LibProxyImpl extends QSPLib implements LibIProxy {
 
     @NonNull
     private List<ListItem> getActionsList() {
-        var check = getCurGameDir();
-        if (check == null) return List.of();
-        var currGameDir = check.get();
-        if (currGameDir == null) return List.of();
+        var gameDir = getCurGameDir();
+        if (!isWritableDir(context, gameDir)) return Collections.emptyList();
         var actions = new ArrayList<ListItem>();
 
         for (var element : getActions()) {
@@ -187,8 +183,8 @@ public class LibProxyImpl extends QSPLib implements LibIProxy {
 
             if (isNotEmptyOrBlank(tempImagePath)) {
                 var tempPath = normalizeContentPath(getFilename(tempImagePath));
-                var fileFromPath = fromRelPath(context.get(), tempPath, currGameDir);
-                if (fileFromPath != null) {
+                var fileFromPath = fromRelPath(context, tempPath, gameDir);
+                if (isWritableFile(context, fileFromPath)) {
                     tempImagePath = String.valueOf(fileFromPath.getUri());
                 }
             }
@@ -201,10 +197,8 @@ public class LibProxyImpl extends QSPLib implements LibIProxy {
 
     @NonNull
     private List<ListItem> getObjectsList() {
-        var check = getCurGameDir();
-        if (check == null) return List.of();
-        var currGameDir = check.get();
-        if (currGameDir == null) return List.of();
+        var gameDir = getCurGameDir();
+        if (!isWritableDir(context, gameDir)) return Collections.emptyList();
         var objects = new ArrayList<ListItem>();
 
         for (var element : getObjects()) {
@@ -214,11 +208,15 @@ public class LibProxyImpl extends QSPLib implements LibIProxy {
             if (tempText.contains("<img")) {
                 if (getHtmlProcessor().isContainsHtmlTags(tempText)) {
                     var tempPath = getHtmlProcessor().getSrcDir(tempText);
-                    var fileFromPath = fromRelPath(context.get(), tempPath, currGameDir);
-                    tempImagePath = String.valueOf(fileFromPath);
+                    var fileFromPath = fromRelPath(context, tempPath, gameDir);
+                    if (isWritableFile(context, fileFromPath)) {
+                        tempImagePath = String.valueOf(fileFromPath.getUri());
+                    }
                 } else {
-                    var fileFromPath = fromRelPath(context.get(), tempText, currGameDir);
-                    tempImagePath = String.valueOf(fileFromPath);
+                    var fileFromPath = fromRelPath(context, tempText, gameDir);
+                    if (isWritableFile(context, fileFromPath)) {
+                        tempImagePath = String.valueOf(fileFromPath.getUri());
+                    }
                 }
             }
 
@@ -312,7 +310,7 @@ public class LibProxyImpl extends QSPLib implements LibIProxy {
             runOnQspThread(() -> loadGameState(uri));
             return;
         }
-        final var gameData = getFileContents(context.get(), uri);
+        final var gameData = getFileContents(context, uri);
         if (gameData == null) return;
         if (!openSavedGameFromData(gameData, true)) {
             showLastQspError();
@@ -327,7 +325,7 @@ public class LibProxyImpl extends QSPLib implements LibIProxy {
         }
         final var gameData = saveGameAsData(false);
         if (gameData == null) return;
-        writeFileContents(context.get(), uri, gameData);
+        writeFileContents(context, uri, gameData);
     }
 
     @Override
@@ -471,17 +469,15 @@ public class LibProxyImpl extends QSPLib implements LibIProxy {
 
     @Override
     public void onShowImage(String file) {
-        var check = getCurGameDir();
-        if (check == null) return;
-        var currGameDir = check.get();
-        if (currGameDir == null) return;
+        var gameDir = getCurGameDir();
+        if (!isWritableDir(context, gameDir)) return;
 
         var inter = gameInterface;
         if (inter == null) return;
 
         if (isNotEmptyOrBlank(file)) {
-            var picFile = fromRelPath(context.get(), file, currGameDir);
-            if (!isWritableFile(context.get(), picFile)) return;
+            var picFile = fromRelPath(context, file, gameDir);
+            if (!isWritableFile(context, picFile)) return;
             inter.showPicture(String.valueOf(picFile.getUri()));
         }
     }
@@ -532,7 +528,7 @@ public class LibProxyImpl extends QSPLib implements LibIProxy {
             inter.showLoadGamePopup();
         } else {
             try {
-                var saveFile = fromFullPath(context.get(), file);
+                var saveFile = fromFullPath(context, file);
                 if (saveFile == null) {
                     Log.e(TAG, "Save file not found");
                     return;
@@ -547,8 +543,8 @@ public class LibProxyImpl extends QSPLib implements LibIProxy {
 
     @Override
     public void onSaveGameStatus(String file) {
-        var check = getCurGameDir();
-        if (check == null) return;
+        var gameDir = getCurGameDir();
+        if (!isWritableDir(context, gameDir)) return;
 
         if (file == null) {
             var inter = gameInterface;
@@ -556,12 +552,12 @@ public class LibProxyImpl extends QSPLib implements LibIProxy {
             inter.showSaveGamePopup();
         } else {
             var saveFile = findOrCreateFile(
-                    context.get(),
-                    check.get(),
+                    context,
+                    gameDir,
                     new File(file).getName(),
                     MimeType.TEXT
             );
-            if (isWritableFile(context.get(), saveFile)) {
+            if (isWritableFile(context, saveFile)) {
                 saveGameState(saveFile.getUri());
             } else {
                 Log.e(TAG, "Error access dir");
@@ -612,11 +608,11 @@ public class LibProxyImpl extends QSPLib implements LibIProxy {
 
     @Override
     public void onOpenGameStatus(String file) {
-        var check = getCurGameDir();
-        if (check == null) return;
+        var gameDir = getCurGameDir();
+        if (!isWritableDir(context, gameDir)) return;
 
-        var newGameDir = fromRelPath(context.get(), file, check.get());
-        if (!isWritableFile(context.get(), newGameDir)) {
+        var newGameDir = fromRelPath(context, file, gameDir);
+        if (!isWritableFile(context, newGameDir)) {
             Log.e(TAG, "Game directory not found: " + file);
             return;
         }
