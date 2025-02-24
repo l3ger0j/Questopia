@@ -78,7 +78,7 @@ public class RemoteGamesListAdapter extends RecyclerView.Adapter<RemoteGamesList
                     .load(Uri.parse(gameData.icon))
                     .fit()
                     .error(R.drawable.baseline_broken_image_24)
-                    .into(holder.listItemGameBinding.gameIcon);
+                    .into(icon);
         } else {
             var drawable = AppCompatResources.getDrawable(
                     context.get(),
