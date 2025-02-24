@@ -9,6 +9,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.content.res.AppCompatResources;
@@ -16,6 +17,8 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.AsyncListDiffer;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.squareup.picasso.Picasso;
 
 import org.qp.android.R;
 import org.qp.android.databinding.ListItemGameBinding;
@@ -91,7 +94,16 @@ public class LocalGamesListAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
             final var icon = gameHolder.listItemGameBinding.gameIcon;
             if (isNotEmptyOrBlank(gameData.icon)) {
-                icon.setImageURI(Uri.parse(gameData.icon));
+                if (gameData.icon.contains("http")) {
+                    Picasso.get()
+                            .load(Uri.parse(gameData.icon))
+                            .fit()
+                            .error(R.drawable.baseline_broken_image_24)
+                            .into(icon);
+                } else {
+                    icon.setScaleType(ImageView.ScaleType.FIT_XY);
+                    icon.setImageURI(Uri.parse(gameData.icon));
+                }
             } else {
                 var drawable = AppCompatResources.getDrawable(
                         context.get(),
