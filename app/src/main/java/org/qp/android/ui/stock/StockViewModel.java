@@ -33,6 +33,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.webkit.CookieManager;
+import android.widget.ImageView;
 
 import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
@@ -150,10 +151,13 @@ public class StockViewModel extends AndroidViewModel {
         this.tempImageFile = tempImageFile;
         if (editBinding != null) {
             editBinding.buttonSelectIcon.setText(tempImageFile.getName());
-            Picasso.get()
-                    .load(tempImageFile.getUri())
-                    .fit()
-                    .into(editBinding.imageView);
+            editBinding.imageView.setScaleType(ImageView.ScaleType.FIT_XY);
+            editBinding.imageView.setImageURI(tempImageFile.getUri());
+        }
+        if (addBinding != null) {
+            addBinding.buttonSelectIcon.setText(tempImageFile.getName());
+            addBinding.imageView.setScaleType(ImageView.ScaleType.FIT_XY);
+            addBinding.imageView.setImageURI(tempImageFile.getUri());
         }
     }
 
