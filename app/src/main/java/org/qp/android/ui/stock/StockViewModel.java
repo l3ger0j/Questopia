@@ -649,7 +649,7 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     private void calculateSizeDir(GameData gameData) {
-        var gameDir = DocumentFileCompat.fromUri(getApplication(), currGameData.gameDirUri);
+        var gameDir = DocumentFileCompat.fromUri(getApplication(), gameData.gameDirUri);
         if (!isWritableDir(getApplication(), gameDir)) return;
 
         CompletableFuture
@@ -873,7 +873,7 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     public void delEntryDirFromList(List<GameData> tempList, GameData data, File listDirsFile) {
-        var gameDir = DocumentFileCompat.fromUri(getApplication(), currGameData.gameDirUri);
+        var gameDir = DocumentFileCompat.fromUri(getApplication(), data.gameDirUri);
         if (!isWritableDir(getApplication(), gameDir)) return;
 
         CompletableFuture
@@ -893,7 +893,7 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     public void delEntryFromList(List<GameData> tempList, GameData data, File listDirsFile) {
-        var gameDir = DocumentFileCompat.fromUri(getApplication(), currGameData.gameDirUri);
+        var gameDir = DocumentFileCompat.fromUri(getApplication(), data.gameDirUri);
         if (!isWritableDir(getApplication(), gameDir)) return;
 
         CompletableFuture
