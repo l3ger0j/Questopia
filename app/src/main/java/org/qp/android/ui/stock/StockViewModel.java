@@ -577,7 +577,9 @@ public class StockViewModel extends AndroidViewModel {
             if (tempImageFile != null) {
                 newGameData.icon = tempImageFile.getUri().toString();
             }
-            if (!addBinding.sizeDirSW.isChecked()) {
+            if (addBinding.sizeDirSW.isChecked()) {
+                calculateSizeDir(newGameData);
+            } else {
                 newGameData.fileSize = DISABLE_CALC_SIZE;
             }
 
