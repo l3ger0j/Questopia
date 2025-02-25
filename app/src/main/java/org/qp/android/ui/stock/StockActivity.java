@@ -62,7 +62,6 @@ import org.qp.android.BuildConfig;
 import org.qp.android.QuestopiaApplication;
 import org.qp.android.R;
 import org.qp.android.databinding.ActivityStockBinding;
-import org.qp.android.dto.stock.GameData;
 import org.qp.android.dto.stock.RemoteDataList;
 import org.qp.android.helpers.bus.Events;
 import org.qp.android.helpers.utils.ViewUtil;
@@ -80,6 +79,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -583,16 +583,11 @@ public class StockActivity extends AppCompatActivity {
                     @Override
                     public boolean onQueryTextChange(String newText) {
                         var gameDataList = stockViewModel.getSortedGames();
-                        var filteredList = new ArrayList<GameData>();
-                        gameDataList.forEach(gameData -> {
-                            if (gameData.title.toLowerCase(Locale.getDefault())
-                                    .contains(newText.toLowerCase(Locale.getDefault()))) {
-                                filteredList.add(gameData);
-                            }
-                        });
-                        if (!filteredList.isEmpty()) {
-                            stockViewModel.dataList.setValue(filteredList);
-                        }
+                        stockViewModel.setDataList(
+                                gameDataList.stream()
+                                        .filter(d -> d.title.toLowerCase().contains(newText.toLowerCase()))
+                                        .collect(Collectors.toList())
+                        );
                         return true;
                     }
                 };

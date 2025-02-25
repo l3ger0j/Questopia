@@ -34,7 +34,7 @@ public class StockRemoteRVFragment extends Fragment {
         mRecyclerView.addItemDecoration(divider);
 
         stockViewModel = new ViewModelProvider(requireActivity()).get(StockViewModel.class);
-        stockViewModel.dataList.observe(getViewLifecycleOwner(), adapter::submitList);
+        stockViewModel.remoteDataList.observe(getViewLifecycleOwner(), adapter::submitList);
 
         return recyclerBinding.getRoot();
     }

@@ -35,7 +35,7 @@ public class StockLocalRVFragment extends Fragment {
         mRecyclerView.addItemDecoration(divider);
 
         stockViewModel = new ViewModelProvider(requireActivity()).get(StockViewModel.class);
-        stockViewModel.dataList.observe(getViewLifecycleOwner(), adapter::submitList);
+        stockViewModel.localDataList.observe(getViewLifecycleOwner(), adapter::submitList);
         stockViewModel.emitter.observe(getViewLifecycleOwner(), eventNavigation -> {
             if (eventNavigation instanceof StockFragmentNavigation.ChangeElementColorToDKGray) {
                 changeElementColorToDKGray();

@@ -85,6 +85,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 public class StockViewModel extends AndroidViewModel {
 
@@ -95,7 +96,8 @@ public class StockViewModel extends AndroidViewModel {
     public static final String EXT_GAME_LIST_NAME = "extGameDirs";
     private static final String INNER_GAME_DIR_NAME = "games-dir";
     public final MutableLiveData<Integer> currPageNumber = new MutableLiveData<>();
-    public final MutableLiveData<List<GameData>> dataList = new MutableLiveData<>();
+    public final MutableLiveData<List<GameData>> remoteDataList = new MutableLiveData<>();
+    public final MutableLiveData<List<GameData>> localDataList = new MutableLiveData<>();
     private final ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
     // Containers
     private final HashMap<Long, GameData> gamesMap = new HashMap<>();
@@ -158,6 +160,15 @@ public class StockViewModel extends AndroidViewModel {
             addBinding.buttonSelectIcon.setText(tempImageFile.getName());
             addBinding.imageView.setScaleType(ImageView.ScaleType.FIT_XY);
             addBinding.imageView.setImageURI(tempImageFile.getUri());
+        }
+    }
+
+    public void setDataList(List<GameData> insertList) {
+        if (localDataList.hasActiveObservers()) {
+            localDataList.setValue(insertList);
+        }
+        if (remoteDataList.hasActiveObservers()) {
+            remoteDataList.setValue(insertList);
         }
     }
 
@@ -543,7 +554,7 @@ public class StockViewModel extends AndroidViewModel {
             var secureRandom = new SecureRandom();
 
             if (!isNotEmptyOrBlank(nameDir)) {
-                nameDir = "game#"+secureRandom.nextInt();
+                nameDir = "game#" + secureRandom.nextInt();
             }
 
             var newGameData = new GameData();
@@ -774,21 +785,14 @@ public class StockViewModel extends AndroidViewModel {
         if (pageNumber == null) return;
 
         if (pageNumber == 0) {
-            dataList.setValue(Collections.emptyList());
-
             doIsHideFAB.setValue(false);
-
             syncFromDisk();
         }
 
         if (pageNumber == 1) {
-            dataList.setValue(Collections.emptyList());
-
             doIsHideFAB.setValue(true);
-
             syncRemote();
         }
-
     }
 
     private void syncFromDisk() {
@@ -801,7 +805,7 @@ public class StockViewModel extends AndroidViewModel {
                 .thenAccept(externalGameData -> externalGameData.forEach(localGameData ->
                         gamesMap.put(localGameData.id, localGameData))
                 )
-                .thenRunAsync(() -> dataList.postValue(getSortedGames()), executor)
+                .thenRunAsync(() -> localDataList.postValue(getSortedGames().stream().filter(this::isGameInstalled).collect(Collectors.toList())), executor)
                 .exceptionally(throwable -> {
                     doOnShowErrorDialog(throwable.toString(), ErrorType.EXCEPTION);
                     return null;
@@ -825,7 +829,7 @@ public class StockViewModel extends AndroidViewModel {
                 .thenAcceptAsync(remDataList -> remDataList.forEach(remGameData ->
                         gamesMap.put(remGameData.id, new GameData(remGameData))
                 ), executor)
-                .thenRunAsync(() -> dataList.postValue(getSortedGames()), executor)
+                .thenRunAsync(() -> remoteDataList.postValue(getSortedGames().stream().filter(d -> !isGameInstalled(d)).collect(Collectors.toList())), executor)
                 .exceptionally(throwable -> {
                     doOnShowErrorDialog(throwable.toString(), ErrorType.EXCEPTION);
                     return null;
