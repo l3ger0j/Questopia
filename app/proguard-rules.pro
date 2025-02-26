@@ -20,8 +20,7 @@
 -keep class org.qp.android.dto.stock.** { *; }
 
 # NDK
--keep class org.libndkqsp.jni.** { *; }
--keep class org.qp.android.dto.lib.** { *; }
+-keep class com.libqsp.jni.** { *; }
 -keep class org.qp.android.model.lib.** { *; }
 
 -dontwarn aQute.bnd.annotation.spi.ServiceProvider
