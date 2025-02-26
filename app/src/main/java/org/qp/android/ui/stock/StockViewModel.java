@@ -284,6 +284,10 @@ public class StockViewModel extends AndroidViewModel {
         return fileSizeString.replace("-SIZE-", sizeWithPref);
     }
 
+    public boolean isPubModDataExist() {
+        return isNotEmptyOrBlank(getGamePubData()) || isNotEmptyOrBlank(getGameModData());
+    }
+
     public String getGamePubData() {
         var data = currGameData;
         if (data == null) return "";

@@ -1,6 +1,8 @@
 package org.qp.android.ui.stock;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +16,8 @@ import androidx.lifecycle.ViewModelProvider;
 import org.qp.android.R;
 import org.qp.android.databinding.FragmentItemGameBinding;
 import org.qp.android.ui.dialogs.StockDialogType;
+
+import java.util.concurrent.CompletableFuture;
 
 public class StockGameFragment extends Fragment {
 
@@ -31,6 +35,18 @@ public class StockGameFragment extends Fragment {
         stockViewModel = new ViewModelProvider(requireActivity())
                 .get(StockViewModel.class);
         fragmentStockGameBinding.setViewModel(stockViewModel);
+
+        CompletableFuture
+                .supplyAsync(() -> stockViewModel.isGamePossiblyDownload())
+                .thenAccept(aBoolean -> new Handler(Looper.getMainLooper()).post(() -> {
+                    fragmentStockGameBinding.downloadButton.setVisibility(aBoolean ? View.VISIBLE : View.GONE);
+                }));
+
+        CompletableFuture
+                .supplyAsync(() -> stockViewModel.isGameInstalled())
+                .thenAccept(aBoolean -> new Handler(Looper.getMainLooper()).post(() ->
+                        fragmentStockGameBinding.buttonLayout.setVisibility(aBoolean ? View.VISIBLE : View.GONE)));
+
         return fragmentStockGameBinding.getRoot();
     }
 
