@@ -25,6 +25,9 @@
 
 -dontwarn aQute.bnd.annotation.spi.ServiceProvider
 
+# PrettyTime
+-keep class org.ocpsoft.prettytime.i18n.**
+
 # SevenZipJBinding
 -keep class net.sf.sevenzipjbinding.** { *; }
 

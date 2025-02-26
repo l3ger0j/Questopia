@@ -52,6 +52,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.squareup.picasso.Picasso;
 
+import org.ocpsoft.prettytime.PrettyTime;
 import org.qp.android.QuestopiaApplication;
 import org.qp.android.R;
 import org.qp.android.databinding.DialogAddBinding;
@@ -73,6 +74,8 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.security.SecureRandom;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -294,8 +297,11 @@ public class StockViewModel extends AndroidViewModel {
         var pubDate = data.pubDate;
         if (!isNotEmptyOrBlank(pubDate)) return "";
 
+        var p = new PrettyTime();
+        var parse = LocalDateTime.parse(pubDate, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+
         var pubDataString = ActivityCompat.getString(getApplication(), R.string.pub_data);
-        return pubDataString.replace("-PUB_DATA-", pubDate);
+        return pubDataString.replace("-PUB_DATA-", p.format(parse));
     }
 
     public String getGameModData() {
@@ -305,8 +311,11 @@ public class StockViewModel extends AndroidViewModel {
         var modDate = data.modDate;
         if (!isNotEmptyOrBlank(modDate)) return "";
 
+        var p = new PrettyTime();
+        var parse = LocalDateTime.parse(modDate, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+
         var modDataString = ActivityCompat.getString(getApplication(), R.string.mod_data);
-        return modDataString.replace("-MOD_DATA-", modDate);
+        return modDataString.replace("-MOD_DATA-", p.format(parse));
     }
 
     public int getCountGameFiles() {

@@ -103,6 +103,7 @@ dependencies {
     implementation libs.appupdater
     implementation libs.storage
     implementation libs.picasso
+    implementation libs.prettytime
 
     implementation libs.retrofit
     implementation libs.converter.jackson
