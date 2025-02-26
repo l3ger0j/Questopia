@@ -20,8 +20,7 @@
 -keep class org.qp.android.dto.stock.** { *; }
 
 # NDK
--keep class org.libndkqsp.jni.** { *; }
--keep class org.qp.android.dto.lib.** { *; }
+-keep class com.libqsp.jni.** { *; }
 -keep class org.qp.android.model.lib.** { *; }
 
 -dontwarn aQute.bnd.annotation.spi.ServiceProvider
@@ -35,27 +34,21 @@
 -keep class * extends com.google.gson.reflect.TypeToken
 -keep public class * implements java.lang.reflect.Type
 
-# Proguard configuration for Jackson 2.x
--keep class * implements com.fasterxml.jackson.core.type.TypeReference
--keep class com.fasterxml.jackson.databind.ObjectMapper {
-    public <methods>;
-    protected <methods>;
-}
--keepclassmembers class * {
-    @com.fasterxml.jackson.annotation.* *;
-}
--keep class com.fasterxml.jackson.databind.ObjectWriter {
-    public ** writeValueAsString(**);
-}
+# Jackson
+-keep @com.fasterxml.jackson.annotation.JsonIgnoreProperties class * { *; }
+-keep @com.fasterxml.jackson.annotation.JsonCreator class * { *; }
+-keep @com.fasterxml.jackson.annotation.JsonValue class * { *; }
+-keep class com.fasterxml.** { *; }
+-keep class org.codehaus.** { *; }
 -keepnames class com.fasterxml.jackson.** { *; }
--dontwarn com.fasterxml.jackson.databind.**
+-keepclassmembers public final enum com.fasterxml.jackson.annotation.JsonAutoDetect$Visibility {
+    public static final com.fasterxml.jackson.annotation.JsonAutoDetect$Visibility *;
+}
 
 # JSR 305 annotations are for embedding nullability information.
 -dontwarn javax.annotation.**
 # A resource is loaded with a relative path so the package of this class must be preserved.
 -keepnames class okhttp3.internal.publicsuffix.PublicSuffixDatabase
-# Animal Sniffer compileOnly dependency to ensure APIs are compatible with older versions of Java.
--dontwarn org.codehaus.mojo.animal_sniffer.*
 # OkHttp platform used only on JVM and when Conscrypt dependency is available.
 -dontwarn okhttp3.internal.platform.ConscryptPlatform
 
