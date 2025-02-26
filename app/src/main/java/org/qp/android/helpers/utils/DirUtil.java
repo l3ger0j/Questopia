@@ -15,14 +15,15 @@ import com.anggrayudi.storage.file.DocumentFileCompat;
 import com.anggrayudi.storage.file.DocumentFileType;
 import com.anggrayudi.storage.file.DocumentFileUtils;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.util.stream.Collectors;
 
 public final class DirUtil {
 
     public static final String MOD_DIR_NAME = "mods";
 
+    @WorkerThread
     public static boolean isDirContainsGameFile(@NonNull Context context,
                                                 @NonNull Uri dirUri) {
         var targetDir = DocumentFileCompat.fromUri(context, dirUri);
@@ -33,7 +34,6 @@ public final class DirUtil {
             var lcName = dirExtension.toLowerCase(Locale.ROOT);
             if (lcName.contains("qsp") || lcName.contains("gam")) return true;
         }
-
         return false;
     }
 
@@ -51,14 +51,14 @@ public final class DirUtil {
     public static List<String> getNamesDir(@NonNull Context context,
                                            @NonNull List<Uri> dirUris) {
         if (dirUris == Uri.EMPTY) {
-            return List.of();
+            return Collections.emptyList();
         }
 
         return dirUris.stream()
                 .map(uri -> DocumentFileCompat.fromUri(context, uri))
                 .filter(d -> d != null && d.getName() != null)
                 .map(DocumentFile::getName)
-                .collect(Collectors.toUnmodifiableList());
+                .toList();
     }
 
     @WorkerThread
