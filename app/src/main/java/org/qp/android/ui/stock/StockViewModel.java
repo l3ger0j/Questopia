@@ -85,7 +85,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
 
 public class StockViewModel extends AndroidViewModel {
 
@@ -200,9 +199,9 @@ public class StockViewModel extends AndroidViewModel {
         if (data == null) return "";
 
         var title = data.title;
-        if (title == null || title.isEmpty() || title.isBlank()) return "";
+        if (!isNotEmptyOrBlank(title)) return "";
 
-        return data.title;
+        return title;
     }
 
     public String getGameAuthor() {
@@ -210,10 +209,10 @@ public class StockViewModel extends AndroidViewModel {
         if (data == null) return "";
 
         var author = data.author;
-        if (author == null || author.isEmpty() || author.isBlank()) return "";
+        if (!isNotEmptyOrBlank(author)) return "";
 
         var authorString = ActivityCompat.getString(getApplication(), R.string.author);
-        return authorString.replace("-AUTHOR-", data.author);
+        return authorString.replace("-AUTHOR-", author);
     }
 
     public String getGameIcon() {
@@ -221,7 +220,7 @@ public class StockViewModel extends AndroidViewModel {
         if (data == null) return "";
 
         var icon = data.icon;
-        if (icon == null || icon.isEmpty() || icon.isBlank()) return "";
+        if (!isNotEmptyOrBlank(icon)) return "";
 
         return icon;
     }
@@ -231,10 +230,10 @@ public class StockViewModel extends AndroidViewModel {
         if (data == null) return "";
 
         var portedBy = data.portedBy;
-        if (portedBy == null || portedBy.isEmpty() || portedBy.isBlank()) return "";
+        if (!isNotEmptyOrBlank(portedBy)) return "";
 
         var portedByString = ActivityCompat.getString(getApplication(), R.string.ported_by);
-        return portedByString.replace("-PORTED_BY-", data.portedBy);
+        return portedByString.replace("-PORTED_BY-", portedBy);
     }
 
     public String getGameVersion() {
@@ -242,10 +241,10 @@ public class StockViewModel extends AndroidViewModel {
         if (data == null) return "";
 
         var version = data.version;
-        if (version == null || version.isEmpty() || version.isBlank()) return "";
+        if (!isNotEmptyOrBlank(version)) return "";
 
         var versionString = ActivityCompat.getString(getApplication(), R.string.version);
-        return versionString.replace("-VERSION-", data.version);
+        return versionString.replace("-VERSION-", version);
     }
 
     public String getGameType() {
@@ -253,14 +252,14 @@ public class StockViewModel extends AndroidViewModel {
         if (data == null) return "";
 
         var fileExt = data.fileExt;
-        if (fileExt == null || fileExt.isEmpty() || fileExt.isBlank()) return "";
+        if (!isNotEmptyOrBlank(fileExt)) return "";
 
         var fileTypeSting = ActivityCompat.getString(getApplication(), R.string.fileType);
         if (fileExt.equals("aqsp")) {
             var experimentalString = ActivityCompat.getString(getApplication(), R.string.experimental);
-            return fileTypeSting.replace("-TYPE-", data.fileExt) + " " + experimentalString;
+            return fileTypeSting.replace("-TYPE-", fileExt) + " " + experimentalString;
         } else {
-            return fileTypeSting.replace("-TYPE-", data.fileExt);
+            return fileTypeSting.replace("-TYPE-", fileExt);
         }
     }
 
@@ -293,7 +292,7 @@ public class StockViewModel extends AndroidViewModel {
         if (data == null) return "";
 
         var pubDate = data.pubDate;
-        if (pubDate == null || pubDate.isEmpty() || pubDate.isBlank()) return "";
+        if (!isNotEmptyOrBlank(pubDate)) return "";
 
         var pubDataString = ActivityCompat.getString(getApplication(), R.string.pub_data);
         return pubDataString.replace("-PUB_DATA-", pubDate);
@@ -304,7 +303,7 @@ public class StockViewModel extends AndroidViewModel {
         if (data == null) return "";
 
         var modDate = data.modDate;
-        if (modDate == null || modDate.isEmpty() || modDate.isBlank()) return "";
+        if (!isNotEmptyOrBlank(modDate)) return "";
 
         var modDataString = ActivityCompat.getString(getApplication(), R.string.mod_data);
         return modDataString.replace("-MOD_DATA-", modDate);
@@ -330,7 +329,6 @@ public class StockViewModel extends AndroidViewModel {
     public boolean isGameInstalled() {
         var gameData = currGameData;
         if (gameData == null) return false;
-
         var rootDirUri = gameData.gameDirUri;
         if (rootDirUri == Uri.EMPTY) return false;
         if (isNotEmptyOrBlank(String.valueOf(rootDirUri))) {
@@ -804,14 +802,19 @@ public class StockViewModel extends AndroidViewModel {
     private void syncFromDisk() {
         fetchInternalData()
                 .thenCombineAsync(fetchExternalData(), (intDataList, extDataList) -> {
-                    var unionList = new ArrayList<>(intDataList);
-                    unionList.addAll(extDataList);
-                    return unionList;
+                    intDataList.addAll(extDataList);
+                    return intDataList;
                 }, executor)
-                .thenAccept(externalGameData -> externalGameData.forEach(localGameData ->
-                        gamesMap.put(localGameData.id, localGameData))
-                )
-                .thenRunAsync(() -> localDataList.postValue(getSortedGames().stream().filter(this::isGameInstalled).collect(Collectors.toList())), executor)
+                .thenAcceptAsync(externalGameData -> externalGameData.forEach(localGameData -> gamesMap.put(localGameData.id, localGameData)), executor)
+                .thenApplyAsync(x -> {
+                    var syncDataList = Collections.synchronizedCollection(gamesMap.values());
+                    if (syncDataList.size() < 2) return syncDataList;
+                    return syncDataList.stream()
+                            .sorted(Comparator.comparing(game -> game.title.toLowerCase()))
+                            .sorted(Comparator.comparing(game -> game.listId.toLowerCase(Locale.ROOT)))
+                            .toList();
+                }, executor)
+                .thenAcceptAsync(list -> localDataList.postValue(list.stream().filter(this::isGameInstalled).toList()))
                 .exceptionally(throwable -> {
                     doOnShowErrorDialog(throwable.toString(), ErrorType.EXCEPTION);
                     return null;
@@ -822,20 +825,25 @@ public class StockViewModel extends AndroidViewModel {
         fetchInternalData()
                 .thenCombineAsync(fetchRemoteData(), (intDataList, remDataList) -> {
                     if (intDataList.isEmpty()) return remDataList;
-
-                    var unionList = new ArrayList<RemoteGameData>();
-                    intDataList.forEach(intData -> remDataList.forEach(remData -> {
-                        if (!Objects.equals(intData.title, remData.title)) {
-                            unionList.add(remData);
-                        }
-                    }));
-
+                    var unionList = Collections.synchronizedList(new ArrayList<RemoteGameData>());
+                    synchronized (unionList) {
+                        intDataList.forEach(intData -> remDataList.forEach(remData -> {
+                            if (!Objects.equals(intData.title, remData.title)) {
+                                unionList.add(remData);
+                            }
+                        }));
+                    }
                     return unionList;
                 }, executor)
-                .thenAcceptAsync(remDataList -> remDataList.forEach(remGameData ->
-                        gamesMap.put(remGameData.id, new GameData(remGameData))
-                ), executor)
-                .thenRunAsync(() -> remoteDataList.postValue(getSortedGames().stream().filter(d -> !isGameInstalled(d)).collect(Collectors.toList())), executor)
+                .thenAcceptAsync(remDataList -> remDataList.forEach(remGameData -> gamesMap.put(remGameData.id, new GameData(remGameData))), executor)
+                .thenApplyAsync(x -> {
+                    var syncDataList = Collections.synchronizedCollection(gamesMap.values());
+                    if (syncDataList.size() < 2) return syncDataList;
+                    return syncDataList.stream()
+                            .sorted(Comparator.comparing(game -> game.title.toLowerCase()))
+                            .toList();
+                }, executor)
+                .thenAcceptAsync(list -> remoteDataList.postValue(list.stream().filter(d -> !isGameInstalled(d)).toList()), executor)
                 .exceptionally(throwable -> {
                     doOnShowErrorDialog(throwable.toString(), ErrorType.EXCEPTION);
                     return null;
