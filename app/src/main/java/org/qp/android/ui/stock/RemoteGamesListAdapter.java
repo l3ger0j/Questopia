@@ -6,7 +6,6 @@ import static org.qp.android.helpers.utils.StringUtil.isNotEmptyOrBlank;
 import static org.qp.android.ui.stock.StockViewModel.DISABLE_CALC_SIZE;
 
 import android.content.Context;
-import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
@@ -72,9 +71,9 @@ public class RemoteGamesListAdapter extends RecyclerView.Adapter<RemoteGamesList
         var gameData = getItem(position);
 
         final var icon = holder.listItemGameBinding.gameIcon;
-        if (isNotEmptyOrBlank(gameData.icon)) {
+        if (isNotEmptyOrBlank(String.valueOf(gameData.iconUrl))) {
             Picasso.get()
-                    .load(Uri.parse(gameData.icon))
+                    .load(gameData.iconUrl)
                     .fit()
                     .error(R.drawable.baseline_broken_image_24)
                     .into(icon);

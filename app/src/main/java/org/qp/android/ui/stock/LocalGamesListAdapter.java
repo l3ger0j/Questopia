@@ -6,7 +6,6 @@ import static org.qp.android.helpers.utils.StringUtil.isNotEmptyOrBlank;
 import static org.qp.android.ui.stock.StockViewModel.DISABLE_CALC_SIZE;
 
 import android.content.Context;
-import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -62,13 +61,11 @@ public class LocalGamesListAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         if (getItemCount() > position + 1) {
             var currGameData = getItem(position);
             var nextGameData = getItem(position + 1);
-
-            if (currGameData.listId.equals("0")
-                    && nextGameData.listId.equals("1")) {
+            if (currGameData.listId == 0
+                    && nextGameData.listId == 1) {
                 return DIVIDER;
             }
         }
-
         return ITEM;
     }
 
@@ -92,16 +89,16 @@ public class LocalGamesListAdapter extends RecyclerView.Adapter<RecyclerView.Vie
             var gameData = getItem(position);
 
             final var icon = gameHolder.listItemGameBinding.gameIcon;
-            if (isNotEmptyOrBlank(gameData.icon)) {
-                if (gameData.icon.contains("http")) {
+            if (isNotEmptyOrBlank(String.valueOf(gameData.iconUrl))) {
+                if (gameData.iconUrl.getAuthority().contains("http")) {
                     Picasso.get()
-                            .load(Uri.parse(gameData.icon))
+                            .load(gameData.iconUrl)
                             .fit()
                             .error(R.drawable.baseline_broken_image_24)
                             .into(icon);
                 } else {
                     icon.setScaleType(ImageView.ScaleType.FIT_XY);
-                    icon.setImageURI(Uri.parse(gameData.icon));
+                    icon.setImageURI(gameData.iconUrl);
                 }
             } else {
                 var drawable = AppCompatResources.getDrawable(

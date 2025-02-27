@@ -1,5 +1,7 @@
 package org.qp.android.dto.stock;
 
+import android.net.Uri;
+
 import androidx.annotation.NonNull;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlCData;
@@ -14,7 +16,7 @@ public class RemoteGameData {
 
     @JacksonXmlProperty(localName = "list_id")
     @JacksonXmlCData
-    public String listId = "";
+    public int listId = 0;
 
     @JacksonXmlCData
     public String author = "";
@@ -36,7 +38,7 @@ public class RemoteGameData {
     public String player = "";
 
     @JacksonXmlCData
-    public String icon = "";
+    public Uri icon = Uri.EMPTY;
 
     @JacksonXmlProperty(localName = "file_url")
     @JacksonXmlCData

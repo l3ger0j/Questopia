@@ -81,7 +81,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -184,8 +183,8 @@ public class StockViewModel extends AndroidViewModel {
         var unsortedGameData = gamesMap.values();
         var gameData = new ArrayList<>(unsortedGameData);
         if (gameData.size() < 2) return gameData;
-        gameData.sort(Comparator.comparing(game -> game.title.toLowerCase(Locale.ROOT)));
-        gameData.sort(Comparator.comparing(game -> game.listId.toLowerCase(Locale.ROOT)));
+        gameData.sort(Comparator.comparing(game -> game.title.toLowerCase()));
+        gameData.sort(Comparator.comparing(game -> game.listId));
         return gameData;
     }
 
@@ -218,12 +217,12 @@ public class StockViewModel extends AndroidViewModel {
         return authorString.replace("-AUTHOR-", author);
     }
 
-    public String getGameIcon() {
+    public Uri getGameIcon() {
         var data = currGameData;
-        if (data == null) return "";
+        if (data == null) return Uri.EMPTY;
 
-        var icon = data.icon;
-        if (!isNotEmptyOrBlank(icon)) return "";
+        var icon = data.iconUrl;
+        if (!isNotEmptyOrBlank(String.valueOf(icon))) return Uri.EMPTY;
 
         return icon;
     }
@@ -591,7 +590,7 @@ public class StockViewModel extends AndroidViewModel {
                 newGameData.version = editTextVersion.getText().toString();
             }
             if (tempImageFile != null) {
-                newGameData.icon = tempImageFile.getUri().toString();
+                newGameData.iconUrl = tempImageFile.getUri();
             }
             if (addBinding.sizeDirSW.isChecked()) {
                 calculateSizeDir(newGameData);
@@ -612,14 +611,16 @@ public class StockViewModel extends AndroidViewModel {
         editBinding = DialogEditBinding.inflate(LayoutInflater.from(getApplication()));
         editBinding.setStockVM(this);
 
-        getCurrGameData().ifPresent(gameData -> {
-            var pathIcon = gameData.icon;
-            if (pathIcon == null || pathIcon.isEmpty()) return;
-            Picasso.get()
-                    .load(pathIcon)
-                    .fit()
-                    .into(editBinding.imageView);
-        });
+        var data = currGameData;
+        if (data != null) {
+            var iconPath = data.iconUrl;
+            if (isNotEmptyOrBlank(String.valueOf(iconPath))) {
+                Picasso.get()
+                        .load(iconPath)
+                        .fit()
+                        .into(editBinding.imageView);
+            }
+        }
 
         if (getGameSize() == DISABLE_CALC_SIZE) {
             editBinding.sizeDirSW.setChecked(false);
@@ -653,7 +654,7 @@ public class StockViewModel extends AndroidViewModel {
                         ? removeExtension(currGameData.version)
                         : editTextVersion.getText().toString();
             }
-            if (tempImageFile != null) currGameData.icon = tempImageFile.getUri().toString();
+            if (tempImageFile != null) currGameData.iconUrl = tempImageFile.getUri();
             if (editBinding.sizeDirSW.isChecked() || getGameSize() != DISABLE_CALC_SIZE) {
                 calculateSizeDir(currGameData);
             }
@@ -746,11 +747,6 @@ public class StockViewModel extends AndroidViewModel {
                     } catch (IOException e) {
                         throw new CompletionException(e);
                     }
-                }, executor)
-                .thenApplyAsync(intDataList -> {
-                    var newList = new ArrayList<>(intDataList);
-                    newList.forEach(item -> item.listId = String.valueOf(0));
-                    return newList;
                 }, executor);
     }
 
@@ -762,11 +758,6 @@ public class StockViewModel extends AndroidViewModel {
                     } catch (IOException e) {
                         throw new CompletionException(e);
                     }
-                }, executor)
-                .thenApplyAsync(extDataList -> {
-                    var newList = new ArrayList<>(extDataList);
-                    newList.forEach(item -> item.listId = String.valueOf(1));
-                    return newList;
                 }, executor);
     }
 
@@ -823,7 +814,7 @@ public class StockViewModel extends AndroidViewModel {
                     if (syncDataList.size() < 2) return syncDataList;
                     return syncDataList.stream()
                             .sorted(Comparator.comparing(game -> game.title.toLowerCase()))
-                            .sorted(Comparator.comparing(game -> game.listId.toLowerCase(Locale.ROOT)))
+                            .sorted(Comparator.comparing(game -> game.listId))
                             .toList();
                 }, executor)
                 .thenAcceptAsync(list -> localDataList.postValue(list.stream().filter(this::isGameInstalled).toList()), executor)

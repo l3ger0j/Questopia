@@ -14,14 +14,14 @@ import java.util.Objects;
 public class GameData implements Serializable {
 
     public long id = 0L;
-    public String listId = "";
+    public int listId = 1;
     public String author = "";
     public String portedBy = "";
     public String version = "";
     public String title = "";
     public String lang = "";
     public String player = "";
-    public String icon = "";
+    public Uri iconUrl = Uri.EMPTY;
     public String fileUrl = "";
     public long fileSize = 0L;
     public String fileExt = "";
@@ -45,7 +45,7 @@ public class GameData implements Serializable {
         title = other.title;
         lang = other.lang;
         player = other.player;
-        icon = other.icon;
+        iconUrl = other.icon;
         fileUrl = other.fileUrl;
         fileSize = other.fileSize;
         fileExt = other.fileExt;
@@ -66,7 +66,7 @@ public class GameData implements Serializable {
                 ", title='" + title + '\'' +
                 ", lang='" + lang + '\'' +
                 ", player='" + player + '\'' +
-                ", icon='" + icon + '\'' +
+                ", icon='" + iconUrl + '\'' +
                 ", fileUrl='" + fileUrl + '\'' +
                 ", fileSize='" + fileSize + '\'' +
                 ", fileExt='" + fileExt + '\'' +
@@ -82,30 +82,30 @@ public class GameData implements Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof GameData gameData)) return false;
-        return Objects.equals(id , gameData.id)
-                && Objects.equals(author , gameData.author)
-                && Objects.equals(portedBy , gameData.portedBy)
-                && Objects.equals(version , gameData.version)
-                && Objects.equals(title , gameData.title)
-                && Objects.equals(lang , gameData.lang)
-                && Objects.equals(player , gameData.player)
-                && Objects.equals(icon , gameData.icon)
-                && Objects.equals(fileUrl , gameData.fileUrl)
-                && Objects.equals(fileSize , gameData.fileSize)
-                && Objects.equals(fileExt , gameData.fileExt)
-                && Objects.equals(descUrl , gameData.descUrl)
-                && Objects.equals(pubDate , gameData.pubDate)
-                && Objects.equals(modDate , gameData.modDate)
+        return Objects.equals(id, gameData.id)
+                && Objects.equals(author, gameData.author)
+                && Objects.equals(portedBy, gameData.portedBy)
+                && Objects.equals(version, gameData.version)
+                && Objects.equals(title, gameData.title)
+                && Objects.equals(lang, gameData.lang)
+                && Objects.equals(player, gameData.player)
+                && Objects.equals(iconUrl, gameData.iconUrl)
+                && Objects.equals(fileUrl, gameData.fileUrl)
+                && Objects.equals(fileSize, gameData.fileSize)
+                && Objects.equals(fileExt, gameData.fileExt)
+                && Objects.equals(descUrl, gameData.descUrl)
+                && Objects.equals(pubDate, gameData.pubDate)
+                && Objects.equals(modDate, gameData.modDate)
                 && Objects.equals(gameDirUri, gameData.gameDirUri)
                 && Objects.equals(gameFilesUri, gameData.gameFilesUri);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id , author , portedBy ,
-                version , title , lang ,
-                player , icon , fileUrl ,
-                fileSize , fileExt , descUrl ,
-                pubDate , modDate , gameDirUri, gameFilesUri);
+        return Objects.hash(id, author, portedBy,
+                version, title, lang,
+                player, iconUrl, fileUrl,
+                fileSize, fileExt, descUrl,
+                pubDate, modDate, gameDirUri, gameFilesUri);
     }
 }
