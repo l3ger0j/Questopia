@@ -20,6 +20,7 @@ import static org.qp.android.helpers.utils.JsonUtil.objectToJson;
 import static org.qp.android.helpers.utils.PathUtil.removeExtension;
 import static org.qp.android.helpers.utils.StringUtil.isNotEmptyOrBlank;
 import static org.qp.android.helpers.utils.ThreadUtil.runOnUiThread;
+import static org.qp.android.helpers.utils.XmlUtil.xmlToObject;
 
 import android.annotation.SuppressLint;
 import android.app.Application;
@@ -49,7 +50,6 @@ import com.anggrayudi.storage.callback.FileCallback;
 import com.anggrayudi.storage.file.DocumentFileCompat;
 import com.anggrayudi.storage.file.MimeType;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.squareup.picasso.Picasso;
 
 import org.ocpsoft.prettytime.PrettyTime;
@@ -781,11 +781,9 @@ public class StockViewModel extends AndroidViewModel {
                     for (var file : listFiles) {
                         if (file.getName().isEmpty()) continue;
                         if (!file.getName().equalsIgnoreCase(EXT_GAME_LIST_NAME)) {
-                            var mapper = new XmlMapper();
                             try {
-                                var ref = new TypeReference<ArrayList<RemoteGameData>>() {
-                                };
-                                return mapper.readValue(file, ref);
+                                var ref = new TypeReference<List<RemoteGameData>>() {};
+                                return xmlToObject(file, ref);
                             } catch (IOException e) {
                                 throw new CompletionException(e);
                             }

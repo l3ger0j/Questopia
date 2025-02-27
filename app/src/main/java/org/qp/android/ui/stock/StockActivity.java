@@ -3,6 +3,8 @@ package org.qp.android.ui.stock;
 import static org.qp.android.helpers.utils.FileUtil.documentWrap;
 import static org.qp.android.helpers.utils.FileUtil.findOrCreateFile;
 import static org.qp.android.helpers.utils.JsonUtil.jsonToObject;
+import static org.qp.android.helpers.utils.XmlUtil.objectToXml;
+import static org.qp.android.helpers.utils.XmlUtil.xmlToObject;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_IMAGE_FILE;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_MOD_FILE;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_PATH_FILE;
@@ -53,7 +55,6 @@ import com.anggrayudi.storage.file.DocumentFileCompat;
 import com.anggrayudi.storage.file.FileUtils;
 import com.anggrayudi.storage.file.MimeType;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.github.javiersantos.appupdater.AppUpdater;
 import com.github.javiersantos.appupdater.enums.UpdateFrom;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -419,18 +420,17 @@ public class StockActivity extends AppCompatActivity {
             @Override
             public void onResponse(@NonNull Call<ResponseBody> call,
                                    @NonNull Response<ResponseBody> response) {
-                var mapper = new XmlMapper();
                 try (var body = response.body()) {
                     if (body == null) return;
                     var string = body.string();
-                    var value = mapper.readValue(string, RemoteDataList.class);
+                    var value = xmlToObject(string, RemoteDataList.class);
                     var remoteGamesList = findOrCreateFile(
                             StockActivity.this,
                             cache,
                             getCurrentTimestamp(),
                             MimeType.TEXT
                     );
-                    mapper.writeValue(remoteGamesList, value.game);
+                    objectToXml(remoteGamesList, value.game);
                 } catch (IOException e) {
                     showErrorDialog(getString(R.string.error)
                             + ": " + e.getMessage());
