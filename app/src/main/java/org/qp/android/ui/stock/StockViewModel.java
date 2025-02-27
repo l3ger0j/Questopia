@@ -120,8 +120,8 @@ public class StockViewModel extends AndroidViewModel {
     public GameData currGameData;
     public Events.Emitter emitter = new Events.Emitter();
     protected boolean isEnableDeleteMode = false;
-    protected List<GameData> tempList = new ArrayList<>();
-    protected List<GameData> selectList = new ArrayList<>();
+    protected final List<GameData> tempList = new ArrayList<>();
+    protected final List<GameData> selectList = new ArrayList<>();
     private DocumentFile tempImageFile, tempPathFile, tempModFile;
     private DialogEditBinding editBinding;
     private DialogAddBinding addBinding;
@@ -409,20 +409,25 @@ public class StockViewModel extends AndroidViewModel {
 
     public void onListItemClick(int position) {
         if (!isEnableDeleteMode) return;
-        var currGamesMapValues = getGamesMap().values();
-        for (var gameData : currGamesMapValues) {
-            if (!isGameInstalled(gameData)) continue;
-            tempList.add(gameData);
-        }
+        CompletableFuture
+                .runAsync(() -> {
+                    var curMapValues = gamesMap.values();
 
-        var gameData = tempList.get(position);
-        if (selectList.isEmpty() || !selectList.contains(gameData)) {
-            selectList.add(gameData);
-            emitter.waitAndExecuteOnce(new StockFragmentNavigation.SelectOnce(position));
-        } else {
-            selectList.remove(gameData);
-            emitter.waitAndExecuteOnce(new StockFragmentNavigation.UnselectOnce(position));
-        }
+                    for (var gameData : curMapValues) {
+                        if (!isGameInstalled(gameData)) continue;
+                        tempList.add(gameData);
+                    }
+                }, executor)
+                .thenRun(() -> {
+                    var gameData = tempList.get(position);
+                    if (selectList.isEmpty() || !selectList.contains(gameData)) {
+                        selectList.add(gameData);
+                        emitter.waitAndExecuteOnce(new StockFragmentNavigation.SelectOnce(position));
+                    } else {
+                        selectList.remove(gameData);
+                        emitter.waitAndExecuteOnce(new StockFragmentNavigation.UnselectOnce(position));
+                    }
+                });
     }
 
     public void onLongListItemClick() {
@@ -455,7 +460,7 @@ public class StockViewModel extends AndroidViewModel {
 
             @Override
             public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-                tempList = getSortedGames();
+                tempList.addAll(getSortedGames());
                 isEnableDeleteMode = true;
                 return true;
             }
@@ -823,7 +828,7 @@ public class StockViewModel extends AndroidViewModel {
                             .sorted(Comparator.comparing(game -> game.listId.toLowerCase(Locale.ROOT)))
                             .toList();
                 }, executor)
-                .thenAcceptAsync(list -> localDataList.postValue(list.stream().filter(this::isGameInstalled).toList()))
+                .thenAcceptAsync(list -> localDataList.postValue(list.stream().filter(this::isGameInstalled).toList()), executor)
                 .exceptionally(throwable -> {
                     doOnShowErrorDialog(throwable.toString(), ErrorType.EXCEPTION);
                     return null;
