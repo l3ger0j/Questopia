@@ -90,15 +90,18 @@ public class LocalGamesListAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
             final var icon = gameHolder.listItemGameBinding.gameIcon;
             if (isNotEmptyOrBlank(String.valueOf(gameData.iconUrl))) {
-                if (gameData.iconUrl.getAuthority().contains("http")) {
-                    Picasso.get()
-                            .load(gameData.iconUrl)
-                            .fit()
-                            .error(R.drawable.baseline_broken_image_24)
-                            .into(icon);
-                } else {
-                    icon.setScaleType(ImageView.ScaleType.FIT_XY);
-                    icon.setImageURI(gameData.iconUrl);
+                var scheme = gameData.iconUrl.getScheme();
+                if (isNotEmptyOrBlank(scheme)) {
+                    if (scheme.contains("http") || scheme.contains("https")) {
+                        Picasso.get()
+                                .load(gameData.iconUrl)
+                                .fit()
+                                .error(R.drawable.baseline_broken_image_24)
+                                .into(icon);
+                    } else {
+                        icon.setScaleType(ImageView.ScaleType.FIT_XY);
+                        icon.setImageURI(gameData.iconUrl);
+                    }
                 }
             } else {
                 var drawable = AppCompatResources.getDrawable(
