@@ -82,6 +82,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import info.hannes.changelog.ChangeLog;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -285,9 +286,11 @@ public class StockActivity extends AppCompatActivity {
     }
 
     public void restoreListDirsFromFile() {
+        var changelog = new ChangeLog(this);
+        if (changelog.isFirstRun()) return;
+
         try {
-            var ref = new TypeReference<HashMap<String, String>>() {
-            };
+            var ref = new TypeReference<HashMap<String, String>>() {};
             var mapFiles = jsonToObject(listDirsFile, ref);
             var listFile = new ArrayList<DocumentFile>();
             for (var value : mapFiles.values()) {
