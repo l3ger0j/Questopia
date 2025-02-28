@@ -1,5 +1,1365 @@
 [
 {
+ "version": "",
+ "code": "1257",
+ "date": "Fri Feb 28 05:10:10 2025 +0300",
+ "message": "Remove-the-script-for-CodeQL"
+},
+{
+ "version": "",
+ "code": "1257",
+ "date": "Fri Feb 28 04:48:32 2025 +0300",
+ "message": "Fix-a-bug-with-displaying-pictures-on-the-tab-with-installed-games"
+},
+{
+ "version": "",
+ "code": "1257",
+ "date": "Fri Feb 28 04:47:41 2025 +0300",
+ "message": "Refactored-LocalGame"
+},
+{
+ "version": "",
+ "code": "1257",
+ "date": "Fri Feb 28 04:42:54 2025 +0300",
+ "message": "Fix-error-related-to-reading-writing-Uri"
+},
+{
+ "version": "",
+ "code": "1257",
+ "date": "Thu Feb 27 23:29:31 2025 +0300",
+ "message": "Refactor-GameData-RemoteGameData"
+},
+{
+ "version": "",
+ "code": "1257",
+ "date": "Thu Feb 27 23:24:12 2025 +0300",
+ "message": "Add-support-for-Uri-conversion"
+},
+{
+ "version": "",
+ "code": "1257",
+ "date": "Thu Feb 27 23:20:50 2025 +0300",
+ "message": "Use-a-new-class-to-process-XML"
+},
+{
+ "version": "",
+ "code": "1257",
+ "date": "Thu Feb 27 23:19:03 2025 +0300",
+ "message": "Combine-XML-processing-in-a-single-class"
+},
+{
+ "version": "",
+ "code": "1257",
+ "date": "Thu Feb 27 23:16:20 2025 +0300",
+ "message": "Add-support-for-image-processing-from-Uri"
+},
+{
+ "version": "",
+ "code": "1257",
+ "date": "Thu Feb 27 05:59:33 2025 +0300",
+ "message": "Improve-performance"
+},
+{
+ "version": "",
+ "code": "1257",
+ "date": "Thu Feb 27 02:51:13 2025 +0300",
+ "message": "Add-a-dependency-to-convert-the-date-to-time-ago"
+},
+{
+ "version": "",
+ "code": "1257",
+ "date": "Thu Feb 27 01:24:34 2025 +0300",
+ "message": "Refactor-StockViewModel"
+},
+{
+ "version": "",
+ "code": "1257",
+ "date": "Thu Feb 27 01:15:59 2025 +0300",
+ "message": "Improve-markup-performance"
+},
+{
+ "version": "",
+ "code": "1257",
+ "date": "Thu Feb 27 01:11:20 2025 +0300",
+ "message": "Refactor-LocalGame-class"
+},
+{
+ "version": "",
+ "code": "1257",
+ "date": "Thu Feb 27 01:10:14 2025 +0300",
+ "message": "Refactor-DirUtil-class"
+},
+{
+ "version": "",
+ "code": "1257",
+ "date": "Thu Feb 27 01:05:02 2025 +0300",
+ "message": "Fix-ProGuard-rules-for-the-native-library-to-work-correctly"
+},
+{
+ "version": "",
+ "code": "1257",
+ "date": "Thu Feb 27 01:04:09 2025 +0300",
+ "message": "Remove-the-extra-spaces"
+},
+{
+ "version": "",
+ "code": "1257",
+ "date": "Wed Feb 26 23:25:41 2025 +0300",
+ "message": "Revert-Update-proguard-rules"
+},
+{
+ "version": "",
+ "code": "1257",
+ "date": "Wed Feb 26 03:59:16 2025 +0300",
+ "message": "Update-proguard-rules"
+},
+{
+ "version": "",
+ "code": "1257",
+ "date": "Wed Feb 26 03:58:44 2025 +0300",
+ "message": "Update-project-dependencies"
+},
+{
+ "version": "",
+ "code": "1257",
+ "date": "Tue Feb 25 03:16:05 2025 +0300",
+ "message": "Enable-folder-size-calculation-when-adding-a-new-game-record"
+},
+{
+ "version": "",
+ "code": "1257",
+ "date": "Tue Feb 25 03:11:15 2025 +0300",
+ "message": "Split-the-game-record-list-holder"
+},
+{
+ "version": "",
+ "code": "1257",
+ "date": "Tue Feb 25 03:00:04 2025 +0300",
+ "message": "Fix-a-bug-related-to-the-use-of-shared-GameData"
+},
+{
+ "version": "",
+ "code": "1257",
+ "date": "Tue Feb 25 02:58:15 2025 +0300",
+ "message": "Remove-useless-WeakReference-on-Context"
+},
+{
+ "version": "",
+ "code": "1257",
+ "date": "Tue Feb 25 01:21:47 2025 +0300",
+ "message": "Fix-the-links-to-the-Telegram-group"
+},
+{
+ "version": "",
+ "code": "1257",
+ "date": "Tue Feb 25 01:19:18 2025 +0300",
+ "message": "Fix-the-display-of-pictures-in-addView"
+},
+{
+ "version": "",
+ "code": "1257",
+ "date": "Tue Feb 25 01:18:30 2025 +0300",
+ "message": "Add-support-for-pictures-on-the-link"
+},
+{
+ "version": "",
+ "code": "1257",
+ "date": "Tue Feb 25 01:17:47 2025 +0300",
+ "message": "Use-a-declared-variable"
+},
+{
+ "version": "",
+ "code": "1257",
+ "date": "Tue Feb 25 01:16:30 2025 +0300",
+ "message": "Remove-unnecessary-layout-tag"
+},
+{
+ "version": "",
+ "code": "1257",
+ "date": "Mon Feb 24 21:56:57 2025 +0300",
+ "message": "Delete-an-unused-method"
+},
+{
+ "version": "",
+ "code": "1257",
+ "date": "Mon Feb 24 21:56:10 2025 +0300",
+ "message": "Refactor-LibProxyImpl-class"
+},
+{
+ "version": "",
+ "code": "1257",
+ "date": "Sun Feb 23 04:37:05 2025 +0300",
+ "message": "Refactor-the-stock-package"
+},
+{
+ "version": "",
+ "code": "1257",
+ "date": "Sun Feb 23 04:33:29 2025 +0300",
+ "message": "Save-a-list-of-game-directories-whenever-add-a-new-game"
+},
+{
+ "version": "",
+ "code": "1257",
+ "date": "Sun Feb 23 04:28:29 2025 +0300",
+ "message": "Use-the-generic-type-List"
+},
+{
+ "version": "",
+ "code": "1257",
+ "date": "Sun Feb 23 04:27:39 2025 +0300",
+ "message": "Delete-useless-DataBinding"
+},
+{
+ "version": "",
+ "code": "1257",
+ "date": "Sun Feb 23 04:24:06 2025 +0300",
+ "message": "Refactoring-DirUtil-class"
+},
+{
+ "version": "",
+ "code": "1257",
+ "date": "Sun Feb 23 04:21:27 2025 +0300",
+ "message": "Refactoring-ArchiveUtils-class"
+},
+{
+ "version": "",
+ "code": "1257",
+ "date": "Fri Feb 21 01:22:21 2025 +0300",
+ "message": "Merge-class-for-OneTime-events"
+},
+{
+ "version": "",
+ "code": "1257",
+ "date": "Fri Feb 21 00:53:15 2025 +0300",
+ "message": "Delete-an-unused-class"
+},
+{
+ "version": "",
+ "code": "1257",
+ "date": "Thu Feb 20 07:18:15 2025 +0300",
+ "message": "Update-the-native-library"
+},
+{
+ "version": "",
+ "code": "1257",
+ "date": "Thu Feb 20 03:26:57 2025 +0300",
+ "message": "Refactoring-settings-package"
+},
+{
+ "version": "",
+ "code": "1257",
+ "date": "Thu Feb 20 03:24:18 2025 +0300",
+ "message": "Refactoring-game-package"
+},
+{
+ "version": "",
+ "code": "1257",
+ "date": "Thu Feb 20 03:14:27 2025 +0300",
+ "message": "Update-project-dependencies"
+},
+{
+ "version": "",
+ "code": "1257",
+ "date": "Thu Feb 20 03:11:07 2025 +0300",
+ "message": "Increase-the-build-version"
+},
+{
+ "version": "",
+ "code": "1257",
+ "date": "Thu Feb 20 03:10:36 2025 +0300",
+ "message": "Delete-useless-fields"
+},
+{
+ "version": "",
+ "code": "1257",
+ "date": "Thu Feb 20 03:08:44 2025 +0300",
+ "message": "Remove-banners-from-NewsFragment"
+},
+{
+ "version": "",
+ "code": "1257",
+ "date": "Thu Feb 20 02:56:38 2025 +0300",
+ "message": "Remove-unused-resources"
+},
+{
+ "version": "",
+ "code": "1257",
+ "date": "Thu Feb 20 02:52:02 2025 +0300",
+ "message": "Refactoring-stock-package"
+},
+{
+ "version": "",
+ "code": "1257",
+ "date": "Thu Feb 20 00:29:51 2025 +0300",
+ "message": "Refactor-the-LibProxyImpl-class"
+},
+{
+ "version": "",
+ "code": "1257",
+ "date": "Thu Feb 20 00:24:42 2025 +0300",
+ "message": "Add-advanced-file-validation"
+},
+{
+ "version": "",
+ "code": "1257",
+ "date": "Thu Feb 20 00:23:44 2025 +0300",
+ "message": "Code-cleanup-for-GameData-class"
+},
+{
+ "version": "",
+ "code": "1257",
+ "date": "Thu Feb 20 00:21:22 2025 +0300",
+ "message": "Delete-irrelevant-TODO"
+},
+{
+ "version": "",
+ "code": "1257",
+ "date": "Thu Feb 20 00:20:15 2025 +0300",
+ "message": "Change-field-types-of-game-DTOs"
+},
+{
+ "version": "",
+ "code": "1257",
+ "date": "Thu Feb 20 00:03:46 2025 +0300",
+ "message": "Use-the-library-solution-to-search-for-a-file-using-the-full-path"
+},
+{
+ "version": "",
+ "code": "1257",
+ "date": "Thu Feb 20 00:00:04 2025 +0300",
+ "message": "Remove-picture-caching"
+},
+{
+ "version": "",
+ "code": "1257",
+ "date": "Wed Feb 19 10:25:54 2025 +0300",
+ "message": "Fixed-the-build-with-optimizer"
+},
+{
+ "version": "",
+ "code": "1257",
+ "date": "Wed Feb 19 10:25:13 2025 +0300",
+ "message": "Replaced-the-method-to-find-the-path-to-the-music-file"
+},
+{
+ "version": "",
+ "code": "1257",
+ "date": "Wed Feb 19 10:23:54 2025 +0300",
+ "message": "Fixed-a-bug-that-caused-the-list-of-objects-to-be-generated-incorrectly"
+},
+{
+ "version": "",
+ "code": "1257",
+ "date": "Tue Feb 18 04:48:14 2025 +0300",
+ "message": "Updated-the-proxy-code-to-interact-with-the-updated-library"
+},
+{
+ "version": "",
+ "code": "1257",
+ "date": "Tue Feb 18 04:46:45 2025 +0300",
+ "message": "Updated-library"
+},
+{
+ "version": "",
+ "code": "1257",
+ "date": "Tue Feb 18 04:00:26 2025 +0300",
+ "message": "Updated-html-templates-for-about-dialog"
+},
+{
+ "version": "",
+ "code": "1257",
+ "date": "Tue Feb 18 03:50:46 2025 +0300",
+ "message": "Removed-plugin-system"
+},
+{
+ "version": "",
+ "code": "1257",
+ "date": "Tue Feb 18 03:39:16 2025 +0300",
+ "message": "Increased-speed-of-image-rendering"
+},{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Wed Aug 28 21:40:21 2024 +0300",
+ "message": "Bump-to-3.24.0"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Wed Aug 28 21:36:40 2024 +0300",
+ "message": "Merge-pull-request-46-from-l3ger0j-unstable"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Wed Aug 28 21:32:47 2024 +0300",
+ "message": "Merge-remote-tracking-branch-origin-unstable-into-unstable"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Wed Aug 28 21:28:39 2024 +0300",
+ "message": "Bypassed-the-tests"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Wed Aug 28 21:08:42 2024 +0300",
+ "message": "Deleted-a-useless-test"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Wed Aug 28 20:47:59 2024 +0300",
+ "message": "Merge-branch-master-into-unstable"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Wed Aug 28 20:34:46 2024 +0300",
+ "message": "Updated-project-dependencies"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Wed Aug 28 19:57:03 2024 +0300",
+ "message": "Fixed-ActionMode-display"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Wed Aug 28 00:03:36 2024 +0300",
+ "message": "Uncommented-variable"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Tue Aug 27 23:23:30 2024 +0300",
+ "message": "Fixed-display-of-title-in-fragments-Settings"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Tue Aug 27 22:57:30 2024 +0300",
+ "message": "Refactored-styles.xml"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Tue Aug 27 22:47:25 2024 +0300",
+ "message": "Removed-unused-tag"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Tue Aug 27 21:39:24 2024 +0300",
+ "message": "Refactored-GameActivity"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Tue Aug 27 20:50:04 2024 +0300",
+ "message": "Fixed-back-button-in-ActionMode"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Fri Aug 23 20:37:41 2024 +0300",
+ "message": "Cleared-unnecessary-imports"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Fri Aug 23 19:24:37 2024 +0300",
+ "message": "Renamed-QuestPlayerApplication-to-QuestopiaApplication"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Fri Aug 23 19:23:47 2024 +0300",
+ "message": "Updated-AGP-to-8.5.2"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Thu Aug 22 23:02:16 2024 +0300",
+ "message": "Added-translate-for-tabs-name"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Thu Aug 22 22:31:43 2024 +0300",
+ "message": "Added-ActionMode-lock-on-the-Remote-Game-tab"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Thu Aug 22 19:05:58 2024 +0300",
+ "message": "Refactored-StockViewModel"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Thu Aug 22 17:45:36 2024 +0300",
+ "message": "Deleted-useless-logging-statements"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Wed Aug 21 20:48:51 2024 +0300",
+ "message": "Revert-Fixed-ConcurrentModificationException"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Wed Aug 21 20:41:26 2024 +0300",
+ "message": "Inverted-if-branch-in-syncFromDisk-method"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Wed Aug 21 20:36:19 2024 +0300",
+ "message": "Fixed-a-bug-related-to-not-updating-the-list-of-games-when-deleting-an-item"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Wed Aug 21 20:09:39 2024 +0300",
+ "message": "Fixed-the-display-of-the-newly-added-game"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Wed Aug 21 18:55:26 2024 +0300",
+ "message": "Added-executor-for-CompletableFuture-in-fetchRemoteData-method"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Wed Aug 21 18:53:32 2024 +0300",
+ "message": "Fixed-ConcurrentModificationException"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Tue Aug 20 22:56:57 2024 +0300",
+ "message": "Fixed-navigation"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Tue Aug 20 20:30:10 2024 +0300",
+ "message": "Removed-getter-in-GameData"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Tue Aug 20 19:22:50 2024 +0300",
+ "message": "Refactored-StockViewModel"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Mon Aug 19 22:40:00 2024 +0300",
+ "message": "Updated-proguard-rules"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Mon Aug 19 20:42:08 2024 +0300",
+ "message": "Adding-a-new-feature-Stage-4"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Mon Jul 29 21:29:23 2024 +0300",
+ "message": "Adding-a-new-feature-Stage-3"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Sat Jul 27 22:40:38 2024 +0300",
+ "message": "A-new-feature-has-been-added"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Sat Jul 20 21:18:18 2024 +0300",
+ "message": "Fixed-preHandleHtml"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Wed Jul 17 19:41:09 2024 +0300",
+ "message": "Removed-unused-imports"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Wed Jul 17 19:40:43 2024 +0300",
+ "message": "Moved-init-listDirsFile-into-StockViewModel"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Wed Jul 17 19:32:03 2024 +0300",
+ "message": "Fixed-game-list-display"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Wed Jul 17 19:30:39 2024 +0300",
+ "message": "Fixed-error-in-build"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Tue Jul 16 22:07:18 2024 +0300",
+ "message": "Adding-a-new-feature-Stage-2"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Sun Jul 7 20:07:01 2024 +0300",
+ "message": "Adding-a-new-feature-Stage-1"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Sun Jul 7 19:49:29 2024 +0300",
+ "message": "Correction-of-indentation-in-the-androidqpwrapper.c-file"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Sun Jul 7 19:47:56 2024 +0300",
+ "message": "Updating-project-dependencies"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Thu Jul 4 18:22:54 2024 +0300",
+ "message": "Fixed-the-display-of-icons-in-the-action-list"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Thu Jun 27 22:44:18 2024 +0300",
+ "message": "Fixed-formatting-of-the-size"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Thu Jun 27 19:10:19 2024 +0300",
+ "message": "Fixed-adding-games"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Thu Jun 27 18:49:15 2024 +0300",
+ "message": "Restored-methods"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Wed Jun 26 20:40:31 2024 +0300",
+ "message": "Refactored-FileUtil"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Tue Jun 25 19:52:37 2024 +0300",
+ "message": "Refactored-DirUtil"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Tue Jun 25 19:10:13 2024 +0300",
+ "message": "Refactored-StockActivity"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Fri Jun 21 22:16:10 2024 +0300",
+ "message": "Added-a-request-for-access-to-the-entire-external-storage"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Fri Jun 21 21:58:06 2024 +0300",
+ "message": "Fixed-IllegalStateException"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Fri Jun 21 21:52:22 2024 +0300",
+ "message": "Improved-the-speed-of-automatic-image-resizing"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Thu Jun 20 18:10:58 2024 +0300",
+ "message": "Updated-AGP-to-8.5.0"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Wed Jun 19 21:01:56 2024 +0300",
+ "message": "Feature-improvement"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Wed Jun 19 20:43:46 2024 +0300",
+ "message": "A-new-feature-has-been-added"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Fri Jun 14 22:11:34 2024 +0300",
+ "message": "A-new-feature-has-been-added"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Fri Jun 14 21:58:58 2024 +0300",
+ "message": "The-translation-for-the-addFolder-button-has-been-updated"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Wed Jun 5 20:28:04 2024 +0300",
+ "message": "Meaningless-arguments-have-been-removed"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Tue Jun 4 23:52:55 2024 +0300",
+ "message": "Improved-PAGE_HEAD_TEMPLATE"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Tue Jun 4 22:20:59 2024 +0300",
+ "message": "Removed-method-oldGetCleanHtmlPageNotImage"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Mon Jun 3 22:31:16 2024 +0300",
+ "message": "Fixed-a-freeze-when-loading-images"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Fri May 31 20:15:11 2024 +0300",
+ "message": "Disabled-minify-for-debug-build"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Fri May 31 20:14:28 2024 +0300",
+ "message": "Renamed-method"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Mon May 27 21:58:37 2024 +0300",
+ "message": "Removed-unneeded-TODO"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Sat May 25 21:34:21 2024 +0300",
+ "message": "Fixed-codeql.yml"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Sat May 25 21:25:51 2024 +0300",
+ "message": "Updated-codeql.yml"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Sat May 25 21:25:51 2024 +0300",
+ "message": "Updated-codeql.yml"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Wed May 22 23:23:31 2024 +0300",
+ "message": "Updated-README.md"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Wed May 22 23:23:31 2024 +0300",
+ "message": "Updated-README.md"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Thu May 9 22:17:32 2024 +0300",
+ "message": "Added-Jitpack.io"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Thu May 9 19:44:07 2024 +0300",
+ "message": "Merge-branch-master-into-unstable"
+},
+{
+ "version": "3.24.0",
+ "code": "1192",
+ "date": "Thu May 9 19:36:57 2024 +0300",
+ "message": "Moved-to-versions.toml"
+},{
+ "version": "3.23.0",
+ "code": "1119",
+ "date": "Thu May 9 00:03:29 2024 +0300",
+ "message": "Bump-to-3.23.0"
+},
+{
+ "version": "3.23.0",
+ "code": "1119",
+ "date": "Wed May 8 23:59:11 2024 +0300",
+ "message": "Stubbed-CodeQL"
+},
+{
+ "version": "3.23.0",
+ "code": "1119",
+ "date": "Wed May 8 23:43:39 2024 +0300",
+ "message": "Merge-pull-request-45-from-l3ger0j-unstable"
+},
+{
+ "version": "3.23.0",
+ "code": "1119",
+ "date": "Wed May 8 23:37:15 2024 +0300",
+ "message": "Fixed-rules-for-build"
+},
+{
+ "version": "3.23.0",
+ "code": "1119",
+ "date": "Wed May 8 23:11:29 2024 +0300",
+ "message": "Stub-for-passing-tests"
+},
+{
+ "version": "3.23.0",
+ "code": "1119",
+ "date": "Wed May 8 22:48:09 2024 +0300",
+ "message": "Merge-branch-master-into-unstable"
+},
+{
+ "version": "3.23.0",
+ "code": "1119",
+ "date": "Wed May 8 22:41:55 2024 +0300",
+ "message": "Renamed-rootProject.name"
+},
+{
+ "version": "3.23.0",
+ "code": "1119",
+ "date": "Wed May 8 22:40:39 2024 +0300",
+ "message": "Upgraded-project-dependencies"
+},
+{
+ "version": "3.23.0",
+ "code": "1119",
+ "date": "Wed May 8 22:39:05 2024 +0300",
+ "message": "Upgraded-AGP-to-8.4.0"
+},
+{
+ "version": "3.23.0",
+ "code": "1119",
+ "date": "Wed May 8 22:38:38 2024 +0300",
+ "message": "Upgraded-Gradle-to-8.6"
+},
+{
+ "version": "3.23.0",
+ "code": "1119",
+ "date": "Wed May 8 22:38:02 2024 +0300",
+ "message": "Improved-unmute-video-in-the-game"
+},
+{
+ "version": "3.23.0",
+ "code": "1119",
+ "date": "Mon Apr 29 23:23:23 2024 +0300",
+ "message": "Added-refreshGameData-into-restoreListDirsFromFile-method"
+},
+{
+ "version": "3.23.0",
+ "code": "1119",
+ "date": "Mon Apr 29 22:58:55 2024 +0300",
+ "message": "Refactored-StockActivity-and-StockViewModel"
+},
+{
+ "version": "3.23.0",
+ "code": "1119",
+ "date": "Sun Apr 28 20:02:44 2024 +0300",
+ "message": "Upgraded-AGP-to-8.3.2"
+},
+{
+ "version": "3.23.0",
+ "code": "1119",
+ "date": "Sun Apr 28 17:51:49 2024 +0300",
+ "message": "Rename-qpListItem-libListItem"
+},
+{
+ "version": "3.23.0",
+ "code": "1119",
+ "date": "Fri Apr 19 19:33:16 2024 +0300",
+ "message": "Improved-setDecorFitsSystemWindows"
+},
+{
+ "version": "3.23.0",
+ "code": "1119",
+ "date": "Fri Apr 19 19:28:16 2024 +0300",
+ "message": "Removed-block-of-synchronization"
+},
+{
+ "version": "3.23.0",
+ "code": "1119",
+ "date": "Fri Apr 19 18:12:22 2024 +0300",
+ "message": "Renamed-method-stop-into-stopLibThread"
+},
+{
+ "version": "3.23.0",
+ "code": "1119",
+ "date": "Fri Apr 19 18:02:26 2024 +0300",
+ "message": "Renamed-method-start-into-startLibThread"
+},
+{
+ "version": "3.23.0",
+ "code": "1119",
+ "date": "Fri Apr 19 17:59:52 2024 +0300",
+ "message": "Removed-TODO"
+},
+{
+ "version": "3.23.0",
+ "code": "1119",
+ "date": "Fri Apr 19 17:57:47 2024 +0300",
+ "message": "The-return-type-has-been-changed-if-imageElement-is-null"
+},
+{
+ "version": "3.23.0",
+ "code": "1119",
+ "date": "Wed Apr 17 18:25:57 2024 +0300",
+ "message": "Refactored-AutoScrollRunnable"
+},
+{
+ "version": "3.23.0",
+ "code": "1119",
+ "date": "Tue Apr 16 17:17:33 2024 +0300",
+ "message": "Fixed-incorrect-fit-when-exiting-fullscreen-mode"
+},
+{
+ "version": "3.23.0",
+ "code": "1119",
+ "date": "Sat Apr 6 20:21:42 2024 +0300",
+ "message": "Refactored-FileUtil"
+},
+{
+ "version": "3.23.0",
+ "code": "1119",
+ "date": "Sat Apr 6 20:20:23 2024 +0300",
+ "message": "Refactored-GameViewModel"
+},
+{
+ "version": "3.23.0",
+ "code": "1119",
+ "date": "Sat Apr 6 20:18:55 2024 +0300",
+ "message": "Refactored-test"
+},
+{
+ "version": "3.23.0",
+ "code": "1119",
+ "date": "Sat Apr 6 20:18:12 2024 +0300",
+ "message": "Refactored-HtmlProcessor"
+},
+{
+ "version": "3.23.0",
+ "code": "1119",
+ "date": "Sat Apr 6 20:12:25 2024 +0300",
+ "message": "Refactored-ImageProvider"
+},
+{
+ "version": "3.23.0",
+ "code": "1119",
+ "date": "Fri Apr 5 21:09:51 2024 +0300",
+ "message": "Added-controller-for-mute-unmute-video-in-the-game"
+},
+{
+ "version": "3.23.0",
+ "code": "1119",
+ "date": "Tue Apr 2 22:34:23 2024 +0300",
+ "message": "Changed-match_parent-0dp"
+},
+{
+ "version": "3.23.0",
+ "code": "1119",
+ "date": "Tue Apr 2 22:34:00 2024 +0300",
+ "message": "Moved-setOnApplyWindowInsetsListener"
+},
+{
+ "version": "3.23.0",
+ "code": "1119",
+ "date": "Tue Apr 2 22:32:46 2024 +0300",
+ "message": "Fixed-ClassNotFoundException"
+},
+{
+ "version": "3.23.0",
+ "code": "1119",
+ "date": "Tue Apr 2 20:29:17 2024 +0300",
+ "message": "Fixed-Invalid-HTML"
+},
+{
+ "version": "3.23.0",
+ "code": "1119",
+ "date": "Tue Apr 2 19:46:40 2024 +0300",
+ "message": "Merge-branch-master-into-unstable"
+},
+{
+ "version": "3.23.0",
+ "code": "1119",
+ "date": "Sun Mar 31 23:06:24 2024 +0300",
+ "message": "Refactored"
+},
+{
+ "version": "3.23.0",
+ "code": "1119",
+ "date": "Fri Mar 29 19:27:55 2024 +0300",
+ "message": "Now-there-is-no-transition-to-a-new-tab-if-it-is-active"
+},
+{
+ "version": "3.23.0",
+ "code": "1119",
+ "date": "Fri Mar 29 19:10:35 2024 +0300",
+ "message": "Fixed-RuntimeException"
+},
+{
+ "version": "3.23.0",
+ "code": "1119",
+ "date": "Fri Mar 29 19:02:10 2024 +0300",
+ "message": "Cleanup-code"
+},
+{
+ "version": "3.23.0",
+ "code": "1119",
+ "date": "Fri Mar 29 18:37:07 2024 +0300",
+ "message": "Added-a-check-for-isFinishing-in-methods-for-displaying-dialogs"
+},
+{
+ "version": "3.23.0",
+ "code": "1119",
+ "date": "Tue Mar 26 18:20:10 2024 +0300",
+ "message": "Integrating-the-new-audio-menu-item-into-the-settings-list"
+},
+{
+ "version": "3.23.0",
+ "code": "1119",
+ "date": "Tue Mar 26 18:05:00 2024 +0300",
+ "message": "Added-SettingSoundFragment-ito-settings_graph"
+},
+{
+ "version": "3.23.0",
+ "code": "1119",
+ "date": "Tue Mar 26 18:03:58 2024 +0300",
+ "message": "Renamed-fragments-in-package-settings"
+},
+{
+ "version": "3.23.0",
+ "code": "1119",
+ "date": "Tue Mar 26 17:57:51 2024 +0300",
+ "message": "Created-new-menu-item-audio"
+},
+{
+ "version": "3.23.0",
+ "code": "1119",
+ "date": "Sat Mar 23 22:24:33 2024 +0300",
+ "message": "Disabled-prettyPrint"
+},
+{
+ "version": "3.23.0",
+ "code": "1119",
+ "date": "Sat Mar 23 22:23:54 2024 +0300",
+ "message": "Renamed-navigationView-to-bottomNavigationView"
+},
+{
+ "version": "3.23.0",
+ "code": "1119",
+ "date": "Thu Mar 21 20:01:58 2024 +0300",
+ "message": "Added-new-method-for-delete-file"
+},
+{
+ "version": "3.23.0",
+ "code": "1119",
+ "date": "Thu Mar 21 19:39:39 2024 +0300",
+ "message": "Extended-logging-in-HtmlProcessor-method-removeHTMLTags"
+},
+{
+ "version": "3.23.0",
+ "code": "1119",
+ "date": "Wed Mar 20 22:40:16 2024 +0300",
+ "message": "Updated-workflow-files-and-added-sign-release"
+},
+{
+ "version": "3.23.0",
+ "code": "1119",
+ "date": "Wed Mar 20 21:47:06 2024 +0300",
+ "message": "Changed-JDK-11-JDK-17"
+},
+{
+ "version": "3.23.0",
+ "code": "1119",
+ "date": "Wed Mar 20 21:46:38 2024 +0300",
+ "message": "Added-codeql"
+},
+{
+ "version": "3.23.0",
+ "code": "1119",
+ "date": "Wed Mar 20 21:32:58 2024 +0300",
+ "message": "Merge-remote-tracking-branch-origin-unstable-into-unstable"
+},
+{
+ "version": "3.23.0",
+ "code": "1119",
+ "date": "Wed Mar 20 20:37:11 2024 +0300",
+ "message": "Refactored-HtmlProcessor"
+},
+{
+ "version": "3.23.0",
+ "code": "1119",
+ "date": "Wed Mar 20 20:35:03 2024 +0300",
+ "message": "Added-TODO-NEED-TO-REFACTORED-into-LibQpProxyImpl"
+},
+{
+ "version": "3.23.0",
+ "code": "1119",
+ "date": "Wed Mar 20 20:34:28 2024 +0300",
+ "message": "Refactored-GameMainFragment"
+},
+{
+ "version": "3.23.0",
+ "code": "1119",
+ "date": "Wed Mar 20 20:33:03 2024 +0300",
+ "message": "Refactored-GameViewModel"
+},
+{
+ "version": "3.23.0",
+ "code": "1119",
+ "date": "Wed Mar 20 20:17:13 2024 +0300",
+ "message": "Added-an-alternative-method-for-getting-DocumentFile-by-relative-path"
+},
+{
+ "version": "3.23.0",
+ "code": "1119",
+ "date": "Wed Mar 20 20:15:45 2024 +0300",
+ "message": "Refactored-Base64Util"
+},
+{
+ "version": "3.23.0",
+ "code": "1119",
+ "date": "Sun Mar 17 17:44:35 2024 +0300",
+ "message": "Fixed-StackOverflowError"
+},
+{
+ "version": "3.23.0",
+ "code": "1119",
+ "date": "Sun Mar 17 17:27:07 2024 +0300",
+ "message": "Refactored-LibQpProxyImpl"
+},
+{
+ "version": "3.23.0",
+ "code": "1119",
+ "date": "Sun Mar 17 17:18:47 2024 +0300",
+ "message": "Fixed-IllegalStateException"
+},{
+ "version": "3.22.5",
+ "code": "1059",
+ "date": "Tue Apr 16 17:57:07 2024 +0300",
+ "message": "Bump-to-3.22.5"
+},
+{
+ "version": "3.22.5",
+ "code": "1059",
+ "date": "Tue Apr 16 17:47:08 2024 +0300",
+ "message": "Merge-pull-request-43-from-l3ger0j-patch-5"
+},
+{
+ "version": "3.22.5",
+ "code": "1059",
+ "date": "Tue Apr 16 17:25:40 2024 +0300",
+ "message": "Fixed-warning-Invalid-HTML"
+},
+{
+ "version": "3.22.5",
+ "code": "1059",
+ "date": "Tue Apr 16 17:21:56 2024 +0300",
+ "message": "Revert-Extended-logging-in-HtmlProcessor-method-removeHTMLTags"
+},
+{
+ "version": "3.22.5",
+ "code": "1059",
+ "date": "Fri Mar 29 19:10:35 2024 +0300",
+ "message": "Fixed-RuntimeException"
+},
+{
+ "version": "3.22.5",
+ "code": "1059",
+ "date": "Tue Apr 16 17:17:33 2024 +0300",
+ "message": "Fixed-incorrect-fit-when-exiting-fullscreen-mode"
+},{
+ "version": "3.22.4",
+ "code": "1049",
+ "date": "Fri Mar 22 18:57:13 2024 +0300",
+ "message": "Merge-pull-request-42-from-l3ger0j-patch-4"
+},
+{
+ "version": "3.22.4",
+ "code": "1049",
+ "date": "Fri Mar 22 17:40:02 2024 +0300",
+ "message": "Bump-to-3.22.4"
+},
+{
+ "version": "3.22.4",
+ "code": "1049",
+ "date": "Thu Mar 21 19:39:39 2024 +0300",
+ "message": "Extended-logging-in-HtmlProcessor-method-removeHTMLTags"
+},
+{
+ "version": "3.22.4",
+ "code": "1049",
+ "date": "Sun Mar 17 17:44:35 2024 +0300",
+ "message": "Fixed-StackOverflowError"
+},
+{
+ "version": "3.22.4",
+ "code": "1049",
+ "date": "Sun Mar 17 17:18:47 2024 +0300",
+ "message": "Fixed-IllegalStateException"
+},{
+ "version": "3.22.3",
+ "code": "1041",
+ "date": "Fri Mar 15 19:59:46 2024 +0300",
+ "message": "Merge-pull-request-41-from-l3ger0j-unstable"
+},
+{
+ "version": "3.22.3",
+ "code": "1041",
+ "date": "Fri Mar 15 19:52:48 2024 +0300",
+ "message": "Merge-branch-master-into-unstable"
+},
+{
+ "version": "3.22.3",
+ "code": "1041",
+ "date": "Fri Mar 15 19:52:15 2024 +0300",
+ "message": "Bump-to-3.22.3"
+},
+{
+ "version": "3.22.3",
+ "code": "1041",
+ "date": "Fri Mar 15 19:43:27 2024 +0300",
+ "message": "Refactored-HtmlProcessor"
+},
+{
+ "version": "3.22.3",
+ "code": "1041",
+ "date": "Fri Mar 15 18:45:08 2024 +0300",
+ "message": "Fixed-IllegalArgumentException"
+},
+{
+ "version": "3.22.3",
+ "code": "1041",
+ "date": "Fri Mar 15 18:12:42 2024 +0300",
+ "message": "Refactored-AudioPlayer"
+},
+{
+ "version": "3.22.3",
+ "code": "1041",
+ "date": "Fri Mar 15 17:24:12 2024 +0300",
+ "message": "Fixed-IllegalStateException"
+},
+{
+ "version": "3.22.3",
+ "code": "1041",
+ "date": "Fri Mar 15 17:22:20 2024 +0300",
+ "message": "Fixed-NullPointerException"
+},{
+ "version": "3.22.2",
+ "code": "1035",
+ "date": "Tue Mar 12 19:00:28 2024 +0300",
+ "message": "Merge-pull-request-40-from-l3ger0j-unstable"
+},
+{
+ "version": "3.22.2",
+ "code": "1035",
+ "date": "Tue Mar 12 18:54:43 2024 +0300",
+ "message": "Bump-to-3.22.2"
+},
+{
+ "version": "3.22.2",
+ "code": "1035",
+ "date": "Tue Mar 12 18:48:22 2024 +0300",
+ "message": "Merge-branch-master-into-unstable"
+},
+{
+ "version": "3.22.2",
+ "code": "1035",
+ "date": "Tue Mar 12 18:43:37 2024 +0300",
+ "message": "Fixed-NullPointerException"
+},
+{
+ "version": "3.22.2",
+ "code": "1035",
+ "date": "Tue Mar 12 18:33:34 2024 +0300",
+ "message": "Fixed-NullPointerException"
+},
+{
+ "version": "3.22.2",
+ "code": "1035",
+ "date": "Tue Mar 12 18:12:38 2024 +0300",
+ "message": "Fixed-IllegalStateException"
+},{
+ "version": "3.22.1",
+ "code": "1034",
+ "date": "Wed Mar 6 21:03:41 2024 +0300",
+ "message": "Bump-to-3.22.1"
+},
+{
+ "version": "3.22.1",
+ "code": "1034",
+ "date": "Wed Mar 6 21:00:08 2024 +0300",
+ "message": "Merge-pull-request-38-from-l3ger0j-unstable"
+},
+{
+ "version": "3.22.1",
+ "code": "1034",
+ "date": "Wed Mar 6 20:55:03 2024 +0300",
+ "message": "Merge-branch-master-into-unstable"
+},
+{
+ "version": "3.22.1",
+ "code": "1034",
+ "date": "Wed Mar 6 20:48:51 2024 +0300",
+ "message": "Merge-remote-tracking-branch-origin-unstable-into-unstable"
+},
+{
+ "version": "3.22.1",
+ "code": "1034",
+ "date": "Wed Mar 6 20:45:00 2024 +0300",
+ "message": "Fixed-IllegalStateException"
+},
+{
+ "version": "3.22.1",
+ "code": "1034",
+ "date": "Wed Mar 6 20:38:43 2024 +0300",
+ "message": "Fixed-image-display"
+},{
+ "version": "3.22.0",
+ "code": "1028",
+ "date": "Tue Mar 5 18:08:26 2024 +0300",
+ "message": "Updated-gitlog.json"
+},
+{
  "version": "3.22.0",
  "code": "1028",
  "date": "Tue Mar 5 17:57:20 2024 +0300",
