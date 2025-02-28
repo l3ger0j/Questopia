@@ -4,8 +4,6 @@ import android.net.Uri;
 
 import androidx.annotation.NonNull;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
@@ -28,10 +26,7 @@ public class GameData implements Serializable {
     public String descUrl = "";
     public String pubDate = "";
     public String modDate = "";
-
-    @JsonIgnore
     public Uri gameDirUri = Uri.EMPTY;
-    @JsonIgnore
     public List<Uri> gameFilesUri = Collections.emptyList();
 
     public GameData() { }

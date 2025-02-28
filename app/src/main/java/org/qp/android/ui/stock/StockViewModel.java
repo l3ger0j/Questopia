@@ -337,20 +337,30 @@ public class StockViewModel extends AndroidViewModel {
     public boolean isGameInstalled() {
         var gameData = currGameData;
         if (gameData == null) return false;
-        var rootDirUri = gameData.gameDirUri;
-        if (rootDirUri == Uri.EMPTY) return false;
-        if (isNotEmptyOrBlank(String.valueOf(rootDirUri))) {
-            return isDirContainsGameFile(getApplication(), rootDirUri);
+        var filesUri = gameData.gameFilesUri;
+        if (filesUri == null || filesUri.isEmpty()) {
+            var rootDirUri = gameData.gameDirUri;
+            if (rootDirUri == Uri.EMPTY) return false;
+            if (isNotEmptyOrBlank(String.valueOf(rootDirUri))) {
+                return isDirContainsGameFile(getApplication(), rootDirUri); // it's too heavy!
+            }
+        } else {
+            return true;
         }
         return false;
     }
 
     public boolean isGameInstalled(GameData entry) {
         if (entry == null) return false;
-        var rootDirUri = entry.gameDirUri;
-        if (rootDirUri == Uri.EMPTY) return false;
-        if (!isNotEmptyOrBlank(String.valueOf(rootDirUri))) return false;
-        return isDirContainsGameFile(getApplication(), rootDirUri);
+        var filesUri = entry.gameFilesUri;
+        if (filesUri == null || filesUri.isEmpty()) {
+            var rootDirUri = entry.gameDirUri;
+            if (rootDirUri == Uri.EMPTY) return false;
+            if (!isNotEmptyOrBlank(String.valueOf(rootDirUri))) return false;
+            return isDirContainsGameFile(getApplication(), rootDirUri);
+        } else {
+            return true;
+        }
     }
 
     public boolean isHasRemoteUrl() {
@@ -598,6 +608,9 @@ public class StockViewModel extends AndroidViewModel {
                 newGameData.fileSize = DISABLE_CALC_SIZE;
             }
 
+            CompletableFuture
+                    .runAsync(() -> localGame.searchAndWriteFileInfo(rootDir), executor);
+
             localGame.createDataIntoFolder(newGameData, rootDir);
             outputIntObserver.setValue(1);
             dialogFragments.dismiss();
@@ -743,7 +756,7 @@ public class StockViewModel extends AndroidViewModel {
         return CompletableFuture
                 .supplyAsync(() -> {
                     try {
-                        return localGame.extractDataFromFolder(rootInDir);
+                        return localGame.lightExtractDataFromDir(rootInDir);
                     } catch (IOException e) {
                         throw new CompletionException(e);
                     }
@@ -754,7 +767,7 @@ public class StockViewModel extends AndroidViewModel {
         return CompletableFuture
                 .supplyAsync(() -> {
                     try {
-                        return localGame.extractDataFromList(extGamesListDir);
+                        return localGame.lightExtractDataFromList(extGamesListDir);
                     } catch (IOException e) {
                         throw new CompletionException(e);
                     }
@@ -1044,9 +1057,8 @@ public class StockViewModel extends AndroidViewModel {
                             .thenRun(() -> {
                                 archive.delete();
 
-                                var localRemoteGame = new LocalGame(getApplication());
                                 var gameFolder = archiveUnpack.unpackFolder;
-                                localRemoteGame.createDataIntoFolder(currGameData, gameFolder);
+                                localGame.searchAndWriteData(gameFolder, currGameData);
                             })
                             .thenRun(() -> {
                                 var notificationBuild = new NotifyBuilder(getApplication(), UNPACK_GAME_CHANNEL_ID);
