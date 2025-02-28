@@ -38,6 +38,10 @@
 -keep public class * implements java.lang.reflect.Type
 
 # Proguard configuration for Jackson 2.x
+-keep class org.qp.android.helpers.UriMixIn
+-keep class org.qp.android.helpers.UriDeserializer
+-keep class org.qp.android.helpers.UriSerializer
+
 -keep class * implements com.fasterxml.jackson.core.type.TypeReference
 -keep class com.fasterxml.jackson.databind.ObjectMapper {
     public <methods>;
