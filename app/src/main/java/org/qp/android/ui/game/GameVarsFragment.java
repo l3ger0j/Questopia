@@ -19,31 +19,31 @@ public class GameVarsFragment extends Fragment {
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater ,
-                             @Nullable ViewGroup container ,
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         var viewModel = new ViewModelProvider(requireActivity()).get(GameViewModel.class);
         varsDescView = new WebView(requireContext());
         varsDescView.setLayoutParams(new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT ,
+                ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT));
         varsDescView.setBackgroundColor(viewModel.getBackgroundColor());
         varsDescView = viewModel.getDefaultWebClient(varsDescView);
-        viewModel.getControllerObserver().observe(getViewLifecycleOwner() , settingsController -> {
+        viewModel.getControllerObserver().observe(getViewLifecycleOwner(), settingsController -> {
             varsDescView.setBackgroundColor(viewModel.getBackgroundColor());
             varsDescView.refreshDrawableState();
         });
-        viewModel.getVarsDescObserver().observe(getViewLifecycleOwner() , desc ->
+        viewModel.getVarsDescObserver().observe(getViewLifecycleOwner(), desc ->
                 varsDescView.loadDataWithBaseURL(
-                        "file:///" ,
-                        desc ,
-                        "text/html" ,
-                        "UTF-8" ,
+                        "file:///",
+                        desc,
+                        "text/html",
+                        "UTF-8",
                         null));
         var layout = new LinearLayout(requireContext());
         layout.setOrientation(LinearLayout.VERTICAL);
         layout.setLayoutParams(new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT ,
+                ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT));
         layout.setGravity(Gravity.CENTER);
         layout.addView(varsDescView);

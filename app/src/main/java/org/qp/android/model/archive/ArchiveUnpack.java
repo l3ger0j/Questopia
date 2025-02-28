@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -41,9 +40,9 @@ public class ArchiveUnpack {
 
     @NonNull
     private static int[] getPrimitiveLongArrayFromInt(Set<Integer> input) {
-        int[] ret = new int[input.size()];
-        Iterator<Integer> iterator = input.iterator();
-        for (int i = 0; i < ret.length; i++) {
+        var ret = new int[input.size()];
+        var iterator = input.iterator();
+        for (var i = 0; i < ret.length; i++) {
             ret[i] = iterator.next();
         }
         return ret;
@@ -81,7 +80,6 @@ public class ArchiveUnpack {
                 if (unpackFolder == null && ind == itemCount - 1) {
                     unpackFolder = new File(destFolder, fileName);
                 }
-                Log.d(TAG, "index: "+ind+"\nfilename: "+fileName+"\nitemCount: "+itemCount);
                 var lastSeparator = fileName.lastIndexOf(File.separator);
                 if (lastSeparator > -1) fileName = fileName.substring(lastSeparator + 1);
                 fileNames.put(ind, fileName);
@@ -102,7 +100,6 @@ public class ArchiveUnpack {
 
         private final File targetFolder;
         private final IInArchive inArchive;
-        private ExtractAskMode extractAskMode;
         private SequentialOutStream stream;
 
         public ArchiveExtractCallback(File targetFolder, IInArchive inArchive) {
@@ -112,11 +109,7 @@ public class ArchiveUnpack {
 
         @Override
         public ISequentialOutStream getStream(int index, ExtractAskMode extractAskMode) throws SevenZipException {
-            Log.v(TAG, "Extract archive, get stream: " + index + " to: " + extractAskMode);
-
-            this.extractAskMode = extractAskMode;
-
-            var isFolder = (Boolean) inArchive.getProperty(index , PropID.IS_FOLDER);
+            var isFolder = (Boolean) inArchive.getProperty(index, PropID.IS_FOLDER);
             var path = (String) inArchive.getProperty(index, PropID.PATH);
             var file = new File(targetFolder.getAbsolutePath(), path);
 
@@ -149,13 +142,10 @@ public class ArchiveUnpack {
 
         @Override
         public void prepareOperation(ExtractAskMode extractAskMode) {
-            Log.v(TAG, String.format("Extract archive, prepare to: %s", extractAskMode));
         }
 
         @Override
         public void setOperationResult(ExtractOperationResult extractOperationResult) throws SevenZipException {
-            Log.v(TAG, String.format("Extract archive, %s completed with: %s", extractAskMode, extractOperationResult));
-
             try {
                 if (stream != null) stream.close();
                 stream = null;
@@ -170,12 +160,10 @@ public class ArchiveUnpack {
 
         @Override
         public void setTotal(long total) {
-            Log.v(TAG, String.format("Extract archive, work planned: %s", total));
         }
 
         @Override
         public void setCompleted(long complete) {
-            Log.v(TAG, String.format("Extract archive, work completed: %s", complete));
         }
     }
 

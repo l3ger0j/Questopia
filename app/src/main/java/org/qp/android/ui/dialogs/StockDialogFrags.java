@@ -16,6 +16,7 @@ import org.qp.android.databinding.DialogEditBinding;
 import org.qp.android.ui.stock.StockViewModel;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class StockDialogFrags extends DialogFragment {
@@ -23,7 +24,7 @@ public class StockDialogFrags extends DialogFragment {
     private DialogAddBinding addBinding;
     private DialogEditBinding editBinding;
     private StockDialogType dialogType;
-    private ArrayList<String> names;
+    private List<String> names;
 
     private boolean isInstalled;
     private String message;
@@ -43,7 +44,7 @@ public class StockDialogFrags extends DialogFragment {
         this.editBinding = editBinding;
     }
 
-    public void setNames(ArrayList<String> names) {
+    public void setNames(List<String> names) {
         this.names = names;
     }
 
@@ -143,7 +144,7 @@ public class StockDialogFrags extends DialogFragment {
         outState.putString("selectedDialogType", dialogType.toString());
         outState.putBoolean("booleanIsInstalled", isInstalled);
         if (names != null) {
-            outState.putStringArrayList("arrayListNames", names);
+            outState.putStringArrayList("listNames", new ArrayList<>(names));
         }
         if (message != null) {
             outState.putString("stringMessage", message);

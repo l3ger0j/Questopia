@@ -1,5 +1,7 @@
 package org.qp.android.dto.stock;
 
+import android.net.Uri;
+
 import androidx.annotation.NonNull;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlCData;
@@ -10,11 +12,11 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 public class RemoteGameData {
 
     @JacksonXmlCData
-    public String id = "";
+    public long id = 0L;
 
     @JacksonXmlProperty(localName = "list_id")
     @JacksonXmlCData
-    public String listId = "";
+    public int listId = 0;
 
     @JacksonXmlCData
     public String author = "";
@@ -36,7 +38,7 @@ public class RemoteGameData {
     public String player = "";
 
     @JacksonXmlCData
-    public String icon = "";
+    public Uri icon = Uri.EMPTY;
 
     @JacksonXmlProperty(localName = "file_url")
     @JacksonXmlCData
@@ -44,7 +46,7 @@ public class RemoteGameData {
 
     @JacksonXmlProperty(localName = "file_size")
     @JacksonXmlCData
-    public String fileSize = "";
+    public long fileSize = 0L;
 
     @JacksonXmlProperty(localName = "file_ext")
     @JacksonXmlCData

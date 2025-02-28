@@ -1,7 +1,6 @@
 package org.qp.android.ui.stock;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -56,7 +55,7 @@ public class StockViewPagerFragment extends Fragment {
 
         var tabZeroName = getString(R.string.tabZeroName);
         var tabOneName = getString(R.string.tabOneName);
-        var tabLayoutMediator = new TabLayoutMediator(tabLayout, stockPager, (tab , position) ->
+        var tabLayoutMediator = new TabLayoutMediator(tabLayout, stockPager, (tab, position) ->
                 tab.setText(position == 0 ? tabZeroName : tabOneName));
         tabLayoutMediator.attach();
 

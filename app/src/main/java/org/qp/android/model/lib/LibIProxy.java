@@ -2,8 +2,6 @@ package org.qp.android.model.lib;
 
 import android.net.Uri;
 
-import androidx.documentfile.provider.DocumentFile;
-
 import org.qp.android.ui.game.GameInterface;
 
 public interface LibIProxy {
@@ -19,7 +17,7 @@ public interface LibIProxy {
 
     void enableDebugMode (boolean isDebug);
 
-    void runGame(String id, String title, DocumentFile dir, DocumentFile file);
+    void runGame(long id, String title, Uri dir, Uri file);
     void restartGame();
     void loadGameState(Uri uri);
     void saveGameState(Uri uri);

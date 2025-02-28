@@ -23,11 +23,6 @@
         android:key="soundPref" />
 
     <Preference
-        android:icon="@drawable/baseline_extension_24"
-        android:title="@string/pluginTitle"
-        android:key="showExtensionMenu"/>
-
-    <Preference
         android:icon="@drawable/baseline_feed_24"
         android:title="@string/newsMenuTitle"
         android:key="newsApp" />

@@ -1,5 +1,8 @@
 package org.qp.android.helpers;
 
+import static org.qp.android.helpers.utils.StringUtil.isNotEmptyOrBlank;
+
+import android.net.Uri;
 import android.widget.ImageView;
 
 import androidx.core.content.res.ResourcesCompat;
@@ -23,6 +26,22 @@ public class Bind {
                         .fit()
                         .into(view);
             }
+        } else {
+            var drawable = ResourcesCompat.getDrawable(
+                    view.getContext().getResources() ,
+                    R.drawable.baseline_broken_image_24 , null
+            );
+            view.setImageDrawable(drawable);
+        }
+    }
+
+    @BindingAdapter({"imageUri"})
+    public static void loadImage(ImageView view, Uri imageUrl) {
+        if (isNotEmptyOrBlank(String.valueOf(imageUrl)) && imageUrl != Uri.EMPTY) {
+            Picasso.get()
+                    .load(imageUrl)
+                    .fit()
+                    .into(view);
         } else {
             var drawable = ResourcesCompat.getDrawable(
                     view.getContext().getResources() ,

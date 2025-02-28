@@ -2,12 +2,9 @@ plugins {
     alias(libs.plugins.android.application)
 }
 
-def viewBind = true
-def dataBind = true
-
 android {
     namespace 'org.qp.android'
-    compileSdk 34
+    compileSdk 35
 
     defaultConfig {
         applicationId "org.qp.android"
@@ -17,6 +14,12 @@ android {
         versionName "3.24.0"
         resourceConfigurations += ['en', 'ru']
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        externalNativeBuild {
+            cmake {
+                arguments "-DBUILD_JAVA=1"
+                cFlags "-DANDROID"
+            }
+        }
     }
 
     configurations {
@@ -27,7 +30,8 @@ android {
 
     externalNativeBuild {
         cmake {
-            path "src/main/jni/CMakeLists.txt"
+            version "3.22.1"
+            path "src/main/cpp/CMakeLists.txt"
         }
     }
 
@@ -61,13 +65,12 @@ android {
     }
 
     buildFeatures {
-        viewBinding viewBind
-        dataBinding dataBind
+        viewBinding true
+        dataBinding true
         buildConfig true
-        aidl true
     }
 
-    ndkVersion = '26.1.10909125'
+    ndkVersion = '27.2.12479018'
     lint {
         abortOnError false
     }
@@ -100,6 +103,7 @@ dependencies {
     implementation libs.appupdater
     implementation libs.storage
     implementation libs.picasso
+    implementation libs.prettytime
 
     implementation libs.retrofit
     implementation libs.converter.jackson

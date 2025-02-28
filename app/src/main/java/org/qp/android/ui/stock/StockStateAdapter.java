@@ -10,6 +10,11 @@ public class StockStateAdapter extends FragmentStateAdapter {
 
     private final static int COUNT_FRAGMENTS = 2;
 
+    public StockStateAdapter(@NonNull FragmentManager fragmentManager,
+                             @NonNull Lifecycle lifecycle) {
+        super(fragmentManager, lifecycle);
+    }
+
     @Override
     public int getItemCount() {
         return COUNT_FRAGMENTS;
@@ -18,12 +23,11 @@ public class StockStateAdapter extends FragmentStateAdapter {
     @NonNull
     @Override
     public Fragment createFragment(int position) {
-        return new StockRecyclerFragment();
-    }
-
-    public StockStateAdapter(@NonNull FragmentManager fragmentManager,
-                             @NonNull Lifecycle lifecycle) {
-        super(fragmentManager , lifecycle);
+        if (position == 0) {
+            return new StockLocalRVFragment();
+        } else {
+            return new StockRemoteRVFragment();
+        }
     }
 
 }
