@@ -1,11 +1,6 @@
 package org.qp.android.ui.settings;
 
-import static org.qp.android.helpers.utils.ColorUtil.getHexColor;
-import static org.qp.android.helpers.utils.FileUtil.readAssetFileAsString;
-import static org.qp.android.helpers.utils.ViewUtil.getFontStyle;
-
 import android.app.Application;
-import android.content.Context;
 
 import androidx.annotation.NonNull;
 import androidx.databinding.ObservableField;
@@ -13,6 +8,8 @@ import androidx.lifecycle.AndroidViewModel;
 
 public class SettingsViewModel extends AndroidViewModel {
 
+    private static final String ABOUT_RU_LINK = "https://questopia.site/about-ru.html";
+    private static final String ABOUT_EN_LINK = "https://questopia.site/about-en.html";
     public ObservableField<SettingsActivity> settingsActivityObservableField = new ObservableField<>();
 
     public SettingsViewModel(@NonNull Application application) {
@@ -23,19 +20,12 @@ public class SettingsViewModel extends AndroidViewModel {
         return SettingsController.newInstance(getApplication());
     }
 
-    public String formationAboutDesc(@NonNull Context context) {
-        var aboutPage = "";
+    public String getLinkAboutDesc() {
         if (getSettingsController().language.equalsIgnoreCase("ru")) {
-            aboutPage = readAssetFileAsString(context, "about-ru.html");
+            return ABOUT_RU_LINK;
         } else if (getSettingsController().language.equalsIgnoreCase("en")) {
-            aboutPage = readAssetFileAsString(context, "about-en.html");
+            return ABOUT_EN_LINK;
         }
-        if (aboutPage == null || aboutPage.isEmpty()) return null;
-        return aboutPage
-                .replace("QSPFONTSTYLE", getFontStyle(getSettingsController().getTypeface()))
-                .replace("QSPFONTSIZE", Integer.toString(getSettingsController().fontSize))
-                .replace("QSPTEXTCOLOR", getHexColor(getSettingsController().textColor))
-                .replace("QSPBACKCOLOR", getHexColor(getSettingsController().backColor))
-                .replace("QSPLINKCOLOR", getHexColor(getSettingsController().linkColor));
+        return ABOUT_EN_LINK;
     }
 }
