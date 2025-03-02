@@ -57,6 +57,24 @@ public class LocalGame {
         forceCreateFile(context, gameDir, MimeType.TEXT, NOSEARCH_FILENAME);
     }
 
+    public boolean tryCreateDataIntoFolder(DocumentFile gameDir, GameData gameData) {
+        var infoFile = findOrCreateFile(context, gameDir, GAME_INFO_FILENAME, MimeType.TEXT);
+
+        if (!isWritableFile(context, infoFile)) {
+            Log.e(TAG, "IS NOT WRITABLE");
+            return false;
+        }
+
+        var tempInfoFile = documentWrap(infoFile);
+        try (var out = tempInfoFile.openOutputStream(context, false)) {
+            objectToJson(out, gameData);
+            return true;
+        } catch (Exception ex) {
+            Log.e(TAG, "ERROR: ", ex);
+            return false;
+        }
+    }
+
     public void createDataIntoFolder(GameData gameData, DocumentFile gameDir) {
         var infoFile = findOrCreateFile(context, gameDir, GAME_INFO_FILENAME, MimeType.TEXT);
 
@@ -113,9 +131,9 @@ public class LocalGame {
     }
 
     @WorkerThread
-    public void searchAndWriteFileInfo(DocumentFile rootDir) {
+    public boolean searchAndWriteFileInfo(DocumentFile rootDir, GameData data) {
         if (!isWritableDir(context, rootDir)) {
-            return;
+            return false;
         }
 
         var gameFiles = Collections.synchronizedList(new ArrayList<Uri>());
@@ -129,32 +147,18 @@ public class LocalGame {
             }
         });
 
-        var infoFile = fromRelPath(context, GAME_INFO_FILENAME, rootDir);
-        if (isWritableFile(context, infoFile)) {
-            GameData data = null;
-            var infoFileCont = readFileAsString(context, infoFile.getUri());
-            if (isNotEmptyOrBlank(infoFileCont)) {
-                try {
-                    data = parseGameInfo(infoFileCont);
-                } catch (IOException e) {
-                    return;
-                }
-            }
-            if (data != null) {
-                if (!Objects.equals(data.gameDirUri.getPath(), rootDir.getUri().getPath())) {
-                    data.gameDirUri = rootDir.getUri();
-                }
+        if (!Objects.equals(data.gameDirUri.getPath(), rootDir.getUri().getPath())) {
+            data.gameDirUri = rootDir.getUri();
+        }
 
-                if (!Objects.deepEquals(data.gameFilesUri, gameFiles)) {
-                    data.gameFilesUri = gameFiles;
-                }
-
-                createDataIntoFolder(data, rootDir);
-            }
+        if (!Objects.deepEquals(data.gameFilesUri, gameFiles)) {
+            data.gameFilesUri = gameFiles;
         }
 
         createNoMediaFile(rootDir);
         createNoSearchFile(rootDir);
+
+        return true;
     }
 
     public List<GameData> lightExtractDataFromDir(File generalGamesDir) throws IOException {

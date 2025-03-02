@@ -3,6 +3,7 @@ package org.qp.android.ui.stock;
 import static org.qp.android.helpers.utils.FileUtil.documentWrap;
 import static org.qp.android.helpers.utils.FileUtil.findOrCreateFile;
 import static org.qp.android.helpers.utils.JsonUtil.jsonToObject;
+import static org.qp.android.helpers.utils.JsonUtil.objectToJson;
 import static org.qp.android.helpers.utils.XmlUtil.objectToXml;
 import static org.qp.android.helpers.utils.XmlUtil.xmlToObject;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_IMAGE_FILE;
@@ -60,7 +61,6 @@ import com.github.javiersantos.appupdater.enums.UpdateFrom;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import org.qp.android.BuildConfig;
-import org.qp.android.QuestopiaApplication;
 import org.qp.android.R;
 import org.qp.android.databinding.ActivityStockBinding;
 import org.qp.android.dto.stock.RemoteDataList;
@@ -207,14 +207,6 @@ public class StockActivity extends AppCompatActivity {
                         getSupportFragmentManager(),
                         rootFolder
                 );
-                stockViewModel.outputIntObserver.observe(this, integer -> {
-                    if (integer == 1) {
-                        var application = (QuestopiaApplication) getApplication();
-                        if (application != null) application.setCurrentGameDir(rootFolder);
-                        stockViewModel.refreshGamesDirs();
-                        stockViewModel.saveListDirsIntoFile(listDirsFile);
-                    }
-                });
             }
         });
 
@@ -287,7 +279,15 @@ public class StockActivity extends AppCompatActivity {
 
     public void restoreListDirsFromFile() {
         var changelog = new ChangeLog(this);
-        if (changelog.isFirstRun()) return;
+        if (changelog.isFirstRun()) {
+            var map = new HashMap<String, String>();
+            try {
+                objectToJson(listDirsFile, map);
+            } catch (IOException e) {
+                showErrorDialog("Error: " + e);
+                return;
+            }
+        }
 
         try {
             var ref = new TypeReference<HashMap<String, String>>() {};
@@ -529,12 +529,6 @@ public class StockActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
-        stockViewModel.saveListDirsIntoFile(listDirsFile);
-    }
-
-    @Override
     protected void onDestroy() {
         super.onDestroy();
 
@@ -549,7 +543,6 @@ public class StockActivity extends AppCompatActivity {
 
         loadPermission();
 
-        stockViewModel.refreshGamesDirs();
         stockViewModel.doIsHideFAB.setValue(false);
         navController.navigate(R.id.stockViewPagerFragment);
 

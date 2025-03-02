@@ -5,8 +5,6 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.os.Build;
 
-import androidx.documentfile.provider.DocumentFile;
-
 import org.qp.android.model.lib.LibIProxy;
 import org.qp.android.model.lib.LibProxyImpl;
 import org.qp.android.model.service.AudioPlayer;
@@ -21,8 +19,6 @@ public class QuestopiaApplication extends Application {
 
     public final ImageProvider imageProvider = new ImageProvider();
     private final HtmlProcessor htmlProcessor = new HtmlProcessor(imageProvider);
-
-    private DocumentFile currentGameDir;
     public final AudioPlayer audioPlayer = new AudioPlayer(this);
     public final LibProxyImpl libProxy = new LibProxyImpl(this);
 
@@ -32,22 +28,13 @@ public class QuestopiaApplication extends Application {
         createNotificationChannels();
     }
 
-    public void setCurrentGameDir(DocumentFile currentGameDir) {
-        this.currentGameDir = currentGameDir;
-    }
-
     public HtmlProcessor getHtmlProcessor() {
         return htmlProcessor
-                .setCurGameDir(currentGameDir)
                 .setController(SettingsController.newInstance(this));
     }
 
     public LibIProxy getLibProxy() {
         return libProxy;
-    }
-
-    public DocumentFile getCurrentGameDir() {
-        return currentGameDir;
     }
 
     public void createNotificationChannels() {

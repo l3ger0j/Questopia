@@ -53,7 +53,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.squareup.picasso.Picasso;
 
 import org.ocpsoft.prettytime.PrettyTime;
-import org.qp.android.QuestopiaApplication;
 import org.qp.android.R;
 import org.qp.android.databinding.DialogAddBinding;
 import org.qp.android.databinding.DialogEditBinding;
@@ -99,12 +98,14 @@ public class StockViewModel extends AndroidViewModel {
     public final MutableLiveData<Integer> currPageNumber = new MutableLiveData<>();
     public final MutableLiveData<List<GameData>> remoteDataList = new MutableLiveData<>();
     public final MutableLiveData<List<GameData>> localDataList = new MutableLiveData<>();
+    public final File listDirsFile;
+    protected final List<GameData> tempList = new ArrayList<>();
+    protected final List<GameData> selectList = new ArrayList<>();
     private final ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-    // Containers
+    private final ExecutorService singleExecutor = Executors.newSingleThreadExecutor();
     private final HashMap<Long, GameData> gamesMap = new HashMap<>();
     private final LocalGame localGame = new LocalGame(getApplication());
     private final DownloadManager downloadManager = getApplication().getSystemService(DownloadManager.class);
-    public final File listDirsFile;
     private final File rootInDir;
     private final FileCallback callback = new FileCallback() {
         @Override
@@ -119,8 +120,6 @@ public class StockViewModel extends AndroidViewModel {
     public GameData currGameData;
     public Events.Emitter emitter = new Events.Emitter();
     protected boolean isEnableDeleteMode = false;
-    protected final List<GameData> tempList = new ArrayList<>();
-    protected final List<GameData> selectList = new ArrayList<>();
     private DocumentFile tempImageFile, tempPathFile, tempModFile;
     private DialogEditBinding editBinding;
     private DialogAddBinding addBinding;
@@ -516,7 +515,6 @@ public class StockViewModel extends AndroidViewModel {
     // region Dialog
     public void showAddDialogFragment(FragmentManager manager,
                                       DocumentFile rootDir) {
-        outputIntObserver = new MutableLiveData<>();
         dialogFragments = new StockDialogFrags();
         dialogFragments.setDialogType(StockDialogType.ADD_DIALOG);
         dialogFragments.setAddBinding(setupAddView(rootDir));
@@ -608,12 +606,23 @@ public class StockViewModel extends AndroidViewModel {
                 newGameData.fileSize = DISABLE_CALC_SIZE;
             }
 
-            CompletableFuture
-                    .runAsync(() -> localGame.searchAndWriteFileInfo(rootDir), executor);
-
-            localGame.createDataIntoFolder(newGameData, rootDir);
-            outputIntObserver.setValue(1);
             dialogFragments.dismiss();
+
+            CompletableFuture
+                    .supplyAsync(() -> localGame.searchAndWriteFileInfo(rootDir, newGameData), executor)
+                    .thenApply(aBoolean -> {
+                        if (aBoolean) {
+                            return localGame.tryCreateDataIntoFolder(rootDir, newGameData);
+                        }
+                        return false;
+                    })
+                    .thenCompose(aBoolean -> {
+                        if (aBoolean) {
+                            return saveDirToFile(rootDir);
+                        }
+                        return null;
+                    })
+                    .thenRun(() -> refreshGamesDirs(rootDir));
         } catch (NullPointerException ex) {
             doOnShowErrorDialog(ex.getMessage(), ErrorType.EXCEPTION);
         }
@@ -684,7 +693,7 @@ public class StockViewModel extends AndroidViewModel {
             }
 
             localGame.createDataIntoFolder(currGameData, gameDir);
-            refreshGamesDirs();
+            refreshGamesDirs(gameDir);
             dialogFragments.dismiss();
         } catch (NullPointerException ex) {
             doOnShowErrorDialog(ex.getMessage(), ErrorType.EXCEPTION);
@@ -710,9 +719,6 @@ public class StockViewModel extends AndroidViewModel {
             if (!isWritableDir(getApplication(), gameDir)) return Optional.empty();
             var intent = new Intent(getApplication(), GameActivity.class);
 
-            var application = (QuestopiaApplication) getApplication();
-            application.setCurrentGameDir(gameDir);
-
             intent.putExtra("gameId", data.id);
             intent.putExtra("gameTitle", data.title);
             intent.putExtra("gameDirUri", String.valueOf(gameDir.getUri()));
@@ -737,17 +743,15 @@ public class StockViewModel extends AndroidViewModel {
     // endregion Dialog
 
     // region Refresh
-    public void refreshGamesDirs() {
-        var rootExDir = ((QuestopiaApplication) getApplication()).getCurrentGameDir();
-
-        if (isWritableDir(getApplication(), rootExDir)) {
-            extGamesListDir.add(rootExDir);
+    public void refreshGamesDirs(DocumentFile gameExDir) {
+        if (isWritableDir(getApplication(), gameExDir)) {
+            extGamesListDir.add(gameExDir);
             refreshGameData();
         } else {
-            if (rootExDir == null) return;
+            if (gameExDir == null) return;
             doOnShowErrorDialog(null, ErrorType.FOLDER_ERROR);
-            var dirName = rootExDir.getName();
-            if (dirName == null) return;
+            var dirName = gameExDir.getName();
+            if (!isNotEmptyOrBlank(dirName)) return;
             removeDirFromListDirsFile(listDirsFile, dirName);
         }
     }
@@ -805,8 +809,8 @@ public class StockViewModel extends AndroidViewModel {
         if (pageNumber == null) return;
 
         if (pageNumber == 0) {
-            doIsHideFAB.setValue(false);
             syncFromDisk();
+            doIsHideFAB.setValue(false);
         }
 
         if (pageNumber == 1) {
@@ -825,12 +829,15 @@ public class StockViewModel extends AndroidViewModel {
                 .thenApplyAsync(x -> {
                     var syncDataList = Collections.synchronizedCollection(gamesMap.values());
                     if (syncDataList.size() < 2) return syncDataList;
-                    return syncDataList.stream()
-                            .sorted(Comparator.comparing(game -> game.title.toLowerCase()))
-                            .sorted(Comparator.comparing(game -> game.listId))
-                            .toList();
+                    synchronized (syncDataList) {
+                        return syncDataList.stream()
+                                .sorted(Comparator.comparing(game -> game.title.toLowerCase()))
+                                .sorted(Comparator.comparing(game -> game.listId))
+                                .filter(this::isGameInstalled)
+                                .toList();
+                    }
                 }, executor)
-                .thenAcceptAsync(list -> localDataList.postValue(list.stream().filter(this::isGameInstalled).toList()), executor)
+                .thenAccept(list -> localDataList.postValue(List.copyOf(list)))
                 .exceptionally(throwable -> {
                     doOnShowErrorDialog(throwable.toString(), ErrorType.EXCEPTION);
                     return null;
@@ -855,11 +862,14 @@ public class StockViewModel extends AndroidViewModel {
                 .thenApplyAsync(x -> {
                     var syncDataList = Collections.synchronizedCollection(gamesMap.values());
                     if (syncDataList.size() < 2) return syncDataList;
-                    return syncDataList.stream()
-                            .sorted(Comparator.comparing(game -> game.title.toLowerCase()))
-                            .toList();
+                    synchronized (syncDataList) {
+                        return syncDataList.stream()
+                                .sorted(Comparator.comparing(game -> game.title.toLowerCase()))
+                                .filter(d -> !isGameInstalled(d))
+                                .toList();
+                    }
                 }, executor)
-                .thenAcceptAsync(list -> remoteDataList.postValue(list.stream().filter(d -> !isGameInstalled(d)).toList()), executor)
+                .thenAcceptAsync(list -> remoteDataList.postValue(List.copyOf(list)), executor)
                 .exceptionally(throwable -> {
                     doOnShowErrorDialog(throwable.toString(), ErrorType.EXCEPTION);
                     return null;
@@ -869,25 +879,35 @@ public class StockViewModel extends AndroidViewModel {
     // endregion Refresh
 
     // region Game list dir
-    public void saveListDirsIntoFile(File listDirsFile) {
-        var listFiles = new ArrayList<>(extGamesListDir);
-        var mapFiles = new HashMap<String, String>();
-
-        CompletableFuture
-                .runAsync(() -> {
-                    for (var file : listFiles) {
-                        if (file.getName() == null) continue;
-                        var packedUri = String.valueOf(file.getUri());
-                        mapFiles.put(file.getName(), packedUri);
-                    }
-                }, executor)
-                .thenRunAsync(() -> {
+    public CompletableFuture<Void> saveDirToFile(DocumentFile rootGameDir) {
+        return CompletableFuture
+                .supplyAsync(() -> {
                     try {
-                        objectToJson(listDirsFile, mapFiles);
+                        var ref = new TypeReference<HashMap<String, String>>() {};
+                        return jsonToObject(listDirsFile, ref);
                     } catch (IOException e) {
                         throw new CompletionException(e);
                     }
-                }, executor)
+                }, singleExecutor)
+                .thenApplyAsync(map -> {
+                    var dirName = rootGameDir.getName();
+                    if (isNotEmptyOrBlank(dirName)
+                            && isWritableDir(getApplication(), rootGameDir)) {
+                        var packedUri = rootGameDir.getUri().toString();
+                        map.put(dirName, packedUri);
+                        return map;
+                    } else {
+                        return null;
+                    }
+                }, singleExecutor)
+                .thenAcceptAsync(map -> {
+                    if (map == null) return;
+                    try {
+                        objectToJson(listDirsFile, map);
+                    } catch (IOException e) {
+                        throw new CompletionException(e);
+                    }
+                }, singleExecutor)
                 .exceptionally(throwable -> {
                     doOnShowErrorDialog(throwable.getMessage(), ErrorType.EXCEPTION);
                     return null;
@@ -971,15 +991,16 @@ public class StockViewModel extends AndroidViewModel {
                 }, executor)
                 .thenRunAsync(() -> {
                     var newList = extGamesListDir;
-                    if (newList == null) return;
+                    if (newList == null || newList.isEmpty()) return;
 
                     newList.removeIf(file -> {
-                        var nameDir = file.getName();
-                        return nameDir.equalsIgnoreCase(folderName);
+                        var dirName = file.getName();
+                        if (!isNotEmptyOrBlank(dirName)) return false;
+                        return dirName.equalsIgnoreCase(folderName);
                     });
+
                     extGamesListDir = newList;
 
-                    ((QuestopiaApplication) getApplication()).setCurrentGameDir(null);
                     runOnUiThread(this::refreshGameData);
                 })
                 .exceptionally(throwable -> {

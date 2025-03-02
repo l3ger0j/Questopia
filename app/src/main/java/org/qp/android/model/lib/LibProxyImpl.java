@@ -619,7 +619,6 @@ public class LibProxyImpl extends QSPLib implements LibIProxy {
         }
 
         gameState.gameDirUri = newGameDir.getUri();
-        getApplication().setCurrentGameDir(newGameDir);
     }
 
     // endregion LibQpCallbacks
