@@ -75,7 +75,8 @@ public class LibProxyImpl extends QSPLib implements LibIProxy {
     }
 
     public AudioPlayer getAudioPlayer() {
-        return getApplication().getAudioPlayer();
+        return getApplication().audioPlayer
+                .setCurGameDir(getCurGameDir());
     }
 
     private void runOnQspThread(final Runnable runnable) {

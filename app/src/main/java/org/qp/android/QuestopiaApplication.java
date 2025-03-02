@@ -19,12 +19,12 @@ public class QuestopiaApplication extends Application {
     public static final int UNPACK_GAME_NOTIFICATION_ID = 1800;
     public static final String UNPACK_GAME_CHANNEL_ID = "org.qp.android.channel.unpack_game";
 
-    private final ImageProvider imageProvider = new ImageProvider();
+    public final ImageProvider imageProvider = new ImageProvider();
     private final HtmlProcessor htmlProcessor = new HtmlProcessor(imageProvider);
-    private final AudioPlayer audioPlayer = new AudioPlayer(this);
-    private final LibProxyImpl libProxy = new LibProxyImpl(this);
 
     private DocumentFile currentGameDir;
+    public final AudioPlayer audioPlayer = new AudioPlayer(this);
+    public final LibProxyImpl libProxy = new LibProxyImpl(this);
 
     @Override
     public void onCreate() {
@@ -40,10 +40,6 @@ public class QuestopiaApplication extends Application {
         return htmlProcessor
                 .setCurGameDir(currentGameDir)
                 .setController(SettingsController.newInstance(this));
-    }
-
-    public AudioPlayer getAudioPlayer() {
-        return audioPlayer.setCurGameDir(currentGameDir);
     }
 
     public LibIProxy getLibProxy() {
