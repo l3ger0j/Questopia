@@ -144,7 +144,11 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
     }
 
     private AudioPlayer getAudioPlayer() {
-        return questopiaApplication.getAudioPlayer();
+        if (getCurGameDir().isPresent()){
+            return questopiaApplication.audioPlayer.setCurGameDir(getCurGameDir().get());
+        } else {
+            return questopiaApplication.audioPlayer;
+        }
     }
 
     public LiveData<String> getAudioErrorObserver() {

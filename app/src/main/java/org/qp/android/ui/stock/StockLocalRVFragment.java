@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import org.qp.android.databinding.FragmentRecyclerBinding;
 import org.qp.android.helpers.adapters.RecyclerItemClickListener;
+import org.qp.android.helpers.bus.Events;
 
 public class StockLocalRVFragment extends Fragment {
 
@@ -33,23 +34,6 @@ public class StockLocalRVFragment extends Fragment {
         mRecyclerView = recyclerBinding.shareRecyclerView;
         mRecyclerView.setAdapter(adapter);
         mRecyclerView.addItemDecoration(divider);
-
-        stockViewModel = new ViewModelProvider(requireActivity()).get(StockViewModel.class);
-        stockViewModel.localDataList.observe(getViewLifecycleOwner(), adapter::submitList);
-        stockViewModel.emitter.observe(getViewLifecycleOwner(), eventNavigation -> {
-            if (eventNavigation instanceof StockFragmentNavigation.ChangeElementColorToDKGray) {
-                changeElementColorToDKGray();
-            }
-            if (eventNavigation instanceof StockFragmentNavigation.ChangeElementColorToLTGray) {
-                changeElementColorToLTGray();
-            }
-            if (eventNavigation instanceof StockFragmentNavigation.SelectOnce once) {
-                selectOnce(once.position);
-            }
-            if (eventNavigation instanceof StockFragmentNavigation.UnselectOnce unselect) {
-                unselectOnce(unselect.position);
-            }
-        });
 
         return recyclerBinding.getRoot();
     }
@@ -88,6 +72,23 @@ public class StockLocalRVFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        stockViewModel = new ViewModelProvider(requireActivity()).get(StockViewModel.class);
+        stockViewModel.localDataList.observe(getViewLifecycleOwner(), adapter::submitList);
+        stockViewModel.fragLocalRVEmit.observe(getViewLifecycleOwner(), new Events.EventObserver(event -> {
+            if (event instanceof StockFragmentNavigation.ChangeElementColorToDKGray) {
+                changeElementColorToDKGray();
+            }
+            if (event instanceof StockFragmentNavigation.ChangeElementColorToLTGray) {
+                changeElementColorToLTGray();
+            }
+            if (event instanceof StockFragmentNavigation.SelectOnce once) {
+                selectOnce(once.position);
+            }
+            if (event instanceof StockFragmentNavigation.UnselectOnce unselect) {
+                unselectOnce(unselect.position);
+            }
+        }));
+
         mRecyclerView.addOnItemTouchListener(new RecyclerItemClickListener(
                 requireContext(),
                 mRecyclerView,

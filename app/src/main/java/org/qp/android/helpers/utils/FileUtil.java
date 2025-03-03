@@ -188,25 +188,6 @@ public final class FileUtil {
         return result.toString();
     }
 
-    @Nullable
-    public static String readAssetFileAsString(Context context ,
-                                               String fileName) {
-        var result = new StringBuilder();
-        var assetManager = context.getAssets();
-
-        try (var in = assetManager.open(fileName);
-             var bufReader = new BufferedReader(new InputStreamReader(in))) {
-            String line;
-            while ((line = bufReader.readLine()) != null) {
-                result.append(line);
-            }
-        } catch (IOException ex) {
-            Log.e(TAG , "Error reading a file" , ex);
-            return null;
-        }
-        return result.toString();
-    }
-
     public static void forceDelFile(@NonNull Context context ,
                                     @NonNull DocumentFile documentFile) {
         DocumentFileUtils.forceDelete(documentFile , context);

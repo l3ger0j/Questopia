@@ -4,17 +4,14 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.webkit.WebResourceRequest;
-import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.LinearLayout;
 
-import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
-import androidx.webkit.WebViewAssetLoader;
 
 import org.qp.android.BuildConfig;
 import org.qp.android.R;
@@ -24,6 +21,7 @@ import java.util.Optional;
 
 public class SettingsHostFragment extends PreferenceFragmentCompat {
 
+    private static final int INITIAL_SCALE = 294;
     private SettingsViewModel viewModel;
 
     @Override
@@ -38,7 +36,7 @@ public class SettingsHostFragment extends PreferenceFragmentCompat {
             versionPref.setTitle(getString(R.string.extendedName)
                     .replace("-VERSION-", BuildConfig.VERSION_NAME));
             versionPref.setSummaryProvider(preference ->
-                    "Lib version: " + "5.7.0" + "\nTimestamp: " + BuildConfig.BUILD_TIME
+                    "Lib version: " + "5.9.2" + "\nTimestamp: " + BuildConfig.BUILD_TIME
             );
         }
 
@@ -102,11 +100,6 @@ public class SettingsHostFragment extends PreferenceFragmentCompat {
     }
 
     private void createCustomView() {
-        final WebViewAssetLoader assetLoader = new WebViewAssetLoader.Builder()
-                .addPathHandler("/assets/", new WebViewAssetLoader.AssetsPathHandler(requireContext()))
-                .addPathHandler("/res/", new WebViewAssetLoader.ResourcesPathHandler(requireContext()))
-                .build();
-
         var linearLayout = new LinearLayout(getContext());
         linearLayout.setOrientation(LinearLayout.VERTICAL);
         var linLayoutParam =
@@ -120,13 +113,6 @@ public class SettingsHostFragment extends PreferenceFragmentCompat {
         var webView = new WebView(requireContext());
         webView.setOverScrollMode(View.OVER_SCROLL_NEVER);
         webView.setWebViewClient(new WebViewClient() {
-            @Nullable
-            @Override
-            public WebResourceResponse shouldInterceptRequest(WebView view,
-                                                              WebResourceRequest request) {
-                return assetLoader.shouldInterceptRequest(request.getUrl());
-            }
-
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 var url = Optional.ofNullable(request.getUrl());
@@ -141,12 +127,8 @@ public class SettingsHostFragment extends PreferenceFragmentCompat {
                 return false;
             }
         });
-        webView.loadDataWithBaseURL(
-                null,
-                viewModel.formationAboutDesc(requireContext()),
-                null,
-                "utf-8",
-                null);
+        webView.setInitialScale(INITIAL_SCALE);
+        webView.loadUrl(viewModel.getLinkAboutDesc());
         webView.setLayoutParams(lpView);
         linearLayout.addView(webView);
         var dialogFrag = new SettingsDialogFrag();
