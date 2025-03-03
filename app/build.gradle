@@ -10,8 +10,8 @@ android {
         applicationId "org.qp.android"
         minSdk 26
         targetSdk 34
-        versionCode 202501
-        versionName "3.25.1"
+        versionCode 202502
+        versionName "3.25.2"
         resourceConfigurations += ['en', 'ru']
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
