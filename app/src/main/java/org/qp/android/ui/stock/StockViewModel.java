@@ -400,7 +400,7 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     public void doOnChangeDestination(@IdRes int resId) {
-        actEmit.waitAndExecuteOnce(new StockFragmentNavigation.ChangeDestination(resId));
+        actEmit.waitAndExecute(new StockFragmentNavigation.ChangeDestination(resId));
     }
 
     public void doOnChangeElementColorToDKGray() {
