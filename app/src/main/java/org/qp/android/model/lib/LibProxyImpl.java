@@ -282,13 +282,13 @@ public class LibProxyImpl extends QSPLib implements LibIProxy {
                            final Uri dir,
                            final Uri file) {
         gameInterface.doWithCounterDisabled(() -> {
-            getAudioPlayer().closeAllFiles();
             gameState.reset();
             gameState.gameRunning = true;
             gameState.gameId = id;
             gameState.gameTitle = title;
             gameState.gameDirUri = dir;
             gameState.gameFileUri = file;
+            getAudioPlayer().closeAllFiles();
             if (!loadGameWorld()) return;
             gameStartTime = SystemClock.elapsedRealtime();
             lastMsCountCallTime = 0;
