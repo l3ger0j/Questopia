@@ -36,7 +36,7 @@ public class SettingsHostFragment extends PreferenceFragmentCompat {
             versionPref.setTitle(getString(R.string.extendedName)
                     .replace("-VERSION-", BuildConfig.VERSION_NAME));
             versionPref.setSummaryProvider(preference ->
-                    "Lib version: " + "5.7.0" + "\nTimestamp: " + BuildConfig.BUILD_TIME
+                    "Lib version: " + "5.9.2" + "\nTimestamp: " + BuildConfig.BUILD_TIME
             );
         }
 
