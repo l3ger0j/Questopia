@@ -224,7 +224,7 @@ public class StockActivity extends AppCompatActivity {
             navController.navigate(R.id.stockViewPagerFragment);
         }
 
-        stockViewModel.emitter.observe(this, new Events.EventObserver(event -> {
+        stockViewModel.actEmit.observe(this, new Events.EventObserver(event -> {
             if (event instanceof StockFragmentNavigation.ShowErrorDialog errorDialog) {
                 switch (errorDialog.getErrorType()) {
                     case FOLDER_ERROR -> showErrorDialog(getString(R.string.gamesFolderError));

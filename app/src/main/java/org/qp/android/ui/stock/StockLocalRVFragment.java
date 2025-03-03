@@ -74,7 +74,7 @@ public class StockLocalRVFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         stockViewModel = new ViewModelProvider(requireActivity()).get(StockViewModel.class);
         stockViewModel.localDataList.observe(getViewLifecycleOwner(), adapter::submitList);
-        stockViewModel.emitter.observe(getViewLifecycleOwner(), new Events.EventObserver(event -> {
+        stockViewModel.fragLocalRVEmit.observe(getViewLifecycleOwner(), new Events.EventObserver(event -> {
             if (event instanceof StockFragmentNavigation.ChangeElementColorToDKGray) {
                 changeElementColorToDKGray();
             }

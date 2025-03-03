@@ -29,6 +29,8 @@ import android.app.NotificationManager;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -118,7 +120,8 @@ public class StockViewModel extends AndroidViewModel {
     public MutableLiveData<Integer> outputIntObserver;
     public List<DocumentFile> extGamesListDir = new ArrayList<>();
     public GameData currGameData;
-    public Events.Emitter emitter = new Events.Emitter();
+    public Events.Emitter actEmit = new Events.Emitter();
+    public Events.Emitter fragLocalRVEmit = new Events.Emitter();
     protected boolean isEnableDeleteMode = false;
     private DocumentFile tempImageFile, tempPathFile, tempModFile;
     private DialogEditBinding editBinding;
@@ -377,35 +380,35 @@ public class StockViewModel extends AndroidViewModel {
     // endregion Getter/Setter
 
     public void doOnShowFilePicker(int requestCode, String[] mimeTypes) {
-        emitter.waitAndExecuteOnce(new StockFragmentNavigation.ShowFilePicker(requestCode, mimeTypes));
+        actEmit.waitAndExecuteOnce(new StockFragmentNavigation.ShowFilePicker(requestCode, mimeTypes));
     }
 
     public void doOnShowErrorDialog(String errorMessage, ErrorType errorType) {
-        emitter.emitAndExecuteOnce(new StockFragmentNavigation.ShowErrorDialog(errorMessage, errorType));
+        actEmit.emitAndExecuteOnce(new StockFragmentNavigation.ShowErrorDialog(errorMessage, errorType));
     }
 
     public void doOnShowDeleteDialog(String errorMessage) {
-        emitter.waitAndExecuteOnce(new StockFragmentNavigation.ShowDeleteDialog(errorMessage));
+        actEmit.waitAndExecuteOnce(new StockFragmentNavigation.ShowDeleteDialog(errorMessage));
     }
 
     public void doOnShowActionMode(ActionMode.Callback callback) {
-        emitter.waitAndExecuteOnce(new StockFragmentNavigation.ShowActionMode(callback));
+        actEmit.waitAndExecute(new StockFragmentNavigation.ShowActionMode(callback));
     }
 
     public void doOnFinishActionMode() {
-        emitter.waitAndExecuteOnce(new StockFragmentNavigation.FinishActionMode());
+        actEmit.waitAndExecute(new StockFragmentNavigation.FinishActionMode());
     }
 
     public void doOnChangeDestination(@IdRes int resId) {
-        emitter.emitAndExecute(new StockFragmentNavigation.ChangeDestination(resId));
+        actEmit.waitAndExecuteOnce(new StockFragmentNavigation.ChangeDestination(resId));
     }
 
     public void doOnChangeElementColorToDKGray() {
-        emitter.emitAndExecuteOnce(new StockFragmentNavigation.ChangeElementColorToDKGray());
+        fragLocalRVEmit.emitAndExecute(new StockFragmentNavigation.ChangeElementColorToDKGray());
     }
 
     public void doOnChangeElementColorToLTGray() {
-        emitter.emitAndExecuteOnce(new StockFragmentNavigation.ChangeElementColorToLTGray());
+        fragLocalRVEmit.emitAndExecute(new StockFragmentNavigation.ChangeElementColorToLTGray());
     }
 
     public void onListItemClick(GameData entryToShow) {
@@ -430,10 +433,14 @@ public class StockViewModel extends AndroidViewModel {
                     var gameData = tempList.get(position);
                     if (selectList.isEmpty() || !selectList.contains(gameData)) {
                         selectList.add(gameData);
-                        emitter.waitAndExecuteOnce(new StockFragmentNavigation.SelectOnce(position));
+                        new Handler(Looper.getMainLooper()).post(() -> {
+                            fragLocalRVEmit.emitAndExecute(new StockFragmentNavigation.SelectOnce(position));
+                        });
                     } else {
                         selectList.remove(gameData);
-                        emitter.waitAndExecuteOnce(new StockFragmentNavigation.UnselectOnce(position));
+                        new Handler(Looper.getMainLooper()).post(() -> {
+                            fragLocalRVEmit.emitAndExecute(new StockFragmentNavigation.UnselectOnce(position));
+                        });
                     }
                 });
     }
