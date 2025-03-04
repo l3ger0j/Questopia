@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -136,16 +137,33 @@ public class LocalGame {
             return false;
         }
 
-        var gameFiles = Collections.synchronizedList(new ArrayList<Uri>());
-        var files = DocumentFileUtils.search(rootDir, true, DocumentFileType.FILE);
+        var files = rootDir.listFiles();
+        if (files == null || files.length == 0) return false;
 
-        files.parallelStream().forEach(d -> {
+        var gameFiles = Collections.synchronizedList(new ArrayList<Uri>());
+        Arrays.stream(files).forEach(d -> {
             var dirExtension = documentWrap(d).getExtension();
             var lcName = dirExtension.toLowerCase(Locale.ROOT);
             if (lcName.endsWith("qsp") || lcName.endsWith("gam")) {
                 gameFiles.add(d.getUri());
             }
         });
+
+        if (gameFiles.isEmpty()) {
+            var allFiles = DocumentFileUtils.search(
+                    rootDir,
+                    true,
+                    DocumentFileType.FILE,
+                    new String[]{MimeType.BINARY_FILE}
+            );
+            allFiles.forEach(d -> {
+                var dirExtension = documentWrap(d).getExtension();
+                var lcName = dirExtension.toLowerCase(Locale.ROOT);
+                if (lcName.endsWith("qsp") || lcName.endsWith("gam")) {
+                    gameFiles.add(d.getUri());
+                }
+            });
+        }
 
         if (!Objects.equals(data.gameDirUri.getPath(), rootDir.getUri().getPath())) {
             data.gameDirUri = rootDir.getUri();
