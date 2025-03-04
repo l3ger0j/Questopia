@@ -578,7 +578,7 @@ public class StockActivity extends AppCompatActivity {
 
                     @Override
                     public boolean onQueryTextChange(String newText) {
-                        var gameDataList = stockViewModel.getSortedGames();
+                        var gameDataList = stockViewModel.getGamesMap().values();
                         stockViewModel.setDataList(
                                 gameDataList.stream()
                                         .filter(r -> isNotEmptyOrBlank(r.title) && r.title.toLowerCase().contains(newText.toLowerCase()))

@@ -180,16 +180,6 @@ public class StockViewModel extends AndroidViewModel {
         return SettingsController.newInstance(getApplication());
     }
 
-    @NonNull
-    public List<GameData> getSortedGames() {
-        var unsortedGameData = gamesMap.values();
-        var gameData = new ArrayList<>(unsortedGameData);
-        if (gameData.size() < 2) return gameData;
-        gameData.sort(Comparator.comparing(game -> game.title.toLowerCase()));
-        gameData.sort(Comparator.comparing(game -> game.listId));
-        return gameData;
-    }
-
     public Optional<GameData> getCurrGameData() {
         return Optional.ofNullable(currGameData);
     }
@@ -475,7 +465,7 @@ public class StockViewModel extends AndroidViewModel {
 
             @Override
             public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-                tempList.addAll(getSortedGames());
+                tempList.addAll(gamesMap.values());
                 isEnableDeleteMode = true;
                 return true;
             }
@@ -838,6 +828,7 @@ public class StockViewModel extends AndroidViewModel {
                     if (syncDataList.size() < 2) return syncDataList;
                     synchronized (syncDataList) {
                         return syncDataList.stream()
+                                .filter(game -> isNotEmptyOrBlank(game.title))
                                 .sorted(Comparator.comparing(game -> game.title.toLowerCase()))
                                 .sorted(Comparator.comparing(game -> game.listId))
                                 .filter(this::isGameInstalled)
@@ -871,6 +862,7 @@ public class StockViewModel extends AndroidViewModel {
                     if (syncDataList.size() < 2) return syncDataList;
                     synchronized (syncDataList) {
                         return syncDataList.stream()
+                                .filter(game -> isNotEmptyOrBlank(game.title))
                                 .sorted(Comparator.comparing(game -> game.title.toLowerCase()))
                                 .filter(d -> !isGameInstalled(d))
                                 .toList();
