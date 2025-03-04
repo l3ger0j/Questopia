@@ -166,7 +166,6 @@ public class LocalGame {
             return Collections.emptyList();
         }
 
-        var itemsGamesDirs = Collections.synchronizedList(new ArrayList<GameData>());
         var subRootDir = Collections.synchronizedList(new ArrayList<File>());
         synchronized (subRootDir) {
             try (var walk = Files.walk(generalGamesDir.toPath(), 1)) {
@@ -178,25 +177,36 @@ public class LocalGame {
             }
         }
 
-        synchronized (itemsGamesDirs) {
+        var subInfosFiles = Collections.synchronizedList(new ArrayList<File>());
+        synchronized (subInfosFiles) {
             for (var dir : subRootDir) {
-                if (!isWritableDir(context, dir)) {
+                try (var walk = Files.walk(dir.toPath())) {
+                    walk.map(Path::toFile)
+                            .filter(f -> f.isFile() && f.getPath().contains(GAME_INFO_FILENAME))
+                            .forEach(subInfosFiles::add);
+                } catch (IOException e) {
+                    return Collections.emptyList();
+                }
+            }
+        }
+
+        var itemsGamesDirs = Collections.synchronizedList(new ArrayList<GameData>());
+        synchronized (itemsGamesDirs) {
+            for (var infos : subInfosFiles) {
+                if (!isWritableFile(context, infos)) {
                     continue;
                 }
                 var item = (GameData) null;
-                var infoFile = fromRelPath(GAME_INFO_FILENAME, dir);
-                if (isWritableFile(context, infoFile)) {
-                    var infoFileCont = readFileAsString(infoFile);
-                    if (isNotEmptyOrBlank(infoFileCont)) {
-                        try {
-                            item = parseGameInfo(infoFileCont);
-                        } catch (IOException e) {
-                            continue;
-                        }
+                var infoFileCont = readFileAsString(infos);
+                if (isNotEmptyOrBlank(infoFileCont)) {
+                    try {
+                        item = parseGameInfo(infoFileCont);
+                    } catch (IOException e) {
+                        continue;
                     }
-                    if (item != null) {
-                        itemsGamesDirs.add(item);
-                    }
+                }
+                if (item != null) {
+                    itemsGamesDirs.add(item);
                 }
             }
         }
