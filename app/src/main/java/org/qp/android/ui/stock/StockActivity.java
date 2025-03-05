@@ -4,6 +4,7 @@ import static org.qp.android.helpers.utils.FileUtil.documentWrap;
 import static org.qp.android.helpers.utils.FileUtil.findOrCreateFile;
 import static org.qp.android.helpers.utils.JsonUtil.jsonToObject;
 import static org.qp.android.helpers.utils.JsonUtil.objectToJson;
+import static org.qp.android.helpers.utils.StringUtil.isNotEmptyOrBlank;
 import static org.qp.android.helpers.utils.XmlUtil.objectToXml;
 import static org.qp.android.helpers.utils.XmlUtil.xmlToObject;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_IMAGE_FILE;
@@ -80,7 +81,6 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import info.hannes.changelog.ChangeLog;
 import okhttp3.ResponseBody;
@@ -578,11 +578,11 @@ public class StockActivity extends AppCompatActivity {
 
                     @Override
                     public boolean onQueryTextChange(String newText) {
-                        var gameDataList = stockViewModel.getSortedGames();
+                        var gameDataList = stockViewModel.getGamesMap().values();
                         stockViewModel.setDataList(
                                 gameDataList.stream()
-                                        .filter(d -> d.title.toLowerCase().contains(newText.toLowerCase()))
-                                        .collect(Collectors.toList())
+                                        .filter(r -> isNotEmptyOrBlank(r.title) && r.title.toLowerCase().contains(newText.toLowerCase()))
+                                        .toList()
                         );
                         return true;
                     }

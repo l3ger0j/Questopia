@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -136,16 +137,33 @@ public class LocalGame {
             return false;
         }
 
-        var gameFiles = Collections.synchronizedList(new ArrayList<Uri>());
-        var files = DocumentFileUtils.search(rootDir, true, DocumentFileType.FILE);
+        var files = rootDir.listFiles();
+        if (files == null || files.length == 0) return false;
 
-        files.parallelStream().forEach(d -> {
+        var gameFiles = Collections.synchronizedList(new ArrayList<Uri>());
+        Arrays.stream(files).forEach(d -> {
             var dirExtension = documentWrap(d).getExtension();
             var lcName = dirExtension.toLowerCase(Locale.ROOT);
             if (lcName.endsWith("qsp") || lcName.endsWith("gam")) {
                 gameFiles.add(d.getUri());
             }
         });
+
+        if (gameFiles.isEmpty()) {
+            var allFiles = DocumentFileUtils.search(
+                    rootDir,
+                    true,
+                    DocumentFileType.FILE,
+                    new String[]{MimeType.BINARY_FILE}
+            );
+            allFiles.forEach(d -> {
+                var dirExtension = documentWrap(d).getExtension();
+                var lcName = dirExtension.toLowerCase(Locale.ROOT);
+                if (lcName.endsWith("qsp") || lcName.endsWith("gam")) {
+                    gameFiles.add(d.getUri());
+                }
+            });
+        }
 
         if (!Objects.equals(data.gameDirUri.getPath(), rootDir.getUri().getPath())) {
             data.gameDirUri = rootDir.getUri();
@@ -166,7 +184,6 @@ public class LocalGame {
             return Collections.emptyList();
         }
 
-        var itemsGamesDirs = Collections.synchronizedList(new ArrayList<GameData>());
         var subRootDir = Collections.synchronizedList(new ArrayList<File>());
         synchronized (subRootDir) {
             try (var walk = Files.walk(generalGamesDir.toPath(), 1)) {
@@ -178,25 +195,36 @@ public class LocalGame {
             }
         }
 
-        synchronized (itemsGamesDirs) {
+        var subInfosFiles = Collections.synchronizedList(new ArrayList<File>());
+        synchronized (subInfosFiles) {
             for (var dir : subRootDir) {
-                if (!isWritableDir(context, dir)) {
+                try (var walk = Files.walk(dir.toPath())) {
+                    walk.map(Path::toFile)
+                            .filter(f -> f.isFile() && f.getPath().contains(GAME_INFO_FILENAME))
+                            .forEach(subInfosFiles::add);
+                } catch (IOException e) {
+                    return Collections.emptyList();
+                }
+            }
+        }
+
+        var itemsGamesDirs = Collections.synchronizedList(new ArrayList<GameData>());
+        synchronized (itemsGamesDirs) {
+            for (var infos : subInfosFiles) {
+                if (!isWritableFile(context, infos)) {
                     continue;
                 }
                 var item = (GameData) null;
-                var infoFile = fromRelPath(GAME_INFO_FILENAME, dir);
-                if (isWritableFile(context, infoFile)) {
-                    var infoFileCont = readFileAsString(infoFile);
-                    if (isNotEmptyOrBlank(infoFileCont)) {
-                        try {
-                            item = parseGameInfo(infoFileCont);
-                        } catch (IOException e) {
-                            continue;
-                        }
+                var infoFileCont = readFileAsString(infos);
+                if (isNotEmptyOrBlank(infoFileCont)) {
+                    try {
+                        item = parseGameInfo(infoFileCont);
+                    } catch (IOException e) {
+                        continue;
                     }
-                    if (item != null) {
-                        itemsGamesDirs.add(item);
-                    }
+                }
+                if (item != null) {
+                    itemsGamesDirs.add(item);
                 }
             }
         }

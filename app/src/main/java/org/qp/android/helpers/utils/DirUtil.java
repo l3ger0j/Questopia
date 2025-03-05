@@ -14,6 +14,7 @@ import androidx.documentfile.provider.DocumentFile;
 import com.anggrayudi.storage.file.DocumentFileCompat;
 import com.anggrayudi.storage.file.DocumentFileType;
 import com.anggrayudi.storage.file.DocumentFileUtils;
+import com.anggrayudi.storage.file.MimeType;
 
 import java.util.Collections;
 import java.util.List;
@@ -28,12 +29,27 @@ public final class DirUtil {
                                                 @NonNull Uri dirUri) {
         var targetDir = DocumentFileCompat.fromUri(context, dirUri);
         if (!isWritableDir(context, targetDir)) return false;
-        var files = DocumentFileUtils.search(targetDir, true, DocumentFileType.FILE);
+        var files = targetDir.listFiles();
+        if (files == null || files.length == 0) return false;
+
         for (var file : files) {
             var dirExtension = documentWrap(file).getExtension();
             var lcName = dirExtension.toLowerCase(Locale.ROOT);
             if (lcName.contains("qsp") || lcName.contains("gam")) return true;
         }
+
+        var allFiles = DocumentFileUtils.search(
+                targetDir,
+                true,
+                DocumentFileType.FILE,
+                new String[]{MimeType.BINARY_FILE}
+        );
+        for (var file : allFiles) {
+            var dirExtension = documentWrap(file).getExtension();
+            var lcName = dirExtension.toLowerCase(Locale.ROOT);
+            if (lcName.contains("qsp") || lcName.contains("gam")) return true;
+        }
+
         return false;
     }
 
