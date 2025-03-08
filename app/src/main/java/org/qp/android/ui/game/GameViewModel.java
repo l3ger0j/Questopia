@@ -6,9 +6,7 @@ import static org.qp.android.helpers.utils.ColorUtil.convertRGBAtoBGRA;
 import static org.qp.android.helpers.utils.ColorUtil.getHexColor;
 import static org.qp.android.helpers.utils.FileUtil.findOrCreateFolder;
 import static org.qp.android.helpers.utils.FileUtil.fromRelPath;
-import static org.qp.android.helpers.utils.FileUtil.isWritableDir;
 import static org.qp.android.helpers.utils.PathUtil.getExtension;
-import static org.qp.android.helpers.utils.StringUtil.isNotEmptyOrBlank;
 import static org.qp.android.helpers.utils.ThreadUtil.assertNonUiThread;
 import static org.qp.android.helpers.utils.ViewUtil.getFontStyle;
 import static org.qp.android.ui.game.GameActivity.LOAD;
@@ -61,11 +59,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
 
 public class GameViewModel extends AndroidViewModel implements GameInterface {
 
@@ -89,12 +83,11 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
             """;
     private static final String PAGE_BODY_TEMPLATE = "<body>REPLACETEXT</body>";
     private final QuestopiaApplication questopiaApplication;
-    private final ExecutorService service = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
     private final MutableLiveData<SettingsController> controllerObserver = new MutableLiveData<>();
     private final MutableLiveData<String> mainDescLiveData = new MutableLiveData<>();
     private final MutableLiveData<String> varsDescLiveData = new MutableLiveData<>();
-    private final MutableLiveData<GameItemRecycler> actionsListLiveData = new MutableLiveData<>();
-    private final MutableLiveData<GameItemRecycler> objectsListLiveData = new MutableLiveData<>();
+    public final MutableLiveData<List<QSPLib.ListItem>> actsListLiveData = new MutableLiveData<>();
+    public final MutableLiveData<List<QSPLib.ListItem>> objsListLiveData = new MutableLiveData<>();
     private final Handler counterHandler = new Handler();
     public ObservableBoolean isActionVisible = new ObservableBoolean();
     public MutableLiveData<String> outputTextObserver = new MutableLiveData<>();
@@ -236,20 +229,6 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
         return varsDescLiveData;
     }
 
-    public LiveData<GameItemRecycler> getObjectsObserver() {
-        if (objectsListLiveData.getValue() == null) {
-            refreshObjectsRecycler();
-        }
-        return objectsListLiveData;
-    }
-
-    public LiveData<GameItemRecycler> getActionObserver() {
-        if (actionsListLiveData.getValue() == null) {
-            refreshActionsRecycler();
-        }
-        return actionsListLiveData;
-    }
-
     public Optional<DocumentFile> getCurGameDir() {
         if (gameDirUri == null) return Optional.empty();
         return Optional.ofNullable(DocumentFileCompat.fromUri(getApplication(), gameDirUri));
@@ -375,39 +354,33 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
     }
 
     private void refreshMainDesc() {
-        CompletableFuture
-                .supplyAsync(() -> getHtml(getLibGameState().mainDesc), service)
-                .thenAcceptAsync(libMainDesc -> {
-                    var dirtyHTML = pageTemplate.replace("REPLACETEXT", libMainDesc);
-                    var cleanHTML = "";
-                    if (getSettingsController().isImageDisabled) {
-                        cleanHTML = getHtmlProcessor().getCleanHtmlRemMedia(dirtyHTML);
-                    } else {
-                        cleanHTML = getHtmlProcessor().getCleanHtmlAndMedia(getApplication(), dirtyHTML);
-                    }
-                    if (!cleanHTML.isBlank()) {
-                        getGameActivity().warnUser(GameActivity.TAB_MAIN_DESC_AND_ACTIONS);
-                    }
-                    mainDescLiveData.postValue(cleanHTML);
-                }, service);
+        var libMainDesc = getHtml(getLibGameState().mainDesc);
+        var dirtyHTML = pageTemplate.replace("REPLACETEXT", libMainDesc);
+        var cleanHTML = "";
+        if (getSettingsController().isImageDisabled) {
+            cleanHTML = getHtmlProcessor().getCleanHtmlRemMedia(dirtyHTML);
+        } else {
+            cleanHTML = getHtmlProcessor().getCleanHtmlAndMedia(getApplication(), dirtyHTML);
+        }
+        if (!cleanHTML.isBlank()) {
+            getGameActivity().warnUser(GameActivity.TAB_MAIN_DESC_AND_ACTIONS);
+        }
+        mainDescLiveData.postValue(cleanHTML);
     }
 
     private void refreshVarsDesc() {
-        CompletableFuture
-                .supplyAsync(() -> getHtml(getLibGameState().varsDesc), service)
-                .thenAcceptAsync(libVarsDesc -> {
-                    var dirtyHTML = pageTemplate.replace("REPLACETEXT", libVarsDesc);
-                    var cleanHTML = "";
-                    if (getSettingsController().isImageDisabled) {
-                        cleanHTML = getHtmlProcessor().getCleanHtmlRemMedia(dirtyHTML);
-                    } else {
-                        cleanHTML = getHtmlProcessor().getCleanHtmlAndMedia(getApplication(), dirtyHTML);
-                    }
-                    if (!cleanHTML.isBlank()) {
-                        getGameActivity().warnUser(GameActivity.TAB_VARS_DESC);
-                    }
-                    varsDescLiveData.postValue(cleanHTML);
-                }, service);
+        final var libVarsDesc = getHtml(getLibGameState().varsDesc);
+        final var dirtyHTML = pageTemplate.replace("REPLACETEXT", libVarsDesc);
+        var cleanHTML = "";
+        if (getSettingsController().isImageDisabled) {
+            cleanHTML = getHtmlProcessor().getCleanHtmlRemMedia(dirtyHTML);
+        } else {
+            cleanHTML = getHtmlProcessor().getCleanHtmlAndMedia(getApplication(), dirtyHTML);
+        }
+        if (!cleanHTML.isBlank()) {
+            getGameActivity().warnUser(GameActivity.TAB_VARS_DESC);
+        }
+        varsDescLiveData.postValue(cleanHTML);
     }
 
     public void onActionClicked(int index) {
@@ -415,35 +388,10 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
     }
 
     private void refreshActionsRecycler() {
-        CompletableFuture
-                .supplyAsync(() -> {
-                    var list = new ArrayList<>(getLibGameState().actionsList);
-                    var dir = DocumentFileCompat.fromUri(getApplication(), gameDirUri);
-                    if (!isWritableDir(getApplication(), dir)) return null;
-                    list.stream()
-                            .parallel()
-                            .map(item -> isNotEmptyOrBlank(item.image())
-                                    ? String.valueOf(fromRelPath(getApplication(), item.image(), dir))
-                                    : ""
-                            )
-                            .collect(Collectors.toUnmodifiableList());
-                    return list;
-                }, service)
-                .thenApplyAsync(list -> {
-                    var actionsRecycler = new GameItemRecycler();
-                    actionsRecycler.typeface = getSettingsController().getTypeface();
-                    actionsRecycler.textSize = getFontSize();
-                    actionsRecycler.textColor = getTextColor();
-                    actionsRecycler.linkTextColor = getLinkColor();
-                    actionsRecycler.backgroundColor = getBackgroundColor();
-                    actionsRecycler.submitList(list);
-                    return actionsRecycler;
-                })
-                .thenAcceptAsync(actionsRecycler -> {
-                    actionsListLiveData.postValue(actionsRecycler);
-                    int count = actionsRecycler.getItemCount();
-                    isActionVisible.set(showActions && count > 0);
-                }, service);
+        var listItems = getLibGameState().actionsList;
+        var listSize = listItems.size();
+        isActionVisible.set(showActions && listSize > 0);
+        actsListLiveData.postValue(listItems);
     }
 
     public void onObjectClicked(int index) {
@@ -451,32 +399,8 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
     }
 
     private void refreshObjectsRecycler() {
-        CompletableFuture
-                .supplyAsync(() -> {
-                    var list = new ArrayList<>(getLibGameState().objectsList);
-                    var dir = DocumentFileCompat.fromUri(getApplication(), gameDirUri);
-                    if (!isWritableDir(getApplication(), dir)) return null;
-                    list.stream()
-                            .parallel()
-                            .map(item -> isNotEmptyOrBlank(item.image())
-                                    ? String.valueOf(fromRelPath(getApplication(), item.image(), dir))
-                                    : ""
-                            )
-                            .collect(Collectors.toUnmodifiableList());
-                    return list;
-                }, service)
-                .thenApplyAsync(list -> {
-                    getGameActivity().warnUser(GameActivity.TAB_OBJECTS);
-                    var objectsRecycler = new GameItemRecycler();
-                    objectsRecycler.typeface = getSettingsController().getTypeface();
-                    objectsRecycler.textSize = getFontSize();
-                    objectsRecycler.textColor = getTextColor();
-                    objectsRecycler.linkTextColor = getLinkColor();
-                    objectsRecycler.backgroundColor = getBackgroundColor();
-                    objectsRecycler.submitList(list);
-                    return objectsRecycler;
-                })
-                .thenAcceptAsync(objectsListLiveData::postValue, service);
+        getGameActivity().warnUser(GameActivity.TAB_OBJECTS);
+        objsListLiveData.postValue(getLibGameState().objectsList);
     }
 
     public void setCallback() {

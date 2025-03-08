@@ -24,6 +24,7 @@ import org.qp.android.helpers.adapters.RecyclerItemClickListener;
 
 public class GameMainFragment extends Fragment {
 
+    private final GameItemAdapter adapter = new GameItemAdapter();
     private GameViewModel viewModel;
     private ConstraintLayout layoutTop;
     private WebView mainDescView;
@@ -76,7 +77,7 @@ public class GameMainFragment extends Fragment {
             }
         }, "img");
         if (viewModel.getSettingsController().isUseAutoscroll) {
-            mainDescView.postDelayed(onScroll, 300);
+            mainDescView.post(onScroll);
         }
         viewModel.getMainDescObserver().observe(getViewLifecycleOwner(), desc ->
                 mainDescView.loadDataWithBaseURL(
@@ -90,13 +91,20 @@ public class GameMainFragment extends Fragment {
         actionsView = gameMainBinding.actions;
         var manager = (LinearLayoutManager) actionsView.getLayoutManager();
         var dividerItemDecoration = new DividerItemDecoration(
-                actionsView.getContext(),
-                manager.getOrientation());
+                actionsView.getContext(), manager.getOrientation());
         actionsView.addItemDecoration(dividerItemDecoration);
         actionsView.setOverScrollMode(View.OVER_SCROLL_NEVER);
-        viewModel.getActionObserver().observe(getViewLifecycleOwner(), actions -> {
+        actionsView.setBackgroundColor(viewModel.getBackgroundColor());
+        actionsView.setAdapter(adapter);
+
+        viewModel.actsListLiveData.observe(getViewLifecycleOwner(), listItems -> {
             actionsView.setBackgroundColor(viewModel.getBackgroundColor());
-            actionsView.setAdapter(actions);
+            adapter.typeface = viewModel.getSettingsController().getTypeface();
+            adapter.textSize = viewModel.getFontSize();
+            adapter.textColor = viewModel.getTextColor();
+            adapter.linkTextColor = viewModel.getLinkColor();
+            adapter.backgroundColor = viewModel.getBackgroundColor();
+            adapter.submitList(listItems);
         });
 
         // Settings
@@ -118,6 +126,7 @@ public class GameMainFragment extends Fragment {
             actionsView.setBackgroundColor(viewModel.getBackgroundColor());
             gameMainBinding.getRoot().refreshDrawableState();
         });
+
         return gameMainBinding.getRoot();
     }
 
