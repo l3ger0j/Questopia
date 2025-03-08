@@ -76,7 +76,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -499,39 +498,33 @@ public class GameViewModel extends AndroidViewModel {
     }
 
     private void refreshMainDesc() {
-        CompletableFuture
-                .supplyAsync(() -> getHtml(getLibGameState().mainDesc), singleService)
-                .thenAcceptAsync(libMainDesc -> {
-                    var dirtyHTML = pageTemplate.replace("REPLACETEXT", libMainDesc);
-                    var cleanHTML = "";
-                    if (getSettingsController().isImageDisabled) {
-                        cleanHTML = getHtmlProcessor().getCleanHtmlRemMedia(dirtyHTML);
-                    } else {
-                        cleanHTML = getHtmlProcessor().getCleanHtmlAndMedia(getApplication(), dirtyHTML);
-                    }
-                    if (!cleanHTML.isBlank()) {
-                        doOnWarnUser(GameActivity.TAB_MAIN_DESC_AND_ACTIONS);
-                    }
-                    mainDescLiveData.postValue(cleanHTML);
-                }, singleService);
+        var libMainDesc = getHtml(getLibGameState().mainDesc);
+        var dirtyHTML = pageTemplate.replace("REPLACETEXT", libMainDesc);
+        var cleanHTML = "";
+        if (getSettingsController().isImageDisabled) {
+            cleanHTML = getHtmlProcessor().getCleanHtmlRemMedia(dirtyHTML);
+        } else {
+            cleanHTML = getHtmlProcessor().getCleanHtmlAndMedia(getApplication(), dirtyHTML);
+        }
+        if (!cleanHTML.isBlank()) {
+            doOnWarnUser(GameActivity.TAB_MAIN_DESC_AND_ACTIONS);
+        }
+        mainDescLiveData.postValue(cleanHTML);
     }
 
     private void refreshVarsDesc() {
-        CompletableFuture
-                .supplyAsync(() -> getHtml(getLibGameState().varsDesc), singleService)
-                .thenAcceptAsync(libVarsDesc -> {
-                    var dirtyHTML = pageTemplate.replace("REPLACETEXT", libVarsDesc);
-                    var cleanHTML = "";
-                    if (getSettingsController().isImageDisabled) {
-                        cleanHTML = getHtmlProcessor().getCleanHtmlRemMedia(dirtyHTML);
-                    } else {
-                        cleanHTML = getHtmlProcessor().getCleanHtmlAndMedia(getApplication(), dirtyHTML);
-                    }
-                    if (!cleanHTML.isBlank()) {
-                        doOnWarnUser(GameActivity.TAB_VARS_DESC);
-                    }
-                    varsDescLiveData.postValue(cleanHTML);
-                }, singleService);
+        var libVarsDesc = getHtml(getLibGameState().varsDesc);
+        var dirtyHTML = pageTemplate.replace("REPLACETEXT", libVarsDesc);
+        var cleanHTML = "";
+        if (getSettingsController().isImageDisabled) {
+            cleanHTML = getHtmlProcessor().getCleanHtmlRemMedia(dirtyHTML);
+        } else {
+            cleanHTML = getHtmlProcessor().getCleanHtmlAndMedia(getApplication(), dirtyHTML);
+        }
+        if (!cleanHTML.isBlank()) {
+            doOnWarnUser(GameActivity.TAB_VARS_DESC);
+        }
+        varsDescLiveData.postValue(cleanHTML);
     }
 
     public void onActionClicked(int index) {
