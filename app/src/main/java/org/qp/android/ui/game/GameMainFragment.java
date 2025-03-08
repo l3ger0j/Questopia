@@ -25,6 +25,7 @@ import org.qp.android.questopiabundle.lib.LibTypeDialog;
 
 public class GameMainFragment extends Fragment {
 
+    private final GameItemAdapter adapter = new GameItemAdapter();
     private GameViewModel viewModel;
     private ConstraintLayout layoutTop;
     private WebView mainDescView;
@@ -97,10 +98,19 @@ public class GameMainFragment extends Fragment {
                 manager.getOrientation());
         actionsView.addItemDecoration(dividerItemDecoration);
         actionsView.setOverScrollMode(View.OVER_SCROLL_NEVER);
-        viewModel.getActionObserver().observe(getViewLifecycleOwner(), actions -> {
-            actions.setStateRestorationPolicy(RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY);
-            actionsView.setAdapter(actions);
+        actionsView.setBackgroundColor(viewModel.getBackgroundColor());
+        adapter.setStateRestorationPolicy(
+                RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY);
+        actionsView.setAdapter(adapter);
+
+        viewModel.actsListLiveData.observe(getViewLifecycleOwner(), actions -> {
             actionsView.setBackgroundColor(viewModel.getBackgroundColor());
+            adapter.typeface = viewModel.getSettingsController().getTypeface();
+            adapter.textSize = viewModel.getFontSize();
+            adapter.textColor = viewModel.getTextColor();
+            adapter.linkTextColor = viewModel.getLinkColor();
+            adapter.backgroundColor = viewModel.getBackgroundColor();
+            adapter.submitList(actions);
         });
 
         // Settings

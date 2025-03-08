@@ -60,6 +60,7 @@ import org.qp.android.questopiabundle.AsyncCallbacks;
 import org.qp.android.questopiabundle.LibDialogRetValue;
 import org.qp.android.questopiabundle.LibException;
 import org.qp.android.questopiabundle.LibResult;
+import org.qp.android.questopiabundle.dto.LibListItem;
 import org.qp.android.questopiabundle.lib.LibGameRequest;
 import org.qp.android.questopiabundle.lib.LibGameState;
 import org.qp.android.questopiabundle.lib.LibIConfig;
@@ -108,8 +109,8 @@ public class GameViewModel extends AndroidViewModel {
     private final MutableLiveData<SettingsController> controllerObserver = new MutableLiveData<>();
     private final MutableLiveData<String> mainDescLiveData = new MutableLiveData<>();
     private final MutableLiveData<String> varsDescLiveData = new MutableLiveData<>();
-    private final MutableLiveData<GameItemAdapter> actionsListLiveData = new MutableLiveData<>();
-    private final MutableLiveData<GameItemAdapter> objectsListLiveData = new MutableLiveData<>();
+    public final MutableLiveData<List<LibListItem>> actsListLiveData = new MutableLiveData<>();
+    public final MutableLiveData<List<LibListItem>> objsListLiveData = new MutableLiveData<>();
     private final PluginClient pluginClient = PluginClient.getInstance();
     public ObservableBoolean isActionVisible = new ObservableBoolean();
     public MutableLiveData<String> outputTextObserver = new MutableLiveData<>();
@@ -339,20 +340,6 @@ public class GameViewModel extends AndroidViewModel {
         return varsDescLiveData;
     }
 
-    public LiveData<GameItemAdapter> getObjectsObserver() {
-        if (objectsListLiveData.getValue() == null) {
-            refreshObjectsRecycler();
-        }
-        return objectsListLiveData;
-    }
-
-    public LiveData<GameItemAdapter> getActionObserver() {
-        if (actionsListLiveData.getValue() == null) {
-            refreshActionsRecycler();
-        }
-        return actionsListLiveData;
-    }
-
     @Nullable
     public DocumentFile getCurGameDir() {
         return DocumentFileCompat.fromUri(getApplication(), gameDirUri);
@@ -556,22 +543,10 @@ public class GameViewModel extends AndroidViewModel {
     }
 
     private void refreshActionsRecycler() {
-        CompletableFuture
-                .supplyAsync(() -> {
-                    var actionsRecycler = new GameItemAdapter();
-                    actionsRecycler.setTypeface(getSettingsController().getTypeface());
-                    actionsRecycler.setTextSize(getFontSize());
-                    actionsRecycler.setTextColor(getTextColor());
-                    actionsRecycler.setLinkTextColor(getLinkColor());
-                    actionsRecycler.setBackgroundColor(getBackgroundColor());
-                    actionsRecycler.submitList(getLibGameState().actionsList);
-                    return actionsRecycler;
-                }, singleService)
-                .thenAcceptAsync(actionsRecycler -> {
-                    actionsListLiveData.postValue(actionsRecycler);
-                    int count = actionsRecycler.getItemCount();
-                    isActionVisible.set(showActions && count > 0);
-                }, singleService);
+        var actionsList = getLibGameState().actionsList;
+        var count = actionsList.size();
+        isActionVisible.set(showActions && count > 0);
+        actsListLiveData.postValue(actionsList);
     }
 
     public void onObjectClicked(int index) {
@@ -583,19 +558,8 @@ public class GameViewModel extends AndroidViewModel {
     }
 
     private void refreshObjectsRecycler() {
-        CompletableFuture
-                .supplyAsync(() -> {
-                    doOnWarnUser(GameActivity.TAB_OBJECTS);
-                    var objectsRecycler = new GameItemAdapter();
-                    objectsRecycler.setTypeface(getSettingsController().getTypeface());
-                    objectsRecycler.setTextSize(getFontSize());
-                    objectsRecycler.setTextColor(getTextColor());
-                    objectsRecycler.setLinkTextColor(getLinkColor());
-                    objectsRecycler.setBackgroundColor(getBackgroundColor());
-                    objectsRecycler.submitList(getLibGameState().objectsList);
-                    return objectsRecycler;
-                }, singleService)
-                .thenAcceptAsync(objectsListLiveData::postValue, singleService);
+        doOnWarnUser(GameActivity.TAB_OBJECTS);
+        objsListLiveData.postValue(getLibGameState().objectsList);
     }
 
     @Override

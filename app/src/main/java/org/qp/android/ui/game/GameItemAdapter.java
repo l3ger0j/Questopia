@@ -40,31 +40,11 @@ public class GameItemAdapter extends RecyclerView.Adapter<GameItemAdapter.ViewHo
             };
     private final AsyncListDiffer<LibListItem> differ =
             new AsyncListDiffer<>(this, DIFF_CALLBACK);
-    private Typeface typeface;
-    private int textSize;
-    private int backgroundColor;
-    private int textColor;
-    private int linkTextColor;
-
-    public void setTypeface(Typeface typeface) {
-        this.typeface = typeface;
-    }
-
-    public void setTextSize(int textSize) {
-        this.textSize = textSize;
-    }
-
-    public void setBackgroundColor(int backgroundColor) {
-        this.backgroundColor = backgroundColor;
-    }
-
-    public void setTextColor(int textColor) {
-        this.textColor = textColor;
-    }
-
-    public void setLinkTextColor(int linkTextColor) {
-        this.linkTextColor = linkTextColor;
-    }
+    public Typeface typeface;
+    public int textSize;
+    public int backgroundColor;
+    public int textColor;
+    public int linkTextColor;
 
     public LibListItem getItem(int position) {
         return differ.getCurrentList().get(position);
