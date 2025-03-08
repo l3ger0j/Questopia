@@ -1,7 +1,6 @@
 package org.qp.android.model.service;
 
 import static org.qp.android.helpers.utils.Base64Util.encodeBase64;
-import static org.qp.android.helpers.utils.FileUtil.fromRelPath;
 import static org.qp.android.helpers.utils.StringUtil.isNotEmpty;
 import static org.qp.android.helpers.utils.StringUtil.isNullOrEmpty;
 
@@ -17,7 +16,6 @@ import org.jsoup.safety.Safelist;
 import org.qp.android.ui.settings.SettingsController;
 
 import java.util.ArrayList;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
@@ -176,62 +174,33 @@ public class HtmlProcessor {
 
     private void handleImagesInHtml(@NonNull Context context,
                                     @NonNull Element documentBody) {
-        var dynBlackList = new ArrayList<String>();
-        documentBody.select("a").forEach(element -> {
-            if (element.attr("href").contains("exec:")) {
-                dynBlackList.add(element.select("img").attr("src"));
-            }
-        });
+        if (controller.isUseFullscreenImages) {
+            var dynBlackList = new ArrayList<String>();
+            documentBody.select("a").forEach(element -> {
+                if (element.attr("href").contains("exec:")) {
+                    dynBlackList.add(element.select("img").attr("src"));
+                }
+            });
+
+            documentBody.select("img").forEach(img -> {
+                if (!dynBlackList.contains(img.attr("src"))) {
+                    img.attr("onclick", "img.onClickImage(this.src);");
+                }
+            });
+        }
 
         documentBody.select("img").forEach(img -> {
-            if (controller.isUseFullscreenImages) {
-                if (!dynBlackList.contains(img.attr("src"))) {
-                    img.attr("onclick" , "img.onClickImage(this.src);");
-                }
-            }
             if (controller.isUseAutoWidth && controller.isUseAutoHeight) {
                 img.attr("style", "display: inline; height: auto; max-width: 100%;");
-            }
-            if (!controller.isUseAutoWidth) {
-                shouldChangeWidth(context, img).thenAccept(aBoolean -> {
-                    if (!aBoolean) return;
+            } else {
+                if (!controller.isUseAutoWidth) {
                     img.attr("style" , "max-width:" + controller.customWidthImage+";");
-                });
-            } else if (!controller.isUseAutoHeight) {
-                shouldChangeHeight(context, img).thenAccept(aBoolean -> {
-                   if (!aBoolean) return;
-                   img.attr("style" , "max-height:" + controller.customHeightImage+";");
-                });
+                }
+                if (!controller.isUseAutoHeight) {
+                    img.attr("style" , "max-height:" + controller.customHeightImage+";");
+                }
             }
         });
-    }
-
-    private CompletableFuture<Boolean> shouldChangeWidth(Context context,
-                                                         Element img) {
-        var relPath = img.attr("src");
-        return CompletableFuture
-                .supplyAsync(() -> fromRelPath(context , relPath , curGameDir), executors)
-                .thenApply(imageFile -> {
-                    if (imageFile == null) return false;
-                    var drawable = imageProvider.getDrawableFromPath(context , imageFile.getUri());
-                    if (drawable == null) return false;
-                    var widthPix = context.getResources().getDisplayMetrics().widthPixels;
-                    return drawable.getIntrinsicWidth() < widthPix;
-                });
-    }
-
-    private CompletableFuture<Boolean> shouldChangeHeight(Context context,
-                                                          Element img) {
-        var relPath = img.attr("src");
-        return CompletableFuture
-                .supplyAsync(() -> fromRelPath(context , relPath , curGameDir), executors)
-                .thenApply(imageFile -> {
-                    if (imageFile == null) return false;
-                    var drawable = imageProvider.getDrawableFromPath(context , imageFile.getUri());
-                    if (drawable == null) return false;
-                    var heightPix = context.getResources().getDisplayMetrics().heightPixels;
-                    return drawable.getIntrinsicHeight() < heightPix;
-                });
     }
 
     private void handleVideosInHtml(Element documentBody) {
