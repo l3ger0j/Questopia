@@ -108,8 +108,8 @@ public class GameViewModel extends AndroidViewModel {
     private final MutableLiveData<SettingsController> controllerObserver = new MutableLiveData<>();
     private final MutableLiveData<String> mainDescLiveData = new MutableLiveData<>();
     private final MutableLiveData<String> varsDescLiveData = new MutableLiveData<>();
-    private final MutableLiveData<GameItemRecycler> actionsListLiveData = new MutableLiveData<>();
-    private final MutableLiveData<GameItemRecycler> objectsListLiveData = new MutableLiveData<>();
+    private final MutableLiveData<GameItemAdapter> actionsListLiveData = new MutableLiveData<>();
+    private final MutableLiveData<GameItemAdapter> objectsListLiveData = new MutableLiveData<>();
     private final PluginClient pluginClient = PluginClient.getInstance();
     public ObservableBoolean isActionVisible = new ObservableBoolean();
     public MutableLiveData<String> outputTextObserver = new MutableLiveData<>();
@@ -339,14 +339,14 @@ public class GameViewModel extends AndroidViewModel {
         return varsDescLiveData;
     }
 
-    public LiveData<GameItemRecycler> getObjectsObserver() {
+    public LiveData<GameItemAdapter> getObjectsObserver() {
         if (objectsListLiveData.getValue() == null) {
             refreshObjectsRecycler();
         }
         return objectsListLiveData;
     }
 
-    public LiveData<GameItemRecycler> getActionObserver() {
+    public LiveData<GameItemAdapter> getActionObserver() {
         if (actionsListLiveData.getValue() == null) {
             refreshActionsRecycler();
         }
@@ -558,7 +558,7 @@ public class GameViewModel extends AndroidViewModel {
     private void refreshActionsRecycler() {
         CompletableFuture
                 .supplyAsync(() -> {
-                    var actionsRecycler = new GameItemRecycler();
+                    var actionsRecycler = new GameItemAdapter();
                     actionsRecycler.setTypeface(getSettingsController().getTypeface());
                     actionsRecycler.setTextSize(getFontSize());
                     actionsRecycler.setTextColor(getTextColor());
@@ -586,7 +586,7 @@ public class GameViewModel extends AndroidViewModel {
         CompletableFuture
                 .supplyAsync(() -> {
                     doOnWarnUser(GameActivity.TAB_OBJECTS);
-                    var objectsRecycler = new GameItemRecycler();
+                    var objectsRecycler = new GameItemAdapter();
                     objectsRecycler.setTypeface(getSettingsController().getTypeface());
                     objectsRecycler.setTextSize(getFontSize());
                     objectsRecycler.setTextColor(getTextColor());

@@ -24,7 +24,7 @@ import org.qp.android.questopiabundle.dto.LibListItem;
 import java.util.List;
 import java.util.Objects;
 
-public class GameItemRecycler extends RecyclerView.Adapter<GameItemRecycler.ViewHolder> {
+public class GameItemAdapter extends RecyclerView.Adapter<GameItemAdapter.ViewHolder> {
 
     private static final DiffUtil.ItemCallback<LibListItem> DIFF_CALLBACK =
             new DiffUtil.ItemCallback<>() {
@@ -85,17 +85,17 @@ public class GameItemRecycler extends RecyclerView.Adapter<GameItemRecycler.View
 
     @NonNull
     @Override
-    public GameItemRecycler.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent,
-                                                          int viewType) {
+    public GameItemAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent,
+                                                         int viewType) {
         var inflater = LayoutInflater.from(parent.getContext());
         ListGameItemBinding listGameItemBinding =
                 DataBindingUtil.inflate(inflater, R.layout.list_game_item, parent, false);
         listGameItemBinding.relativeLayout.setAccessibilityDelegate(customAccessibilityDelegate());
-        return new GameItemRecycler.ViewHolder(listGameItemBinding);
+        return new GameItemAdapter.ViewHolder(listGameItemBinding);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull GameItemRecycler.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull GameItemAdapter.ViewHolder holder, int position) {
         holder.listItemActionObjectBinding(getGameData().get(position));
         var qpListItem = getItem(position);
 
