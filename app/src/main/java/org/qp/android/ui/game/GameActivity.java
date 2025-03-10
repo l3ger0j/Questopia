@@ -45,6 +45,7 @@ import org.jetbrains.annotations.Contract;
 import org.qp.android.R;
 import org.qp.android.databinding.ActivityGameBinding;
 import org.qp.android.helpers.ErrorType;
+import org.qp.android.helpers.bus.Events;
 import org.qp.android.questopiabundle.lib.LibGameRequest;
 import org.qp.android.ui.dialogs.GameDialogFrags;
 import org.qp.android.ui.dialogs.GameDialogType;
@@ -193,7 +194,7 @@ public class GameActivity extends AppCompatActivity {
             initGame();
         }
 
-        gameViewModel.emitter.observe(this, eventNavigation -> {
+        gameViewModel.emitter.observe(this, new Events.EventObserver(eventNavigation -> {
             if (eventNavigation instanceof GameFragmentNavigation.ApplySettings) {
                 applySettings();
             }
@@ -250,7 +251,7 @@ public class GameActivity extends AppCompatActivity {
                     showMenuDialog(inputListString, inputQueue);
                 }
             }
-        });
+        }));
 
         gameViewModel.getAudioErrorObserver().observe(this, path -> {
             if (!settingsController.isUseMusicDebug) return;
