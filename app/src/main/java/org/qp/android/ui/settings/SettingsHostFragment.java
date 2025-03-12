@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.webkit.WebResourceRequest;
-import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.LinearLayout;
@@ -17,7 +16,6 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
-import androidx.webkit.WebViewAssetLoader;
 
 import org.qp.android.BuildConfig;
 import org.qp.android.QuestopiaApplication;
@@ -26,6 +24,7 @@ import org.qp.android.ui.dialogs.SettingsDialogFrag;
 
 public class SettingsHostFragment extends PreferenceFragmentCompat {
 
+    private static final int INITIAL_SCALE = 294;
     private SettingsViewModel viewModel;
 
     @Override
@@ -129,11 +128,6 @@ public class SettingsHostFragment extends PreferenceFragmentCompat {
     }
 
     private void createCustomView() {
-        final var assetLoader = new WebViewAssetLoader.Builder()
-                .addPathHandler("/assets/", new WebViewAssetLoader.AssetsPathHandler(requireContext()))
-                .addPathHandler("/res/", new WebViewAssetLoader.ResourcesPathHandler(requireContext()))
-                .build();
-
         var linearLayout = new LinearLayout(getContext());
         linearLayout.setOrientation(LinearLayout.VERTICAL);
         var linLayoutParam =
@@ -147,13 +141,6 @@ public class SettingsHostFragment extends PreferenceFragmentCompat {
         var webView = new WebView(requireContext());
         webView.setOverScrollMode(View.OVER_SCROLL_NEVER);
         webView.setWebViewClient(new WebViewClient() {
-            @Nullable
-            @Override
-            public WebResourceResponse shouldInterceptRequest(WebView view,
-                                                              WebResourceRequest request) {
-                return assetLoader.shouldInterceptRequest(request.getUrl());
-            }
-
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 if (request.getUrl() == null) return false;
@@ -169,14 +156,7 @@ public class SettingsHostFragment extends PreferenceFragmentCompat {
                 return false;
             }
         });
-
-        webView.loadDataWithBaseURL(
-                null,
-                viewModel.formationAboutDesc(requireContext()),
-                null,
-                "utf-8",
-                null
-        );
+        webView.loadUrl(viewModel.getLinkAboutDesc());
         webView.setLayoutParams(lpView);
         linearLayout.addView(webView);
         var dialogFrag = new SettingsDialogFrag();
