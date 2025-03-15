@@ -55,6 +55,7 @@ import org.qp.android.BuildConfig;
 import org.qp.android.R;
 import org.qp.android.data.db.Game;
 import org.qp.android.databinding.ActivityStockBinding;
+import org.qp.android.helpers.bus.Events;
 import org.qp.android.helpers.utils.ViewUtil;
 import org.qp.android.model.plugin.PluginClient;
 import org.qp.android.ui.dialogs.StockDialogType;
@@ -292,24 +293,24 @@ public class StockActivity extends AppCompatActivity {
             navController.navigate(R.id.stockViewPagerFragment);
         }
 
-        stockViewModel.emitter.observe(this, eventNavigation -> {
-            if (eventNavigation instanceof StockFragmentNavigation.ShowErrorDialog errorDialog) {
+        stockViewModel.emitter.observe(this, new Events.EventObserver(event -> {
+            if (event instanceof StockFragmentNavigation.ShowErrorDialog errorDialog) {
                 switch (errorDialog.errorType) {
                     case FOLDER_ERROR -> showErrorDialog(getString(R.string.gamesFolderError));
                     case EXCEPTION -> showErrorDialog(getString(R.string.error)
                             + ": " + errorDialog.errorMessage);
                 }
             }
-            if (eventNavigation instanceof StockFragmentNavigation.ShowGameFragment gameFragment) {
+            if (event instanceof StockFragmentNavigation.ShowGameFragment gameFragment) {
                 onListItemClick(gameFragment.entry);
             }
-            if (eventNavigation instanceof StockFragmentNavigation.ShowActionMode) {
+            if (event instanceof StockFragmentNavigation.ShowActionMode) {
                 onLongListItemClick();
             }
-            if (eventNavigation instanceof StockFragmentNavigation.ShowFilePicker filePicker) {
+            if (event instanceof StockFragmentNavigation.ShowFilePicker filePicker) {
                 showFilePickerActivity(filePicker.requestCode, filePicker.mimeTypes);
             }
-        });
+        }));
 
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
