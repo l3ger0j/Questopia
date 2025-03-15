@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import org.qp.android.R;
 import org.qp.android.databinding.FragmentRecyclerBinding;
 import org.qp.android.helpers.adapters.RecyclerItemClickListener;
+import org.qp.android.helpers.bus.Events;
 
 public class StockLocalRVFragment extends Fragment {
 
@@ -44,18 +45,17 @@ public class StockLocalRVFragment extends Fragment {
         selectColor = ContextCompat.getColor(requireContext(), R.color.md_theme_primaryContainer);
 
         localAdapter = new LocalGamesListAdapter();
-        stockViewModel.gameEntriesLiveData.observe(getViewLifecycleOwner(), gameEntries ->
-                localAdapter.submitList(gameEntries));
+        stockViewModel.gameEntriesLiveData.observe(getViewLifecycleOwner(), localAdapter::submitList);
         mRecyclerView.setAdapter(localAdapter);
 
-        stockViewModel.emitter.observe(getViewLifecycleOwner(), eventNavigation -> {
-            if (eventNavigation instanceof StockFragmentNavigation.SelectAllElements) {
+        stockViewModel.emitter.observe(getViewLifecycleOwner(), new Events.EventObserver(event -> {
+            if (event instanceof StockFragmentNavigation.SelectAllElements) {
                 selectAllElements();
             }
-            if (eventNavigation instanceof StockFragmentNavigation.UnselectAllElements) {
+            if (event instanceof StockFragmentNavigation.UnselectAllElements) {
                 unselectAllElements();
             }
-        });
+        }));
 
         return recyclerBinding.getRoot();
     }
