@@ -48,7 +48,7 @@ public class StockLocalRVFragment extends Fragment {
         stockViewModel.gameEntriesLiveData.observe(getViewLifecycleOwner(), localAdapter::submitList);
         mRecyclerView.setAdapter(localAdapter);
 
-        stockViewModel.emitter.observe(getViewLifecycleOwner(), new Events.EventObserver(event -> {
+        stockViewModel.fragLocalRVEmit.observe(getViewLifecycleOwner(), new Events.EventObserver(event -> {
             if (event instanceof StockFragmentNavigation.SelectAllElements) {
                 selectAllElements();
             }
@@ -117,7 +117,7 @@ public class StockLocalRVFragment extends Fragment {
 
             @Override
             public void onLongItemClick(View view, int position) {
-                stockViewModel.doOnShowActionMode();
+                stockViewModel.onLongListItemClick();
             }
         }));
     }

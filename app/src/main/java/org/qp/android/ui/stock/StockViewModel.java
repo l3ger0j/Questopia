@@ -18,17 +18,21 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Environment;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.webkit.CookieManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.view.ActionMode;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelKt;
 import androidx.paging.Pager;
 import androidx.paging.PagingConfig;
@@ -109,7 +113,9 @@ public class StockViewModel extends AndroidViewModel {
     public Game currGameEntry;
     public MutableLiveData<Game> gameEntryLiveData = new MutableLiveData<>();
     public MutableLiveData<List<Game>> gameEntriesLiveData = new MutableLiveData<>();
-    public final Events.Emitter emitter = new Events.Emitter();
+    public final Events.Emitter actEmit = new Events.Emitter();
+    public final Events.Emitter fragLocalRVEmit = new Events.Emitter();
+    public final Events.Emitter fragRemoteRVEmit = new Events.Emitter();
     public Flowable<PagingData<Game>> remoteDataFlow;
     private Uri gameFolderUri;
     private DocumentFile tempImageFile, tempPathFile, tempModFile;
@@ -164,7 +170,7 @@ public class StockViewModel extends AndroidViewModel {
 
         var inputStr = "No folder for downloading games was found. Download functionality is disabled";
         var rightButtonMsg = isSDCardAvailable(getApplication()) ? FOLDER_LOCK : FOLDER_CREATE;
-        emitter.waitAndExecuteOnce(new StockFragmentNavigation.ShowErrorBanner(inputStr, rightButtonMsg));
+        fragRemoteRVEmit.waitAndExecuteOnce(new StockFragmentNavigation.ShowErrorBanner(inputStr, rightButtonMsg));
     }
 
     // region Getter/Setter
@@ -253,27 +259,117 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     public void doOnShowFilePicker(int requestCode, String[] mimeTypes) {
-        emitter.waitAndExecuteOnce(new StockFragmentNavigation.ShowFilePicker(requestCode, mimeTypes));
+        actEmit.waitAndExecuteOnce(new StockFragmentNavigation.ShowFilePicker(requestCode, mimeTypes));
     }
 
     public void doOnShowErrorDialog(String errorMessage, ErrorType errorType) {
-        emitter.emitAndExecuteOnce(new StockFragmentNavigation.ShowErrorDialog(errorMessage, errorType));
+        actEmit.emitAndExecuteOnce(new StockFragmentNavigation.ShowErrorDialog(errorMessage, errorType));
+    }
+
+    public void doOnShowDeleteDialog(String deleteMessage) {
+        actEmit.waitAndExecuteOnce(new StockFragmentNavigation.ShowDeleteDialog(deleteMessage));
     }
 
     public void doOnShowGameFragment(Game entryToShow) {
-        emitter.emitAndExecuteOnce(new StockFragmentNavigation.ShowGameFragment(entryToShow));
+        actEmit.emitAndExecuteOnce(new StockFragmentNavigation.ShowGameFragment(entryToShow));
     }
 
-    public void doOnShowActionMode() {
-        emitter.emitAndExecuteOnce(new StockFragmentNavigation.ShowActionMode());
+    public void doOnPrepareActionMode() {
+        actEmit.waitAndExecuteOnce(new StockFragmentNavigation.PrepareActionMode());
+    }
+
+    public void doOnShowActionMode(ActionMode.Callback callback) {
+        actEmit.emitAndExecuteOnce(new StockFragmentNavigation.ShowActionMode(callback));
+    }
+
+    public void doOnFinishActionMode() {
+        actEmit.waitAndExecute(new StockFragmentNavigation.FinishActionMode());
+    }
+
+    public void doOnDestroyActionMode() {
+        actEmit.emitAndExecuteOnce(new StockFragmentNavigation.DestroyActionMode());
     }
 
     public void doOnSelectAllElements() {
-        emitter.emitAndExecuteOnce(new StockFragmentNavigation.SelectAllElements());
+        fragLocalRVEmit.emitAndExecuteOnce(new StockFragmentNavigation.SelectAllElements());
     }
 
     public void doOnUnselectAllElements() {
-        emitter.emitAndExecuteOnce(new StockFragmentNavigation.UnselectAllElements());
+        fragLocalRVEmit.emitAndExecuteOnce(new StockFragmentNavigation.UnselectAllElements());
+    }
+
+    public void onLongListItemClick() {
+        if (isEnableDeleteMode) return;
+
+        var pageNumber = currPageNumber.getValue();
+        if (pageNumber == null) return;
+        if (pageNumber == 1) return;
+
+        var callback = new ActionMode.Callback() {
+            Observer<Integer> observer = integer -> {
+                if (integer == 1) {
+                    removeEntryAndDirFromDB(selGameEntriesList);
+                    doOnFinishActionMode();
+                } else {
+                    removeEntryFromDB(selGameEntriesList);
+                    doOnFinishActionMode();
+                }
+            };
+
+            @Override
+            public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+                mode.getMenuInflater().inflate(R.menu.menu_delete, menu);
+                return true;
+            }
+
+            @Override
+            public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+                doOnPrepareActionMode();
+                currInstalledGamesList = getListGames();
+                isEnableDeleteMode = true;
+                return true;
+            }
+
+            @SuppressLint("NonConstantResourceId")
+            @Override
+            public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+                var gamesSelList = selGameEntriesList;
+                var gameEntriesList = currInstalledGamesList;
+
+                switch (item.getItemId()) {
+                    case R.id.delete_game -> {
+                        doOnShowDeleteDialog(String.valueOf(gamesSelList.size()));
+                        outputIntObserver.observeForever(observer);
+                    }
+                    case R.id.select_all -> {
+                        if (gamesSelList.size() == gameEntriesList.size()) {
+                            gamesSelList.clear();
+                            doOnUnselectAllElements();
+                        } else {
+                            gamesSelList.clear();
+                            gamesSelList.addAll(gameEntriesList);
+                            doOnSelectAllElements();
+                        }
+                    }
+                }
+                return true;
+            }
+
+            @Override
+            public void onDestroyActionMode(ActionMode mode) {
+                doOnDestroyActionMode();
+                doOnUnselectAllElements();
+                observer = null;
+                isEnableDeleteMode = false;
+                selGameEntriesList.clear();
+                currInstalledGamesList.clear();
+                doIsHideFAB.setValue(false);
+            }
+        };
+
+        doIsHideFAB.setValue(true);
+
+        doOnShowActionMode(callback);
     }
 
     // region Dialog

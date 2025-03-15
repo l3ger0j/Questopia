@@ -293,7 +293,7 @@ public class StockActivity extends AppCompatActivity {
             navController.navigate(R.id.stockViewPagerFragment);
         }
 
-        stockViewModel.emitter.observe(this, new Events.EventObserver(event -> {
+        stockViewModel.actEmit.observe(this, new Events.EventObserver(event -> {
             if (event instanceof StockFragmentNavigation.ShowErrorDialog errorDialog) {
                 switch (errorDialog.errorType) {
                     case FOLDER_ERROR -> showErrorDialog(getString(R.string.gamesFolderError));
@@ -301,11 +301,35 @@ public class StockActivity extends AppCompatActivity {
                             + ": " + errorDialog.errorMessage);
                 }
             }
+            if (event instanceof StockFragmentNavigation.ShowDeleteDialog deleteDialog) {
+                stockViewModel.showDialogFragment(
+                        getSupportFragmentManager(),
+                        StockDialogType.DELETE_DIALOG,
+                        deleteDialog.deleteMessage,
+                        null
+                );
+            }
             if (event instanceof StockFragmentNavigation.ShowGameFragment gameFragment) {
                 onListItemClick(gameFragment.entry);
             }
-            if (event instanceof StockFragmentNavigation.ShowActionMode) {
-                onLongListItemClick();
+            if (event instanceof StockFragmentNavigation.PrepareActionMode) {
+                var actBar = getSupportActionBar();
+                if (actBar != null) {
+                    actBar.hide();
+                }
+            }
+            if (event instanceof StockFragmentNavigation.ShowActionMode mode) {
+                deleteMode = startSupportActionMode(mode.callback);
+            }
+            if (event instanceof StockFragmentNavigation.FinishActionMode) {
+                deleteMode.finish();
+                deleteMode = null;
+            }
+            if (event instanceof StockFragmentNavigation.DestroyActionMode) {
+                var actBar = getSupportActionBar();
+                if (actBar != null) {
+                    actBar.show();
+                }
             }
             if (event instanceof StockFragmentNavigation.ShowFilePicker filePicker) {
                 showFilePickerActivity(filePicker.requestCode, filePicker.mimeTypes);
@@ -504,87 +528,6 @@ public class StockActivity extends AppCompatActivity {
             navController.navigate(R.id.action_stockViewPagerFragment_to_stockGameFragment);
             stockViewModel.doIsHideFAB.setValue(true);
         }
-    }
-
-    public void onLongListItemClick() {
-        if (stockViewModel.isEnableDeleteMode) return;
-
-        var pageNumber = stockViewModel.currPageNumber.getValue();
-        if (pageNumber == null) return;
-        if (pageNumber == 1) return;
-
-        var callback = new ActionMode.Callback() {
-            @Override
-            public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-                mode.getMenuInflater().inflate(R.menu.menu_delete, menu);
-                return true;
-            }
-
-            @Override
-            public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-                if (getSupportActionBar() != null) {
-                    getSupportActionBar().hide();
-                }
-                stockViewModel.currInstalledGamesList = stockViewModel.getListGames();
-                stockViewModel.isEnableDeleteMode = true;
-                return true;
-            }
-
-            @SuppressLint("NonConstantResourceId")
-            @Override
-            public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-                var gamesSelList = stockViewModel.selGameEntriesList;
-                var gameEntriesList = stockViewModel.currInstalledGamesList;
-
-                switch (item.getItemId()) {
-                    case R.id.delete_game -> {
-                        stockViewModel.showDialogFragment(
-                                getSupportFragmentManager(),
-                                StockDialogType.DELETE_DIALOG,
-                                String.valueOf(gamesSelList.size()),
-                                null
-                        );
-                        stockViewModel.outputIntObserver.observe(StockActivity.this, integer -> {
-                            if (integer == 1) {
-                                stockViewModel.removeEntryAndDirFromDB(gamesSelList);
-                                deleteMode.finish();
-                            } else {
-                                stockViewModel.removeEntryFromDB(gamesSelList);
-                                deleteMode.finish();
-                            }
-                        });
-                    }
-                    case R.id.select_all -> {
-                        if (gamesSelList.size() == gameEntriesList.size()) {
-                            gamesSelList.clear();
-                            stockViewModel.doOnUnselectAllElements();
-                        } else {
-                            gamesSelList.clear();
-                            gamesSelList.addAll(gameEntriesList);
-                            stockViewModel.doOnSelectAllElements();
-                        }
-                    }
-                }
-                return true;
-            }
-
-            @Override
-            public void onDestroyActionMode(ActionMode mode) {
-                if (getSupportActionBar() != null) {
-                    getSupportActionBar().show();
-                }
-
-                stockViewModel.doOnUnselectAllElements();
-                deleteMode = null;
-                stockViewModel.isEnableDeleteMode = false;
-                stockViewModel.selGameEntriesList.clear();
-                stockViewModel.currInstalledGamesList.clear();
-                mFAB.show();
-            }
-        };
-
-        mFAB.hide();
-        deleteMode = startSupportActionMode(callback);
     }
 
     @Override
