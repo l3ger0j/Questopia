@@ -21,7 +21,7 @@ import org.qp.android.databinding.ListGameItemBinding;
 import java.util.List;
 import java.util.Objects;
 
-public class GameItemRecycler extends RecyclerView.Adapter<GameItemRecycler.ViewHolder> {
+public class GameItemAdapter extends RecyclerView.Adapter<GameItemAdapter.ViewHolder> {
 
     private static final DiffUtil.ItemCallback<QSPLib.ListItem> DIFF_CALLBACK =
             new DiffUtil.ItemCallback<>() {
@@ -62,15 +62,15 @@ public class GameItemRecycler extends RecyclerView.Adapter<GameItemRecycler.View
 
     @NonNull
     @Override
-    public GameItemRecycler.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent,
-                                                          int viewType) {
+    public GameItemAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent,
+                                                         int viewType) {
         var inflater = LayoutInflater.from(parent.getContext());
         var listGameItemBinding = ListGameItemBinding.inflate(inflater, parent, false);
-        return new GameItemRecycler.ViewHolder(listGameItemBinding);
+        return new GameItemAdapter.ViewHolder(listGameItemBinding);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull GameItemRecycler.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull GameItemAdapter.ViewHolder holder, int position) {
         var qpListItem = getItem(position);
 
         final var itemImage = holder.listGameItemBinding.itemIcon;

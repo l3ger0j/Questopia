@@ -1,5 +1,6 @@
 package org.qp.android.model.repository;
 
+import static org.qp.android.helpers.utils.DirUtil.MOD_DIR_NAME;
 import static org.qp.android.helpers.utils.FileUtil.documentWrap;
 import static org.qp.android.helpers.utils.FileUtil.findOrCreateFile;
 import static org.qp.android.helpers.utils.FileUtil.forceCreateFile;
@@ -148,6 +149,20 @@ public class LocalGame {
                 gameFiles.add(d.getUri());
             }
         });
+
+        var modDir = fromRelPath(context, MOD_DIR_NAME, rootDir);
+        if (isWritableDir(context, modDir)) {
+            var modFiles = modDir.listFiles();
+            if (modFiles != null || modFiles.length != 0) {
+                Arrays.stream(modFiles).forEach(d -> {
+                    var dirExtension = documentWrap(d).getExtension();
+                    var lcName = dirExtension.toLowerCase(Locale.ROOT);
+                    if (lcName.endsWith("qsp") || lcName.endsWith("gam")) {
+                        gameFiles.add(d.getUri());
+                    }
+                });
+            }
+        }
 
         if (gameFiles.isEmpty()) {
             var allFiles = DocumentFileUtils.search(

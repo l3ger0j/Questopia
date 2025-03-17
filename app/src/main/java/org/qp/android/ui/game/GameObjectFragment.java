@@ -18,6 +18,7 @@ import org.qp.android.helpers.adapters.RecyclerItemClickListener;
 
 public class GameObjectFragment extends Fragment {
 
+    private final GameItemAdapter adapter = new GameItemAdapter();
     private FragmentRecyclerBinding recyclerBinding;
     private GameViewModel viewModel;
     private RecyclerView objectView;
@@ -38,9 +39,17 @@ public class GameObjectFragment extends Fragment {
                 manager.getOrientation());
         objectView.addItemDecoration(dividerItemDecoration);
         objectView.setOverScrollMode(View.OVER_SCROLL_NEVER);
-        viewModel.getObjectsObserver().observe(getViewLifecycleOwner(), gameItemRecycler -> {
+        objectView.setBackgroundColor(viewModel.getBackgroundColor());
+        objectView.setAdapter(adapter);
+
+        viewModel.objsListLiveData.observe(getViewLifecycleOwner(), listItems -> {
             objectView.setBackgroundColor(viewModel.getBackgroundColor());
-            recyclerBinding.shareRecyclerView.setAdapter(gameItemRecycler);
+            adapter.typeface = viewModel.getSettingsController().getTypeface();
+            adapter.textSize = viewModel.getFontSize();
+            adapter.textColor = viewModel.getTextColor();
+            adapter.linkTextColor = viewModel.getLinkColor();
+            adapter.backgroundColor = viewModel.getBackgroundColor();
+            adapter.submitList(listItems);
         });
 
         // Settings
@@ -48,6 +57,7 @@ public class GameObjectFragment extends Fragment {
             objectView.setBackgroundColor(viewModel.getBackgroundColor());
             recyclerBinding.getRoot().refreshDrawableState();
         });
+
         return recyclerBinding.getRoot();
     }
 
