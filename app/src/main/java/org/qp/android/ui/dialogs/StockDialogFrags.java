@@ -2,6 +2,9 @@ package org.qp.android.ui.dialogs;
 
 import static org.qp.android.helpers.utils.PathUtil.removeExtension;
 import static org.qp.android.helpers.utils.StringUtil.isNotEmpty;
+import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_IMAGE_FILE;
+import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_MOD_FILE;
+import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_PATH_FILE;
 
 import android.app.Dialog;
 import android.os.Bundle;
@@ -13,6 +16,7 @@ import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.anggrayudi.storage.file.MimeType;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import org.qp.android.R;
@@ -108,7 +112,8 @@ public class StockDialogFrags extends DialogFragment {
                     titleText.setText(newDirEntry.getName());
                 }
 
-                addBinding.buttonSelectIcon.setOnClickListener(stockViewModel::sendIntent);
+                addBinding.buttonSelectIcon.setOnClickListener(v ->
+                        stockViewModel.doOnShowFilePicker(CODE_PICK_IMAGE_FILE, new String[]{MimeType.IMAGE}));
                 addBinding.addBT.setOnClickListener(v -> {
                     var nameDir = newDirEntry.getName();
                     if (nameDir == null) {
@@ -146,9 +151,12 @@ public class StockDialogFrags extends DialogFragment {
                 dataObserver.iconUriObserver.set(stockViewModel.currGameEntry.gameIconUri);
                 editBinding.setGame(dataObserver);
 
-                editBinding.buttonSelectPath.setOnClickListener(stockViewModel::sendIntent);
-                editBinding.buttonSelectMod.setOnClickListener(stockViewModel::sendIntent);
-                editBinding.buttonSelectIcon.setOnClickListener(stockViewModel::sendIntent);
+                editBinding.buttonSelectPath.setOnClickListener(v ->
+                        stockViewModel.doOnShowFilePicker(CODE_PICK_PATH_FILE, new String[]{MimeType.BINARY_FILE}));
+                editBinding.buttonSelectMod.setOnClickListener(v ->
+                        stockViewModel.doOnShowFilePicker(CODE_PICK_MOD_FILE, new String[]{MimeType.BINARY_FILE}));
+                editBinding.buttonSelectIcon.setOnClickListener(v ->
+                        stockViewModel.doOnShowFilePicker(CODE_PICK_IMAGE_FILE, new String[]{MimeType.IMAGE}));
                 editBinding.editBT.setOnClickListener(v -> {
                     var unfilledEntry = new Game();
                     var editTextTitle = editBinding.ET0.getEditText();

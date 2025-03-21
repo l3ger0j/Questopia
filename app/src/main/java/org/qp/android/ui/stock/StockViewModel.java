@@ -20,7 +20,6 @@ import android.os.Environment;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.webkit.CookieManager;
 
 import androidx.annotation.NonNull;
@@ -511,18 +510,6 @@ public class StockViewModel extends AndroidViewModel {
         return intent;
     }
 
-    @SuppressLint("NonConstantResourceId")
-    public void sendIntent(@NonNull View view) {
-        switch (view.getId()) {
-            case R.id.buttonSelectIcon ->
-                    doOnShowFilePicker(CODE_PICK_IMAGE_FILE, new String[]{"image/png", "image/jpeg"});
-            case R.id.buttonSelectPath ->
-                    doOnShowFilePicker(CODE_PICK_PATH_FILE, new String[]{"application/octet-stream"});
-            case R.id.buttonSelectMod ->
-                    doOnShowFilePicker(CODE_PICK_MOD_FILE, new String[]{"application/octet-stream"});
-        }
-    }
-
     // endregion Dialog
     public void createEntryInDBFromFile(DocumentFile gameDir) {
         localGame.createEntryInDBFromDir(gameDir)
@@ -606,7 +593,7 @@ public class StockViewModel extends AndroidViewModel {
                     }
                 })
                 .thenAccept(s -> {
-                    if (s.isEmpty() || s.isBlank()) return;
+                    if (isNotEmptyOrBlank(s)) return;
 
                     var downloadUri = Uri.parse(gameEntry.fileUrl);
                     var request = new DownloadManager.Request(downloadUri)
@@ -633,7 +620,7 @@ public class StockViewModel extends AndroidViewModel {
                     if (colUriIndex == -1) return;
                     var path = c.getString(colUriIndex).replace("file:///", "");
                     var file = DocumentFileCompat.fromUri(getApplication(), Uri.parse(c.getString(colUriIndex)));
-                    if (file == null || !isWritableFile(getApplication(), file)) return;
+                    if (!isWritableFile(getApplication(), file)) return;
 
                     var archive = new File(path);
                     var archiveUnpack = new ArchiveUnpack(
