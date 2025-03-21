@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
-public class RemoteGamePagingSource extends RxPagingSource<Integer, Game> {
+public class RemoteGameSource extends RxPagingSource<Integer, Game> {
 
     @NonNull
     @Override

@@ -55,7 +55,7 @@ import org.qp.android.helpers.utils.FileUtil;
 import org.qp.android.model.archive.ArchiveUnpack;
 import org.qp.android.model.notify.NotifyBuilder;
 import org.qp.android.model.repository.LocalGame;
-import org.qp.android.model.repository.RemoteGamePagingSource;
+import org.qp.android.model.repository.RemoteGameSource;
 import org.qp.android.ui.dialogs.StockDialogFrags;
 import org.qp.android.ui.dialogs.StockDialogType;
 import org.qp.android.ui.game.GameActivity;
@@ -134,7 +134,7 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     private void initRecycler() {
-        var source = new RemoteGamePagingSource();
+        var source = new RemoteGameSource();
 
         var pager = new Pager<>(new PagingConfig(
                 10,
