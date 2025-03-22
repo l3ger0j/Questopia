@@ -525,6 +525,7 @@ public class StockViewModel extends AndroidViewModel {
         if (fragment != null && fragment.isAdded()) {
             fragment.onDestroy();
         } else {
+            if (manager.isDestroyed()) return;
             switch (dialogType) {
                 case DELETE_DIALOG -> {
                     outputIntObserver = new MutableLiveData<>();
