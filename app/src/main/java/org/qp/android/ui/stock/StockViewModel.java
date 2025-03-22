@@ -258,11 +258,11 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     public void doOnShowFilePicker(int requestCode, String[] mimeTypes) {
-        actEmit.waitAndExecuteOnce(new StockFragmentNavigation.ShowFilePicker(requestCode, mimeTypes));
+        actEmit.waitAndExecute(new StockFragmentNavigation.ShowFilePicker(requestCode, mimeTypes));
     }
 
     public void doOnShowErrorDialog(String errorMessage, ErrorType errorType) {
-        actEmit.emitAndExecuteOnce(new StockFragmentNavigation.ShowErrorDialog(errorMessage, errorType));
+        actEmit.waitAndExecute(new StockFragmentNavigation.ShowErrorDialog(errorMessage, errorType));
     }
 
     public void doOnShowDeleteDialog(String deleteMessage) {
@@ -270,15 +270,15 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     public void doOnShowGameFragment(Game entryToShow) {
-        actEmit.emitAndExecuteOnce(new StockFragmentNavigation.ShowGameFragment(entryToShow));
+        actEmit.waitAndExecute(new StockFragmentNavigation.ShowGameFragment(entryToShow));
     }
 
     public void doOnPrepareActionMode() {
-        actEmit.waitAndExecuteOnce(new StockFragmentNavigation.PrepareActionMode());
+        actEmit.waitAndExecute(new StockFragmentNavigation.PrepareActionMode());
     }
 
     public void doOnShowActionMode(ActionMode.Callback callback) {
-        actEmit.emitAndExecuteOnce(new StockFragmentNavigation.ShowActionMode(callback));
+        actEmit.waitAndExecute(new StockFragmentNavigation.ShowActionMode(callback));
     }
 
     public void doOnFinishActionMode() {
@@ -286,15 +286,15 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     public void doOnDestroyActionMode() {
-        actEmit.emitAndExecuteOnce(new StockFragmentNavigation.DestroyActionMode());
+        actEmit.waitAndExecute(new StockFragmentNavigation.DestroyActionMode());
     }
 
     public void doOnSelectAllElements() {
-        fragLocalRVEmit.emitAndExecuteOnce(new StockFragmentNavigation.SelectAllElements());
+        fragLocalRVEmit.emitAndExecute(new StockFragmentNavigation.SelectAllElements());
     }
 
     public void doOnUnselectAllElements() {
-        fragLocalRVEmit.emitAndExecuteOnce(new StockFragmentNavigation.UnselectAllElements());
+        fragLocalRVEmit.emitAndExecute(new StockFragmentNavigation.UnselectAllElements());
     }
 
     public void onLongListItemClick() {
