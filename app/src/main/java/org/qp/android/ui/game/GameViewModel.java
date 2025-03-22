@@ -328,6 +328,7 @@ public class GameViewModel extends AndroidViewModel {
         final var gameDir = getCurGameDir();
         if (!isWritableDir(getApplication(), gameDir)) return Uri.EMPTY;
         var imageFile = fromRelPath(getApplication(), relPath, gameDir, true);
+        if (!isWritableFile(getApplication(), imageFile)) return Uri.EMPTY;
         return imageFile.getUri();
     }
 
