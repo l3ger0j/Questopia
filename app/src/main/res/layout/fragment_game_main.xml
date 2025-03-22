@@ -1,55 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
-    <data>
-        <import type="android.view.View"/>
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/layout_top"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
-        <variable
-            name="gameViewModel"
-            type="org.qp.android.ui.game.GameViewModel" />
-    </data>
+    <WebView
+        android:id="@+id/main_desc"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@color/web_background"
+        android:textColor="@color/web_text"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toTopOf="@id/separator"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_weight="0.67" />
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/layout_top"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+    <View
+        android:id="@+id/separator"
+        android:layout_width="0dp"
+        android:layout_height="4dp"
+        android:background="@color/materialcolorpicker__grey"
+        app:layout_constraintBottom_toTopOf="@id/actions"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/main_desc" />
 
-        <WebView
-            android:id="@+id/main_desc"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:background="@color/web_background"
-            android:textColor="@color/web_text"
-            android:textSize="16sp"
-            app:layout_constraintBottom_toTopOf="@id/separator"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_weight="0.67" />
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/actions"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/separator"
+        app:layout_constraintVertical_weight="0.33" />
 
-        <View
-            android:id="@+id/separator"
-            android:layout_width="0dp"
-            android:layout_height="4dp"
-            android:background="@color/materialcolorpicker__grey"
-            android:visibility="@{gameViewModel.isActionVisible ? View.VISIBLE : View.GONE}"
-            app:layout_constraintBottom_toTopOf="@id/actions"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/main_desc" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/actions"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:visibility="@{gameViewModel.isActionVisible ? View.VISIBLE : View.GONE}"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/separator"
-            app:layout_constraintVertical_weight="0.33" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-</layout>
+</androidx.constraintlayout.widget.ConstraintLayout>

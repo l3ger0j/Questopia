@@ -1,5 +1,8 @@
 package org.qp.android.ui.game;
 
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
+
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -47,7 +50,6 @@ public class GameMainFragment extends Fragment {
                              @Nullable Bundle savedInstanceState) {
         var gameMainBinding = FragmentGameMainBinding.inflate(getLayoutInflater());
         viewModel = new ViewModelProvider(requireActivity()).get(GameViewModel.class);
-        gameMainBinding.setGameViewModel(viewModel);
 
         layoutTop = gameMainBinding.layoutTop;
         layoutTop.setBackgroundColor(viewModel.getBackgroundColor());
@@ -103,13 +105,20 @@ public class GameMainFragment extends Fragment {
         actionsView.setAdapter(adapter);
 
         viewModel.actsListLiveData.observe(getViewLifecycleOwner(), listItems -> {
-            actionsView.setBackgroundColor(viewModel.getBackgroundColor());
-            adapter.typeface = viewModel.getSettingsController().getTypeface();
-            adapter.textSize = viewModel.getFontSize();
-            adapter.textColor = viewModel.getTextColor();
-            adapter.linkTextColor = viewModel.getLinkColor();
-            adapter.backgroundColor = viewModel.getBackgroundColor();
-            adapter.submitList(listItems);
+            if (!viewModel.showActions || listItems.isEmpty()) {
+                actionsView.setVisibility(GONE);
+                separatorView.setVisibility(GONE);
+            } else {
+                actionsView.setVisibility(VISIBLE);
+                separatorView.setVisibility(VISIBLE);
+                actionsView.setBackgroundColor(viewModel.getBackgroundColor());
+                adapter.typeface = viewModel.getSettingsController().getTypeface();
+                adapter.textSize = viewModel.getFontSize();
+                adapter.textColor = viewModel.getTextColor();
+                adapter.linkTextColor = viewModel.getLinkColor();
+                adapter.backgroundColor = viewModel.getBackgroundColor();
+                adapter.submitList(listItems);
+            }
         });
 
         // Settings
