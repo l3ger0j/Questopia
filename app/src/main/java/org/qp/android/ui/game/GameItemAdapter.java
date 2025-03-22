@@ -1,5 +1,7 @@
 package org.qp.android.ui.game;
 
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
 import static org.qp.android.helpers.utils.AccessibilityUtil.customAccessibilityDelegate;
 import static org.qp.android.helpers.utils.StringUtil.isNotEmptyOrBlank;
 
@@ -10,7 +12,6 @@ import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
-import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.AsyncListDiffer;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
@@ -50,10 +51,6 @@ public class GameItemAdapter extends RecyclerView.Adapter<GameItemAdapter.ViewHo
         return differ.getCurrentList().get(position);
     }
 
-    public List<LibListItem> getGameData() {
-        return differ.getCurrentList();
-    }
-
     @Override
     public int getItemCount() {
         return differ.getCurrentList().size();
@@ -68,34 +65,38 @@ public class GameItemAdapter extends RecyclerView.Adapter<GameItemAdapter.ViewHo
     public GameItemAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent,
                                                          int viewType) {
         var inflater = LayoutInflater.from(parent.getContext());
-        ListGameItemBinding listGameItemBinding =
-                DataBindingUtil.inflate(inflater, R.layout.list_game_item, parent, false);
+        var listGameItemBinding = ListGameItemBinding.inflate(inflater, parent, false);
         listGameItemBinding.relativeLayout.setAccessibilityDelegate(customAccessibilityDelegate());
         return new GameItemAdapter.ViewHolder(listGameItemBinding);
     }
 
     @Override
     public void onBindViewHolder(@NonNull GameItemAdapter.ViewHolder holder, int position) {
-        holder.listItemActionObjectBinding(getGameData().get(position));
         var qpListItem = getItem(position);
 
-        if (isNotEmptyOrBlank(qpListItem.pathToImage)) {
+        var itemIcon = holder.listGameItemBinding.itemIcon;
+        if (!isNotEmptyOrBlank(qpListItem.pathToImage)) {
+            itemIcon.setVisibility(GONE);
+        } else {
+            itemIcon.setVisibility(VISIBLE);
             Glide.with(holder.listGameItemBinding.itemIcon)
                     .load(qpListItem.pathToImage)
                     .error(R.drawable.baseline_broken_image_24)
                     .centerCrop()
-                    .into(holder.listGameItemBinding.itemIcon);
+                    .into(itemIcon);
         }
 
-        if (isNotEmptyOrBlank(qpListItem.text)) {
-            var itemText = holder.listGameItemBinding.itemText;
+        var itemText = holder.listGameItemBinding.itemText;
+        if (!isNotEmptyOrBlank(qpListItem.text)) {
+            itemText.setVisibility(GONE);
+        } else {
+            itemText.setVisibility(VISIBLE);
             itemText.setTypeface(typeface);
             itemText.setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize);
             itemText.setBackgroundColor(backgroundColor);
             itemText.setTextColor(textColor);
             itemText.setLinkTextColor(linkTextColor);
-            // TODO: 27.06.2023 rewrite this!
-            itemText.setText(Html.fromHtml(String.valueOf(qpListItem.text), Html.FROM_HTML_MODE_LEGACY));
+            itemText.setText(Html.fromHtml(qpListItem.text, Html.FROM_HTML_MODE_LEGACY));
         }
     }
 
@@ -105,11 +106,6 @@ public class GameItemAdapter extends RecyclerView.Adapter<GameItemAdapter.ViewHo
         ViewHolder(ListGameItemBinding binding) {
             super(binding.getRoot());
             this.listGameItemBinding = binding;
-        }
-
-        public void listItemActionObjectBinding(LibListItem libListItem) {
-            listGameItemBinding.setLibListItem(libListItem);
-            listGameItemBinding.executePendingBindings();
         }
     }
 }
