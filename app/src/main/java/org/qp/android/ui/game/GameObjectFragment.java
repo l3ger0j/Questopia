@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import org.qp.android.databinding.FragmentRecyclerBinding;
 import org.qp.android.helpers.adapters.RecyclerItemClickListener;
+import org.qp.android.helpers.adapters.WrapContentLinearLayoutManager;
 
 public class GameObjectFragment extends Fragment {
 
@@ -32,11 +33,14 @@ public class GameObjectFragment extends Fragment {
         viewModel = new ViewModelProvider(requireActivity()).get(GameViewModel.class);
 
         // RecyclerView
+        var layoutManager = new WrapContentLinearLayoutManager(
+                requireContext(), LinearLayoutManager.VERTICAL, false
+        );
         objectView = recyclerBinding.shareRecyclerView;
-        var manager = (LinearLayoutManager) objectView.getLayoutManager();
+        objectView.setLayoutManager(layoutManager);
         var dividerItemDecoration = new DividerItemDecoration(
-                objectView.getContext(),
-                manager.getOrientation());
+                objectView.getContext(), layoutManager.getOrientation()
+        );
         objectView.addItemDecoration(dividerItemDecoration);
         objectView.setOverScrollMode(View.OVER_SCROLL_NEVER);
         objectView.setBackgroundColor(viewModel.getBackgroundColor());
