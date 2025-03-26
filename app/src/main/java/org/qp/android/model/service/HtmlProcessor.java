@@ -1,15 +1,12 @@
 package org.qp.android.model.service;
 
 import static org.qp.android.helpers.utils.Base64Util.encodeBase64;
-import static org.qp.android.helpers.utils.FileUtil.fromRelPath;
 import static org.qp.android.helpers.utils.StringUtil.isNotEmpty;
 import static org.qp.android.helpers.utils.StringUtil.isNullOrEmpty;
 
-import android.content.Context;
 import android.util.Base64;
 
 import androidx.annotation.NonNull;
-import androidx.documentfile.provider.DocumentFile;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
@@ -17,44 +14,26 @@ import org.jsoup.safety.Safelist;
 import org.qp.android.ui.settings.SettingsController;
 
 import java.util.ArrayList;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
 
 public class HtmlProcessor {
 
-    private final String TAG = this.getClass().getSimpleName();
-
     private static final Pattern EXEC_PATTERN = Pattern.compile("href=\"exec:([\\s\\S]*?)\"", Pattern.CASE_INSENSITIVE);
     private static final Pattern HTML_PATTERN = Pattern.compile("<(\"[^\"]*\"|'[^']*'|[^'\">])*>");
     private static final Pattern BODY_PATTERN = Pattern.compile(".*?<body.*?>(.*?)</body>.*?", Pattern.DOTALL);
-
-    private final ExecutorService executors = Executors.newSingleThreadExecutor();
-
-    private final ImageProvider imageProvider;
     private SettingsController controller;
-    private DocumentFile curGameDir;
-
-    public String getSrcDir(String html) {
-        var document = Jsoup.parse(html);
-        var imageElement = document.select("img").first();
-        if (imageElement == null) return "";
-        return imageElement.attr("src");
-    }
 
     /**
      * Bring the HTML code <code>html</code> obtained from the library to
      * HTML code acceptable for display in {@linkplain android.webkit.WebView}.
      */
-    public String getCleanHtmlAndMedia(@NonNull Context context ,
-                                       @NonNull String dirtyHtml) {
+    public String getCleanHtmlAndMedia(@NonNull String dirtyHtml) {
         if (isNullOrEmpty(dirtyHtml)) return "";
 
         var document = Jsoup.parse(preHandleHtml(dirtyHtml));
         document.outputSettings().prettyPrint(true);
         var body = document.body();
-        handleImagesInHtml(context , body);
+        handleImagesInHtml(body);
         handleVideosInHtml(body);
 
         return document.toString();
@@ -89,17 +68,8 @@ public class HtmlProcessor {
         return this;
     }
 
-    public HtmlProcessor setCurGameDir(DocumentFile curGameDir) {
-        this.curGameDir = curGameDir;
-        return this;
-    }
-
-    public boolean isContainsHtmlTags(String text){
+    public boolean isContainsHtmlTags(String text) {
         return HTML_PATTERN.matcher(text).find();
-    }
-
-    public HtmlProcessor(ImageProvider imageProvider) {
-        this.imageProvider = imageProvider;
     }
 
     public String convertLibHtmlToWebHtml(String html) {
@@ -136,7 +106,7 @@ public class HtmlProcessor {
             result.append(html, fromIdx, idx);
             var endIdx = html.indexOf('>', idx + 1);
             if (endIdx == -1) {
-                return Jsoup.clean(html , Safelist.none());
+                return Jsoup.clean(html, Safelist.none());
             }
             fromIdx = endIdx + 1;
         }
@@ -175,64 +145,34 @@ public class HtmlProcessor {
                 .replace("\r", "");
     }
 
-    private void handleImagesInHtml(@NonNull Context context,
-                                    @NonNull Element documentBody) {
-        var dynBlackList = new ArrayList<String>();
-        documentBody.select("a").forEach(element -> {
-            if (element.attr("href").contains("exec:")) {
-                dynBlackList.add(element.select("img").attr("src"));
-            }
-        });
+    private void handleImagesInHtml(@NonNull Element documentBody) {
+        if (controller.isUseFullscreenImages) {
+            var dynBlackList = new ArrayList<String>();
+            documentBody.select("a").forEach(element -> {
+                if (element.attr("href").contains("exec:")) {
+                    dynBlackList.add(element.select("img").attr("src"));
+                }
+            });
+
+            documentBody.select("img").forEach(img -> {
+                if (!dynBlackList.contains(img.attr("src"))) {
+                    img.attr("onclick", "img.onClickImage(this.src);");
+                }
+            });
+        }
 
         documentBody.select("img").forEach(img -> {
-            if (controller.isUseFullscreenImages) {
-                if (!dynBlackList.contains(img.attr("src"))) {
-                    img.attr("onclick" , "img.onClickImage(this.src);");
-                }
-            }
             if (controller.isUseAutoWidth && controller.isUseAutoHeight) {
                 img.attr("style", "display: inline; height: auto; max-width: 100%;");
-            }
-            if (!controller.isUseAutoWidth) {
-                shouldChangeWidth(context, img).thenAccept(aBoolean -> {
-                    if (!aBoolean) return;
-                    img.attr("style" , "max-width:" + controller.customWidthImage+";");
-                });
-            } else if (!controller.isUseAutoHeight) {
-                shouldChangeHeight(context, img).thenAccept(aBoolean -> {
-                   if (!aBoolean) return;
-                   img.attr("style" , "max-height:" + controller.customHeightImage+";");
-                });
+            } else {
+                if (!controller.isUseAutoWidth) {
+                    img.attr("style", "max-width:" + controller.customWidthImage + ";");
+                }
+                if (!controller.isUseAutoHeight) {
+                    img.attr("style", "max-height:" + controller.customHeightImage + ";");
+                }
             }
         });
-    }
-
-    private CompletableFuture<Boolean> shouldChangeWidth(Context context,
-                                                         Element img) {
-        var relPath = img.attr("src");
-        return CompletableFuture
-                .supplyAsync(() -> fromRelPath(context , relPath , curGameDir, false), executors)
-                .thenApply(imageFile -> {
-                    if (imageFile == null) return false;
-                    var drawable = imageProvider.getDrawableFromPath(context , imageFile.getUri());
-                    if (drawable == null) return false;
-                    var widthPix = context.getResources().getDisplayMetrics().widthPixels;
-                    return drawable.getIntrinsicWidth() < widthPix;
-                });
-    }
-
-    private CompletableFuture<Boolean> shouldChangeHeight(Context context,
-                                                          Element img) {
-        var relPath = img.attr("src");
-        return CompletableFuture
-                .supplyAsync(() -> fromRelPath(context , relPath , curGameDir, false), executors)
-                .thenApply(imageFile -> {
-                    if (imageFile == null) return false;
-                    var drawable = imageProvider.getDrawableFromPath(context , imageFile.getUri());
-                    if (drawable == null) return false;
-                    var heightPix = context.getResources().getDisplayMetrics().heightPixels;
-                    return drawable.getIntrinsicHeight() < heightPix;
-                });
     }
 
     private void handleVideosInHtml(Element documentBody) {
@@ -261,7 +201,7 @@ public class HtmlProcessor {
         }
 
         var headDirt = dirtyHtml.split(".*?<body.*?>(.*?)</body>.*?")[0];
-        return headDirt+"<body>"+bodyDirt+"</body>";
+        return headDirt + "<body>" + bodyDirt + "</body>";
     }
 
     private String extractBody(String html) {

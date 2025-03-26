@@ -42,7 +42,6 @@ import com.anggrayudi.storage.callback.FileCallback;
 import com.anggrayudi.storage.file.DocumentFileCompat;
 import com.anggrayudi.storage.file.DocumentFileUtils;
 
-import org.qp.android.QuestopiaApplication;
 import org.qp.android.R;
 import org.qp.android.data.db.Game;
 import org.qp.android.data.db.GameDao;
@@ -499,9 +498,6 @@ public class StockViewModel extends AndroidViewModel {
         var gameDir = DocumentFileCompat.fromUri(getApplication(), currGameEntry.gameDirUri);
         if (!isWritableDir(getApplication(), gameDir)) return null;
         var intent = new Intent(getApplication(), GameActivity.class);
-
-        var application = (QuestopiaApplication) getApplication();
-        application.currentGameDir = gameDir;
 
         intent.putExtra("gameId", data.id);
         intent.putExtra("gameTitle", data.title);

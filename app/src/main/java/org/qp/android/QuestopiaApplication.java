@@ -5,11 +5,8 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.os.Build;
 
-import androidx.documentfile.provider.DocumentFile;
-
 import org.qp.android.model.service.AudioPlayer;
 import org.qp.android.model.service.HtmlProcessor;
-import org.qp.android.model.service.ImageProvider;
 import org.qp.android.ui.settings.SettingsController;
 
 import dagger.hilt.android.HiltAndroidApp;
@@ -19,12 +16,8 @@ public class QuestopiaApplication extends Application {
 
     public static final int UNPACK_GAME_NOTIFICATION_ID = 1800;
     public static final String UNPACK_GAME_CHANNEL_ID = "org.qp.android.channel.unpack_game";
-
-    private final ImageProvider imageProvider = new ImageProvider();
-    private final HtmlProcessor htmlProcessor = new HtmlProcessor(imageProvider);
-    private final AudioPlayer audioPlayer = new AudioPlayer(this);
-
-    public DocumentFile currentGameDir;
+    public final AudioPlayer audioPlayer = new AudioPlayer(this);
+    private final HtmlProcessor htmlProcessor = new HtmlProcessor();
 
     @Override
     public void onCreate() {
@@ -34,12 +27,7 @@ public class QuestopiaApplication extends Application {
 
     public HtmlProcessor getHtmlProcessor() {
         return htmlProcessor
-                .setCurGameDir(currentGameDir)
                 .setController(SettingsController.getInstance(this));
-    }
-
-    public AudioPlayer getAudioPlayer() {
-        return audioPlayer.setCurGameDir(currentGameDir);
     }
 
     public void createNotificationChannels() {
@@ -47,7 +35,7 @@ public class QuestopiaApplication extends Application {
         var importance = NotificationManager.IMPORTANCE_DEFAULT;
 
         var name = getString(R.string.channelInstallGame);
-        var channel = new NotificationChannel(UNPACK_GAME_CHANNEL_ID , name , importance);
+        var channel = new NotificationChannel(UNPACK_GAME_CHANNEL_ID, name, importance);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             channel.setAllowBubbles(true);

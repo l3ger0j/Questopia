@@ -251,7 +251,13 @@ public class GameViewModel extends AndroidViewModel {
     }
 
     private AudioPlayer getAudioPlayer() {
-        return questopiaApplication.getAudioPlayer();
+        var gameDir = getCurGameDir();
+        if (isWritableDir(getApplication(), gameDir)) {
+            return questopiaApplication.audioPlayer
+                    .setCurGameDir(getCurGameDir());
+        } else {
+            return questopiaApplication.audioPlayer;
+        }
     }
 
     public LiveData<String> getAudioErrorObserver() {
@@ -505,7 +511,7 @@ public class GameViewModel extends AndroidViewModel {
         if (getSettingsController().isImageDisabled) {
             cleanHTML = getHtmlProcessor().getCleanHtmlRemMedia(dirtyHTML);
         } else {
-            cleanHTML = getHtmlProcessor().getCleanHtmlAndMedia(getApplication(), dirtyHTML);
+            cleanHTML = getHtmlProcessor().getCleanHtmlAndMedia(dirtyHTML);
         }
         if (!cleanHTML.isBlank()) {
             doOnWarnUser(GameActivity.TAB_MAIN_DESC_AND_ACTIONS);
@@ -520,7 +526,7 @@ public class GameViewModel extends AndroidViewModel {
         if (getSettingsController().isImageDisabled) {
             cleanHTML = getHtmlProcessor().getCleanHtmlRemMedia(dirtyHTML);
         } else {
-            cleanHTML = getHtmlProcessor().getCleanHtmlAndMedia(getApplication(), dirtyHTML);
+            cleanHTML = getHtmlProcessor().getCleanHtmlAndMedia(dirtyHTML);
         }
         if (!cleanHTML.isBlank()) {
             doOnWarnUser(GameActivity.TAB_VARS_DESC);
