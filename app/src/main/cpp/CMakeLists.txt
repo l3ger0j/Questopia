@@ -77,7 +77,7 @@ else()
 	set(CMAKE_POLICY_DEFAULT_CMP0063 NEW)
 	set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 	add_subdirectory("${CMAKE_BINARY_DIR}/oniguruma-src"
-			"${CMAKE_BINARY_DIR}/oniguruma-build"
+					 "${CMAKE_BINARY_DIR}/oniguruma-build"
 	)
 	add_library(oniguruma::onig ALIAS onig)
 endif()
@@ -85,36 +85,36 @@ endif()
 configure_file(qsp_config.h.cmakein qsp_config.h @ONLY)
 
 set(QSP_SOURCES
-		qsp/bindings/bindings_config.h
-		qsp/bindings/default/default_callbacks.c
-		qsp/bindings/default/default_control.c
-		qsp/bindings/default/qsp_default.h
-		qsp/bindings/java/java_callbacks.c
-		qsp/bindings/java/java_control.c
-		qsp/bindings/java/qsp_java.h
-		qsp/bindings/qsp.h
-		qsp/actions.c qsp/actions.h
-		qsp/callbacks.c qsp/callbacks.h
-		qsp/codetools.c qsp/codetools.h
-		qsp/coding.c qsp/coding.h
-		qsp/common.c qsp/common.h
-		qsp/errors.c qsp/errors.h
-		qsp/game.c qsp/game.h
-		qsp/locations.c qsp/locations.h
-		qsp/mathops.c qsp/mathops.h
-		qsp/memwatch.c qsp/memwatch.h
-		qsp/menu.c qsp/menu.h
-		qsp/objects.c qsp/objects.h
-		qsp/playlist.c qsp/playlist.h
-		qsp/regexp.c qsp/regexp.h
-		qsp/statements.c qsp/statements.h
-		qsp/text.c qsp/text.h
-		qsp/time.c qsp/time.h
-		qsp/towlower.c
-		qsp/towupper.c
-		qsp/tuples.c qsp/tuples.h
-		qsp/variables.c qsp/variables.h
-		qsp/variant.c qsp/variant.h
+	qsp/bindings/bindings_config.h
+	qsp/bindings/default/default_callbacks.c
+	qsp/bindings/default/default_control.c
+	qsp/bindings/default/qsp_default.h
+	qsp/bindings/java/java_callbacks.c
+	qsp/bindings/java/java_control.c
+	qsp/bindings/java/qsp_java.h
+	qsp/bindings/qsp.h
+	qsp/actions.c qsp/actions.h
+	qsp/callbacks.c qsp/callbacks.h
+	qsp/codetools.c qsp/codetools.h
+	qsp/coding.c qsp/coding.h
+	qsp/common.c qsp/common.h
+	qsp/errors.c qsp/errors.h
+	qsp/game.c qsp/game.h
+	qsp/locations.c qsp/locations.h
+	qsp/mathops.c qsp/mathops.h
+	qsp/memwatch.c qsp/memwatch.h
+	qsp/menu.c qsp/menu.h
+	qsp/objects.c qsp/objects.h
+	qsp/playlist.c qsp/playlist.h
+	qsp/regexp.c qsp/regexp.h
+	qsp/statements.c qsp/statements.h
+	qsp/text.c qsp/text.h
+	qsp/time.c qsp/time.h
+	qsp/towlower.c
+	qsp/towupper.c
+	qsp/tuples.c qsp/tuples.h
+	qsp/variables.c qsp/variables.h
+	qsp/variant.c qsp/variant.h
 )
 add_library(qsp SHARED ${QSP_SOURCES})
 target_compile_definitions(qsp PUBLIC _UNICODE)
@@ -135,7 +135,7 @@ if (BUILD_JAVA)
 endif()
 
 target_include_directories(qsp
-		INTERFACE
+	INTERFACE
 		"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/qsp/bindings/default>"
 		"$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>"
 		"$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/qsp>"
@@ -145,33 +145,33 @@ target_include_directories(qsp
 install(TARGETS qsp EXPORT QspTargets)
 
 generate_export_header(qsp
-		BASE_NAME Qsp
-		EXPORT_MACRO_NAME QSP_EXTERN
+  BASE_NAME Qsp
+  EXPORT_MACRO_NAME QSP_EXTERN
 )
 
 write_basic_package_version_file(${CMAKE_CURRENT_BINARY_DIR}/cmake/Qsp/QspConfigVersion.cmake COMPATIBILITY AnyNewerVersion)
 configure_package_config_file(QspConfig.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/cmake/Qsp/QspConfig.cmake
-		INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/Qsp"
+	INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/Qsp"
 )
 
 export(TARGETS qsp NAMESPACE Qsp:: FILE ${CMAKE_CURRENT_BINARY_DIR}/QspConfig.cmake)
 install(EXPORT QspTargets NAMESPACE Qsp:: DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/Qsp")
 
 install(
-		DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/cmake
-		DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+	DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/cmake
+	DESTINATION "${CMAKE_INSTALL_LIBDIR}"
 )
 
 install(FILES
 		qsp/bindings/qsp.h
 		qsp/bindings/bindings_config.h
 		"${CMAKE_CURRENT_BINARY_DIR}/qsp_export.h"
-		DESTINATION
+	DESTINATION
 		"${CMAKE_INSTALL_INCLUDEDIR}/qsp"
 )
 
 install(FILES
 		qsp/bindings/default/qsp_default.h
-		DESTINATION
+	DESTINATION
 		"${CMAKE_INSTALL_INCLUDEDIR}/qsp/default"
 )
