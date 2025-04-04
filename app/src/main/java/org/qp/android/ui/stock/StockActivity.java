@@ -271,11 +271,6 @@ public class StockActivity extends AppCompatActivity {
                         null,
                         rootFolder
                 );
-                stockViewModel.outputIntObserver.observe(this, integer -> {
-                    if (integer == 1) {
-                        stockViewModel.loadGameDataFromDB();
-                    }
-                });
             }
         });
 

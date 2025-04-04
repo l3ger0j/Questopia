@@ -381,7 +381,6 @@ public class StockViewModel extends AndroidViewModel {
         } else {
             switch (dialogType) {
                 case ADD_DIALOG -> {
-                    outputIntObserver = new MutableLiveData<>();
                     dialogFragments = new StockDialogFrags();
                     dialogFragments.setDialogType(StockDialogType.ADD_DIALOG);
                     dialogFragments.setNewDirEntry(rootDir);
@@ -434,7 +433,7 @@ public class StockViewModel extends AndroidViewModel {
             if (tempImageFile != null) unfilledEntry.gameIconUri = tempImageFile.getUri();
 
             localGame.insertEntryInDB(unfilledEntry, rootDir);
-            outputIntObserver.setValue(1);
+            loadGameDataFromDB();
             dialogFragments.dismiss();
         } catch (NullPointerException ex) {
             doOnShowErrorDialog(ex.getMessage(), ErrorType.EXCEPTION);
