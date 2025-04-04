@@ -96,6 +96,7 @@ public class GameActivity extends AppCompatActivity {
         activityGameBinding = ActivityGameBinding.inflate(getLayoutInflater());
         gameViewModel = new ViewModelProvider(this).get(GameViewModel.class);
         gameViewModel.activityObserver.setValue(this);
+        gameViewModel.initNativePlugin();
         settingsController = gameViewModel.getSettingsController();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {

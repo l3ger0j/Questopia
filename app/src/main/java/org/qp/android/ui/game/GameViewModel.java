@@ -57,6 +57,7 @@ import org.qp.android.model.plugin.PluginType;
 import org.qp.android.model.service.AudioPlayer;
 import org.qp.android.model.service.HtmlProcessor;
 import org.qp.android.questopiabundle.AsyncCallbacks;
+import org.qp.android.questopiabundle.IQuestopiaBundle;
 import org.qp.android.questopiabundle.LibDialogRetValue;
 import org.qp.android.questopiabundle.LibException;
 import org.qp.android.questopiabundle.LibResult;
@@ -103,13 +104,13 @@ public class GameViewModel extends AndroidViewModel {
             </head>
             """;
     private static final String PAGE_BODY_TEMPLATE = "<body>REPLACETEXT</body>";
+    public final MutableLiveData<List<LibListItem>> actsListLiveData = new MutableLiveData<>();
+    public final MutableLiveData<List<LibListItem>> objsListLiveData = new MutableLiveData<>();
     private final QuestopiaApplication questopiaApplication;
     private final ExecutorService singleService = Executors.newSingleThreadExecutor();
     private final MutableLiveData<SettingsController> controllerObserver = new MutableLiveData<>();
     private final MutableLiveData<String> mainDescLiveData = new MutableLiveData<>();
     private final MutableLiveData<String> varsDescLiveData = new MutableLiveData<>();
-    public final MutableLiveData<List<LibListItem>> actsListLiveData = new MutableLiveData<>();
-    public final MutableLiveData<List<LibListItem>> objsListLiveData = new MutableLiveData<>();
     private final PluginClient pluginClient = PluginClient.getInstance();
     public ObservableBoolean isActionVisible = new ObservableBoolean();
     public MutableLiveData<String> outputTextObserver = new MutableLiveData<>();
@@ -130,6 +131,7 @@ public class GameViewModel extends AndroidViewModel {
         refreshActionsRecycler();
         refreshObjectsRecycler();
     };
+    private IQuestopiaBundle iQuestopiaBundle;
     private volatile int nativeLibVer;
 
     public GameViewModel(@NonNull Application application) {
@@ -137,17 +139,11 @@ public class GameViewModel extends AndroidViewModel {
         preferences = PreferenceManager.getDefaultSharedPreferences(application);
         preferences.registerOnSharedPreferenceChangeListener(preferenceChangeListener);
         questopiaApplication = (QuestopiaApplication) getApplication();
-
-        pluginClient.proxyMethod(questopiaApplication, PluginType.ENGINE_PLUGIN, this::initPluginHandler)
-                .exceptionally(throwable -> {
-                    Log.e(this.getClass().getSimpleName(), "Error", throwable);
-                    return null;
-                });
     }
 
     private void initPluginHandler() {
         try {
-            pluginClient.questopiaBundle.sendAsync(new AsyncCallbacks.Stub() {
+            iQuestopiaBundle.sendAsync(new AsyncCallbacks.Stub() {
                 @Override
                 public void sendLibGameState(LibResult libResult) throws RemoteException {
                     libGameState = (LibGameState) libResult.value;
@@ -348,6 +344,7 @@ public class GameViewModel extends AndroidViewModel {
 
     @Nullable
     public DocumentFile getCurGameDir() {
+        if (gameDirUri == null) return null;
         return DocumentFileCompat.fromUri(getApplication(), gameDirUri);
     }
 
@@ -437,6 +434,7 @@ public class GameViewModel extends AndroidViewModel {
             case "closeGameDialogFragment" -> {
                 stopAudio();
                 stopNativeLib();
+                terminateNativePlugin();
                 doOnFinishActivity();
             }
             case "inputDialogFragment", "executorDialogFragment" -> {
@@ -536,7 +534,7 @@ public class GameViewModel extends AndroidViewModel {
 
     public void onActionClicked(int index) {
         try {
-            pluginClient.questopiaBundle.onActionClicked(index);
+            iQuestopiaBundle.onActionClicked(index);
         } catch (RemoteException e) {
             showErrorDialog(e.toString(), ErrorType.EXCEPTION);
         }
@@ -551,7 +549,7 @@ public class GameViewModel extends AndroidViewModel {
 
     public void onObjectClicked(int index) {
         try {
-            pluginClient.questopiaBundle.onObjectClicked(index);
+            iQuestopiaBundle.onObjectClicked(index);
         } catch (RemoteException e) {
             showErrorDialog(e.toString(), ErrorType.EXCEPTION);
         }
@@ -566,6 +564,7 @@ public class GameViewModel extends AndroidViewModel {
     protected void onCleared() {
         super.onCleared();
         preferences.unregisterOnSharedPreferenceChangeListener(preferenceChangeListener);
+        terminateNativePlugin();
     }
 
     public void startAudio() {
@@ -578,7 +577,7 @@ public class GameViewModel extends AndroidViewModel {
 
     public void resumeAudio() {
         final var gameDir = getCurGameDir();
-        if (isWritableDir(getApplication(), gameDir)) return;
+        if (!isWritableDir(getApplication(), gameDir)) return;
 
         getAudioPlayer().setCurGameDir(gameDir);
         getAudioPlayer().setSoundEnabled(getSettingsController().isSoundEnabled);
@@ -589,31 +588,37 @@ public class GameViewModel extends AndroidViewModel {
         getAudioPlayer().stop();
     }
 
+    public void initNativePlugin() {
+        pluginClient.startThread();
+        pluginClient.connectPlugin(getApplication(), PluginType.ENGINE_PLUGIN);
+    }
+
     public void startNativeLib() {
+        this.iQuestopiaBundle = pluginClient.questopiaBundle;
+
         nativeLibVer = getSettingsController().nativeLibVersion;
-        pluginClient.proxyMethod(questopiaApplication, PluginType.ENGINE_PLUGIN, () -> {
+        pluginClient.runOnThread(this::initPluginHandler);
+        pluginClient.runOnThread(() -> {
             try {
-                pluginClient.questopiaBundle.startNativeLib(nativeLibVer);
+                iQuestopiaBundle.startNativeLib(nativeLibVer);
             } catch (Exception e) {
                 Log.e(this.getClass().getSimpleName(), "Error: ", e);
             }
-        }).exceptionally(throwable -> {
-            Log.e(this.getClass().getSimpleName(), "Error", throwable);
-            return null;
         });
     }
 
+    public void terminateNativePlugin() {
+        pluginClient.disconnectPlugin(getApplication(), PluginType.ENGINE_PLUGIN);
+        pluginClient.stopThread();
+    }
+
     public void stopNativeLib() {
-        pluginClient.proxyMethod(questopiaApplication, PluginType.ENGINE_PLUGIN, () -> {
+        pluginClient.runOnThread(() -> {
             try {
-                pluginClient.questopiaBundle.stopNativeLib(nativeLibVer);
-                pluginClient.disconnectPlugin(getApplication(), PluginType.ENGINE_PLUGIN);
+                iQuestopiaBundle.stopNativeLib(nativeLibVer);
             } catch (Exception e) {
                 showErrorDialog(e.toString(), ErrorType.EXCEPTION);
             }
-        }).exceptionally(throwable -> {
-            Log.e(this.getClass().getSimpleName(), "Error", throwable);
-            return null;
         });
     }
 
@@ -621,7 +626,7 @@ public class GameViewModel extends AndroidViewModel {
                                      String gameTitle,
                                      DocumentFile gameDir,
                                      DocumentFile gameFile) {
-        pluginClient.proxyMethod(questopiaApplication, PluginType.ENGINE_PLUGIN, () -> {
+        pluginClient.runOnThread(() -> {
             try {
                 getApplication().grantUriPermission(
                         "org.qp.android.questopiabundle",
@@ -636,36 +641,33 @@ public class GameViewModel extends AndroidViewModel {
                                 | Intent.FLAG_GRANT_READ_URI_PERMISSION
                 );
 
-                pluginClient.questopiaBundle.runGameIntoLib(gameId, gameTitle, gameDir.getUri(), gameFile.getUri());
+                iQuestopiaBundle.runGameIntoLib(gameId, gameTitle, gameDir.getUri(), gameFile.getUri());
             } catch (Exception e) {
                 showErrorDialog(e.toString(), ErrorType.EXCEPTION);
             }
-        }).exceptionally(throwable -> {
-            Log.e(this.getClass().getSimpleName(), "Error", throwable);
-            return null;
         });
     }
 
     public void requestForNativeLib(LibGameRequest req, String codeToExec) {
         try {
-            pluginClient.questopiaBundle.doLibRequest(new LibResult<>(req), codeToExec, Uri.EMPTY);
-        } catch (Exception e) {
+            iQuestopiaBundle.doLibRequest(new LibResult<>(req), codeToExec, Uri.EMPTY);
+        } catch (RemoteException e) {
             showErrorDialog(e.toString(), ErrorType.EXCEPTION);
         }
     }
 
     public void requestForNativeLib(LibGameRequest req, Uri fileUri) {
         try {
-            pluginClient.questopiaBundle.doLibRequest(new LibResult<>(req), "", fileUri);
-        } catch (Exception e) {
+            iQuestopiaBundle.doLibRequest(new LibResult<>(req), "", fileUri);
+        } catch (RemoteException e) {
             showErrorDialog(e.toString(), ErrorType.EXCEPTION);
         }
     }
 
     public void requestForNativeLib(LibGameRequest req) {
         try {
-            pluginClient.questopiaBundle.doLibRequest(new LibResult<>(req), "", Uri.EMPTY);
-        } catch (Exception e) {
+            iQuestopiaBundle.doLibRequest(new LibResult<>(req), "", Uri.EMPTY);
+        } catch (RemoteException e) {
             showErrorDialog(e.toString(), ErrorType.EXCEPTION);
         }
     }
@@ -708,8 +710,7 @@ public class GameViewModel extends AndroidViewModel {
                     doOnShowSimpleDialog(inputString, GameDialogType.ERROR_DIALOG, null);
             case DIALOG_PICTURE ->
                     doOnShowSimpleDialog(inputString, GameDialogType.IMAGE_DIALOG, null);
-            case DIALOG_POPUP_LOAD ->
-                    doOnShowSimpleDialog("", GameDialogType.LOAD_DIALOG, null);
+            case DIALOG_POPUP_LOAD -> doOnShowSimpleDialog("", GameDialogType.LOAD_DIALOG, null);
             case DIALOG_MESSAGE -> {
                 assertNonUiThread();
 

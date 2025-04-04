@@ -1,15 +1,10 @@
 package org.qp.android.ui.settings;
 
-import static org.qp.android.model.plugin.PluginClient.KEY_SERVICENAME;
-import static org.qp.android.model.plugin.PluginClient.LIB_DELAY;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,7 +20,8 @@ import org.qp.android.R;
 import org.qp.android.databinding.FragmentRecyclerBinding;
 import org.qp.android.helpers.adapters.RecyclerItemClickListener;
 import org.qp.android.model.plugin.PluginClient;
-import org.qp.android.model.plugin.PluginType;
+
+import java.util.Collections;
 
 public class SettingPluginFragment extends Fragment {
 
@@ -34,7 +30,7 @@ public class SettingPluginFragment extends Fragment {
 
     private PackageBroadcastReceiver packageBroadcastReceiver;
     private IntentFilter packageFilter;
-    private PluginClient client;
+    private final PluginClient client = PluginClient.getInstance();
 
     @Nullable
     @Override
@@ -50,6 +46,9 @@ public class SettingPluginFragment extends Fragment {
         requireActivity().getOnBackPressedDispatcher()
                 .addCallback(getViewLifecycleOwner(), callback);
 
+        client.startThread();
+        client.connectAllPlugin(requireContext());
+
         packageBroadcastReceiver = new PackageBroadcastReceiver();
         packageFilter = new IntentFilter();
 
@@ -64,25 +63,9 @@ public class SettingPluginFragment extends Fragment {
     }
 
     private void refreshPluginInfo() {
-        client.getServicesLiveData().observe(getViewLifecycleOwner(), hashMaps -> {
-            if (hashMaps == null) return;
-            hashMaps.forEach(stringStringHashMap -> {
-                var service = stringStringHashMap.get(KEY_SERVICENAME);
-                if (service == null) return;
-                switch (service) {
-                    case "org.qp.android.questopiabundle.QuestopiaBundle" -> {
-                        var infoBundle = client.requestInfo(requireContext(), PluginType.ENGINE_PLUGIN);
-                        if (infoBundle == null) return;
-                        infoBundle.thenAccept(pluginInfoList -> {
-                            if (pluginInfoList.isEmpty()) return;
-                            new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                                pluginAdapter.submitList(pluginInfoList);
-                            }, LIB_DELAY);
-                        }).exceptionally(throwable -> null);
-                    }
-                }
-            });
-        });
+        client.getInfoPluginsLiveData().observe(getViewLifecycleOwner(), pluginInfos ->
+                pluginAdapter.submitList(pluginInfos == null ? Collections.emptyList() : pluginInfos)
+        );
 
         packageFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
         packageFilter.addAction(Intent.ACTION_PACKAGE_REPLACED);
@@ -108,8 +91,6 @@ public class SettingPluginFragment extends Fragment {
     }
 
     private void fillPluginList() {
-        client = PluginClient.getInstance();
-        client.loadListPlugin(requireContext());
         refreshPluginInfo();
     }
 
@@ -123,6 +104,13 @@ public class SettingPluginFragment extends Fragment {
     public void onPause() {
         super.onPause();
         requireActivity().unregisterReceiver(packageBroadcastReceiver);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        client.disconnectAllPlugin(requireContext());
+        client.stopThread();
     }
 
     class PackageBroadcastReceiver extends BroadcastReceiver {

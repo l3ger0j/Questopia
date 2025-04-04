@@ -1,5 +1,7 @@
 package org.qp.android.model.plugin;
 
+import static org.qp.android.helpers.utils.ThreadUtil.throwIfNotMainThread;
+
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -9,6 +11,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.util.Log;
 
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
@@ -20,29 +23,44 @@ import org.qp.android.questopiabundle.IQuestopiaBundle;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class PluginClient {
 
-    private static final String ACTION_PICK_PLUGIN = "org.qp.intent.action.PICK_PLUGIN";
-    private static final String ENGINE_PLUGIN_ID = "org.qp.android.plugin.ENGINE_PLUGIN";
     public static final int LIB_DELAY = 3;
     public static final String KEY_PKG = "pkg";
     public static final String KEY_SERVICENAME = "servicename";
     public static final String KEY_ACTIONS = "actions";
     public static final String KEY_CATEGORIES = "categories";
-
+    private static final String TAG = PluginClient.class.getSimpleName();
+    private static final String ACTION_PICK_PLUGIN = "org.qp.intent.action.PICK_PLUGIN";
+    private static final String ENGINE_PLUGIN_ID = "org.qp.android.plugin.ENGINE_PLUGIN";
+    private final ExecutorService singleService = Executors.newSingleThreadExecutor();
     private final MutableLiveData<List<HashMap<String, String>>> servicesLiveData = new MutableLiveData<>();
     private final MutableLiveData<List<String>> categoriesLiveData = new MutableLiveData<>();
-
+    private final MutableLiveData<List<PluginInfo>> infoPluginsLiveData = new MutableLiveData<>();
+    private final MutableLiveData<IQuestopiaBundle> bundleMutableLiveData = new MutableLiveData<>();
+    private final ReentrantLock threadLock = new ReentrantLock();
     public IQuestopiaBundle questopiaBundle;
-
     private final ServiceConnection engineConn = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             questopiaBundle = IQuestopiaBundle.Stub.asInterface(service);
+
+            bundleMutableLiveData.postValue(questopiaBundle);
+            try {
+                var pluginInfo = new PluginInfo("", "", "");
+                pluginInfo = new PluginInfo(
+                        questopiaBundle.versionPlugin(),
+                        questopiaBundle.titlePlugin(),
+                        questopiaBundle.authorPlugin()
+                );
+                infoPluginsLiveData.postValue(List.of(pluginInfo));
+            } catch (RemoteException e) {
+                throw new RuntimeException(e);
+            }
         }
 
         @Override
@@ -50,15 +68,24 @@ public class PluginClient {
             questopiaBundle = null;
         }
     };
-
-    private PluginClient() {}
+    private Thread pluginClientThread;
+    private volatile Handler threadHandler;
+    private volatile boolean threadInit;
+    private volatile boolean isInitPlugin = false;
 
     private static class PluginClientHolder {
         public static final PluginClient HOLDER_INSTANCE = new PluginClient();
     }
 
+    private PluginClient() {
+    }
+
     public static PluginClient getInstance() {
         return PluginClientHolder.HOLDER_INSTANCE;
+    }
+
+    public LiveData<List<PluginInfo>> getInfoPluginsLiveData() {
+        return infoPluginsLiveData;
     }
 
     public LiveData<List<HashMap<String, String>>> getServicesLiveData() {
@@ -73,8 +100,8 @@ public class PluginClient {
         var currPluginList = servicesLiveData.getValue();
         if (currPluginList == null) {
             loadListPlugin(context);
-            return new Handler(Looper.getMainLooper()).postDelayed(
-                    () -> isPluginExist(context, serviceName), LIB_DELAY);
+            return new Handler(Looper.getMainLooper()).post(() ->
+                    isPluginExist(context, serviceName));
         }
         if (currPluginList.isEmpty()) return false;
         for (var element : currPluginList) {
@@ -87,90 +114,110 @@ public class PluginClient {
         return false;
     }
 
-    public CompletableFuture<Void> proxyMethod(Context context, PluginType pluginType, Runnable runnable) {
-        return CompletableFuture
-                .supplyAsync(() -> {
-                    boolean status;
-                    try {
-                        status = connectPluginTask(context, pluginType).get();
-                    } catch (ExecutionException | InterruptedException e) {
-                        throw new CompletionException(e);
+    public void startThread() {
+        pluginClientThread = new Thread(() -> {
+            while (!Thread.currentThread().isInterrupted()) {
+                try {
+                    if (Looper.myLooper() == null) {
+                        Looper.prepare();
                     }
-                    return status;
-                })
-                .thenAccept(aBoolean -> {
-                    if (!aBoolean) return;
-                    new Handler(Looper.getMainLooper()).postDelayed(runnable, LIB_DELAY);
-                });
-    }
-
-    @Nullable
-    public CompletableFuture<List<PluginInfo>> requestInfo(Context context, PluginType pluginType) {
-        return CompletableFuture
-                .supplyAsync(() -> {
-                    boolean status;
-                    try {
-                        status = connectPluginTask(context, pluginType).get();
-                    } catch (ExecutionException | InterruptedException e) {
-                        throw new CompletionException(e);
-                    }
-                    return status;
-                })
-                .thenApplyAsync(aBoolean -> {
-                    if (!aBoolean) return null;
-                    var pluginInfoList = new ArrayList<PluginInfo>();
-
-                    try {
-                        switch (pluginType) {
-                            case ENGINE_PLUGIN -> {
-                                var pluginInfo = new PluginInfo(
-                                        questopiaBundle.versionPlugin(),
-                                        questopiaBundle.titlePlugin(),
-                                        questopiaBundle.authorPlugin()
-                                );
-                                pluginInfoList.add(pluginInfo);
-                            }
-                        }
-                    } catch (RemoteException e) {
-                        throw new CompletionException(e);
-                    }
-
-                    return pluginInfoList;
-                })
-                .thenApplyAsync(info -> {
-                    if (!disconnectPlugin(context, pluginType)) {
-                        throw new CompletionException(new RuntimeException("Error disconnect plugin"));
-                    }
-                    return info;
-                });
-    }
-
-    public CompletableFuture<Boolean> connectPluginTask(Context context, PluginType pluginType) {
-        switch (pluginType) {
-            case ENGINE_PLUGIN -> {
-                var intent = new Intent(ENGINE_PLUGIN_ID);
-                var updatedIntent = createExplicitIntent(context, intent);
-                if (updatedIntent == null) return CompletableFuture.supplyAsync(() -> false);
-                return CompletableFuture
-                        .supplyAsync(() -> context.bindService(updatedIntent, engineConn, Context.BIND_AUTO_CREATE));
-            }
-        }
-        return CompletableFuture.supplyAsync(() -> false);
-    }
-
-    public boolean disconnectPlugin(Context context, PluginType pluginType) {
-        switch (pluginType) {
-            case ENGINE_PLUGIN -> {
-                var intent = new Intent(ENGINE_PLUGIN_ID);
-                var updatedIntent = createExplicitIntent(context, intent);
-                if (updatedIntent == null) return false;
-                if (context.stopService(updatedIntent)) {
-                    context.unbindService(engineConn);
-                    return true;
+                    threadHandler = new Handler(Looper.myLooper());
+                    threadInit = true;
+                    Looper.loop();
+                } catch (Throwable t) {
+                    Log.e(TAG, "thread has stopped exceptionally", t);
+                    Thread.currentThread().interrupt();
                 }
             }
+        }, "pluginClientThread");
+        pluginClientThread.start();
+    }
+
+    public void stopThread() {
+        throwIfNotMainThread();
+        if (pluginClientThread == null) return;
+        if (threadInit) {
+            var handler = threadHandler;
+            if (handler != null) {
+                handler.getLooper().quitSafely();
+            }
+            threadInit = false;
+        } else {
+            Log.w(TAG, "thread has been started, but not initialized");
         }
-        return false;
+        pluginClientThread.interrupt();
+    }
+
+    public void runOnThread(final Runnable runnable) {
+        throwIfNotMainThread();
+        if (pluginClientThread == null) {
+            Log.w(TAG, "thread has not been started");
+            return;
+        }
+        if (!threadInit) {
+            Log.w(TAG, "thread has been started, but not initialized");
+            return;
+        }
+
+        var mLibHandler = threadHandler;
+        if (mLibHandler == null) return;
+        mLibHandler.post(() -> {
+            threadLock.lock();
+            try {
+                runnable.run();
+            } finally {
+                threadLock.unlock();
+            }
+        });
+    }
+
+    public void connectAllPlugin(Context context) {
+        for (var pluginType : PluginType.values()) {
+            switch (pluginType) {
+                case ENGINE_PLUGIN -> runOnThread(() -> {
+                    var intent = new Intent(ENGINE_PLUGIN_ID);
+                    var updatedIntent = createExplicitIntent(context, intent);
+                    if (updatedIntent == null) return;
+                    isInitPlugin = context.bindService(updatedIntent, engineConn, Context.BIND_AUTO_CREATE);
+                });
+            }
+        }
+    }
+
+    public void connectPlugin(Context context, PluginType pluginType) {
+        switch (pluginType) {
+            case ENGINE_PLUGIN -> runOnThread(() -> {
+                var intent = new Intent(ENGINE_PLUGIN_ID);
+                var updatedIntent = createExplicitIntent(context, intent);
+                if (updatedIntent == null) return;
+                isInitPlugin = context.bindService(updatedIntent, engineConn, Context.BIND_AUTO_CREATE);
+            });
+        }
+    }
+
+    public void disconnectAllPlugin(Context context) {
+        if (!isInitPlugin) return;
+        for (var pluginType : PluginType.values()) {
+            switch (pluginType) {
+                case ENGINE_PLUGIN -> runOnThread(() -> {
+                    var intent = new Intent(ENGINE_PLUGIN_ID);
+                    var updatedIntent = createExplicitIntent(context, intent);
+                    if (updatedIntent == null) return;
+                    context.stopService(updatedIntent);
+                });
+            }
+        }
+    }
+
+    public void disconnectPlugin(Context context, PluginType pluginType) {
+        switch (pluginType) {
+            case ENGINE_PLUGIN -> runOnThread(() -> {
+                var intent = new Intent(ENGINE_PLUGIN_ID);
+                var updatedIntent = createExplicitIntent(context, intent);
+                if (updatedIntent == null) return;
+                context.stopService(updatedIntent);
+            });
+        }
     }
 
     public void loadListPlugin(Context context) {
@@ -194,14 +241,14 @@ public class PluginClient {
 
                 if (filter != null) {
                     var actions = new StringBuilder();
-                    for (var actionIterator = filter.actionsIterator(); actionIterator.hasNext();) {
+                    for (var actionIterator = filter.actionsIterator(); actionIterator.hasNext(); ) {
                         var action = actionIterator.next();
                         if (actions.length() > 0) actions.append(",");
                         actions.append(action);
                     }
 
                     var categories = new StringBuilder();
-                    for (var categoryIterator = filter.categoriesIterator(); categoryIterator.hasNext();) {
+                    for (var categoryIterator = filter.categoriesIterator(); categoryIterator.hasNext(); ) {
                         var category = categoryIterator.next();
                         if (firstCategory.isEmpty()) firstCategory = category;
                         if (categories.length() > 0) categories.append(",");
@@ -220,10 +267,8 @@ public class PluginClient {
             }
         }
 
-        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            servicesLiveData.setValue(servicesList);
-            categoriesLiveData.setValue(categoriesList);
-        }, LIB_DELAY);
+        servicesLiveData.postValue(servicesList);
+        categoriesLiveData.postValue(categoriesList);
     }
 
     @Nullable
