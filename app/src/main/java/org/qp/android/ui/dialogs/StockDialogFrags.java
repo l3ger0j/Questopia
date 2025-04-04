@@ -2,6 +2,7 @@ package org.qp.android.ui.dialogs;
 
 import static org.qp.android.helpers.utils.PathUtil.removeExtension;
 import static org.qp.android.helpers.utils.StringUtil.isNotEmpty;
+import static org.qp.android.helpers.utils.StringUtil.isNotEmptyOrBlank;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_IMAGE_FILE;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_MOD_FILE;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_PATH_FILE;
@@ -116,7 +117,7 @@ public class StockDialogFrags extends DialogFragment {
                         stockViewModel.doOnShowFilePicker(CODE_PICK_IMAGE_FILE, new String[]{MimeType.IMAGE}));
                 addBinding.addBT.setOnClickListener(v -> {
                     var nameDir = newDirEntry.getName();
-                    if (nameDir == null) {
+                    if (!isNotEmptyOrBlank(nameDir)) {
                         var secureRandom = new SecureRandom();
                         nameDir = "game#" + secureRandom.nextInt();
                     }
@@ -125,9 +126,7 @@ public class StockDialogFrags extends DialogFragment {
                     var editTextTitle = addBinding.ET0.getEditText();
                     if (editTextTitle != null) {
                         var entryTitle = editTextTitle.getText().toString();
-                        unfilledEntry.title = !isNotEmpty(entryTitle)
-                                ? nameDir
-                                : editTextTitle.getText().toString();
+                        unfilledEntry.title = isNotEmpty(entryTitle) ? entryTitle : nameDir;
                     }
                     var editTextAuthor = addBinding.ET1.getEditText();
                     if (editTextAuthor != null) {
