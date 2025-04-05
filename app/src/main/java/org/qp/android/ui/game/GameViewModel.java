@@ -166,7 +166,11 @@ public class GameViewModel extends AndroidViewModel {
                 @Override
                 public LibDialogRetValue doOnShowDialog(LibResult typeDialog, String inputString) throws RemoteException {
                     var libType = (LibTypeDialog) typeDialog.value;
-                    return showLibDialog(libType, inputString);
+                    return switch (libType) {
+                        case DIALOG_PICTURE ->
+                                showLibDialog(libType, normalizeContentPath(inputString));
+                        default -> showLibDialog(libType, inputString);
+                    };
                 }
 
                 @Override
