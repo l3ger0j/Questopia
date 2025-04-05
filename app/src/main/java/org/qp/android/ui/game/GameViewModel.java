@@ -116,7 +116,6 @@ public class GameViewModel extends AndroidViewModel {
     public MutableLiveData<String> outputTextObserver = new MutableLiveData<>();
     public MutableLiveData<Integer> outputIntObserver = new MutableLiveData<>();
     public MutableLiveData<Boolean> outputBooleanObserver = new MutableLiveData<>(false);
-    public MutableLiveData<GameActivity> activityObserver = new MutableLiveData<>();
     public String pageTemplate = "";
     public SharedPreferences preferences;
     public Events.Emitter emitter = new Events.Emitter();
