@@ -124,19 +124,21 @@ public class GameViewModel extends AndroidViewModel {
     private Uri gameDirUri;
     private boolean showActions = true;
     private LibGameState libGameState = new LibGameState();
-    private final SharedPreferences.OnSharedPreferenceChangeListener preferenceChangeListener = (sharedPreferences, key) -> {
-        controllerObserver.postValue(getSettingsController());
-        updatePageTemplate();
-        refreshMainDesc();
-        refreshVarsDesc();
-        refreshActionsRecycler();
-        refreshObjectsRecycler();
-    };
+    private final SharedPreferences.OnSharedPreferenceChangeListener preferenceChangeListener =
+            (sharedPreferences, key) -> {
+                controllerObserver.postValue(getSettingsController());
+                updatePageTemplate();
+                refreshMainDesc();
+                refreshVarsDesc();
+                refreshActionsRecycler();
+                refreshObjectsRecycler();
+            };
     private IQuestopiaBundle iQuestopiaBundle;
     private volatile int nativeLibVer;
 
     public GameViewModel(@NonNull Application application) {
         super(application);
+
         preferences = PreferenceManager.getDefaultSharedPreferences(application);
         preferences.registerOnSharedPreferenceChangeListener(preferenceChangeListener);
         questopiaApplication = (QuestopiaApplication) getApplication();
