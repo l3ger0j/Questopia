@@ -1,6 +1,7 @@
 package org.qp.android.model.service;
 
-import static org.qp.android.helpers.utils.FileUtil.fromFullPath;
+import static org.qp.android.helpers.utils.FileUtil.fromRelPath;
+import static org.qp.android.helpers.utils.FileUtil.isWritableFile;
 import static org.qp.android.helpers.utils.PathUtil.normalizeContentPath;
 import static org.qp.android.helpers.utils.StringUtil.isNotEmpty;
 import static org.qp.android.helpers.utils.ThreadUtil.throwIfNotMainThread;
@@ -16,6 +17,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import java.io.IOException;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -40,9 +42,10 @@ public class AudioPlayer {
         return isThrowError;
     }
 
-    public AudioPlayer setCurGameDir(DocumentFile curGameDir) {
-        this.curGameDir = curGameDir;
-        return this;
+    public void setCurGameDir(DocumentFile curGameDir) {
+        if (!Objects.equals(this.curGameDir, curGameDir)) {
+            this.curGameDir = curGameDir;
+        }
     }
 
     public AudioPlayer(Context context) {
@@ -120,9 +123,9 @@ public class AudioPlayer {
         }
 
         var normPath = normalizeContentPath(sound.path);
-        var soundFile = fromFullPath(context, normPath , curGameDir);
+        var soundFile = fromRelPath(context, normPath, curGameDir, false);
 
-        if (soundFile == null) {
+        if (!isWritableFile(context, soundFile)) {
             final var latch = new CountDownLatch(1);
             isThrowError.postValue(normPath);
             try {
@@ -130,21 +133,23 @@ public class AudioPlayer {
             } catch (InterruptedException ex) {
                 Log.e(TAG,"An error occurred while waiting", ex);
             }
-            return;
-        }
+        } else {
+            var player = new MediaPlayer();
 
-        var player = new MediaPlayer();
-        try {
-            player.setDataSource(context , soundFile.getUri());
-            player.prepare();
-        } catch (IOException ex) {
-            Log.e(TAG,"Failed to initialize media player", ex);
-            return;
+            try {
+                player.setDataSource(context , soundFile.getUri());
+                player.prepare();
+            } catch (IOException ex) {
+                Log.e(TAG,"Failed to initialize media player", ex);
+                return;
+            }
+
+            player.setOnCompletionListener(mediaPlayer -> sounds.remove(sound.path));
+            player.setVolume(sysVolume, sysVolume);
+            player.start();
+
+            sound.player = player;
         }
-        player.setOnCompletionListener(mp -> sounds.remove(sound.path));
-        player.setVolume(sysVolume, sysVolume);
-        player.start();
-        sound.player = player;
     }
 
     private float getSystemVolume(int volume) {
