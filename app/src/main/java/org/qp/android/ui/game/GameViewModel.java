@@ -157,7 +157,10 @@ public class GameViewModel extends AndroidViewModel {
 
                 @Override
                 public void sendChangeCurrGameDir(Uri gameDirUri) throws RemoteException {
-                    // TODO: 06.01.2025 Add necessary functionality
+                    var oldValue = GameViewModel.this.gameDirUri;
+                    if (!Objects.equals(oldValue, gameDirUri)) {
+                        GameViewModel.this.gameDirUri = gameDirUri;
+                    }
                 }
 
                 @Override
