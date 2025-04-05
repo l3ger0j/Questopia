@@ -332,7 +332,7 @@ public class GameViewModel extends AndroidViewModel {
         if (!isNotEmptyOrBlank(relPath)) return Uri.EMPTY;
         final var gameDir = getCurGameDir();
         if (!isWritableDir(getApplication(), gameDir)) return Uri.EMPTY;
-        var imageFile = fromRelPath(getApplication(), relPath, gameDir, true);
+        var imageFile = fromRelPath(getApplication(), relPath, gameDir, false);
         if (!isWritableFile(getApplication(), imageFile)) return Uri.EMPTY;
         return imageFile.getUri();
     }
