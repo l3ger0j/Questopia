@@ -10,6 +10,7 @@ import static org.qp.android.helpers.utils.FileUtil.fromRelPath;
 import static org.qp.android.helpers.utils.FileUtil.isWritableDir;
 import static org.qp.android.helpers.utils.FileUtil.isWritableFile;
 import static org.qp.android.helpers.utils.PathUtil.getExtension;
+import static org.qp.android.helpers.utils.PathUtil.normalizeContentPath;
 import static org.qp.android.helpers.utils.StringUtil.isNotEmptyOrBlank;
 import static org.qp.android.helpers.utils.ThreadUtil.assertNonUiThread;
 import static org.qp.android.helpers.utils.ViewUtil.getFontStyle;
@@ -112,6 +113,7 @@ public class GameViewModel extends AndroidViewModel {
     private final MutableLiveData<String> mainDescLiveData = new MutableLiveData<>();
     private final MutableLiveData<String> varsDescLiveData = new MutableLiveData<>();
     private final PluginClient pluginClient = PluginClient.getInstance();
+    private final AudioPlayer player;
     public ObservableBoolean isActionVisible = new ObservableBoolean();
     public MutableLiveData<String> outputTextObserver = new MutableLiveData<>();
     public MutableLiveData<Integer> outputIntObserver = new MutableLiveData<>();
@@ -138,6 +140,9 @@ public class GameViewModel extends AndroidViewModel {
         preferences = PreferenceManager.getDefaultSharedPreferences(application);
         preferences.registerOnSharedPreferenceChangeListener(preferenceChangeListener);
         questopiaApplication = (QuestopiaApplication) getApplication();
+
+        this.player = questopiaApplication.audioPlayer;
+        this.player.setCurGameDir(getCurGameDir());
     }
 
     private void initPluginHandler() {
@@ -183,22 +188,22 @@ public class GameViewModel extends AndroidViewModel {
 
                 @Override
                 public boolean isPlayingFile(String filePath) throws RemoteException {
-                    return getAudioPlayer().isPlayingFile(filePath);
+                    return player.isPlayingFile(filePath);
                 }
 
                 @Override
                 public void closeAllFiles() throws RemoteException {
-                    getAudioPlayer().closeAllFiles();
+                    player.closeAllFiles();
                 }
 
                 @Override
                 public void closeFile(String filePath) throws RemoteException {
-                    getAudioPlayer().closeFile(filePath);
+                    player.closeFile(filePath);
                 }
 
                 @Override
                 public void playFile(String path, int volume) throws RemoteException {
-                    getAudioPlayer().playFile(path, volume);
+                    player.playFile(path, volume);
                 }
 
                 @Override
@@ -252,18 +257,8 @@ public class GameViewModel extends AndroidViewModel {
         return getLibGameState().interfaceConfig;
     }
 
-    private AudioPlayer getAudioPlayer() {
-        var gameDir = getCurGameDir();
-        if (isWritableDir(getApplication(), gameDir)) {
-            return questopiaApplication.audioPlayer
-                    .setCurGameDir(getCurGameDir());
-        } else {
-            return questopiaApplication.audioPlayer;
-        }
-    }
-
     public LiveData<String> getAudioErrorObserver() {
-        return getAudioPlayer().getIsThrowError();
+        return player.getIsThrowError();
     }
 
     public SettingsController getSettingsController() {
@@ -574,24 +569,29 @@ public class GameViewModel extends AndroidViewModel {
     }
 
     public void startAudio() {
-        getAudioPlayer().start();
+        player.start();
     }
 
     public void pauseAudio() {
-        getAudioPlayer().pause();
+        player.pause();
     }
 
     public void resumeAudio() {
+        updateLinks();
+
+        player.setSoundEnabled(getSettingsController().isSoundEnabled);
+        player.resume();
+    }
+
+    private void updateLinks() {
         final var gameDir = getCurGameDir();
         if (!isWritableDir(getApplication(), gameDir)) return;
 
-        getAudioPlayer().setCurGameDir(gameDir);
-        getAudioPlayer().setSoundEnabled(getSettingsController().isSoundEnabled);
-        getAudioPlayer().resume();
+        player.setCurGameDir(gameDir);
     }
 
     public void stopAudio() {
-        getAudioPlayer().stop();
+        player.stop();
     }
 
     public void initNativePlugin() {
