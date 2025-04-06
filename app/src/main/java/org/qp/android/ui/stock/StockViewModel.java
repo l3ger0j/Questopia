@@ -494,13 +494,13 @@ public class StockViewModel extends AndroidViewModel {
     public Intent createPlayGameIntent() {
         var data = currGameEntry;
         if (data == null) return null;
-        var gameDir = DocumentFileCompat.fromUri(getApplication(), currGameEntry.gameDirUri);
+        var gameDir = DocumentFileCompat.fromUri(getApplication(), data.gameDirUri);
         if (!isWritableDir(getApplication(), gameDir)) return null;
         var intent = new Intent(getApplication(), GameActivity.class);
 
         intent.putExtra("gameId", data.id);
         intent.putExtra("gameTitle", data.title);
-        intent.putExtra("gameDirUri", String.valueOf(gameDir.getUri()));
+        intent.putExtra("gameDirUri", String.valueOf(data.gameDirUri));
 
         return intent;
     }
