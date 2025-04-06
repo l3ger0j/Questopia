@@ -69,10 +69,7 @@ public class SettingsActivity extends AppCompatActivity {
             navController = navFragment.getNavController();
         }
 
-        var settingsViewModel = new ViewModelProvider(this)
-                .get(SettingsViewModel.class);
-        settingsViewModel.settingsActivityObservableField.set(this);
-
+        var settingsViewModel = new ViewModelProvider(this).get(SettingsViewModel.class);
         switch (settingsViewModel.getSettingsController().language) {
             case "ru" -> AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("ru"));
             case "en" -> AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("en"));
