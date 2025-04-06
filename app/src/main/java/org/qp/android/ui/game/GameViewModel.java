@@ -242,7 +242,7 @@ public class GameViewModel extends AndroidViewModel {
                 }
             });
         } catch (Exception e) {
-            showErrorDialog(e.toString(), ErrorType.EXCEPTION);
+            Log.e(this.getClass().getSimpleName(), "Error: ", e);
         }
     }
 
@@ -625,7 +625,7 @@ public class GameViewModel extends AndroidViewModel {
             try {
                 iQuestopiaBundle.stopNativeLib(nativeLibVer);
             } catch (Exception e) {
-                showErrorDialog(e.toString(), ErrorType.EXCEPTION);
+                Log.e(this.getClass().getSimpleName(), "Error: ", e);
             }
         });
     }
@@ -651,7 +651,7 @@ public class GameViewModel extends AndroidViewModel {
 
                 iQuestopiaBundle.runGameIntoLib(gameId, gameTitle, gameDir.getUri(), gameFile.getUri());
             } catch (Exception e) {
-                showErrorDialog(e.toString(), ErrorType.EXCEPTION);
+                Log.e(this.getClass().getSimpleName(), "Error: ", e);
             }
         });
     }
@@ -660,7 +660,7 @@ public class GameViewModel extends AndroidViewModel {
         try {
             iQuestopiaBundle.doLibRequest(new LibResult<>(req), codeToExec, Uri.EMPTY);
         } catch (RemoteException e) {
-            showErrorDialog(e.toString(), ErrorType.EXCEPTION);
+            Log.e(this.getClass().getSimpleName(), "Error: ", e);
         }
     }
 
@@ -668,7 +668,7 @@ public class GameViewModel extends AndroidViewModel {
         try {
             iQuestopiaBundle.doLibRequest(new LibResult<>(req), "", fileUri);
         } catch (RemoteException e) {
-            showErrorDialog(e.toString(), ErrorType.EXCEPTION);
+            Log.e(this.getClass().getSimpleName(), "Error: ", e);
         }
     }
 
@@ -676,7 +676,7 @@ public class GameViewModel extends AndroidViewModel {
         try {
             iQuestopiaBundle.doLibRequest(new LibResult<>(req), "", Uri.EMPTY);
         } catch (RemoteException e) {
-            showErrorDialog(e.toString(), ErrorType.EXCEPTION);
+            Log.e(this.getClass().getSimpleName(), "Error: ", e);
         }
     }
 
