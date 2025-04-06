@@ -41,15 +41,13 @@ public class PluginClient {
     private final MutableLiveData<List<HashMap<String, String>>> servicesLiveData = new MutableLiveData<>();
     private final MutableLiveData<List<String>> categoriesLiveData = new MutableLiveData<>();
     private final MutableLiveData<List<PluginInfo>> infoPluginsLiveData = new MutableLiveData<>();
-    private final MutableLiveData<IQuestopiaBundle> bundleMutableLiveData = new MutableLiveData<>();
     private final ReentrantLock threadLock = new ReentrantLock();
-    public IQuestopiaBundle questopiaBundle;
+    public IQuestopiaBundle questopiaBundle = new IQuestopiaBundle.Default();
     private final ServiceConnection engineConn = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             questopiaBundle = IQuestopiaBundle.Stub.asInterface(service);
 
-            bundleMutableLiveData.postValue(questopiaBundle);
             try {
                 var pluginInfo = new PluginInfo("", "", "");
                 pluginInfo = new PluginInfo(
