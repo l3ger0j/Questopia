@@ -18,7 +18,6 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 
 import org.qp.android.BuildConfig;
-import org.qp.android.QuestopiaApplication;
 import org.qp.android.R;
 import org.qp.android.ui.dialogs.SettingsDialogFrag;
 
@@ -35,14 +34,7 @@ public class SettingsHostFragment extends PreferenceFragmentCompat {
 
         var versionPref = findPreference("showVersion");
         if (versionPref != null) {
-            var application = (QuestopiaApplication) requireActivity().getApplication();
-            versionPref.setTitle(getString(R.string.extendedName)
-                    .replace("-VERSION-", BuildConfig.VERSION_NAME));
-//            if (application.getCurrPluginClient() != null) {
-//                versionPref.setSummaryProvider(preference ->
-//                        "Lib version: " + "5.7.0" + "\nTimestamp: " + BuildConfig.BUILD_TIME
-//                );
-//            }
+            versionPref.setTitle(getString(R.string.extendedName).replace("-VERSION-", BuildConfig.VERSION_NAME));
         }
 
         Preference.OnPreferenceClickListener listener = preference -> {
