@@ -31,13 +31,11 @@ import androidx.core.os.LocaleListCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
-import androidx.documentfile.provider.DocumentFile;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.anggrayudi.storage.SimpleStorageHelper;
-import com.anggrayudi.storage.file.DocumentFileCompat;
 import com.anggrayudi.storage.file.MimeType;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -84,10 +82,6 @@ public class GameActivity extends AppCompatActivity {
     private ActivityGameBinding activityGameBinding;
     private ActivityResultLauncher<Intent> saveResultLaunch;
 
-    public SimpleStorageHelper getStorageHelper() {
-        return storageHelper;
-    }
-
     @Override
     @SuppressLint("NonConstantResourceId")
     public void onCreate(Bundle savedInstanceState) {
@@ -129,13 +123,10 @@ public class GameActivity extends AppCompatActivity {
         bottomNavigationView = activityGameBinding.bottomNavigationView;
         bottomNavigationView.setSelectedItemId(R.id.menu_mainDesc);
         bottomNavigationView.setOnItemSelectedListener(item -> {
-            int itemId = item.getItemId();
-            if (itemId == R.id.menu_mainDesc) {
-                setActiveTab(TAB_MAIN_DESC_AND_ACTIONS);
-            } else if (itemId == R.id.menu_varsDesc) {
-                setActiveTab(TAB_VARS_DESC);
-            } else if (itemId == R.id.menu_inventory) {
-                setActiveTab(TAB_OBJECTS);
+            switch (item.getItemId()) {
+                case R.id.menu_mainDesc -> setActiveTab(TAB_MAIN_DESC_AND_ACTIONS);
+                case R.id.menu_varsDesc -> setActiveTab(TAB_VARS_DESC);
+                case R.id.menu_inventory -> setActiveTab(TAB_OBJECTS);
             }
             return true;
         });
@@ -159,7 +150,7 @@ public class GameActivity extends AppCompatActivity {
         );
 
         storageHelper.setOnFileSelected((integer, documentFiles) -> {
-            for (DocumentFile documentFile : documentFiles) {
+            for (var documentFile : documentFiles) {
                 var document = documentWrap(documentFile);
                 switch (document.getExtension()) {
                     case "text", "pl", "txt", "el" -> {
@@ -316,12 +307,9 @@ public class GameActivity extends AppCompatActivity {
         var gameId = intent.getLongExtra("gameId", 0L);
         var gameTitle = intent.getStringExtra("gameTitle");
         var gameDirUri = Uri.parse(intent.getStringExtra("gameDirUri"));
-        var gameDir = DocumentFileCompat.fromUri(this, gameDirUri);
         var gameFileUri = Uri.parse(intent.getStringExtra("gameFileUri"));
-        var gameFile = DocumentFileCompat.fromUri(this, gameFileUri);
 
-        gameViewModel.setGameDirUri(gameDirUri);
-        gameViewModel.runGameIntoNativeLib(gameId, gameTitle, gameDir, gameFile);
+        gameViewModel.runGameIntoNativeLib(gameId, gameTitle, gameDirUri, gameFileUri);
     }
 
     private void setActiveTab(int tab) {

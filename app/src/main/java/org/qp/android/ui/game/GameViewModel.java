@@ -79,8 +79,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class GameViewModel extends AndroidViewModel {
 
@@ -108,7 +106,6 @@ public class GameViewModel extends AndroidViewModel {
     public final MutableLiveData<List<LibListItem>> actsListLiveData = new MutableLiveData<>();
     public final MutableLiveData<List<LibListItem>> objsListLiveData = new MutableLiveData<>();
     private final QuestopiaApplication questopiaApplication;
-    private final ExecutorService singleService = Executors.newSingleThreadExecutor();
     private final MutableLiveData<SettingsController> controllerObserver = new MutableLiveData<>();
     private final MutableLiveData<String> mainDescLiveData = new MutableLiveData<>();
     private final MutableLiveData<String> varsDescLiveData = new MutableLiveData<>();
@@ -355,10 +352,6 @@ public class GameViewModel extends AndroidViewModel {
     public DocumentFile getSavesDir() {
         if (!isWritableDir(getApplication(), getCurGameDir())) return null;
         return findOrCreateFolder(getApplication(), getCurGameDir(), "saves");
-    }
-
-    public void setGameDirUri(Uri gameDirUri) {
-        this.gameDirUri = gameDirUri;
     }
 
     // endregion Getter/Setter
@@ -632,24 +625,25 @@ public class GameViewModel extends AndroidViewModel {
 
     public void runGameIntoNativeLib(long gameId,
                                      String gameTitle,
-                                     DocumentFile gameDir,
-                                     DocumentFile gameFile) {
+                                     Uri gameDirUri,
+                                     Uri gameFileUri) {
+        this.gameDirUri = gameDirUri;
         pluginClient.runOnThread(() -> {
             try {
                 getApplication().grantUriPermission(
                         "org.qp.android.questopiabundle",
-                        gameFile.getUri(),
+                        gameFileUri,
                         Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                                 | Intent.FLAG_GRANT_READ_URI_PERMISSION
                 );
                 getApplication().grantUriPermission(
                         "org.qp.android.questopiabundle",
-                        gameDir.getUri(),
+                        gameDirUri,
                         Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                                 | Intent.FLAG_GRANT_READ_URI_PERMISSION
                 );
 
-                iQuestopiaBundle.runGameIntoLib(gameId, gameTitle, gameDir.getUri(), gameFile.getUri());
+                iQuestopiaBundle.runGameIntoLib(gameId, gameTitle, gameDirUri, gameFileUri);
             } catch (Exception e) {
                 Log.e(this.getClass().getSimpleName(), "Error: ", e);
             }
