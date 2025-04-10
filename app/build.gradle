@@ -16,7 +16,7 @@ android {
         applicationId "org.qp.android"
         minSdk 26
         targetSdk 34
-        versionCode 209000
+        versionCode 209100
         versionName "4.0.0-alpha"
         resourceConfigurations += ['en', 'ru']
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
