@@ -628,21 +628,22 @@ public class GameViewModel extends AndroidViewModel {
                                      Uri gameDirUri,
                                      Uri gameFileUri) {
         this.gameDirUri = gameDirUri;
+
+        getApplication().grantUriPermission(
+                "org.qp.android.questopiabundle",
+                gameFileUri,
+                Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                        | Intent.FLAG_GRANT_READ_URI_PERMISSION
+        );
+        getApplication().grantUriPermission(
+                "org.qp.android.questopiabundle",
+                gameDirUri,
+                Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                        | Intent.FLAG_GRANT_READ_URI_PERMISSION
+        );
+
         pluginClient.runOnThread(() -> {
             try {
-                getApplication().grantUriPermission(
-                        "org.qp.android.questopiabundle",
-                        gameFileUri,
-                        Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                                | Intent.FLAG_GRANT_READ_URI_PERMISSION
-                );
-                getApplication().grantUriPermission(
-                        "org.qp.android.questopiabundle",
-                        gameDirUri,
-                        Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                                | Intent.FLAG_GRANT_READ_URI_PERMISSION
-                );
-
                 iQuestopiaBundle.runGameIntoLib(gameId, gameTitle, gameDirUri, gameFileUri);
             } catch (Exception e) {
                 Log.e(this.getClass().getSimpleName(), "Error: ", e);
