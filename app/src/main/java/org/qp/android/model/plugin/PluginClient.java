@@ -6,7 +6,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -20,26 +19,14 @@ import androidx.lifecycle.MutableLiveData;
 import org.qp.android.dto.plugin.PluginInfo;
 import org.qp.android.questopiabundle.IQuestopiaBundle;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class PluginClient {
 
     public static final int LIB_DELAY = 3;
-    public static final String KEY_PKG = "pkg";
-    public static final String KEY_SERVICENAME = "servicename";
-    public static final String KEY_ACTIONS = "actions";
-    public static final String KEY_CATEGORIES = "categories";
     private static final String TAG = PluginClient.class.getSimpleName();
-    private static final String ACTION_PICK_PLUGIN = "org.qp.intent.action.PICK_PLUGIN";
     private static final String ENGINE_PLUGIN_ID = "org.qp.android.plugin.ENGINE_PLUGIN";
-    private final ExecutorService singleService = Executors.newSingleThreadExecutor();
-    private final MutableLiveData<List<HashMap<String, String>>> servicesLiveData = new MutableLiveData<>();
-    private final MutableLiveData<List<String>> categoriesLiveData = new MutableLiveData<>();
     private final MutableLiveData<List<PluginInfo>> infoPluginsLiveData = new MutableLiveData<>();
     private final ReentrantLock threadLock = new ReentrantLock();
     public IQuestopiaBundle questopiaBundle = new IQuestopiaBundle.Default();
@@ -84,32 +71,6 @@ public class PluginClient {
 
     public LiveData<List<PluginInfo>> getInfoPluginsLiveData() {
         return infoPluginsLiveData;
-    }
-
-    public LiveData<List<HashMap<String, String>>> getServicesLiveData() {
-        return servicesLiveData;
-    }
-
-    public LiveData<List<String>> getCategoriesLiveData() {
-        return categoriesLiveData;
-    }
-
-    public boolean isPluginExist(Context context, String serviceName) {
-        var currPluginList = servicesLiveData.getValue();
-        if (currPluginList == null) {
-            loadListPlugin(context);
-            return new Handler(Looper.getMainLooper()).post(() ->
-                    isPluginExist(context, serviceName));
-        }
-        if (currPluginList.isEmpty()) return false;
-        for (var element : currPluginList) {
-            var service = element.get(KEY_SERVICENAME);
-            if (service == null) return false;
-            if (service.equals(serviceName)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     public void startThread() {
@@ -216,57 +177,6 @@ public class PluginClient {
                 context.stopService(updatedIntent);
             });
         }
-    }
-
-    public void loadListPlugin(Context context) {
-        var servicesList = new ArrayList<HashMap<String, String>>();
-        var categoriesList = new ArrayList<String>();
-        var packageManager = context.getPackageManager();
-
-        var baseIntent = new Intent(ACTION_PICK_PLUGIN);
-        baseIntent.setFlags(Intent.FLAG_DEBUG_LOG_RESOLUTION);
-        var list = packageManager.queryIntentServices(baseIntent, PackageManager.GET_RESOLVED_FILTER);
-
-        for (int i = 0; i < list.size(); ++i) {
-            var info = list.get(i);
-            var serviceInfo = info.serviceInfo;
-            var filter = info.filter;
-            if (serviceInfo != null) {
-                var item = new HashMap<String, String>();
-                item.put(KEY_PKG, serviceInfo.packageName);
-                item.put(KEY_SERVICENAME, serviceInfo.name);
-                var firstCategory = "";
-
-                if (filter != null) {
-                    var actions = new StringBuilder();
-                    for (var actionIterator = filter.actionsIterator(); actionIterator.hasNext(); ) {
-                        var action = actionIterator.next();
-                        if (actions.length() > 0) actions.append(",");
-                        actions.append(action);
-                    }
-
-                    var categories = new StringBuilder();
-                    for (var categoryIterator = filter.categoriesIterator(); categoryIterator.hasNext(); ) {
-                        var category = categoryIterator.next();
-                        if (firstCategory.isEmpty()) firstCategory = category;
-                        if (categories.length() > 0) categories.append(",");
-                        categories.append(category);
-                    }
-
-                    item.put(KEY_ACTIONS, new String(actions));
-                    item.put(KEY_CATEGORIES, new String(categories));
-                } else {
-                    item.put(KEY_ACTIONS, "<null>");
-                    item.put(KEY_CATEGORIES, "<null>");
-                }
-
-                categoriesList.add(firstCategory);
-                servicesList.add(item);
-            }
-        }
-
-        servicesLiveData.postValue(servicesList);
-        categoriesLiveData.postValue(categoriesList);
     }
 
     @Nullable
