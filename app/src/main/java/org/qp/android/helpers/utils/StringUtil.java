@@ -7,7 +7,7 @@ import org.jetbrains.annotations.Contract;
 public final class StringUtil {
 
     public static boolean isNotEmptyOrBlank(String str) {
-        return str != null && !str.isEmpty() && !str.isBlank();
+        return str != null && !str.isBlank();
     }
 
     public static boolean isNotEmpty(String str) {
