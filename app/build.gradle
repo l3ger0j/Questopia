@@ -16,8 +16,7 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
-                arguments "-DBUILD_JAVA=1"
-                cFlags "-DANDROID"
+                cFlags "-D_ANDROID"
             }
         }
     }

@@ -1,11 +1,7 @@
 package org.qp.android.ui.game;
 
-import com.libqsp.jni.QSPLib;
-
 import org.qp.android.model.lib.LibRefIRequest;
 import org.qp.android.model.lib.LibWindowType;
-
-import java.util.List;
 
 public interface GameInterface {
 
@@ -21,7 +17,7 @@ public interface GameInterface {
 
     String showExecutorDialog(String prompt);
 
-    int showMenu(List<QSPLib.ListItem> items);
+    int showMenu();
 
     void showLoadGamePopup();
 

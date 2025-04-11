@@ -39,8 +39,8 @@ import androidx.preference.PreferenceManager;
 
 import com.anggrayudi.storage.file.DocumentFileCompat;
 import com.google.android.material.textfield.TextInputLayout;
-import com.libqsp.jni.QSPLib;
 
+import org.libndkqsp.jni.NDKLib;
 import org.qp.android.QuestopiaApplication;
 import org.qp.android.R;
 import org.qp.android.helpers.ErrorType;
@@ -87,8 +87,8 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
     private final MutableLiveData<SettingsController> controllerObserver = new MutableLiveData<>();
     private final MutableLiveData<String> mainDescLiveData = new MutableLiveData<>();
     private final MutableLiveData<String> varsDescLiveData = new MutableLiveData<>();
-    public final MutableLiveData<List<QSPLib.ListItem>> actsListLiveData = new MutableLiveData<>();
-    public final MutableLiveData<List<QSPLib.ListItem>> objsListLiveData = new MutableLiveData<>();
+    public final MutableLiveData<List<NDKLib.ListItem>> actsListLiveData = new MutableLiveData<>();
+    public final MutableLiveData<List<NDKLib.ListItem>> objsListLiveData = new MutableLiveData<>();
     private final Handler counterHandler = new Handler();
     public MutableLiveData<String> outputTextObserver = new MutableLiveData<>();
     public MutableLiveData<Integer> outputIntObserver = new MutableLiveData<>();
@@ -550,13 +550,14 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
     }
 
     @Override
-    public int showMenu(List<QSPLib.ListItem> items) {
+    public int showMenu() {
         assertNonUiThread();
 
         final var resultQueue = new ArrayBlockingQueue<Integer>(1);
+        final var currentItems = getLibProxy().getGameState().menuItemsList;
         final var newItems = new ArrayList<String>();
-        items.forEach(libMenuItem -> newItems.add(libMenuItem.image()));
-        getGameActivity().showMenuDialog(newItems, resultQueue);
+        currentItems.forEach(libMenuItem -> newItems.add(libMenuItem.text()));
+        getGameActivity().showMenuDialog(newItems , resultQueue);
         try {
             return resultQueue.take();
         } catch (InterruptedException ex) {

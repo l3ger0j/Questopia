@@ -1,5 +1,6 @@
 package org.qp.android.model.lib;
 
+import static org.qp.android.helpers.utils.FileUtil.documentWrap;
 import static org.qp.android.helpers.utils.FileUtil.findOrCreateFile;
 import static org.qp.android.helpers.utils.FileUtil.fromFullPath;
 import static org.qp.android.helpers.utils.FileUtil.fromRelPath;
@@ -10,7 +11,6 @@ import static org.qp.android.helpers.utils.FileUtil.writeFileContents;
 import static org.qp.android.helpers.utils.PathUtil.getFilename;
 import static org.qp.android.helpers.utils.PathUtil.normalizeContentPath;
 import static org.qp.android.helpers.utils.StringUtil.getStringOrEmpty;
-import static org.qp.android.helpers.utils.StringUtil.isNotEmpty;
 import static org.qp.android.helpers.utils.StringUtil.isNotEmptyOrBlank;
 import static org.qp.android.helpers.utils.ThreadUtil.isSameThread;
 import static org.qp.android.helpers.utils.ThreadUtil.throwIfNotMainThread;
@@ -28,8 +28,8 @@ import androidx.documentfile.provider.DocumentFile;
 
 import com.anggrayudi.storage.file.DocumentFileCompat;
 import com.anggrayudi.storage.file.MimeType;
-import com.libqsp.jni.QSPLib;
 
+import org.libndkqsp.jni.NDKLib;
 import org.qp.android.QuestopiaApplication;
 import org.qp.android.model.service.AudioPlayer;
 import org.qp.android.model.service.HtmlProcessor;
@@ -40,9 +40,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class LibProxyImpl extends QSPLib implements LibIProxy {
+public class LibProxyImpl extends NDKLib implements LibIProxy {
     private final String TAG = this.getClass().getSimpleName();
 
     private final ReentrantLock libLock = new ReentrantLock();
@@ -103,9 +104,13 @@ public class LibProxyImpl extends QSPLib implements LibIProxy {
 
     private boolean loadGameWorld() {
         final var gameFileUri = gameState.gameFileUri;
+        var gameFile = DocumentFileCompat.fromUri(context, gameState.gameFileUri);
+        if (!isWritableFile(context, gameFile)) return false;
+        var gameFileFullPath = documentWrap(gameFile).getAbsolutePath(context);
+        if (!isNotEmptyOrBlank(gameFileFullPath)) return false;
         final var gameData = getFileContents(context, gameFileUri);
         if (gameData == null) return false;
-        if (!loadGameWorldFromData(gameData, true)) {
+        if (!QSPLoadGameWorldFromData(gameData, gameFileFullPath)) {
             showLastQspError();
             return false;
         }
@@ -113,16 +118,16 @@ public class LibProxyImpl extends QSPLib implements LibIProxy {
     }
 
     private void showLastQspError() {
-        var errorData = getLastErrorData();
-        var locName = getStringOrEmpty(errorData.locName);
-        var desc = getStringOrEmpty(getErrorDesc(errorData.errorNum));
+        var errorData = QSPGetLastErrorData();
+        var locName = getStringOrEmpty(errorData.locName());
+        var desc = getStringOrEmpty(QSPGetErrorDesc(errorData.errorNum()));
         final var message = String.format(
                 Locale.getDefault(),
                 "Location: %s\nAction: %d\nLine: %d\nError number: %d\nDescription: %s",
                 locName,
-                errorData.actIndex,
-                errorData.intLineNum,
-                errorData.errorNum,
+                errorData.index(),
+                errorData.line(),
+                errorData.errorNum(),
                 desc);
         Log.e(TAG, message);
         if (gameInterface == null) return;
@@ -138,34 +143,36 @@ public class LibProxyImpl extends QSPLib implements LibIProxy {
         final var config = gameState.interfaceConfig;
         var changed = false;
 
-        final var htmlResult = getNumVarValue("USEHTML", 0);
-        final var useHtml = htmlResult != 0L;
-        if (config.useHtml != useHtml) {
-            config.useHtml = useHtml;
+        final var htmlResult = (VarValResp) QSPGetVarValues("USEHTML", 0);
+        if (htmlResult.isSuccess()) {
+            boolean useHtml = htmlResult.intValue() != 0;
+            if (config.useHtml != useHtml) {
+                config.useHtml = useHtml;
+                changed = true;
+            }
+        }
+
+        final var fSizeResult = (VarValResp) QSPGetVarValues("FSIZE", 0);
+        if (fSizeResult.isSuccess() && config.fontSize != fSizeResult.intValue()) {
+            config.fontSize = fSizeResult.intValue();
             changed = true;
         }
 
-        final var fSizeResult = getNumVarValue("FSIZE", 0);
-        if (config.fontSize != fSizeResult) {
-            config.fontSize = (int) fSizeResult;
+        final var bColorResult = (VarValResp) QSPGetVarValues("BCOLOR", 0);
+        if (bColorResult.isSuccess() && config.backColor != bColorResult.intValue()) {
+            config.backColor = bColorResult.intValue();
             changed = true;
         }
 
-        final var bColorResult = getNumVarValue("BCOLOR", 0);
-        if (config.backColor != bColorResult) {
-            config.backColor = (int) bColorResult;
+        final var fColorResult = (VarValResp) QSPGetVarValues("FCOLOR", 0);
+        if (fColorResult.isSuccess() && config.fontColor != fColorResult.intValue()) {
+            config.fontColor = fColorResult.intValue();
             changed = true;
         }
 
-        final var fColorResult = getNumVarValue("FCOLOR", 0);
-        if (config.fontColor != fColorResult) {
-            config.fontColor = (int) fColorResult;
-            changed = true;
-        }
-
-        final var lColorResult = getNumVarValue("LCOLOR", 0);
-        if (config.linkColor != lColorResult) {
-            config.linkColor = (int) lColorResult;
+        final var lColorResult = (VarValResp) QSPGetVarValues("LCOLOR", 0);
+        if (lColorResult.isSuccess() && config.linkColor != lColorResult.intValue()) {
+            config.linkColor = lColorResult.intValue();
             changed = true;
         }
 
@@ -178,9 +185,9 @@ public class LibProxyImpl extends QSPLib implements LibIProxy {
         if (!isWritableDir(context, gameDir)) return Collections.emptyList();
         var actions = new ArrayList<ListItem>();
 
-        for (var element : getActions()) {
+        for (var element : QSPGetActionData()) {
             var tempImagePath = element.image() == null ? "" : element.image();
-            var tempText = element.name() == null ? "" : element.name();
+            var tempText = element.text() == null ? "" : element.text();
 
             if (isNotEmptyOrBlank(tempImagePath)) {
                 var tempPath = normalizeContentPath(getFilename(tempImagePath));
@@ -202,9 +209,9 @@ public class LibProxyImpl extends QSPLib implements LibIProxy {
         if (!isWritableDir(context, gameDir)) return Collections.emptyList();
         var objects = new ArrayList<ListItem>();
 
-        for (var element : getObjects()) {
+        for (var element : QSPGetObjectData()) {
             var tempImagePath = element.image() == null ? "" : element.image();
-            var tempText = element.name() == null ? "" : element.name();
+            var tempText = element.text() == null ? "" : element.text();
 
             if (tempText.contains("<img")) {
                 if (getHtmlProcessor().isContainsHtmlTags(tempText)) {
@@ -233,14 +240,14 @@ public class LibProxyImpl extends QSPLib implements LibIProxy {
         libThread = new Thread(() -> {
             while (!Thread.currentThread().isInterrupted()) {
                 try {
-                    init();
+                    QSPInit();
                     if (Looper.myLooper() == null) {
                         Looper.prepare();
                     }
                     libHandler = new Handler(Looper.myLooper());
                     libThreadInit = true;
                     Looper.loop();
-                    terminate();
+                    QSPDeInit();
                 } catch (Throwable t) {
                     Log.e(TAG, "lib thread has stopped exceptionally", t);
                     Thread.currentThread().interrupt();
@@ -292,7 +299,7 @@ public class LibProxyImpl extends QSPLib implements LibIProxy {
             if (!loadGameWorld()) return;
             gameStartTime = SystemClock.elapsedRealtime();
             lastMsCountCallTime = 0;
-            if (!restartGame(true)) {
+            if (!QSPRestartGame(true)) {
                 showLastQspError();
             }
         });
@@ -313,7 +320,7 @@ public class LibProxyImpl extends QSPLib implements LibIProxy {
         }
         final var gameData = getFileContents(context, uri);
         if (gameData == null) return;
-        if (!openSavedGameFromData(gameData, true)) {
+        if (!QSPOpenSavedGameFromData(gameData, gameData.length, true)) {
             showLastQspError();
         }
     }
@@ -324,7 +331,7 @@ public class LibProxyImpl extends QSPLib implements LibIProxy {
             runOnQspThread(() -> saveGameState(uri));
             return;
         }
-        final var gameData = saveGameAsData(false);
+        final var gameData = QSPSaveGameAsData(false);
         if (gameData == null) return;
         writeFileContents(context, uri, gameData);
     }
@@ -332,10 +339,10 @@ public class LibProxyImpl extends QSPLib implements LibIProxy {
     @Override
     public void onActionClicked(final int index) {
         runOnQspThread(() -> {
-            if (!setSelActIndex(index, false)) {
+            if (!QSPSetSelActionIndex(index, false)) {
                 showLastQspError();
             }
-            if (!execSelAction(true)) {
+            if (!QSPExecuteSelActionCode(true)) {
                 showLastQspError();
             }
         });
@@ -344,7 +351,7 @@ public class LibProxyImpl extends QSPLib implements LibIProxy {
     @Override
     public void onObjectSelected(final int index) {
         runOnQspThread(() -> {
-            if (!setSelObjIndex(index, true)) {
+            if (!QSPSetSelObjectIndex(index, true)) {
                 showLastQspError();
             }
         });
@@ -356,8 +363,9 @@ public class LibProxyImpl extends QSPLib implements LibIProxy {
         if (inter == null) return;
         runOnQspThread(() -> {
             var input = inter.showInputDialog("userInputTitle");
-            setInputStrText(input);
-            if (!execUserInput(true)) {
+            if (!isNotEmptyOrBlank(input)) return;
+            QSPSetInputStrText(input);
+            if (!QSPExecUserInput(true)) {
                 showLastQspError();
             }
         });
@@ -369,7 +377,8 @@ public class LibProxyImpl extends QSPLib implements LibIProxy {
         if (inter == null) return;
         runOnQspThread(() -> {
             var input = inter.showExecutorDialog("execStringTitle");
-            if (!execString(input, true)) {
+            if (!isNotEmptyOrBlank(input)) return;
+            if (!QSPExecString(input, true)) {
                 showLastQspError();
             }
         });
@@ -378,7 +387,7 @@ public class LibProxyImpl extends QSPLib implements LibIProxy {
     @Override
     public void execute(final String code) {
         runOnQspThread(() -> {
-            if (!execString(code, true)) {
+            if (!QSPExecString(code, true)) {
                 showLastQspError();
             }
         });
@@ -388,7 +397,7 @@ public class LibProxyImpl extends QSPLib implements LibIProxy {
     public void executeCounter() {
         if (libLock.isLocked()) return;
         runOnQspThread(() -> {
-            if (!execCounter(true)) {
+            if (!QSPExecCounter(true)) {
                 showLastQspError();
             }
         });
@@ -410,25 +419,25 @@ public class LibProxyImpl extends QSPLib implements LibIProxy {
 
 
     @Override
-    public void onRefreshInt(boolean isForced) {
+    public void RefreshInt() {
         var request = new LibRefIRequest();
         var configChanged = loadInterfaceConfiguration();
 
         if (configChanged) {
             request.isIConfigChanged = true;
         }
-        if (isMainDescChanged()) {
+        if (QSPIsMainDescChanged()) {
             if (isNotEmptyOrBlank(gameState.mainDesc)) {
-                if (!gameState.mainDesc.equals(getMainDesc())) {
-                    gameState.mainDesc = getMainDesc();
+                if (!gameState.mainDesc.equals(QSPGetMainDesc())) {
+                    gameState.mainDesc = QSPGetMainDesc();
                     request.isMainDescChanged = true;
                 }
             } else {
-                gameState.mainDesc = getMainDesc();
+                gameState.mainDesc = QSPGetMainDesc();
                 request.isMainDescChanged = true;
             }
         }
-        if (isActsChanged()) {
+        if (QSPIsActionsChanged()) {
             if (gameState.actionsList.isEmpty()) {
                 gameState.actionsList = getActionsList();
                 request.isActionsChanged = true;
@@ -439,7 +448,7 @@ public class LibProxyImpl extends QSPLib implements LibIProxy {
                 }
             }
         }
-        if (isObjsChanged()) {
+        if (QSPIsObjectsChanged()) {
             if (gameState.objectsList.isEmpty()) {
                 gameState.objectsList = getObjectsList();
                 request.isObjectsChanged = true;
@@ -450,14 +459,14 @@ public class LibProxyImpl extends QSPLib implements LibIProxy {
                 }
             }
         }
-        if (isVarsDescChanged()) {
+        if (QSPIsVarsDescChanged()) {
             if (isNotEmptyOrBlank(gameState.varsDesc)) {
-                if (!gameState.varsDesc.equals(getVarsDesc())) {
-                    gameState.varsDesc = getVarsDesc();
+                if (!gameState.varsDesc.equals(QSPGetVarsDesc())) {
+                    gameState.varsDesc = QSPGetVarsDesc();
                     request.isVarsDescChanged = true;
                 }
             } else {
-                gameState.varsDesc = getVarsDesc();
+                gameState.varsDesc = QSPGetVarsDesc();
                 request.isVarsDescChanged = true;
             }
         }
@@ -469,7 +478,7 @@ public class LibProxyImpl extends QSPLib implements LibIProxy {
     }
 
     @Override
-    public void onShowImage(String file) {
+    public void ShowPicture(String file) {
         var gameDir = getCurGameDir();
         if (!isWritableDir(context, gameDir)) return;
 
@@ -484,7 +493,7 @@ public class LibProxyImpl extends QSPLib implements LibIProxy {
     }
 
     @Override
-    public void onSetTimer(int msecs) {
+    public void SetTimer(int msecs) {
         var inter = gameInterface;
         if (inter == null) return;
 
@@ -492,28 +501,28 @@ public class LibProxyImpl extends QSPLib implements LibIProxy {
     }
 
     @Override
-    public void onShowMessage(String text) {
+    public void ShowMessage(String message) {
         var inter = gameInterface;
         if (inter == null) return;
 
-        inter.showMessage(text);
+        inter.showMessage(message);
     }
 
     @Override
-    public void onPlayFile(String file, int volume) {
-        if (!isNotEmptyOrBlank(file)) return;
+    public void PlayFile(String path, int volume) {
+        if (!isNotEmptyOrBlank(path)) return;
 
-        getAudioPlayer().playFile(file, volume);
+        getAudioPlayer().playFile(path, volume);
     }
 
     @Override
-    public boolean onIsPlayingFile(String file) {
-        return isNotEmptyOrBlank(file) && getAudioPlayer().isPlayingFile(file);
+    public boolean IsPlayingFile(final String path) {
+        return isNotEmptyOrBlank(path) && getAudioPlayer().isPlayingFile(path);
     }
 
     @Override
-    public void onCloseFile(String path) {
-        if (isNotEmpty(path)) {
+    public void CloseFile(String path) {
+        if (isNotEmptyOrBlank(path)) {
             getAudioPlayer().closeFile(path);
         } else {
             getAudioPlayer().closeAllFiles();
@@ -521,18 +530,23 @@ public class LibProxyImpl extends QSPLib implements LibIProxy {
     }
 
     @Override
-    public void onOpenGame(String file, boolean isNewGame) {
+    public void OpenGame(String filename) {
         var inter = gameInterface;
         if (inter == null) return;
+        var currGameDir = getCurGameDir();
+        if (currGameDir == null) return;
 
-        if (file == null) {
+        if (!isNotEmptyOrBlank(filename)) {
             inter.showLoadGamePopup();
         } else {
             try {
-                var saveFile = fromFullPath(context, file);
-                if (saveFile == null) {
-                    Log.e(TAG, "Save file not found");
-                    return;
+                var saveFile = fromRelPath(context, filename, currGameDir);
+                if (!isWritableFile(context, saveFile)) {
+                    saveFile = fromFullPath(context, filename);
+                    if (!isWritableFile(context, saveFile)) {
+                        Log.e(TAG, "Save file not found");
+                        return;
+                    }
                 }
                 var saveFileUri = saveFile.getUri();
                 inter.doWithCounterDisabled(() -> loadGameState(saveFileUri));
@@ -543,19 +557,17 @@ public class LibProxyImpl extends QSPLib implements LibIProxy {
     }
 
     @Override
-    public void onSaveGameStatus(String file) {
+    public void SaveGame(String filename) {
         var gameDir = getCurGameDir();
         if (!isWritableDir(context, gameDir)) return;
 
-        if (file == null) {
+        if (!isNotEmptyOrBlank(filename)) {
             var inter = gameInterface;
             if (inter == null) return;
             inter.showSaveGamePopup();
         } else {
-            var saveFile = findOrCreateFile(
-                    context,
-                    gameDir,
-                    new File(file).getName(),
+            var saveFile = findOrCreateFile(context, gameDir,
+                    new File(filename).getName(),
                     MimeType.TEXT
             );
             if (isWritableFile(context, saveFile)) {
@@ -567,12 +579,15 @@ public class LibProxyImpl extends QSPLib implements LibIProxy {
     }
 
     @Override
-    public String onInputBox(String text) {
-        return gameInterface != null ? gameInterface.showInputDialog(text) : "";
+    public String InputBox(String prompt) {
+        var inter = gameInterface;
+        if (inter == null) return "";
+
+        return isNotEmptyOrBlank(prompt) ? gameInterface.showInputDialog(prompt) : "";
     }
 
     @Override
-    public int onGetMsCount() {
+    public int GetMSCount() {
         var now = SystemClock.elapsedRealtime();
         if (lastMsCountCallTime == 0) {
             lastMsCountCallTime = gameStartTime;
@@ -583,15 +598,28 @@ public class LibProxyImpl extends QSPLib implements LibIProxy {
     }
 
     @Override
-    public int onShowMenu(ListItem[] items) {
-        var inter = gameInterface;
-        if (inter == null) return super.onShowMenu(items);
-        var result = inter.showMenu(List.of(items));
-        return result != -1 ? result : super.onShowMenu(items);
+    public void AddMenuItem(String name, String imgPath) {
+        var item = new NDKLib.ListItem(imgPath, name);
+        gameState.menuItemsList.add(item);
     }
 
     @Override
-    public void onSleep(int msecs) {
+    public void ShowMenu() {
+        var inter = gameInterface;
+        if (inter == null) return;
+        var result = inter.showMenu();
+        if (result != -1) {
+            QSPSelectMenuItem(result);
+        }
+    }
+
+    @Override
+    public void DeleteMenu() {
+        gameState.menuItemsList.clear();
+    }
+
+    @Override
+    public void Wait(int msecs) {
         try {
             Thread.sleep(msecs);
         } catch (InterruptedException ex) {
@@ -600,25 +628,42 @@ public class LibProxyImpl extends QSPLib implements LibIProxy {
     }
 
     @Override
-    public void onShowWindow(int type, boolean toShow) {
+    public void ShowWindow(int type, boolean isShow) {
         var inter = gameInterface;
         if (inter == null) return;
         var windowType = LibWindowType.values()[type];
-        inter.showWindow(windowType, toShow);
+        inter.showWindow(windowType, isShow);
     }
 
     @Override
-    public void onOpenGameStatus(String file) {
+    public byte[] GetFileContents(String path) {
         var gameDir = getCurGameDir();
-        if (!isWritableDir(context, gameDir)) return;
+        if (gameDir == null) return null;
 
-        var newGameDir = fromRelPath(context, file, gameDir);
+        var targetFile = fromRelPath(context, path, gameDir);
+        if (!isWritableFile(context, targetFile)) {
+            targetFile = fromFullPath(context, path);
+            if (!isWritableFile(context, targetFile)) return null;
+        }
+        var targetFileUri = targetFile.getUri();
+        return getFileContents(context, targetFileUri);
+    }
+
+    @Override
+    public void ChangeQuestPath(String path) {
+        var oldGameDir = getCurGameDir();
+        if (oldGameDir == null) return;
+
+        var newGameDir = fromFullPath(context, path);
         if (!isWritableFile(context, newGameDir)) {
-            Log.e(TAG, "Game directory not found: " + file);
             return;
         }
 
-        gameState.gameDirUri = newGameDir.getUri();
+        var currGameDirUri = oldGameDir.getUri();
+        var newGameDirUri = newGameDir.getUri();
+        if (!Objects.equals(currGameDirUri, newGameDirUri)) {
+            gameState.gameDirUri = newGameDirUri;
+        }
     }
 
     // endregion LibQpCallbacks

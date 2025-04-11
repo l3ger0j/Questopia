@@ -14,8 +14,7 @@ import androidx.recyclerview.widget.AsyncListDiffer;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.libqsp.jni.QSPLib;
-
+import org.libndkqsp.jni.NDKLib;
 import org.qp.android.databinding.ListGameItemBinding;
 
 import java.util.List;
@@ -23,19 +22,19 @@ import java.util.Objects;
 
 public class GameItemAdapter extends RecyclerView.Adapter<GameItemAdapter.ViewHolder> {
 
-    private static final DiffUtil.ItemCallback<QSPLib.ListItem> DIFF_CALLBACK =
+    private static final DiffUtil.ItemCallback<NDKLib.ListItem> DIFF_CALLBACK =
             new DiffUtil.ItemCallback<>() {
                 @Override
-                public boolean areItemsTheSame(@NonNull QSPLib.ListItem oldItem, @NonNull QSPLib.ListItem newItem) {
-                    return Objects.equals(oldItem.image(), newItem.image()) && Objects.equals(oldItem.name(), newItem.name());
+                public boolean areItemsTheSame(@NonNull NDKLib.ListItem oldItem, @NonNull NDKLib.ListItem newItem) {
+                    return Objects.equals(oldItem.image(), newItem.image()) && Objects.equals(oldItem.text(), newItem.text());
                 }
 
                 @Override
-                public boolean areContentsTheSame(@NonNull QSPLib.ListItem oldItem, @NonNull QSPLib.ListItem newItem) {
+                public boolean areContentsTheSame(@NonNull NDKLib.ListItem oldItem, @NonNull NDKLib.ListItem newItem) {
                     return oldItem.equals(newItem);
                 }
             };
-    private final AsyncListDiffer<QSPLib.ListItem> differ =
+    private final AsyncListDiffer<NDKLib.ListItem> differ =
             new AsyncListDiffer<>(this, DIFF_CALLBACK);
     public Typeface typeface;
     public int textSize;
@@ -43,11 +42,11 @@ public class GameItemAdapter extends RecyclerView.Adapter<GameItemAdapter.ViewHo
     public int textColor;
     public int linkTextColor;
 
-    public QSPLib.ListItem getItem(int position) {
+    public NDKLib.ListItem getItem(int position) {
         return differ.getCurrentList().get(position);
     }
 
-    public List<QSPLib.ListItem> getGameData() {
+    public List<NDKLib.ListItem> getGameData() {
         return differ.getCurrentList();
     }
 
@@ -56,7 +55,7 @@ public class GameItemAdapter extends RecyclerView.Adapter<GameItemAdapter.ViewHo
         return differ.getCurrentList().size();
     }
 
-    public void submitList(List<QSPLib.ListItem> gameData) {
+    public void submitList(List<NDKLib.ListItem> gameData) {
         differ.submitList(gameData);
     }
 
@@ -82,14 +81,14 @@ public class GameItemAdapter extends RecyclerView.Adapter<GameItemAdapter.ViewHo
         }
 
         final var itemText = holder.listGameItemBinding.itemText;
-        if (isNotEmptyOrBlank(qpListItem.name())) {
+        if (isNotEmptyOrBlank(qpListItem.text())) {
             itemText.setVisibility(ViewGroup.VISIBLE);
             itemText.setTypeface(typeface);
             itemText.setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize);
             itemText.setBackgroundColor(backgroundColor);
             itemText.setTextColor(textColor);
             itemText.setLinkTextColor(linkTextColor);
-            itemText.setText(Html.fromHtml(qpListItem.name(), Html.FROM_HTML_MODE_LEGACY));
+            itemText.setText(Html.fromHtml(qpListItem.text(), Html.FROM_HTML_MODE_LEGACY));
         } else {
             itemText.setVisibility(ViewGroup.GONE);
         }
