@@ -500,6 +500,8 @@ public class StockActivity extends AppCompatActivity {
     }
 
     public void showErrorDialog(String errorMessage) {
+        if (isFinishing() || isDestroyed()) return;
+
         stockViewModel.showDialogFragment(getSupportFragmentManager(),
                 StockDialogType.ERROR_DIALOG, errorMessage);
     }

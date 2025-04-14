@@ -525,6 +525,7 @@ public class StockViewModel extends AndroidViewModel {
         if (fragment != null && fragment.isAdded()) {
             fragment.onDestroy();
         } else {
+            if (manager.isDestroyed()) return;
             switch (dialogType) {
                 case DELETE_DIALOG -> {
                     outputIntObserver = new MutableLiveData<>();
@@ -926,13 +927,16 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     public void delEntryDirFromList(List<GameData> tempList, GameData data, File listDirsFile) {
+        if (data.gameDirUri == null) return;
         var gameDir = DocumentFileCompat.fromUri(getApplication(), data.gameDirUri);
         if (!isWritableDir(getApplication(), gameDir)) return;
+        var nameGameDir = gameDir.getName();
+        if (!isNotEmptyOrBlank(nameGameDir)) return;
 
         CompletableFuture
                 .runAsync(() -> tempList.remove(data), executor)
                 .thenCombineAsync(
-                        removeDirFromListDirsFile(listDirsFile, gameDir.getName()),
+                        removeDirFromListDirsFile(listDirsFile, nameGameDir),
                         (unused, unused2) -> null,
                         executor
                 )
@@ -946,13 +950,16 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     public void delEntryFromList(List<GameData> tempList, GameData data, File listDirsFile) {
+        if (data.gameDirUri == null) return;
         var gameDir = DocumentFileCompat.fromUri(getApplication(), data.gameDirUri);
         if (!isWritableDir(getApplication(), gameDir)) return;
+        var nameGameDir = gameDir.getName();
+        if (!isNotEmptyOrBlank(nameGameDir)) return;
 
         CompletableFuture
                 .runAsync(() -> tempList.remove(data), executor)
                 .thenCombineAsync(
-                        removeDirFromListDirsFile(listDirsFile, gameDir.getName()),
+                        removeDirFromListDirsFile(listDirsFile, nameGameDir),
                         (unused, unused2) -> null,
                         executor
                 )

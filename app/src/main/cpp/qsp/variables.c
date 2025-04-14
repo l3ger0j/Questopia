@@ -127,18 +127,20 @@ QSPVar *qspVarReference(QSPString name, QSP_BOOL toCreate)
     }
     if (toCreate)
     {
-        if (varsCount >= QSP_VARSMAXBUCKETSIZE)
+        if (bucket->Vars)
         {
-            qspSetError(QSP_ERR_TOOMANYVARS);
-            return 0;
+            if (varsCount >= QSP_VARSBUCKETSIZE)
+            {
+                qspSetError(QSP_ERR_TOOMANYVARS);
+                return 0;
+            }
+            var = bucket->Vars + varsCount;
         }
-        if (varsCount >= bucket->Capacity)
+        else
         {
-            bucket->Capacity = varsCount + 16;
-            bucket->Vars = (QSPVar *)realloc(bucket->Vars, bucket->Capacity * sizeof(QSPVar));
+            /* The fixed buffer without memory reallocation helps to cache specific variables */
+            var = bucket->Vars = (QSPVar *)malloc(QSP_VARSBUCKETSIZE * sizeof(QSPVar));
         }
-
-        var = bucket->Vars + varsCount;
 
         var->Name = qspCopyToNewText(name);
         qspInitVarData(var);
@@ -167,7 +169,7 @@ void qspClearAllVars(QSP_BOOL toInit)
             }
             free(bucket->Vars);
         }
-        bucket->Capacity = bucket->VarsCount = 0;
+        bucket->VarsCount = 0;
         bucket->Vars = 0;
         ++bucket;
     }

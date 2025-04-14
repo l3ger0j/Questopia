@@ -30,7 +30,6 @@ import android.webkit.WebViewClient;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.databinding.ObservableBoolean;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.AndroidViewModel;
@@ -91,7 +90,6 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
     public final MutableLiveData<List<QSPLib.ListItem>> actsListLiveData = new MutableLiveData<>();
     public final MutableLiveData<List<QSPLib.ListItem>> objsListLiveData = new MutableLiveData<>();
     private final Handler counterHandler = new Handler();
-    public ObservableBoolean isActionVisible = new ObservableBoolean();
     public MutableLiveData<String> outputTextObserver = new MutableLiveData<>();
     public MutableLiveData<Integer> outputIntObserver = new MutableLiveData<>();
     public MutableLiveData<Boolean> outputBooleanObserver = new MutableLiveData<>(false);
@@ -99,7 +97,7 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
     public String pageTemplate = "";
     public SharedPreferences preferences;
     private Uri gameDirUri;
-    private boolean showActions = true;
+    public boolean showActions = true;
     SharedPreferences.OnSharedPreferenceChangeListener preferenceChangeListener = (sharedPreferences, key) -> {
         controllerObserver.postValue(getSettingsController());
         updatePageTemplate();
@@ -391,8 +389,6 @@ public class GameViewModel extends AndroidViewModel implements GameInterface {
 
     private void refreshActionsRecycler() {
         var listItems = getLibGameState().actionsList;
-        var listSize = listItems.size();
-        isActionVisible.set(showActions && listSize > 0);
         actsListLiveData.postValue(listItems);
     }
 
