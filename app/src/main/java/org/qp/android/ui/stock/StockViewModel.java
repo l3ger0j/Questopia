@@ -156,7 +156,6 @@ public class StockViewModel extends AndroidViewModel {
 
     public void isEnginePluginExist(LifecycleOwner owner, Context context) {
         var client = PluginClient.getInstance();
-        client.startThread();
         client.connectAllPlugin(getApplication());
         client.getInfoPluginsLiveData().observe(owner, pluginInfos -> {
             var isEnginePluginExist = pluginInfos.stream()
@@ -166,7 +165,6 @@ public class StockViewModel extends AndroidViewModel {
                 doOnShowErrorDialog("Questopia Bundle plugin non found!", ErrorType.EXCEPTION);
             }
             client.disconnectAllPlugin(getApplication());
-            client.stopThread();
         });
     }
 

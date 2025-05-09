@@ -46,7 +46,6 @@ public class SettingPluginFragment extends Fragment {
         requireActivity().getOnBackPressedDispatcher()
                 .addCallback(getViewLifecycleOwner(), callback);
 
-        client.startThread();
         client.connectAllPlugin(requireContext());
 
         packageBroadcastReceiver = new PackageBroadcastReceiver();
@@ -110,7 +109,6 @@ public class SettingPluginFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
         client.disconnectAllPlugin(requireContext());
-        client.stopThread();
     }
 
     class PackageBroadcastReceiver extends BroadcastReceiver {

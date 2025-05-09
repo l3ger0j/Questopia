@@ -590,7 +590,6 @@ public class GameViewModel extends AndroidViewModel {
     }
 
     public void initNativePlugin() {
-        pluginClient.startThread();
         pluginClient.connectPlugin(getApplication(), PluginType.ENGINE_PLUGIN);
     }
 
@@ -610,7 +609,6 @@ public class GameViewModel extends AndroidViewModel {
 
     public void terminateNativePlugin() {
         pluginClient.disconnectPlugin(getApplication(), PluginType.ENGINE_PLUGIN);
-        pluginClient.stopThread();
     }
 
     public void stopNativeLib() {

@@ -3,8 +3,10 @@ package org.qp.android;
 import android.app.Application;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.content.Intent;
 import android.os.Build;
 
+import org.qp.android.model.plugin.PluginService;
 import org.qp.android.model.service.AudioPlayer;
 import org.qp.android.model.service.HtmlProcessor;
 import org.qp.android.ui.settings.SettingsController;
@@ -23,6 +25,7 @@ public class QuestopiaApplication extends Application {
     public void onCreate() {
         super.onCreate();
         createNotificationChannels();
+        startService(new Intent(this, PluginService.class));
     }
 
     public HtmlProcessor getHtmlProcessor() {
