@@ -1,5 +1,6 @@
 package org.qp.android.model.plugin;
 
+import static org.qp.android.helpers.utils.ThreadUtil.isSameThread;
 import static org.qp.android.helpers.utils.ThreadUtil.throwIfNotMainThread;
 
 import android.content.ComponentName;
@@ -56,14 +57,12 @@ public class PluginClient {
     private Thread pluginClientThread;
     private volatile Handler threadHandler;
     private volatile boolean threadInit;
-    private volatile boolean isInitPlugin = false;
 
     private static class PluginClientHolder {
         public static final PluginClient HOLDER_INSTANCE = new PluginClient();
     }
 
-    private PluginClient() {
-    }
+    private PluginClient() { }
 
     public static PluginClient getInstance() {
         return PluginClientHolder.HOLDER_INSTANCE;
@@ -73,7 +72,7 @@ public class PluginClient {
         return infoPluginsLiveData;
     }
 
-    public void startThread() {
+    void startThread() {
         pluginClientThread = new Thread(() -> {
             while (!Thread.currentThread().isInterrupted()) {
                 try {
@@ -92,7 +91,7 @@ public class PluginClient {
         pluginClientThread.start();
     }
 
-    public void stopThread() {
+    void stopThread() {
         throwIfNotMainThread();
         if (pluginClientThread == null) return;
         if (threadInit) {
@@ -131,51 +130,70 @@ public class PluginClient {
     }
 
     public void connectAllPlugin(Context context) {
+        if (!isSameThread(pluginClientThread)) {
+            runOnThread(() -> connectAllPlugin(context));
+            return;
+        }
+
         for (var pluginType : PluginType.values()) {
             switch (pluginType) {
-                case ENGINE_PLUGIN -> runOnThread(() -> {
+                case ENGINE_PLUGIN -> {
                     var intent = new Intent(ENGINE_PLUGIN_ID);
                     var updatedIntent = createExplicitIntent(context, intent);
                     if (updatedIntent == null) return;
-                    isInitPlugin = context.bindService(updatedIntent, engineConn, Context.BIND_AUTO_CREATE);
-                });
+                    context.bindService(updatedIntent, engineConn, Context.BIND_AUTO_CREATE);
+                }
             }
         }
     }
 
     public void connectPlugin(Context context, PluginType pluginType) {
+        if (!isSameThread(pluginClientThread)) {
+            runOnThread(() -> connectPlugin(context, pluginType));
+            return;
+        }
+
         switch (pluginType) {
-            case ENGINE_PLUGIN -> runOnThread(() -> {
+            case ENGINE_PLUGIN -> {
                 var intent = new Intent(ENGINE_PLUGIN_ID);
                 var updatedIntent = createExplicitIntent(context, intent);
                 if (updatedIntent == null) return;
-                isInitPlugin = context.bindService(updatedIntent, engineConn, Context.BIND_AUTO_CREATE);
-            });
+                context.bindService(updatedIntent, engineConn, Context.BIND_AUTO_CREATE);
+            }
         }
     }
 
     public void disconnectAllPlugin(Context context) {
-        if (!isInitPlugin) return;
+        if (!isSameThread(pluginClientThread)) {
+            runOnThread(() -> disconnectAllPlugin(context));
+            return;
+        }
+
         for (var pluginType : PluginType.values()) {
             switch (pluginType) {
-                case ENGINE_PLUGIN -> runOnThread(() -> {
+                case ENGINE_PLUGIN -> {
                     var intent = new Intent(ENGINE_PLUGIN_ID);
                     var updatedIntent = createExplicitIntent(context, intent);
                     if (updatedIntent == null) return;
                     context.stopService(updatedIntent);
-                });
+                }
             }
         }
     }
 
     public void disconnectPlugin(Context context, PluginType pluginType) {
+        if (!isSameThread(pluginClientThread)) {
+            runOnThread(() -> disconnectPlugin(context, pluginType));
+            return;
+        }
+
         switch (pluginType) {
-            case ENGINE_PLUGIN -> runOnThread(() -> {
+            case ENGINE_PLUGIN -> {
                 var intent = new Intent(ENGINE_PLUGIN_ID);
                 var updatedIntent = createExplicitIntent(context, intent);
                 if (updatedIntent == null) return;
                 context.stopService(updatedIntent);
-            });
+            }
         }
     }
 
