@@ -9,7 +9,6 @@ import android.os.Build;
 import org.qp.android.model.plugin.PluginService;
 import org.qp.android.model.service.AudioPlayer;
 import org.qp.android.model.service.HtmlProcessor;
-import org.qp.android.ui.settings.SettingsController;
 
 import dagger.hilt.android.HiltAndroidApp;
 
@@ -18,19 +17,14 @@ public class QuestopiaApplication extends Application {
 
     public static final int UNPACK_GAME_NOTIFICATION_ID = 1800;
     public static final String UNPACK_GAME_CHANNEL_ID = "org.qp.android.channel.unpack_game";
-    public final AudioPlayer audioPlayer = new AudioPlayer(this);
-    private final HtmlProcessor htmlProcessor = new HtmlProcessor();
+    public final AudioPlayer audioPlayer = new AudioPlayer();
+    public final HtmlProcessor htmlProcessor = new HtmlProcessor();
 
     @Override
     public void onCreate() {
         super.onCreate();
         createNotificationChannels();
         startService(new Intent(this, PluginService.class));
-    }
-
-    public HtmlProcessor getHtmlProcessor() {
-        return htmlProcessor
-                .setController(SettingsController.getInstance(this));
     }
 
     public void createNotificationChannels() {

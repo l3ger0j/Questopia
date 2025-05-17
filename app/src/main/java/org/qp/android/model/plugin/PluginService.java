@@ -7,16 +7,13 @@ import android.os.IBinder;
 import androidx.annotation.Nullable;
 
 public class PluginService extends Service {
+
+    public static final PluginClient client = new PluginClient();
+
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
         return null;
-    }
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        PluginClient.getInstance().startThread();
     }
 
     @Override
@@ -27,6 +24,6 @@ public class PluginService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        PluginClient.getInstance().stopThread();
+        client.stopThread();
     }
 }

@@ -13,8 +13,6 @@ import java.util.concurrent.CountDownLatch;
 
 public interface GameFragmentNavigation {
 
-    class ApplySettings extends NavigationEvent {}
-
     class ShowPopupSave extends NavigationEvent {}
 
     class FinishActivity extends NavigationEvent {}

@@ -1,5 +1,7 @@
 package org.qp.android.ui.game;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -47,7 +49,6 @@ public class GameMainFragment extends Fragment {
                              @Nullable Bundle savedInstanceState) {
         var gameMainBinding = FragmentGameMainBinding.inflate(getLayoutInflater());
         viewModel = new ViewModelProvider(requireActivity()).get(GameViewModel.class);
-        gameMainBinding.setGameViewModel(viewModel);
 
         layoutTop = gameMainBinding.layoutTop;
         layoutTop.setBackgroundColor(viewModel.getBackgroundColor());
@@ -111,6 +112,49 @@ public class GameMainFragment extends Fragment {
             adapter.linkTextColor = viewModel.getLinkColor();
             adapter.backgroundColor = viewModel.getBackgroundColor();
             adapter.submitList(actions);
+        });
+
+        viewModel.actsVisibility.observe(getViewLifecycleOwner(), visible -> {
+            var shortAnimationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
+            if (visible) {
+                separatorView.animate()
+                        .alpha(1f)
+                        .setDuration(shortAnimationDuration)
+                        .setListener(new AnimatorListenerAdapter() {
+                            @Override
+                            public void onAnimationEnd(Animator animation) {
+                                separatorView.setVisibility(View.VISIBLE);
+                            }
+                        });
+                actionsView.animate()
+                        .alpha(1f)
+                        .setDuration(shortAnimationDuration)
+                        .setListener(new AnimatorListenerAdapter() {
+                            @Override
+                            public void onAnimationEnd(Animator animation) {
+                                actionsView.setVisibility(View.VISIBLE);
+                            }
+                        });
+            } else {
+                separatorView.animate()
+                        .alpha(0f)
+                        .setDuration(shortAnimationDuration)
+                        .setListener(new AnimatorListenerAdapter() {
+                            @Override
+                            public void onAnimationEnd(Animator animation) {
+                                separatorView.setVisibility(View.GONE);
+                            }
+                        });
+                actionsView.animate()
+                        .alpha(0f)
+                        .setDuration(shortAnimationDuration)
+                        .setListener(new AnimatorListenerAdapter() {
+                            @Override
+                            public void onAnimationEnd(Animator animation) {
+                                actionsView.setVisibility(View.GONE);
+                            }
+                        });
+            }
         });
 
         // Settings

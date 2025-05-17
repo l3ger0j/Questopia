@@ -10,6 +10,7 @@ import static org.qp.android.helpers.utils.ThreadUtil.isMainThread;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Build;
@@ -33,6 +34,7 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.preference.PreferenceManager;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.anggrayudi.storage.SimpleStorageHelper;
@@ -58,6 +60,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -71,6 +74,24 @@ public class GameActivity extends AppCompatActivity {
     private static final int MAX_SAVE_SLOTS = 5;
 
     private final SimpleStorageHelper storageHelper = new SimpleStorageHelper(this);
+    private final SharedPreferences.OnSharedPreferenceChangeListener preferenceChangeListener = (sharedPreferences, key) -> {
+        if (key == null) return;
+        switch (key) {
+            case "lang" -> {
+                switch (sharedPreferences.getString("lang", "ru")) {
+                    case "ru" -> AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("ru"));
+                    case "en" -> AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("en"));
+                }
+            }
+            case "theme" -> {
+                switch (sharedPreferences.getString("theme", "auto")) {
+                    case "auto" -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+                    case "light" -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+                    case "dark" -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+                }
+            }
+        }
+    };
     private SettingsController settingsController;
     private int activeTab;
     private ActionBar actionBar;
@@ -89,7 +110,11 @@ public class GameActivity extends AppCompatActivity {
 
         activityGameBinding = ActivityGameBinding.inflate(getLayoutInflater());
         gameViewModel = new ViewModelProvider(this).get(GameViewModel.class);
-        gameViewModel.initNativePlugin();
+
+        PreferenceManager
+                .getDefaultSharedPreferences(this)
+                .registerOnSharedPreferenceChangeListener(preferenceChangeListener);
+
         settingsController = gameViewModel.getSettingsController();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
@@ -176,19 +201,20 @@ public class GameActivity extends AppCompatActivity {
             return null;
         });
 
-        if (savedInstanceState != null) {
-            initControls();
-            setActiveTab(savedInstanceState.getInt("savedActiveTab"));
+        if (gameViewModel.checkNativePlugin()) {
+            if (savedInstanceState != null) {
+                initControls();
+                setActiveTab(savedInstanceState.getInt("savedActiveTab"));
+            } else {
+                initServices();
+                initControls();
+                initGame();
+            }
         } else {
-            initServices();
-            initControls();
-            initGame();
+            showSimpleDialog("Plugin not connected!", GameDialogType.ERROR_DIALOG, ErrorType.EXCEPTION);
         }
 
-        gameViewModel.emitter.observe(this, new Events.EventObserver(eventNavigation -> {
-            if (eventNavigation instanceof GameFragmentNavigation.ApplySettings) {
-                applySettings();
-            }
+        gameViewModel.actEmit.observe(this, new Events.EventObserver(eventNavigation -> {
             if (eventNavigation instanceof GameFragmentNavigation.StartRWSave rwSave) {
                 startReadOrWriteSave(rwSave.slotAction);
             }
@@ -243,15 +269,6 @@ public class GameActivity extends AppCompatActivity {
                 }
             }
         }));
-
-        gameViewModel.getAudioErrorObserver().observe(this, path -> {
-            if (!settingsController.isUseMusicDebug) return;
-            showSimpleDialog(
-                    path,
-                    GameDialogType.ERROR_DIALOG,
-                    ErrorType.SOUND_ERROR
-            );
-        });
     }
 
     @Override
@@ -299,7 +316,16 @@ public class GameActivity extends AppCompatActivity {
 
     private void initServices() {
         gameViewModel.startAudio();
-        gameViewModel.startNativeLib();
+        gameViewModel.initNativePlugin()
+                .thenAccept(aBoolean -> {
+                    if (!aBoolean) {
+                        throw new CompletionException(new Exception("Plugin is not init!"));
+                    }
+                })
+                .exceptionally(throwable -> {
+                    runOnUiThread(() -> showSimpleDialog(throwable.toString(), GameDialogType.ERROR_DIALOG, ErrorType.EXCEPTION));
+                    return null;
+                });
     }
 
     private void initGame() {
@@ -375,6 +401,10 @@ public class GameActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+
+        PreferenceManager
+                .getDefaultSharedPreferences(getApplication())
+                .unregisterOnSharedPreferenceChangeListener(preferenceChangeListener);
     }
 
     @Override
@@ -387,29 +417,9 @@ public class GameActivity extends AppCompatActivity {
     public void onResume() {
         super.onResume();
         settingsController = gameViewModel.getSettingsController();
-        applySettings();
+
         if (gameViewModel.isGameRunning()) {
             gameViewModel.resumeAudio();
-        }
-    }
-
-    public void applySettings() {
-        if (!isMainThread()) {
-            runOnUiThread(this::applySettings);
-        } else {
-            if (settingsController.language.equals("ru")) {
-                AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("ru"));
-            } else {
-                AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("en"));
-            }
-            switch (settingsController.theme) {
-                case "auto" ->
-                        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
-                case "light" ->
-                        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-                case "dark" ->
-                        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-            }
         }
     }
 

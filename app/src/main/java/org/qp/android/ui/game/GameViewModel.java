@@ -13,19 +13,20 @@ import static org.qp.android.helpers.utils.PathUtil.getExtension;
 import static org.qp.android.helpers.utils.PathUtil.normalizeContentPath;
 import static org.qp.android.helpers.utils.StringUtil.isNotEmptyOrBlank;
 import static org.qp.android.helpers.utils.ThreadUtil.assertNonUiThread;
+import static org.qp.android.helpers.utils.ThreadUtil.runOnUiThread;
 import static org.qp.android.helpers.utils.ViewUtil.getFontStyle;
-import static org.qp.android.model.plugin.PluginClient.LIB_DELAY;
 import static org.qp.android.ui.game.GameActivity.LOAD;
 
 import android.annotation.SuppressLint;
 import android.app.Application;
 import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.net.Uri;
-import android.os.Handler;
-import android.os.Looper;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.View;
@@ -37,7 +38,7 @@ import android.webkit.WebViewClient;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.databinding.ObservableBoolean;
+import androidx.core.content.ContextCompat;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.AndroidViewModel;
@@ -54,6 +55,7 @@ import org.qp.android.R;
 import org.qp.android.helpers.ErrorType;
 import org.qp.android.helpers.bus.Events;
 import org.qp.android.model.plugin.PluginClient;
+import org.qp.android.model.plugin.PluginService;
 import org.qp.android.model.plugin.PluginType;
 import org.qp.android.model.service.AudioPlayer;
 import org.qp.android.model.service.HtmlProcessor;
@@ -62,10 +64,10 @@ import org.qp.android.questopiabundle.IQuestopiaBundle;
 import org.qp.android.questopiabundle.LibDialogRetValue;
 import org.qp.android.questopiabundle.LibException;
 import org.qp.android.questopiabundle.LibResult;
-import org.qp.android.questopiabundle.dto.LibListItem;
+import org.qp.android.questopiabundle.dto.LibGameState;
+import org.qp.android.questopiabundle.dto.LibGenItem;
+import org.qp.android.questopiabundle.dto.LibIConfig;
 import org.qp.android.questopiabundle.lib.LibGameRequest;
-import org.qp.android.questopiabundle.lib.LibGameState;
-import org.qp.android.questopiabundle.lib.LibIConfig;
 import org.qp.android.questopiabundle.lib.LibRefIRequest;
 import org.qp.android.questopiabundle.lib.LibTypeDialog;
 import org.qp.android.questopiabundle.lib.LibTypeWindow;
@@ -78,11 +80,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.CountDownLatch;
 
 public class GameViewModel extends AndroidViewModel {
 
-    private static final int EMITTER_DELAY = LIB_DELAY;
     private static final String PAGE_HEAD_TEMPLATE = """
             <!DOCTYPE html>
             <head>
@@ -103,21 +106,23 @@ public class GameViewModel extends AndroidViewModel {
             </head>
             """;
     private static final String PAGE_BODY_TEMPLATE = "<body>REPLACETEXT</body>";
-    public final MutableLiveData<List<LibListItem>> actsListLiveData = new MutableLiveData<>();
-    public final MutableLiveData<List<LibListItem>> objsListLiveData = new MutableLiveData<>();
-    private final QuestopiaApplication questopiaApplication;
+    public final MutableLiveData<List<LibGenItem>> actsListLiveData = new MutableLiveData<>();
+    public final MutableLiveData<Boolean> actsVisibility = new MutableLiveData<>();
+    public final MutableLiveData<List<LibGenItem>> objsListLiveData = new MutableLiveData<>();
     private final MutableLiveData<SettingsController> controllerObserver = new MutableLiveData<>();
     private final MutableLiveData<String> mainDescLiveData = new MutableLiveData<>();
     private final MutableLiveData<String> varsDescLiveData = new MutableLiveData<>();
-    private final PluginClient pluginClient = PluginClient.getInstance();
+    private final PluginClient pluginClient = PluginService.client;
     private final AudioPlayer player;
-    public ObservableBoolean isActionVisible = new ObservableBoolean();
+    private final HtmlProcessor processor;
+    private final int nativeLibVer;
+    private final CompletableFuture<IQuestopiaBundle> serviceReadyFuture = new CompletableFuture<>();
     public MutableLiveData<String> outputTextObserver = new MutableLiveData<>();
     public MutableLiveData<Integer> outputIntObserver = new MutableLiveData<>();
     public MutableLiveData<Boolean> outputBooleanObserver = new MutableLiveData<>(false);
     public String pageTemplate = "";
     public SharedPreferences preferences;
-    public Events.Emitter emitter = new Events.Emitter();
+    public Events.Emitter actEmit = new Events.Emitter();
     private Uri gameDirUri;
     private boolean showActions = true;
     private LibGameState libGameState = new LibGameState();
@@ -130,134 +135,47 @@ public class GameViewModel extends AndroidViewModel {
                 refreshActionsRecycler();
                 refreshObjectsRecycler();
             };
-    private IQuestopiaBundle iQuestopiaBundle;
-    private volatile int nativeLibVer;
+    private IQuestopiaBundle questopiaBundle = null;
+    private final ServiceConnection engineConn = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            questopiaBundle = IQuestopiaBundle.Stub.asInterface(service);
+
+            pluginClient.proxyPluginMethods(() -> {
+                try {
+                    questopiaBundle.startNativeLib(nativeLibVer);
+                    initPluginHandler();
+                    serviceReadyFuture.complete(questopiaBundle);
+                } catch (Exception e) {
+                    throw new CompletionException(e);
+                }
+            }).exceptionally(t -> {
+                Log.e(this.getClass().getSimpleName(), "Error: ", t);
+                return null;
+            });
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            questopiaBundle = new IQuestopiaBundle.Default();
+        }
+    };
 
     public GameViewModel(@NonNull Application application) {
         super(application);
 
         preferences = PreferenceManager.getDefaultSharedPreferences(application);
         preferences.registerOnSharedPreferenceChangeListener(preferenceChangeListener);
-        questopiaApplication = (QuestopiaApplication) getApplication();
+        nativeLibVer = getSettingsController().nativeLibVersion;
 
-        this.player = questopiaApplication.audioPlayer;
-        this.player.setCurGameDir(getCurGameDir());
-    }
-
-    private void initPluginHandler() {
-        try {
-            iQuestopiaBundle.sendAsync(new AsyncCallbacks.Stub() {
-                @Override
-                public void sendLibGameState(LibResult libResult) throws RemoteException {
-                    libGameState = (LibGameState) libResult.value;
-                }
-
-                @Override
-                public void sendLibRef(LibResult libResult) throws RemoteException {
-                    var libRefIRequest = (LibRefIRequest) libResult.value;
-                    doRefresh(libRefIRequest);
-                }
-
-                @Override
-                public void sendChangeCurrGameDir(Uri gameDirUri) throws RemoteException {
-                    var oldValue = GameViewModel.this.gameDirUri;
-                    if (!Objects.equals(oldValue, gameDirUri)) {
-                        GameViewModel.this.gameDirUri = gameDirUri;
-                    }
-                }
-
-                @Override
-                public LibDialogRetValue doOnShowDialog(LibResult typeDialog, String inputString) throws RemoteException {
-                    var libType = (LibTypeDialog) typeDialog.value;
-                    return switch (libType) {
-                        case DIALOG_PICTURE ->
-                                showLibDialog(libType, normalizeContentPath(inputString));
-                        default -> showLibDialog(libType, inputString);
-                    };
-                }
-
-                @Override
-                public void doChangeVisWindow(LibResult typeWindow, boolean isShow) throws RemoteException {
-                    var libWindowType = (LibTypeWindow) typeWindow.value;
-                    if (libWindowType == LibTypeWindow.ACTIONS) {
-                        showActions = isShow;
-                        refreshActionsRecycler();
-                    }
-                }
-
-                @Override
-                public boolean isPlayingFile(String filePath) throws RemoteException {
-                    return player.isPlayingFile(filePath);
-                }
-
-                @Override
-                public void closeAllFiles() throws RemoteException {
-                    player.closeAllFiles();
-                }
-
-                @Override
-                public void closeFile(String filePath) throws RemoteException {
-                    player.closeFile(filePath);
-                }
-
-                @Override
-                public void playFile(String path, int volume) throws RemoteException {
-                    player.playFile(path, volume);
-                }
-
-                @Override
-                public void requestPermOnFile(Uri fileUri) throws RemoteException {
-                    getApplication().grantUriPermission(
-                            "org.qp.android.questopiabundle",
-                            fileUri,
-                            Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                                    | Intent.FLAG_GRANT_READ_URI_PERMISSION
-                    );
-                }
-
-                @Override
-                public Uri requestCreateFile(Uri fileUri, String path) throws RemoteException {
-                    var dir = DocumentFileCompat.fromUri(getApplication(), fileUri);
-                    if (isWritableDir(getApplication(), dir)) {
-                        var file = findOrCreateFile(getApplication(), dir, path, MimeType.TEXT);
-                        if (isWritableFile(getApplication(), file)) {
-                            getApplication().grantUriPermission(
-                                    "org.qp.android.questopiabundle",
-                                    file.getUri(),
-                                    Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                                            | Intent.FLAG_GRANT_READ_URI_PERMISSION
-                            );
-                            return file.getUri();
-                        }
-                    }
-                    return Uri.EMPTY;
-                }
-
-                @Override
-                public void onError(LibException libException) throws RemoteException {
-                    showErrorDialog(libException.toException().toString(), ErrorType.EXCEPTION);
-                }
-            });
-        } catch (Exception e) {
-            Log.e(this.getClass().getSimpleName(), "Error: ", e);
-        }
+        var app = (QuestopiaApplication) application;
+        this.processor = app.htmlProcessor;
+        this.player = app.audioPlayer;
     }
 
     // region Getter/Setter
-    private HtmlProcessor getHtmlProcessor() {
-        return questopiaApplication.getHtmlProcessor();
-    }
-
-    private LibGameState getLibGameState() {
-        return libGameState;
-    }
-
     public LibIConfig getIConfig() {
-        return getLibGameState().interfaceConfig;
-    }
-
-    public LiveData<String> getAudioErrorObserver() {
-        return player.getIsThrowError();
+        return libGameState.interfaceConfig;
     }
 
     public SettingsController getSettingsController() {
@@ -282,7 +200,7 @@ public class GameViewModel extends AndroidViewModel {
     }
 
     public int getTextColor() {
-        var libState = getLibGameState();
+        var libState = libGameState;
         if (libState == null) return Color.WHITE;
         var config = libState.interfaceConfig;
         if (getSettingsController().isUseGameTextColor && config.fontColor != 0) {
@@ -293,7 +211,7 @@ public class GameViewModel extends AndroidViewModel {
     }
 
     public int getBackgroundColor() {
-        var config = getLibGameState().interfaceConfig;
+        var config = getIConfig();
         if (getSettingsController().isUseGameBackgroundColor && config.backColor != 0) {
             return convertRGBAtoBGRA((int) config.backColor);
         } else {
@@ -302,7 +220,7 @@ public class GameViewModel extends AndroidViewModel {
     }
 
     public int getLinkColor() {
-        var config = getLibGameState().interfaceConfig;
+        var config = getIConfig();
         if (getSettingsController().isUseGameLinkColor && config.linkColor != 0) {
             return convertRGBAtoBGRA((int) config.linkColor);
         } else {
@@ -311,17 +229,17 @@ public class GameViewModel extends AndroidViewModel {
     }
 
     public int getFontSize() {
-        var config = getLibGameState().interfaceConfig;
+        var config = getIConfig();
         return getSettingsController().isUseGameFont && config.fontSize != 0
                 ? (int) config.fontSize
                 : getSettingsController().fontSize;
     }
 
     public String getHtml(String str) {
-        var config = getLibGameState().interfaceConfig;
+        var config = getIConfig();
         return config.useHtml ?
-                getHtmlProcessor().convertLibHtmlToWebHtml(str) :
-                getHtmlProcessor().convertLibStrToHtml(str);
+                processor.convertLibHtmlToWebHtml(str) :
+                processor.convertLibStrToHtml(str);
     }
 
     public Uri getImageUriFromPath(String src) {
@@ -355,70 +273,54 @@ public class GameViewModel extends AndroidViewModel {
     }
 
     // endregion Getter/Setter
-
     public void doOnStartRWSave(int slotAction) {
-        emitter.emitAndExecuteOnce(new GameFragmentNavigation.StartRWSave(slotAction));
+        actEmit.emitAndExecuteOnce(new GameFragmentNavigation.StartRWSave(slotAction));
     }
 
     public void doOnFinishActivity() {
-        emitter.emitAndExecuteOnce(new GameFragmentNavigation.FinishActivity());
+        actEmit.emitAndExecuteOnce(new GameFragmentNavigation.FinishActivity());
     }
 
     public void doOnWarnUser(int tabId) {
-        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            emitter.emitAndExecuteOnce(new GameFragmentNavigation.WarnUser(tabId));
-        }, EMITTER_DELAY);
+        actEmit.emitAndExecuteOnce(new GameFragmentNavigation.WarnUser(tabId));
     }
 
     public void doOnShowSavePopup() {
-        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            emitter.emitAndExecuteOnce(new GameFragmentNavigation.ShowPopupSave());
-        }, EMITTER_DELAY);
+        actEmit.emitAndExecuteOnce(new GameFragmentNavigation.ShowPopupSave());
     }
 
     public void doOnShowSimpleDialog(@NonNull String inputString,
                                      @NonNull GameDialogType dialogType,
                                      @Nullable ErrorType errorType) {
-        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            emitter.emitAndExecuteOnce(new GameFragmentNavigation.ShowSimpleDialog(inputString, dialogType, errorType));
-        }, EMITTER_DELAY);
+        actEmit.emitAndExecuteOnce(new GameFragmentNavigation.ShowSimpleDialog(inputString, dialogType, errorType));
     }
 
     public void doOnShowMessageDialog(@Nullable String inputString,
                                       @NonNull CountDownLatch latch) {
-        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            emitter.emitAndExecuteOnce(new GameFragmentNavigation.ShowMessageDialog(inputString, latch));
-        }, EMITTER_DELAY);
+        actEmit.emitAndExecuteOnce(new GameFragmentNavigation.ShowMessageDialog(inputString, latch));
     }
 
     public void doOnShowInputDialog(@Nullable String inputString,
                                     @NonNull ArrayBlockingQueue<String> inputQueue) {
-        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            emitter.emitAndExecuteOnce(new GameFragmentNavigation.ShowInputDialog(inputString, inputQueue));
-        }, EMITTER_DELAY);
+        actEmit.emitAndExecuteOnce(new GameFragmentNavigation.ShowInputDialog(inputString, inputQueue));
     }
 
     public void doOnShowExecutorDialog(@Nullable String inputString,
                                        @NonNull ArrayBlockingQueue<String> inputQueue) {
-        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            emitter.emitAndExecuteOnce(new GameFragmentNavigation.ShowExecutorDialog(inputString, inputQueue));
-        }, EMITTER_DELAY);
+        actEmit.emitAndExecuteOnce(new GameFragmentNavigation.ShowExecutorDialog(inputString, inputQueue));
     }
 
     public void doOnShowMenuDialog(@Nullable List<String> inputListString,
                                    @NonNull ArrayBlockingQueue<Integer> inputQueue) {
-        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            emitter.emitAndExecuteOnce(new GameFragmentNavigation.ShowMenuDialog(inputListString, inputQueue));
-        }, EMITTER_DELAY);
-
+        actEmit.emitAndExecuteOnce(new GameFragmentNavigation.ShowMenuDialog(inputListString, inputQueue));
     }
 
     public String removeHtmlTags(String dirtyHTML) {
-        return getHtmlProcessor().removeHtmlTags(dirtyHTML);
+        return processor.removeHtmlTags(dirtyHTML);
     }
 
     private boolean isHasHTMLTags(String input) {
-        return getHtmlProcessor().isContainsHtmlTags(input);
+        return processor.isContainsHtmlTags(input);
     }
 
     public void onDialogPositiveClick(DialogFragment dialog) {
@@ -429,8 +331,7 @@ public class GameViewModel extends AndroidViewModel {
         switch (dialog.getTag()) {
             case "closeGameDialogFragment" -> {
                 stopAudio();
-                stopNativeLib();
-                terminateNativePlugin();
+                terminateLibAndPlugin();
                 doOnFinishActivity();
             }
             case "inputDialogFragment", "executorDialogFragment" -> {
@@ -499,72 +400,72 @@ public class GameViewModel extends AndroidViewModel {
     }
 
     private void refreshMainDesc() {
-        var libMainDesc = getHtml(getLibGameState().mainDesc);
+        var libMainDesc = getHtml(libGameState.mainDesc);
         var dirtyHTML = pageTemplate.replace("REPLACETEXT", libMainDesc);
         var cleanHTML = "";
         if (getSettingsController().isImageDisabled) {
-            cleanHTML = getHtmlProcessor().getCleanHtmlRemMedia(dirtyHTML);
+            cleanHTML = processor.getCleanHtmlRemMedia(dirtyHTML);
         } else {
-            cleanHTML = getHtmlProcessor().getCleanHtmlAndMedia(dirtyHTML);
+            cleanHTML = processor.getCleanHtmlAndMedia(dirtyHTML, getSettingsController());
         }
         if (!cleanHTML.isBlank()) {
-            doOnWarnUser(GameActivity.TAB_MAIN_DESC_AND_ACTIONS);
+            runOnUiThread(() -> doOnWarnUser(GameActivity.TAB_MAIN_DESC_AND_ACTIONS));
         }
         mainDescLiveData.postValue(cleanHTML);
     }
 
     private void refreshVarsDesc() {
-        var libVarsDesc = getHtml(getLibGameState().varsDesc);
+        var libVarsDesc = getHtml(libGameState.varsDesc);
         var dirtyHTML = pageTemplate.replace("REPLACETEXT", libVarsDesc);
         var cleanHTML = "";
         if (getSettingsController().isImageDisabled) {
-            cleanHTML = getHtmlProcessor().getCleanHtmlRemMedia(dirtyHTML);
+            cleanHTML = processor.getCleanHtmlRemMedia(dirtyHTML);
         } else {
-            cleanHTML = getHtmlProcessor().getCleanHtmlAndMedia(dirtyHTML);
+            cleanHTML = processor.getCleanHtmlAndMedia(dirtyHTML, getSettingsController());
         }
         if (!cleanHTML.isBlank()) {
-            doOnWarnUser(GameActivity.TAB_VARS_DESC);
+            runOnUiThread(() -> doOnWarnUser(GameActivity.TAB_VARS_DESC));
         }
         varsDescLiveData.postValue(cleanHTML);
     }
 
     public void onActionClicked(int index) {
         try {
-            iQuestopiaBundle.onActionClicked(index);
+            questopiaBundle.onActionClicked(index);
         } catch (RemoteException e) {
-            showErrorDialog(e.toString(), ErrorType.EXCEPTION);
+            Log.e(this.getClass().getSimpleName(), "Error: ", e);
         }
     }
 
     private void refreshActionsRecycler() {
-        var actionsList = getLibGameState().actionsList;
-        var count = actionsList.size();
-        isActionVisible.set(showActions && count > 0);
-        actsListLiveData.postValue(actionsList);
+        var actionsList = libGameState.actionsList;
+        if (actionsList != null) {
+            var countElement = actionsList.size();
+            actsVisibility.postValue(showActions && countElement > 0);
+            actsListLiveData.postValue(actionsList);
+        }
     }
 
     public void onObjectClicked(int index) {
         try {
-            iQuestopiaBundle.onObjectClicked(index);
+            questopiaBundle.onObjectClicked(index);
         } catch (RemoteException e) {
-            showErrorDialog(e.toString(), ErrorType.EXCEPTION);
+            Log.e(this.getClass().getSimpleName(), "Error: ", e);
         }
     }
 
     private void refreshObjectsRecycler() {
-        doOnWarnUser(GameActivity.TAB_OBJECTS);
-        objsListLiveData.postValue(getLibGameState().objectsList);
+        var objectList = libGameState.objectsList;
+        if (objectList != null) {
+            runOnUiThread(() -> doOnWarnUser(GameActivity.TAB_OBJECTS));
+            objsListLiveData.postValue(objectList);
+        }
     }
 
     @Override
     protected void onCleared() {
         super.onCleared();
         preferences.unregisterOnSharedPreferenceChangeListener(preferenceChangeListener);
-        terminateNativePlugin();
-    }
-
-    public void startAudio() {
-        player.start();
     }
 
     public void pauseAudio() {
@@ -572,52 +473,186 @@ public class GameViewModel extends AndroidViewModel {
     }
 
     public void resumeAudio() {
-        updateLinks();
-
         player.setSoundEnabled(getSettingsController().isSoundEnabled);
         player.resume();
     }
 
-    private void updateLinks() {
-        final var gameDir = getCurGameDir();
-        if (!isWritableDir(getApplication(), gameDir)) return;
-
-        player.setCurGameDir(gameDir);
+    public void startAudio() {
+        player.start();
     }
 
     public void stopAudio() {
         player.stop();
     }
 
-    public void initNativePlugin() {
-        pluginClient.connectPlugin(getApplication(), PluginType.ENGINE_PLUGIN);
+    private void initPluginHandler() throws CompletionException {
+        try {
+            questopiaBundle.sendAsync(new AsyncCallbacks.Stub() {
+                @Override
+                public void updateState(LibResult refReq, LibResult newState) throws RemoteException {
+                    libGameState = (LibGameState) newState.value;
+                    var libRefIRequest = (LibRefIRequest) refReq.value;
+                    doRefresh(libRefIRequest);
+                }
+
+                @Override
+                public void sendChangeCurrGameDir(Uri gameDirUri) throws RemoteException {
+                    var oldValue = GameViewModel.this.gameDirUri;
+                    if (!Objects.equals(oldValue, gameDirUri)) {
+                        GameViewModel.this.gameDirUri = gameDirUri;
+                    }
+                }
+
+                @Override
+                public LibDialogRetValue doOnShowDialog(LibResult typeDialog, String inputString) throws RemoteException {
+                    final var libType = (LibTypeDialog) typeDialog.value;
+                    try {
+                        return CompletableFuture
+                                .supplyAsync(() -> switch (libType) {
+                                    case DIALOG_PICTURE ->
+                                            showLibDialog(libType, normalizeContentPath(inputString));
+                                    default -> showLibDialog(libType, inputString);
+                                }, ContextCompat.getMainExecutor(getApplication()))
+                                .get();
+                    } catch (Exception e) {
+                        Log.e(GameViewModel.this.getClass().getSimpleName(), "Error: " + e);
+                        return new LibDialogRetValue();
+                    }
+                }
+
+                @Override
+                public void doChangeVisWindow(LibResult typeWindow, boolean isShow) throws RemoteException {
+                    final var libWindowType = (LibTypeWindow) typeWindow.value;
+                    if (libWindowType == LibTypeWindow.ACTIONS) {
+                        runOnUiThread(() -> showActions = isShow);
+                    }
+                }
+
+                @Override
+                public boolean isPlayingFile(String filePath) throws RemoteException {
+                    final var normPath = normalizeContentPath(filePath);
+                    final var gameDir = getCurGameDir();
+                    if (isWritableFile(getApplication(), gameDir)) {
+                        var soundFile = fromRelPath(getApplication(), normPath, gameDir, false);
+                        if (isWritableFile(getApplication(), soundFile)) {
+                            return player.isPlayingFile(soundFile.getUri());
+                        } else {
+                            if (getSettingsController().isUseMusicDebug) {
+                                runOnUiThread(() -> showErrorDialog(filePath, ErrorType.SOUND_ERROR));
+                            }
+                        }
+                    }
+                    return false;
+                }
+
+                @Override
+                public void closeAllFiles() throws RemoteException {
+                    player.closeAllFiles().exceptionally(throwable -> {
+                        Log.e(GameViewModel.this.getClass().getSimpleName(), "Error: ", throwable);
+                        return null;
+                    });
+                }
+
+                @Override
+                public void closeFile(String filePath) throws RemoteException {
+                    final var normPath = normalizeContentPath(filePath);
+                    final var gameDir = getCurGameDir();
+                    if (isWritableFile(getApplication(), gameDir)) {
+                        var soundFile = fromRelPath(getApplication(), normPath, gameDir, false);
+                        if (isWritableFile(getApplication(), soundFile)) {
+                            player.closeFile(soundFile.getUri()).exceptionally(throwable -> {
+                                Log.e(GameViewModel.this.getClass().getSimpleName(), "Error: ", throwable);
+                                return null;
+                            });
+                        } else {
+                            if (getSettingsController().isUseMusicDebug) {
+                                runOnUiThread(() -> showErrorDialog(filePath, ErrorType.SOUND_ERROR));
+                            }
+                        }
+                    }
+                }
+
+                @Override
+                public void playFile(String path, int volume) throws RemoteException {
+                    final var normPath = normalizeContentPath(path);
+                    final var gameDir = getCurGameDir();
+                    if (isWritableFile(getApplication(), gameDir)) {
+                        var soundFile = fromRelPath(getApplication(), normPath, gameDir, false);
+                        if (isWritableFile(getApplication(), soundFile)) {
+                            player.playFile(getApplication(), soundFile, volume).exceptionally(throwable -> {
+                                Log.e(GameViewModel.this.getClass().getSimpleName(), "Error: ", throwable);
+                                return null;
+                            });
+                        } else {
+                            if (getSettingsController().isUseMusicDebug) {
+                                runOnUiThread(() -> showErrorDialog(path, ErrorType.SOUND_ERROR));
+                            }
+                        }
+                    }
+                }
+
+                @Override
+                public void requestPermOnFile(Uri fileUri) throws RemoteException {
+                    getApplication().grantUriPermission(
+                            "org.qp.android.questopiabundle",
+                            fileUri,
+                            Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                                    | Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    );
+                }
+
+                @Override
+                public Uri requestCreateFile(Uri fileUri, String path) throws RemoteException {
+                    var dir = DocumentFileCompat.fromUri(getApplication(), fileUri);
+                    if (isWritableDir(getApplication(), dir)) {
+                        var file = findOrCreateFile(getApplication(), dir, path, MimeType.TEXT);
+                        if (isWritableFile(getApplication(), file)) {
+                            getApplication().grantUriPermission(
+                                    "org.qp.android.questopiabundle",
+                                    file.getUri(),
+                                    Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                                            | Intent.FLAG_GRANT_READ_URI_PERMISSION
+                            );
+                            return file.getUri();
+                        }
+                    }
+                    return Uri.EMPTY;
+                }
+
+                @Override
+                public void onError(LibException libException) throws RemoteException {
+                    runOnUiThread(() -> showErrorDialog(libException.toException().toString(), ErrorType.EXCEPTION));
+                }
+            });
+        } catch (Exception e) {
+            throw new CompletionException(e);
+        }
     }
 
-    public void startNativeLib() {
-        this.iQuestopiaBundle = pluginClient.questopiaBundle;
+    public boolean checkNativePlugin() {
+        return pluginClient.isPluginExist(getApplication(), PluginType.ENGINE_PLUGIN);
+    }
 
-        nativeLibVer = getSettingsController().nativeLibVersion;
-        pluginClient.runOnThread(this::initPluginHandler);
-        pluginClient.runOnThread(() -> {
+    public CompletableFuture<Boolean> initNativePlugin() {
+        return pluginClient.connectEnginePlugin(getApplication(), engineConn);
+    }
+
+    public void terminateLibAndPlugin() {
+        pluginClient.proxyPluginMethods(() -> {
             try {
-                iQuestopiaBundle.startNativeLib(nativeLibVer);
+                questopiaBundle.stopNativeLib(nativeLibVer);
             } catch (Exception e) {
-                Log.e(this.getClass().getSimpleName(), "Error: ", e);
+                throw new CompletionException(e);
             }
-        });
-    }
-
-    public void terminateNativePlugin() {
-        pluginClient.disconnectPlugin(getApplication(), PluginType.ENGINE_PLUGIN);
-    }
-
-    public void stopNativeLib() {
-        pluginClient.runOnThread(() -> {
-            try {
-                iQuestopiaBundle.stopNativeLib(nativeLibVer);
-            } catch (Exception e) {
-                Log.e(this.getClass().getSimpleName(), "Error: ", e);
+        }).thenCombine(pluginClient.disconnectEnginePlugin(getApplication()), (Void, aBool) -> {
+            if (!aBool) {
+                throw new CompletionException(new Exception("Error disconnect plugin!"));
+            } else {
+                return true;
             }
+        }).exceptionally(throwable -> {
+            Log.e(GameViewModel.this.getClass().getSimpleName(), "Error: ", throwable);
+            return null;
         });
     }
 
@@ -640,18 +675,21 @@ public class GameViewModel extends AndroidViewModel {
                         | Intent.FLAG_GRANT_READ_URI_PERMISSION
         );
 
-        pluginClient.runOnThread(() -> {
+        serviceReadyFuture.thenCompose(bundle -> pluginClient.proxyPluginMethods(() -> {
             try {
-                iQuestopiaBundle.runGameIntoLib(gameId, gameTitle, gameDirUri, gameFileUri);
-            } catch (Exception e) {
-                Log.e(this.getClass().getSimpleName(), "Error: ", e);
+                bundle.runGameIntoLib(gameId, gameTitle, gameDirUri, gameFileUri);
+            } catch (RemoteException e) {
+                throw new CompletionException(e);
             }
+        })).exceptionally(throwable -> {
+            Log.e(this.getClass().getSimpleName(), "Error: ", throwable);
+            return null;
         });
     }
 
     public void requestForNativeLib(LibGameRequest req, String codeToExec) {
         try {
-            iQuestopiaBundle.doLibRequest(new LibResult<>(req), codeToExec, Uri.EMPTY);
+            questopiaBundle.doLibRequest(new LibResult<>(req), codeToExec, Uri.EMPTY);
         } catch (RemoteException e) {
             Log.e(this.getClass().getSimpleName(), "Error: ", e);
         }
@@ -659,7 +697,7 @@ public class GameViewModel extends AndroidViewModel {
 
     public void requestForNativeLib(LibGameRequest req, Uri fileUri) {
         try {
-            iQuestopiaBundle.doLibRequest(new LibResult<>(req), "", fileUri);
+            questopiaBundle.doLibRequest(new LibResult<>(req), "", fileUri);
         } catch (RemoteException e) {
             Log.e(this.getClass().getSimpleName(), "Error: ", e);
         }
@@ -667,54 +705,55 @@ public class GameViewModel extends AndroidViewModel {
 
     public void requestForNativeLib(LibGameRequest req) {
         try {
-            iQuestopiaBundle.doLibRequest(new LibResult<>(req), "", Uri.EMPTY);
+            questopiaBundle.doLibRequest(new LibResult<>(req), "", Uri.EMPTY);
         } catch (RemoteException e) {
             Log.e(this.getClass().getSimpleName(), "Error: ", e);
         }
     }
 
     public Boolean isGameRunning() {
-        if (getLibGameState() == null) return false;
-        return getLibGameState().gameRunning;
+        if (libGameState == null) return false;
+        return libGameState.gameRunning;
     }
 
     // region GameInterface
     public void doRefresh(final LibRefIRequest request) {
-        if (request.isIConfigChanged) {
-            new Handler(Looper.getMainLooper()).postDelayed(() ->
-                    emitter.emitAndExecuteOnce(new GameFragmentNavigation.ApplySettings()), LIB_DELAY);
-        }
         if (request.isActionsChanged) {
-            new Handler(Looper.getMainLooper()).postDelayed(this::refreshActionsRecycler, LIB_DELAY);
+            refreshActionsRecycler();
         }
         if (request.isObjectsChanged) {
-            new Handler(Looper.getMainLooper()).postDelayed(this::refreshObjectsRecycler, LIB_DELAY);
+            refreshObjectsRecycler();
         }
         if (request.isIConfigChanged || request.isMainDescChanged) {
-            new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                updatePageTemplate();
-                refreshMainDesc();
-            }, LIB_DELAY);
+            updatePageTemplate();
+            refreshMainDesc();
         }
         if (request.isIConfigChanged || request.isVarsDescChanged) {
-            new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                updatePageTemplate();
-                refreshVarsDesc();
-            }, LIB_DELAY);
+            updatePageTemplate();
+            refreshVarsDesc();
         }
     }
 
     public LibDialogRetValue showLibDialog(LibTypeDialog dialog, String inputString) {
-        switch (dialog) {
-            case DIALOG_POPUP_SAVE -> doOnShowSavePopup();
-            case DIALOG_ERROR ->
-                    doOnShowSimpleDialog(inputString, GameDialogType.ERROR_DIALOG, null);
-            case DIALOG_PICTURE ->
-                    doOnShowSimpleDialog(inputString, GameDialogType.IMAGE_DIALOG, null);
-            case DIALOG_POPUP_LOAD -> doOnShowSimpleDialog("", GameDialogType.LOAD_DIALOG, null);
+        assertNonUiThread();
+        return switch (dialog) {
+            case DIALOG_POPUP_SAVE -> {
+                doOnShowSavePopup();
+                yield null;
+            }
+            case DIALOG_ERROR -> {
+                doOnShowSimpleDialog(inputString, GameDialogType.ERROR_DIALOG, null);
+                yield null;
+            }
+            case DIALOG_PICTURE -> {
+                doOnShowSimpleDialog(inputString, GameDialogType.IMAGE_DIALOG, null);
+                yield null;
+            }
+            case DIALOG_POPUP_LOAD -> {
+                doOnShowSimpleDialog("", GameDialogType.LOAD_DIALOG, null);
+                yield null;
+            }
             case DIALOG_MESSAGE -> {
-                assertNonUiThread();
-
                 final var latch = new CountDownLatch(1);
                 doOnShowMessageDialog(inputString, latch);
                 try {
@@ -722,61 +761,49 @@ public class GameViewModel extends AndroidViewModel {
                 } catch (InterruptedException ex) {
                     showErrorDialog(ex.getMessage(), ErrorType.WAITING_ERROR);
                 }
+                yield null;
             }
             case DIALOG_INPUT -> {
-                assertNonUiThread();
-
                 final var inputQueue = new ArrayBlockingQueue<String>(1);
                 doOnShowInputDialog(inputString, inputQueue);
                 try {
                     var wrap = new LibDialogRetValue();
                     wrap.outTextValue = inputQueue.take();
-                    return wrap;
+                    yield wrap;
                 } catch (InterruptedException ex) {
                     showErrorDialog(ex.getMessage(), ErrorType.WAITING_INPUT_ERROR);
-                    var wrap = new LibDialogRetValue();
-                    wrap.outTextValue = "";
-                    return wrap;
+                    yield new LibDialogRetValue();
                 }
             }
             case DIALOG_EXECUTOR -> {
-                assertNonUiThread();
-
                 final var inputQueue = new ArrayBlockingQueue<String>(1);
                 doOnShowExecutorDialog(inputString, inputQueue);
                 try {
                     var wrap = new LibDialogRetValue();
                     wrap.outTextValue = inputQueue.take();
-                    return wrap;
+                    yield wrap;
                 } catch (InterruptedException ex) {
                     showErrorDialog(ex.getMessage(), ErrorType.WAITING_INPUT_ERROR);
-                    var wrap = new LibDialogRetValue();
-                    wrap.outTextValue = "";
-                    return wrap;
+                    yield new LibDialogRetValue();
                 }
             }
             case DIALOG_MENU -> {
-                assertNonUiThread();
-
                 final var resultQueue = new ArrayBlockingQueue<Integer>(1);
-                final var currentItems = getLibGameState().menuItemsList;
+                final var currentItems = libGameState.menuItemsList;
                 final var newItems = new ArrayList<String>();
 
-                currentItems.forEach(libMenuItem -> newItems.add(libMenuItem.name));
+                currentItems.forEach(libMenuItem -> newItems.add(libMenuItem.text));
                 doOnShowMenuDialog(newItems, resultQueue);
                 try {
                     var wrap = new LibDialogRetValue();
                     wrap.outNumValue = resultQueue.take();
-                    return wrap;
+                    yield wrap;
                 } catch (InterruptedException ex) {
                     showErrorDialog(ex.getMessage(), ErrorType.WAITING_ERROR);
-                    var wrap = new LibDialogRetValue();
-                    wrap.outNumValue = -1;
-                    return wrap;
+                    yield new LibDialogRetValue();
                 }
             }
-        }
-        return null;
+        };
     }
 
     public void showErrorDialog(final String message, final ErrorType errorType) {

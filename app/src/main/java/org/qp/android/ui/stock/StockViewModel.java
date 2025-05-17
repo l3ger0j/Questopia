@@ -14,7 +14,6 @@ import android.annotation.SuppressLint;
 import android.app.Application;
 import android.app.DownloadManager;
 import android.app.NotificationManager;
-import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Environment;
@@ -31,7 +30,6 @@ import androidx.core.content.ContextCompat;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.AndroidViewModel;
-import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelKt;
@@ -47,7 +45,6 @@ import com.anggrayudi.storage.file.DocumentFileUtils;
 import org.qp.android.R;
 import org.qp.android.data.db.Game;
 import org.qp.android.data.db.GameDao;
-import org.qp.android.dto.plugin.PluginInfo;
 import org.qp.android.dto.stock.TempFile;
 import org.qp.android.dto.stock.TempFileType;
 import org.qp.android.helpers.ErrorType;
@@ -56,7 +53,6 @@ import org.qp.android.helpers.utils.DatabaseUtil;
 import org.qp.android.helpers.utils.FileUtil;
 import org.qp.android.model.archive.ArchiveUnpack;
 import org.qp.android.model.notify.NotifyBuilder;
-import org.qp.android.model.plugin.PluginClient;
 import org.qp.android.model.repository.LocalGame;
 import org.qp.android.model.repository.RemoteGameSource;
 import org.qp.android.ui.dialogs.StockDialogFrags;
@@ -150,22 +146,6 @@ public class StockViewModel extends AndroidViewModel {
         remoteDataFlow = PagingRx.getFlowable(pager);
         var coroutineScope = ViewModelKt.getViewModelScope(this);
         PagingRx.cachedIn(remoteDataFlow, coroutineScope);
-    }
-
-    private static final String ENGINE_PLUGIN_NAME = "Questopia Bundle";
-
-    public void isEnginePluginExist(LifecycleOwner owner, Context context) {
-        var client = PluginClient.getInstance();
-        client.connectAllPlugin(getApplication());
-        client.getInfoPluginsLiveData().observe(owner, pluginInfos -> {
-            var isEnginePluginExist = pluginInfos.stream()
-                    .map(PluginInfo::title)
-                    .anyMatch(s -> s.equalsIgnoreCase(ENGINE_PLUGIN_NAME));
-            if (!isEnginePluginExist) {
-                doOnShowErrorDialog("Questopia Bundle plugin non found!", ErrorType.EXCEPTION);
-            }
-            client.disconnectAllPlugin(getApplication());
-        });
     }
 
     private void checkFolder() {

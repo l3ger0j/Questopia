@@ -176,7 +176,6 @@ public class StockActivity extends AppCompatActivity {
             return windowInsets;
         });
         stockViewModel = new ViewModelProvider(this).get(StockViewModel.class);
-        stockViewModel.isEnginePluginExist(this, this);
         var searchToolbar = activityStockBinding.stockSearchBar;
         setSupportActionBar(activityStockBinding.stockSearchBar);
 

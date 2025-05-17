@@ -6,8 +6,7 @@ import org.qp.android.questopiabundle.LibException;
 import org.qp.android.questopiabundle.LibDialogRetValue;
 
 interface AsyncCallbacks {
-    void sendLibGameState(in LibResult libResult);
-    void sendLibRef(in LibResult libResult);
+    void updateState(in LibResult refReq, in LibResult newState);
     void sendChangeCurrGameDir(in Uri gameDirUri);
 
     LibDialogRetValue doOnShowDialog(in LibResult typeDialog, String inputString);

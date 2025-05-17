@@ -1,4 +1,4 @@
-package org.qp.android.questopiabundle.lib;
+package org.qp.android.questopiabundle.dto;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -25,7 +25,8 @@ public class LibIConfig implements Parcelable {
     public long fontColor = 0L;
     public long linkColor = 0L;
 
-    public LibIConfig() {}
+    public LibIConfig() {
+    }
 
     protected LibIConfig(Parcel in) {
         useHtml = in.readInt() != 0;
@@ -33,14 +34,6 @@ public class LibIConfig implements Parcelable {
         backColor = in.readLong();
         fontColor = in.readLong();
         linkColor = in.readLong();
-    }
-
-    public void reset() {
-        useHtml = false;
-        fontSize = 0L;
-        backColor = 0L;
-        fontColor = 0L;
-        linkColor = 0L;
     }
 
     @Override
@@ -57,15 +50,4 @@ public class LibIConfig implements Parcelable {
         dest.writeLong(linkColor);
     }
 
-    @NonNull
-    @Override
-    public String toString() {
-        return "LibIConfig{" +
-                "useHtml=" + useHtml +
-                ", fontSize=" + fontSize +
-                ", backColor=" + backColor +
-                ", fontColor=" + fontColor +
-                ", linkColor=" + linkColor +
-                '}';
-    }
 }

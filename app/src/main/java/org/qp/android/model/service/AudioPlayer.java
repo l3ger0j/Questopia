@@ -1,223 +1,136 @@
 package org.qp.android.model.service;
 
-import static org.qp.android.helpers.utils.FileUtil.fromRelPath;
-import static org.qp.android.helpers.utils.FileUtil.isWritableFile;
-import static org.qp.android.helpers.utils.PathUtil.normalizeContentPath;
-import static org.qp.android.helpers.utils.StringUtil.isNotEmpty;
-import static org.qp.android.helpers.utils.ThreadUtil.throwIfNotMainThread;
-
 import android.content.Context;
 import android.media.MediaPlayer;
-import android.os.Handler;
-import android.os.Looper;
-import android.util.Log;
+import android.net.Uri;
 
 import androidx.documentfile.provider.DocumentFile;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
 
 import java.io.IOException;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class AudioPlayer {
 
-    private final String TAG = this.getClass().getSimpleName();
-
-    private final ConcurrentHashMap<String, Sound> sounds = new ConcurrentHashMap<>();
-    private ExecutorService audioService;
-    private volatile Handler audioHandler;
-    private volatile boolean isAudioServiceInit;
-    private boolean soundEnabled;
-    private boolean isPaused = false;
-    private final Context context;
-    private DocumentFile curGameDir;
-
-    private final MutableLiveData<String> isThrowError = new MutableLiveData<>();
-
-    public LiveData<String> getIsThrowError() {
-        return isThrowError;
-    }
-
-    public void setCurGameDir(DocumentFile curGameDir) {
-        if (!Objects.equals(this.curGameDir, curGameDir)) {
-            this.curGameDir = curGameDir;
-        }
-    }
-
-    public AudioPlayer(Context context) {
-        this.context = context;
-    }
+    private final ConcurrentHashMap<Uri, MediaPlayer> sounds = new ConcurrentHashMap<>();
+    private ExecutorService audioExecutor;
+    private volatile boolean soundEnabled = true;
+    private volatile boolean isPaused = false;
 
     public void start() {
-        throwIfNotMainThread();
-        audioService = Executors.newSingleThreadExecutor();
-        audioService.submit(() -> {
-            Looper.prepare();
-            audioHandler = new Handler();
-            isAudioServiceInit = true;
-            Looper.loop();
-        });
+        audioExecutor = Executors.newSingleThreadExecutor();
     }
 
     public void stop() {
-        throwIfNotMainThread();
         pause();
-        if (audioService == null) return;
-        if (isAudioServiceInit) {
-            var handler = audioHandler;
-            if (handler != null) {
-                handler.getLooper().quitSafely();
-            }
-            isAudioServiceInit = false;
-        } else {
-            Log.w(TAG,"Audio thread has been started, but not initialized");
-        }
-        audioService = null;
+        audioExecutor.shutdown();
     }
 
-    public void playFile(final String path, final int volume) {
-        runOnAudioThread(() -> {
-            var sound = sounds.get(path);
+    public CompletableFuture<Void> playFile(final Context context,
+                                            final DocumentFile soundFile,
+                                            final int volume) {
+        return CompletableFuture.runAsync(() -> {
+            var sound = sounds.get(soundFile.getUri());
             if (sound != null) {
-                sound.volume = volume;
+                var newVolume = getSystemVolume(volume);
+                sound.setVolume(newVolume, newVolume);
+                if (soundEnabled && !isPaused) {
+                    if (!sound.isPlaying()) {
+                        sound.start();
+                    }
+                }
             } else {
-                sound = new Sound();
-                sound.path = path;
-                sound.volume = volume;
-                sounds.put(path, sound);
+                var newSound = createNewSound(context, soundFile.getUri(), volume);
+                if (soundEnabled && !isPaused) {
+                    if (!newSound.isPlaying()) {
+                        newSound.start();
+                    }
+                }
             }
-            if (soundEnabled && !isPaused) {
-                doPlay(sound);
-            }
-        });
+        }, audioExecutor);
     }
 
-    private void runOnAudioThread(final Runnable runnable) {
-        if (audioService == null) {
-            Log.w(TAG,"Audio service has not been started");
-            return;
-        }
-        if (!isAudioServiceInit) {
-            Log.w(TAG,"Audio service has not been initialized");
-            return;
-        }
-        var handler = audioHandler;
-        if (handler != null) {
-            handler.post(runnable);
-        }
-    }
+    private MediaPlayer createNewSound(final Context context,
+                                       final Uri filePath,
+                                       final int fileVolume) {
+        var sysVolume = getSystemVolume(fileVolume);
+        var filePlayer = new MediaPlayer();
 
-    private void doPlay(final Sound sound) {
-        var sysVolume = getSystemVolume(sound.volume);
-
-        if (sound.player != null) {
-            sound.player.setVolume(sysVolume, sysVolume);
-            if (!sound.player.isPlaying()) {
-                sound.player.start();
-            }
-            return;
+        try {
+            filePlayer.setDataSource(context, filePath);
+            filePlayer.prepare();
+        } catch (IOException ex) {
+            throw new CompletionException(ex);
         }
 
-        var normPath = normalizeContentPath(sound.path);
-        var soundFile = fromRelPath(context, normPath, curGameDir, false);
+        filePlayer.setOnCompletionListener(mediaPlayer -> sounds.remove(filePath));
+        filePlayer.setVolume(sysVolume, sysVolume);
 
-        if (!isWritableFile(context, soundFile)) {
-            final var latch = new CountDownLatch(1);
-            isThrowError.postValue(normPath);
-            try {
-                latch.await();
-            } catch (InterruptedException ex) {
-                Log.e(TAG,"An error occurred while waiting", ex);
-            }
-        } else {
-            var player = new MediaPlayer();
-
-            try {
-                player.setDataSource(context , soundFile.getUri());
-                player.prepare();
-            } catch (IOException ex) {
-                Log.e(TAG,"Failed to initialize media player", ex);
-                return;
-            }
-
-            player.setOnCompletionListener(mediaPlayer -> sounds.remove(sound.path));
-            player.setVolume(sysVolume, sysVolume);
-            player.start();
-
-            sound.player = player;
-        }
+        return sounds.put(filePath, filePlayer);
     }
 
     private float getSystemVolume(int volume) {
         return volume / 100.f;
     }
 
-    public void closeAllFiles() {
-        runOnAudioThread(() -> {
-            for (var sound : sounds.values()) {
-                doClose(sound);
-            }
+    public CompletableFuture<Void> closeAllFiles() {
+        return CompletableFuture.runAsync(() -> {
+            sounds.values().stream()
+                    .filter(Objects::nonNull)
+                    .forEach(player -> {
+                        if (player.isPlaying()) {
+                            player.stop();
+                        }
+                        player.release();
+                    });
             sounds.clear();
-        });
+        }, audioExecutor);
     }
 
-    private void doClose(Sound sound) {
-        if (sound.player == null) {
-            return;
-        }
-        if (sound.player.isPlaying()) {
-            sound.player.stop();
-        }
-        sound.player.release();
-    }
-
-    public void closeFile(final String path) {
-        runOnAudioThread(() -> {
-            var sound = sounds.remove(path);
+    public CompletableFuture<Void> closeFile(final Uri filePath) {
+        return CompletableFuture.runAsync(() -> {
+            final var sound = sounds.remove(filePath);
             if (sound != null) {
-                doClose(sound);
+                if (sound.isPlaying()) {
+                    sound.stop();
+                }
+                sound.release();
             }
-        });
+        }, audioExecutor);
     }
 
     public void pause() {
         if (isPaused) return;
         isPaused = true;
-        runOnAudioThread(() -> {
-            for (var sound : sounds.values()) {
-                if (sound.player != null && sound.player.isPlaying()) {
-                    sound.player.pause();
-                }
-            }
-        });
+
+        audioExecutor.submit(() ->
+                sounds.values().stream()
+                        .filter(player -> player != null && player.isPlaying())
+                        .forEach(MediaPlayer::pause)
+        );
     }
 
     public void resume() {
+        if (!soundEnabled) return;
         if (!isPaused) return;
         isPaused = false;
-        if (!soundEnabled) return;
-        runOnAudioThread(() -> {
-            for (var sound : sounds.values()) {
-                doPlay(sound);
-            }
-        });
+
+        audioExecutor.submit(() ->
+                sounds.values().stream()
+                        .filter(player -> player != null && !player.isPlaying())
+                        .forEach(MediaPlayer::start)
+        );
     }
 
-    public boolean isPlayingFile(String path) {
-        return isNotEmpty(path) && sounds.containsKey(path);
+    public boolean isPlayingFile(final Uri filePath) {
+        return filePath != null && !filePath.equals(Uri.EMPTY) && sounds.containsKey(filePath);
     }
 
     public void setSoundEnabled(boolean enabled) {
         soundEnabled = enabled;
-    }
-
-    private static class Sound {
-        private String path;
-        private int volume;
-        private MediaPlayer player;
     }
 }

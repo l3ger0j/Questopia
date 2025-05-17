@@ -20,26 +20,27 @@ import com.bumptech.glide.Glide;
 
 import org.qp.android.R;
 import org.qp.android.databinding.ListGameItemBinding;
-import org.qp.android.questopiabundle.dto.LibListItem;
+import org.qp.android.questopiabundle.dto.LibGenItem;
 
 import java.util.List;
 import java.util.Objects;
 
 public class GameItemAdapter extends RecyclerView.Adapter<GameItemAdapter.ViewHolder> {
 
-    private static final DiffUtil.ItemCallback<LibListItem> DIFF_CALLBACK =
+    private static final DiffUtil.ItemCallback<LibGenItem> DIFF_CALLBACK =
             new DiffUtil.ItemCallback<>() {
                 @Override
-                public boolean areItemsTheSame(@NonNull LibListItem oldItem, @NonNull LibListItem newItem) {
-                    return Objects.equals(oldItem.pathToImage, newItem.pathToImage) && Objects.equals(oldItem.text, newItem.text);
+                public boolean areItemsTheSame(@NonNull LibGenItem oldItem, @NonNull LibGenItem newItem) {
+                    return Objects.equals(oldItem.imagePath, newItem.imagePath)
+                            && Objects.equals(oldItem.text, newItem.text);
                 }
 
                 @Override
-                public boolean areContentsTheSame(@NonNull LibListItem oldItem, @NonNull LibListItem newItem) {
-                    return oldItem.equals(newItem);
+                public boolean areContentsTheSame(@NonNull LibGenItem oldItem, @NonNull LibGenItem newItem) {
+                    return Objects.equals(oldItem, newItem);
                 }
             };
-    private final AsyncListDiffer<LibListItem> differ =
+    private final AsyncListDiffer<LibGenItem> differ =
             new AsyncListDiffer<>(this, DIFF_CALLBACK);
     public Typeface typeface;
     public int textSize;
@@ -47,7 +48,7 @@ public class GameItemAdapter extends RecyclerView.Adapter<GameItemAdapter.ViewHo
     public int textColor;
     public int linkTextColor;
 
-    public LibListItem getItem(int position) {
+    public LibGenItem getItem(int position) {
         return differ.getCurrentList().get(position);
     }
 
@@ -56,7 +57,7 @@ public class GameItemAdapter extends RecyclerView.Adapter<GameItemAdapter.ViewHo
         return differ.getCurrentList().size();
     }
 
-    public void submitList(List<LibListItem> gameData) {
+    public void submitList(List<LibGenItem> gameData) {
         differ.submitList(gameData);
     }
 
@@ -75,12 +76,12 @@ public class GameItemAdapter extends RecyclerView.Adapter<GameItemAdapter.ViewHo
         var qpListItem = getItem(position);
 
         var itemIcon = holder.listGameItemBinding.itemIcon;
-        if (!isNotEmptyOrBlank(qpListItem.pathToImage)) {
+        if (!isNotEmptyOrBlank(qpListItem.imagePath)) {
             itemIcon.setVisibility(GONE);
         } else {
             itemIcon.setVisibility(VISIBLE);
             Glide.with(holder.listGameItemBinding.itemIcon)
-                    .load(qpListItem.pathToImage)
+                    .load(qpListItem.imagePath)
                     .error(R.drawable.baseline_broken_image_24)
                     .centerCrop()
                     .into(itemIcon);

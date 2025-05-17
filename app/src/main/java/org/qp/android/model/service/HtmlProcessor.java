@@ -21,20 +21,20 @@ public class HtmlProcessor {
     private static final Pattern EXEC_PATTERN = Pattern.compile("href=\"exec:([\\s\\S]*?)\"", Pattern.CASE_INSENSITIVE);
     private static final Pattern HTML_PATTERN = Pattern.compile("<(\"[^\"]*\"|'[^']*'|[^'\">])*>");
     private static final Pattern BODY_PATTERN = Pattern.compile(".*?<body.*?>(.*?)</body>.*?", Pattern.DOTALL);
-    private SettingsController controller;
 
     /**
      * Bring the HTML code <code>html</code> obtained from the library to
      * HTML code acceptable for display in {@linkplain android.webkit.WebView}.
      */
-    public String getCleanHtmlAndMedia(@NonNull String dirtyHtml) {
+    public String getCleanHtmlAndMedia(@NonNull String dirtyHtml,
+                                       SettingsController controller) {
         if (isNullOrEmpty(dirtyHtml)) return "";
 
         var document = Jsoup.parse(preHandleHtml(dirtyHtml));
         document.outputSettings().prettyPrint(true);
         var body = document.body();
-        handleImagesInHtml(body);
-        handleVideosInHtml(body);
+        handleImagesInHtml(body, controller);
+        handleVideosInHtml(body, controller);
 
         return document.toString();
     }
@@ -61,11 +61,6 @@ public class HtmlProcessor {
         body.select("video").remove();
 
         return document.toString();
-    }
-
-    public HtmlProcessor setController(SettingsController controller) {
-        this.controller = controller;
-        return this;
     }
 
     public boolean isContainsHtmlTags(String text) {
@@ -145,7 +140,8 @@ public class HtmlProcessor {
                 .replace("\r", "");
     }
 
-    private void handleImagesInHtml(@NonNull Element documentBody) {
+    private void handleImagesInHtml(@NonNull Element documentBody,
+                                    SettingsController controller) {
         if (controller.isUseFullscreenImages) {
             var dynBlackList = new ArrayList<String>();
             documentBody.select("a").forEach(element -> {
@@ -175,7 +171,8 @@ public class HtmlProcessor {
         });
     }
 
-    private void handleVideosInHtml(Element documentBody) {
+    private void handleVideosInHtml(Element documentBody,
+                                    SettingsController controller) {
         var videoElement = documentBody.select("video");
         videoElement.attr("style", "max-width:100%;");
         if (controller.isVideoMute) {

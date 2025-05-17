@@ -19,8 +19,8 @@ public class LibDialogRetValue implements Parcelable {
         }
     };
 
-    public String outTextValue;
-    public int outNumValue;
+    public String outTextValue = "";
+    public int outNumValue = -1;
 
     protected LibDialogRetValue(Parcel in) {
         outTextValue = in.readString();
