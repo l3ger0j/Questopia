@@ -576,7 +576,7 @@ public class GameViewModel extends AndroidViewModel {
                 public void playFile(String path, int volume) throws RemoteException {
                     final var normPath = normalizeContentPath(path);
                     final var gameDir = getCurGameDir();
-                    if (isWritableFile(getApplication(), gameDir)) {
+                    if (isWritableDir(getApplication(), gameDir)) {
                         var soundFile = fromRelPath(getApplication(), normPath, gameDir, false);
                         if (isWritableFile(getApplication(), soundFile)) {
                             player.playFile(getApplication(), soundFile, volume).exceptionally(throwable -> {
