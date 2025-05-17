@@ -274,45 +274,45 @@ public class GameViewModel extends AndroidViewModel {
 
     // endregion Getter/Setter
     public void doOnStartRWSave(int slotAction) {
-        actEmit.emitAndExecuteOnce(new GameFragmentNavigation.StartRWSave(slotAction));
+        actEmit.emitAndExecute(new GameFragmentNavigation.StartRWSave(slotAction));
     }
 
     public void doOnFinishActivity() {
-        actEmit.emitAndExecuteOnce(new GameFragmentNavigation.FinishActivity());
+        actEmit.emitAndExecute(new GameFragmentNavigation.FinishActivity());
     }
 
     public void doOnWarnUser(int tabId) {
-        actEmit.emitAndExecuteOnce(new GameFragmentNavigation.WarnUser(tabId));
+        actEmit.emitAndExecute(new GameFragmentNavigation.WarnUser(tabId));
     }
 
     public void doOnShowSavePopup() {
-        actEmit.emitAndExecuteOnce(new GameFragmentNavigation.ShowPopupSave());
+        actEmit.emitAndExecute(new GameFragmentNavigation.ShowPopupSave());
     }
 
     public void doOnShowSimpleDialog(@NonNull String inputString,
                                      @NonNull GameDialogType dialogType,
                                      @Nullable ErrorType errorType) {
-        actEmit.emitAndExecuteOnce(new GameFragmentNavigation.ShowSimpleDialog(inputString, dialogType, errorType));
+        actEmit.emitAndExecute(new GameFragmentNavigation.ShowSimpleDialog(inputString, dialogType, errorType));
     }
 
     public void doOnShowMessageDialog(@Nullable String inputString,
                                       @NonNull CountDownLatch latch) {
-        actEmit.emitAndExecuteOnce(new GameFragmentNavigation.ShowMessageDialog(inputString, latch));
+        actEmit.emitAndExecute(new GameFragmentNavigation.ShowMessageDialog(inputString, latch));
     }
 
     public void doOnShowInputDialog(@Nullable String inputString,
                                     @NonNull ArrayBlockingQueue<String> inputQueue) {
-        actEmit.emitAndExecuteOnce(new GameFragmentNavigation.ShowInputDialog(inputString, inputQueue));
+        actEmit.emitAndExecute(new GameFragmentNavigation.ShowInputDialog(inputString, inputQueue));
     }
 
     public void doOnShowExecutorDialog(@Nullable String inputString,
                                        @NonNull ArrayBlockingQueue<String> inputQueue) {
-        actEmit.emitAndExecuteOnce(new GameFragmentNavigation.ShowExecutorDialog(inputString, inputQueue));
+        actEmit.emitAndExecute(new GameFragmentNavigation.ShowExecutorDialog(inputString, inputQueue));
     }
 
     public void doOnShowMenuDialog(@Nullable List<String> inputListString,
                                    @NonNull ArrayBlockingQueue<Integer> inputQueue) {
-        actEmit.emitAndExecuteOnce(new GameFragmentNavigation.ShowMenuDialog(inputListString, inputQueue));
+        actEmit.emitAndExecute(new GameFragmentNavigation.ShowMenuDialog(inputListString, inputQueue));
     }
 
     public String removeHtmlTags(String dirtyHTML) {
