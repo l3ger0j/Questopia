@@ -135,7 +135,7 @@ public class GameViewModel extends AndroidViewModel {
                 refreshActionsRecycler();
                 refreshObjectsRecycler();
             };
-    private IQuestopiaBundle questopiaBundle = null;
+    private IQuestopiaBundle questopiaBundle = new IQuestopiaBundle.Default();
     private final ServiceConnection engineConn = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
