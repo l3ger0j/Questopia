@@ -6,6 +6,7 @@ import static org.qp.android.helpers.utils.FileUtil.findOrCreateFile;
 import static org.qp.android.helpers.utils.FileUtil.fromRelPath;
 import static org.qp.android.helpers.utils.FileUtil.isWritableDir;
 import static org.qp.android.helpers.utils.StringUtil.isNotEmptyOrBlank;
+import static org.qp.android.helpers.utils.ThreadUtil.assertNonUiThread;
 import static org.qp.android.helpers.utils.ThreadUtil.isMainThread;
 
 import android.annotation.SuppressLint;
@@ -28,11 +29,11 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.core.content.ContextCompat;
 import androidx.core.os.LocaleListCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
-import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.preference.PreferenceManager;
 import androidx.viewpager2.widget.ViewPager2;
@@ -49,6 +50,7 @@ import org.qp.android.helpers.bus.Events;
 import org.qp.android.questopiabundle.lib.LibGameRequest;
 import org.qp.android.ui.dialogs.GameDialogFrags;
 import org.qp.android.ui.dialogs.GameDialogType;
+import org.qp.android.ui.dialogs.GamePopupType;
 import org.qp.android.ui.settings.SettingsActivity;
 import org.qp.android.ui.settings.SettingsController;
 
@@ -56,12 +58,8 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CompletionException;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class GameActivity extends AppCompatActivity {
@@ -190,9 +188,9 @@ public class GameActivity extends AppCompatActivity {
                                 }
                             }
                         } catch (FileNotFoundException e) {
-                            showSimpleDialog(getString(R.string.notFoundFile) + "\n" + e, GameDialogType.ERROR_DIALOG, null);
+                            doShowErrorDialog(getString(R.string.notFoundFile) + "\n" + e, ErrorType.EXCEPTION);
                         } catch (IOException e) {
-                            showSimpleDialog(getString(R.string.notReadFile) + "\n" + e, GameDialogType.ERROR_DIALOG, null);
+                            doShowErrorDialog(getString(R.string.notReadFile) + "\n" + e, ErrorType.EXCEPTION);
                         }
                         postTextInDialogFrags(stringBuilder.toString());
                     }
@@ -211,7 +209,7 @@ public class GameActivity extends AppCompatActivity {
                 initGame();
             }
         } else {
-            showSimpleDialog("Plugin not connected!", GameDialogType.ERROR_DIALOG, ErrorType.EXCEPTION);
+            doShowErrorDialog("Plugin not connected!", ErrorType.EXCEPTION);
         }
 
         gameViewModel.actEmit.observe(this, new Events.EventObserver(eventNavigation -> {
@@ -224,49 +222,16 @@ public class GameActivity extends AppCompatActivity {
             if (eventNavigation instanceof GameFragmentNavigation.WarnUser user) {
                 warnUser(user.tabId);
             }
-            if (eventNavigation instanceof GameFragmentNavigation.ShowPopupSave) {
-                showSavePopup();
-            }
-            if (eventNavigation instanceof GameFragmentNavigation.ShowSimpleDialog dialog) {
-                var inputString = dialog.inputString;
-                var dialogType = dialog.dialogType;
-                var errorType = dialog.errorType;
+            if (eventNavigation instanceof GameFragmentNavigation.ShowDialog dialog) {
+                var type = dialog.dialogType;
+                var buildDialog = dialog.buildDialog;
 
-                if (inputString != null && dialogType != null) {
-                    showSimpleDialog(inputString, dialogType, errorType);
+                if (type != null && buildDialog != null) {
+                    showDialog(type, buildDialog);
                 }
             }
-            if (eventNavigation instanceof GameFragmentNavigation.ShowMessageDialog messageDialog) {
-                var inputString = messageDialog.inputString;
-                var latch = messageDialog.latch;
-
-                if (latch != null) {
-                    showMessageDialog(inputString, latch);
-                }
-            }
-            if (eventNavigation instanceof GameFragmentNavigation.ShowInputDialog inputDialog) {
-                var inputString = inputDialog.inputString;
-                var inputQueue = inputDialog.inputQueue;
-
-                if (inputQueue != null) {
-                    showInputDialog(inputString, inputQueue);
-                }
-            }
-            if (eventNavigation instanceof GameFragmentNavigation.ShowExecutorDialog executorDialog) {
-                var inputString = executorDialog.inputString;
-                var inputQueue = executorDialog.inputQueue;
-
-                if (inputQueue != null) {
-                    showExecutorDialog(inputString, inputQueue);
-                }
-            }
-            if (eventNavigation instanceof GameFragmentNavigation.ShowMenuDialog menuDialog) {
-                var inputListString = menuDialog.inputListString;
-                var inputQueue = menuDialog.inputQueue;
-
-                if (inputQueue != null) {
-                    showMenuDialog(inputListString, inputQueue);
-                }
+            if (eventNavigation instanceof GameFragmentNavigation.ShowPopup popup) {
+                showPopup(popup.popupType);
             }
         }));
     }
@@ -311,7 +276,7 @@ public class GameActivity extends AppCompatActivity {
         setSupportActionBar(activityGameBinding.gameToolbar);
         actionBar = getSupportActionBar();
         activityGameBinding.gameToolbar.setNavigationIcon(R.drawable.baseline_arrow_back_24);
-        activityGameBinding.gameToolbar.setNavigationOnClickListener(v -> promptCloseGame());
+        activityGameBinding.gameToolbar.setNavigationOnClickListener(v -> doShowCloseDialog());
     }
 
     private void initServices() {
@@ -323,7 +288,7 @@ public class GameActivity extends AppCompatActivity {
                     }
                 })
                 .exceptionally(throwable -> {
-                    runOnUiThread(() -> showSimpleDialog(throwable.toString(), GameDialogType.ERROR_DIALOG, ErrorType.EXCEPTION));
+                    runOnUiThread(() -> doShowErrorDialog(throwable.toString(), ErrorType.EXCEPTION));
                     return null;
                 });
     }
@@ -423,187 +388,65 @@ public class GameActivity extends AppCompatActivity {
         }
     }
 
-    private void promptCloseGame() {
-        if (!isMainThread()) {
-            runOnUiThread(this::promptCloseGame);
-        } else {
-            var dialogFragment = new GameDialogFrags();
-            dialogFragment.setDialogType(GameDialogType.CLOSE_DIALOG);
-            dialogFragment.setCancelable(false);
-            var manager = getSupportFragmentManager();
-            if (!manager.isDestroyed()) {
-                dialogFragment.show(manager, "closeGameDialogFragment");
-            }
-        }
-    }
-
-    public void showSavePopup() {
-        if (!isMainThread()) {
-            runOnUiThread(this::showSavePopup);
-        } else {
-            mainMenu.performIdentifierAction(R.id.menu_saveGame, 0);
-        }
-    }
-
-    public void showSimpleDialog(@NonNull String inputString,
-                                 @NonNull GameDialogType dialogType,
-                                 @Nullable ErrorType errorType) {
+    public void showPopup(GamePopupType popupType) {
         if (isFinishing()) return;
         if (isDestroyed()) return;
-        if (!isMainThread()) {
-            runOnUiThread(() -> showSimpleDialog(inputString, dialogType, errorType));
-        } else {
-            var manager = getSupportFragmentManager();
-            var optErrorType = Optional.ofNullable(errorType);
-            if (manager.isDestroyed()) return;
 
-            switch (dialogType) {
-                case ERROR_DIALOG -> {
-                    var dialogFragment = new GameDialogFrags();
-                    dialogFragment.setDialogType(GameDialogType.ERROR_DIALOG);
-                    if (optErrorType.isPresent()) {
-                        dialogFragment.setMessage(getErrorMessage(inputString, optErrorType.get()));
-                    } else {
-                        dialogFragment.setMessage(inputString);
-                    }
-                    dialogFragment.show(manager, "errorDialogFragment");
-                }
-                case IMAGE_DIALOG -> {
-                    var dialogFragment = new GameDialogFrags();
-                    dialogFragment.setDialogType(GameDialogType.IMAGE_DIALOG);
-                    dialogFragment.pathToImage = gameViewModel.getImageUriFromPath(inputString);
-                    dialogFragment.show(manager, "imageDialogFragment");
-                }
-                case LOAD_DIALOG -> {
-                    var dialogFragment = new GameDialogFrags();
-                    dialogFragment.setDialogType(GameDialogType.LOAD_DIALOG);
-                    dialogFragment.setCancelable(true);
-                    dialogFragment.show(manager, "loadGameDialogFragment");
-                }
+        runOnUiThread(() -> {
+            if (popupType == GamePopupType.SAVE_POPUP) {
+                mainMenu.performIdentifierAction(R.id.menu_saveGame, 0);
             }
-        }
+        });
+    }
+
+    private void doShowCloseDialog() {
+        var dialogFragment = new GameDialogFrags();
+        dialogFragment.setDialogType(GameDialogType.CLOSE_DIALOG);
+        dialogFragment.setCancelable(false);
+        showDialog(GameDialogType.CLOSE_DIALOG, dialogFragment);
     }
 
     private String getErrorMessage(String inputString, @NonNull ErrorType errorType) {
         return switch (errorType) {
-            case IMAGE_ERROR -> getString(R.string.notFoundImage) + "\n" + inputString;
-            case SOUND_ERROR -> getString(R.string.notFoundSound) + "\n" + inputString;
-            case WAITING_ERROR -> getString(R.string.waitingError) + "\n" + inputString;
-            case WAITING_INPUT_ERROR -> getString(R.string.waitingInputError) + "\n" + inputString;
-            case EXCEPTION -> getString(R.string.error) + "\n" + inputString;
+            case IMAGE_ERROR -> ContextCompat.getString(getApplication(), R.string.notFoundImage) + "\n" + inputString;
+            case SOUND_ERROR -> ContextCompat.getString(getApplication(), R.string.notFoundSound) + "\n" + inputString;
+            case WAITING_ERROR -> ContextCompat.getString(getApplication(), R.string.waitingError) + "\n" + inputString;
+            case WAITING_INPUT_ERROR -> ContextCompat.getString(getApplication(), R.string.waitingInputError) + "\n" + inputString;
+            case EXCEPTION -> ContextCompat.getString(getApplication(), R.string.error) + "\n" + inputString;
             default -> "";
         };
     }
 
-    public void showMessageDialog(@Nullable String inputString,
-                                  @NonNull CountDownLatch latch) {
-        if (isFinishing()) return;
-        if (!isMainThread()) {
-            runOnUiThread(() -> showMessageDialog(inputString, latch));
-        } else {
-            var manager = getSupportFragmentManager();
-            if (manager.isDestroyed()) return;
+    private void doShowErrorDialog(String errorStr, ErrorType errorType) {
+        var dialogFragment = new GameDialogFrags();
 
-            var config = gameViewModel.getIConfig();
-            var processedMsg = config.useHtml ? gameViewModel.removeHtmlTags(inputString) : inputString;
-            if (processedMsg == null) {
-                processedMsg = "";
-            }
-            if (gameViewModel.outputBooleanObserver.hasObservers()) {
-                gameViewModel.outputBooleanObserver = new MutableLiveData<>();
-            }
-            var dialogFragment = new GameDialogFrags();
-            dialogFragment.setDialogType(GameDialogType.MESSAGE_DIALOG);
-            dialogFragment.setProcessedMsg(processedMsg);
-            dialogFragment.setCancelable(false);
-            dialogFragment.show(manager, "showMessageDialogFragment");
-            gameViewModel.outputBooleanObserver.observeForever(aBoolean -> {
-                if (aBoolean) {
-                    latch.countDown();
-                }
-            });
+        if (errorType == null) {
+            dialogFragment.setMessage(errorStr);
+        } else {
+            dialogFragment.setMessage(getErrorMessage(errorStr, errorType));
         }
+
+        showDialog(GameDialogType.ERROR_DIALOG_WSEND, dialogFragment);
     }
 
-    public void showInputDialog(@Nullable String inputString,
-                                @NonNull ArrayBlockingQueue<String> inputQueue) {
+    public void showDialog(GameDialogType dialogType,
+                           GameDialogFrags buildDialog) {
         if (isFinishing()) return;
-        if (!isMainThread()) {
-            runOnUiThread(() -> showInputDialog(inputString, inputQueue));
-        } else {
-            var manager = getSupportFragmentManager();
-            if (manager.isDestroyed()) return;
+        if (isDestroyed()) return;
+        assertNonUiThread();
 
-            var config = gameViewModel.getIConfig();
-            var message = config.useHtml ? gameViewModel.removeHtmlTags(inputString) : inputString;
-            if (message == null) {
-                message = "0";
-            }
-            if (gameViewModel.outputTextObserver.hasObservers()) {
-                gameViewModel.outputTextObserver = new MutableLiveData<>();
-            }
-            var dialogFragment = new GameDialogFrags();
-            dialogFragment.setDialogType(GameDialogType.INPUT_DIALOG);
-            if (message.equals("userInputTitle")) {
-                dialogFragment.setMessage(getString(R.string.userInputTitle));
-            } else {
-                dialogFragment.setMessage(message);
-            }
-            dialogFragment.setCancelable(false);
-            dialogFragment.show(manager, "inputDialogFragment");
-            gameViewModel.outputTextObserver.observeForever(inputQueue::add);
-        }
-    }
+        var manager = getSupportFragmentManager();
+        if (manager.isDestroyed()) return;
 
-    public void showExecutorDialog(@Nullable String inputString,
-                                   @NonNull ArrayBlockingQueue<String> inputQueue) {
-        if (isFinishing()) return;
-        if (!isMainThread()) {
-            runOnUiThread(() -> showExecutorDialog(inputString, inputQueue));
-        } else {
-            var manager = getSupportFragmentManager();
-            if (manager.isDestroyed()) return;
-
-            var config = gameViewModel.getIConfig();
-            var message = config.useHtml ? gameViewModel.removeHtmlTags(inputString) : inputString;
-            if (message == null) {
-                message = "";
-            }
-            if (gameViewModel.outputTextObserver.hasObservers()) {
-                gameViewModel.outputTextObserver = new MutableLiveData<>();
-            }
-            var dialogFragment = new GameDialogFrags();
-            dialogFragment.setDialogType(GameDialogType.EXECUTOR_DIALOG);
-            if (message.equals("execStringTitle")) {
-                dialogFragment.setMessage(getString(R.string.execStringTitle));
-            } else {
-                dialogFragment.setMessage(message);
-            }
-            dialogFragment.setCancelable(false);
-            dialogFragment.show(manager, "executorDialogFragment");
-            gameViewModel.outputTextObserver.observeForever(inputQueue::add);
-        }
-    }
-
-    public void showMenuDialog(@NonNull List<String> items,
-                               @NonNull ArrayBlockingQueue<Integer> resultQueue) {
-        if (isFinishing()) return;
-        if (!isMainThread()) {
-            runOnUiThread(() -> showMenuDialog(items, resultQueue));
-        } else {
-            var manager = getSupportFragmentManager();
-            if (manager.isDestroyed()) return;
-
-            if (gameViewModel.outputIntObserver.hasObservers()) {
-                gameViewModel.outputIntObserver = new MutableLiveData<>();
-            }
-
-            var dialogFragment = new GameDialogFrags();
-            dialogFragment.setDialogType(GameDialogType.MENU_DIALOG);
-            dialogFragment.setItems(items);
-            dialogFragment.setCancelable(false);
-            dialogFragment.show(manager, "showMenuDialogFragment");
-            gameViewModel.outputIntObserver.observeForever(resultQueue::add);
+        switch (dialogType) {
+            case ERROR_DIALOG_WSEND -> buildDialog.show(manager, "errorDialogFragment");
+            case ERROR_DIALOG_WOSEND -> buildDialog.show(manager, "loadErrorGameDialogFragment");
+            case CLOSE_DIALOG -> buildDialog.show(manager, "closeDialogFragment");
+            case IMAGE_DIALOG -> buildDialog.show(manager, "imageDialogFragment");
+            case INPUT_DIALOG -> buildDialog.show(manager, "inputDialogFragment");
+            case MENU_DIALOG -> buildDialog.show(manager, "menuDialogFragment");
+            case MESSAGE_DIALOG -> buildDialog.show(manager, "messageDialogFragment");
+            case EXECUTOR_DIALOG -> buildDialog.show(manager, "executorDialogFragment");
         }
     }
 
@@ -611,7 +454,7 @@ public class GameActivity extends AppCompatActivity {
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK
                 && event.getRepeatCount() == 0) {
-            promptCloseGame();
+            doShowCloseDialog();
             return true;
         }
         return super.onKeyDown(keyCode, event);

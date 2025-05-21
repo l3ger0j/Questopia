@@ -140,7 +140,16 @@ public class GameDialogFrags extends DialogFragment {
                         (dialog, which) -> gameViewModel.onDialogPositiveClick(this));
                 return builder.create();
             }
-            case ERROR_DIALOG -> {
+            case ERROR_DIALOG_WOSEND -> {
+                builder.setMessage(requireContext().getString(R.string.loadGamePopup));
+                builder.setPositiveButton(android.R.string.ok,
+                        (dialog, which) -> gameViewModel.onDialogPositiveClick(this));
+                builder.setNegativeButton(android.R.string.no,
+                        (dialog, which) -> {
+                        });
+                return builder.create();
+            }
+            case ERROR_DIALOG_WSEND -> {
                 final var errorFeBackView = getLayoutInflater().inflate(R.layout.dialog_feedback, null);
                 var feedBackScrollError = (ScrollView) errorFeBackView.findViewById(R.id.feedBackScrollError);
                 var feedBackTV = (TextView) feedBackScrollError.findViewById(R.id.feedBackTV);
@@ -187,15 +196,6 @@ public class GameDialogFrags extends DialogFragment {
                 builder.setView(imageBinding.getRoot());
                 return builder.create();
             }
-            case LOAD_DIALOG -> {
-                builder.setMessage(requireContext().getString(R.string.loadGamePopup));
-                builder.setPositiveButton(android.R.string.ok,
-                        (dialog, which) -> gameViewModel.onDialogPositiveClick(this));
-                builder.setNegativeButton(android.R.string.no,
-                        (dialog, which) -> {
-                        });
-                return builder.create();
-            }
             case MENU_DIALOG -> {
                 builder.setItems(items.toArray(new CharSequence[0]),
                         (dialog, which) -> gameViewModel.onDialogListClick(this, which));
@@ -224,7 +224,7 @@ public class GameDialogFrags extends DialogFragment {
         final var dialog = Optional.ofNullable((AlertDialog) getDialog());
 
         if (dialog.isPresent()) {
-            if (dialogType.equals(GameDialogType.ERROR_DIALOG)) {
+            if (dialogType.equals(GameDialogType.ERROR_DIALOG_WSEND)) {
                 var sendButton = dialog.get().getButton(Dialog.BUTTON_POSITIVE);
                 sendButton.setOnClickListener(v -> {
                     if (isValidate()) {

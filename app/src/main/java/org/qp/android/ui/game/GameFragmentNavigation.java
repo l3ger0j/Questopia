@@ -1,19 +1,11 @@
 package org.qp.android.ui.game;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import org.qp.android.helpers.ErrorType;
 import org.qp.android.helpers.bus.NavigationEvent;
+import org.qp.android.ui.dialogs.GameDialogFrags;
 import org.qp.android.ui.dialogs.GameDialogType;
-
-import java.util.List;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.CountDownLatch;
+import org.qp.android.ui.dialogs.GamePopupType;
 
 public interface GameFragmentNavigation {
-
-    class ShowPopupSave extends NavigationEvent {}
 
     class FinishActivity extends NavigationEvent {}
 
@@ -33,61 +25,22 @@ public interface GameFragmentNavigation {
         }
     }
 
-    class ShowMessageDialog extends NavigationEvent {
-        public final String inputString;
-        public final CountDownLatch latch;
-
-        public ShowMessageDialog(@Nullable String inputString,
-                                 @NonNull CountDownLatch latch) {
-            this.inputString = inputString;
-            this.latch = latch;
-        }
-    }
-
-    class ShowInputDialog extends NavigationEvent {
-        public final String inputString;
-        public final ArrayBlockingQueue<String> inputQueue;
-
-        public ShowInputDialog(@Nullable String inputString,
-                               @NonNull ArrayBlockingQueue<String> inputQueue) {
-            this.inputString = inputString;
-            this.inputQueue = inputQueue;
-        }
-    }
-
-    class ShowExecutorDialog extends NavigationEvent {
-        public final String inputString;
-        public final ArrayBlockingQueue<String> inputQueue;
-
-        public ShowExecutorDialog(@Nullable String inputString,
-                                  @NonNull ArrayBlockingQueue<String> inputQueue) {
-            this.inputString = inputString;
-            this.inputQueue = inputQueue;
-        }
-    }
-
-    class ShowMenuDialog extends NavigationEvent {
-        public final List<String> inputListString;
-        public final ArrayBlockingQueue<Integer> inputQueue;
-
-        public ShowMenuDialog(@Nullable List<String> inputListString,
-                              @NonNull ArrayBlockingQueue<Integer> inputQueue) {
-            this.inputListString = inputListString;
-            this.inputQueue = inputQueue;
-        }
-    }
-
-    class ShowSimpleDialog extends NavigationEvent {
-        public final String inputString;
+    class ShowDialog extends NavigationEvent {
         public final GameDialogType dialogType;
-        public final ErrorType errorType;
+        public final GameDialogFrags buildDialog;
 
-        public ShowSimpleDialog(@NonNull String inputString,
-                                @NonNull GameDialogType dialogType,
-                                @Nullable ErrorType errorType) {
-            this.inputString = inputString;
+        public ShowDialog(GameDialogType dialogType,
+                          GameDialogFrags buildDialog) {
             this.dialogType = dialogType;
-            this.errorType = errorType;
+            this.buildDialog = buildDialog;
+        }
+    }
+
+    class ShowPopup extends NavigationEvent {
+        public final GamePopupType popupType;
+
+        public ShowPopup(GamePopupType popupType) {
+            this.popupType = popupType;
         }
     }
 
