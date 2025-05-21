@@ -890,7 +890,7 @@ public class GameViewModel extends AndroidViewModel {
                 return super.shouldInterceptRequest(view, request);
 
             final var rootDir = getCurGameDir();
-            if (!isWritableDir(getApplication(), getCurGameDir()))
+            if (!isWritableDir(getApplication(), rootDir))
                 return super.shouldInterceptRequest(view, request);
 
             try {
