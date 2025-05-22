@@ -28,7 +28,6 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.util.Log;
 import android.view.View;
 import android.webkit.MimeTypeMap;
 import android.webkit.WebResourceRequest;
@@ -150,7 +149,7 @@ public class GameViewModel extends AndroidViewModel {
                     throw new CompletionException(e);
                 }
             }).exceptionally(t -> {
-                Log.e(this.getClass().getSimpleName(), "Error: ", t);
+                runOnUiThread(() -> doShowErrorDialog(t.toString(), ErrorType.EXCEPTION));
                 return null;
             });
         }
@@ -406,7 +405,7 @@ public class GameViewModel extends AndroidViewModel {
         try {
             questopiaBundle.onActionClicked(index);
         } catch (RemoteException e) {
-            Log.e(this.getClass().getSimpleName(), "Error: ", e);
+            doShowErrorDialog(e.toString(), ErrorType.EXCEPTION);
         }
     }
 
@@ -423,7 +422,7 @@ public class GameViewModel extends AndroidViewModel {
         try {
             questopiaBundle.onObjectClicked(index);
         } catch (RemoteException e) {
-            Log.e(this.getClass().getSimpleName(), "Error: ", e);
+            doShowErrorDialog(e.toString(), ErrorType.EXCEPTION);
         }
     }
 
@@ -498,7 +497,7 @@ public class GameViewModel extends AndroidViewModel {
                                 })
                                 .get();
                     } catch (Exception e) {
-                        Log.e(GameViewModel.this.getClass().getSimpleName(), "Error: " + e);
+                        runOnUiThread(() -> doShowErrorDialog(e.toString(), ErrorType.EXCEPTION));
                         return new LibDialogRetValue();
                     }
                 }
@@ -530,8 +529,8 @@ public class GameViewModel extends AndroidViewModel {
 
                 @Override
                 public void closeAllFiles() throws RemoteException {
-                    player.closeAllFiles().exceptionally(throwable -> {
-                        Log.e(GameViewModel.this.getClass().getSimpleName(), "Error: ", throwable);
+                    player.closeAllFiles().exceptionally(t -> {
+                        runOnUiThread(() -> doShowErrorDialog(t.toString(), ErrorType.EXCEPTION));
                         return null;
                     });
                 }
@@ -543,8 +542,8 @@ public class GameViewModel extends AndroidViewModel {
                     if (isWritableFile(getApplication(), gameDir)) {
                         var soundFile = fromRelPath(getApplication(), normPath, gameDir, false);
                         if (isWritableFile(getApplication(), soundFile)) {
-                            player.closeFile(soundFile.getUri()).exceptionally(throwable -> {
-                                Log.e(GameViewModel.this.getClass().getSimpleName(), "Error: ", throwable);
+                            player.closeFile(soundFile.getUri()).exceptionally(t -> {
+                                runOnUiThread(() -> doShowErrorDialog(t.toString(), ErrorType.EXCEPTION));
                                 return null;
                             });
                         } else {
@@ -562,8 +561,8 @@ public class GameViewModel extends AndroidViewModel {
                     if (isWritableDir(getApplication(), gameDir)) {
                         var soundFile = fromRelPath(getApplication(), normPath, gameDir, false);
                         if (isWritableFile(getApplication(), soundFile)) {
-                            player.playFile(getApplication(), soundFile, volume).exceptionally(throwable -> {
-                                Log.e(GameViewModel.this.getClass().getSimpleName(), "Error: ", throwable);
+                            player.playFile(getApplication(), soundFile, volume).exceptionally(t -> {
+                                runOnUiThread(() -> doShowErrorDialog(t.toString(), ErrorType.EXCEPTION));
                                 return null;
                             });
                         } else {
@@ -633,8 +632,8 @@ public class GameViewModel extends AndroidViewModel {
             } else {
                 return true;
             }
-        }).exceptionally(throwable -> {
-            Log.e(GameViewModel.this.getClass().getSimpleName(), "Error: ", throwable);
+        }).exceptionally(t -> {
+            runOnUiThread(() -> doShowErrorDialog(t.toString(), ErrorType.EXCEPTION));
             return null;
         });
     }
@@ -664,8 +663,8 @@ public class GameViewModel extends AndroidViewModel {
             } catch (RemoteException e) {
                 throw new CompletionException(e);
             }
-        })).exceptionally(throwable -> {
-            Log.e(this.getClass().getSimpleName(), "Error: ", throwable);
+        }).exceptionally(t -> {
+            runOnUiThread(() -> doShowErrorDialog(t.toString(), ErrorType.EXCEPTION));
             return null;
         });
     }
@@ -674,7 +673,7 @@ public class GameViewModel extends AndroidViewModel {
         try {
             questopiaBundle.doLibRequest(new LibResult<>(req), codeToExec, Uri.EMPTY);
         } catch (RemoteException e) {
-            Log.e(this.getClass().getSimpleName(), "Error: ", e);
+            runOnUiThread(() -> doShowErrorDialog(e.toString(), ErrorType.EXCEPTION));
         }
     }
 
@@ -682,7 +681,7 @@ public class GameViewModel extends AndroidViewModel {
         try {
             questopiaBundle.doLibRequest(new LibResult<>(req), "", fileUri);
         } catch (RemoteException e) {
-            Log.e(this.getClass().getSimpleName(), "Error: ", e);
+            runOnUiThread(() -> doShowErrorDialog(e.toString(), ErrorType.EXCEPTION));
         }
     }
 
@@ -690,7 +689,7 @@ public class GameViewModel extends AndroidViewModel {
         try {
             questopiaBundle.doLibRequest(new LibResult<>(req), "", Uri.EMPTY);
         } catch (RemoteException e) {
-            Log.e(this.getClass().getSimpleName(), "Error: ", e);
+            runOnUiThread(() -> doShowErrorDialog(e.toString(), ErrorType.EXCEPTION));
         }
     }
 
