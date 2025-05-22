@@ -660,7 +660,7 @@ public class GameViewModel extends AndroidViewModel {
                         | Intent.FLAG_GRANT_READ_URI_PERMISSION
         );
 
-        serviceReadyFuture.thenCompose(bundle -> pluginClient.proxyPluginMethods(() -> {
+        serviceReadyFuture.thenAccept(bundle -> {
             try {
                 bundle.runGameIntoLib(gameId, gameTitle, gameDirUri, gameFileUri);
             } catch (RemoteException e) {
