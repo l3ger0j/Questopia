@@ -111,7 +111,7 @@ public class GameViewModel extends AndroidViewModel {
     public final MutableLiveData<List<LibGenItem>> actsListLiveData = new MutableLiveData<>();
     public final MutableLiveData<Boolean> actsVisibility = new MutableLiveData<>();
     public final MutableLiveData<List<LibGenItem>> objsListLiveData = new MutableLiveData<>();
-    public final BehaviorSubject<String> dialogConnector = BehaviorSubject.create();
+    private final BehaviorSubject<String> dialogConnector = BehaviorSubject.create();
     private final MutableLiveData<SettingsController> controllerObserver = new MutableLiveData<>();
     private final MutableLiveData<String> mainDescLiveData = new MutableLiveData<>();
     private final MutableLiveData<String> varsDescLiveData = new MutableLiveData<>();
