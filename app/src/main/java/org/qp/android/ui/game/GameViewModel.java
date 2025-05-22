@@ -12,7 +12,6 @@ import static org.qp.android.helpers.utils.FileUtil.isWritableFile;
 import static org.qp.android.helpers.utils.PathUtil.getExtension;
 import static org.qp.android.helpers.utils.PathUtil.normalizeContentPath;
 import static org.qp.android.helpers.utils.StringUtil.isNotEmptyOrBlank;
-import static org.qp.android.helpers.utils.ThreadUtil.assertNonUiThread;
 import static org.qp.android.helpers.utils.ThreadUtil.runOnUiThread;
 import static org.qp.android.helpers.utils.ViewUtil.getFontStyle;
 import static org.qp.android.ui.game.GameActivity.LOAD;
@@ -493,6 +492,10 @@ public class GameViewModel extends AndroidViewModel {
                                         showLibDialog(inputString, GameDialogType.ERROR_DIALOG_WSEND);
                                         yield null;
                                     }
+                                    case DIALOG_POPUP_SAVE -> {
+                                        showLibSavePopup();
+                                        yield null;
+                                    }
                                     default -> showLibDialog(libType, inputString);
                                 })
                                 .get();
@@ -830,11 +833,8 @@ public class GameViewModel extends AndroidViewModel {
         };
     }
 
-    public void showLibPopup(LibTypeDialog dialog) {
-        assertNonUiThread();
-        switch (dialog) {
-            case DIALOG_POPUP_SAVE -> doOnShowPopup(GamePopupType.SAVE_POPUP);
-        }
+    public void showLibSavePopup() {
+        runOnUiThread(() -> doOnShowPopup(GamePopupType.SAVE_POPUP));
     }
     // endregion GameInterface
 
