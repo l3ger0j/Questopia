@@ -54,8 +54,7 @@ public class SettingPluginFragment extends Fragment {
                                 questopiaBundle.authorPlugin()
                         )
                 ));
-            } catch (RemoteException e) {
-//                throw new RuntimeException(e);
+            } catch (RemoteException ignored) {
             }
         }
 
@@ -141,7 +140,7 @@ public class SettingPluginFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        client.disconnectEnginePlugin(requireContext());
+        client.disconnectEnginePlugin(requireContext(), () -> {});
     }
 
     class PackageBroadcastReceiver extends BroadcastReceiver {

@@ -618,21 +618,15 @@ public class GameViewModel extends AndroidViewModel {
     }
 
     public void terminateLibAndPlugin() {
-        pluginClient.proxyPluginMethods(() -> {
+        pluginClient.disconnectEnginePlugin(getApplication(), () -> {
             try {
                 questopiaBundle.stopNativeLib(nativeLibVer);
             } catch (Exception e) {
                 throw new CompletionException(e);
             }
-        }).thenCombine(pluginClient.disconnectEnginePlugin(getApplication()), (Void, aBool) -> {
-            if (!aBool) {
-                throw new CompletionException(new Exception("Error disconnect plugin!"));
-            } else {
-                return true;
-            }
         }).exceptionally(t -> {
             runOnUiThread(() -> doShowErrorDialog(t.toString(), ErrorType.EXCEPTION));
-            return null;
+            return false;
         });
     }
 

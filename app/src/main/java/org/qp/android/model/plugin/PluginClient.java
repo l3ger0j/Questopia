@@ -8,6 +8,7 @@ import android.content.ServiceConnection;
 import androidx.annotation.Nullable;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -45,13 +46,21 @@ public class PluginClient {
         }, clientExecutor);
     }
 
-    public CompletableFuture<Boolean> disconnectEnginePlugin(Context context) {
-        return CompletableFuture.supplyAsync(() -> {
-            var intent = new Intent(ENGINE_PLUGIN_ID);
-            var updatedIntent = createExplicitIntent(context, intent);
-            if (updatedIntent == null) return false;
-            return context.stopService(updatedIntent);
-        }, clientExecutor);
+    public CompletableFuture<Boolean> disconnectEnginePlugin(Context context, Runnable runnable) {
+        return CompletableFuture
+                .runAsync(runnable)
+                .thenCombine(CompletableFuture.supplyAsync(() -> {
+                    var intent = new Intent(ENGINE_PLUGIN_ID);
+                    var updatedIntent = createExplicitIntent(context, intent);
+                    if (updatedIntent == null) return false;
+                    return context.stopService(updatedIntent);
+                }, clientExecutor), (Void, aBool) -> {
+                    if (!aBool) {
+                        throw new CompletionException(new Exception("Error disconnect plugin!"));
+                    } else {
+                        return true;
+                    }
+                });
     }
 
     @Nullable
