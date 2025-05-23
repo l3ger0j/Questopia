@@ -139,18 +139,13 @@ public class GameViewModel extends AndroidViewModel {
         public void onServiceConnected(ComponentName name, IBinder service) {
             questopiaBundle = IQuestopiaBundle.Stub.asInterface(service);
 
-            pluginClient.proxyPluginMethods(() -> {
-                try {
-                    questopiaBundle.startNativeLib(nativeLibVer);
-                    initPluginHandler();
-                    serviceReadyFuture.complete(questopiaBundle);
-                } catch (Exception e) {
-                    throw new CompletionException(e);
-                }
-            }).exceptionally(t -> {
-                runOnUiThread(() -> doShowErrorDialog(t.toString(), ErrorType.EXCEPTION));
-                return null;
-            });
+            try {
+                questopiaBundle.startNativeLib(nativeLibVer);
+                initPluginHandler();
+                serviceReadyFuture.complete(questopiaBundle);
+            } catch (Exception e) {
+                runOnUiThread(() -> doShowErrorDialog(e.toString(), ErrorType.EXCEPTION));
+            }
         }
 
         @Override
