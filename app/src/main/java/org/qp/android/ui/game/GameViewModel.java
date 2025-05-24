@@ -451,6 +451,17 @@ public class GameViewModel extends AndroidViewModel {
         player.stop();
     }
 
+    private Uri soundFileGetter(DocumentFile rootDir, String filePath) {
+        var soundFile = fromRelPath(getApplication(), filePath, rootDir, false);
+        if (!isWritableFile(getApplication(), soundFile)) {
+            soundFile = rootDir.findFile(filePath);
+            if (soundFile == null) {
+                return Uri.EMPTY;
+            }
+        }
+        return soundFile.getUri();
+    }
+
     private void initPluginHandler() throws CompletionException {
         try {
             questopiaBundle.sendAsync(new AsyncCallbacks.Stub() {
@@ -513,9 +524,9 @@ public class GameViewModel extends AndroidViewModel {
                     final var normPath = normalizeContentPath(filePath);
                     final var gameDir = getCurGameDir();
                     if (isWritableFile(getApplication(), gameDir)) {
-                        var soundFile = fromRelPath(getApplication(), normPath, gameDir, false);
-                        if (isWritableFile(getApplication(), soundFile)) {
-                            return player.isPlayingFile(soundFile.getUri());
+                        var soundFileUri = soundFileGetter(gameDir, normPath);
+                        if (soundFileUri != Uri.EMPTY) {
+                            return player.isPlayingFile(soundFileUri);
                         } else {
                             if (getSettingsController().isUseMusicDebug) {
                                 doShowErrorDialog(filePath, ErrorType.SOUND_ERROR);
@@ -538,9 +549,9 @@ public class GameViewModel extends AndroidViewModel {
                     final var normPath = normalizeContentPath(filePath);
                     final var gameDir = getCurGameDir();
                     if (isWritableFile(getApplication(), gameDir)) {
-                        var soundFile = fromRelPath(getApplication(), normPath, gameDir, false);
-                        if (isWritableFile(getApplication(), soundFile)) {
-                            player.closeFile(soundFile.getUri()).exceptionally(t -> {
+                        var soundFileUri = soundFileGetter(gameDir, normPath);
+                        if (soundFileUri != Uri.EMPTY) {
+                            player.closeFile(soundFileUri).exceptionally(t -> {
                                 runOnUiThread(() -> doShowErrorDialog(t.toString(), ErrorType.EXCEPTION));
                                 return null;
                             });
@@ -557,9 +568,9 @@ public class GameViewModel extends AndroidViewModel {
                     final var normPath = normalizeContentPath(path);
                     final var gameDir = getCurGameDir();
                     if (isWritableDir(getApplication(), gameDir)) {
-                        var soundFile = fromRelPath(getApplication(), normPath, gameDir, false);
-                        if (isWritableFile(getApplication(), soundFile)) {
-                            player.playFile(getApplication(), soundFile, volume).exceptionally(t -> {
+                        var soundFileUri = soundFileGetter(gameDir, normPath);
+                        if (soundFileUri != Uri.EMPTY) {
+                            player.playFile(getApplication(), soundFileUri, volume).exceptionally(t -> {
                                 runOnUiThread(() -> doShowErrorDialog(t.toString(), ErrorType.EXCEPTION));
                                 return null;
                             });
