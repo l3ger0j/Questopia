@@ -4,8 +4,6 @@ import android.content.Context;
 import android.media.MediaPlayer;
 import android.net.Uri;
 
-import androidx.documentfile.provider.DocumentFile;
-
 import java.io.IOException;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -31,10 +29,10 @@ public class AudioPlayer {
     }
 
     public CompletableFuture<Void> playFile(final Context context,
-                                            final DocumentFile soundFile,
+                                            final Uri soundFileUri,
                                             final int volume) {
         return CompletableFuture.runAsync(() -> {
-            var sound = sounds.get(soundFile.getUri());
+            var sound = sounds.get(soundFileUri);
             if (sound != null) {
                 var newVolume = getSystemVolume(volume);
                 sound.setVolume(newVolume, newVolume);
@@ -44,7 +42,7 @@ public class AudioPlayer {
                     }
                 }
             } else {
-                var newSound = createNewSound(context, soundFile.getUri(), volume);
+                var newSound = createNewSound(context, soundFileUri, volume);
                 if (soundEnabled && !isPaused) {
                     if (!newSound.isPlaying()) {
                         newSound.start();
