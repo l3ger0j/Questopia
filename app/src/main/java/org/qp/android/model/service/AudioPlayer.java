@@ -20,11 +20,13 @@ public class AudioPlayer {
     private volatile boolean isPaused = false;
 
     public void start() {
+        isPaused = false;
         audioExecutor = Executors.newSingleThreadExecutor();
     }
 
     public void stop() {
         pause();
+        release();
         audioExecutor.shutdown();
     }
 
@@ -65,10 +67,15 @@ public class AudioPlayer {
             throw new CompletionException(ex);
         }
 
-        filePlayer.setOnCompletionListener(mediaPlayer -> sounds.remove(filePath));
+        filePlayer.setOnCompletionListener(mediaPlayer -> {
+            sounds.remove(filePath);
+            mediaPlayer.reset();
+            mediaPlayer.release();
+        });
         filePlayer.setVolume(sysVolume, sysVolume);
 
-        return sounds.put(filePath, filePlayer);
+        sounds.put(filePath, filePlayer);
+        return sounds.get(filePath);
     }
 
     private float getSystemVolume(int volume) {
@@ -99,6 +106,19 @@ public class AudioPlayer {
                 sound.release();
             }
         }, audioExecutor);
+    }
+
+    private void release() {
+        if (audioExecutor == null) return;
+        if (isPaused) return;
+        isPaused = true;
+
+        CompletableFuture
+                .runAsync(() ->
+                        sounds.values().stream()
+                                .filter(player -> player != null && player.isPlaying())
+                                .forEach(MediaPlayer::release),
+                        audioExecutor);
     }
 
     public void pause() {
