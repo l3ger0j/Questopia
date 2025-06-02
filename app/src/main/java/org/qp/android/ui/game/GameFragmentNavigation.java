@@ -2,12 +2,12 @@ package org.qp.android.ui.game;
 
 import org.qp.android.helpers.bus.NavigationEvent;
 import org.qp.android.ui.dialogs.GameDialogFrags;
-import org.qp.android.ui.dialogs.GameDialogType;
 import org.qp.android.ui.dialogs.GamePopupType;
 
 public interface GameFragmentNavigation {
 
-    class FinishActivity extends NavigationEvent {}
+    class FinishActivity extends NavigationEvent {
+    }
 
     class StartRWSave extends NavigationEvent {
         public final int slotAction;
@@ -26,12 +26,9 @@ public interface GameFragmentNavigation {
     }
 
     class ShowDialog extends NavigationEvent {
-        public final GameDialogType dialogType;
         public final GameDialogFrags buildDialog;
 
-        public ShowDialog(GameDialogType dialogType,
-                          GameDialogFrags buildDialog) {
-            this.dialogType = dialogType;
+        public ShowDialog(GameDialogFrags buildDialog) {
             this.buildDialog = buildDialog;
         }
     }

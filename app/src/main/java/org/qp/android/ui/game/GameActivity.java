@@ -223,11 +223,9 @@ public class GameActivity extends AppCompatActivity {
                 warnUser(user.tabId);
             }
             if (eventNavigation instanceof GameFragmentNavigation.ShowDialog dialog) {
-                var type = dialog.dialogType;
                 var buildDialog = dialog.buildDialog;
-
-                if (type != null && buildDialog != null) {
-                    showDialog(type, buildDialog);
+                if (buildDialog != null) {
+                    showDialog(buildDialog);
                 }
             }
             if (eventNavigation instanceof GameFragmentNavigation.ShowPopup popup) {
@@ -400,10 +398,9 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void doShowCloseDialog() {
-        var dialogFragment = new GameDialogFrags();
-        dialogFragment.setDialogType(GameDialogType.CLOSE_DIALOG);
+        var dialogFragment = new GameDialogFrags(GameDialogType.CLOSE_DIALOG);
         dialogFragment.setCancelable(false);
-        showDialog(GameDialogType.CLOSE_DIALOG, dialogFragment);
+        showDialog(dialogFragment);
     }
 
     private String getErrorMessage(String inputString, @NonNull ErrorType errorType) {
@@ -418,7 +415,7 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void doShowErrorDialog(String errorStr, ErrorType errorType) {
-        var dialogFragment = new GameDialogFrags();
+        var dialogFragment = new GameDialogFrags(GameDialogType.ERROR_DIALOG_WSEND);
 
         if (errorType == null) {
             dialogFragment.setMessage(errorStr);
@@ -426,11 +423,10 @@ public class GameActivity extends AppCompatActivity {
             dialogFragment.setMessage(getErrorMessage(errorStr, errorType));
         }
 
-        showDialog(GameDialogType.ERROR_DIALOG_WSEND, dialogFragment);
+        showDialog(dialogFragment);
     }
 
-    public void showDialog(GameDialogType dialogType,
-                           GameDialogFrags buildDialog) {
+    public void showDialog(GameDialogFrags buildDialog) {
         if (isFinishing()) return;
         if (isDestroyed()) return;
         assertNonUiThread();
@@ -438,7 +434,7 @@ public class GameActivity extends AppCompatActivity {
         var manager = getSupportFragmentManager();
         if (manager.isDestroyed()) return;
 
-        switch (dialogType) {
+        switch (buildDialog.getDialogType()) {
             case ERROR_DIALOG_WSEND -> buildDialog.show(manager, "errorDialogFragment");
             case ERROR_DIALOG_WOSEND -> buildDialog.show(manager, "loadErrorGameDialogFragment");
             case CLOSE_DIALOG -> buildDialog.show(manager, "closeDialogFragment");

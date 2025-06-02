@@ -59,10 +59,6 @@ public class GameDialogFrags extends DialogFragment {
         }
     };
 
-    public void setDialogType(GameDialogType dialogType) {
-        this.dialogType = dialogType;
-    }
-
     public void setItems(List<String> items) {
         this.items = items;
     }
@@ -75,8 +71,16 @@ public class GameDialogFrags extends DialogFragment {
         this.message = message;
     }
 
+    public GameDialogType getDialogType() {
+        return dialogType;
+    }
+
     private boolean isValidate() {
         return validateUserName() && validateEmail();
+    }
+
+    public GameDialogFrags(GameDialogType dialogType) {
+        this.dialogType = dialogType;
     }
 
     @Override

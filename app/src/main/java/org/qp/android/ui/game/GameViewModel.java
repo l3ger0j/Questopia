@@ -282,8 +282,8 @@ public class GameViewModel extends AndroidViewModel {
         actEmit.emitAndExecute(new GameFragmentNavigation.ShowPopup(type));
     }
 
-    public void doOnShowDialog(GameDialogType type, GameDialogFrags buildDialog) {
-        actEmit.emitAndExecute(new GameFragmentNavigation.ShowDialog(type, buildDialog));
+    public void doOnShowDialog(GameDialogFrags buildDialog) {
+        actEmit.emitAndExecute(new GameFragmentNavigation.ShowDialog(buildDialog));
     }
 
     public String removeHtmlTags(String dirtyHTML) {
@@ -727,8 +727,7 @@ public class GameViewModel extends AndroidViewModel {
     public LibDialogRetValue sendInputDialog(String inputStr) {
         final var message = convertMessage(inputStr);
 
-        var dialogFragment = new GameDialogFrags();
-        dialogFragment.setDialogType(GameDialogType.INPUT_DIALOG);
+        var dialogFragment = new GameDialogFrags(GameDialogType.INPUT_DIALOG);
         if (message.equals("userInputTitle")) {
             dialogFragment.setMessage(ContextCompat.getString(getApplication(), R.string.userInputTitle));
         } else {
@@ -736,7 +735,7 @@ public class GameViewModel extends AndroidViewModel {
         }
         dialogFragment.setCancelable(false);
 
-        runOnUiThread(() -> doOnShowDialog(GameDialogType.INPUT_DIALOG, dialogFragment));
+        runOnUiThread(() -> doOnShowDialog(dialogFragment));
 
         var textValue = dialogConnector.blockingFirst();
         var wrap = new LibDialogRetValue();
@@ -747,8 +746,7 @@ public class GameViewModel extends AndroidViewModel {
     public LibDialogRetValue sendExecutorDialog(String inputStr) {
         final var message = convertMessage(inputStr);
 
-        var dialogFragment = new GameDialogFrags();
-        dialogFragment.setDialogType(GameDialogType.EXECUTOR_DIALOG);
+        var dialogFragment = new GameDialogFrags(GameDialogType.EXECUTOR_DIALOG);
         if (message.equals("execStringTitle")) {
             dialogFragment.setMessage(ContextCompat.getString(getApplication(), R.string.execStringTitle));
         } else {
@@ -756,7 +754,7 @@ public class GameViewModel extends AndroidViewModel {
         }
         dialogFragment.setCancelable(false);
 
-        runOnUiThread(() -> doOnShowDialog(GameDialogType.EXECUTOR_DIALOG, dialogFragment));
+        runOnUiThread(() -> doOnShowDialog(dialogFragment));
 
         var textValue = dialogConnector.blockingFirst();
         var wrap = new LibDialogRetValue();
@@ -770,12 +768,11 @@ public class GameViewModel extends AndroidViewModel {
 
         currentItems.forEach(libMenuItem -> newItems.add(libMenuItem.text));
 
-        var dialogFragment = new GameDialogFrags();
-        dialogFragment.setDialogType(GameDialogType.MENU_DIALOG);
+        var dialogFragment = new GameDialogFrags(GameDialogType.MENU_DIALOG);
         dialogFragment.setItems(newItems);
         dialogFragment.setCancelable(false);
 
-        runOnUiThread(() -> doOnShowDialog(GameDialogType.MENU_DIALOG, dialogFragment));
+        runOnUiThread(() -> doOnShowDialog(dialogFragment));
 
         try {
             var selItem = Integer.parseInt(dialogConnector.blockingFirst());
@@ -800,7 +797,7 @@ public class GameViewModel extends AndroidViewModel {
     }
 
     private void doShowErrorDialog(String errorStr, ErrorType errorType) {
-        var dialogFragment = new GameDialogFrags();
+        var dialogFragment = new GameDialogFrags(GameDialogType.ERROR_DIALOG_WSEND);
 
         if (errorType == null) {
             dialogFragment.setMessage(errorStr);
@@ -808,12 +805,11 @@ public class GameViewModel extends AndroidViewModel {
             dialogFragment.setMessage(getErrorMessage(errorStr, errorType));
         }
 
-        runOnUiThread(() -> doOnShowDialog(GameDialogType.ERROR_DIALOG_WSEND, dialogFragment));
+        runOnUiThread(() -> doOnShowDialog(dialogFragment));
     }
 
     public void showLibDialog(String inputStr, GameDialogType type) {
-        var dialogFragment = new GameDialogFrags();
-        dialogFragment.setDialogType(type);
+        var dialogFragment = new GameDialogFrags(type);
 
         switch (type) {
             case ERROR_DIALOG_WSEND -> dialogFragment.setMessage(inputStr);
@@ -821,7 +817,7 @@ public class GameViewModel extends AndroidViewModel {
             case MESSAGE_DIALOG -> dialogFragment.setProcessedMsg(convertMessage(inputStr));
         }
 
-        runOnUiThread(() -> doOnShowDialog(type, dialogFragment));
+        runOnUiThread(() -> doOnShowDialog(dialogFragment));
     }
 
     public LibDialogRetValue showLibDialog(LibTypeDialog dialog, String inputStr) {
