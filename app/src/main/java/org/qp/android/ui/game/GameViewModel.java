@@ -6,6 +6,7 @@ import static org.qp.android.helpers.utils.ColorUtil.convertRGBAtoBGRA;
 import static org.qp.android.helpers.utils.ColorUtil.getHexColor;
 import static org.qp.android.helpers.utils.FileUtil.findOrCreateFile;
 import static org.qp.android.helpers.utils.FileUtil.findOrCreateFolder;
+import static org.qp.android.helpers.utils.FileUtil.fromFullPath;
 import static org.qp.android.helpers.utils.FileUtil.fromRelPath;
 import static org.qp.android.helpers.utils.FileUtil.isWritableDir;
 import static org.qp.android.helpers.utils.FileUtil.isWritableFile;
@@ -81,6 +82,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutionException;
 
 import io.reactivex.rxjava3.subjects.BehaviorSubject;
 
@@ -451,17 +453,6 @@ public class GameViewModel extends AndroidViewModel {
         player.stop();
     }
 
-    private Uri soundFileGetter(DocumentFile rootDir, String filePath) {
-        var soundFile = fromRelPath(getApplication(), filePath, rootDir, false);
-        if (!isWritableFile(getApplication(), soundFile)) {
-            soundFile = rootDir.findFile(filePath);
-            if (soundFile == null) {
-                return Uri.EMPTY;
-            }
-        }
-        return soundFile.getUri();
-    }
-
     private void initPluginHandler() throws CompletionException {
         try {
             questopiaBundle.sendAsync(new AsyncCallbacks.Stub() {
@@ -523,17 +514,27 @@ public class GameViewModel extends AndroidViewModel {
                 public boolean isPlayingFile(String filePath) throws RemoteException {
                     final var normPath = normalizeContentPath(filePath);
                     final var gameDir = getCurGameDir();
-                    if (isWritableFile(getApplication(), gameDir)) {
-                        var soundFileUri = soundFileGetter(gameDir, normPath);
-                        if (soundFileUri != Uri.EMPTY) {
-                            return player.isPlayingFile(soundFileUri);
-                        } else {
-                            if (getSettingsController().isUseMusicDebug) {
-                                doShowErrorDialog(filePath, ErrorType.SOUND_ERROR);
-                            }
-                        }
+                    if (!isWritableDir(getApplication(), gameDir)) return false;
+
+                    var mainExecutor = ContextCompat.getMainExecutor(getApplication());
+                    try {
+                        return CompletableFuture
+                                .supplyAsync(() -> fromRelPath(getApplication(), normPath, gameDir, false), mainExecutor)
+                                .thenApply(soundFile -> {
+                                    if (isWritableFile(getApplication(), soundFile)) {
+                                        return player.isPlayingFile(soundFile.getUri());
+                                    } else {
+                                        if (getSettingsController().isUseMusicDebug) {
+                                            doShowErrorDialog(filePath, ErrorType.SOUND_ERROR);
+                                        }
+                                        return false;
+                                    }
+                                })
+                                .get();
+                    } catch (ExecutionException | InterruptedException e) {
+                        doShowErrorDialog(e.toString(), ErrorType.EXCEPTION);
+                        return false;
                     }
-                    return false;
                 }
 
                 @Override
@@ -548,66 +549,113 @@ public class GameViewModel extends AndroidViewModel {
                 public void closeFile(String filePath) throws RemoteException {
                     final var normPath = normalizeContentPath(filePath);
                     final var gameDir = getCurGameDir();
-                    if (isWritableFile(getApplication(), gameDir)) {
-                        var soundFileUri = soundFileGetter(gameDir, normPath);
-                        if (soundFileUri != Uri.EMPTY) {
-                            player.closeFile(soundFileUri).exceptionally(t -> {
-                                runOnUiThread(() -> doShowErrorDialog(t.toString(), ErrorType.EXCEPTION));
-                                return null;
+                    if (!isWritableDir(getApplication(), gameDir)) return;
+
+                    var mainExecutor = ContextCompat.getMainExecutor(getApplication());
+                    CompletableFuture
+                            .supplyAsync(() -> fromRelPath(getApplication(), normPath, gameDir, false), mainExecutor)
+                            .thenAccept(soundFile -> {
+                                if (isWritableFile(getApplication(), soundFile)) {
+                                    player.closeFile(soundFile.getUri()).exceptionally(t -> {
+                                        runOnUiThread(() -> doShowErrorDialog(t.toString(), ErrorType.EXCEPTION));
+                                        return null;
+                                    });
+                                } else {
+                                    if (getSettingsController().isUseMusicDebug) {
+                                        doShowErrorDialog(filePath, ErrorType.SOUND_ERROR);
+                                    }
+                                }
                             });
-                        } else {
-                            if (getSettingsController().isUseMusicDebug) {
-                                doShowErrorDialog(filePath, ErrorType.SOUND_ERROR);
-                            }
-                        }
-                    }
                 }
 
                 @Override
                 public void playFile(String path, int volume) throws RemoteException {
                     final var normPath = normalizeContentPath(path);
                     final var gameDir = getCurGameDir();
-                    if (isWritableDir(getApplication(), gameDir)) {
-                        var soundFileUri = soundFileGetter(gameDir, normPath);
-                        if (soundFileUri != Uri.EMPTY) {
-                            player.playFile(getApplication(), soundFileUri, volume).exceptionally(t -> {
-                                runOnUiThread(() -> doShowErrorDialog(t.toString(), ErrorType.EXCEPTION));
-                                return null;
+                    if (!isWritableDir(getApplication(), gameDir)) return;
+
+                    var mainExecutor = ContextCompat.getMainExecutor(getApplication());
+                    CompletableFuture
+                            .supplyAsync(() -> fromRelPath(getApplication(), normPath, gameDir, false), mainExecutor)
+                            .thenAccept(soundFile -> {
+                                if (isWritableFile(getApplication(), soundFile)) {
+                                    player.playFile(getApplication(), soundFile.getUri(), volume).exceptionally(t -> {
+                                        runOnUiThread(() -> doShowErrorDialog(t.toString(), ErrorType.EXCEPTION));
+                                        return null;
+                                    });
+                                } else {
+                                    if (getSettingsController().isUseMusicDebug) {
+                                        doShowErrorDialog(path, ErrorType.SOUND_ERROR);
+                                    }
+                                }
                             });
-                        } else {
-                            if (getSettingsController().isUseMusicDebug) {
-                                doShowErrorDialog(path, ErrorType.SOUND_ERROR);
-                            }
-                        }
-                    }
                 }
 
                 @Override
-                public void requestPermOnFile(Uri fileUri) throws RemoteException {
-                    getApplication().grantUriPermission(
-                            "org.qp.android.questopiabundle",
-                            fileUri,
-                            Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                                    | Intent.FLAG_GRANT_READ_URI_PERMISSION
-                    );
+                public Uri requestReceiveFile(String filePath) throws RemoteException {
+                    if (!isNotEmptyOrBlank(filePath)) return Uri.EMPTY;
+                    final var gameDir = getCurGameDir();
+                    if (!isWritableDir(getApplication(), gameDir)) return Uri.EMPTY;
+
+                    var mainExecutor = ContextCompat.getMainExecutor(getApplication());
+                    try {
+                        return CompletableFuture
+                                .supplyAsync(() -> {
+                                    if (DocumentFileCompat.doesExist(getApplication(), filePath)) {
+                                        var receiveFile = fromFullPath(getApplication(), filePath, gameDir);
+                                        if (isWritableFile(getApplication(), receiveFile)) {
+                                            return receiveFile.getUri();
+                                        }
+                                    } else {
+                                        var receiveFile = fromRelPath(getApplication(), filePath, gameDir, false);
+                                        if (isWritableFile(getApplication(), receiveFile)) {
+                                            return receiveFile.getUri();
+                                        }
+                                    }
+                                    return Uri.EMPTY;
+                                }, mainExecutor)
+                                .thenApply(fileUri -> {
+                                    if (fileUri == Uri.EMPTY) return fileUri;
+                                    getApplication().grantUriPermission(
+                                            "org.qp.android.questopiabundle",
+                                            fileUri,
+                                            Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                                                    | Intent.FLAG_GRANT_READ_URI_PERMISSION
+                                    );
+                                    return fileUri;
+                                })
+                                .get();
+                    } catch (ExecutionException | InterruptedException e) {
+                        doShowErrorDialog(e.toString(), ErrorType.EXCEPTION);
+                        return Uri.EMPTY;
+                    }
                 }
 
                 @Override
                 public Uri requestCreateFile(Uri fileUri, String path) throws RemoteException {
-                    var dir = DocumentFileCompat.fromUri(getApplication(), fileUri);
-                    if (isWritableDir(getApplication(), dir)) {
-                        var file = findOrCreateFile(getApplication(), dir, path, MimeType.TEXT);
-                        if (isWritableFile(getApplication(), file)) {
-                            getApplication().grantUriPermission(
-                                    "org.qp.android.questopiabundle",
-                                    file.getUri(),
-                                    Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                                            | Intent.FLAG_GRANT_READ_URI_PERMISSION
-                            );
-                            return file.getUri();
-                        }
+                    var mainExecutor = ContextCompat.getMainExecutor(getApplication());
+                    try {
+                        return CompletableFuture
+                                .supplyAsync(() -> DocumentFileCompat.fromUri(getApplication(), fileUri), mainExecutor)
+                                .thenApply(dir -> {
+                                    if (isWritableDir(getApplication(), dir)) {
+                                        var file = findOrCreateFile(getApplication(), dir, path, MimeType.TEXT);
+                                        if (isWritableFile(getApplication(), file)) {
+                                            getApplication().grantUriPermission(
+                                                    "org.qp.android.questopiabundle",
+                                                    file.getUri(),
+                                                    Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                                                            | Intent.FLAG_GRANT_READ_URI_PERMISSION
+                                            );
+                                            return file.getUri();
+                                        }
+                                    }
+                                    return Uri.EMPTY;
+                                }).get();
+                    } catch (ExecutionException | InterruptedException e) {
+                        doShowErrorDialog(e.toString(), ErrorType.EXCEPTION);
+                        return Uri.EMPTY;
                     }
-                    return Uri.EMPTY;
                 }
 
                 @Override
@@ -682,6 +730,12 @@ public class GameViewModel extends AndroidViewModel {
 
     public void requestForNativeLib(LibGameRequest req, Uri fileUri) {
         try {
+            getApplication().grantUriPermission(
+                    "org.qp.android.questopiabundle",
+                    fileUri,
+                    Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                            | Intent.FLAG_GRANT_READ_URI_PERMISSION
+            );
             questopiaBundle.doLibRequest(new LibResult<>(req), "", fileUri);
         } catch (RemoteException e) {
             runOnUiThread(() -> doShowErrorDialog(e.toString(), ErrorType.EXCEPTION));

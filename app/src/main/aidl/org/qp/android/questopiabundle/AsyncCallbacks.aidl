@@ -17,7 +17,7 @@ interface AsyncCallbacks {
     void closeFile(String filePath);
     void playFile(String path, int volume);
 
-    void requestPermOnFile(in Uri fileUri);
+    Uri requestReceiveFile(in String filePath);
     Uri requestCreateFile(in Uri fileUri, String path);
 
     void onError(in LibException libException);
