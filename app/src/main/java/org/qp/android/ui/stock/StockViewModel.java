@@ -6,7 +6,6 @@ import static org.qp.android.helpers.utils.DirUtil.isDirContainsGameFile;
 import static org.qp.android.helpers.utils.DirUtil.isWritableDir;
 import static org.qp.android.helpers.utils.FileUtil.copyFileToDir;
 import static org.qp.android.helpers.utils.FileUtil.fromRelPath;
-import static org.qp.android.helpers.utils.FileUtil.isSDCardAvailable;
 import static org.qp.android.helpers.utils.FileUtil.isWritableFile;
 import static org.qp.android.helpers.utils.StringUtil.isNotEmptyOrBlank;
 
@@ -26,7 +25,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.view.ActionMode;
 import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.AndroidViewModel;
@@ -50,7 +48,6 @@ import org.qp.android.dto.stock.TempFileType;
 import org.qp.android.helpers.ErrorType;
 import org.qp.android.helpers.bus.Events;
 import org.qp.android.helpers.utils.DatabaseUtil;
-import org.qp.android.helpers.utils.FileUtil;
 import org.qp.android.model.archive.ArchiveUnpack;
 import org.qp.android.model.notify.NotifyBuilder;
 import org.qp.android.model.repository.LocalGame;
@@ -82,13 +79,9 @@ public class StockViewModel extends AndroidViewModel {
     public static final int CODE_PICK_IMAGE_FILE = 300;
     public static final int CODE_PICK_PATH_FILE = 301;
     public static final int CODE_PICK_MOD_FILE = 302;
-
-    public static final String FOLDER_LOCK = "Select a folder location";
-    public static final String FOLDER_CREATE = "Create a folder";
-
-    public static final String GAME_DIR_NAME = "Questopia games";
-
     public final MutableLiveData<Integer> currPageNumber = new MutableLiveData<>();
+    public final Events.Emitter actEmit = new Events.Emitter();
+    public final Events.Emitter fragLocalRVEmit = new Events.Emitter();
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private final String TAG = this.getClass().getSimpleName();
     private final HashMap<Long, Game> gamesMap = new HashMap<>();
@@ -111,9 +104,6 @@ public class StockViewModel extends AndroidViewModel {
     public Game currGameEntry;
     public MutableLiveData<Game> gameEntryLiveData = new MutableLiveData<>();
     public MutableLiveData<List<Game>> gameEntriesLiveData = new MutableLiveData<>();
-    public final Events.Emitter actEmit = new Events.Emitter();
-    public final Events.Emitter fragLocalRVEmit = new Events.Emitter();
-    public final Events.Emitter fragRemoteRVEmit = new Events.Emitter();
     public Flowable<PagingData<Game>> remoteDataFlow;
     private Uri gameFolderUri;
     private DocumentFile tempImageFile, tempPathFile, tempModFile;
@@ -129,7 +119,6 @@ public class StockViewModel extends AndroidViewModel {
         databaseUtil = new DatabaseUtil(gameDao);
 
         initRecycler();
-        checkFolder();
     }
 
     private void initRecycler() {
@@ -146,29 +135,6 @@ public class StockViewModel extends AndroidViewModel {
         remoteDataFlow = PagingRx.getFlowable(pager);
         var coroutineScope = ViewModelKt.getViewModelScope(this);
         PagingRx.cachedIn(remoteDataFlow, coroutineScope);
-    }
-
-    private void checkFolder() {
-        // Questopia games (folder) -> Downloaded games (folder), .nomedia (file), .nosearch (file)
-        // if is exist - do nothing
-        // if is not exist - do show dialog -> Game folder is not found! Process to create?
-
-        DocumentFile targetFolder = null;
-        for (var file : ContextCompat.getExternalFilesDirs(getApplication(), null)) {
-            var rootPath = file.getAbsolutePath();
-            var storagePath = rootPath.replace("Android/data/org.qp.android/files", "");
-            var rootFile = DocumentFile.fromFile(new File(storagePath));
-            if (rootFile != null) {
-                targetFolder = DocumentFileUtils.findFolder(rootFile, GAME_DIR_NAME);
-                break;
-            }
-        }
-
-        if (isWritableDir(getApplication(), targetFolder)) return;
-
-        var inputStr = "No folder for downloading games was found. Download functionality is disabled";
-        var rightButtonMsg = isSDCardAvailable(getApplication()) ? FOLDER_LOCK : FOLDER_CREATE;
-        fragRemoteRVEmit.waitAndExecuteOnce(new StockFragmentNavigation.ShowErrorBanner(inputStr, rightButtonMsg));
     }
 
     // region Getter/Setter
@@ -242,18 +208,6 @@ public class StockViewModel extends AndroidViewModel {
         if (!isWritableDir(getApplication(), gameDir)) return false;
         var modDir = fromRelPath(getApplication(), "mods", gameDir, false);
         return isWritableFile(getApplication(), modDir);
-    }
-
-    public boolean doMakeGameDir(DocumentFile rootDir) {
-        if (rootDir == null) {
-            rootDir = DocumentFile.fromFile(Environment.getExternalStorageDirectory());
-            if (!isWritableDir(getApplication(), rootDir)) return false;
-            var gameFolder = FileUtil.findOrCreateFolder(getApplication(), rootDir, GAME_DIR_NAME);
-            if (!isWritableDir(getApplication(), gameFolder)) return false;
-            gameFolderUri = gameFolder.getUri();
-            return true;
-        }
-        return false;
     }
 
     public void doOnShowFilePicker(int requestCode, String[] mimeTypes) {

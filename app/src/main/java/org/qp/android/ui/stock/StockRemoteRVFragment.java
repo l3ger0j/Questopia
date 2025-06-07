@@ -1,7 +1,5 @@
 package org.qp.android.ui.stock;
 
-import static org.qp.android.ui.stock.StockViewModel.FOLDER_CREATE;
-
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -17,8 +15,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import org.qp.android.databinding.FragmentRecyclerRemoteBinding;
 import org.qp.android.helpers.adapters.RecyclerItemClickListener;
-import org.qp.android.helpers.bus.Events;
-import org.qp.android.ui.dialogs.StockDialogType;
 
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 
@@ -38,11 +34,6 @@ public class StockRemoteRVFragment extends Fragment {
         stockViewModel = new ViewModelProvider(requireActivity()).get(StockViewModel.class);
         mRecyclerView = recyclerBinding.shareRV.getRoot();
 
-        var banner = recyclerBinding.remoteErrorBanner;
-        banner.setLeftButton("Dismiss", banner1 -> {
-            banner.dismiss(500);
-        });
-
         var orientation = getResources().getConfiguration().orientation;
         if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
             mRecyclerView.setLayoutManager(new GridLayoutManager(requireContext(), 3));
@@ -60,28 +51,6 @@ public class StockRemoteRVFragment extends Fragment {
                 remoteAdapter.withLoadStateFooter(
                         new RemoteGamesLoadStateAdapter(view -> remoteAdapter.retry()))
         );
-
-        stockViewModel.fragRemoteRVEmit.observe(getViewLifecycleOwner(), new Events.EventObserver(event -> {
-            if (event instanceof StockFragmentNavigation.ShowErrorBanner errorBanner) {
-                banner.setMessage(errorBanner.inputMessage);
-
-                banner.setRightButton(errorBanner.rightButtonMsg, banner3 -> {
-                    if (errorBanner.rightButtonMsg.equals(FOLDER_CREATE)) {
-                        if (stockViewModel.doMakeGameDir(null)) {
-                            banner.dismiss(500);
-                        }
-                    } else {
-                        stockViewModel.showDialogFragment(
-                                getChildFragmentManager(),
-                                StockDialogType.GAME_FOLDER_INIT,
-                                null,
-                                null
-                        );
-                    }
-                });
-                banner.show(500);
-            }
-        }));
 
         return recyclerBinding.getRoot();
     }
