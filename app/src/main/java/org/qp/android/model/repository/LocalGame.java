@@ -62,7 +62,7 @@ public class LocalGame {
                 });
     }
 
-    public void insertEntryInDB(Game unfilledEntry, DocumentFile rootDir) {
+    public CompletableFuture<Void> insertEntryInDB(Game unfilledEntry, DocumentFile rootDir) {
         var gameFiles = new ArrayList<Uri>();
         var files = rootDir.listFiles();
 
@@ -82,7 +82,7 @@ public class LocalGame {
         createNoSearchFile(rootDir);
 
         var databaseUtil = new DatabaseUtil(gameDao);
-        databaseUtil.insertEntry(unfilledEntry);
+        return databaseUtil.insertEntry(unfilledEntry);
     }
 
     public CompletableFuture<Void> createEntryInDBFromDir(File rootDir) {

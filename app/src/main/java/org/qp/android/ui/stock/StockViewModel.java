@@ -386,9 +386,10 @@ public class StockViewModel extends AndroidViewModel {
         try {
             if (tempImageFile != null) unfilledEntry.gameIconUri = tempImageFile.getUri();
 
-            localGame.insertEntryInDB(unfilledEntry, rootDir);
-            loadGameDataFromDB();
-            dialogFragments.dismiss();
+            localGame.insertEntryInDB(unfilledEntry, rootDir).thenRun(() -> {
+                loadGameDataFromDB();
+                dialogFragments.dismiss();
+            });
         } catch (NullPointerException ex) {
             doOnShowErrorDialog(ex.getMessage(), ErrorType.EXCEPTION);
         }
