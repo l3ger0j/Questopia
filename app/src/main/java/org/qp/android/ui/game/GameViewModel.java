@@ -49,7 +49,6 @@ import com.anggrayudi.storage.file.DocumentFileCompat;
 import com.anggrayudi.storage.file.MimeType;
 import com.google.android.material.textfield.TextInputLayout;
 
-import org.qp.android.QuestopiaApplication;
 import org.qp.android.R;
 import org.qp.android.helpers.ErrorType;
 import org.qp.android.helpers.bus.Events;
@@ -161,18 +160,18 @@ public class GameViewModel extends AndroidViewModel {
 
     @Inject
     public GameViewModel(@NonNull Application application,
-                         @NonNull PluginClient pluginClient) {
+                         @NonNull PluginClient pluginClient,
+                         @NonNull HtmlProcessor htmlProcessor,
+                         @NonNull AudioPlayer audioPlayer) {
         super(application);
 
         this.pluginClient = pluginClient;
+        this.processor = htmlProcessor;
+        this.player = audioPlayer;
 
         preferences = PreferenceManager.getDefaultSharedPreferences(application);
         preferences.registerOnSharedPreferenceChangeListener(preferenceChangeListener);
         nativeLibVer = getSettingsController().nativeLibVersion;
-
-        var app = (QuestopiaApplication) application;
-        this.processor = app.htmlProcessor;
-        this.player = app.audioPlayer;
     }
 
     // region Getter/Setter

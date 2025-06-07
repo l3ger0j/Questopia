@@ -2,6 +2,9 @@ package org.qp.android.di;
 
 import android.content.Context;
 
+import org.qp.android.model.service.AudioPlayer;
+import org.qp.android.model.service.HtmlProcessor;
+
 import javax.inject.Singleton;
 
 import dagger.Module;
@@ -18,6 +21,18 @@ public class AppModule {
     @Singleton
     public Context provideContext(@ApplicationContext Context context) {
         return context;
+    }
+
+    @Provides
+    @Singleton
+    public AudioPlayer provideAudioPlayer() {
+        return new AudioPlayer();
+    }
+
+    @Provides
+    @Singleton
+    public HtmlProcessor provideHtmlProcessor() {
+        return new HtmlProcessor();
     }
 
 }
