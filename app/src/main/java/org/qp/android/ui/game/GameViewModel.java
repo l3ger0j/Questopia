@@ -604,7 +604,7 @@ public class GameViewModel extends AndroidViewModel {
                         return CompletableFuture
                                 .supplyAsync(() -> {
                                     if (DocumentFileCompat.doesExist(getApplication(), filePath)) {
-                                        var receiveFile = fromFullPath(getApplication(), filePath, gameDir);
+                                        var receiveFile = fromFullPath(getApplication(), filePath, false);
                                         if (isWritableFile(getApplication(), receiveFile)) {
                                             return receiveFile.getUri();
                                         }
