@@ -62,6 +62,9 @@ import java.util.Objects;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ThreadLocalRandom;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class GameActivity extends AppCompatActivity {
 
     public static final int TAB_MAIN_DESC_AND_ACTIONS = 0;

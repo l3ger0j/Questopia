@@ -17,6 +17,9 @@ import androidx.navigation.fragment.NavHostFragment;
 import org.qp.android.R;
 import org.qp.android.databinding.ActivitySettingsBinding;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class SettingsActivity extends AppCompatActivity {
 
     private ActivitySettingsBinding settingsViewBinding;

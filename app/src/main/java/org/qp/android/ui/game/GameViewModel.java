@@ -54,7 +54,6 @@ import org.qp.android.R;
 import org.qp.android.helpers.ErrorType;
 import org.qp.android.helpers.bus.Events;
 import org.qp.android.model.plugin.PluginClient;
-import org.qp.android.model.plugin.PluginService;
 import org.qp.android.model.plugin.PluginType;
 import org.qp.android.model.service.AudioPlayer;
 import org.qp.android.model.service.HtmlProcessor;
@@ -84,8 +83,12 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 
-import io.reactivex.rxjava3.subjects.BehaviorSubject;
+import javax.inject.Inject;
 
+import dagger.hilt.android.lifecycle.HiltViewModel;
+import io.reactivex.rxjava3.subjects.PublishSubject;
+
+@HiltViewModel
 public class GameViewModel extends AndroidViewModel {
 
     private static final String PAGE_HEAD_TEMPLATE = """
@@ -111,11 +114,11 @@ public class GameViewModel extends AndroidViewModel {
     public final MutableLiveData<List<LibGenItem>> actsListLiveData = new MutableLiveData<>();
     public final MutableLiveData<Boolean> actsVisibility = new MutableLiveData<>();
     public final MutableLiveData<List<LibGenItem>> objsListLiveData = new MutableLiveData<>();
-    private final BehaviorSubject<String> dialogConnector = BehaviorSubject.create();
+    private final PublishSubject<String> dialogConnector = PublishSubject.create();
     private final MutableLiveData<SettingsController> controllerObserver = new MutableLiveData<>();
     private final MutableLiveData<String> mainDescLiveData = new MutableLiveData<>();
     private final MutableLiveData<String> varsDescLiveData = new MutableLiveData<>();
-    private final PluginClient pluginClient = PluginService.client;
+    private final PluginClient pluginClient;
     private final AudioPlayer player;
     private final HtmlProcessor processor;
     private final int nativeLibVer;
@@ -156,8 +159,12 @@ public class GameViewModel extends AndroidViewModel {
         }
     };
 
-    public GameViewModel(@NonNull Application application) {
+    @Inject
+    public GameViewModel(@NonNull Application application,
+                         @NonNull PluginClient pluginClient) {
         super(application);
+
+        this.pluginClient = pluginClient;
 
         preferences = PreferenceManager.getDefaultSharedPreferences(application);
         preferences.registerOnSharedPreferenceChangeListener(preferenceChangeListener);
@@ -516,11 +523,10 @@ public class GameViewModel extends AndroidViewModel {
                     final var gameDir = getCurGameDir();
                     if (!isWritableDir(getApplication(), gameDir)) return false;
 
-                    var mainExecutor = ContextCompat.getMainExecutor(getApplication());
                     try {
                         return CompletableFuture
-                                .supplyAsync(() -> fromRelPath(getApplication(), normPath, gameDir, false), mainExecutor)
-                                .thenApply(soundFile -> {
+                                .supplyAsync(() -> fromRelPath(getApplication(), normPath, gameDir, true))
+                                .thenApplyAsync(soundFile -> {
                                     if (isWritableFile(getApplication(), soundFile)) {
                                         return player.isPlayingFile(soundFile.getUri());
                                     } else {
@@ -551,10 +557,9 @@ public class GameViewModel extends AndroidViewModel {
                     final var gameDir = getCurGameDir();
                     if (!isWritableDir(getApplication(), gameDir)) return;
 
-                    var mainExecutor = ContextCompat.getMainExecutor(getApplication());
                     CompletableFuture
-                            .supplyAsync(() -> fromRelPath(getApplication(), normPath, gameDir, false), mainExecutor)
-                            .thenAccept(soundFile -> {
+                            .supplyAsync(() -> fromRelPath(getApplication(), normPath, gameDir, true))
+                            .thenAcceptAsync(soundFile -> {
                                 if (isWritableFile(getApplication(), soundFile)) {
                                     player.closeFile(soundFile.getUri()).exceptionally(t -> {
                                         runOnUiThread(() -> doShowErrorDialog(t.toString(), ErrorType.EXCEPTION));
@@ -574,10 +579,9 @@ public class GameViewModel extends AndroidViewModel {
                     final var gameDir = getCurGameDir();
                     if (!isWritableDir(getApplication(), gameDir)) return;
 
-                    var mainExecutor = ContextCompat.getMainExecutor(getApplication());
                     CompletableFuture
-                            .supplyAsync(() -> fromRelPath(getApplication(), normPath, gameDir, false), mainExecutor)
-                            .thenAccept(soundFile -> {
+                            .supplyAsync(() -> fromRelPath(getApplication(), normPath, gameDir, true))
+                            .thenAcceptAsync(soundFile -> {
                                 if (isWritableFile(getApplication(), soundFile)) {
                                     player.playFile(getApplication(), soundFile.getUri(), volume).exceptionally(t -> {
                                         runOnUiThread(() -> doShowErrorDialog(t.toString(), ErrorType.EXCEPTION));
@@ -597,7 +601,6 @@ public class GameViewModel extends AndroidViewModel {
                     final var gameDir = getCurGameDir();
                     if (!isWritableDir(getApplication(), gameDir)) return Uri.EMPTY;
 
-                    var mainExecutor = ContextCompat.getMainExecutor(getApplication());
                     try {
                         return CompletableFuture
                                 .supplyAsync(() -> {
@@ -607,14 +610,14 @@ public class GameViewModel extends AndroidViewModel {
                                             return receiveFile.getUri();
                                         }
                                     } else {
-                                        var receiveFile = fromRelPath(getApplication(), filePath, gameDir, false);
+                                        var receiveFile = fromRelPath(getApplication(), filePath, gameDir, true);
                                         if (isWritableFile(getApplication(), receiveFile)) {
                                             return receiveFile.getUri();
                                         }
                                     }
                                     return Uri.EMPTY;
-                                }, mainExecutor)
-                                .thenApply(fileUri -> {
+                                })
+                                .thenApplyAsync(fileUri -> {
                                     if (fileUri == Uri.EMPTY) return fileUri;
                                     getApplication().grantUriPermission(
                                             "org.qp.android.questopiabundle",
@@ -633,11 +636,10 @@ public class GameViewModel extends AndroidViewModel {
 
                 @Override
                 public Uri requestCreateFile(Uri fileUri, String path) throws RemoteException {
-                    var mainExecutor = ContextCompat.getMainExecutor(getApplication());
                     try {
                         return CompletableFuture
-                                .supplyAsync(() -> DocumentFileCompat.fromUri(getApplication(), fileUri), mainExecutor)
-                                .thenApply(dir -> {
+                                .supplyAsync(() -> DocumentFileCompat.fromUri(getApplication(), fileUri))
+                                .thenApplyAsync(dir -> {
                                     if (isWritableDir(getApplication(), dir)) {
                                         var file = findOrCreateFile(getApplication(), dir, path, MimeType.TEXT);
                                         if (isWritableFile(getApplication(), file)) {

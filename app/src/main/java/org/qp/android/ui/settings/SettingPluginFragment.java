@@ -26,15 +26,19 @@ import org.qp.android.databinding.FragmentRecyclerBinding;
 import org.qp.android.dto.plugin.PluginInfo;
 import org.qp.android.helpers.adapters.RecyclerItemClickListener;
 import org.qp.android.model.plugin.PluginClient;
-import org.qp.android.model.plugin.PluginService;
 import org.qp.android.questopiabundle.IQuestopiaBundle;
 
 import java.util.Collections;
 import java.util.List;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class SettingPluginFragment extends Fragment {
 
-    private final PluginClient client = PluginService.client;
+    @Inject PluginClient client;
     private final MutableLiveData<List<PluginInfo>> infoPluginsLiveData = new MutableLiveData<>();
     private RecyclerView recyclerView;
     private SettingPluginAdapter pluginAdapter;

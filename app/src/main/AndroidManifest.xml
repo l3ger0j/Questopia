@@ -52,8 +52,6 @@
             android:label="@string/settingsTitle"
             android:theme="@style/AppTheme" />
 
-        <service android:name=".model.plugin.PluginService" />
-
         <service
             android:name="androidx.appcompat.app.AppLocalesMetadataHolderService"
             android:enabled="false"

@@ -20,14 +20,6 @@ public class PluginClient {
         this.clientExecutor = Executors.newSingleThreadExecutor();
     }
 
-    void stopThread() {
-        clientExecutor.shutdown();
-    }
-
-    public CompletableFuture<Void> proxyPluginMethods(final Runnable runnable) {
-        return CompletableFuture.runAsync(runnable, clientExecutor);
-    }
-
     public boolean isPluginExist(Context context, PluginType pluginType) {
         if (pluginType == PluginType.ENGINE_PLUGIN) {
             var intent = new Intent(ENGINE_PLUGIN_ID);
