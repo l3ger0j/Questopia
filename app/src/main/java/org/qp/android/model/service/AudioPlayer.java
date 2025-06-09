@@ -122,14 +122,16 @@ public class AudioPlayer {
     }
 
     public void pause() {
+        if (audioExecutor == null) return;
         if (isPaused) return;
         isPaused = true;
 
-        audioExecutor.submit(() ->
-                sounds.values().stream()
-                        .filter(player -> player != null && player.isPlaying())
-                        .forEach(MediaPlayer::pause)
-        );
+        CompletableFuture
+                .runAsync(() ->
+                        sounds.values().stream()
+                                .filter(player -> player != null && player.isPlaying())
+                                .forEach(MediaPlayer::pause),
+                        audioExecutor);
     }
 
     public void resume() {
