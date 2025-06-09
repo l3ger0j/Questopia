@@ -953,7 +953,7 @@ public class GameViewModel extends AndroidViewModel {
                 if (getSettingsController().isUseImageDebug) {
                     doShowErrorDialog(uri.getPath(), ErrorType.IMAGE_ERROR);
                 }
-                return null;
+                return super.shouldInterceptRequest(view, request);
             }
         }
     }
