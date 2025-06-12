@@ -524,17 +524,22 @@ public class GameViewModel extends AndroidViewModel {
 
                     try {
                         return CompletableFuture
-                                .supplyAsync(() -> fromRelPath(getApplication(), normPath, gameDir, true))
+                                .supplyAsync(() -> fromRelPath(getApplication(), normPath, gameDir, false))
                                 .thenApplyAsync(soundFile -> {
                                     if (isWritableFile(getApplication(), soundFile)) {
-                                        return player.isPlayingFile(soundFile.getUri());
+                                        return soundFile.getUri();
                                     } else {
-                                        if (getSettingsController().isUseMusicDebug) {
-                                            doShowErrorDialog(filePath, ErrorType.SOUND_ERROR);
-                                        }
-                                        return false;
+                                        var errorMsg = String.format("Sound file by path: %s not writable", filePath);
+                                        throw new CompletionException(new RuntimeException(errorMsg));
                                     }
                                 })
+                                .exceptionally(throwable -> {
+                                    if (getSettingsController().isUseMusicDebug) {
+                                        doShowErrorDialog(throwable.toString(), ErrorType.SOUND_ERROR);
+                                    }
+                                    return Uri.EMPTY;
+                                })
+                                .thenApply(player::isPlayingFile)
                                 .get();
                     } catch (ExecutionException | InterruptedException e) {
                         doShowErrorDialog(e.toString(), ErrorType.EXCEPTION);
@@ -557,18 +562,27 @@ public class GameViewModel extends AndroidViewModel {
                     if (!isWritableDir(getApplication(), gameDir)) return;
 
                     CompletableFuture
-                            .supplyAsync(() -> fromRelPath(getApplication(), normPath, gameDir, true))
-                            .thenAcceptAsync(soundFile -> {
+                            .supplyAsync(() -> fromRelPath(getApplication(), normPath, gameDir, false))
+                            .thenApplyAsync(soundFile -> {
                                 if (isWritableFile(getApplication(), soundFile)) {
-                                    player.closeFile(soundFile.getUri()).exceptionally(t -> {
-                                        runOnUiThread(() -> doShowErrorDialog(t.toString(), ErrorType.EXCEPTION));
-                                        return null;
-                                    });
+                                    return soundFile.getUri();
                                 } else {
-                                    if (getSettingsController().isUseMusicDebug) {
-                                        doShowErrorDialog(filePath, ErrorType.SOUND_ERROR);
-                                    }
+                                    return Uri.EMPTY;
                                 }
+                            })
+                            .thenCompose(uri -> {
+                                if (uri != Uri.EMPTY) {
+                                    return player.closeFile(uri);
+                                } else {
+                                    var errorMsg = String.format("Sound file by path: %s not writable", filePath);
+                                    throw new CompletionException(new RuntimeException(errorMsg));
+                                }
+                            })
+                            .exceptionally(throwable -> {
+                                if (getSettingsController().isUseMusicDebug) {
+                                    doShowErrorDialog(throwable.toString(), ErrorType.SOUND_ERROR);
+                                }
+                                return null;
                             });
                 }
 
@@ -579,18 +593,27 @@ public class GameViewModel extends AndroidViewModel {
                     if (!isWritableDir(getApplication(), gameDir)) return;
 
                     CompletableFuture
-                            .supplyAsync(() -> fromRelPath(getApplication(), normPath, gameDir, true))
-                            .thenAcceptAsync(soundFile -> {
+                            .supplyAsync(() -> fromRelPath(getApplication(), normPath, gameDir, false))
+                            .thenApplyAsync(soundFile -> {
                                 if (isWritableFile(getApplication(), soundFile)) {
-                                    player.playFile(getApplication(), soundFile.getUri(), volume).exceptionally(t -> {
-                                        runOnUiThread(() -> doShowErrorDialog(t.toString(), ErrorType.EXCEPTION));
-                                        return null;
-                                    });
+                                    return soundFile.getUri();
                                 } else {
-                                    if (getSettingsController().isUseMusicDebug) {
-                                        doShowErrorDialog(path, ErrorType.SOUND_ERROR);
-                                    }
+                                    return Uri.EMPTY;
                                 }
+                            })
+                            .thenCompose(uri -> {
+                                if (uri != Uri.EMPTY) {
+                                    return player.playFile(getApplication(), uri, volume);
+                                } else {
+                                    var errorMsg = String.format("Sound file by path: %s not writable", path);
+                                    throw new CompletionException(new RuntimeException(errorMsg));
+                                }
+                            })
+                            .exceptionally(throwable -> {
+                                if (getSettingsController().isUseMusicDebug) {
+                                    doShowErrorDialog(throwable.toString(), ErrorType.SOUND_ERROR);
+                                }
+                                return null;
                             });
                 }
 
@@ -602,19 +625,20 @@ public class GameViewModel extends AndroidViewModel {
 
                     try {
                         return CompletableFuture
-                                .supplyAsync(() -> {
-                                    if (DocumentFileCompat.doesExist(getApplication(), filePath)) {
-                                        var receiveFile = fromFullPath(getApplication(), filePath, false);
-                                        if (isWritableFile(getApplication(), receiveFile)) {
-                                            return receiveFile.getUri();
-                                        }
+                                .supplyAsync(() -> DocumentFileCompat.doesExist(getApplication(), filePath))
+                                .thenApplyAsync(aBoolean -> {
+                                    if (aBoolean) {
+                                        return fromFullPath(getApplication(), filePath, false);
                                     } else {
-                                        var receiveFile = fromRelPath(getApplication(), filePath, gameDir, true);
-                                        if (isWritableFile(getApplication(), receiveFile)) {
-                                            return receiveFile.getUri();
-                                        }
+                                        return fromRelPath(getApplication(), filePath, gameDir, false);
                                     }
-                                    return Uri.EMPTY;
+                                })
+                                .thenApplyAsync(receiveFile -> {
+                                    if (isWritableFile(getApplication(), receiveFile)) {
+                                        return receiveFile.getUri();
+                                    } else {
+                                        return Uri.EMPTY;
+                                    }
                                 })
                                 .thenApplyAsync(fileUri -> {
                                     if (fileUri == Uri.EMPTY) return fileUri;
@@ -635,24 +659,30 @@ public class GameViewModel extends AndroidViewModel {
 
                 @Override
                 public Uri requestCreateFile(Uri fileUri, String path) throws RemoteException {
+                    final var gameDir = getCurGameDir();
+                    if (!isWritableDir(getApplication(), gameDir)) return Uri.EMPTY;
+
                     try {
                         return CompletableFuture
-                                .supplyAsync(() -> DocumentFileCompat.fromUri(getApplication(), fileUri))
-                                .thenApplyAsync(dir -> {
-                                    if (isWritableDir(getApplication(), dir)) {
-                                        var file = findOrCreateFile(getApplication(), dir, path, MimeType.TEXT);
-                                        if (isWritableFile(getApplication(), file)) {
-                                            getApplication().grantUriPermission(
-                                                    "org.qp.android.questopiabundle",
-                                                    file.getUri(),
-                                                    Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                                                            | Intent.FLAG_GRANT_READ_URI_PERMISSION
-                                            );
-                                            return file.getUri();
-                                        }
+                                .supplyAsync(() -> findOrCreateFile(getApplication(), gameDir, path, MimeType.TEXT))
+                                .thenApplyAsync(newFile -> {
+                                    if (isWritableFile(getApplication(), newFile)) {
+                                        return newFile.getUri();
+                                    } else {
+                                        return Uri.EMPTY;
                                     }
-                                    return Uri.EMPTY;
-                                }).get();
+                                })
+                                .thenApplyAsync(newFileUri -> {
+                                    if (newFileUri == Uri.EMPTY) return newFileUri;
+                                    getApplication().grantUriPermission(
+                                            "org.qp.android.questopiabundle",
+                                            newFileUri,
+                                            Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                                                    | Intent.FLAG_GRANT_READ_URI_PERMISSION
+                                    );
+                                    return newFileUri;
+                                })
+                                .get();
                     } catch (ExecutionException | InterruptedException e) {
                         doShowErrorDialog(e.toString(), ErrorType.EXCEPTION);
                         return Uri.EMPTY;
