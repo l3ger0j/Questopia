@@ -550,12 +550,12 @@ public class GameActivity extends AppCompatActivity {
     }
 
     public void startReadOrWriteSave(int slotAction) {
-        Intent mIntent;
         switch (slotAction) {
             case LOAD -> {
-                mIntent = new Intent(Intent.ACTION_GET_CONTENT);
+                var mIntent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                mIntent.addCategory(Intent.CATEGORY_OPENABLE);
                 mIntent.putExtra(Intent.ACTION_GET_CONTENT, true);
-                mIntent.setType("application/octet-stream");
+                mIntent.setType(MimeType.BINARY_FILE);
                 this.slotAction = slotAction;
                 saveResultLaunch.launch(mIntent);
             }
@@ -564,15 +564,16 @@ public class GameActivity extends AppCompatActivity {
                 if (!isWritableDir(getApplication(), gameDir)) return;
                 final var gameDirName = gameDir.getName();
 
-                mIntent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+                var mIntent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
                 var extraValue = "";
                 if (isNotEmptyOrBlank(gameDirName)) {
                     extraValue = gameDirName + ".sav";
                 } else {
                     extraValue = ThreadLocalRandom.current().nextInt() + ".sav";
                 }
+                mIntent.addCategory(Intent.CATEGORY_OPENABLE);
                 mIntent.putExtra(Intent.EXTRA_TITLE, extraValue);
-                mIntent.setType("application/octet-stream");
+                mIntent.setType(MimeType.BINARY_FILE);
                 this.slotAction = slotAction;
                 saveResultLaunch.launch(mIntent);
             }
