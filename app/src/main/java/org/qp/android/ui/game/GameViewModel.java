@@ -24,7 +24,6 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -201,9 +200,7 @@ public class GameViewModel extends AndroidViewModel {
     }
 
     public int getTextColor() {
-        var libState = libGameState;
-        if (libState == null) return Color.WHITE;
-        var config = libState.interfaceConfig;
+        var config = getIConfig();
         if (getSettingsController().isUseGameTextColor && config.fontColor != 0) {
             return convertRGBAtoBGRA((int) config.fontColor);
         } else {
