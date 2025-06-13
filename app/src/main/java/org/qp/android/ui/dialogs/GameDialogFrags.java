@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -13,6 +14,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.os.BundleCompat;
 import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -21,6 +23,10 @@ import com.google.android.material.textfield.TextInputLayout;
 
 import org.qp.android.R;
 import org.qp.android.databinding.DialogImageBinding;
+import org.qp.android.databinding.FragmentRecyclerBinding;
+import org.qp.android.helpers.adapters.RecyclerItemClickListener;
+import org.qp.android.questopiabundle.dto.LibGenItem;
+import org.qp.android.ui.game.GameItemAdapter;
 import org.qp.android.ui.game.GameViewModel;
 
 import java.util.ArrayList;
@@ -30,7 +36,7 @@ import java.util.Optional;
 public class GameDialogFrags extends DialogFragment {
 
     public Uri pathToImage = Uri.EMPTY;
-    private List<String> items;
+    private List<LibGenItem> items;
     private GameDialogType dialogType;
     private DialogImageBinding imageBinding;
     private String processedMsg;
@@ -59,7 +65,7 @@ public class GameDialogFrags extends DialogFragment {
         }
     };
 
-    public void setItems(List<String> items) {
+    public void setItems(List<LibGenItem> items) {
         this.items = items;
     }
 
@@ -120,7 +126,7 @@ public class GameDialogFrags extends DialogFragment {
                 dialogType = GameDialogType.valueOf(savedInstanceState.getString("selectedDialogType"));
             }
             if (savedInstanceState.containsKey("items")) {
-                items = savedInstanceState.getStringArrayList("items");
+                items = BundleCompat.getParcelableArrayList(savedInstanceState, "items", LibGenItem.class);
             }
             if (savedInstanceState.containsKey("message")) {
                 message = savedInstanceState.getString("message");
@@ -201,8 +207,34 @@ public class GameDialogFrags extends DialogFragment {
                 return builder.create();
             }
             case MENU_DIALOG -> {
-                builder.setItems(items.toArray(new CharSequence[0]),
-                        (dialog, which) -> gameViewModel.onDialogListClick(this, which));
+                var recyclerView = FragmentRecyclerBinding.inflate(getLayoutInflater());
+                var adapter = new GameItemAdapter();
+                adapter.typeface = gameViewModel.getSettingsController().getTypeface();
+                adapter.textSize = gameViewModel.getFontSize();
+                adapter.textColor = gameViewModel.getTextColor();
+                adapter.linkTextColor = gameViewModel.getLinkColor();
+                adapter.backgroundColor = gameViewModel.getBackgroundColor();
+                adapter.submitList(items);
+                recyclerView.shareRecyclerView.setBackgroundColor(gameViewModel.getBackgroundColor());
+                recyclerView.shareRecyclerView.setAdapter(adapter);
+                recyclerView.shareRecyclerView.addOnItemTouchListener(
+                        new RecyclerItemClickListener(
+                                requireContext(),
+                                recyclerView.shareRecyclerView,
+                                new RecyclerItemClickListener.OnItemClickListener() {
+                                    @Override
+                                    public void onItemClick(View view, int position) {
+                                        gameViewModel.onDialogListClick(GameDialogFrags.this, position);
+                                        GameDialogFrags.this.onDestroyView();
+                                    }
+
+                                    @Override
+                                    public void onLongItemClick(View view, int position) {
+                                    }
+                                }
+                        )
+                );
+                builder.setView(recyclerView.getRoot());
                 return builder.create();
             }
             case MESSAGE_DIALOG -> {
@@ -245,7 +277,7 @@ public class GameDialogFrags extends DialogFragment {
         super.onSaveInstanceState(outState);
         outState.putString("selectedDialogType", dialogType.toString());
         if (items != null) {
-            outState.putStringArrayList("items", new ArrayList<>(items));
+            outState.putParcelableArrayList("items", new ArrayList<>(items));
         }
         if (message != null) {
             outState.putString("message", message);

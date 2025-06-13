@@ -73,7 +73,6 @@ import org.qp.android.ui.dialogs.GamePopupType;
 import org.qp.android.ui.settings.SettingsController;
 
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -345,16 +344,19 @@ public class GameViewModel extends AndroidViewModel {
     }
 
     public void onDialogNegativeClick(DialogFragment dialog) {
-        if (dialog.getTag() != null) {
-            if (dialog.getTag().equals("showMenuDialogFragment")) {
-                dialogConnector.onNext(String.valueOf(-1));
+        var dialogTag = dialog.getTag();
+        if (dialogTag != null) {
+            switch (dialogTag) {
+                case "inputDialogFragment", "executorDialogFragment" -> dialogConnector.onNext("");
+                case "menuDialogFragment" -> dialogConnector.onNext(String.valueOf(-1));
             }
         }
     }
 
     public void onDialogListClick(DialogFragment dialog, int which) {
-        if (dialog.getTag() != null) {
-            if (Objects.equals(dialog.getTag(), "showMenuDialogFragment")) {
+        var dialogTag = dialog.getTag();
+        if (dialogTag != null) {
+            if (Objects.equals(dialogTag, "menuDialogFragment")) {
                 dialogConnector.onNext(String.valueOf(which));
             }
         }
@@ -779,7 +781,6 @@ public class GameViewModel extends AndroidViewModel {
     }
 
     public Boolean isGameRunning() {
-        if (libGameState == null) return false;
         return libGameState.gameRunning;
     }
 
@@ -815,7 +816,6 @@ public class GameViewModel extends AndroidViewModel {
         } else {
             dialogFragment.setMessage(message);
         }
-        dialogFragment.setCancelable(false);
 
         runOnUiThread(() -> doOnShowDialog(dialogFragment));
 
@@ -834,7 +834,6 @@ public class GameViewModel extends AndroidViewModel {
         } else {
             dialogFragment.setMessage(message);
         }
-        dialogFragment.setCancelable(false);
 
         runOnUiThread(() -> doOnShowDialog(dialogFragment));
 
@@ -846,18 +845,15 @@ public class GameViewModel extends AndroidViewModel {
 
     public LibDialogRetValue sendMenuDialog() {
         final var currentItems = libGameState.menuItemsList;
-        final var newItems = new ArrayList<String>();
 
-        currentItems.forEach(libMenuItem -> newItems.add(libMenuItem.text));
-
-        var dialogFragment = new GameDialogFrags(GameDialogType.MENU_DIALOG);
-        dialogFragment.setItems(newItems);
-        dialogFragment.setCancelable(false);
+        final var dialogFragment = new GameDialogFrags(GameDialogType.MENU_DIALOG);
+        dialogFragment.setItems(currentItems);
 
         runOnUiThread(() -> doOnShowDialog(dialogFragment));
 
         try {
-            var selItem = Integer.parseInt(dialogConnector.blockingFirst());
+            var item = dialogConnector.blockingFirst();
+            var selItem = Integer.parseInt(item);
             var wrap = new LibDialogRetValue();
             wrap.outNumValue = selItem;
             return wrap;
