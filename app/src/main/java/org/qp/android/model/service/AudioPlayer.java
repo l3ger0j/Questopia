@@ -19,21 +19,18 @@ public class AudioPlayer {
     private volatile boolean soundEnabled = true;
     private volatile boolean isPaused = false;
 
+    private boolean isExecutorExistNotDown() {
+        return audioExecutor != null && !audioExecutor.isShutdown();
+    }
+
     public void start() {
         isPaused = false;
         audioExecutor = Executors.newSingleThreadExecutor();
     }
 
     public void stop() {
-        if (audioExecutor != null) {
-            isPaused = true;
-            sounds.values().stream()
-                    .filter(player -> player != null && player.isPlaying())
-                    .forEach(player -> {
-                        player.stop();
-                        player.reset();
-                        player.release();
-                    });
+        if (isExecutorExistNotDown()) {
+            closeAllFiles();
             audioExecutor.shutdown();
         }
     }
@@ -41,7 +38,7 @@ public class AudioPlayer {
     public CompletableFuture<Void> playFile(final Context context,
                                             final Uri soundFileUri,
                                             final int volume) {
-        if (audioExecutor != null) {
+        if (isExecutorExistNotDown()) {
             return CompletableFuture.runAsync(() -> {
                 var sound = sounds.get(soundFileUri);
                 if (sound != null) {
@@ -94,7 +91,7 @@ public class AudioPlayer {
     }
 
     public CompletableFuture<Void> closeAllFiles() {
-        if (audioExecutor != null) {
+        if (isExecutorExistNotDown()) {
             return CompletableFuture.runAsync(() -> {
                 sounds.values().stream()
                         .filter(Objects::nonNull)
@@ -112,7 +109,7 @@ public class AudioPlayer {
     }
 
     public CompletableFuture<Void> closeFile(final Uri filePath) {
-        if (audioExecutor != null) {
+        if (isExecutorExistNotDown()) {
             return CompletableFuture.runAsync(() -> {
                 if (sounds.containsKey(filePath)) {
                     final var player = sounds.get(filePath);
@@ -132,7 +129,7 @@ public class AudioPlayer {
 
     public void pause() {
         if (isPaused) return;
-        if (audioExecutor != null) {
+        if (isExecutorExistNotDown()) {
             isPaused = true;
             CompletableFuture
                     .runAsync(() ->
@@ -146,7 +143,7 @@ public class AudioPlayer {
     public void resume() {
         if (!soundEnabled) return;
         if (!isPaused) return;
-        if (audioExecutor != null) {
+        if (isExecutorExistNotDown()) {
             isPaused = false;
             CompletableFuture
                     .runAsync(() ->
