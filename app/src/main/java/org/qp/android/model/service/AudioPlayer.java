@@ -25,33 +25,44 @@ public class AudioPlayer {
     }
 
     public void stop() {
-        pause();
-        release();
-        audioExecutor.shutdown();
+        if (audioExecutor != null) {
+            isPaused = true;
+            sounds.values().stream()
+                    .filter(player -> player != null && player.isPlaying())
+                    .forEach(player -> {
+                        player.stop();
+                        player.reset();
+                        player.release();
+                    });
+            audioExecutor.shutdown();
+        }
     }
 
     public CompletableFuture<Void> playFile(final Context context,
                                             final Uri soundFileUri,
                                             final int volume) {
-        return CompletableFuture.runAsync(() -> {
-            var sound = sounds.get(soundFileUri);
-            if (sound != null) {
-                var newVolume = getSystemVolume(volume);
-                sound.setVolume(newVolume, newVolume);
-                if (soundEnabled && !isPaused) {
-                    if (!sound.isPlaying()) {
-                        sound.start();
+        if (audioExecutor != null) {
+            return CompletableFuture.runAsync(() -> {
+                var sound = sounds.get(soundFileUri);
+                if (sound != null) {
+                    var newVolume = getSystemVolume(volume);
+                    sound.setVolume(newVolume, newVolume);
+                    if (soundEnabled && !isPaused) {
+                        if (!sound.isPlaying()) {
+                            sound.start();
+                        }
+                    }
+                } else {
+                    var newSound = createNewSound(context, soundFileUri, volume);
+                    if (soundEnabled && !isPaused) {
+                        if (!newSound.isPlaying()) {
+                            newSound.start();
+                        }
                     }
                 }
-            } else {
-                var newSound = createNewSound(context, soundFileUri, volume);
-                if (soundEnabled && !isPaused) {
-                    if (!newSound.isPlaying()) {
-                        newSound.start();
-                    }
-                }
-            }
-        }, audioExecutor);
+            }, audioExecutor);
+        }
+        return CompletableFuture.runAsync(() -> {});
     }
 
     private MediaPlayer createNewSound(final Context context,
@@ -83,67 +94,67 @@ public class AudioPlayer {
     }
 
     public CompletableFuture<Void> closeAllFiles() {
-        return CompletableFuture.runAsync(() -> {
-            sounds.values().stream()
-                    .filter(Objects::nonNull)
-                    .forEach(player -> {
-                        if (player.isPlaying()) {
-                            player.stop();
-                        }
-                        player.release();
-                    });
-            sounds.clear();
-        }, audioExecutor);
+        if (audioExecutor != null) {
+            return CompletableFuture.runAsync(() -> {
+                sounds.values().stream()
+                        .filter(Objects::nonNull)
+                        .forEach(player -> {
+                            if (player.isPlaying()) {
+                                player.stop();
+                            }
+                            player.reset();
+                            player.release();
+                        });
+                sounds.clear();
+            }, audioExecutor);
+        }
+        return CompletableFuture.runAsync(() -> {});
     }
 
     public CompletableFuture<Void> closeFile(final Uri filePath) {
-        return CompletableFuture.runAsync(() -> {
-            final var sound = sounds.remove(filePath);
-            if (sound != null) {
-                if (sound.isPlaying()) {
-                    sound.stop();
+        if (audioExecutor != null) {
+            return CompletableFuture.runAsync(() -> {
+                if (sounds.containsKey(filePath)) {
+                    final var player = sounds.get(filePath);
+                    if (player != null) {
+                        if (player.isPlaying()) {
+                            player.stop();
+                        }
+                        player.reset();
+                        player.release();
+                    }
+                    sounds.remove(filePath);
                 }
-                sound.release();
-            }
-        }, audioExecutor);
-    }
-
-    private void release() {
-        if (audioExecutor == null) return;
-        if (isPaused) return;
-        isPaused = true;
-
-        CompletableFuture
-                .runAsync(() ->
-                        sounds.values().stream()
-                                .filter(player -> player != null && player.isPlaying())
-                                .forEach(MediaPlayer::release),
-                        audioExecutor);
+            }, audioExecutor);
+        }
+        return CompletableFuture.runAsync(() -> {});
     }
 
     public void pause() {
-        if (audioExecutor == null) return;
         if (isPaused) return;
-        isPaused = true;
-
-        CompletableFuture
-                .runAsync(() ->
-                        sounds.values().stream()
-                                .filter(player -> player != null && player.isPlaying())
-                                .forEach(MediaPlayer::pause),
-                        audioExecutor);
+        if (audioExecutor != null) {
+            isPaused = true;
+            CompletableFuture
+                    .runAsync(() ->
+                            sounds.values().stream()
+                                    .filter(player -> player != null && player.isPlaying())
+                                    .forEach(MediaPlayer::pause),
+                            audioExecutor);
+        }
     }
 
     public void resume() {
         if (!soundEnabled) return;
         if (!isPaused) return;
-        isPaused = false;
-
-        audioExecutor.submit(() ->
-                sounds.values().stream()
-                        .filter(player -> player != null && !player.isPlaying())
-                        .forEach(MediaPlayer::start)
-        );
+        if (audioExecutor != null) {
+            isPaused = false;
+            CompletableFuture
+                    .runAsync(() ->
+                            sounds.values().stream()
+                                    .filter(player -> player != null && !player.isPlaying())
+                                    .forEach(MediaPlayer::start),
+                            audioExecutor);
+        }
     }
 
     public boolean isPlayingFile(final Uri filePath) {
