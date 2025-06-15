@@ -4,6 +4,7 @@ import static org.qp.android.helpers.utils.Base64Util.decodeBase64;
 import static org.qp.android.helpers.utils.Base64Util.isBase64;
 import static org.qp.android.helpers.utils.ColorUtil.convertRGBAtoBGRA;
 import static org.qp.android.helpers.utils.ColorUtil.getHexColor;
+import static org.qp.android.helpers.utils.FileUtil.documentWrap;
 import static org.qp.android.helpers.utils.FileUtil.findOrCreateFile;
 import static org.qp.android.helpers.utils.FileUtil.findOrCreateFolder;
 import static org.qp.android.helpers.utils.FileUtil.fromFullPath;
@@ -469,11 +470,23 @@ public class GameViewModel extends AndroidViewModel {
                 }
 
                 @Override
-                public void sendChangeCurrGameDir(Uri gameDirUri) throws RemoteException {
-                    var oldValue = GameViewModel.this.gameDirUri;
-                    if (!Objects.equals(oldValue, gameDirUri)) {
-                        GameViewModel.this.gameDirUri = gameDirUri;
-                    }
+                public void changeGameDir(String filePath) throws RemoteException {
+                    final var gameDir = getCurGameDir();
+                    if (!isWritableDir(getApplication(), gameDir)) return;
+
+                    CompletableFuture
+                            .supplyAsync(() -> DocumentFileCompat.doesExist(getApplication(), filePath))
+                            .thenAcceptAsync(aBoolean -> {
+                                if (aBoolean) {
+                                    var oldDirPath = documentWrap(gameDir).getAbsolutePath(getApplication());
+                                    if (!Objects.equals(oldDirPath, filePath)) {
+                                        var newGameDir = fromFullPath(getApplication(), filePath, true);
+                                        if (isWritableDir(getApplication(), newGameDir)) {
+                                            GameViewModel.this.gameDirUri = newGameDir.getUri();
+                                        }
+                                    }
+                                }
+                            });
                 }
 
                 @Override
@@ -657,7 +670,7 @@ public class GameViewModel extends AndroidViewModel {
                 }
 
                 @Override
-                public Uri requestCreateFile(Uri fileUri, String path) throws RemoteException {
+                public Uri requestCreateFile(String path) throws RemoteException {
                     final var gameDir = getCurGameDir();
                     if (!isWritableDir(getApplication(), gameDir)) return Uri.EMPTY;
 
