@@ -18,7 +18,7 @@ interface AsyncCallbacks {
     void playFile(String path, int volume);
 
     Uri requestReceiveFile(in String filePath);
-    Uri requestCreateFile(in String path);
+    Uri requestCreateFile(in String path, in String mimeType);
 
     void onError(in LibException libException);
 }

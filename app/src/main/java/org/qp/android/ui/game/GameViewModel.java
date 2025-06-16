@@ -46,7 +46,6 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.preference.PreferenceManager;
 
 import com.anggrayudi.storage.file.DocumentFileCompat;
-import com.anggrayudi.storage.file.MimeType;
 import com.google.android.material.textfield.TextInputLayout;
 
 import org.qp.android.R;
@@ -670,13 +669,13 @@ public class GameViewModel extends AndroidViewModel {
                 }
 
                 @Override
-                public Uri requestCreateFile(String path) throws RemoteException {
+                public Uri requestCreateFile(String path, String mimeType) throws RemoteException {
                     final var gameDir = getCurGameDir();
                     if (!isWritableDir(getApplication(), gameDir)) return Uri.EMPTY;
 
                     try {
                         return CompletableFuture
-                                .supplyAsync(() -> findOrCreateFile(getApplication(), gameDir, path, MimeType.TEXT))
+                                .supplyAsync(() -> findOrCreateFile(getApplication(), gameDir, path, mimeType))
                                 .thenApplyAsync(newFile -> {
                                     if (isWritableFile(getApplication(), newFile)) {
                                         return newFile.getUri();
