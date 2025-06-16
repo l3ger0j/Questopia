@@ -79,10 +79,11 @@ public class GameMainFragment extends Fragment {
                 viewModel.showLibDialog(LibTypeDialog.DIALOG_PICTURE, pathToPic);
             }
         }, "img");
-        if (viewModel.getSettingsController().isUseAutoscroll) {
-            mainDescView.postDelayed(onAutoScroll, 300);
-        }
+
         viewModel.getMainDescObserver().observe(getViewLifecycleOwner(), desc -> {
+            if (viewModel.getSettingsController().isUseAutoscroll) {
+                mainDescView.postDelayed(onAutoScroll, 500);
+            }
             mainDescView.loadDataWithBaseURL(
                     "file:///",
                     desc,

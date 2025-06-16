@@ -67,7 +67,7 @@ public class SettingsController {
         settingsController.binaryPrefixes = Integer.parseInt(preferences.getString("binPref", "1000"));
         settingsController.nativeLibVersion = Integer.parseInt(preferences.getString("libVer", "570"));
         settingsController.actionsHeightRatio = parseActionsHeightRatio(preferences.getString("actsHeight", "1/3"));
-        settingsController.isUseAutoscroll = preferences.getBoolean("autoscroll", true);
+        settingsController.isUseAutoscroll = preferences.getBoolean("autoscroll", false);
         settingsController.isUseExecString = preferences.getBoolean("execString", false);
         settingsController.isUseSeparator = preferences.getBoolean("separator", true);
         settingsController.isUseGameFont = preferences.getBoolean("useGameFont", false);
