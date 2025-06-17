@@ -16,7 +16,6 @@ import android.app.NotificationManager;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Environment;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.webkit.CookieManager;
@@ -82,7 +81,6 @@ public class StockViewModel extends AndroidViewModel {
     public final Events.Emitter actEmit = new Events.Emitter();
     public final Events.Emitter fragLocalRVEmit = new Events.Emitter();
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
-    private final String TAG = this.getClass().getSimpleName();
     private final HashMap<Long, Game> gamesMap = new HashMap<>();
     private final DownloadManager downloadManager = getApplication().getSystemService(DownloadManager.class);
     private final LocalGame localGame;
@@ -478,7 +476,7 @@ public class StockViewModel extends AndroidViewModel {
                     gameEntriesLiveData.postValue(new ArrayList<>(gamesMap.values()));
                 }, executor)
                 .exceptionally(throwable -> {
-                    Log.e(TAG, "Error: ", throwable);
+                    doOnShowErrorDialog(throwable.toString(), ErrorType.EXCEPTION);
                     return null;
                 });
     }
@@ -538,7 +536,7 @@ public class StockViewModel extends AndroidViewModel {
                         var contentSplit = content.split("filename=");
                         return contentSplit[1].replace("filename=", "").replace("\"", "").trim();
                     } catch (IOException exception) {
-                        Log.e(TAG, "Error:", exception);
+                        doOnShowErrorDialog(exception.toString(), ErrorType.EXCEPTION);
                         return "";
                     }
                 })
@@ -582,7 +580,7 @@ public class StockViewModel extends AndroidViewModel {
                     CompletableFuture
                             .runAsync(archiveUnpack::extractArchiveEntries, executor)
                             .thenRunAsync(() -> {
-                                Log.i(TAG, "Archive is delete " + archive.delete());
+//                                Log.i(TAG, "Archive is delete " + archive.delete());
 
                                 var notificationBuild = new NotifyBuilder(getApplication(), UNPACK_GAME_CHANNEL_ID);
                                 var unpackBody = ActivityCompat.getString(getApplication(), R.string.bodyUnpackDoneNotify);
@@ -600,7 +598,7 @@ public class StockViewModel extends AndroidViewModel {
                                 }
                             }, executor)
                             .exceptionally(throwable -> {
-                                Log.e(TAG, String.valueOf(throwable.getMessage()));
+                                doOnShowErrorDialog(throwable.toString(), ErrorType.EXCEPTION);
                                 return null;
                             });
                 }
