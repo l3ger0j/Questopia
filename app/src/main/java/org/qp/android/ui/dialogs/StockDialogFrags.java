@@ -47,10 +47,6 @@ public class StockDialogFrags extends DialogFragment {
     private final GameDataObserver dataObserver = new GameDataObserver();
     private StockViewModel stockViewModel;
 
-    public void setDialogType(StockDialogType dialogType) {
-        this.dialogType = dialogType;
-    }
-
     public void setNames(ArrayList<String> names) {
         this.names = names;
     }
@@ -69,6 +65,14 @@ public class StockDialogFrags extends DialogFragment {
 
     public void setInstalled(boolean installed) {
         isInstalled = installed;
+    }
+
+    public StockDialogType getDialogType() {
+        return dialogType;
+    }
+
+    public StockDialogFrags(StockDialogType dialogType) {
+        this.dialogType = dialogType;
     }
 
     @Override
@@ -138,6 +142,7 @@ public class StockDialogFrags extends DialogFragment {
                     }
 
                     stockViewModel.createAddIntent(unfilledEntry, newDirEntry);
+                    dismissAllowingStateLoss();
                 });
 
                 builder.setView(addBinding.getRoot());
@@ -180,6 +185,7 @@ public class StockDialogFrags extends DialogFragment {
                     }
 
                     stockViewModel.createEditIntent(unfilledEntry);
+                    dismissAllowingStateLoss();
                 });
 
                 builder.setView(editBinding.getRoot());

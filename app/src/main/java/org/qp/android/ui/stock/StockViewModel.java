@@ -63,7 +63,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -107,7 +106,6 @@ public class StockViewModel extends AndroidViewModel {
     public Flowable<PagingData<Game>> remoteDataFlow;
     private Uri gameFolderUri;
     private DocumentFile tempImageFile, tempPathFile, tempModFile;
-    private StockDialogFrags dialogFragments = new StockDialogFrags();
     private long downloadId = 0L;
 
     @Inject
@@ -329,53 +327,59 @@ public class StockViewModel extends AndroidViewModel {
                                    StockDialogType dialogType,
                                    String errorMessage,
                                    DocumentFile rootDir) {
-        var fragment = manager.findFragmentByTag(dialogFragments.getTag());
-        if (fragment != null && fragment.isAdded()) {
-            fragment.onDestroy();
-        } else {
-            switch (dialogType) {
-                case ADD_DIALOG -> {
-                    dialogFragments = new StockDialogFrags();
-                    dialogFragments.setDialogType(StockDialogType.ADD_DIALOG);
-                    dialogFragments.setNewDirEntry(rootDir);
+        switch (dialogType) {
+            case ADD_DIALOG -> {
+                var dialogFragments = new StockDialogFrags(StockDialogType.ADD_DIALOG);
+                dialogFragments.setNewDirEntry(rootDir);
+                if (manager.findFragmentByTag("addDialogFragment") == null) {
                     dialogFragments.show(manager, "addDialogFragment");
                 }
-                case DELETE_DIALOG -> {
-                    outputIntObserver = new MutableLiveData<>();
-                    dialogFragments = new StockDialogFrags();
-                    dialogFragments.setMessage(errorMessage);
-                    dialogFragments.setDialogType(StockDialogType.DELETE_DIALOG);
+            }
+            case DELETE_DIALOG -> {
+                outputIntObserver = new MutableLiveData<>();
+                var dialogFragments = new StockDialogFrags(StockDialogType.DELETE_DIALOG);
+                dialogFragments.setMessage(errorMessage);
+                if (manager.findFragmentByTag("deleteDialogFragment") == null) {
                     dialogFragments.show(manager, "deleteDialogFragment");
                 }
-                case EDIT_DIALOG -> {
-                    outputIntObserver = new MutableLiveData<>();
-                    dialogFragments = new StockDialogFrags();
-                    dialogFragments.setDialogType(StockDialogType.EDIT_DIALOG);
+            }
+            case EDIT_DIALOG -> {
+                outputIntObserver = new MutableLiveData<>();
+                var dialogFragments = new StockDialogFrags(StockDialogType.EDIT_DIALOG);
+                if (manager.findFragmentByTag("editDialogFragment") == null) {
                     dialogFragments.show(manager, "editDialogFragment");
                 }
-                case ERROR_DIALOG -> {
-                    var message = Optional.ofNullable(errorMessage);
-                    dialogFragments.setDialogType(StockDialogType.ERROR_DIALOG);
-                    message.ifPresent(s -> dialogFragments.setMessage(s));
-                    dialogFragments.show(manager, "errorDialogFragment");
+            }
+            case ERROR_DIALOG -> {
+                if (isNotEmptyOrBlank(errorMessage)) {
+                    var dialogFragments = new StockDialogFrags(StockDialogType.ERROR_DIALOG);
+                    dialogFragments.setMessage(errorMessage);
+                    if (manager.findFragmentByTag("errorDialogFragment") == null) {
+                        dialogFragments.show(manager, "errorDialogFragment");
+                    }
                 }
-                case MIGRATION_DIALOG -> {
-                    dialogFragments = new StockDialogFrags();
-                    dialogFragments.setDialogType(StockDialogType.MIGRATION_DIALOG);
+            }
+            case MIGRATION_DIALOG -> {
+                var dialogFragments = new StockDialogFrags(StockDialogType.MIGRATION_DIALOG);
+                if (manager.findFragmentByTag("migrationDialogFragment") == null) {
                     dialogFragments.show(manager, "migrationDialogFragment");
                 }
-                case GAME_FOLDER_INIT -> {
-                    dialogFragments = new StockDialogFrags();
-                    dialogFragments.setDialogType(StockDialogType.GAME_FOLDER_INIT);
+            }
+            case GAME_FOLDER_INIT -> {
+                var dialogFragments = new StockDialogFrags(StockDialogType.GAME_FOLDER_INIT);
+                if (manager.findFragmentByTag("gameFolderInitDialogFragment") == null) {
                     dialogFragments.show(manager, "gameFolderInitDialogFragment");
                 }
-                case SELECT_DIALOG -> {
-                    outputIntObserver = new MutableLiveData<>();
-                    var names = new ArrayList<String>();
-                    var files = currGameEntry.gameFilesUri.stream().map(uri -> DocumentFileCompat.fromUri(getApplication(), uri));
-                    files.forEach(file -> names.add(file.getName()));
-                    dialogFragments.setDialogType(StockDialogType.SELECT_DIALOG);
-                    dialogFragments.setNames(names);
+            }
+            case SELECT_DIALOG -> {
+                outputIntObserver = new MutableLiveData<>();
+                var names = new ArrayList<String>();
+                var files = currGameEntry.gameFilesUri.stream().map(uri -> DocumentFileCompat.fromUri(getApplication(), uri));
+                files.forEach(file -> names.add(file.getName()));
+
+                var dialogFragments = new StockDialogFrags(StockDialogType.SELECT_DIALOG);
+                dialogFragments.setNames(names);
+                if (manager.findFragmentByTag("selectDialogFragment") == null) {
                     dialogFragments.show(manager, "selectDialogFragment");
                 }
             }
@@ -386,10 +390,7 @@ public class StockViewModel extends AndroidViewModel {
         try {
             if (tempImageFile != null) unfilledEntry.gameIconUri = tempImageFile.getUri();
 
-            localGame.insertEntryInDB(unfilledEntry, rootDir).thenRun(() -> {
-                loadGameDataFromDB();
-                dialogFragments.dismiss();
-            });
+            localGame.insertEntryInDB(unfilledEntry, rootDir).thenRun(this::loadGameDataFromDB);
         } catch (NullPointerException ex) {
             doOnShowErrorDialog(ex.getMessage(), ErrorType.EXCEPTION);
         }
@@ -427,7 +428,6 @@ public class StockViewModel extends AndroidViewModel {
                         doOnShowErrorDialog(throwable.toString(), ErrorType.EXCEPTION);
                         return null;
                     });
-            dialogFragments.dismiss();
         } catch (NullPointerException ex) {
             doOnShowErrorDialog(ex.toString(), ErrorType.EXCEPTION);
         }
