@@ -11,7 +11,6 @@ import static org.qp.android.helpers.utils.FileUtil.fromFullPath;
 import static org.qp.android.helpers.utils.FileUtil.fromRelPath;
 import static org.qp.android.helpers.utils.FileUtil.isWritableDir;
 import static org.qp.android.helpers.utils.FileUtil.isWritableFile;
-import static org.qp.android.helpers.utils.PathUtil.getExtension;
 import static org.qp.android.helpers.utils.PathUtil.normalizeContentPath;
 import static org.qp.android.helpers.utils.StringUtil.isNotEmptyOrBlank;
 import static org.qp.android.helpers.utils.ThreadUtil.runOnUiThread;
@@ -29,7 +28,6 @@ import android.net.Uri;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.view.View;
-import android.webkit.MimeTypeMap;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
@@ -46,6 +44,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.preference.PreferenceManager;
 
 import com.anggrayudi.storage.file.DocumentFileCompat;
+import com.anggrayudi.storage.file.MimeType;
 import com.google.android.material.textfield.TextInputLayout;
 
 import org.qp.android.R;
@@ -980,9 +979,9 @@ public class GameViewModel extends AndroidViewModel {
 
             try {
                 if (uri.getPath() == null) throw new NullPointerException();
-                var imageFile = fromRelPath(getApplication(), uri.getPath(), rootDir, false);
-                var extension = MimeTypeMap.getSingleton().getMimeTypeFromExtension(getExtension(imageFile));
-                var in = getApplication().getContentResolver().openInputStream(imageFile.getUri());
+                final var imageFile = fromRelPath(getApplication(), uri.getPath(), rootDir, false);
+                final var extension = MimeType.getMimeTypeFromFileName(imageFile.getName());
+                final var in = getApplication().getContentResolver().openInputStream(imageFile.getUri());
                 return new WebResourceResponse(extension, null, in);
             } catch (NullPointerException | FileNotFoundException ex) {
                 if (getSettingsController().isUseImageDebug) {
