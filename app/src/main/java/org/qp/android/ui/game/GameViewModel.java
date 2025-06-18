@@ -56,9 +56,9 @@ import org.qp.android.model.service.AudioPlayer;
 import org.qp.android.model.service.HtmlProcessor;
 import org.qp.android.questopiabundle.AsyncCallbacks;
 import org.qp.android.questopiabundle.IQuestopiaBundle;
-import org.qp.android.questopiabundle.LibDialogRetValue;
 import org.qp.android.questopiabundle.LibException;
 import org.qp.android.questopiabundle.LibResult;
+import org.qp.android.questopiabundle.LibReturnValue;
 import org.qp.android.questopiabundle.dto.LibGameState;
 import org.qp.android.questopiabundle.dto.LibGenItem;
 import org.qp.android.questopiabundle.dto.LibIConfig;
@@ -77,7 +77,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
-import java.util.concurrent.ExecutionException;
 
 import javax.inject.Inject;
 
@@ -488,34 +487,41 @@ public class GameViewModel extends AndroidViewModel {
                 }
 
                 @Override
-                public LibDialogRetValue doOnShowDialog(LibResult typeDialog, String inputString) throws RemoteException {
+                public void doShowDialog(LibResult typeDialog, String inputString) throws RemoteException {
                     final var libType = (LibTypeDialog) typeDialog.value;
-                    try {
-                        return CompletableFuture
-                                .supplyAsync(() -> switch (libType) {
-                                    case DIALOG_PICTURE -> {
-                                        showLibDialog(normalizeContentPath(inputString), GameDialogType.IMAGE_DIALOG);
-                                        yield null;
+                    CompletableFuture
+                            .supplyAsync(() -> switch (libType) {
+                                case DIALOG_PICTURE -> {
+                                    showLibDialog(normalizeContentPath(inputString), GameDialogType.IMAGE_DIALOG);
+                                    yield null;
+                                }
+                                case DIALOG_MESSAGE -> {
+                                    showLibDialog(inputString, GameDialogType.MESSAGE_DIALOG);
+                                    yield null;
+                                }
+                                case DIALOG_ERROR -> {
+                                    showLibDialog(inputString, GameDialogType.ERROR_DIALOG_WSEND);
+                                    yield null;
+                                }
+                                case DIALOG_POPUP_SAVE -> {
+                                    showLibSavePopup();
+                                    yield null;
+                                }
+                                default -> showLibDialog(libType, inputString);
+                            })
+                            .thenAcceptAsync(libDialogRetValue -> {
+                                if (libDialogRetValue != null) {
+                                    try {
+                                        questopiaBundle.receiveValue(libDialogRetValue);
+                                    } catch (RemoteException e) {
+                                        throw new CompletionException(e);
                                     }
-                                    case DIALOG_MESSAGE -> {
-                                        showLibDialog(inputString, GameDialogType.MESSAGE_DIALOG);
-                                        yield null;
-                                    }
-                                    case DIALOG_ERROR -> {
-                                        showLibDialog(inputString, GameDialogType.ERROR_DIALOG_WSEND);
-                                        yield null;
-                                    }
-                                    case DIALOG_POPUP_SAVE -> {
-                                        showLibSavePopup();
-                                        yield null;
-                                    }
-                                    default -> showLibDialog(libType, inputString);
-                                })
-                                .get();
-                    } catch (Exception e) {
-                        runOnUiThread(() -> doShowErrorDialog(e.toString(), ErrorType.EXCEPTION));
-                        return new LibDialogRetValue();
-                    }
+                                }
+                            })
+                            .exceptionally(t -> {
+                                runOnUiThread(() -> doShowErrorDialog(t.toString(), ErrorType.EXCEPTION));
+                                return null;
+                            });
                 }
 
                 @Override
@@ -527,34 +533,43 @@ public class GameViewModel extends AndroidViewModel {
                 }
 
                 @Override
-                public boolean isPlayingFile(String filePath) throws RemoteException {
+                public void isPlayingFile(String filePath) throws RemoteException {
                     final var normPath = normalizeContentPath(filePath);
                     final var gameDir = getCurGameDir();
-                    if (!isWritableDir(getApplication(), gameDir)) return false;
+                    if (!isWritableDir(getApplication(), gameDir)) return;
 
-                    try {
-                        return CompletableFuture
-                                .supplyAsync(() -> fromRelPath(getApplication(), normPath, gameDir, false))
-                                .thenApplyAsync(soundFile -> {
-                                    if (isWritableFile(getApplication(), soundFile)) {
-                                        return soundFile.getUri();
-                                    } else {
-                                        var errorMsg = String.format("Sound file by path: %s not writable", filePath);
-                                        throw new CompletionException(new RuntimeException(errorMsg));
+                    CompletableFuture
+                            .supplyAsync(() -> fromRelPath(getApplication(), normPath, gameDir, false))
+                            .thenApplyAsync(soundFile -> {
+                                if (isWritableFile(getApplication(), soundFile)) {
+                                    return soundFile.getUri();
+                                } else {
+                                    var errorMsg = String.format("Sound file by path: %s not writable", filePath);
+                                    throw new CompletionException(new RuntimeException(errorMsg));
+                                }
+                            })
+                            .exceptionally(throwable -> {
+                                if (getSettingsController().isUseMusicDebug) {
+                                    doShowErrorDialog(throwable.toString(), ErrorType.SOUND_ERROR);
+                                }
+                                return Uri.EMPTY;
+                            })
+                            .thenApply(player::isPlayingFile)
+                            .thenAcceptAsync(isPlay -> {
+                                if (isPlay != null) {
+                                    try {
+                                        var returnValue = new LibReturnValue();
+                                        returnValue.playFileState = isPlay;
+                                        questopiaBundle.receiveValue(returnValue);
+                                    } catch (RemoteException e) {
+                                        throw new CompletionException(e);
                                     }
-                                })
-                                .exceptionally(throwable -> {
-                                    if (getSettingsController().isUseMusicDebug) {
-                                        doShowErrorDialog(throwable.toString(), ErrorType.SOUND_ERROR);
-                                    }
-                                    return Uri.EMPTY;
-                                })
-                                .thenApply(player::isPlayingFile)
-                                .get();
-                    } catch (ExecutionException | InterruptedException e) {
-                        doShowErrorDialog(e.toString(), ErrorType.EXCEPTION);
-                        return false;
-                    }
+                                }
+                            })
+                            .exceptionally(t -> {
+                                runOnUiThread(() -> doShowErrorDialog(t.toString(), ErrorType.EXCEPTION));
+                                return null;
+                            });
                 }
 
                 @Override
@@ -628,75 +643,83 @@ public class GameViewModel extends AndroidViewModel {
                 }
 
                 @Override
-                public Uri requestReceiveFile(String filePath) throws RemoteException {
-                    if (!isNotEmptyOrBlank(filePath)) return Uri.EMPTY;
+                public void requestReceiveFile(String filePath) throws RemoteException {
+                    if (!isNotEmptyOrBlank(filePath)) return;
                     final var gameDir = getCurGameDir();
-                    if (!isWritableDir(getApplication(), gameDir)) return Uri.EMPTY;
+                    if (!isWritableDir(getApplication(), gameDir)) return;
 
-                    try {
-                        return CompletableFuture
-                                .supplyAsync(() -> DocumentFileCompat.doesExist(getApplication(), filePath))
-                                .thenApplyAsync(aBoolean -> {
-                                    if (aBoolean) {
-                                        return fromFullPath(getApplication(), filePath, false);
-                                    } else {
-                                        return fromRelPath(getApplication(), filePath, gameDir, false);
-                                    }
-                                })
-                                .thenApplyAsync(receiveFile -> {
-                                    if (isWritableFile(getApplication(), receiveFile)) {
-                                        return receiveFile.getUri();
-                                    } else {
-                                        return Uri.EMPTY;
-                                    }
-                                })
-                                .thenApplyAsync(fileUri -> {
-                                    if (fileUri == Uri.EMPTY) return fileUri;
-                                    getApplication().grantUriPermission(
-                                            "org.qp.android.questopiabundle",
-                                            fileUri,
-                                            Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                                                    | Intent.FLAG_GRANT_READ_URI_PERMISSION
-                                    );
-                                    return fileUri;
-                                })
-                                .get();
-                    } catch (ExecutionException | InterruptedException e) {
-                        doShowErrorDialog(e.toString(), ErrorType.EXCEPTION);
-                        return Uri.EMPTY;
-                    }
+                    CompletableFuture
+                            .supplyAsync(() -> DocumentFileCompat.doesExist(getApplication(), filePath))
+                            .thenApplyAsync(aBoolean -> {
+                                if (aBoolean) {
+                                    return fromFullPath(getApplication(), filePath, false);
+                                } else {
+                                    return fromRelPath(getApplication(), filePath, gameDir, false);
+                                }
+                            })
+                            .thenApplyAsync(receiveFile -> {
+                                if (isWritableFile(getApplication(), receiveFile)) {
+                                    return receiveFile.getUri();
+                                } else {
+                                    return Uri.EMPTY;
+                                }
+                            })
+                            .thenAcceptAsync(fileUri -> {
+                                if (fileUri == Uri.EMPTY) return;
+                                getApplication().grantUriPermission(
+                                        "org.qp.android.questopiabundle",
+                                        fileUri,
+                                        Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                                                | Intent.FLAG_GRANT_READ_URI_PERMISSION
+                                );
+                                try {
+                                    var returnValue = new LibReturnValue();
+                                    returnValue.fileUri = fileUri;
+                                    questopiaBundle.receiveValue(returnValue);
+                                } catch (RemoteException e) {
+                                    throw new CompletionException(e);
+                                }
+                            })
+                            .exceptionally(t -> {
+                                runOnUiThread(() -> doShowErrorDialog(t.toString(), ErrorType.EXCEPTION));
+                                return null;
+                            });
                 }
 
                 @Override
-                public Uri requestCreateFile(String path, String mimeType) throws RemoteException {
+                public void requestCreateFile(String path, String mimeType) throws RemoteException {
                     final var gameDir = getCurGameDir();
-                    if (!isWritableDir(getApplication(), gameDir)) return Uri.EMPTY;
+                    if (!isWritableDir(getApplication(), gameDir)) return;
 
-                    try {
-                        return CompletableFuture
-                                .supplyAsync(() -> findOrCreateFile(getApplication(), gameDir, path, mimeType))
-                                .thenApplyAsync(newFile -> {
-                                    if (isWritableFile(getApplication(), newFile)) {
-                                        return newFile.getUri();
-                                    } else {
-                                        return Uri.EMPTY;
-                                    }
-                                })
-                                .thenApplyAsync(newFileUri -> {
-                                    if (newFileUri == Uri.EMPTY) return newFileUri;
-                                    getApplication().grantUriPermission(
-                                            "org.qp.android.questopiabundle",
-                                            newFileUri,
-                                            Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                                                    | Intent.FLAG_GRANT_READ_URI_PERMISSION
-                                    );
-                                    return newFileUri;
-                                })
-                                .get();
-                    } catch (ExecutionException | InterruptedException e) {
-                        doShowErrorDialog(e.toString(), ErrorType.EXCEPTION);
-                        return Uri.EMPTY;
-                    }
+                    CompletableFuture
+                            .supplyAsync(() -> findOrCreateFile(getApplication(), gameDir, path, mimeType))
+                            .thenApplyAsync(newFile -> {
+                                if (isWritableFile(getApplication(), newFile)) {
+                                    return newFile.getUri();
+                                } else {
+                                    return Uri.EMPTY;
+                                }
+                            })
+                            .thenAcceptAsync(fileUri -> {
+                                if (fileUri == Uri.EMPTY) return;
+                                getApplication().grantUriPermission(
+                                        "org.qp.android.questopiabundle",
+                                        fileUri,
+                                        Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                                                | Intent.FLAG_GRANT_READ_URI_PERMISSION
+                                );
+                                try {
+                                    var returnValue = new LibReturnValue();
+                                    returnValue.fileUri = fileUri;
+                                    questopiaBundle.receiveValue(returnValue);
+                                } catch (RemoteException e) {
+                                    throw new CompletionException(e);
+                                }
+                            })
+                            .exceptionally(t -> {
+                                runOnUiThread(() -> doShowErrorDialog(t.toString(), ErrorType.EXCEPTION));
+                                return null;
+                            });
                 }
 
                 @Override
@@ -818,7 +841,7 @@ public class GameViewModel extends AndroidViewModel {
         return processedMsg == null ? "" : processedMsg;
     }
 
-    public LibDialogRetValue sendInputDialog(String inputStr) {
+    public LibReturnValue sendInputDialog(String inputStr) {
         final var message = convertMessage(inputStr);
 
         var dialogFragment = new GameDialogFrags(GameDialogType.INPUT_DIALOG);
@@ -831,12 +854,12 @@ public class GameViewModel extends AndroidViewModel {
         runOnUiThread(() -> doOnShowDialog(dialogFragment));
 
         var textValue = dialogConnector.blockingFirst();
-        var wrap = new LibDialogRetValue();
+        var wrap = new LibReturnValue();
         wrap.outTextValue = textValue;
         return wrap;
     }
 
-    public LibDialogRetValue sendExecutorDialog(String inputStr) {
+    public LibReturnValue sendExecutorDialog(String inputStr) {
         final var message = convertMessage(inputStr);
 
         var dialogFragment = new GameDialogFrags(GameDialogType.EXECUTOR_DIALOG);
@@ -849,12 +872,12 @@ public class GameViewModel extends AndroidViewModel {
         runOnUiThread(() -> doOnShowDialog(dialogFragment));
 
         var textValue = dialogConnector.blockingFirst();
-        var wrap = new LibDialogRetValue();
+        var wrap = new LibReturnValue();
         wrap.outTextValue = textValue;
         return wrap;
     }
 
-    public LibDialogRetValue sendMenuDialog() {
+    public LibReturnValue sendMenuDialog() {
         final var currentItems = libGameState.menuItemsList;
 
         final var dialogFragment = new GameDialogFrags(GameDialogType.MENU_DIALOG);
@@ -865,12 +888,12 @@ public class GameViewModel extends AndroidViewModel {
         try {
             var item = dialogConnector.blockingFirst();
             var selItem = Integer.parseInt(item);
-            var wrap = new LibDialogRetValue();
+            var wrap = new LibReturnValue();
             wrap.outNumValue = selItem;
             return wrap;
         } catch (NumberFormatException ex) {
 //            showErrorDialog(ex.getMessage(), ErrorType.WAITING_ERROR);
-            return new LibDialogRetValue();
+            return new LibReturnValue();
         }
     }
 
@@ -909,7 +932,7 @@ public class GameViewModel extends AndroidViewModel {
         runOnUiThread(() -> doOnShowDialog(dialogFragment));
     }
 
-    public LibDialogRetValue showLibDialog(LibTypeDialog dialog, String inputStr) {
+    public LibReturnValue showLibDialog(LibTypeDialog dialog, String inputStr) {
         return switch (dialog) {
             case DIALOG_INPUT -> sendInputDialog(inputStr);
             case DIALOG_EXECUTOR -> sendExecutorDialog(inputStr);
