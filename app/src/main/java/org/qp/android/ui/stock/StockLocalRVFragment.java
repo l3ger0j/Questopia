@@ -64,6 +64,7 @@ public class StockLocalRVFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         mRecyclerView = null;
+        localAdapter = null;
         recyclerBinding = null;
     }
 

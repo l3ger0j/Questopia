@@ -58,6 +58,8 @@ public class StockRemoteRVFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        mRecyclerView = null;
+        remoteAdapter = null;
         recyclerBinding = null;
         compositeDisposable.dispose();
     }
