@@ -79,7 +79,6 @@ public class GameMainFragment extends Fragment {
                 viewModel.showLibDialog(LibTypeDialog.DIALOG_PICTURE, pathToPic);
             }
         }, "img");
-
         viewModel.getMainDescObserver().observe(getViewLifecycleOwner(), desc -> {
             if (viewModel.getSettingsController().isUseAutoscroll) {
                 mainDescView.postDelayed(onAutoScroll, 500);
@@ -89,7 +88,8 @@ public class GameMainFragment extends Fragment {
                     desc,
                     "text/html",
                     "UTF-8",
-                    "");
+                    null
+            );
         });
 
         // RecyclerView
