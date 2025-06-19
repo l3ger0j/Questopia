@@ -182,11 +182,9 @@ public class GameViewModel extends AndroidViewModel {
     @SuppressLint("SetJavaScriptEnabled")
     public WebView getDefaultWebClient(WebView view) {
         var webViewClient = new GameWebViewClient();
-        var webClientSettings = view.getSettings();
-        webClientSettings.setAllowFileAccess(true);
-        webClientSettings.setJavaScriptEnabled(true);
-        webClientSettings.setUseWideViewPort(true);
-        view.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+        view.getSettings().setAllowFileAccess(true);
+        view.getSettings().setJavaScriptEnabled(true);
+        view.getSettings().setUseWideViewPort(true);
         view.setOverScrollMode(View.OVER_SCROLL_NEVER);
         view.setWebViewClient(webViewClient);
         return view;
