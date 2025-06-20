@@ -72,7 +72,7 @@ public class SettingsController {
         settingsController.isUseSeparator = preferences.getBoolean("separator", true);
         settingsController.isUseGameFont = preferences.getBoolean("useGameFont", false);
         settingsController.isUseImmersiveMode = preferences.getBoolean("immersiveMode", true);
-        settingsController.language = preferences.getString("lang", "ru");
+        settingsController.language = preferences.getString("lang", "en");
         settingsController.theme = preferences.getString("theme", "auto");
         imageSettings(settingsController, preferences);
         colorSettings(settingsController, preferences);

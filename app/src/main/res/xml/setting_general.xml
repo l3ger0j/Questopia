@@ -9,7 +9,7 @@
         android:icon="@drawable/baseline_dark_mode_24"
         android:title="@string/appTheme"/>
     <ListPreference
-        android:defaultValue="ru"
+        android:defaultValue="en"
         android:entries="@array/langName"
         android:entryValues="@array/langValue"
         android:key="lang"

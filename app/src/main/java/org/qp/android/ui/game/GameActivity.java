@@ -79,7 +79,7 @@ public class GameActivity extends AppCompatActivity {
         if (key == null) return;
         switch (key) {
             case "lang" -> {
-                switch (sharedPreferences.getString("lang", "ru")) {
+                switch (sharedPreferences.getString("lang", "en")) {
                     case "ru" -> AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("ru"));
                     case "en" -> AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("en"));
                 }

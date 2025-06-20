@@ -83,7 +83,7 @@ public class StockActivity extends AppCompatActivity {
         switch (key) {
             case "binPref" -> stockViewModel.loadGameDataFromDB();
             case "lang" -> {
-                switch (sharedPreferences.getString("lang", "ru")) {
+                switch (sharedPreferences.getString("lang", "en")) {
                     case "ru" -> AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("ru"));
                     case "en" -> AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("en"));
                 }
