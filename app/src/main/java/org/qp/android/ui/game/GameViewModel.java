@@ -666,13 +666,14 @@ public class GameViewModel extends AndroidViewModel {
                                 }
                             })
                             .thenAcceptAsync(fileUri -> {
-                                if (fileUri == Uri.EMPTY) return;
-                                getApplication().grantUriPermission(
-                                        "org.qp.android.questopiabundle",
-                                        fileUri,
-                                        Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                                                | Intent.FLAG_GRANT_READ_URI_PERMISSION
-                                );
+                                if (fileUri != Uri.EMPTY) {
+                                    getApplication().grantUriPermission(
+                                            "org.qp.android.questopiabundle",
+                                            fileUri,
+                                            Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                                                    | Intent.FLAG_GRANT_READ_URI_PERMISSION
+                                    );
+                                }
                                 try {
                                     var returnValue = new LibReturnValue();
                                     returnValue.fileUri = fileUri;
