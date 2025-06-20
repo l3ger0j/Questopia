@@ -30,6 +30,7 @@ import android.os.RemoteException;
 import android.view.View;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
@@ -185,6 +186,8 @@ public class GameViewModel extends AndroidViewModel {
         view.getSettings().setAllowFileAccess(true);
         view.getSettings().setJavaScriptEnabled(true);
         view.getSettings().setUseWideViewPort(true);
+        view.getSettings().setBlockNetworkLoads(true);
+        view.getSettings().setCacheMode(WebSettings.LOAD_CACHE_ONLY);
         view.setOverScrollMode(View.OVER_SCROLL_NEVER);
         view.setWebViewClient(webViewClient);
         return view;
