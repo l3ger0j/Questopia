@@ -41,11 +41,11 @@ public class LocalGame {
     }
 
     private void createNoMediaFile(@NonNull DocumentFile gameDir) {
-        forceCreateFile(context , gameDir , MimeType.TEXT , NOMEDIA_FILENAME);
+        forceCreateFile(context, gameDir, NOMEDIA_FILENAME, MimeType.TEXT);
     }
 
     private void createNoSearchFile(@NonNull DocumentFile gameDir) {
-        forceCreateFile(context , gameDir , MimeType.TEXT , NOSEARCH_FILENAME);
+        forceCreateFile(context, gameDir, NOSEARCH_FILENAME, MimeType.TEXT);
     }
 
     //        return CompletableFuture
