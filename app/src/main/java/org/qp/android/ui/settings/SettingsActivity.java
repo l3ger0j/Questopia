@@ -1,5 +1,6 @@
 package org.qp.android.ui.settings;
 
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.WindowManager;
@@ -10,9 +11,9 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.os.LocaleListCompat;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
+import androidx.preference.PreferenceManager;
 
 import org.qp.android.R;
 import org.qp.android.databinding.ActivitySettingsBinding;
@@ -44,6 +45,24 @@ public class SettingsActivity extends AppCompatActivity {
                 }
             };
     private NavController navController;
+    private final SharedPreferences.OnSharedPreferenceChangeListener preferenceChangeListener = (sharedPreferences, key) -> {
+        if (key == null) return;
+        switch (key) {
+            case "lang" -> {
+                switch (sharedPreferences.getString("lang", "en")) {
+                    case "ru" -> AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("ru"));
+                    case "en" -> AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("en"));
+                }
+            }
+            case "theme" -> {
+                switch (sharedPreferences.getString("theme", "auto")) {
+                    case "auto" -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+                    case "light" -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+                    case "dark" -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+                }
+            }
+        }
+    };
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -61,6 +80,10 @@ public class SettingsActivity extends AppCompatActivity {
 
         setContentView(settingsViewBinding.getRoot());
 
+        PreferenceManager
+                .getDefaultSharedPreferences(getApplication())
+                .registerOnSharedPreferenceChangeListener(preferenceChangeListener);
+
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setDisplayShowHomeEnabled(true);
@@ -70,17 +93,6 @@ public class SettingsActivity extends AppCompatActivity {
                 .findFragmentById(R.id.settingsFragHost);
         if (navFragment != null) {
             navController = navFragment.getNavController();
-        }
-
-        var settingsViewModel = new ViewModelProvider(this).get(SettingsViewModel.class);
-        switch (settingsViewModel.getSettingsController().language) {
-            case "ru" -> AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("ru"));
-            case "en" -> AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("en"));
-        }
-        switch (settingsViewModel.getSettingsController().theme) {
-            case "auto" -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
-            case "light" -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-            case "dark" -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
         }
 
         navController.addOnDestinationChangedListener(listener);
@@ -130,6 +142,9 @@ public class SettingsActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        PreferenceManager
+                .getDefaultSharedPreferences(getApplication())
+                .unregisterOnSharedPreferenceChangeListener(preferenceChangeListener);
         navController.removeOnDestinationChangedListener(listener);
     }
 }
