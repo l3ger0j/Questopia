@@ -21,14 +21,14 @@ public class LibReturnValue implements Parcelable {
         }
     };
 
-    public String outTextValue = "";
-    public int outNumValue = -1;
+    public String dialogTextValue = "";
+    public int dialogNumValue = -1;
     public boolean playFileState = false;
     public Uri fileUri = Uri.EMPTY;
 
     protected LibReturnValue(Parcel in) {
-        outTextValue = in.readString();
-        outNumValue = in.readInt();
+        dialogTextValue = in.readString();
+        dialogNumValue = in.readInt();
         playFileState = in.readInt() != 0;
         fileUri = ParcelCompat.readParcelable(in, Uri.class.getClassLoader(), Uri.class);
     }
@@ -44,8 +44,8 @@ public class LibReturnValue implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeString(outTextValue);
-        dest.writeInt(outNumValue);
+        dest.writeString(dialogTextValue);
+        dest.writeInt(dialogNumValue);
         dest.writeInt(playFileState ? 1 : 0);
         dest.writeParcelable(fileUri, flags);
     }

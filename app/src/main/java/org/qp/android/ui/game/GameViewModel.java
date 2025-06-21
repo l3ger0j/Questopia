@@ -67,7 +67,7 @@ import org.qp.android.questopiabundle.lib.LibGameRequest;
 import org.qp.android.questopiabundle.lib.LibRefIRequest;
 import org.qp.android.questopiabundle.lib.LibTypeDialog;
 import org.qp.android.questopiabundle.lib.LibTypeWindow;
-import org.qp.android.ui.dialogs.GameDialogFrags;
+import org.qp.android.ui.dialogs.GameDialogFragBuilder;
 import org.qp.android.ui.dialogs.GameDialogType;
 import org.qp.android.ui.dialogs.GamePopupType;
 import org.qp.android.ui.settings.SettingsController;
@@ -285,7 +285,7 @@ public class GameViewModel extends AndroidViewModel {
         actEmit.emitAndExecute(new GameFragmentNavigation.ShowPopup(type));
     }
 
-    public void doOnShowDialog(GameDialogFrags buildDialog) {
+    public void doOnShowDialog(GameDialogFragBuilder buildDialog) {
         actEmit.emitAndExecute(new GameFragmentNavigation.ShowDialog(buildDialog));
     }
 
@@ -838,63 +838,40 @@ public class GameViewModel extends AndroidViewModel {
         }
     }
 
-    private String convertMessage(String inputStr) {
-        var processedMsg = getIConfig().useHtml ? removeHtmlTags(inputStr) : inputStr;
-        return processedMsg == null ? "" : processedMsg;
-    }
-
-    public LibReturnValue sendInputDialog(String inputStr) {
-        final var message = convertMessage(inputStr);
-
-        var dialogFragment = new GameDialogFrags(GameDialogType.INPUT_DIALOG);
-        if (message.equals("userInputTitle")) {
-            dialogFragment.setMessage(ContextCompat.getString(getApplication(), R.string.userInputTitle));
-        } else {
-            dialogFragment.setMessage(message);
-        }
-
-        runOnUiThread(() -> doOnShowDialog(dialogFragment));
-
-        var textValue = dialogConnector.blockingFirst();
-        var wrap = new LibReturnValue();
-        wrap.outTextValue = textValue;
+    public LibReturnValue sendInputDialog(final String inputStr) {
+        final var dialogBuilder = new GameDialogFragBuilder(GameDialogType.INPUT_DIALOG);
+        final var replaceStr = ContextCompat.getString(getApplication(), R.string.execStringTitle);
+        dialogBuilder.inputStr = inputStr.equals("userInputTitle") ? replaceStr : inputStr;
+        runOnUiThread(() -> doOnShowDialog(dialogBuilder));
+        final var textValue = dialogConnector.blockingFirst();
+        final var wrap = new LibReturnValue();
+        wrap.dialogTextValue = textValue;
         return wrap;
     }
 
-    public LibReturnValue sendExecutorDialog(String inputStr) {
-        final var message = convertMessage(inputStr);
-
-        var dialogFragment = new GameDialogFrags(GameDialogType.EXECUTOR_DIALOG);
-        if (message.equals("execStringTitle")) {
-            dialogFragment.setMessage(ContextCompat.getString(getApplication(), R.string.execStringTitle));
-        } else {
-            dialogFragment.setMessage(message);
-        }
-
-        runOnUiThread(() -> doOnShowDialog(dialogFragment));
-
-        var textValue = dialogConnector.blockingFirst();
-        var wrap = new LibReturnValue();
-        wrap.outTextValue = textValue;
+    public LibReturnValue sendExecutorDialog(final String inputStr) {
+        final var dialogBuilder = new GameDialogFragBuilder(GameDialogType.EXECUTOR_DIALOG);
+        final var replaceStr = ContextCompat.getString(getApplication(), R.string.execStringTitle);
+        dialogBuilder.inputStr = inputStr.equals("execStringTitle") ? replaceStr : inputStr;
+        runOnUiThread(() -> doOnShowDialog(dialogBuilder));
+        final var textValue = dialogConnector.blockingFirst();
+        final var wrap = new LibReturnValue();
+        wrap.dialogTextValue = textValue;
         return wrap;
     }
 
     public LibReturnValue sendMenuDialog() {
-        final var currentItems = libGameState.menuItemsList;
-
-        final var dialogFragment = new GameDialogFrags(GameDialogType.MENU_DIALOG);
-        dialogFragment.setItems(currentItems);
-
-        runOnUiThread(() -> doOnShowDialog(dialogFragment));
+        final var dialogBuilder = new GameDialogFragBuilder(GameDialogType.MENU_DIALOG);
+        dialogBuilder.listGenItems = libGameState.menuItemsList;
+        runOnUiThread(() -> doOnShowDialog(dialogBuilder));
 
         try {
-            var item = dialogConnector.blockingFirst();
-            var selItem = Integer.parseInt(item);
-            var wrap = new LibReturnValue();
-            wrap.outNumValue = selItem;
+            final var item = dialogConnector.blockingFirst();
+            final var selItem = Integer.parseInt(item);
+            final var wrap = new LibReturnValue();
+            wrap.dialogNumValue = selItem;
             return wrap;
         } catch (NumberFormatException ex) {
-//            showErrorDialog(ex.getMessage(), ErrorType.WAITING_ERROR);
             return new LibReturnValue();
         }
     }
@@ -911,27 +888,18 @@ public class GameViewModel extends AndroidViewModel {
     }
 
     private void doShowErrorDialog(String errorStr, ErrorType errorType) {
-        var dialogFragment = new GameDialogFrags(GameDialogType.ERROR_DIALOG_WSEND);
-
-        if (errorType == null) {
-            dialogFragment.setMessage(errorStr);
-        } else {
-            dialogFragment.setMessage(getErrorMessage(errorStr, errorType));
-        }
-
-        runOnUiThread(() -> doOnShowDialog(dialogFragment));
+        final var dialogBuilder = new GameDialogFragBuilder(GameDialogType.ERROR_DIALOG_WSEND);
+        dialogBuilder.inputStr = errorType == null ? errorStr : getErrorMessage(errorStr, errorType);
+        runOnUiThread(() -> doOnShowDialog(dialogBuilder));
     }
 
     public void showLibDialog(String inputStr, GameDialogType type) {
-        var dialogFragment = new GameDialogFrags(type);
-
+        final var dialogBuilder = new GameDialogFragBuilder(type);
         switch (type) {
-            case ERROR_DIALOG_WSEND -> dialogFragment.setMessage(inputStr);
-            case IMAGE_DIALOG -> dialogFragment.pathToImage = getImageUriFromPath(inputStr);
-            case MESSAGE_DIALOG -> dialogFragment.setProcessedMsg(convertMessage(inputStr));
+            case ERROR_DIALOG_WSEND, MESSAGE_DIALOG -> dialogBuilder.inputStr = inputStr;
+            case IMAGE_DIALOG -> dialogBuilder.imageUri = getImageUriFromPath(inputStr);
         }
-
-        runOnUiThread(() -> doOnShowDialog(dialogFragment));
+        runOnUiThread(() -> doOnShowDialog(dialogBuilder));
     }
 
     public LibReturnValue showLibDialog(LibTypeDialog dialog, String inputStr) {

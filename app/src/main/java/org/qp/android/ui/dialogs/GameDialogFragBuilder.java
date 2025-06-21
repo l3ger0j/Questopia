@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.Html;
 import android.text.TextWatcher;
 import android.view.View;
 import android.widget.EditText;
@@ -33,14 +34,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class GameDialogFrags extends DialogFragment {
+public class GameDialogFragBuilder extends DialogFragment {
 
-    public Uri pathToImage = Uri.EMPTY;
-    private List<LibGenItem> items;
+    public Uri imageUri = Uri.EMPTY;
+    public List<LibGenItem> listGenItems;
+    public String inputStr;
     private GameDialogType dialogType;
     private DialogImageBinding imageBinding;
-    private String processedMsg;
-    private String message;
     private GameViewModel gameViewModel;
     private TextInputLayout feedBackName;
     private EditText feedBackNameET;
@@ -65,16 +65,8 @@ public class GameDialogFrags extends DialogFragment {
         }
     };
 
-    public void setItems(List<LibGenItem> items) {
-        this.items = items;
-    }
-
-    public void setProcessedMsg(String processedMsg) {
-        this.processedMsg = processedMsg;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
+    public GameDialogFragBuilder(GameDialogType dialogType) {
+        this.dialogType = dialogType;
     }
 
     public GameDialogType getDialogType() {
@@ -83,10 +75,6 @@ public class GameDialogFrags extends DialogFragment {
 
     private boolean isValidate() {
         return validateUserName() && validateEmail();
-    }
-
-    public GameDialogFrags(GameDialogType dialogType) {
-        this.dialogType = dialogType;
     }
 
     @Override
@@ -126,16 +114,13 @@ public class GameDialogFrags extends DialogFragment {
                 dialogType = GameDialogType.valueOf(savedInstanceState.getString("selectedDialogType"));
             }
             if (savedInstanceState.containsKey("items")) {
-                items = BundleCompat.getParcelableArrayList(savedInstanceState, "items", LibGenItem.class);
+                listGenItems = BundleCompat.getParcelableArrayList(savedInstanceState, "items", LibGenItem.class);
             }
-            if (savedInstanceState.containsKey("message")) {
-                message = savedInstanceState.getString("message");
+            if (savedInstanceState.containsKey("inputStr")) {
+                inputStr = savedInstanceState.getString("inputStr");
             }
             if (savedInstanceState.containsKey("pathToImage")) {
-                pathToImage = savedInstanceState.getParcelable("pathToImage");
-            }
-            if (savedInstanceState.containsKey("processedMsg")) {
-                processedMsg = savedInstanceState.getString("processedMsg");
+                imageUri = savedInstanceState.getParcelable("pathToImage");
             }
         }
         switch (dialogType) {
@@ -144,7 +129,7 @@ public class GameDialogFrags extends DialogFragment {
                         getLayoutInflater().inflate(R.layout.dialog_input, null);
                 final var textInputLayout =
                         (TextInputLayout) executorView.findViewById(R.id.inputBox_edit);
-                textInputLayout.setHelperText(message);
+                textInputLayout.setHelperText(Html.fromHtml(inputStr, Html.FROM_HTML_MODE_COMPACT));
                 builder.setView(executorView);
                 builder.setPositiveButton(android.R.string.ok,
                         (dialog, which) -> gameViewModel.onDialogPositiveClick(this));
@@ -181,7 +166,7 @@ public class GameDialogFrags extends DialogFragment {
                         editText.addTextChangedListener(watcher);
                     });
                 });
-                feedBackTV.setText(message);
+                feedBackTV.setText(inputStr);
                 builder.setTitle(R.string.error);
                 builder.setView(errorFeBackView);
                 builder.setPositiveButton("Send", null);
@@ -201,7 +186,7 @@ public class GameDialogFrags extends DialogFragment {
             }
             case IMAGE_DIALOG -> {
                 imageBinding = DialogImageBinding.inflate(getLayoutInflater());
-                imageBinding.imageBox.setImageURI(pathToImage);
+                imageBinding.imageBox.setImageURI(imageUri);
                 imageBinding.imageBox.setOnClickListener(v -> dismiss());
                 builder.setView(imageBinding.getRoot());
                 return builder.create();
@@ -214,7 +199,7 @@ public class GameDialogFrags extends DialogFragment {
                 adapter.textColor = gameViewModel.getTextColor();
                 adapter.linkTextColor = gameViewModel.getLinkColor();
                 adapter.backgroundColor = gameViewModel.getBackgroundColor();
-                adapter.submitList(items);
+                adapter.submitList(listGenItems);
                 recyclerView.shareRecyclerView.setBackgroundColor(gameViewModel.getBackgroundColor());
                 recyclerView.shareRecyclerView.setAdapter(adapter);
                 recyclerView.shareRecyclerView.addOnItemTouchListener(
@@ -224,8 +209,8 @@ public class GameDialogFrags extends DialogFragment {
                                 new RecyclerItemClickListener.OnItemClickListener() {
                                     @Override
                                     public void onItemClick(View view, int position) {
-                                        gameViewModel.onDialogListClick(GameDialogFrags.this, position);
-                                        GameDialogFrags.this.onDestroyView();
+                                        gameViewModel.onDialogListClick(GameDialogFragBuilder.this, position);
+                                        GameDialogFragBuilder.this.onDestroyView();
                                     }
 
                                     @Override
@@ -238,7 +223,7 @@ public class GameDialogFrags extends DialogFragment {
                 return builder.create();
             }
             case MESSAGE_DIALOG -> {
-                builder.setMessage(processedMsg);
+                builder.setMessage(Html.fromHtml(inputStr, Html.FROM_HTML_MODE_COMPACT));
                 builder.setPositiveButton(android.R.string.ok,
                         (dialog, which) -> gameViewModel.onDialogPositiveClick(this));
                 return builder.create();
@@ -276,17 +261,14 @@ public class GameDialogFrags extends DialogFragment {
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString("selectedDialogType", dialogType.toString());
-        if (items != null) {
-            outState.putParcelableArrayList("items", new ArrayList<>(items));
+        if (listGenItems != null) {
+            outState.putParcelableArrayList("items", new ArrayList<>(listGenItems));
         }
-        if (message != null) {
-            outState.putString("message", message);
+        if (inputStr != null) {
+            outState.putString("inputStr", inputStr);
         }
-        if (pathToImage != null) {
-            outState.putParcelable("pathToImage", pathToImage);
-        }
-        if (processedMsg != null) {
-            outState.putString("processedMsg", processedMsg);
+        if (imageUri != null) {
+            outState.putParcelable("pathToImage", imageUri);
         }
     }
 

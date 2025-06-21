@@ -1,7 +1,7 @@
 package org.qp.android.ui.game;
 
 import org.qp.android.helpers.bus.NavigationEvent;
-import org.qp.android.ui.dialogs.GameDialogFrags;
+import org.qp.android.ui.dialogs.GameDialogFragBuilder;
 import org.qp.android.ui.dialogs.GamePopupType;
 
 public interface GameFragmentNavigation {
@@ -26,9 +26,9 @@ public interface GameFragmentNavigation {
     }
 
     class ShowDialog extends NavigationEvent {
-        public final GameDialogFrags buildDialog;
+        public final GameDialogFragBuilder buildDialog;
 
-        public ShowDialog(GameDialogFrags buildDialog) {
+        public ShowDialog(GameDialogFragBuilder buildDialog) {
             this.buildDialog = buildDialog;
         }
     }

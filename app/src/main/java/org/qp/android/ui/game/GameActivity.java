@@ -48,7 +48,7 @@ import org.qp.android.databinding.ActivityGameBinding;
 import org.qp.android.helpers.ErrorType;
 import org.qp.android.helpers.bus.Events;
 import org.qp.android.questopiabundle.lib.LibGameRequest;
-import org.qp.android.ui.dialogs.GameDialogFrags;
+import org.qp.android.ui.dialogs.GameDialogFragBuilder;
 import org.qp.android.ui.dialogs.GameDialogType;
 import org.qp.android.ui.dialogs.GamePopupType;
 import org.qp.android.ui.settings.SettingsActivity;
@@ -401,9 +401,9 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void doShowCloseDialog() {
-        var dialogFragment = new GameDialogFrags(GameDialogType.CLOSE_DIALOG);
-        dialogFragment.setCancelable(false);
-        showDialog(dialogFragment);
+        final var dialogBuilder = new GameDialogFragBuilder(GameDialogType.CLOSE_DIALOG);
+        dialogBuilder.setCancelable(false);
+        showDialog(dialogBuilder);
     }
 
     private String getErrorMessage(String inputString, @NonNull ErrorType errorType) {
@@ -418,18 +418,12 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void doShowErrorDialog(String errorStr, ErrorType errorType) {
-        var dialogFragment = new GameDialogFrags(GameDialogType.ERROR_DIALOG_WSEND);
-
-        if (errorType == null) {
-            dialogFragment.setMessage(errorStr);
-        } else {
-            dialogFragment.setMessage(getErrorMessage(errorStr, errorType));
-        }
-
+        final var dialogFragment = new GameDialogFragBuilder(GameDialogType.ERROR_DIALOG_WSEND);
+        dialogFragment.inputStr = errorType == null ? errorStr : getErrorMessage(errorStr, errorType);
         showDialog(dialogFragment);
     }
 
-    public void showDialog(GameDialogFrags buildDialog) {
+    public void showDialog(GameDialogFragBuilder buildDialog) {
         if (isFinishing()) return;
         if (isDestroyed()) return;
         assertNonUiThread();
