@@ -1,12 +1,15 @@
 package org.qp.android.model.archive;
 
-import static org.qp.android.helpers.utils.ThreadUtil.assertNonUiThread;
+import static org.qp.android.helpers.utils.FileUtil.findOrCreateFile;
+import static org.qp.android.helpers.utils.FileUtil.findOrCreateFolder;
 
 import android.content.Context;
-import android.net.Uri;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.documentfile.provider.DocumentFile;
+
+import com.anggrayudi.storage.file.MimeType;
 
 import net.sf.sevenzipjbinding.ExtractAskMode;
 import net.sf.sevenzipjbinding.ExtractOperationResult;
@@ -17,110 +20,71 @@ import net.sf.sevenzipjbinding.PropID;
 import net.sf.sevenzipjbinding.SevenZip;
 import net.sf.sevenzipjbinding.SevenZipException;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
 
 public class ArchiveUnpack {
 
     private static final String TAG = ArchiveUnpack.class.getSimpleName();
     private final Context context;
-    private Uri targetArchive;
-    public Uri unpackFolder;
-    private Uri destDir;
-
-    @NonNull
-    private static int[] getPrimitiveLongArrayFromInt(Set<Integer> input) {
-        var ret = new int[input.size()];
-        var iterator = input.iterator();
-        for (var i = 0; i < ret.length; i++) {
-            ret[i] = iterator.next();
-        }
-        return ret;
-    }
+    private final DocumentFile targetArchive;
+    private final DocumentFile destFolder;
 
     public ArchiveUnpack(@NonNull Context context,
-                         @NonNull Uri targetArchiveUri,
-                         @NonNull Uri destFolderUri) {
+                         @NonNull DocumentFile targetArchive,
+                         @NonNull DocumentFile destFolder) {
         this.context = context;
-        this.targetArchive = targetArchiveUri;
-        this.destDir = destFolderUri;
+        this.targetArchive = targetArchive;
+        this.destFolder = destFolder;
     }
 
     public void extractArchiveEntries() {
-        assertNonUiThread();
-
-        Map<Integer, String> fileNames = new HashMap<>();
-        try (var stream = new DocumentFileRandomInStream(context, targetArchive);
-             var inArchive = SevenZip.openInArchive(null, stream)) {
-            var itemCount = inArchive.getNumberOfItems();
-
-            for (var index = 0; index < itemCount; index++) {
-                var fileName = inArchive.getStringProperty(index, PropID.PATH);
-                var lastSeparator = fileName.lastIndexOf(File.separator);
-                if (lastSeparator > -1) fileName = fileName.substring(lastSeparator + 1);
-                fileNames.put(index, fileName);
-            }
-
-            var indexes = getPrimitiveLongArrayFromInt(fileNames.keySet());
-            Log.d(TAG, fileNames.toString());
-            inArchive.extract(indexes, false, new ArchiveExtractCallback(destDir, inArchive));
+        try (final var stream = new DocumentFileRandomInStream(context, targetArchive.getUri());
+             final var inArchive = SevenZip.openInArchive(null, stream)) {
+            inArchive.extract(
+                    null,
+                    false,
+                    new ArchiveExtractCallback(context, destFolder, inArchive)
+            );
         } catch (IOException e) {
             Log.e(TAG, "", e);
         }
     }
 
-    private class ArchiveExtractCallback implements IArchiveExtractCallback {
-
-        private final Uri targetFolder;
+    private static class ArchiveExtractCallback implements IArchiveExtractCallback {
+        private final Context context;
+        private final DocumentFile targetFolder;
         private final IInArchive inArchive;
         private ExtractAskMode extractAskMode;
         private SequentialOutStream stream;
 
-        public ArchiveExtractCallback(Uri targetFolder, IInArchive inArchive) {
+        public ArchiveExtractCallback(Context context, DocumentFile targetFolder, IInArchive inArchive) {
+            this.context = context;
             this.targetFolder = targetFolder;
             this.inArchive = inArchive;
         }
 
         @Override
         public ISequentialOutStream getStream(int index, ExtractAskMode extractAskMode) throws SevenZipException {
-            Log.v(TAG, "Extract archive, get stream: " + index + " to: " + extractAskMode);
-
             this.extractAskMode = extractAskMode;
 
-            var isFolder = (Boolean) inArchive.getProperty(index , PropID.IS_FOLDER);
+            var isFolder = (Boolean) inArchive.getProperty(index, PropID.IS_FOLDER);
             var path = (String) inArchive.getProperty(index, PropID.PATH);
-//            var documentFile = new File(targetFolder.getAbsolutePath(), path);
-//            DocumentFileCompat.createFile(ArchiveUnpack.this.context, );
 
-//            if (isFolder) {
-//                createDirectory(file);
-//                return null;
-//            }
-//
-//            var fileParent = file.getParentFile();
-//            if (fileParent == null) return null;
-//
-//            createDirectory(fileParent);
-//
-//            try {
-//                stream = new SequentialOutStream(new FileOutputStream(file));
-//            } catch (FileNotFoundException e) {
-//                Log.e(TAG, "Error: ", e);
-//            }
-            return stream;
-        }
-
-        private void createDirectory(File parentFile) throws SevenZipException {
-            if (!parentFile.exists()) {
-                if (!parentFile.mkdirs()) {
-                    throw new SevenZipException("Error creating directory: "
-                            + parentFile.getAbsolutePath());
-                }
+            if (isFolder) {
+                findOrCreateFolder(context, targetFolder, path);
+                return null;
             }
+
+            var file = findOrCreateFile(context, targetFolder, path, MimeType.UNKNOWN);
+            if (file == null) return null;
+            if (file.isDirectory()) return null;
+            try {
+                stream = new SequentialOutStream(context.getContentResolver().openOutputStream(file.getUri()));
+            } catch (Exception e) {
+                Log.e(TAG, "Error: ", e);
+            }
+            return stream;
         }
 
         @Override

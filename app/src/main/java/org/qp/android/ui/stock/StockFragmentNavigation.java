@@ -67,6 +67,14 @@ public interface StockFragmentNavigation {
         }
     }
 
+    class ShowDirPicker extends NavigationEvent {
+        public final int requestCode;
+
+        public ShowDirPicker(int requestCode) {
+            this.requestCode = requestCode;
+        }
+    }
+
     class ShowErrorBanner extends NavigationEvent {
         public final String inputMessage;
         public final String rightButtonMsg;

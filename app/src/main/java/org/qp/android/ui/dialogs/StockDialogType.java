@@ -2,6 +2,7 @@ package org.qp.android.ui.dialogs;
 
 public enum StockDialogType {
     ADD_DIALOG,
+    DOWNLOAD_DIALOG,
     DELETE_DIALOG,
     EDIT_DIALOG,
     ERROR_DIALOG,

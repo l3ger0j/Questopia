@@ -1,7 +1,6 @@
 package org.qp.android.model.repository;
 
 import static org.qp.android.helpers.utils.FileUtil.forceCreateFile;
-import static org.qp.android.helpers.utils.StringUtil.isNotEmptyOrBlank;
 
 import android.content.Context;
 import android.net.Uri;
@@ -16,8 +15,6 @@ import org.qp.android.data.db.Game;
 import org.qp.android.data.db.GameDao;
 import org.qp.android.helpers.utils.DatabaseUtil;
 
-import java.io.File;
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -83,70 +80,6 @@ public class LocalGame {
 
         var databaseUtil = new DatabaseUtil(gameDao);
         return databaseUtil.insertEntry(unfilledEntry);
-    }
-
-    public CompletableFuture<Void> createEntryInDBFromDir(File rootDir) {
-        var nameDir = rootDir.getName();
-        if (!isNotEmptyOrBlank(nameDir)) {
-            var secureRandom = new SecureRandom();
-            nameDir = "UnknownGame " + secureRandom.nextInt();
-        }
-
-        var gameFiles = new ArrayList<Uri>();
-        var files = rootDir.listFiles();
-
-        if (files == null) return new CompletableFuture<>();
-
-        for (var file : files) {
-            var dirName = file.getName();
-            if (!isNotEmptyOrBlank(dirName)) continue;
-            var locName = file.getName().toLowerCase(Locale.ROOT);
-            if (locName.endsWith(".qsp") || locName.endsWith(".gam")) {
-                gameFiles.add(Uri.fromFile(file));
-            }
-        }
-
-        var emptyGameEntry = new Game();
-        var databaseUtil = new DatabaseUtil(gameDao);
-
-        emptyGameEntry.listId = 1;
-        emptyGameEntry.title = nameDir;
-        emptyGameEntry.gameDirUri = Uri.fromFile(rootDir);
-        emptyGameEntry.gameFilesUri = gameFiles;
-
-        return databaseUtil.updateOrInsertEntry(emptyGameEntry);
-    }
-
-    public CompletableFuture<Void> createEntryInDBFromDir(DocumentFile rootDir) {
-        var nameDir = rootDir.getName();
-        if (!isNotEmptyOrBlank(nameDir)) {
-            var secureRandom = new SecureRandom();
-            nameDir = "UnknownGame " + secureRandom.nextInt();
-        }
-
-        var gameFiles = new ArrayList<Uri>();
-        var files = rootDir.listFiles();
-
-        for (var file : files) {
-            if (file.getName() == null) continue;
-            var lcName = file.getName().toLowerCase(Locale.ROOT);
-            if (lcName.endsWith(".qsp") || lcName.endsWith(".gam")) {
-                gameFiles.add(file.getUri());
-            }
-        }
-
-        var newGameEntry = new Game();
-        var databaseUtil = new DatabaseUtil(gameDao);
-
-        newGameEntry.listId = 0;
-        newGameEntry.title = nameDir;
-        newGameEntry.gameDirUri = rootDir.getUri();
-        newGameEntry.gameFilesUri = gameFiles;
-
-        createNoMediaFile(rootDir);
-        createNoSearchFile(rootDir);
-
-        return databaseUtil.insertEntry(newGameEntry);
     }
 
     public CompletableFuture<Void> updateEntryInDB(Game gameEntry) {

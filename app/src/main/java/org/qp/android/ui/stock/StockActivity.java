@@ -1,6 +1,8 @@
 package org.qp.android.ui.stock;
 
 import static org.qp.android.helpers.utils.FileUtil.documentWrap;
+import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_ADD_FOLDER;
+import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_DOWNLOAD_FOLDER;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_IMAGE_FILE;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_MOD_FILE;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_PATH_FILE;
@@ -109,7 +111,47 @@ public class StockActivity extends AppCompatActivity {
     private NavController navController;
     private ActionMode deleteMode;
     private FloatingActionButton mFAB;
-    private ActivityResultLauncher<Intent> rootFolderLauncher;
+    private final ActivityResultLauncher<Intent> dialogAddFolderLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == Activity.RESULT_OK) {
+                    var data = result.getData();
+                    if (data == null) return;
+                    var uri = data.getData();
+                    if (uri == null) return;
+
+                    getContentResolver().takePersistableUriPermission(uri,
+                            Intent.FLAG_GRANT_READ_URI_PERMISSION
+                                    | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+
+                    var rootFolder = DocumentFileCompat.fromUri(this, uri);
+                    stockViewModel.showDialogFragment(
+                            getSupportFragmentManager(),
+                            StockDialogType.ADD_DIALOG,
+                            null,
+                            rootFolder
+                    );
+                }
+            }
+    );
+    private final ActivityResultLauncher<Intent> dialogDownloadFolderLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == Activity.RESULT_OK) {
+                    var data = result.getData();
+                    if (data == null) return;
+                    var uri = data.getData();
+                    if (uri == null) return;
+
+                    getContentResolver().takePersistableUriPermission(uri,
+                            Intent.FLAG_GRANT_READ_URI_PERMISSION
+                                    | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+
+                    var rootFolder = DocumentFileCompat.fromUri(this, uri);
+                    stockViewModel.setTempDownloadFolder(rootFolder);
+                }
+            }
+    );
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -209,7 +251,7 @@ public class StockActivity extends AppCompatActivity {
                 mFAB.show();
             }
         });
-        mFAB.setOnClickListener(view -> showDirPickerDialog());
+        mFAB.setOnClickListener(view -> showDirPickerDialog(CODE_PICK_ADD_FOLDER));
 
         searchView.addTransitionListener((searchView1, previousState, newState) -> {
             if (newState.name().equalsIgnoreCase("SHOWING")) {
@@ -249,27 +291,6 @@ public class StockActivity extends AppCompatActivity {
                 });
             }
             return null;
-        });
-
-        rootFolderLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
-            if (result.getResultCode() == Activity.RESULT_OK) {
-                var data = result.getData();
-                if (data == null) return;
-                var uri = data.getData();
-                if (uri == null) return;
-
-                getContentResolver().takePersistableUriPermission(uri,
-                        Intent.FLAG_GRANT_READ_URI_PERMISSION
-                                | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-
-                var rootFolder = DocumentFileCompat.fromUri(this, uri);
-                stockViewModel.showDialogFragment(
-                        getSupportFragmentManager(),
-                        StockDialogType.ADD_DIALOG,
-                        null,
-                        rootFolder
-                );
-            }
         });
 
         loadPermission();
@@ -326,6 +347,9 @@ public class StockActivity extends AppCompatActivity {
             }
             if (event instanceof StockFragmentNavigation.ShowFilePicker filePicker) {
                 showFilePickerActivity(filePicker.requestCode, filePicker.mimeTypes);
+            }
+            if (event instanceof StockFragmentNavigation.ShowDirPicker dirPicker) {
+                showDirPickerDialog(dirPicker.requestCode);
             }
         }));
 
@@ -475,7 +499,7 @@ public class StockActivity extends AppCompatActivity {
         storageHelper.openFilePicker(requestCode, false, mimeTypes);
     }
 
-    public void showDirPickerDialog() {
+    public void showDirPickerDialog(int requestCode) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             var intentQ = new Intent();
             var sm = (StorageManager) getSystemService(Activity.STORAGE_SERVICE);
@@ -484,14 +508,20 @@ public class StockActivity extends AppCompatActivity {
             intentQ.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
             intentQ.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
             intentQ.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            rootFolderLauncher.launch(intentQ);
+            switch (requestCode) {
+                case CODE_PICK_ADD_FOLDER -> dialogAddFolderLauncher.launch(intentQ);
+                case CODE_PICK_DOWNLOAD_FOLDER -> dialogDownloadFolderLauncher.launch(intentQ);
+            }
         } else {
             var intentLQ = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
             var flags = Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
                     | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                     | Intent.FLAG_GRANT_READ_URI_PERMISSION;
             intentLQ.addFlags(flags);
-            rootFolderLauncher.launch(intentLQ);
+            switch (requestCode) {
+                case CODE_PICK_ADD_FOLDER -> dialogAddFolderLauncher.launch(intentLQ);
+                case CODE_PICK_DOWNLOAD_FOLDER -> dialogDownloadFolderLauncher.launch(intentLQ);
+            }
         }
     }
 

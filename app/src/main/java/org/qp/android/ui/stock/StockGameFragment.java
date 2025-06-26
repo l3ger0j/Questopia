@@ -158,7 +158,7 @@ public class StockGameFragment extends Fragment {
         fragmentStockGameBinding.downloadButton.setOnClickListener(view3 -> {
             var data = stockViewModel.currGameEntry;
             if (data == null) return;
-            stockViewModel.startFileDownload(data);
+            stockViewModel.showDialogFragment(getParentFragmentManager(), StockDialogType.DOWNLOAD_DIALOG, null, null);
         });
     }
 

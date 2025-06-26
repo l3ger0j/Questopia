@@ -55,7 +55,6 @@ import org.qp.android.ui.dialogs.StockDialogFrags;
 import org.qp.android.ui.dialogs.StockDialogType;
 import org.qp.android.ui.game.GameActivity;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -74,6 +73,8 @@ import io.reactivex.rxjava3.core.Flowable;
 @HiltViewModel
 public class StockViewModel extends AndroidViewModel {
 
+    public static final int CODE_PICK_ADD_FOLDER = 400;
+    public static final int CODE_PICK_DOWNLOAD_FOLDER = 401;
     public static final int CODE_PICK_IMAGE_FILE = 300;
     public static final int CODE_PICK_PATH_FILE = 301;
     public static final int CODE_PICK_MOD_FILE = 302;
@@ -102,7 +103,7 @@ public class StockViewModel extends AndroidViewModel {
     public MutableLiveData<Game> gameEntryLiveData = new MutableLiveData<>();
     public MutableLiveData<List<Game>> gameEntriesLiveData = new MutableLiveData<>();
     public Flowable<PagingData<Game>> remoteDataFlow;
-    private Uri gameFolderUri;
+    private DocumentFile gameFolder;
     private DocumentFile tempImageFile, tempPathFile, tempModFile;
     private long downloadId = 0L;
 
@@ -137,6 +138,11 @@ public class StockViewModel extends AndroidViewModel {
     public void setCurrGameData(Game currGameData) {
         gameEntryLiveData.setValue(currGameData);
         this.currGameEntry = currGameData;
+    }
+
+    public void setTempDownloadFolder(DocumentFile tempDownloadFolder) {
+        this.gameFolder = tempDownloadFolder;
+        fileMutableLiveData.setValue(new TempFile(tempDownloadFolder, TempFileType.DOWNLOAD_FILE));
     }
 
     public void setTempPathFile(DocumentFile tempPathFile) {
@@ -208,6 +214,10 @@ public class StockViewModel extends AndroidViewModel {
 
     public void doOnShowFilePicker(int requestCode, String[] mimeTypes) {
         actEmit.waitAndExecute(new StockFragmentNavigation.ShowFilePicker(requestCode, mimeTypes));
+    }
+
+    public void doOnShowDirPicker(int requestCode) {
+        actEmit.waitAndExecute(new StockFragmentNavigation.ShowDirPicker(requestCode));
     }
 
     public void doOnShowErrorDialog(String errorMessage, ErrorType errorType) {
@@ -331,6 +341,12 @@ public class StockViewModel extends AndroidViewModel {
                 dialogFragments.setNewDirEntry(rootDir);
                 if (manager.findFragmentByTag("addDialogFragment") == null) {
                     dialogFragments.show(manager, "addDialogFragment");
+                }
+            }
+            case DOWNLOAD_DIALOG -> {
+                var dialogFragments = new StockDialogFrags(StockDialogType.DOWNLOAD_DIALOG);
+                if (manager.findFragmentByTag("downloadDialogFragment") == null) {
+                    dialogFragments.show(manager, "downloadDialogFragment");
                 }
             }
             case DELETE_DIALOG -> {
@@ -459,14 +475,6 @@ public class StockViewModel extends AndroidViewModel {
     }
 
     // endregion Dialog
-    public void createEntryInDBFromFile(DocumentFile gameDir) {
-        localGame.createEntryInDBFromDir(gameDir)
-                .exceptionally(throwable -> {
-                    doOnShowErrorDialog(throwable.toString(), ErrorType.EXCEPTION);
-                    return null;
-                });
-    }
-
     public void loadGameDataFromDB() {
         gamesMap.clear();
 
@@ -541,8 +549,7 @@ public class StockViewModel extends AndroidViewModel {
                     }
                 })
                 .thenAccept(s -> {
-                    if (isNotEmptyOrBlank(s)) return;
-
+                    if (!isNotEmptyOrBlank(s)) return;
                     var downloadUri = Uri.parse(gameEntry.fileUrl);
                     var request = new DownloadManager.Request(downloadUri)
                             .setVisibleInDownloadsUi(true)
@@ -564,24 +571,15 @@ public class StockViewModel extends AndroidViewModel {
             if (c.moveToFirst()) {
                 var colStatusIndex = c.getColumnIndex(DownloadManager.COLUMN_STATUS);
                 if (DownloadManager.STATUS_SUCCESSFUL == c.getInt(colStatusIndex)) {
-                    var colUriIndex = c.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI);
+                    final var colUriIndex = c.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI);
                     if (colUriIndex == -1) return;
-                    var path = c.getString(colUriIndex).replace("file:///", "");
-                    var file = DocumentFileCompat.fromUri(getApplication(), Uri.parse(c.getString(colUriIndex)));
+                    final var file = DocumentFileCompat.fromUri(getApplication(), Uri.parse(c.getString(colUriIndex)));
                     if (!isWritableFile(getApplication(), file)) return;
-
-                    var archive = new File(path);
-                    var archiveUnpack = new ArchiveUnpack(
-                            getApplication(),
-                            file.getUri(),
-                            gameFolderUri
-                    );
+                    final var archiveUnpack = new ArchiveUnpack(getApplication(), file, gameFolder);
 
                     CompletableFuture
                             .runAsync(archiveUnpack::extractArchiveEntries, executor)
                             .thenRunAsync(() -> {
-//                                Log.i(TAG, "Archive is delete " + archive.delete());
-
                                 var notificationBuild = new NotifyBuilder(getApplication(), UNPACK_GAME_CHANNEL_ID);
                                 var unpackBody = ActivityCompat.getString(getApplication(), R.string.bodyUnpackDoneNotify);
                                 var notification = notificationBuild.buildStandardNotification(
@@ -591,10 +589,10 @@ public class StockViewModel extends AndroidViewModel {
                                 var notificationManager = getApplication().getSystemService(NotificationManager.class);
                                 notificationManager.notify(UNPACK_GAME_NOTIFICATION_ID, notification);
 
-                                var gameFolderUri = archiveUnpack.unpackFolder;
+                                var gameFolderUri = gameFolder.getUri();
                                 var gameFolder = DocumentFileCompat.fromUri(getApplication(), gameFolderUri);
                                 if (isWritableDir(getApplication(), gameFolder)) {
-                                    createEntryInDBFromFile(gameFolder);
+                                    localGame.insertEntryInDB(currGameEntry, gameFolder);
                                 }
                             }, executor)
                             .exceptionally(throwable -> {

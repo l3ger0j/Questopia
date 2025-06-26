@@ -1,8 +1,10 @@
 package org.qp.android.ui.dialogs;
 
+import static org.qp.android.helpers.utils.FileUtil.checkSetRemoteImage;
 import static org.qp.android.helpers.utils.PathUtil.removeExtension;
 import static org.qp.android.helpers.utils.StringUtil.isNotEmpty;
 import static org.qp.android.helpers.utils.StringUtil.isNotEmptyOrBlank;
+import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_DOWNLOAD_FOLDER;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_IMAGE_FILE;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_MOD_FILE;
 import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_PATH_FILE;
@@ -23,6 +25,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import org.qp.android.R;
 import org.qp.android.data.db.Game;
 import org.qp.android.databinding.DialogAddBinding;
+import org.qp.android.databinding.DialogDownloadBinding;
 import org.qp.android.databinding.DialogEditBinding;
 import org.qp.android.ui.stock.GameDataObserver;
 import org.qp.android.ui.stock.StockViewModel;
@@ -35,6 +38,7 @@ public class StockDialogFrags extends DialogFragment {
 
     private DialogAddBinding addBinding;
     private DialogEditBinding editBinding;
+    private DialogDownloadBinding downloadBinding;
     private StockDialogType dialogType;
     private ArrayList<String> names;
 
@@ -191,6 +195,35 @@ public class StockDialogFrags extends DialogFragment {
                 builder.setView(editBinding.getRoot());
                 return builder.create();
             }
+            case DOWNLOAD_DIALOG -> {
+                downloadBinding = DialogDownloadBinding.inflate(getLayoutInflater());
+
+                var titleET = downloadBinding.gameNameET.getEditText();
+                if (titleET != null) {
+                    titleET.setText(stockViewModel.currGameEntry.title);
+                }
+                var authorET = downloadBinding.gameAuthorET.getEditText();
+                if (authorET != null) {
+                    authorET.setText(stockViewModel.currGameEntry.author);
+                }
+                var versionET = downloadBinding.gameVersionET.getEditText();
+                if (versionET != null) {
+                    versionET.setText(stockViewModel.currGameEntry.version);
+                }
+                checkSetRemoteImage(downloadBinding.imageView, stockViewModel.currGameEntry.gameIconUri);
+
+                downloadBinding.buttonSelectIcon.setOnClickListener(v ->
+                        stockViewModel.doOnShowFilePicker(CODE_PICK_IMAGE_FILE, new String[]{MimeType.IMAGE}));
+                downloadBinding.gameFolderET.setEndIconOnClickListener(v ->
+                        stockViewModel.doOnShowDirPicker(CODE_PICK_DOWNLOAD_FOLDER));
+
+                builder.setPositiveButton("Start download" , (dialog , which) ->
+                        stockViewModel.startFileDownload(stockViewModel.currGameEntry));
+                builder.setNegativeButton(android.R.string.cancel, (dialog, which) -> {
+                });
+
+                return builder.setView(downloadBinding.getRoot()).create();
+            }
             case DELETE_DIALOG -> {
                 if (Objects.equals(message, "1")) {
                     builder.setTitle("Delete a folder?");
@@ -248,12 +281,25 @@ public class StockDialogFrags extends DialogFragment {
         stockViewModel.fileMutableLiveData.observe(this, file -> {
             switch (file.fileType()) {
                 case IMAGE_FILE -> {
-                    if (editBinding == null) {
-                        addBinding.buttonSelectIcon.setText(file.inputFile().getName());
-                        dataObserver.iconUriObserver.set(file.inputFile().getUri());
-                    } else {
+                    if (editBinding != null) {
                         editBinding.buttonSelectIcon.setText(file.inputFile().getName());
                         dataObserver.iconUriObserver.set(file.inputFile().getUri());
+                    }
+                    if (addBinding != null) {
+                        addBinding.buttonSelectIcon.setText(file.inputFile().getName());
+                        dataObserver.iconUriObserver.set(file.inputFile().getUri());
+                    }
+                    if (downloadBinding != null) {
+                        downloadBinding.buttonSelectIcon.setText(file.inputFile().getName());
+                        checkSetRemoteImage(downloadBinding.imageView, file.inputFile().getUri());
+                    }
+                }
+                case DOWNLOAD_FILE -> {
+                    if (downloadBinding != null) {
+                        var gameFolderET = downloadBinding.gameFolderET.getEditText();
+                        if (gameFolderET != null) {
+                            gameFolderET.setText(String.valueOf(file.inputFile().getUri()));
+                        }
                     }
                 }
                 case PATH_FILE ->
@@ -288,6 +334,9 @@ public class StockDialogFrags extends DialogFragment {
         }
         if (editBinding != null) {
             editBinding = null;
+        }
+        if (downloadBinding != null) {
+            downloadBinding = null;
         }
     }
 }

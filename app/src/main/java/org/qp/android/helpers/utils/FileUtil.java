@@ -3,10 +3,12 @@ package org.qp.android.helpers.utils;
 import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
+import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.documentfile.provider.DocumentFile;
 
 import com.anggrayudi.storage.FileWrapper;
@@ -16,8 +18,10 @@ import com.anggrayudi.storage.file.DocumentFileCompat;
 import com.anggrayudi.storage.file.DocumentFileType;
 import com.anggrayudi.storage.file.DocumentFileUtils;
 import com.anggrayudi.storage.file.FileUtils;
+import com.bumptech.glide.Glide;
 
 import org.jetbrains.annotations.Contract;
+import org.qp.android.R;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -55,6 +59,27 @@ public final class FileUtil {
         if (dir == null) return false;
         var canWrite = FileUtils.isWritable(dir, context);
         return dir.exists() && dir.isDirectory() && canWrite;
+    }
+
+    public static void checkSetLocalImage(ImageView view, Uri imageUri) {
+        if (imageUri != null && imageUri != Uri.EMPTY) {
+            view.setImageURI(imageUri);
+        } else {
+            var drawable = ResourcesCompat.getDrawable(
+                    view.getContext().getResources(),
+                    R.drawable.baseline_broken_image_24,
+                    null
+            );
+            view.setImageDrawable(drawable);
+        }
+    }
+
+    public static void checkSetRemoteImage(ImageView view, Uri imageUri) {
+        Glide.with(view)
+                .load(imageUri)
+                .centerCrop()
+                .error(R.drawable.baseline_broken_image_24)
+                .into(view);
     }
 
     public static void forceCreateFile(Context context,
