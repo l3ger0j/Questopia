@@ -3,8 +3,6 @@
     <!-- Use in dialog/toast/notification -->
     <!-- Notification channel -->
         <string name="channelInstallGame">Распаковка игры</string>
-    <!-- Install notification -->
-        <string name="titleNotify">Установка игры</string>
     <!-- Unpack notification -->
         <string name="titleUnpackDoneNotify">Игра распакована!</string>
         <string name="bodyUnpackDoneNotify">Фух! Я наконец-таки распаковала игру -GAMENAME-!</string>
@@ -21,15 +19,10 @@
         <string name="downloadButton">Скачать игру</string>
     <!-- Dialog Error -->
         <string name="error">Ошибка</string>
-        <string name="interFolderError">Ошибка чтения внутренней папки приложения</string>
         <string name="gamesFolderError">Ошибка чтения папки с игрой</string>
         <string name="gameFolderEmpty">Я не нашла в папке с игрой файла в формате .qsp или .gam!</string>
-        <string name="infoFileNotWritable">Ошибка чтения файла с информацией об игре</string>
-        <string name="infoFileWriteError">Ошибка записи информации об игре в файл</string>
-        <string name="installError">Я не могу скопировать папку с игрой -GAMENAME-!</string>
         <string name="waitingError">Во время ожидания произошла ошибка</string>
         <string name="waitingInputError">Я не смогла дождаться ввода</string>
-        <string name="noGameFilesError">Я не нашла файлы игры после копирования!</string>
         <string name="notFoundSound">Звуковой файл не найден:</string>
         <string name="notFoundImage">Файл изображения не найден:</string>
         <string name="notFoundFile">Файл не найден:</string>
@@ -39,10 +32,7 @@
         <string name="gameAuthor">Автор игры</string>
         <string name="gameVersion">Версия игры</string>
         <string name="btnAddGame">Добавить новую игровую запись</string>
-        <string name="calcSizeDir">Рассчитать размер папки</string>
-        <string name="selectFolder">Выберите папку с файлом</string>
         <string name="selectIcon">Иконка для игры</string>
-        <string name="add">Скопировать в корневую папку</string>
     <!-- Dialog GameInfo -->
         <string name="author">Автор: -AUTHOR-</string>
         <string name="ported_by">Портировал: -PORTED_BY-</string>
@@ -52,15 +42,12 @@
         <string name="experimental">(экспериментально)</string>
         <string name="mod_data">Изменено: -MOD_DATA-</string>
         <string name="pub_data">Опубликовано: -PUB_DATA-</string>
-        <string name="close">Закрыть</string>
         <string name="play">Играть</string>
     <!-- Use in activity/fragment -->
     <!-- QTopia -->
         <string name="appName">Questopia</string>
     <!-- SettingsFragment -->
         <string name="addFolder">Выбрать папку с игрой</string>
-        <string name="addFolderSum0">Текущий корневой каталог это внутренняя директория приложения</string>
-        <string name="addFolderSum1">Текущий корневая директория это внешняя директория устройства</string>
     <!-- FragmentImageBox -->
         <string name="image">Изображение</string>
     <!-- StockViewPagerFragment -->
@@ -81,7 +68,6 @@
         <string name="loadTitle">Загрузить</string>
         <string name="saveTitle">Сохранить</string>
         <!-- Group default -->
-        <string name="gameStockTitle">Полка игр</string>
         <string name="search">Поиск</string>
         <string name="settingsTitle">Настройки</string>
     <!-- Menu delete -->
@@ -135,8 +121,6 @@
         <string name="pref_audio_play">Воспроизводить звук в игре</string>
         <string name="pref_mute_video">Отключение звука видео в игре</string>
         <string name="pref_audio_debug">Отладчик путей к звукам</string>
-        <!-- Switch section -->
-        <string name="filePicker">Диалог Выбора Файла (альфа)</string>
         <!-- Extra section -->
         <string name="pluginTitle">Дополнения</string>
         <string name="aboutTitle">О программе</string>
