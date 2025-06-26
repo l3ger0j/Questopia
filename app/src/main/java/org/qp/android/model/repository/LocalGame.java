@@ -1,6 +1,7 @@
 package org.qp.android.model.repository;
 
 import static org.qp.android.helpers.utils.FileUtil.forceCreateFile;
+import static org.qp.android.helpers.utils.FileUtil.tryReceiveDirSize;
 
 import android.content.Context;
 import android.net.Uri;
@@ -74,6 +75,11 @@ public class LocalGame {
         unfilledEntry.listId = 0;
         unfilledEntry.gameDirUri = rootDir.getUri();
         unfilledEntry.gameFilesUri = gameFiles;
+
+        var gameDirSize = tryReceiveDirSize(context.getContentResolver(), rootDir.getUri());
+        if (gameDirSize != 0) {
+            unfilledEntry.fileSize = gameDirSize;
+        }
 
         createNoMediaFile(rootDir);
         createNoSearchFile(rootDir);

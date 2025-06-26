@@ -447,19 +447,6 @@ public class StockViewModel extends AndroidViewModel {
         }
     }
 
-    // TODO: 25.06.2024 Release service for calculate size dir
-    private void calculateSizeDir() {
-//        var gameDir = gameData.getGameDir(getApplication());
-
-//        CompletableFuture
-//                .supplyAsync(() -> calculateDirSize(gameDir), executor)
-//                .thenAccept(aLong -> {
-//                    gameData.fileSize = formatFileSize(aLong, getController().binaryPrefixes);
-//                    localGame.updateEntryInDB(gameData);
-//                    gameData.fileSize = String.valueOf(aLong);
-//                });
-    }
-
     public Intent createPlayGameIntent() {
         var data = currGameEntry;
         if (data == null) return null;

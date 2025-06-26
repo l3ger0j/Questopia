@@ -1,7 +1,10 @@
 package org.qp.android.helpers.utils;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.net.Uri;
+import android.os.Build;
+import android.provider.DocumentsContract;
 import android.util.Log;
 import android.widget.ImageView;
 
@@ -26,6 +29,7 @@ import org.qp.android.R;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.text.DecimalFormat;
@@ -59,6 +63,19 @@ public final class FileUtil {
         if (dir == null) return false;
         var canWrite = FileUtils.isWritable(dir, context);
         return dir.exists() && dir.isDirectory() && canWrite;
+    }
+
+    public static long tryReceiveDirSize(ContentResolver resolver, Uri dirUri) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            try {
+                var dirMetadata = DocumentsContract.getDocumentMetadata(resolver, dirUri);
+                if (dirMetadata != null && dirMetadata.containsKey(DocumentsContract.METADATA_TREE_SIZE)) {
+                    return dirMetadata.getLong(DocumentsContract.METADATA_TREE_SIZE, 0);
+                }
+            } catch (FileNotFoundException ignored) {
+            }
+        }
+        return 0;
     }
 
     public static void checkSetLocalImage(ImageView view, Uri imageUri) {
@@ -119,7 +136,7 @@ public final class FileUtil {
         return FileUtils.makeFolder(srcDir, context, name, CreateMode.REUSE);
     }
 
-    public static DocumentFile fromRelPath(@NonNull Context context ,
+    public static DocumentFile fromRelPath(@NonNull Context context,
                                            @NonNull final String path,
                                            @NonNull DocumentFile parentDir,
                                            final boolean requiresWriteAccess) {
@@ -141,7 +158,7 @@ public final class FileUtil {
     }
 
     @Nullable
-    public static String readFileAsString(Context context ,
+    public static String readFileAsString(Context context,
                                           Uri fileUri) {
         if (fileUri == null) return null;
 
@@ -155,7 +172,7 @@ public final class FileUtil {
                 result.append(line);
             }
         } catch (IOException ex) {
-            Log.e(TAG , "Error reading a file" , ex);
+            Log.e(TAG, "Error reading a file", ex);
             return null;
         }
         return result.toString();
@@ -168,20 +185,20 @@ public final class FileUtil {
         var result = new StringBuilder();
 
         try (var in = new InputStreamReader(new FileInputStream(file));
-             var bufReader = new BufferedReader(in)){
+             var bufReader = new BufferedReader(in)) {
             String line;
             while ((line = bufReader.readLine()) != null) {
                 result.append(line);
             }
         } catch (IOException ex) {
-            Log.e(TAG , "Error reading a file" , ex);
+            Log.e(TAG, "Error reading a file", ex);
             return null;
         }
         return result.toString();
     }
 
     @Nullable
-    public static String readAssetFileAsString(Context context ,
+    public static String readAssetFileAsString(Context context,
                                                String fileName) {
         var result = new StringBuilder();
         var assetManager = context.getAssets();
@@ -193,15 +210,15 @@ public final class FileUtil {
                 result.append(line);
             }
         } catch (IOException ex) {
-            Log.e(TAG , "Error reading a file" , ex);
+            Log.e(TAG, "Error reading a file", ex);
             return null;
         }
         return result.toString();
     }
 
-    public static void forceDelFile(@NonNull Context context ,
+    public static void forceDelFile(@NonNull Context context,
                                     @NonNull DocumentFile documentFile) {
-        DocumentFileUtils.forceDelete(documentFile , context);
+        DocumentFileUtils.forceDelete(documentFile, context);
     }
 
     @NonNull
@@ -211,13 +228,13 @@ public final class FileUtil {
         }
         var units = new String[0];
         if (numCountInfo == 1000) {
-            units = new String[]{"B" , "KB" , "MB" , "GB" , "TB"};
+            units = new String[]{"B", "KB", "MB", "GB", "TB"};
         } else if (numCountInfo == 1024) {
-            units = new String[]{"B" , "KiB" , "MiB" , "GiB" , "TiB"};
+            units = new String[]{"B", "KiB", "MiB", "GiB", "TiB"};
         }
         var digitGroups = (int) (Math.log10(size) / Math.log10(numCountInfo));
         return new DecimalFormat("#,##0.#").format(size /
-                Math.pow(numCountInfo , digitGroups))
+                Math.pow(numCountInfo, digitGroups))
                 + " " + units[digitGroups];
     }
 
