@@ -1,5 +1,5 @@
 [versions]
-agp = "8.10.1"
+agp = "8.11.0"
 hagp = "2.51.1"
 changelog = "3.5"
 collection = "1.5.0"
