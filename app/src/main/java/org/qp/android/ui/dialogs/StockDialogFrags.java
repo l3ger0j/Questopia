@@ -1,5 +1,6 @@
 package org.qp.android.ui.dialogs;
 
+import static org.qp.android.helpers.utils.FileUtil.checkSetLocalImage;
 import static org.qp.android.helpers.utils.FileUtil.checkSetRemoteImage;
 import static org.qp.android.helpers.utils.PathUtil.removeExtension;
 import static org.qp.android.helpers.utils.StringUtil.isNotEmpty;
@@ -11,6 +12,7 @@ import static org.qp.android.ui.stock.StockViewModel.CODE_PICK_PATH_FILE;
 
 import android.app.Dialog;
 import android.os.Bundle;
+import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -114,7 +116,6 @@ public class StockDialogFrags extends DialogFragment {
         switch (dialogType) {
             case ADD_DIALOG -> {
                 addBinding = DialogAddBinding.inflate(getLayoutInflater());
-                addBinding.setGame(dataObserver);
 
                 var titleText = addBinding.ET0.getEditText();
                 if (titleText != null) {
@@ -149,15 +150,18 @@ public class StockDialogFrags extends DialogFragment {
                     dismissAllowingStateLoss();
                 });
 
-                builder.setView(addBinding.getRoot());
-                return builder.create();
+                return builder.setView(addBinding.getRoot()).create();
             }
             case EDIT_DIALOG -> {
                 editBinding = DialogEditBinding.inflate(getLayoutInflater());
 
-                dataObserver.isModDirExist.set(stockViewModel.isModsDirExist());
-                dataObserver.iconUriObserver.set(stockViewModel.currGameEntry.gameIconUri);
-                editBinding.setGame(dataObserver);
+                editBinding.buttonSelectMod.setVisibility(stockViewModel.isModsDirExist() ? View.VISIBLE : View.GONE);
+                var scheme = stockViewModel.currGameEntry.gameIconUri.getScheme();
+                if (Objects.equals(scheme, "http") || Objects.equals(scheme, "https")) {
+                    checkSetRemoteImage(editBinding.iconView, stockViewModel.currGameEntry.gameIconUri);
+                } else {
+                    checkSetLocalImage(editBinding.iconView, stockViewModel.currGameEntry.gameIconUri);
+                }
 
                 editBinding.buttonSelectPath.setOnClickListener(v ->
                         stockViewModel.doOnShowFilePicker(CODE_PICK_PATH_FILE, new String[]{MimeType.BINARY_FILE}));
@@ -192,8 +196,7 @@ public class StockDialogFrags extends DialogFragment {
                     dismissAllowingStateLoss();
                 });
 
-                builder.setView(editBinding.getRoot());
-                return builder.create();
+                return builder.setView(editBinding.getRoot()).create();
             }
             case DOWNLOAD_DIALOG -> {
                 downloadBinding = DialogDownloadBinding.inflate(getLayoutInflater());
@@ -283,11 +286,16 @@ public class StockDialogFrags extends DialogFragment {
                 case IMAGE_FILE -> {
                     if (editBinding != null) {
                         editBinding.buttonSelectIcon.setText(file.inputFile().getName());
-                        dataObserver.iconUriObserver.set(file.inputFile().getUri());
+                        var scheme = stockViewModel.currGameEntry.gameIconUri.getScheme();
+                        if (Objects.equals(scheme, "http") || Objects.equals(scheme, "https")) {
+                            checkSetRemoteImage(editBinding.iconView, stockViewModel.currGameEntry.gameIconUri);
+                        } else {
+                            checkSetLocalImage(editBinding.iconView, stockViewModel.currGameEntry.gameIconUri);
+                        }
                     }
                     if (addBinding != null) {
                         addBinding.buttonSelectIcon.setText(file.inputFile().getName());
-                        dataObserver.iconUriObserver.set(file.inputFile().getUri());
+                        checkSetLocalImage(addBinding.imageView, file.inputFile().getUri());
                     }
                     if (downloadBinding != null) {
                         downloadBinding.buttonSelectIcon.setText(file.inputFile().getName());

@@ -1,6 +1,6 @@
 package org.qp.android.helpers;
 
-import static org.qp.android.helpers.utils.StringUtil.isNotEmptyOrBlank;
+import static org.qp.android.helpers.utils.UriUtil.isNotEmptyOrBlanks;
 
 import android.net.Uri;
 import android.widget.ImageView;
@@ -12,22 +12,18 @@ import com.bumptech.glide.Glide;
 
 import org.qp.android.R;
 
+import java.util.Objects;
+
 public class Bind {
 
     @BindingAdapter({"imageUri"})
     public static void loadImage(ImageView view, Uri imageUri) {
-        if (isNotEmptyOrBlank(String.valueOf(imageUri))) {
-            switch (view.getId()) {
-                case R.id.loc_game_icon -> view.setImageURI(imageUri);
-                case R.id.game_icon -> Glide.with(view)
-                        .load(imageUri)
-                        .centerCrop()
-                        .error(R.drawable.baseline_broken_image_24)
-                        .into(view);
-                default -> Glide.with(view)
-                        .load(imageUri)
-                        .centerCrop()
-                        .into(view);
+        if (isNotEmptyOrBlanks(imageUri)) {
+            var scheme = imageUri.getScheme();
+            if (Objects.equals(scheme, "http") || Objects.equals(scheme, "https")) {
+                Glide.with(view).load(imageUri).centerCrop().into(view);
+            }  else {
+                view.setImageURI(imageUri);
             }
         } else {
             var drawable = ResourcesCompat.getDrawable(
