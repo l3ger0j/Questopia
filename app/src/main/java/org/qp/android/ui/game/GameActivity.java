@@ -314,23 +314,19 @@ public class GameActivity extends AppCompatActivity {
                 pager2.setCurrentItem(0, false);
                 var badge = bottomNavigationView.getBadge(R.id.menu_mainDesc);
                 if (badge != null) bottomNavigationView.removeBadge(R.id.menu_mainDesc);
-                setTitle(getString(R.string.mainDescFullTitle));
+                setTitle(ContextCompat.getString(getApplication(), R.string.mainDescFullTitle));
             }
             case TAB_OBJECTS -> {
                 pager2.setCurrentItem(1, false);
                 var badge = bottomNavigationView.getBadge(R.id.menu_inventory);
                 if (badge != null) bottomNavigationView.removeBadge(R.id.menu_inventory);
-                setTitle(getString(R.string.inventoryTitle));
+                setTitle(ContextCompat.getString(getApplication(), R.string.inventoryTitle));
             }
             case TAB_VARS_DESC -> {
                 pager2.setCurrentItem(2, false);
                 var badge = bottomNavigationView.getBadge(R.id.menu_varsDesc);
                 if (badge != null) bottomNavigationView.removeBadge(R.id.menu_varsDesc);
-                if (!settingsController.language.equals("ru")) {
-                    setTitle(getString(R.string.varsDescFullTitle));
-                } else {
-                    setTitle(getString(R.string.varsDescTitle));
-                }
+                setTitle(ContextCompat.getString(getApplication(), R.string.varsDescTitle));
             }
         }
 

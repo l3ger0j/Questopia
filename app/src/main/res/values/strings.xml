@@ -60,7 +60,6 @@
         <string name="mainDescFullTitle">Main description</string>
         <string name="mainDescContDesc">Go to main description</string>
         <string name="varsDescTitle">Extra desc</string>
-        <string name="varsDescFullTitle" translatable="false">Extra description</string>
         <string name="varsDescContDesc">Go to extra description</string>
         <string name="inventoryTitle">Inventory</string>
         <string name="inventoryContDesc">Go to inventory</string>
