@@ -71,8 +71,10 @@ public class LocalGame {
             unfilledEntry.fileSize = gameDirSize;
         }
 
-        createNoMediaFile(gameDir);
-        createNoSearchFile(gameDir);
+        CompletableFuture.runAsync(() -> {
+            createNoMediaFile(gameDir);
+            createNoSearchFile(gameDir);
+        });
 
         var databaseUtil = new DatabaseUtil(gameDao);
         return databaseUtil.insertEntry(unfilledEntry);
