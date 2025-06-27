@@ -40,20 +40,20 @@ public class AudioPlayer {
                                             final int volume) {
         if (isExecutorExistNotDown()) {
             return CompletableFuture.runAsync(() -> {
-                var sound = sounds.get(soundFileUri);
-                if (sound != null) {
-                    var newVolume = getSystemVolume(volume);
-                    sound.setVolume(newVolume, newVolume);
-                    if (soundEnabled && !isPaused) {
-                        if (!sound.isPlaying()) {
-                            sound.start();
-                        }
-                    }
-                } else {
-                    var newSound = createNewSound(context, soundFileUri, volume);
+                final var sound = sounds.get(soundFileUri);
+                final var sysVolume = getSystemVolume(volume);
+                if (sound == null) {
+                    final var newSound = createNewSound(context, soundFileUri, sysVolume);
                     if (soundEnabled && !isPaused) {
                         if (!newSound.isPlaying()) {
                             newSound.start();
+                        }
+                    }
+                } else {
+                    sound.setVolume(sysVolume, sysVolume);
+                    if (soundEnabled && !isPaused) {
+                        if (!sound.isPlaying()) {
+                            sound.start();
                         }
                     }
                 }
@@ -64,8 +64,7 @@ public class AudioPlayer {
 
     private MediaPlayer createNewSound(final Context context,
                                        final Uri filePath,
-                                       final int fileVolume) {
-        var sysVolume = getSystemVolume(fileVolume);
+                                       final float sysVolume) {
         var filePlayer = new MediaPlayer();
 
         try {
@@ -83,7 +82,7 @@ public class AudioPlayer {
         filePlayer.setVolume(sysVolume, sysVolume);
 
         sounds.put(filePath, filePlayer);
-        return sounds.get(filePath);
+        return filePlayer;
     }
 
     private float getSystemVolume(int volume) {
@@ -109,19 +108,17 @@ public class AudioPlayer {
     }
 
     public CompletableFuture<Void> closeFile(final Uri filePath) {
-        if (isExecutorExistNotDown()) {
+        if (isExecutorExistNotDown() && sounds.containsKey(filePath)) {
             return CompletableFuture.runAsync(() -> {
-                if (sounds.containsKey(filePath)) {
-                    final var player = sounds.get(filePath);
-                    if (player != null) {
-                        if (player.isPlaying()) {
-                            player.stop();
-                        }
-                        player.reset();
-                        player.release();
+                final var player = sounds.get(filePath);
+                if (player != null) {
+                    if (player.isPlaying()) {
+                        player.stop();
                     }
-                    sounds.remove(filePath);
+                    player.reset();
+                    player.release();
                 }
+                sounds.remove(filePath);
             }, audioExecutor);
         }
         return CompletableFuture.runAsync(() -> {});
