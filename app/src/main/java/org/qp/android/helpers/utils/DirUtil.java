@@ -83,21 +83,4 @@ public final class DirUtil {
         return gameFiles;
     }
 
-    @WorkerThread
-    public static long calculateDirSize(DocumentFile dir) {
-        if (dir.exists()) {
-            long result = 0;
-            var fileList = dir.listFiles();
-            for (var file : fileList) {
-                if (file.isDirectory()) {
-                    result += calculateDirSize(file);
-                } else {
-                    result += file.length();
-                }
-            }
-            return result;
-        }
-        return 0;
-    }
-
 }
