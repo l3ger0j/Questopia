@@ -4,6 +4,7 @@ import static org.qp.android.QuestopiaApplication.UNPACK_GAME_CHANNEL_ID;
 import static org.qp.android.QuestopiaApplication.UNPACK_GAME_NOTIFICATION_ID;
 import static org.qp.android.helpers.utils.DirUtil.isDirContainsGameFile;
 import static org.qp.android.helpers.utils.DirUtil.isWritableDir;
+import static org.qp.android.helpers.utils.DirUtil.receiveGameFilesFromDir;
 import static org.qp.android.helpers.utils.FileUtil.copyFileToDir;
 import static org.qp.android.helpers.utils.FileUtil.fromRelPath;
 import static org.qp.android.helpers.utils.FileUtil.isWritableFile;
@@ -404,7 +405,10 @@ public class StockViewModel extends AndroidViewModel {
         try {
             if (tempImageFile != null) unfilledEntry.gameIconUri = tempImageFile.getUri();
 
-            localGame.insertEntryInDB(unfilledEntry, rootDir).thenRun(this::loadGameDataFromDB);
+            CompletableFuture
+                    .supplyAsync(() -> receiveGameFilesFromDir(getApplication(), rootDir), executor)
+                    .thenComposeAsync(list -> localGame.insertEntryInDB(unfilledEntry, rootDir, list))
+                    .thenRun(this::loadGameDataFromDB);
         } catch (NullPointerException ex) {
             doOnShowErrorDialog(ex.getMessage(), ErrorType.EXCEPTION);
         }
@@ -566,7 +570,16 @@ public class StockViewModel extends AndroidViewModel {
 
                     CompletableFuture
                             .runAsync(archiveUnpack::extractArchiveEntries, executor)
-                            .thenRunAsync(() -> {
+                            .thenApplyAsync(v -> receiveGameFilesFromDir(getApplication(), gameFolder), executor)
+                            .thenApplyAsync(gameFiles -> {
+                                if (gameFiles.isEmpty()) {
+                                    return false;
+                                } else {
+                                    localGame.insertEntryInDB(currGameEntry, gameFolder, gameFiles);
+                                    return true;
+                                }
+                            }, executor)
+                            .thenAccept(aBoolean -> {
                                 var notificationBuild = new NotifyBuilder(getApplication(), UNPACK_GAME_CHANNEL_ID);
                                 var unpackBody = ActivityCompat.getString(getApplication(), R.string.bodyUnpackDoneNotify);
                                 var notification = notificationBuild.buildStandardNotification(
@@ -575,13 +588,7 @@ public class StockViewModel extends AndroidViewModel {
                                 );
                                 var notificationManager = getApplication().getSystemService(NotificationManager.class);
                                 notificationManager.notify(UNPACK_GAME_NOTIFICATION_ID, notification);
-
-                                var gameFolderUri = gameFolder.getUri();
-                                var gameFolder = DocumentFileCompat.fromUri(getApplication(), gameFolderUri);
-                                if (isWritableDir(getApplication(), gameFolder)) {
-                                    localGame.insertEntryInDB(currGameEntry, gameFolder);
-                                }
-                            }, executor)
+                            })
                             .exceptionally(throwable -> {
                                 doOnShowErrorDialog(throwable.toString(), ErrorType.EXCEPTION);
                                 return null;

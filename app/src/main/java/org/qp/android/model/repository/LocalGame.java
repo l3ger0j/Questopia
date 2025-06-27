@@ -18,7 +18,6 @@ import org.qp.android.helpers.utils.DatabaseUtil;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -60,29 +59,20 @@ public class LocalGame {
                 });
     }
 
-    public CompletableFuture<Void> insertEntryInDB(Game unfilledEntry, DocumentFile rootDir) {
-        var gameFiles = new ArrayList<Uri>();
-        var files = rootDir.listFiles();
-
-        for (var file : files) {
-            if (file.getName() == null) continue;
-            var lcName = file.getName().toLowerCase(Locale.ROOT);
-            if (lcName.endsWith(".qsp") || lcName.endsWith(".gam")) {
-                gameFiles.add(file.getUri());
-            }
-        }
-
+    public CompletableFuture<Void> insertEntryInDB(Game unfilledEntry,
+                                                   DocumentFile gameDir,
+                                                   List<Uri> gameFiles) {
         unfilledEntry.listId = 0;
-        unfilledEntry.gameDirUri = rootDir.getUri();
+        unfilledEntry.gameDirUri = gameDir.getUri();
         unfilledEntry.gameFilesUri = gameFiles;
 
-        var gameDirSize = tryReceiveDirSize(context.getContentResolver(), rootDir.getUri());
+        var gameDirSize = tryReceiveDirSize(context.getContentResolver(), gameDir.getUri());
         if (gameDirSize != 0) {
             unfilledEntry.fileSize = gameDirSize;
         }
 
-        createNoMediaFile(rootDir);
-        createNoSearchFile(rootDir);
+        createNoMediaFile(gameDir);
+        createNoSearchFile(gameDir);
 
         var databaseUtil = new DatabaseUtil(gameDao);
         return databaseUtil.insertEntry(unfilledEntry);
