@@ -545,7 +545,7 @@ public class StockViewModel extends AndroidViewModel {
                     var request = new DownloadManager.Request(downloadUri)
                             .setVisibleInDownloadsUi(true)
                             .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-                            .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, s);
+                            .setDestinationInExternalFilesDir(getApplication(), Environment.DIRECTORY_DOWNLOADS, s);
                     downloadId = downloadManager.enqueue(request);
                 })
                 .exceptionally(throwable -> {
@@ -556,8 +556,7 @@ public class StockViewModel extends AndroidViewModel {
 
     public void postProcessingDownload() {
         if (downloadId == 0) return;
-        var query = new DownloadManager.Query()
-                .setFilterById(downloadId);
+        var query = new DownloadManager.Query().setFilterById(downloadId);
         try (var c = downloadManager.query(query)) {
             if (c.moveToFirst()) {
                 var colStatusIndex = c.getColumnIndex(DownloadManager.COLUMN_STATUS);
@@ -580,6 +579,7 @@ public class StockViewModel extends AndroidViewModel {
                                 }
                             }, executor)
                             .thenAccept(aBoolean -> {
+                                file.delete();
                                 var notificationBuild = new NotifyBuilder(getApplication(), UNPACK_GAME_CHANNEL_ID);
                                 var unpackBody = ActivityCompat.getString(getApplication(), R.string.bodyUnpackDoneNotify);
                                 var notification = notificationBuild.buildStandardNotification(
@@ -589,6 +589,7 @@ public class StockViewModel extends AndroidViewModel {
                                 var notificationManager = getApplication().getSystemService(NotificationManager.class);
                                 notificationManager.notify(UNPACK_GAME_NOTIFICATION_ID, notification);
                             })
+                            .thenRun(this::loadGameDataFromDB)
                             .exceptionally(throwable -> {
                                 doOnShowErrorDialog(throwable.toString(), ErrorType.EXCEPTION);
                                 return null;
