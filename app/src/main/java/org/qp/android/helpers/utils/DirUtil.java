@@ -12,8 +12,6 @@ import com.anggrayudi.storage.file.DocumentFileUtils;
 import com.anggrayudi.storage.file.FileUtils;
 import com.anggrayudi.storage.file.MimeType;
 
-import org.jetbrains.annotations.Unmodifiable;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,7 +47,7 @@ public final class DirUtil {
 
     @NonNull
     @WorkerThread
-    public static @Unmodifiable List<Uri> receiveGameFilesFromDir(Context context, DocumentFile gameDir) {
+    public static List<Uri> receiveGameFilesFromDir(Context context, DocumentFile gameDir) {
         if (!isWritableDir(context, gameDir)) return List.of();
         final var files = gameDir.listFiles();
         if (files.length == 0) return List.of();
