@@ -226,18 +226,23 @@ public class StockActivity extends AppCompatActivity {
                 .getEditText()
                 .setOnEditorActionListener((v, actionId, event) -> {
                     searchToolbar.setText(searchView.getText());
-                    var gameList = stockViewModel.getListGames();
-                    var filteredList = new ArrayList<Game>();
-                    gameList.forEach(game -> {
-                        var title = game.title.toLowerCase(Locale.getDefault());
-                        var searchTitle = searchView.getText().toString().toLowerCase(Locale.getDefault());
-                        if (title.contains(searchTitle)) {
-                            filteredList.add(game);
-                        }
-                    });
-                    if (!filteredList.isEmpty()) {
-                        stockViewModel.gameEntriesLiveData.setValue(filteredList);
-                    }
+                    var searchTitle = searchView.getText().toString().toLowerCase(Locale.getDefault());
+                    stockViewModel.getListGamesFuture()
+                            .thenApply(games -> {
+                                var filteredList = new ArrayList<Game>();
+                                for (var gameEntry : games) {
+                                    var title = gameEntry.title.toLowerCase(Locale.getDefault());
+                                    if (title.contains(searchTitle)) {
+                                        filteredList.add(gameEntry);
+                                    }
+                                }
+                                return filteredList;
+                            })
+                            .thenAccept(newGames -> {
+                                if (!newGames.isEmpty()) {
+                                    stockViewModel.gameEntriesLiveData.postValue(newGames);
+                                }
+                            });
                     searchView.hide();
                     return false;
                 });
@@ -526,13 +531,7 @@ public class StockActivity extends AppCompatActivity {
     }
 
     public void onListItemClick(Game entryToShow) {
-        if (stockViewModel.isEnableDeleteMode) {
-            var currGamesMapValues = stockViewModel.getGamesMap().values();
-            for (var gameData : currGamesMapValues) {
-                if (!stockViewModel.isGameInstalled()) continue;
-                stockViewModel.currInstalledGamesList.add(gameData);
-            }
-        } else {
+        if (!stockViewModel.isEnableDeleteMode) {
             stockViewModel.setCurrGameData(entryToShow);
             var currDest = navController.getCurrentDestination();
 

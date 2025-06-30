@@ -1,7 +1,5 @@
 package org.qp.android.ui.stock;
 
-import static androidx.recyclerview.widget.RecyclerView.NO_POSITION;
-
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,14 +7,14 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.selection.SelectionPredicates;
+import androidx.recyclerview.selection.SelectionTracker;
+import androidx.recyclerview.selection.StorageStrategy;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import org.qp.android.R;
 import org.qp.android.databinding.FragmentRecyclerBinding;
 import org.qp.android.helpers.adapters.RecyclerItemClickListener;
 import org.qp.android.helpers.bus.Events;
@@ -25,10 +23,6 @@ public class StockLocalRVFragment extends Fragment {
 
     private StockViewModel stockViewModel;
     private RecyclerView mRecyclerView;
-
-    private int unselectColor;
-    private int selectColor;
-
     private FragmentRecyclerBinding recyclerBinding;
     private LocalGamesListAdapter localAdapter;
 
@@ -41,19 +35,48 @@ public class StockLocalRVFragment extends Fragment {
         mRecyclerView = recyclerBinding.shareRecyclerView;
         mRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
 
-        unselectColor = android.R.attr.selectableItemBackground;
-        selectColor = ContextCompat.getColor(requireContext(), R.color.md_theme_primaryContainer);
-
         localAdapter = new LocalGamesListAdapter();
         stockViewModel.gameEntriesLiveData.observe(getViewLifecycleOwner(), localAdapter::submitList);
         mRecyclerView.setAdapter(localAdapter);
 
-        stockViewModel.fragLocalRVEmit.observe(getViewLifecycleOwner(), new Events.EventObserver(event -> {
-            if (event instanceof StockFragmentNavigation.SelectAllElements) {
-                selectAllElements();
+        var selectionTracker = new SelectionTracker.Builder<>(
+                "long-game-id",
+                mRecyclerView,
+                new LocalGamesListAdapter.LocalGamesIdsProvider(localAdapter),
+                new LocalGamesListAdapter.LocalGamesDetailsLookup(mRecyclerView),
+                StorageStrategy.createLongStorage()
+        ).withSelectionPredicate(SelectionPredicates.createSelectAnything()).build();
+        selectionTracker.onRestoreInstanceState(savedInstanceState);
+        localAdapter.setTracker(selectionTracker);
+
+        selectionTracker.addObserver(new SelectionTracker.SelectionObserver<>() {
+            @Override
+            public void onItemStateChanged(@NonNull Long key, boolean selected) {
+                stockViewModel.onUpdateSelection(key, selected);
             }
-            if (event instanceof StockFragmentNavigation.UnselectAllElements) {
-                unselectAllElements();
+
+            @Override
+            public void onSelectionChanged() {
+                if (!selectionTracker.getSelection().isEmpty()) {
+                    stockViewModel.onLongListItemClick();
+                }
+            }
+        });
+
+        stockViewModel.fragLocalRVEmit.observe(getViewLifecycleOwner(), new Events.EventObserver(event -> {
+            if (event instanceof StockFragmentNavigation.ClearSelectElements) {
+                selectionTracker.clearSelection();
+            }
+            if (event instanceof StockFragmentNavigation.ChangeStateElements) {
+                stockViewModel.getListGamesFuture().thenAccept(games -> {
+                    var idsList = games.stream().map(game -> game.id).toList();
+                    if (stockViewModel.selGameEntriesSet.size() == games.size()) {
+                        selectionTracker.clearSelection();
+                        stockViewModel.selGameEntriesSet.clear();
+                    } else {
+                        selectionTracker.setItemsSelected(idsList, true);
+                    }
+                });
             }
         }));
 
@@ -68,22 +91,6 @@ public class StockLocalRVFragment extends Fragment {
         recyclerBinding = null;
     }
 
-    private void selectAllElements() {
-        for (int childCount = mRecyclerView.getChildCount(), i = 0; i < childCount; ++i) {
-            final var holder = mRecyclerView.getChildViewHolder(mRecyclerView.getChildAt(i));
-            var constraintLayout = (ConstraintLayout) holder.itemView.findViewById(R.id.relativeLayout);
-            constraintLayout.setBackgroundColor(selectColor);
-        }
-    }
-
-    private void unselectAllElements() {
-        for (int childCount = mRecyclerView.getChildCount(), i = 0; i < childCount; ++i) {
-            final var holder = mRecyclerView.getChildViewHolder(mRecyclerView.getChildAt(i));
-            var constraintLayout = (ConstraintLayout) holder.itemView.findViewById(R.id.relativeLayout);
-            constraintLayout.setBackgroundColor(unselectColor);
-        }
-    }
-
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -94,32 +101,11 @@ public class StockLocalRVFragment extends Fragment {
                 if (!stockViewModel.isEnableDeleteMode) {
                     var entry = localAdapter.getGameEntry(position);
                     stockViewModel.doOnShowGameFragment(entry);
-                } else {
-                    var mViewHolder = mRecyclerView.findViewHolderForAdapterPosition(position);
-                    if (mViewHolder == null) return;
-
-                    var adapterPosition = mViewHolder.getAbsoluteAdapterPosition();
-                    var gameEntriesList = stockViewModel.currInstalledGamesList;
-                    if (adapterPosition == NO_POSITION) return;
-                    if (adapterPosition < 0 || adapterPosition >= gameEntriesList.size()) return;
-
-                    var gamesSelList = stockViewModel.selGameEntriesList;
-                    var gameEntry = gameEntriesList.get(adapterPosition);
-                    if (gamesSelList.isEmpty() || !gamesSelList.contains(gameEntry)) {
-                        gamesSelList.add(gameEntry);
-                        var constraintLayout = (ConstraintLayout) mViewHolder.itemView.findViewById(R.id.relativeLayout);
-                        constraintLayout.setBackgroundColor(selectColor);
-                    } else {
-                        gamesSelList.remove(gameEntry);
-                        var constraintLayout = (ConstraintLayout) mViewHolder.itemView.findViewById(R.id.relativeLayout);
-                        constraintLayout.setBackgroundColor(unselectColor);
-                    }
                 }
             }
 
             @Override
             public void onLongItemClick(View view, int position) {
-                stockViewModel.onLongListItemClick();
             }
         }));
     }

@@ -20,6 +20,17 @@ public final class DatabaseUtil {
         this.gameDao = gameDao;
     }
 
+    public CompletableFuture<Game> getGameEntryById(long entryId) {
+        return CompletableFuture
+                .supplyAsync(() -> {
+                    try {
+                        return gameDao.getById(entryId);
+                    } catch (Exception e) {
+                        throw new CompletionException(e);
+                    }
+                });
+    }
+
     public CompletableFuture<List<Game>> getAllGameEntries() {
         return CompletableFuture
                 .supplyAsync(() -> {

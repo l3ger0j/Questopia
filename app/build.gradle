@@ -87,6 +87,7 @@ dependencies {
     annotationProcessor libs.androidx.room.compiler
     implementation libs.androidx.collection
     implementation libs.androidx.recyclerview
+    implementation libs.androidx.recyclerview.selection
 
     implementation libs.hilt.android
     annotationProcessor libs.hilt.compiler

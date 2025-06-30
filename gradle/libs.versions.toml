@@ -22,6 +22,7 @@ pagingRxjava3 = "3.3.6"
 glide = "4.16.0"
 preference = "1.2.1"
 recyclerview = "1.4.0"
+recyclerviewsel = "1.2.0"
 retrofit = "3.0.0"
 roomRuntime = "2.7.2"
 rxandroid = "3.0.2"
@@ -42,6 +43,7 @@ androidx-paging-rxjava3 = { module = "androidx.paging:paging-rxjava3", version.r
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomRuntime" }
 androidx-recyclerview = { module = "androidx.recyclerview:recyclerview", version.ref = "recyclerview" }
+androidx-recyclerview-selection = { module = "androidx.recyclerview:recyclerview-selection", version.ref = "recyclerviewsel" }
 androidx-work-runtime = { module = "androidx.work:work-runtime", version.ref = "workRuntime" }
 appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 changelog = { module = "com.github.AppDevNext:ChangeLog", version.ref = "changelog" }

@@ -60,7 +60,7 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -83,7 +83,6 @@ public class StockViewModel extends AndroidViewModel {
     public final Events.Emitter actEmit = new Events.Emitter();
     public final Events.Emitter fragLocalRVEmit = new Events.Emitter();
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
-    private final HashMap<Long, Game> gamesMap = new HashMap<>();
     private final DownloadManager downloadManager = getApplication().getSystemService(DownloadManager.class);
     private final LocalGame localGame;
     private final DatabaseUtil databaseUtil;
@@ -98,8 +97,7 @@ public class StockViewModel extends AndroidViewModel {
     public MutableLiveData<Boolean> doIsHideFAB = new MutableLiveData<>();
     public MutableLiveData<Integer> outputIntObserver;
     public boolean isEnableDeleteMode = false;
-    public List<Game> selGameEntriesList = new ArrayList<>();
-    public List<Game> currInstalledGamesList = new ArrayList<>();
+    public HashSet<Game> selGameEntriesSet = new HashSet<>();
     public Game currGameEntry;
     public MutableLiveData<Game> gameEntryLiveData = new MutableLiveData<>();
     public MutableLiveData<List<Game>> gameEntriesLiveData = new MutableLiveData<>();
@@ -161,12 +159,8 @@ public class StockViewModel extends AndroidViewModel {
         fileMutableLiveData.setValue(new TempFile(tempImageFile, TempFileType.IMAGE_FILE));
     }
 
-    public List<Game> getListGames() {
-        return new ArrayList<>(gamesMap.values());
-    }
-
-    public HashMap<Long, Game> getGamesMap() {
-        return gamesMap;
+    public CompletableFuture<List<Game>> getListGamesFuture() {
+        return databaseUtil.getAllGameEntries();
     }
 
     public int getCountGameFiles() {
@@ -249,28 +243,22 @@ public class StockViewModel extends AndroidViewModel {
         actEmit.waitAndExecute(new StockFragmentNavigation.DestroyActionMode());
     }
 
-    public void doOnSelectAllElements() {
-        fragLocalRVEmit.emitAndExecute(new StockFragmentNavigation.SelectAllElements());
+    void doClearSelectElements() {
+        fragLocalRVEmit.emitAndExecute(new StockFragmentNavigation.ClearSelectElements());
     }
 
-    public void doOnUnselectAllElements() {
-        fragLocalRVEmit.emitAndExecute(new StockFragmentNavigation.UnselectAllElements());
+    void doChangeStateElements() {
+        fragLocalRVEmit.emitAndExecute(new StockFragmentNavigation.ChangeStateElements());
     }
 
-    public void onLongListItemClick() {
-        if (isEnableDeleteMode) return;
-
-        var pageNumber = currPageNumber.getValue();
-        if (pageNumber == null) return;
-        if (pageNumber == 1) return;
-
-        var callback = new ActionMode.Callback() {
+    private ActionMode.Callback initDeleteMode() {
+        return new ActionMode.Callback() {
             Observer<Integer> observer = integer -> {
                 if (integer == 1) {
-                    removeEntryAndDirFromDB(selGameEntriesList);
+                    removeEntryAndDirFromDB(List.copyOf(selGameEntriesSet));
                     doOnFinishActionMode();
                 } else {
-                    removeEntryFromDB(selGameEntriesList);
+                    removeEntryFromDB(List.copyOf(selGameEntriesSet));
                     doOnFinishActionMode();
                 }
             };
@@ -284,7 +272,6 @@ public class StockViewModel extends AndroidViewModel {
             @Override
             public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
                 doOnPrepareActionMode();
-                currInstalledGamesList = getListGames();
                 isEnableDeleteMode = true;
                 return true;
             }
@@ -292,24 +279,14 @@ public class StockViewModel extends AndroidViewModel {
             @SuppressLint("NonConstantResourceId")
             @Override
             public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-                var gamesSelList = selGameEntriesList;
-                var gameEntriesList = currInstalledGamesList;
+                var gamesSelList = selGameEntriesSet;
 
                 switch (item.getItemId()) {
                     case R.id.delete_game -> {
                         doOnShowDeleteDialog(String.valueOf(gamesSelList.size()));
                         outputIntObserver.observeForever(observer);
                     }
-                    case R.id.select_all -> {
-                        if (gamesSelList.size() == gameEntriesList.size()) {
-                            gamesSelList.clear();
-                            doOnUnselectAllElements();
-                        } else {
-                            gamesSelList.clear();
-                            gamesSelList.addAll(gameEntriesList);
-                            doOnSelectAllElements();
-                        }
-                    }
+                    case R.id.select_all -> doChangeStateElements();
                 }
                 return true;
             }
@@ -317,18 +294,36 @@ public class StockViewModel extends AndroidViewModel {
             @Override
             public void onDestroyActionMode(ActionMode mode) {
                 doOnDestroyActionMode();
-                doOnUnselectAllElements();
+                doClearSelectElements();
                 observer = null;
                 isEnableDeleteMode = false;
-                selGameEntriesList.clear();
-                currInstalledGamesList.clear();
+                selGameEntriesSet.clear();
                 doIsHideFAB.setValue(false);
             }
         };
+    }
+
+    public void onUpdateSelection(long key, boolean selected) {
+        databaseUtil.getGameEntryById(key)
+                .thenAccept(gameEntry -> {
+                   if (selected) {
+                       selGameEntriesSet.add(gameEntry);
+                   } else {
+                       selGameEntriesSet.remove(gameEntry);
+                   }
+                });
+    }
+
+    public void onLongListItemClick() {
+        if (isEnableDeleteMode) return;
+
+        var pageNumber = currPageNumber.getValue();
+        if (pageNumber == null) return;
+        if (pageNumber == 1) return;
 
         doIsHideFAB.setValue(true);
 
-        doOnShowActionMode(callback);
+        doOnShowActionMode(initDeleteMode());
     }
 
     // region Dialog
@@ -467,13 +462,8 @@ public class StockViewModel extends AndroidViewModel {
 
     // endregion Dialog
     public void loadGameDataFromDB() {
-        gamesMap.clear();
-
         databaseUtil.getAllGameEntries()
-                .thenAcceptAsync(listGameEntries -> {
-                    listGameEntries.forEach(gameData -> gamesMap.put(gameData.id, gameData));
-                    gameEntriesLiveData.postValue(new ArrayList<>(gamesMap.values()));
-                }, executor)
+                .thenAccept(gameEntriesLiveData::postValue)
                 .exceptionally(throwable -> {
                     doOnShowErrorDialog(throwable.toString(), ErrorType.EXCEPTION);
                     return null;
@@ -494,14 +484,7 @@ public class StockViewModel extends AndroidViewModel {
 
     public CompletableFuture<Void> removeEntryFromDB(List<Game> entriesDelete) {
         return localGame.deleteGamesEntries(entriesDelete)
-                .thenAccept(integer -> {
-                    for (var element : entriesDelete) {
-                        gamesMap.remove(element.id, element);
-                    }
-                    var localGameData = new ArrayList<>(gamesMap.values());
-                    gameEntriesLiveData.postValue(localGameData);
-                    loadGameDataFromDB();
-                });
+                .thenAccept(integer -> loadGameDataFromDB());
     }
 
     public void removeEntryAndDirFromDB(List<Game> entriesDelete) {

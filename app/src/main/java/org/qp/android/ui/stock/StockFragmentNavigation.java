@@ -25,10 +25,10 @@ public interface StockFragmentNavigation {
     class DestroyActionMode extends NavigationEvent {
     }
 
-    class SelectAllElements extends NavigationEvent {
+    class ClearSelectElements extends NavigationEvent{
     }
 
-    class UnselectAllElements extends NavigationEvent {
+    class ChangeStateElements extends NavigationEvent {
     }
 
     class ShowGameFragment extends NavigationEvent {
