@@ -55,7 +55,7 @@ public class GameObjectFragment extends Fragment {
         });
 
         // Settings
-        viewModel.getControllerObserver().observe(getViewLifecycleOwner(), settingsController -> {
+        viewModel.controllerObserver.observe(getViewLifecycleOwner(), settingsController -> {
             objectView.setBackgroundColor(viewModel.getBackgroundColor());
             recyclerBinding.getRoot().refreshDrawableState();
         });

@@ -79,7 +79,7 @@ public class GameMainFragment extends Fragment {
                 viewModel.showLibDialog(LibTypeDialog.DIALOG_PICTURE, pathToPic);
             }
         }, "img");
-        viewModel.getMainDescObserver().observe(getViewLifecycleOwner(), desc -> {
+        viewModel.mainDescLiveData.observe(getViewLifecycleOwner(), desc -> {
             if (viewModel.getSettingsController().isUseAutoscroll) {
                 mainDescView.postDelayed(onAutoScroll, 500);
             }
@@ -159,7 +159,7 @@ public class GameMainFragment extends Fragment {
         });
 
         // Settings
-        viewModel.getControllerObserver().observe(getViewLifecycleOwner(), settingsController -> {
+        viewModel.controllerObserver.observe(getViewLifecycleOwner(), settingsController -> {
             if (settingsController.isUseSeparator) {
                 var defSepColor = requireContext().getColor(R.color.materialcolorpicker__grey);
                 separatorView.setBackgroundColor(defSepColor);

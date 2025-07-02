@@ -29,11 +29,11 @@ public class GameVarsFragment extends Fragment {
                 ViewGroup.LayoutParams.MATCH_PARENT));
         varsDescView.setBackgroundColor(viewModel.getBackgroundColor());
         varsDescView = viewModel.getDefaultWebClient(varsDescView);
-        viewModel.getControllerObserver().observe(getViewLifecycleOwner(), settingsController -> {
+        viewModel.controllerObserver.observe(getViewLifecycleOwner(), settingsController -> {
             varsDescView.setBackgroundColor(viewModel.getBackgroundColor());
             varsDescView.refreshDrawableState();
         });
-        viewModel.getVarsDescObserver().observe(getViewLifecycleOwner(), desc ->
+        viewModel.varsDescLiveData.observe(getViewLifecycleOwner(), desc ->
                 varsDescView.loadDataWithBaseURL(
                         "file:///",
                         desc,

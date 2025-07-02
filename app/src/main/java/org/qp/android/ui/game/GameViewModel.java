@@ -40,7 +40,6 @@ import androidx.core.content.ContextCompat;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.AndroidViewModel;
-import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.preference.PreferenceManager;
 
@@ -111,9 +110,9 @@ public class GameViewModel extends AndroidViewModel {
     public final MutableLiveData<Boolean> actsVisibility = new MutableLiveData<>();
     public final MutableLiveData<List<LibGenItem>> objsListLiveData = new MutableLiveData<>();
     private final PublishSubject<String> dialogConnector = PublishSubject.create();
-    private final MutableLiveData<SettingsController> controllerObserver = new MutableLiveData<>();
-    private final MutableLiveData<String> mainDescLiveData = new MutableLiveData<>();
-    private final MutableLiveData<String> varsDescLiveData = new MutableLiveData<>();
+    final MutableLiveData<SettingsController> controllerObserver = new MutableLiveData<>();
+    final MutableLiveData<String> mainDescLiveData = new MutableLiveData<>();
+    final MutableLiveData<String> varsDescLiveData = new MutableLiveData<>();
     private final PluginClient pluginClient;
     private final AudioPlayer player;
     private final HtmlProcessor processor;
@@ -193,10 +192,6 @@ public class GameViewModel extends AndroidViewModel {
         return view;
     }
 
-    public LiveData<SettingsController> getControllerObserver() {
-        return controllerObserver;
-    }
-
     public int getTextColor() {
         var config = getIConfig();
         if (getSettingsController().isUseGameTextColor && config.fontColor != 0) {
@@ -246,14 +241,6 @@ public class GameViewModel extends AndroidViewModel {
         var imageFile = fromRelPath(getApplication(), relPath, gameDir, false);
         if (!isWritableFile(getApplication(), imageFile)) return Uri.EMPTY;
         return imageFile.getUri();
-    }
-
-    public LiveData<String> getMainDescObserver() {
-        return mainDescLiveData;
-    }
-
-    public LiveData<String> getVarsDescObserver() {
-        return varsDescLiveData;
     }
 
     @Nullable
