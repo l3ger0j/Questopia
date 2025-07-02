@@ -46,12 +46,7 @@ public class GameObjectFragment extends Fragment {
 
         viewModel.objsListLiveData.observe(getViewLifecycleOwner(), objects -> {
             objectView.setBackgroundColor(viewModel.getBackgroundColor());
-            adapter.typeface = viewModel.getSettingsController().getTypeface();
-            adapter.textSize = viewModel.getFontSize();
-            adapter.textColor = viewModel.getTextColor();
-            adapter.linkTextColor = viewModel.getLinkColor();
-            adapter.backgroundColor = viewModel.getBackgroundColor();
-            adapter.submitList(objects);
+            viewModel.getDefaultItemAdapter(adapter).submitList(objects);
         });
 
         // Settings

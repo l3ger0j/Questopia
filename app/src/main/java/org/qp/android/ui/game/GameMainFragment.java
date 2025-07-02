@@ -107,12 +107,7 @@ public class GameMainFragment extends Fragment {
 
         viewModel.actsListLiveData.observe(getViewLifecycleOwner(), actions -> {
             actionsView.setBackgroundColor(viewModel.getBackgroundColor());
-            adapter.typeface = viewModel.getSettingsController().getTypeface();
-            adapter.textSize = viewModel.getFontSize();
-            adapter.textColor = viewModel.getTextColor();
-            adapter.linkTextColor = viewModel.getLinkColor();
-            adapter.backgroundColor = viewModel.getBackgroundColor();
-            adapter.submitList(actions);
+            viewModel.getDefaultItemAdapter(adapter).submitList(actions);
         });
 
         viewModel.actsVisibility.observe(getViewLifecycleOwner(), visible -> {

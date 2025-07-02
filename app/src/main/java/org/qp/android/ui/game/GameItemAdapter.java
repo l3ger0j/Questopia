@@ -57,8 +57,9 @@ public class GameItemAdapter extends RecyclerView.Adapter<GameItemAdapter.ViewHo
         return differ.getCurrentList().size();
     }
 
-    public void submitList(List<LibGenItem> gameData) {
+    public GameItemAdapter submitList(List<LibGenItem> gameData) {
         differ.submitList(gameData);
+        return this;
     }
 
     @NonNull

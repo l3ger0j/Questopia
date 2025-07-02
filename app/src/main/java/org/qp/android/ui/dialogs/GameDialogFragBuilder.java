@@ -193,13 +193,7 @@ public class GameDialogFragBuilder extends DialogFragment {
             }
             case MENU_DIALOG -> {
                 var recyclerView = FragmentRecyclerBinding.inflate(getLayoutInflater());
-                var adapter = new GameItemAdapter();
-                adapter.typeface = gameViewModel.getSettingsController().getTypeface();
-                adapter.textSize = gameViewModel.getFontSize();
-                adapter.textColor = gameViewModel.getTextColor();
-                adapter.linkTextColor = gameViewModel.getLinkColor();
-                adapter.backgroundColor = gameViewModel.getBackgroundColor();
-                adapter.submitList(listGenItems);
+                var adapter = gameViewModel.getDefaultItemAdapter(new GameItemAdapter()).submitList(listGenItems);
                 recyclerView.shareRecyclerView.setBackgroundColor(gameViewModel.getBackgroundColor());
                 recyclerView.shareRecyclerView.setAdapter(adapter);
                 recyclerView.shareRecyclerView.addOnItemTouchListener(

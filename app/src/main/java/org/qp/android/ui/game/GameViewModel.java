@@ -192,6 +192,15 @@ public class GameViewModel extends AndroidViewModel {
         return view;
     }
 
+    public GameItemAdapter getDefaultItemAdapter(GameItemAdapter adapter) {
+        adapter.typeface = getSettingsController().getTypeface();
+        adapter.textSize = getFontSize();
+        adapter.textColor = getTextColor();
+        adapter.linkTextColor = getLinkColor();
+        adapter.backgroundColor = getBackgroundColor();
+        return adapter;
+    }
+
     public int getTextColor() {
         var config = getIConfig();
         if (getSettingsController().isUseGameTextColor && config.fontColor != 0) {
