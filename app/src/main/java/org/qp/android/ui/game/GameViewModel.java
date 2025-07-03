@@ -197,7 +197,6 @@ public class GameViewModel extends AndroidViewModel {
         adapter.textSize = getFontSize();
         adapter.textColor = getTextColor();
         adapter.linkTextColor = getLinkColor();
-        adapter.backgroundColor = getBackgroundColor();
         return adapter;
     }
 

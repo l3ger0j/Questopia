@@ -44,7 +44,6 @@ public class GameItemAdapter extends RecyclerView.Adapter<GameItemAdapter.ViewHo
             new AsyncListDiffer<>(this, DIFF_CALLBACK);
     public Typeface typeface;
     public int textSize;
-    public int backgroundColor;
     public int textColor;
     public int linkTextColor;
 
@@ -95,7 +94,6 @@ public class GameItemAdapter extends RecyclerView.Adapter<GameItemAdapter.ViewHo
             itemText.setVisibility(VISIBLE);
             itemText.setTypeface(typeface);
             itemText.setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize);
-            itemText.setBackgroundColor(backgroundColor);
             itemText.setTextColor(textColor);
             itemText.setLinkTextColor(linkTextColor);
             itemText.setText(Html.fromHtml(qpListItem.text, Html.FROM_HTML_MODE_LEGACY));
