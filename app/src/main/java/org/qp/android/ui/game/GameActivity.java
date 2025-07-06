@@ -41,6 +41,8 @@ import androidx.viewpager2.widget.ViewPager2;
 import com.anggrayudi.storage.SimpleStorageHelper;
 import com.anggrayudi.storage.file.MimeType;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.navigation.NavigationBarView;
+import com.google.android.material.navigationrail.NavigationRailView;
 
 import org.jetbrains.annotations.Contract;
 import org.qp.android.R;
@@ -98,6 +100,7 @@ public class GameActivity extends AppCompatActivity {
     private ActionBar actionBar;
     private Menu mainMenu;
     private ViewPager2 pager2;
+    private NavigationRailView navigationRailView;
     private BottomNavigationView bottomNavigationView;
     private int slotAction = 0;
     private GameViewModel gameViewModel;
@@ -146,17 +149,33 @@ public class GameActivity extends AppCompatActivity {
         pager2.setUserInputEnabled(false);
         pager2.setAdapter(new GameStateAdapter(this));
 
-        bottomNavigationView = activityGameBinding.bottomNavigationView;
-        bottomNavigationView.setSelectedItemId(R.id.menu_mainDesc);
-        bottomNavigationView.setOnItemSelectedListener(item -> {
-            switch (item.getItemId()) {
-                case R.id.menu_mainDesc -> setActiveTab(TAB_MAIN_DESC_AND_ACTIONS);
-                case R.id.menu_varsDesc -> setActiveTab(TAB_VARS_DESC);
-                case R.id.menu_inventory -> setActiveTab(TAB_OBJECTS);
-            }
-            return true;
-        });
-        setOnApplyWindowInsetsListener(bottomNavigationView, null);
+        if (activityGameBinding.bottomNavigationView != null) {
+            bottomNavigationView = activityGameBinding.bottomNavigationView;
+            bottomNavigationView.setSelectedItemId(R.id.menu_mainDesc);
+            bottomNavigationView.setOnItemSelectedListener(item -> {
+                switch (item.getItemId()) {
+                    case R.id.menu_mainDesc -> setActiveTab(TAB_MAIN_DESC_AND_ACTIONS);
+                    case R.id.menu_varsDesc -> setActiveTab(TAB_VARS_DESC);
+                    case R.id.menu_inventory -> setActiveTab(TAB_OBJECTS);
+                }
+                return true;
+            });
+            setOnApplyWindowInsetsListener(bottomNavigationView, null);
+        }
+
+        if (activityGameBinding.railNavigationView != null) {
+            navigationRailView = activityGameBinding.railNavigationView;
+            navigationRailView.setSelectedItemId(R.id.menu_mainDesc);
+            navigationRailView.setOnItemSelectedListener(item -> {
+                switch (item.getItemId()) {
+                    case R.id.menu_mainDesc -> setActiveTab(TAB_MAIN_DESC_AND_ACTIONS);
+                    case R.id.menu_varsDesc -> setActiveTab(TAB_VARS_DESC);
+                    case R.id.menu_inventory -> setActiveTab(TAB_OBJECTS);
+                }
+                return true;
+            });
+            setOnApplyWindowInsetsListener(navigationRailView, null);
+        }
 
         saveResultLaunch = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
@@ -237,6 +256,10 @@ public class GameActivity extends AppCompatActivity {
         }));
     }
 
+    private NavigationBarView getNavigation() {
+        return navigationRailView != null ? navigationRailView : bottomNavigationView;
+    }
+
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         outState.putInt("savedActiveTab", activeTab);
@@ -312,20 +335,20 @@ public class GameActivity extends AppCompatActivity {
         switch (tab) {
             case TAB_MAIN_DESC_AND_ACTIONS -> {
                 pager2.setCurrentItem(0, false);
-                var badge = bottomNavigationView.getBadge(R.id.menu_mainDesc);
-                if (badge != null) bottomNavigationView.removeBadge(R.id.menu_mainDesc);
+                var badge = getNavigation().getBadge(R.id.menu_mainDesc);
+                if (badge != null) getNavigation().removeBadge(R.id.menu_mainDesc);
                 setTitle(ContextCompat.getString(getApplication(), R.string.mainDescFullTitle));
             }
             case TAB_OBJECTS -> {
                 pager2.setCurrentItem(1, false);
-                var badge = bottomNavigationView.getBadge(R.id.menu_inventory);
-                if (badge != null) bottomNavigationView.removeBadge(R.id.menu_inventory);
+                var badge = getNavigation().getBadge(R.id.menu_inventory);
+                if (badge != null) getNavigation().removeBadge(R.id.menu_inventory);
                 setTitle(ContextCompat.getString(getApplication(), R.string.inventoryTitle));
             }
             case TAB_VARS_DESC -> {
                 pager2.setCurrentItem(2, false);
-                var badge = bottomNavigationView.getBadge(R.id.menu_varsDesc);
-                if (badge != null) bottomNavigationView.removeBadge(R.id.menu_varsDesc);
+                var badge = getNavigation().getBadge(R.id.menu_varsDesc);
+                if (badge != null) getNavigation().removeBadge(R.id.menu_varsDesc);
                 setTitle(ContextCompat.getString(getApplication(), R.string.varsDescTitle));
             }
         }
@@ -346,15 +369,15 @@ public class GameActivity extends AppCompatActivity {
             switch (id) {
                 case TAB_MAIN_DESC_AND_ACTIONS -> {
                     if (currItem != 0)
-                        bottomNavigationView.getOrCreateBadge(R.id.menu_mainDesc);
+                        getNavigation().getOrCreateBadge(R.id.menu_mainDesc);
                 }
                 case TAB_OBJECTS -> {
                     if (currItem != 1)
-                        bottomNavigationView.getOrCreateBadge(R.id.menu_inventory);
+                        getNavigation().getOrCreateBadge(R.id.menu_inventory);
                 }
                 case TAB_VARS_DESC -> {
                     if (currItem != 2)
-                        bottomNavigationView.getOrCreateBadge(R.id.menu_varsDesc);
+                        getNavigation().getOrCreateBadge(R.id.menu_varsDesc);
                 }
             }
         }
