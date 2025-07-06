@@ -63,8 +63,7 @@ public class GameItemAdapter extends RecyclerView.Adapter<GameItemAdapter.ViewHo
 
     @NonNull
     @Override
-    public GameItemAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent,
-                                                         int viewType) {
+    public GameItemAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         var inflater = LayoutInflater.from(parent.getContext());
         var listGameItemBinding = ListGameItemBinding.inflate(inflater, parent, false);
         listGameItemBinding.relativeLayout.setAccessibilityDelegate(customAccessibilityDelegate());
