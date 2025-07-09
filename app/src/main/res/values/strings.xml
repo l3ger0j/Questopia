@@ -79,9 +79,7 @@
         <string name="appTheme">Application theme</string>
         <string name="langTitle">Application language</string>
         <string name="binPrefTitle">Binary prefixes</string>
-        <string name="actsHeightTitle">Actions list height</string>
-        <string name="separatorTitle">Visibility of the separator</string>
-        <string name="separatorSum">Between the list of actions and the main description</string>
+        <string name="countActsVisTitle">Count visible actions</string>
         <string name="immersiveModeTitle">Immersive mode</string>
         <string name="autoscrollTitle">Autoscroll</string>
         <string name="musicDebugSum">A dialog that reports an error if the path to the sound is incorrect</string>

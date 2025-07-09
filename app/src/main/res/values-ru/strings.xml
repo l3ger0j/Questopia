@@ -79,9 +79,7 @@
         <string name="appTheme">Тема приложения</string>
         <string name="langTitle">Язык приложения</string>
         <string name="binPrefTitle">Двоичные префиксы</string>
-        <string name="actsHeightTitle">Высота списка действий</string>
-        <string name="separatorTitle">Видимость разделителя</string>
-        <string name="separatorSum">Между списком действий и основным описанием</string>
+        <string name="countActsVisTitle">Количество видимых действий</string>
         <string name="immersiveModeTitle">Режим погружения</string>
         <string name="autoscrollTitle">Автопролистывание</string>
         <string name="musicDebugSum">Диалог, сообщающий об ошибке, если путь к звуку неправильный</string>

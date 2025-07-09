@@ -13,14 +13,12 @@ import android.webkit.WebView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import org.qp.android.R;
 import org.qp.android.databinding.FragmentGameMainBinding;
 import org.qp.android.helpers.adapters.RecyclerItemClickListener;
 import org.qp.android.questopiabundle.lib.LibTypeDialog;
@@ -39,8 +37,7 @@ public class GameMainFragment extends Fragment {
             mainDescView.scrollBy(0, mainDescView.getHeight());
         }
     };
-    private View separatorView;
-    private RecyclerView actionsView;
+    private GameActionRecyclerView actionsView;
 
     @Nullable
     @Override
@@ -50,21 +47,9 @@ public class GameMainFragment extends Fragment {
         var gameMainBinding = FragmentGameMainBinding.inflate(getLayoutInflater());
         viewModel = new ViewModelProvider(requireActivity()).get(GameViewModel.class);
 
+        // ConstraintLayout
         layoutTop = gameMainBinding.layoutTop;
         layoutTop.setBackgroundColor(viewModel.getBackgroundColor());
-        var constraintSet = new ConstraintSet();
-        constraintSet.clone(layoutTop);
-        constraintSet.setVerticalWeight(R.id.gameMainDesc, 1.0f - (viewModel.getSettingsController().actionsHeightRatio));
-        constraintSet.setVerticalWeight(R.id.gameMainActions, (viewModel.getSettingsController().actionsHeightRatio));
-        constraintSet.applyTo(layoutTop);
-
-        separatorView = gameMainBinding.separator;
-        if (viewModel.getSettingsController().isUseSeparator) {
-            var defSepColor = requireContext().getColor(R.color.materialcolorpicker__grey);
-            separatorView.setBackgroundColor(defSepColor);
-        } else {
-            separatorView.setBackgroundColor(viewModel.getBackgroundColor());
-        }
 
         // WebView
         mainDescView = viewModel.getDefaultWebClient(gameMainBinding.gameMainDesc);
@@ -94,6 +79,7 @@ public class GameMainFragment extends Fragment {
 
         // RecyclerView
         actionsView = gameMainBinding.gameMainActions;
+        actionsView.setMaxVisibleItems(viewModel.getSettingsController().countActsVis);
         var manager = (LinearLayoutManager) actionsView.getLayoutManager();
         var dividerItemDecoration = new DividerItemDecoration(
                 actionsView.getContext(),
@@ -105,23 +91,8 @@ public class GameMainFragment extends Fragment {
                 RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY);
         actionsView.setAdapter(adapter);
 
-        viewModel.actsListLiveData.observe(getViewLifecycleOwner(), actions -> {
-            actionsView.setBackgroundColor(viewModel.getBackgroundColor());
-            viewModel.getDefaultItemAdapter(adapter).submitList(actions);
-        });
-
-        viewModel.actsVisibility.observe(getViewLifecycleOwner(), visible -> {
             var shortAnimationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
-            if (visible) {
-                separatorView.animate()
-                        .alpha(1f)
-                        .setDuration(shortAnimationDuration)
-                        .setListener(new AnimatorListenerAdapter() {
-                            @Override
-                            public void onAnimationEnd(Animator animation) {
-                                separatorView.setVisibility(View.VISIBLE);
-                            }
-                        });
+            if (actionsView.getVisibility() == View.GONE) {
                 actionsView.animate()
                         .alpha(1f)
                         .setDuration(shortAnimationDuration)
@@ -132,15 +103,6 @@ public class GameMainFragment extends Fragment {
                             }
                         });
             } else {
-                separatorView.animate()
-                        .alpha(0f)
-                        .setDuration(shortAnimationDuration)
-                        .setListener(new AnimatorListenerAdapter() {
-                            @Override
-                            public void onAnimationEnd(Animator animation) {
-                                separatorView.setVisibility(View.GONE);
-                            }
-                        });
                 actionsView.animate()
                         .alpha(0f)
                         .setDuration(shortAnimationDuration)
@@ -153,20 +115,13 @@ public class GameMainFragment extends Fragment {
             }
         });
 
+        viewModel.actsListLiveData.observe(getViewLifecycleOwner(), actions -> {
+            actionsView.setBackgroundColor(viewModel.getBackgroundColor());
+            viewModel.getDefaultItemAdapter(adapter).submitList(actions);
+        });
         // Settings
         viewModel.controllerObserver.observe(getViewLifecycleOwner(), settingsController -> {
-            if (settingsController.isUseSeparator) {
-                var defSepColor = requireContext().getColor(R.color.materialcolorpicker__grey);
-                separatorView.setBackgroundColor(defSepColor);
-            } else {
-                separatorView.setBackgroundColor(viewModel.getBackgroundColor());
-            }
-
-            constraintSet.clone(layoutTop);
-            constraintSet.setVerticalWeight(R.id.gameMainDesc, 1.0f - (settingsController.actionsHeightRatio));
-            constraintSet.setVerticalWeight(R.id.gameMainActions, (settingsController.actionsHeightRatio));
-            constraintSet.applyTo(layoutTop);
-
+            actionsView.setMaxVisibleItems(settingsController.countActsVis);
             layoutTop.setBackgroundColor(viewModel.getBackgroundColor());
             mainDescView.setBackgroundColor(viewModel.getBackgroundColor());
             actionsView.setBackgroundColor(viewModel.getBackgroundColor());

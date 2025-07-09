@@ -19,12 +19,11 @@ public class SettingsController {
     public int customHeightImage;
     public int binaryPrefixes;
     public int nativeLibVersion;
-    public float actionsHeightRatio;
+    public int countActsVis;
     public boolean isSoundEnabled;
     public boolean isImageDisabled;
     public boolean isUseAutoWidth;
     public boolean isUseAutoHeight;
-    public boolean isUseSeparator;
     public boolean isUseGameFont;
     public boolean isUseAutoscroll;
     public boolean isUseExecString;
@@ -66,10 +65,9 @@ public class SettingsController {
         settingsController.fontSize = Integer.parseInt(preferences.getString("fontSize", "16"));
         settingsController.binaryPrefixes = Integer.parseInt(preferences.getString("binPref", "1000"));
         settingsController.nativeLibVersion = Integer.parseInt(preferences.getString("libVer", "570"));
-        settingsController.actionsHeightRatio = parseActionsHeightRatio(preferences.getString("actsHeight", "1/3"));
+        settingsController.countActsVis = Integer.parseInt(preferences.getString("countActsVis", "3"));
         settingsController.isUseAutoscroll = preferences.getBoolean("autoscroll", false);
         settingsController.isUseExecString = preferences.getBoolean("execString", false);
-        settingsController.isUseSeparator = preferences.getBoolean("separator", true);
         settingsController.isUseGameFont = preferences.getBoolean("useGameFont", false);
         settingsController.isUseImmersiveMode = preferences.getBoolean("immersiveMode", true);
         settingsController.language = preferences.getString("lang", "en");

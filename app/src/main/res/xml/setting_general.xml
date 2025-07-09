@@ -30,17 +30,11 @@
         android:title="@string/binPrefTitle" />
     <ListPreference
         android:icon="@drawable/baseline_height_24"
-        android:defaultValue="1/3"
-        android:entries="@array/actsHeight"
-        android:entryValues="@array/actsHeight"
-        android:key="actsHeight"
-        android:title="@string/actsHeightTitle" />
-    <CheckBoxPreference
-        android:icon="@drawable/baseline_visibility_24"
-        android:defaultValue="true"
-        android:key="separator"
-        android:summary="@string/separatorSum"
-        android:title="@string/separatorTitle" />
+        android:defaultValue="3"
+        android:entries="@array/itemVisible"
+        android:entryValues="@array/itemVisible"
+        android:key="countActsVis"
+        android:title="@string/countActsVisTitle" />
     <SwitchPreferenceCompat
         android:defaultValue="true"
         android:key="immersiveMode"
