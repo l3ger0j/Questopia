@@ -47,6 +47,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="32dp"
         android:layout_marginEnd="32dp"
+        android:elevation="2dp"
         android:layout_gravity="bottom|center|end"
         android:contentDescription="@string/addFolder"
         android:tooltipText="@string/addFolder"
