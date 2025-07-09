@@ -7,7 +7,7 @@
     android:layout_height="wrap_content"
     android:clickable="true"
     android:focusable="true"
-    android:background="@drawable/custom_ripple">
+    android:background="?android:attr/selectableItemBackground">
 
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/item_icon"
