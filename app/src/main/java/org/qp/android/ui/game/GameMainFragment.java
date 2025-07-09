@@ -21,7 +21,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import org.qp.android.databinding.FragmentGameMainBinding;
 import org.qp.android.helpers.adapters.RecyclerItemClickListener;
-import org.qp.android.questopiabundle.lib.LibTypeDialog;
+import org.qp.android.ui.dialogs.GameDialogType;
 
 public class GameMainFragment extends Fragment {
 
@@ -61,7 +61,7 @@ public class GameMainFragment extends Fragment {
                 var imageUri = viewModel.getImageUriFromPath(src);
                 if (imageUri.equals(Uri.EMPTY)) return;
                 var pathToPic = String.valueOf(imageUri);
-                viewModel.showLibDialog(LibTypeDialog.DIALOG_PICTURE, pathToPic);
+                viewModel.showLibDialog(pathToPic, GameDialogType.IMAGE_DIALOG);
             }
         }, "img");
         viewModel.mainDescLiveData.observe(getViewLifecycleOwner(), desc -> {
