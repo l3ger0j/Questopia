@@ -303,7 +303,7 @@ public class GameViewModel extends AndroidViewModel {
                 terminateLibAndPlugin();
                 doOnFinishActivity();
             }
-            case "inputDialogFragment", "executorDialogFragment" -> {
+            case "inputDialogFragment" -> {
                 var inputBoxEdit = (TextInputLayout) optWindow.get().findViewById(R.id.inputBox_edit);
                 var optInputBoxEditET = Optional.ofNullable(inputBoxEdit.getEditText());
                 if (optInputBoxEditET.isEmpty()) return;
@@ -844,17 +844,6 @@ public class GameViewModel extends AndroidViewModel {
         return wrap;
     }
 
-    public LibReturnValue sendExecutorDialog(final String inputStr) {
-        final var dialogBuilder = new GameDialogFragBuilder(GameDialogType.EXECUTOR_DIALOG);
-        final var replaceStr = ContextCompat.getString(getApplication(), R.string.execStringTitle);
-        dialogBuilder.inputStr = inputStr.equals("execStringTitle") ? replaceStr : inputStr;
-        runOnUiThread(() -> doOnShowDialog(dialogBuilder));
-        final var textValue = dialogConnector.blockingFirst();
-        final var wrap = new LibReturnValue();
-        wrap.dialogTextValue = textValue;
-        return wrap;
-    }
-
     public LibReturnValue sendMenuDialog() {
         final var dialogBuilder = new GameDialogFragBuilder(GameDialogType.MENU_DIALOG);
         dialogBuilder.listGenItems = libGameState.menuItemsList;
@@ -900,7 +889,6 @@ public class GameViewModel extends AndroidViewModel {
     public LibReturnValue showLibDialog(LibTypeDialog dialog, String inputStr) {
         return switch (dialog) {
             case DIALOG_INPUT -> sendInputDialog(inputStr);
-            case DIALOG_EXECUTOR -> sendExecutorDialog(inputStr);
             case DIALOG_MENU -> sendMenuDialog();
             default -> null;
         };

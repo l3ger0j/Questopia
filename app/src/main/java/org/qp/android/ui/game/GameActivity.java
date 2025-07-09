@@ -72,6 +72,7 @@ public class GameActivity extends AppCompatActivity {
     public static final int TAB_MAIN_DESC_AND_ACTIONS = 0;
     public static final int TAB_OBJECTS = 1;
     public static final int TAB_VARS_DESC = 2;
+    public static final int TAB_USER_INPUT = 3;
     public static final int LOAD = 0;
     public static final int SAVE = 1;
     private static final int MAX_SAVE_SLOTS = 5;
@@ -157,6 +158,7 @@ public class GameActivity extends AppCompatActivity {
                     case R.id.menu_mainDesc -> setActiveTab(TAB_MAIN_DESC_AND_ACTIONS);
                     case R.id.menu_varsDesc -> setActiveTab(TAB_VARS_DESC);
                     case R.id.menu_inventory -> setActiveTab(TAB_OBJECTS);
+                    case R.id.menu_userInput -> setActiveTab(TAB_USER_INPUT);
                 }
                 return true;
             });
@@ -351,6 +353,12 @@ public class GameActivity extends AppCompatActivity {
                 if (badge != null) getNavigation().removeBadge(R.id.menu_varsDesc);
                 setTitle(ContextCompat.getString(getApplication(), R.string.varsDescTitle));
             }
+            case TAB_USER_INPUT -> {
+                pager2.setCurrentItem(3, false);
+                var badge = getNavigation().getBadge(R.id.menu_userInput);
+                if (badge != null) getNavigation().removeBadge(R.id.menu_userInput);
+                setTitle(ContextCompat.getString(getApplication(), R.string.userInputTitle));
+            }
         }
 
         activeTab = tab;
@@ -378,6 +386,10 @@ public class GameActivity extends AppCompatActivity {
                 case TAB_VARS_DESC -> {
                     if (currItem != 2)
                         getNavigation().getOrCreateBadge(R.id.menu_varsDesc);
+                }
+                case TAB_USER_INPUT -> {
+                    if (currItem != 3)
+                        getNavigation().getOrCreateBadge(R.id.menu_userInput);
                 }
             }
         }
@@ -458,7 +470,6 @@ public class GameActivity extends AppCompatActivity {
             case INPUT_DIALOG -> buildDialog.show(manager, "inputDialogFragment");
             case MENU_DIALOG -> buildDialog.show(manager, "menuDialogFragment");
             case MESSAGE_DIALOG -> buildDialog.show(manager, "messageDialogFragment");
-            case EXECUTOR_DIALOG -> buildDialog.show(manager, "executorDialogFragment");
         }
     }
 
@@ -604,14 +615,6 @@ public class GameActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int itemId = item.getItemId();
         switch (itemId) {
-            case R.id.menu_userInput -> {
-                if (settingsController.isUseExecString) {
-                    gameViewModel.requestForNativeLib(LibGameRequest.USE_EXECUTOR);
-                } else {
-                    gameViewModel.requestForNativeLib(LibGameRequest.USE_INPUT);
-                }
-                return true;
-            }
             case R.id.menu_options -> {
                 startActivity(new Intent().setClass(this, SettingsActivity.class));
                 return true;

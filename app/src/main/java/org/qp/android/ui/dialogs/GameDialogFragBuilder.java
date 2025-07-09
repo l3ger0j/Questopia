@@ -124,7 +124,7 @@ public class GameDialogFragBuilder extends DialogFragment {
             }
         }
         switch (dialogType) {
-            case EXECUTOR_DIALOG, INPUT_DIALOG -> {
+            case INPUT_DIALOG -> {
                 final var executorView =
                         getLayoutInflater().inflate(R.layout.dialog_input, null);
                 final var textInputLayout =

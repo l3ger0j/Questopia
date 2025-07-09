@@ -10,7 +10,6 @@ public enum LibTypeDialog implements Parcelable {
     DIALOG_PICTURE,
     DIALOG_MESSAGE,
     DIALOG_INPUT,
-    DIALOG_EXECUTOR,
     DIALOG_MENU,
     DIALOG_POPUP_SAVE,
     DIALOG_POPUP_LOAD,

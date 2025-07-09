@@ -8,5 +8,4 @@ public enum GameDialogType {
     INPUT_DIALOG,
     MENU_DIALOG,
     MESSAGE_DIALOG,
-    EXECUTOR_DIALOG,
 }

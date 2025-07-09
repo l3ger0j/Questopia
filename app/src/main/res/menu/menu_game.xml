@@ -10,11 +10,6 @@
             android:title="@string/restartGameTitle"
             app:showAsAction="ifRoom"/>
         <item
-            android:id="@+id/menu_userInput"
-            android:icon="@drawable/baseline_tab_input_24"
-            android:title="@string/userInputTitle"
-            app:showAsAction="always" />
-        <item
             android:id="@+id/menu_loadGame"
             android:orderInCategory="1"
             android:title="@string/loadTitle" />

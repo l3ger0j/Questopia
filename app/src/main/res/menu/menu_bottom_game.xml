@@ -15,4 +15,9 @@
         android:title="@string/inventoryTitle"
         android:tooltipText="@string/inventoryContDesc"
         android:icon="@drawable/baseline_tab_object_24" />
+    <item
+        android:id="@+id/menu_userInput"
+        android:title="@string/userInputTitle"
+        android:tooltipText="@string/userInputContDesc"
+        android:icon="@drawable/baseline_tab_input_24"/>
 </menu>
