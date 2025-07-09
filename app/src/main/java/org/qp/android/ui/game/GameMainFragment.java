@@ -91,6 +91,8 @@ public class GameMainFragment extends Fragment {
                 RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY);
         actionsView.setAdapter(adapter);
 
+        // FAB
+        gameMainBinding.gameActionVisibility.setOnClickListener(v -> {
             var shortAnimationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
             if (actionsView.getVisibility() == View.GONE) {
                 actionsView.animate()
@@ -119,6 +121,9 @@ public class GameMainFragment extends Fragment {
             actionsView.setBackgroundColor(viewModel.getBackgroundColor());
             viewModel.getDefaultItemAdapter(adapter).submitList(actions);
         });
+
+        viewModel.actsVisibility.observe(getViewLifecycleOwner(), gameMainBinding.gameActionVisibility::setEnabled);
+
         // Settings
         viewModel.controllerObserver.observe(getViewLifecycleOwner(), settingsController -> {
             actionsView.setMaxVisibleItems(settingsController.countActsVis);
