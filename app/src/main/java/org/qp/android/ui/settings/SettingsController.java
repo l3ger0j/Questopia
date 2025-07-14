@@ -105,15 +105,4 @@ public class SettingsController {
         controller.isVideoMute = preferences.getBoolean("videoMute", true);
         controller.isUseMusicDebug = preferences.getBoolean("debugMusic", false);
     }
-
-    private static float parseActionsHeightRatio(@NonNull String str) {
-        return switch (str) {
-            case "1/5" -> 0.2f;
-            case "1/4" -> 0.25f;
-            case "1/3" -> 0.33f;
-            case "1/2" -> 0.5f;
-            case "2/3" -> 0.67f;
-            default -> throw new RuntimeException("Unsupported value of actsHeight: " + str);
-        };
-    }
 }
