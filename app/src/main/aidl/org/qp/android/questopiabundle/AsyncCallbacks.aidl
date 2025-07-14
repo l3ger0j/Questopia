@@ -4,7 +4,8 @@ import org.qp.android.questopiabundle.LibResult;
 import org.qp.android.questopiabundle.LibException;
 
 interface AsyncCallbacks {
-    void updateState(in LibResult refReq, in LibResult newState);
+    void updateState(in LibResult newState);
+    void updateUI(in LibResult newConfig);
     void changeGameDir(in String filePath);
 
     void doShowDialog(in LibResult typeDialog, String inputString);

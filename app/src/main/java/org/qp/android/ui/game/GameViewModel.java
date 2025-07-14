@@ -61,9 +61,8 @@ import org.qp.android.questopiabundle.LibResult;
 import org.qp.android.questopiabundle.LibReturnValue;
 import org.qp.android.questopiabundle.dto.LibGameState;
 import org.qp.android.questopiabundle.dto.LibGenItem;
-import org.qp.android.questopiabundle.dto.LibIConfig;
+import org.qp.android.questopiabundle.dto.LibUIConfig;
 import org.qp.android.questopiabundle.lib.LibGameRequest;
-import org.qp.android.questopiabundle.lib.LibRefIRequest;
 import org.qp.android.questopiabundle.lib.LibTypeDialog;
 import org.qp.android.questopiabundle.lib.LibTypeWindow;
 import org.qp.android.ui.dialogs.GameDialogFragBuilder;
@@ -118,21 +117,14 @@ public class GameViewModel extends AndroidViewModel {
     private final HtmlProcessor processor;
     private final int nativeLibVer;
     private final CompletableFuture<IQuestopiaBundle> serviceReadyFuture = new CompletableFuture<>();
-    public String pageTemplate = "";
     public SharedPreferences preferences;
     public Events.Emitter actEmit = new Events.Emitter();
     private Uri gameDirUri;
     private boolean showActions = true;
     private LibGameState libGameState = new LibGameState();
+    private LibUIConfig libUIConfig = new LibUIConfig();
     private final SharedPreferences.OnSharedPreferenceChangeListener preferenceChangeListener =
-            (sharedPreferences, key) -> {
-                controllerObserver.postValue(getSettingsController());
-                updatePageTemplate();
-                refreshMainDesc();
-                refreshVarsDesc();
-                refreshActionsRecycler();
-                refreshObjectsRecycler();
-            };
+            (sharedPreferences, key) -> controllerObserver.postValue(getSettingsController());
     private IQuestopiaBundle questopiaBundle = new IQuestopiaBundle.Default();
     private final ServiceConnection engineConn = new ServiceConnection() {
         @Override
@@ -171,10 +163,6 @@ public class GameViewModel extends AndroidViewModel {
     }
 
     // region Getter/Setter
-    public LibIConfig getIConfig() {
-        return libGameState.interfaceConfig;
-    }
-
     public SettingsController getSettingsController() {
         return SettingsController.getInstance(getApplication());
     }
@@ -201,7 +189,7 @@ public class GameViewModel extends AndroidViewModel {
     }
 
     public int getTextColor() {
-        var config = getIConfig();
+        var config = libUIConfig;
         if (getSettingsController().isUseGameTextColor && config.fontColor != 0) {
             return convertRGBAtoBGRA((int) config.fontColor);
         } else {
@@ -210,7 +198,7 @@ public class GameViewModel extends AndroidViewModel {
     }
 
     public int getBackgroundColor() {
-        var config = getIConfig();
+        var config = libUIConfig;
         if (getSettingsController().isUseGameBackgroundColor && config.backColor != 0) {
             return convertRGBAtoBGRA((int) config.backColor);
         } else {
@@ -219,7 +207,7 @@ public class GameViewModel extends AndroidViewModel {
     }
 
     public int getLinkColor() {
-        var config = getIConfig();
+        var config = libUIConfig;
         if (getSettingsController().isUseGameLinkColor && config.linkColor != 0) {
             return convertRGBAtoBGRA((int) config.linkColor);
         } else {
@@ -228,14 +216,14 @@ public class GameViewModel extends AndroidViewModel {
     }
 
     public int getFontSize() {
-        var config = getIConfig();
+        var config = libUIConfig;
         return getSettingsController().isUseGameFont && config.fontSize != 0
                 ? (int) config.fontSize
                 : getSettingsController().fontSize;
     }
 
     public String getHtml(String str) {
-        var config = getIConfig();
+        var config = libUIConfig;
         return config.useHtml ?
                 processor.convertLibHtmlToWebHtml(str) :
                 processor.convertLibStrToHtml(str);
@@ -356,19 +344,19 @@ public class GameViewModel extends AndroidViewModel {
         }
     }
 
-    public void updatePageTemplate() {
+    @NonNull
+    private String createPageTemplate() {
         var pageHeadTemplate = PAGE_HEAD_TEMPLATE
                 .replace("QSPTEXTCOLOR", getHexColor(getTextColor()))
                 .replace("QSPBACKCOLOR", getHexColor(getBackgroundColor()))
                 .replace("QSPLINKCOLOR", getHexColor(getLinkColor()))
                 .replace("QSPFONTSTYLE", getFontStyle(getSettingsController().getTypeface()))
                 .replace("QSPFONTSIZE", Integer.toString(getFontSize()));
-        pageTemplate = pageHeadTemplate + PAGE_BODY_TEMPLATE;
+        return pageHeadTemplate + PAGE_BODY_TEMPLATE;
     }
 
-    private void refreshMainDesc() {
-        var libMainDesc = getHtml(libGameState.mainDesc);
-        var dirtyHTML = pageTemplate.replace("REPLACETEXT", libMainDesc);
+    private void refreshMainDesc(final String libMainDesc) {
+        final var dirtyHTML = createPageTemplate().replace("REPLACETEXT", libMainDesc);
         var cleanHTML = "";
         if (getSettingsController().isImageDisabled) {
             cleanHTML = processor.getCleanHtmlRemMedia(dirtyHTML);
@@ -381,9 +369,8 @@ public class GameViewModel extends AndroidViewModel {
         mainDescLiveData.postValue(cleanHTML);
     }
 
-    private void refreshVarsDesc() {
-        var libVarsDesc = getHtml(libGameState.varsDesc);
-        var dirtyHTML = pageTemplate.replace("REPLACETEXT", libVarsDesc);
+    private void refreshVarsDesc(final String libVarsDesc) {
+        final var dirtyHTML = createPageTemplate().replace("REPLACETEXT", libVarsDesc);
         var cleanHTML = "";
         if (getSettingsController().isImageDisabled) {
             cleanHTML = processor.getCleanHtmlRemMedia(dirtyHTML);
@@ -404,8 +391,7 @@ public class GameViewModel extends AndroidViewModel {
         }
     }
 
-    private void refreshActionsRecycler() {
-        var actionsList = libGameState.actionsList;
+    private void refreshActionsRecycler(final List<LibGenItem> actionsList) {
         if (actionsList != null) {
             var countElement = actionsList.size();
             actsVisibility.postValue(showActions && countElement > 0);
@@ -421,8 +407,7 @@ public class GameViewModel extends AndroidViewModel {
         }
     }
 
-    private void refreshObjectsRecycler() {
-        var objectList = libGameState.objectsList;
+    private void refreshObjectsRecycler(final List<LibGenItem> objectList) {
         if (objectList != null) {
             runOnUiThread(() -> doOnWarnUser(GameActivity.TAB_OBJECTS));
             objsListLiveData.postValue(objectList);
@@ -456,10 +441,32 @@ public class GameViewModel extends AndroidViewModel {
         try {
             questopiaBundle.sendAsync(new AsyncCallbacks.Stub() {
                 @Override
-                public void updateState(LibResult refReq, LibResult newState) throws RemoteException {
-                    libGameState = (LibGameState) newState.value;
-                    var libRefIRequest = (LibRefIRequest) refReq.value;
-                    doRefresh(libRefIRequest);
+                public void updateState(LibResult newState) throws RemoteException {
+                    if (newState != null) {
+                        var state = (LibGameState) newState.value;
+                        if (state.actionsList != libGameState.actionsList) {
+                            refreshActionsRecycler(state.actionsList);
+                        }
+                        if (state.objectsList != libGameState.objectsList) {
+                            refreshObjectsRecycler(state.objectsList);
+                        }
+                        if (!Objects.equals(state.mainDesc, libGameState.mainDesc)) {
+                            refreshMainDesc(getHtml(state.mainDesc));
+                        }
+                        if (!Objects.equals(state.varsDesc, libGameState.varsDesc)) {
+                            refreshVarsDesc(getHtml(state.varsDesc));
+                        }
+                        if (!Objects.equals(state, libGameState)) {
+                            libGameState = (LibGameState) newState.value;
+                        }
+                    }
+                }
+
+                @Override
+                public void updateUI(LibResult newConfig) throws RemoteException {
+                    if (newConfig != null) {
+                        libUIConfig = (LibUIConfig) newConfig.value;
+                    }
                 }
 
                 @Override
@@ -816,24 +823,7 @@ public class GameViewModel extends AndroidViewModel {
     }
 
     // region GameInterface
-    public void doRefresh(final LibRefIRequest request) {
-        if (request.isActionsChanged) {
-            refreshActionsRecycler();
-        }
-        if (request.isObjectsChanged) {
-            refreshObjectsRecycler();
-        }
-        if (request.isIConfigChanged || request.isMainDescChanged) {
-            updatePageTemplate();
-            refreshMainDesc();
-        }
-        if (request.isIConfigChanged || request.isVarsDescChanged) {
-            updatePageTemplate();
-            refreshVarsDesc();
-        }
-    }
-
-    public LibReturnValue sendInputDialog(final String inputStr) {
+    private LibReturnValue sendInputDialog(final String inputStr) {
         final var dialogBuilder = new GameDialogFragBuilder(GameDialogType.INPUT_DIALOG);
         final var replaceStr = ContextCompat.getString(getApplication(), R.string.execStringTitle);
         dialogBuilder.inputStr = inputStr.equals("userInputTitle") ? replaceStr : inputStr;
@@ -844,7 +834,7 @@ public class GameViewModel extends AndroidViewModel {
         return wrap;
     }
 
-    public LibReturnValue sendMenuDialog() {
+    private LibReturnValue sendMenuDialog() {
         final var dialogBuilder = new GameDialogFragBuilder(GameDialogType.MENU_DIALOG);
         dialogBuilder.listGenItems = libGameState.menuItemsList;
         runOnUiThread(() -> doOnShowDialog(dialogBuilder));

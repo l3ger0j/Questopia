@@ -21,7 +21,6 @@ public class LibGameState implements Parcelable {
         }
     };
 
-    public LibIConfig interfaceConfig = new LibIConfig();
     public boolean gameRunning = false;
     public long gameId = 0L;
     public String gameTitle = "";
@@ -37,7 +36,6 @@ public class LibGameState implements Parcelable {
     }
 
     protected LibGameState(Parcel in) {
-        interfaceConfig = in.readParcelable(LibIConfig.class.getClassLoader());
         gameRunning = in.readInt() != 0;
         gameId = in.readLong();
         gameTitle = in.readString();
@@ -52,7 +50,6 @@ public class LibGameState implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeParcelable(interfaceConfig, flags);
         dest.writeInt(gameRunning ? 1 : 0);
         dest.writeLong(gameId);
         dest.writeString(gameTitle);

@@ -5,17 +5,17 @@ import android.os.Parcelable;
 
 import androidx.annotation.NonNull;
 
-public class LibIConfig implements Parcelable {
+public class LibUIConfig implements Parcelable {
 
-    public static final Creator<LibIConfig> CREATOR = new Creator<>() {
+    public static final Creator<LibUIConfig> CREATOR = new Creator<>() {
         @Override
-        public LibIConfig createFromParcel(Parcel in) {
-            return new LibIConfig(in);
+        public LibUIConfig createFromParcel(Parcel in) {
+            return new LibUIConfig(in);
         }
 
         @Override
-        public LibIConfig[] newArray(int size) {
-            return new LibIConfig[size];
+        public LibUIConfig[] newArray(int size) {
+            return new LibUIConfig[size];
         }
     };
 
@@ -25,10 +25,10 @@ public class LibIConfig implements Parcelable {
     public long fontColor = 0L;
     public long linkColor = 0L;
 
-    public LibIConfig() {
+    public LibUIConfig() {
     }
 
-    protected LibIConfig(Parcel in) {
+    protected LibUIConfig(Parcel in) {
         useHtml = in.readInt() != 0;
         fontSize = in.readLong();
         backColor = in.readLong();
