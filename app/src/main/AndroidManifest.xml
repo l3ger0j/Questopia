@@ -35,7 +35,7 @@
         tools:targetApi="s">
 
         <activity
-            android:name=".ui.stock.StockActivity"
+            android:name=".presentation.stock.StockActivity"
             android:exported="true"
             android:theme="@style/Theme.App.Starting">
             <intent-filter>
@@ -46,13 +46,13 @@
         </activity>
 
         <activity
-            android:name=".ui.game.GameActivity"
+            android:name=".presentation.game.GameActivity"
             android:hardwareAccelerated="true"
             android:alwaysRetainTaskState="true"
             android:theme="@style/AppTheme" />
 
         <activity
-            android:name=".ui.settings.SettingsActivity"
+            android:name=".presentation.settings.SettingsActivity"
             android:label="@string/settingsTitle"
             android:theme="@style/AppTheme" />
 

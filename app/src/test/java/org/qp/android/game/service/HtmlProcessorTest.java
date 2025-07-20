@@ -3,13 +3,11 @@ package org.qp.android.game.service;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
-import org.qp.android.model.service.HtmlProcessor;
-import org.qp.android.model.service.ImageProvider;
+import org.qp.android.helpers.service.HtmlProcessor;
 
 public class HtmlProcessorTest {
 
-    private final ImageProvider imageProvider = new ImageProvider();
-    private final HtmlProcessor sut = new HtmlProcessor(imageProvider);
+    private final HtmlProcessor sut = new HtmlProcessor();
 
     @Test
     public void convertQspHtmlToWebViewHtml_escapedQuotes() {

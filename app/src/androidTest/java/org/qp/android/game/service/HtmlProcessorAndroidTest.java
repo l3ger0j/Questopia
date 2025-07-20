@@ -6,14 +6,12 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.qp.android.model.service.HtmlProcessor;
-import org.qp.android.model.service.ImageProvider;
+import org.qp.android.helpers.service.HtmlProcessor;
 
 @RunWith(AndroidJUnit4.class)
 public class HtmlProcessorAndroidTest {
 
-    private final ImageProvider imageProvider = new ImageProvider();
-    private final HtmlProcessor sut = new HtmlProcessor(imageProvider);
+    private final HtmlProcessor sut = new HtmlProcessor();
 
     @Test
     public void convertQspHtmlToWebViewHtml_execBlocks() {

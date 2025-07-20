@@ -9,7 +9,7 @@
 
         <variable
             name="data"
-            type="org.qp.android.ui.stock.GameDataObserver" />
+            type="org.qp.android.presentation.stock.GameDataObserver" />
     </data>
 
     <com.google.android.material.card.MaterialCardView

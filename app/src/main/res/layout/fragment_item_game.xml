@@ -9,11 +9,11 @@
 
         <variable
             name="viewModel"
-            type="org.qp.android.ui.stock.StockViewModel" />
+            type="org.qp.android.presentation.stock.StockViewModel" />
 
         <variable
             name="data"
-            type="org.qp.android.ui.stock.GameDataObserver" />
+            type="org.qp.android.presentation.stock.GameDataObserver" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

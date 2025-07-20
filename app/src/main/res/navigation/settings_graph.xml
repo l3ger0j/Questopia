@@ -6,31 +6,31 @@
     app:startDestination="@id/settingsFragment">
     <fragment
         android:id="@+id/settingsFragment"
-        android:name="org.qp.android.ui.settings.SettingsHostFragment"
+        android:name="org.qp.android.presentation.settings.SettingsHostFragment"
         android:label="SettingsFragment" />
     <fragment
         android:id="@+id/pluginFragment"
-        android:name="org.qp.android.ui.settings.SettingPluginFragment"
+        android:name="org.qp.android.presentation.settings.SettingPluginFragment"
         android:label="PluginFragment" />
     <fragment
         android:id="@+id/newsFragment"
-        android:name="org.qp.android.ui.settings.SettingNewsFragment"
+        android:name="org.qp.android.presentation.settings.SettingNewsFragment"
         android:label="NewsFragment" />
     <fragment
         android:id="@+id/settingGeneralFragment"
-        android:name="org.qp.android.ui.settings.SettingGeneralFragment"
+        android:name="org.qp.android.presentation.settings.SettingGeneralFragment"
         android:label="SettingGeneralFragment" />
     <fragment
         android:id="@+id/settingTextFragment"
-        android:name="org.qp.android.ui.settings.SettingTextFragment"
+        android:name="org.qp.android.presentation.settings.SettingTextFragment"
         android:label="SettingTextFragment" />
     <fragment
         android:id="@+id/settingImageFragment"
-        android:name="org.qp.android.ui.settings.SettingImageFragment"
+        android:name="org.qp.android.presentation.settings.SettingImageFragment"
         android:label="SettingImageFragment" />
     <fragment
         android:id="@+id/settingSoundFragment"
-        android:name="org.qp.android.ui.settings.SettingSoundFragment"
+        android:name="org.qp.android.presentation.settings.SettingSoundFragment"
         android:label="SettingSoundFragment" />
 
 </navigation>

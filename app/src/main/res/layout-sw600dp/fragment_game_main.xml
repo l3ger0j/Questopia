@@ -27,7 +27,7 @@
         app:layout_constraintBottom_toTopOf="@+id/gameMainActions"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <org.qp.android.ui.game.GameActionRecyclerView
+    <org.qp.android.presentation.game.GameActionRecyclerView
         android:id="@+id/gameMainActions"
         android:layout_width="0dp"
         android:layout_height="wrap_content"

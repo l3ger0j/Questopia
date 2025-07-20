@@ -8,7 +8,7 @@
 
         <variable
             name="pluginInfo"
-            type="org.qp.android.dto.plugin.PluginInfo" />
+            type="org.qp.android.domain.model.PluginInfo" />
     </data>
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/relativeLayout"

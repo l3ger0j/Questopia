@@ -1,0 +1,274 @@
+package org.qp.android.presentation.dialogs;
+
+import android.app.Dialog;
+import android.content.DialogInterface;
+import android.net.Uri;
+import android.os.Bundle;
+import android.text.Editable;
+import android.text.Html;
+import android.text.TextWatcher;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.ScrollView;
+import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.core.os.BundleCompat;
+import androidx.fragment.app.DialogFragment;
+import androidx.lifecycle.ViewModelProvider;
+
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.textfield.TextInputLayout;
+
+import org.qp.android.R;
+import org.qp.android.databinding.DialogImageBinding;
+import org.qp.android.databinding.FragmentRecyclerBinding;
+import org.qp.android.helpers.adapters.RecyclerItemClickListener;
+import org.qp.android.presentation.game.GameItemAdapter;
+import org.qp.android.presentation.game.GameViewModel;
+import org.qp.android.questopiabundle.dto.LibGenItem;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+public class GameDialogFragBuilder extends DialogFragment {
+
+    public Uri imageUri = Uri.EMPTY;
+    public List<LibGenItem> listGenItems;
+    public String inputStr;
+    private GameDialogType dialogType;
+    private DialogImageBinding imageBinding;
+    private GameViewModel gameViewModel;
+    private TextInputLayout feedBackName;
+    private EditText feedBackNameET;
+    private TextInputLayout feedBackContact;
+    private EditText feedBackContactET;
+    private final TextWatcher watcher = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+            if (feedBackNameET != null) {
+                validateUserName();
+            } else if (feedBackContactET != null) {
+                validateEmail();
+            }
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+        }
+    };
+
+    public GameDialogFragBuilder(GameDialogType dialogType) {
+        this.dialogType = dialogType;
+    }
+
+    public GameDialogType getDialogType() {
+        return dialogType;
+    }
+
+    private boolean isValidate() {
+        return validateUserName() && validateEmail();
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        gameViewModel = new ViewModelProvider(requireActivity()).get(GameViewModel.class);
+    }
+
+    private boolean validateUserName() {
+        if (feedBackNameET.getText().toString().trim().isEmpty()) {
+            feedBackName.setError("Required Field!");
+            feedBackNameET.requestFocus();
+            return false;
+        } else {
+            feedBackName.setErrorEnabled(false);
+        }
+        return true;
+    }
+
+    private boolean validateEmail() {
+        if (feedBackContactET.getText().toString().trim().isEmpty()) {
+            feedBackContact.setError("Required Field!");
+            feedBackContactET.requestFocus();
+            return false;
+        } else {
+            feedBackContact.setErrorEnabled(false);
+        }
+        return true;
+    }
+
+    @NonNull
+    @Override
+    public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
+        var builder = new MaterialAlertDialogBuilder(requireContext());
+        if (savedInstanceState != null) {
+            if (savedInstanceState.containsKey("selectedDialogType")) {
+                dialogType = GameDialogType.valueOf(savedInstanceState.getString("selectedDialogType"));
+            }
+            if (savedInstanceState.containsKey("items")) {
+                listGenItems = BundleCompat.getParcelableArrayList(savedInstanceState, "items", LibGenItem.class);
+            }
+            if (savedInstanceState.containsKey("inputStr")) {
+                inputStr = savedInstanceState.getString("inputStr");
+            }
+            if (savedInstanceState.containsKey("pathToImage")) {
+                imageUri = savedInstanceState.getParcelable("pathToImage");
+            }
+        }
+        switch (dialogType) {
+            case INPUT_DIALOG -> {
+                final var executorView =
+                        getLayoutInflater().inflate(R.layout.dialog_input, null);
+                final var textInputLayout =
+                        (TextInputLayout) executorView.findViewById(R.id.inputBox_edit);
+                textInputLayout.setHelperText(Html.fromHtml(inputStr, Html.FROM_HTML_MODE_COMPACT));
+                builder.setView(executorView);
+                builder.setPositiveButton(android.R.string.ok,
+                        (dialog, which) -> gameViewModel.onDialogPositiveClick(this));
+                return builder.create();
+            }
+            case ERROR_DIALOG_WOSEND -> {
+                builder.setMessage(requireContext().getString(R.string.loadGamePopup));
+                builder.setPositiveButton(android.R.string.ok,
+                        (dialog, which) -> gameViewModel.onDialogPositiveClick(this));
+                builder.setNegativeButton(android.R.string.no,
+                        (dialog, which) -> {
+                        });
+                return builder.create();
+            }
+            case ERROR_DIALOG_WSEND -> {
+                final var errorFeBackView = getLayoutInflater().inflate(R.layout.dialog_feedback, null);
+                var feedBackScrollError = (ScrollView) errorFeBackView.findViewById(R.id.feedBackScrollError);
+                var feedBackTV = (TextView) feedBackScrollError.findViewById(R.id.feedBackTV);
+                var optFeedBackName = Optional.ofNullable((TextInputLayout) errorFeBackView.findViewById(R.id.feedBackName));
+                optFeedBackName.ifPresent(textInputLayout -> {
+                    feedBackName = optFeedBackName.get();
+                    var optEditText = Optional.ofNullable(optFeedBackName.get().getEditText());
+                    optEditText.ifPresent(editText -> {
+                        feedBackNameET = editText;
+                        editText.addTextChangedListener(watcher);
+                    });
+                });
+                var optFeedBackContact = Optional.ofNullable((TextInputLayout) errorFeBackView.findViewById(R.id.feedBackContact));
+                optFeedBackContact.ifPresent(textInputLayout -> {
+                    feedBackContact = optFeedBackContact.get();
+                    var optEditText = Optional.ofNullable(optFeedBackContact.get().getEditText());
+                    optEditText.ifPresent(editText -> {
+                        feedBackContactET = editText;
+                        editText.addTextChangedListener(watcher);
+                    });
+                });
+                feedBackTV.setText(inputStr);
+                builder.setTitle(R.string.error);
+                builder.setView(errorFeBackView);
+                builder.setPositiveButton("Send", null);
+                builder.setNegativeButton(android.R.string.cancel,
+                        (dialog, which) -> {
+                        });
+                return builder.create();
+            }
+            case CLOSE_DIALOG -> {
+                builder.setMessage(requireContext().getString(R.string.promptCloseGame));
+                builder.setPositiveButton(android.R.string.ok,
+                        (dialog, which) -> gameViewModel.onDialogPositiveClick(this));
+                builder.setNegativeButton(android.R.string.cancel,
+                        (dialog, which) -> {
+                        });
+                return builder.create();
+            }
+            case IMAGE_DIALOG -> {
+                imageBinding = DialogImageBinding.inflate(getLayoutInflater());
+                imageBinding.imageBox.setImageURI(imageUri);
+                imageBinding.imageBox.setOnClickListener(v -> dismiss());
+                builder.setView(imageBinding.getRoot());
+                return builder.create();
+            }
+            case MENU_DIALOG -> {
+                var recyclerView = FragmentRecyclerBinding.inflate(getLayoutInflater());
+                var adapter = gameViewModel.getDefaultItemAdapter(new GameItemAdapter()).submitList(listGenItems);
+                recyclerView.shareRecyclerView.setBackgroundColor(gameViewModel.getBackgroundColor());
+                recyclerView.shareRecyclerView.setAdapter(adapter);
+                recyclerView.shareRecyclerView.addOnItemTouchListener(
+                        new RecyclerItemClickListener(
+                                requireContext(),
+                                recyclerView.shareRecyclerView,
+                                new RecyclerItemClickListener.OnItemClickListener() {
+                                    @Override
+                                    public void onItemClick(View view, int position) {
+                                        gameViewModel.onDialogListClick(GameDialogFragBuilder.this, position);
+                                        GameDialogFragBuilder.this.onDestroyView();
+                                    }
+
+                                    @Override
+                                    public void onLongItemClick(View view, int position) {
+                                    }
+                                }
+                        )
+                );
+                builder.setView(recyclerView.getRoot());
+                return builder.create();
+            }
+            case MESSAGE_DIALOG -> {
+                builder.setMessage(Html.fromHtml(inputStr, Html.FROM_HTML_MODE_COMPACT));
+                builder.setPositiveButton(android.R.string.ok,
+                        (dialog, which) -> gameViewModel.onDialogPositiveClick(this));
+                return builder.create();
+            }
+        }
+        return super.onCreateDialog(savedInstanceState);
+    }
+
+    @Override
+    public void onCancel(@NonNull DialogInterface dialog) {
+        super.onCancel(dialog);
+        gameViewModel.onDialogNegativeClick(this);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        final var dialog = Optional.ofNullable((AlertDialog) getDialog());
+
+        if (dialog.isPresent()) {
+            if (dialogType.equals(GameDialogType.ERROR_DIALOG_WSEND)) {
+                var sendButton = dialog.get().getButton(Dialog.BUTTON_POSITIVE);
+                sendButton.setOnClickListener(v -> {
+                    if (isValidate()) {
+                        gameViewModel.onDialogPositiveClick(this);
+                        dialog.get().dismiss();
+                    }
+                });
+            }
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString("selectedDialogType", dialogType.toString());
+        if (listGenItems != null) {
+            outState.putParcelableArrayList("items", new ArrayList<>(listGenItems));
+        }
+        if (inputStr != null) {
+            outState.putString("inputStr", inputStr);
+        }
+        if (imageUri != null) {
+            outState.putParcelable("pathToImage", imageUri);
+        }
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (imageBinding != null) imageBinding = null;
+    }
+}
