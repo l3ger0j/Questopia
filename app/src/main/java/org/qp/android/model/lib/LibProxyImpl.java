@@ -502,7 +502,32 @@ public class LibProxyImpl extends QSPLib implements LibIProxy {
     @Override
     public void onPlayFile(String file, int volume) {
         if (!isNotEmptyOrBlank(file)) return;
-
+    
+        // Convert to URI so we can check extension
+        Uri uri = Uri.parse(file);
+    
+        // Extract extension safely
+        String last = uri.getLastPathSegment();
+        String ext = last != null && last.contains(".")
+                ? last.substring(last.lastIndexOf('.') + 1).toLowerCase()
+                : "";
+    
+        // Check if this file is a video
+        boolean isVideo = java.util.Arrays.asList(
+                "mp4", "m4v", "mov", "webm", "3gp", "3gpp", "mkv"
+        ).contains(ext);
+    
+        if (isVideo) {
+            // If video: launch custom VideoPlayerActivity
+            Intent i = new Intent(context, org.qp.android.ui.video.VideoPlayerActivity.class);
+            i.putExtra("videoUri", uri.toString());
+            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK); // required if not from an Activity
+            context.startActivity(i);
+    
+            return; // stop here so we don’t send video to AudioPlayer
+        }
+    
+        // Otherwise: handle as audio normally
         getAudioPlayer().playFile(file, volume);
     }
 
