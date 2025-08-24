@@ -16,12 +16,12 @@ import static org.qp.android.helpers.utils.ThreadUtil.isSameThread;
 import static org.qp.android.helpers.utils.ThreadUtil.throwIfNotMainThread;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
 import android.util.Log;
-import android.content.Intent;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
