@@ -9,6 +9,12 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
+    <!-- Android 13+ granular media access -->
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+    <!-- Legacy (< Android 13) fallback permission, harmless on 13+ -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+    tools:ignore="ScopedStorage" />
+
 
     <queries android:exported="false">
         <intent>
