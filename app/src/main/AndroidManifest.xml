@@ -37,6 +37,11 @@
         tools:targetApi="s">
 
         <activity
+            android:name="org.qp.android.ui.video.VideoPlayerActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Material3.DayNight.NoActionBar" />
+
+        <activity
             android:name=".ui.stock.StockActivity"
             android:exported="true"
             android:theme="@style/Theme.QP.Translucent.NoActionBar">
