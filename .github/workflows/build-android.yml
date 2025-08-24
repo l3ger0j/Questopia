@@ -3,7 +3,7 @@ name: Build Questopia APK
 on:
   workflow_dispatch:    # lets you click 'Run workflow' by hand
   push:                 # builds on every commit to master/main
-    branches: [ master, main ]
+    branches: [ master, main, feature/video-support ]
 
 jobs:
   build:
