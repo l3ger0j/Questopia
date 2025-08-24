@@ -1,0 +1,45 @@
+name: Build Questopia APK
+
+on:
+  workflow_dispatch:    # lets you click 'Run workflow' by hand
+  push:                 # builds on every commit to master/main
+    branches: [ master, main, feature/video-support ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK (cmdline-tools, platform-tools, licenses)
+        uses: android-actions/setup-android@v3
+        # This action installs the commandline tools and accepts SDK licenses for us.
+
+      - name: Install required SDK packages
+        run: |
+          sdkmanager --sdk_root="$ANDROID_SDK_ROOT" \
+            "platform-tools" \
+            "platforms;android-34" \
+            "build-tools;34.0.0" \
+            "cmake;3.22.1" \
+            "ndk;27.2.12479018"
+
+      - name: Make Gradle wrapper executable
+        run: chmod +x ./gradlew
+
+      - name: Build debug APK
+        run: ./gradlew assembleDebug --stacktrace
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: questopia-debug-apk
+          path: app/build/outputs/apk/debug/*.apk
